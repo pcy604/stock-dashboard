@@ -342,13 +342,13 @@ with tab1:
         sig_display = ['4w_52주','4w_거래량','4w_이평','4w_컵','4w_라이딩','4w_RSI','현_52주','현_이평','현_컵']
 
         styled1 = df1[disp_cols].style \
-            .applymap(color_ret, subset=['4주수익률','1주수익률']) \
+            .map(color_ret, subset=['4주수익률','1주수익률']) \
             .format({'4주수익률': '{:+.1f}%', '1주수익률': '{:+.1f}%'})
 
         if show_detail:
             existing_sig_cols = [c for c in sig_display if c in disp_cols]
             if existing_sig_cols:
-                styled1 = styled1.applymap(color_sig, subset=existing_sig_cols)
+                styled1 = styled1.map(color_sig, subset=existing_sig_cols)
 
         st.dataframe(styled1, use_container_width=True, height=420)
 
@@ -373,7 +373,7 @@ with tab1:
                 })
         if sig_perf:
             sp_df = pd.DataFrame(sig_perf).sort_values('평균4주수익률', ascending=False)
-            st.dataframe(sp_df.style.applymap(color_ret, subset=['평균4주수익률','중앙값']),
+            st.dataframe(sp_df.style.map(color_ret, subset=['평균4주수익률','중앙값']),
                          use_container_width=True, hide_index=True)
             st.bar_chart(sp_df.set_index('신호')['평균4주수익률'])
 
@@ -471,11 +471,11 @@ with tab2:
             return 'color:#555'
 
         styled2 = df2[disp2].style \
-            .applymap(color_sig, subset=sig2_cols) \
-            .applymap(color_ret, subset=['주간%']) \
+            .map(color_sig, subset=sig2_cols) \
+            .map(color_ret, subset=['주간%']) \
             .format({'주간%': '{:+.1f}%'})
         if show_entry and '진입' in disp2:
-            styled2 = styled2.applymap(color_entry, subset=['진입'])
+            styled2 = styled2.map(color_entry, subset=['진입'])
 
         st.dataframe(styled2, use_container_width=True, height=420)
 
@@ -612,8 +612,8 @@ with tab3:
             st.subheader(f"총 {len(df3)}개 종목 | N✅ L✅ 필수, C/A/S/I는 슬라이더 기준으로 색상 표시")
             st.dataframe(
                 df3[disp3].style
-                    .applymap(color_score3, subset=['점수/7'])
-                    .applymap(color_cell3,  subset=sig3c),
+                    .map(color_score3, subset=['점수/7'])
+                    .map(color_cell3,  subset=sig3c),
                 use_container_width=True, height=380,
             )
 
@@ -874,7 +874,7 @@ with tab4:
                 return 'color:#56d364' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#f78166'
             except: return ''
         st.dataframe(
-            idx_df.style.applymap(_ci_chg, subset=['전일대비','YoY']),
+            idx_df.style.map(_ci_chg, subset=['전일대비','YoY']),
             use_container_width=True, hide_index=True,
             height=36 + 35*len(idx_df),
         )
@@ -1089,9 +1089,9 @@ with tab5:
 
             disp5 = ['시장','종목명','코드','신호','신호점수','주간%','52주거리%','추천비중%','추천금액']
             styled5 = df5[disp5].style \
-                .applymap(color_score, subset=['신호점수']) \
-                .applymap(color_ret,   subset=['주간%']) \
-                .applymap(color_dist,  subset=['52주거리%']) \
+                .map(color_score, subset=['신호점수']) \
+                .map(color_ret,   subset=['주간%']) \
+                .map(color_dist,  subset=['52주거리%']) \
                 .format({'주간%': '{:+.1f}%', '추천비중%': '{}%'})
 
             st.subheader(f"📋 상위 {len(top)}개 추천 종목")
@@ -1276,9 +1276,9 @@ with tab6:
                     return '-'
 
             styled7 = df7[disp7].style \
-                .applymap(status_color, subset=['상태']) \
-                .applymap(yoy_color,   subset=['YoY성장%']) \
-                .applymap(color_sig,   subset=['마진개선']) \
+                .map(status_color, subset=['상태']) \
+                .map(yoy_color,   subset=['YoY성장%']) \
+                .map(color_sig,   subset=['마진개선']) \
                 .format({'YoY성장%': fmt_pct, '매출YoY%': fmt_pct}, na_rep='-')
 
             st.dataframe(styled7, use_container_width=True, height=420)
@@ -1585,7 +1585,7 @@ with tab7:
                         except: pass
                         return ''
                     st.dataframe(
-                        ext_df.style.applymap(_color_ext, subset=['현재 대비']),
+                        ext_df.style.map(_color_ext, subset=['현재 대비']),
                         use_container_width=True, hide_index=True,
                         height=36 + 35 * len(ext_df),
                     )
@@ -1634,7 +1634,7 @@ with tab7:
                         f = float(str(v).replace('%','').replace('+',''))
                         return 'color:#56d364' if f >= 0 else 'color:#f78166'
                     except: return ''
-                st.dataframe(r_df.style.applymap(_cr, subset=['수익률']),
+                st.dataframe(r_df.style.map(_cr, subset=['수익률']),
                              use_container_width=True, hide_index=True,
                              height=36 + 35*len(r_df))
 
@@ -1809,8 +1809,8 @@ with tab8:
 
         disp_pf = ['시장','종목명','코드','수량','매수가','현재가','수익률','P&L','손절가','목표가','매수일','메모']
         styled_pf = df_pf[disp_pf].style \
-            .applymap(_color_pnl,     subset=['수익률']) \
-            .applymap(_color_pnl_amt, subset=['P&L']) \
+            .map(_color_pnl,     subset=['수익률']) \
+            .map(_color_pnl_amt, subset=['P&L']) \
             .format({'수익률': lambda v: f"{v:+.1f}%" if v is not None else '-',
                      'P&L':    lambda v: f"{v:+,.0f}" if v is not None else '-',
                      '수량':    '{:.0f}'})
@@ -1944,7 +1944,7 @@ with tab9:
                             return 'color:#f78166;font-weight:bold'
                         except: return ''
                     st.dataframe(
-                        _df.style.applymap(_c_gap, subset=['괴리%']).applymap(_c_mult, subset=['신뢰계수'])
+                        _df.style.map(_c_gap, subset=['괴리%']).map(_c_mult, subset=['신뢰계수'])
                             .format({'실전승률':'{:.1f}%','실전EV%':'{:+.2f}','백테EV%':'{:+.2f}',
                                      '괴리%':'{:+.2f}','신뢰계수':'{:.2f}'}),
                         use_container_width=True, hide_index=True)
@@ -1969,7 +1969,7 @@ with tab9:
                 try: return 'color:#56d364' if float(v)>=0 else 'color:#f78166'
                 except: return ''
             st.dataframe(
-                _rtd.style.applymap(_c_ret, subset=['4주%','13주%'])
+                _rtd.style.map(_c_ret, subset=['4주%','13주%'])
                     .format({'4주%': lambda v: f'{v:+.1f}' if v is not None else '대기',
                              '13주%': lambda v: f'{v:+.1f}' if v is not None else '대기'}, na_rep='대기'),
                 use_container_width=True, hide_index=True, height=420)
