@@ -75,7 +75,14 @@ def load_json(path):
         return None
     try:
         with open(path, encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+        # 스크래퍼가 저장한 HTML 이스케이프(&amp; 등) 종목명 복원
+        import html as _html
+        if isinstance(data, dict) and isinstance(data.get('stocks'), list):
+            for _s in data['stocks']:
+                if isinstance(_s, dict) and isinstance(_s.get('name'), str):
+                    _s['name'] = _html.unescape(_s['name'])
+        return data
     except Exception:
         return None
 
@@ -1858,9 +1865,9 @@ with tab8:
 
         st.divider()
         if st.button("📲 지금 텔레그램으로 포트폴리오 전송", key="tg_now"):
-            import subprocess
+            import subprocess, sys as _sys
             result = subprocess.run(
-                ['python', 'portfolio_monitor.py'],
+                [_sys.executable, 'portfolio_monitor.py'],
                 capture_output=True, text=True,
                 cwd=str(Path(__file__).parent),
             )

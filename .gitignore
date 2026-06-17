@@ -12,3 +12,6 @@ __pycache__/
 *.pyc
 results/*.csv
 *.tmp
+
+# 로컬 개발용
+.claude/
