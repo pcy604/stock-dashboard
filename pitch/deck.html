@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantEdge — Investment Signal Platform · Confidential Pitch</title>
+<style>
+  :root{
+    --bg:#0a0e17; --panel:#111722; --line:#1e2837; --ink:#e8edf4; --dim:#8a99ad;
+    --accent:#4f8cff; --gold:#d4af37; --green:#39d98a; --red:#ff6b6b; --amber:#ffb454;
+    --serif:Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#05080e;color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,'Malgun Gothic',sans-serif;-webkit-font-smoothing:antialiased}
+  .deck{max-width:1180px;margin:0 auto;padding:30px 16px 120px}
+  .slide{background:linear-gradient(160deg,#0d131e,#0a0e17);border:1px solid var(--line);border-radius:14px;
+    padding:46px 54px;margin-bottom:26px;min-height:560px;position:relative;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .slide::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;
+    background:linear-gradient(180deg,var(--accent),var(--gold))}
+  .kicker{font:600 12px/1 var(--sans);letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+  h1{font:700 40px/1.12 var(--serif);letter-spacing:-.5px;margin-bottom:14px}
+  h2{font:700 30px/1.2 var(--serif);letter-spacing:-.3px;margin-bottom:20px}
+  h3{font:600 17px/1.3 sans-serif;color:var(--gold);margin:22px 0 10px;letter-spacing:.3px}
+  p{color:var(--dim);font-size:15.5px;line-height:1.72;max-width:78ch}
+  .lead{font-size:19px;color:#c7d2e0;line-height:1.7;max-width:70ch}
+  .pageno{position:absolute;bottom:20px;right:26px;font-size:12px;color:#3d4a5c;letter-spacing:2px}
+  .tag{position:absolute;top:24px;right:28px;font-size:11px;color:#4a5667;letter-spacing:2px;text-transform:uppercase}
+  .grid{display:grid;gap:18px;margin-top:24px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+  .card .n{font:700 30px/1 var(--serif);color:var(--ink)}
+  .card .n.a{color:var(--accent)}.card .n.g{color:var(--green)}.card .n.gold{color:var(--gold)}.card .n.r{color:var(--red)}
+  .card .l{font-size:12.5px;color:var(--dim);margin-top:8px;line-height:1.5}
+  ul{list-style:none;margin-top:8px}
+  li{color:var(--dim);font-size:15px;line-height:1.85;padding-left:22px;position:relative;max-width:74ch}
+  li::before{content:'▸';position:absolute;left:0;color:var(--accent)}
+  li b{color:var(--ink);font-weight:600}
+  table{width:100%;border-collapse:collapse;margin-top:18px;font-size:13.5px}
+  th{text-align:left;color:var(--gold);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.5px}
+  td{padding:9px 12px;border-bottom:1px solid #161e2a;color:var(--dim)}
+  td.hl{color:var(--ink);font-weight:600}
+  .pos{color:var(--green)}.neg{color:var(--red)}.mid{color:var(--amber)}
+  .cover{min-height:640px;display:flex;flex-direction:column;justify-content:center}
+  .cover h1{font-size:62px;line-height:1.05;background:linear-gradient(120deg,#fff,#7fa8ff 60%,var(--gold));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:22px}
+  .cover .sub{font-size:21px;color:#aebacb;max-width:60ch;line-height:1.6}
+  .pill{display:inline-block;border:1px solid var(--line);background:var(--panel);border-radius:20px;
+    padding:6px 16px;font-size:12.5px;color:var(--dim);margin:24px 10px 0 0;letter-spacing:.5px}
+  .divider{height:1px;background:var(--line);margin:26px 0}
+  .quote{border-left:3px solid var(--gold);padding:10px 20px;font-style:italic;color:#c7d2e0;font-size:16px;margin-top:18px}
+  .foot-note{font-size:12px;color:#54627a;margin-top:18px;line-height:1.6;font-style:italic}
+  .bar{height:9px;background:#1a2333;border-radius:5px;overflow:hidden;margin-top:6px}
+  .bar > i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--green))}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:24px}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:13px 16px;font-size:13px;color:var(--ink);text-align:center;flex:1;min-width:90px}
+  .step small{display:block;color:var(--dim);font-size:11px;margin-top:3px}
+  .arrow{color:var(--accent);font-size:18px}
+  .warn{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.25);border-radius:8px;padding:14px 18px;margin-top:16px}
+  .warn b{color:var(--red)}
+  nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,18,.92);backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);padding:11px 20px;text-align:center;font-size:12px;color:#54627a;z-index:9}
+  nav b{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1 COVER -->
+  <section class="slide cover">
+    <span class="tag">Strictly Private &amp; Confidential</span>
+    <div class="kicker">Quantitative Signal Platform · Project Memorandum</div>
+    <h1>QuantEdge</h1>
+    <div class="sub">한·미 시장 통합 모멘텀 시그널 엔진과 백테스트 검증 프레임워크.<br>매크로 레짐 판단부터 종목 선별·포지션 사이징·실시간 알림까지 단일 파이프라인.</div>
+    <div>
+      <span class="pill">KR + US · 2,600+ 종목 유니버스</span>
+      <span class="pill">5년 백테스트 · 비용 반영</span>
+      <span class="pill">8-탭 통합 대시보드</span>
+    </div>
+    <div class="foot-note">본 자료는 매각 협의 목적의 논의용이며, 과거 성과는 미래 수익을 보장하지 않습니다. 2026.06 기준.</div>
+    <div class="pageno">01</div>
+  </section>
+
+  <!-- 2 PROBLEM -->
+  <section class="slide">
+    <div class="kicker">The Gap</div>
+    <h2>리테일과 기관 사이, 빈 공간</h2>
+    <p class="lead">Bloomberg 터미널은 연 2,400만 원, FactSet도 그에 준한다. 반대편엔 근거 없는 '주식 추천 리딩방'이 있다. 그 사이 — <b style="color:var(--ink)">검증된 규칙 + 비용까지 반영한 정직한 백테스트 + 통합 실행</b> — 을 제공하는 가벼운 레이어가 비어 있다.</p>
+    <div class="grid g3">
+      <div class="card"><div class="n r">₩24M+/yr</div><div class="l">Bloomberg/FactSet 1석 비용 — 개인·소형 운용사엔 과잉</div></div>
+      <div class="card"><div class="n mid">~50%</div><div class="l">리딩방·유튜브 시그널의 실제 승률 (무검증, 추적 불가)</div></div>
+      <div class="card"><div class="n a">Empty</div><div class="l">규칙 투명성 + 백테스트 + 실행을 한 번에 묶은 경량 솔루션</div></div>
+    </div>
+    <div class="quote">"근거를 숫자로 보여주되, 그 숫자가 비용·생존편향까지 정직하게 차감된 것." — 본 제품의 설계 원칙</div>
+    <div class="pageno">02</div>
+  </section>
+
+  <!-- 3 WHAT IT IS -->
+  <section class="slide">
+    <div class="kicker">Product</div>
+    <h2>8개 모듈, 하나의 의사결정 흐름</h2>
+    <div class="flow">
+      <div class="step">매크로 레짐<small>FRED·금리·M2</small></div><span class="arrow">→</span>
+      <div class="step">현금비중 결정<small>10~70%</small></div><span class="arrow">→</span>
+      <div class="step">시그널 스크리닝<small>주봉 6종</small></div><span class="arrow">→</span>
+      <div class="step">CANSLIM·흑자전환<small>펀더멘털</small></div><span class="arrow">→</span>
+      <div class="step">포지션 사이징<small>Kelly 기반</small></div><span class="arrow">→</span>
+      <div class="step">알림·추적<small>텔레그램·손절</small></div>
+    </div>
+    <div class="grid g2" style="margin-top:30px">
+      <div>
+        <h3>시그널 레이어</h3>
+        <ul>
+          <li><b>6개 기술 신호</b> — 52주 신고가, 이평수렴, 컵위드핸들, 거래량 폭발, RSI/MACD, 5주선 라이딩</li>
+          <li><b>look-ahead 차단</b> — 모든 롤링 지표 shift(1) 적용</li>
+          <li><b>주봉 기반</b> — 노이즈 억제, 회전율 통제</li>
+        </ul>
+      </div>
+      <div>
+        <h3>검증 레이어</h3>
+        <ul>
+          <li><b>5년 백테스트</b> — 2,608 종목, 2021–2026</li>
+          <li><b>실거래 비용 차감</b> — KR ~0.40% / US ~0.25% 왕복 + 슬리피지</li>
+          <li><b>생존편향 명시</b> — 낙관 보정치를 리포트에 경고로 표기</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pageno">03</div>
+  </section>
+
+  <!-- 4 EVIDENCE / BACKTEST -->
+  <section class="slide">
+    <div class="kicker">Evidence</div>
+    <h2>비용 차감 후에도 살아남는 엣지</h2>
+    <p>전체 유니버스 2021–2026 주봉. 13주 보유, 실거래 비용·슬리피지 차감 기준 상위 신호.</p>
+    <table>
+      <tr><th>신호 조합</th><th>발생</th><th>승률</th><th>순기대값(13주)</th><th>샤프(연율)</th><th>중앙값</th></tr>
+      <tr><td class="hl">52주 + 이평수렴</td><td>10,847</td><td>56.3%</td><td class="pos">+5.4%</td><td class="pos">1.33</td><td class="pos">+2.3%</td></tr>
+      <tr><td class="hl">이평선 수렴</td><td>55,007</td><td>53.5%</td><td class="pos">+4.3%</td><td class="pos">1.25</td><td class="pos">+1.2%</td></tr>
+      <tr><td class="hl">52주 + 컵핸들</td><td>6,940</td><td>55.7%</td><td class="pos">+1.7%</td><td class="pos">1.36</td><td class="pos">+1.3%</td></tr>
+      <tr><td class="hl">컵위드핸들</td><td>34,578</td><td>56.4%</td><td class="pos">+2.0%</td><td class="pos">1.28</td><td class="pos">+1.5%</td></tr>
+      <tr><td class="hl">52주 신고가</td><td>50,733</td><td>51.5%</td><td class="mid">+2.9%</td><td class="mid">0.90</td><td class="mid">+0.5%</td></tr>
+    </table>
+    <p style="margin-top:18px"><b style="color:var(--ink)">핵심:</b> 최강 조합(52주+이평수렴)은 13주 보유 시 연율 샤프 <span class="pos">1.33</span>, 중앙값까지 양(+)으로 — 평균을 끌어올리는 소수 대박이 아니라 분포 중심이 우상향.</p>
+    <div class="foot-note">상기 수치는 in-sample 전체기간 기준. 비용 반영 후 값이며 1주 보유 단기 신호는 대부분 코인토스(샤프 0.2~0.5)임을 명시함. 표기 수치는 v2 백테스트 엔진 산출.</div>
+    <div class="pageno">04</div>
+  </section>
+
+  <!-- 5 DIFFERENTIATION -->
+  <section class="slide">
+    <div class="kicker">Why This, Not That</div>
+    <h2>차별점은 '정직함'에 있다</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">대부분의 리테일 툴</h3>
+        <ul>
+          <li>비용·슬리피지 무시한 그로스 수익률</li>
+          <li>생존편향 방치 (상폐 종목 누락)</li>
+          <li>승률만 강조, 분포·낙폭 숨김</li>
+          <li>신호 따로, 실행 따로</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:rgba(79,140,255,.4)">
+        <h3 style="margin-top:0;color:var(--accent)">QuantEdge</h3>
+        <ul>
+          <li><b>왕복 비용·슬리피지 차감</b>이 기본값</li>
+          <li><b>생존편향을 리포트에 명시 경고</b></li>
+          <li><b>샤프·중앙값·최대낙폭·vs벤치마크</b> 동시 표기</li>
+          <li><b>레짐→선별→사이징→알림</b> 단일 흐름</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote">파는 것은 '대박 신호'가 아니라, <b>검증 가능한 규칙과 그 한계를 숨기지 않는 프레임워크</b>다.</div>
+    <div class="pageno">05</div>
+  </section>
+
+  <!-- 6 MARKET / BUYERS -->
+  <section class="slide">
+    <div class="kicker">Acquirer Fit</div>
+    <h2>누가, 왜 사는가</h2>
+    <table>
+      <tr><th>인수 후보</th><th>활용 시나리오</th><th>핵심 가치</th></tr>
+      <tr><td class="hl">리테일 증권사<br><small style="color:#54627a">토스·키움·삼성</small></td><td>앱 내 '검증된 스크리너' 기능 탑재, MAU 리텐션</td><td class="pos">즉시 제품화 가능한 UX+엔진</td></tr>
+      <tr><td class="hl">로보어드바이저<br><small style="color:#54627a">에임·파운트</small></td><td>레짐 기반 현금비중 + 종목 후보 생성 엔진</td><td class="pos">매크로→배분 로직</td></tr>
+      <tr><td class="hl">자산운용사 퀀트팀<br><small style="color:#54627a">여의도 중소형</small></td><td>아이디어 생성·1차 스크리닝 보조 도구</td><td class="mid">방법론 + 백테스트 코드</td></tr>
+      <tr><td class="hl">글로벌 IB 데스크<br><small style="color:#54627a">GS·JPM</small></td><td>—</td><td class="neg">기존 내부 인프라가 우위 (후술)</td></tr>
+    </table>
+    <p style="margin-top:18px">현실적 1차 타깃은 <b style="color:var(--ink)">리테일 증권사·로보어드바이저</b>. 글로벌 IB는 인수자가 아니라 '벤치마크'로 본다 — 다음 장에서 그들의 시선으로 본 한계를 먼저 공개한다.</p>
+    <div class="pageno">06</div>
+  </section>
+
+  <!-- 7 HONEST LIMITS -->
+  <section class="slide">
+    <div class="kicker">Risk Disclosure</div>
+    <h2>우리가 먼저 말하는 한계</h2>
+    <p>실사에서 나올 질문을 매도자가 먼저 테이블에 올린다. 신뢰는 여기서 생긴다.</p>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card"><h3 style="margin-top:0">데이터 출처</h3><div class="l">무료 스크래핑(yfinance·네이버) 기반 → SLA·상업적 라이선스·point-in-time 무결성 미보장. 기관 납품 시 유료 데이터 교체 필요.</div></div>
+      <div class="card"><h3 style="margin-top:0">검증 범위</h3><div class="l">현재 in-sample 전체기간. Walk-forward/레짐 분리 검증은 v2.1에서 추가 (본 자료와 함께 착수).</div></div>
+      <div class="card"><h3 style="margin-top:0">생존편향</h3><div class="l">유니버스가 '현재 상장 종목' → 승률 낙관. 보정 전까지 참고확률로만.</div></div>
+      <div class="card"><h3 style="margin-top:0">팩터 중복</h3><div class="l">상당부분 모멘텀 팩터 노출일 수 있음 → 알파 vs 베타 분해 미완.</div></div>
+    </div>
+    <div class="warn"><b>매도자 입장:</b> 이 제품은 '글로벌 IB 트레이딩 인프라 대체재'가 아니다. 그렇게 팔지 않는다. 리테일·로보 시장의 <b style="color:var(--ink)">검증된 경량 의사결정 레이어</b>로 포지셔닝한다.</div>
+    <div class="pageno">07</div>
+  </section>
+
+  <!-- 8 ROADMAP / ASK -->
+  <section class="slide">
+    <div class="kicker">Roadmap &amp; Ask</div>
+    <h2>v2.1 — 실사 대응 강화</h2>
+    <div class="grid g3">
+      <div class="card"><div class="n a">OOS</div><div class="l">Walk-forward 아웃오브샘플 검증 (학습/검증 분리)</div></div>
+      <div class="card"><div class="n a">Regime</div><div class="l">상승장/하락장 레짐별 성과 분리 — 과최적화 노출 확인</div></div>
+      <div class="card"><div class="n a">Risk+</div><div class="l">Sortino·Profit Factor·하락편차 — 다운사이드 정밀화</div></div>
+    </div>
+    <div class="divider"></div>
+    <h3>제안 (Ask)</h3>
+    <ul>
+      <li><b>전략적 인수</b> — 코드베이스 + 방법론 + 6개월 통합 지원</li>
+      <li><b>라이선스</b> — 백테스트 엔진·시그널 모듈 API 제공</li>
+      <li><b>Acqui-hire</b> — 빌더 합류 + IP 이전</li>
+    </ul>
+    <div class="foot-note">다음 섹션: 본 장표를 받은 가상의 3개 인수후보(GS 퀀트 · JPM AM · 여의도 운용사)의 솔직한 반응과, 그에 따른 제품 개선 결과를 동봉함.</div>
+    <div class="pageno">08</div>
+  </section>
+
+</div>
+<nav>QuantEdge Pitch — <b>↓ 스크롤</b>로 8개 슬라이드 열람 · 동봉 문서: <b>FEEDBACK.md</b> (인수후보 반응) · <b>backtest_engine.py v2.1</b> (개선 코드)</nav>
+</body>
+</html>

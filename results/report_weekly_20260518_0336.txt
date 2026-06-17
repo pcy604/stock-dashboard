@@ -1,0 +1,250 @@
+📌 주봉 신호 종목 현황 (2026-05-18 기준)
+시총 높은 순 | 총 108개 종목
+
+🇰🇷 한국 (5개)
+       시총  [주간%]  종목명
+  6.7조    [+8.1%]  코웨이  ← 5일선라이딩, RSI/MACD
+  5.1조   [+26.3%]  신세계  ← 5일선라이딩, RSI/MACD
+  3.2조    [+1.3%]  F&F  ← 5일선라이딩, RSI/MACD
+  1.6조   [+27.3%]  씨젠  ← 거래량폭발, RSI/MACD
+4,288억    [+2.3%]  SIMPAC  ← 5일선라이딩, RSI/MACD
+
+🇺🇸 미국 (103개)
+       시총  [주간%]  종목명
+$  2.7T    [+2.4%]  Apple  ← 5일선라이딩, RSI/MACD
+$  2.0T    [-0.9%]  Alphabet (Google)  ← 5일선라이딩, RSI/MACD
+$   567B    [+2.2%]  Visa  ← 5일선라이딩, RSI/MACD
+$   405B    [+3.7%]  UnitedHealth  ← 5일선라이딩, RSI/MACD
+$   196B   [+22.4%]  Cisco  ← 5일선라이딩, RSI/MACD
+$   151B    [+5.2%]  Texas Instruments  ← 5일선라이딩, RSI/MACD
+$   143B    [+2.2%]  Union Pacific Corporation  ← 5일선라이딩, RSI/MACD
+$   140B    [-0.3%]  Morgan Stanley  ← 5일선라이딩, RSI/MACD
+$   126B    [+1.3%]  Goldman Sachs  ← 5일선라이딩, RSI/MACD
+$   116B    [+3.9%]  Elevance Health  ← 5일선라이딩, RSI/MACD
+$   114B    [-0.3%]  BlackRock  ← 5일선라이딩, RSI/MACD
+$    99B    [-1.0%]  Cigna  ← 5일선라이딩, RSI/MACD
+$    96B    [+1.8%]  Starbucks  ← 5일선라이딩, RSI/MACD
+$    95B    [+0.2%]  Analog Devices  ← 5일선라이딩, RSI/MACD
+$    90B   [+16.8%]  Palo Alto Networks  ← 5일선라이딩, RSI/MACD
+$    87B    [+5.9%]  CVS Health  ← 5일선라이딩, RSI/MACD
+$    56B    [+1.3%]  Norfolk Southern  ← 5일선라이딩, RSI/MACD
+$    53B    [-0.4%]  Welltower  ← 5일선라이딩, RSI/MACD
+$    51B    [+2.2%]  MetLife  ← 5일선라이딩, RSI/MACD
+$    47B    [-0.2%]  Nucor  ← 5일선라이딩, RSI/MACD
+$    46B    [+3.1%]  Interactive Brokers  ← 5일선라이딩, RSI/MACD
+$    45B    [+2.6%]  United Rentals  ← 5일선라이딩, RSI/MACD
+$    41B    [+1.0%]  Ameriprise Financial  ← 5일선라이딩, RSI/MACD
+$    41B    [-1.4%]  Grayscale Bitcoin Trust  ← 5일선라이딩, RSI/MACD
+$    41B    [+0.3%]  Keurig Dr Pepper  ← 5일선라이딩, RSI/MACD
+$    41B    [+2.5%]  Cummins  ← 5일선라이딩, RSI/MACD
+$    38B    [+4.1%]  Centene  ← 5일선라이딩, RSI/MACD
+$    38B   [+11.0%]  Humana  ← 5일선라이딩, RSI/MACD
+$    37B    [+3.4%]  Quanta Services  ← 5일선라이딩, RSI/MACD
+$    35B    [+2.4%]  Nasdaq  ← 5일선라이딩, RSI/MACD
+$    29B    [+9.6%]  ON Semiconductor  ← 5일선라이딩, RSI/MACD
+$    27B    [+7.8%]  eBay  ← 5일선라이딩, RSI/MACD
+$    26B    [-1.8%]  AvalonBay Communities  ← 5일선라이딩, RSI/MACD
+$    26B    [-3.2%]  T. Rowe Price  ← 5일선라이딩, RSI/MACD
+$    26B    [-0.1%]  Raymond James  ← 5일선라이딩, RSI/MACD
+$    25B   [+10.0%]  Take 2 Interactive  ← 5일선라이딩, RSI/MACD
+$    23B    [+5.6%]  Hewlett Packard Enterprise  ← 5일선라이딩, RSI/MACD
+$    19B    [+4.1%]  Cboe  ← 5일선라이딩, RSI/MACD
+$    19B    [+0.0%]  Principal  ← 5일선라이딩, RSI/MACD
+$    16B    [+2.6%]  Skyworks Solutions  ← 5일선라이딩, RSI/MACD
+$    16B    [+1.3%]  Essex Property Trust  ← 5일선라이딩, RSI/MACD
+$    13B    [-4.0%]  Viatris  ← 5일선라이딩, RSI/MACD
+$    13B    [+2.5%]  Franklin Resources  ← 5일선라이딩, RSI/MACD
+$    13B    [+0.0%]  UDR Apartments  ← 5일선라이딩, RSI/MACD
+$    11B    [+2.1%]  Comfort Systems  ← 5일선라이딩, RSI/MACD
+$    11B    [+1.9%]  Qorvo  ← 5일선라이딩, RSI/MACD
+$    10B    [+0.9%]  Unum  ← 5일선라이딩, RSI/MACD
+$     9B    [+6.2%]  Assurant  ← 5일선라이딩, RSI/MACD
+$     9B    [-0.7%]  SEI Investments  ← 5일선라이딩, RSI/MACD
+$     9B    [-1.4%]  Jefferies Financial Group  ← 5일선라이딩, RSI/MACD
+$     8B    [+0.3%]  Omega Healthcare  ← 5일선라이딩, RSI/MACD
+$     7B    [-0.6%]  Applied Industrial Technologies  ← 5일선라이딩, RSI/MACD
+$     7B    [-0.2%]  Voya Financial  ← 5일선라이딩, RSI/MACD
+$     7B    [-1.7%]  Invesco  ← 5일선라이딩, RSI/MACD
+$     7B    [+2.7%]  Credit Acceptance  ← 5일선라이딩, RSI/MACD
+$     7B    [+6.9%]  Arrow Electronics  ← 5일선라이딩, RSI/MACD
+$     6B    [-0.0%]  Atkore  ← 5일선라이딩, RSI/MACD
+$     6B    [+2.7%]  Revolution Medicines  ← 5일선라이딩, RSI/MACD
+$     6B    [-3.1%]  Mueller Industries  ← 5일선라이딩, RSI/MACD
+$     6B    [-4.9%]  Vornado Realty Trust  ← 5일선라이딩, RSI/MACD
+$     5B    [+0.7%]  Healthcare Realty  ← 5일선라이딩, RSI/MACD
+$     5B    [+0.4%]  MSC Industrial Direct  ← 5일선라이딩, RSI/MACD
+$     5B    [+2.9%]  Hanover Insurance Group  ← 5일선라이딩, RSI/MACD
+$     5B    [-3.0%]  Radian Group  ← 5일선라이딩, RSI/MACD
+$     4B    [+3.4%]  Herc Holdings  ← 5일선라이딩, RSI/MACD
+$     4B    [+0.4%]  Organon  ← 5일선라이딩, RSI/MACD
+$     4B    [+2.4%]  Avnet  ← 5일선라이딩, RSI/MACD
+$     4B    [+0.9%]  Lantheus Holdings  ← 5일선라이딩, RSI/MACD
+$     4B    [+2.1%]  Dycom Industries  ← 5일선라이딩, RSI/MACD
+$     4B    [-2.6%]  Apple Hospitality REIT  ← 5일선라이딩, RSI/MACD
+$     4B    [+9.9%]  Wendy’s Company  ← 거래량폭발, RSI/MACD
+$     4B    [+3.1%]  EnerSys  ← 5일선라이딩, RSI/MACD
+$     4B    [+0.0%]  RLJ Lodging Trust  ← 5일선라이딩, RSI/MACD
+$     4B    [+2.2%]  Synaptics  ← 5일선라이딩, RSI/MACD
+$     3B    [-1.8%]  Cohen &amp; Steers  ← 5일선라이딩, RSI/MACD
+$     3B    [-3.6%]  Cousins Properties  ← 5일선라이딩, RSI/MACD
+$     3B    [+9.4%]  Oscar Health  ← 5일선라이딩, RSI/MACD
+$     3B    [+1.4%]  TFS Financial  ← 5일선라이딩, RSI/MACD
+$     3B    [-1.6%]  EPR Properties  ← 5일선라이딩, RSI/MACD
+$     3B    [+5.5%]  Arrowhead Pharmaceuticals  ← 5일선라이딩, RSI/MACD
+$     3B    [+0.2%]  Victory Capital  ← 5일선라이딩, RSI/MACD
+$     3B    [+1.7%]  CNO Financial Group  ← 5일선라이딩, RSI/MACD
+$     3B    [-1.2%]  Global Business Travel Group  ← 5일선라이딩, RSI/MACD
+$     3B    [+0.2%]  Highwoods Properties  ← 5일선라이딩, RSI/MACD
+$     3B    [-0.7%]  Genworth Financial  ← 5일선라이딩, RSI/MACD
+$     2B    [+2.3%]  IES Holdings  ← 5일선라이딩, RSI/MACD
+$     2B    [+7.8%]  Corcept Therapeutics  ← 5일선라이딩, RSI/MACD
+$     2B    [-3.2%]  Sunstone Hotel Investors  ← 5일선라이딩, RSI/MACD
+$     2B    [-0.7%]  Rogers Corporation  ← 5일선라이딩, RSI/MACD
+$     2B    [+6.4%]  Ambarella  ← 5일선라이딩, RSI/MACD
+$     2B    [+0.1%]  Catalyst Pharmaceuticals  ← 5일선라이딩, RSI/MACD
+$     2B    [+1.4%]  Dorian LPG  ← 5일선라이딩, RSI/MACD
+$     2B    [+1.0%]  Global Partners LP  ← 5일선라이딩, RSI/MACD
+$     1B    [+0.4%]  CSG International  ← 5일선라이딩, RSI/MACD
+$     1B    [-0.5%]  Knowles  ← 5일선라이딩, RSI/MACD
+$     1B    [-1.6%]  NETSCOUT  ← 5일선라이딩, RSI/MACD
+$     1B    [+1.6%]  WisdomTree  ← 5일선라이딩, RSI/MACD
+$     1B    [+1.4%]  Custom Truck One Source  ← 5일선라이딩, RSI/MACD
+$     1B    [-0.5%]  Monarch Casino &amp; Resort  ← 5일선라이딩, RSI/MACD
+$     1B    [-0.7%]  Benchmark Electronics  ← 5일선라이딩, RSI/MACD
+$     1B    [+0.0%]  Golden Entertainment  ← 5일선라이딩, RSI/MACD
+$     1B    [-2.1%]  Ellington Financial  ← 5일선라이딩, RSI/MACD
+$     1B   [+32.1%]  PureCycle Technologies  ← 5일선라이딩, RSI/MACD
+
+==================================================
+개별 종목 상세
+==================================================
+
+──────────────────────────────────────────────────
+✅ 코웨이(+8.11%)
+
+❗ 5일선라이딩 | RSI/MACD
+
+시가총액 : 6.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+코웨이 [1Q26 Review : 기우에 불과했던 우려들. 제 ..]
+  26.05.11 / 목표가: 
+  한화투자증권
+코웨이 [조용하게 강하다]
+  26.05.11 / 목표가: 
+  신한투자증권
+코웨이 [1Q26 Preview : 우려를 불식시키는 실적에 더..]
+  26.04.13 / 목표가: 
+  한화투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=021240
+
+──────────────────────────────────────────────────
+✅ 신세계(+26.25%)
+
+❗ 5일선라이딩 | RSI/MACD
+
+시가총액 : 5.1조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+신세계 [백화점은 매출 성장, 면세업은 수익 회복]
+  26.05.14 / 목표가: 
+  삼성증권
+신세계 [외국인, 패션, 럭셔리 고성장 3박자]
+  26.05.13 / 목표가: 
+  대신증권
+신세계 [1Q26 Review : LVMH가 주목한 백화점]
+  26.05.13 / 목표가: 
+  한화투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=004170
+
+──────────────────────────────────────────────────
+✅ F&F(+1.32%)
+
+❗ 5일선라이딩 | RSI/MACD
+
+시가총액 : 3.2조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+F&F [실적 호전과 풍부한 재원에서 비롯되는 주주..]
+  26.05.06 / 목표가: 
+  대신증권
+F&F [1Q26 Review : 국내외에서 확인된 MLB의 브랜..]
+  26.05.04 / 목표가: 
+  한화투자증권
+F&F [외국인이 견인하는 레버리지]
+  26.05.04 / 목표가: 
+  미래에셋증권
+
+📎 https://finance.naver.com/item/main.naver?code=383220
+
+──────────────────────────────────────────────────
+✅ 씨젠(+27.25%)
+
+❗ 거래량폭발 | RSI/MACD
+
+시가총액 : 1.6조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+씨젠 [4년 만에 두 자릿수 영업이익률로 돌아갈 시..]
+  26.05.11 / 목표가: 
+  미래에셋증권
+씨젠 [체외진단 매출 5,000억원 시대를 예고하다]
+  26.02.26 / 목표가: 
+  미래에셋증권
+씨젠 [마진 하방 확인. 하반기는 기대해 볼 만하다.]
+  25.08.14 / 목표가: 
+  미래에셋증권
+
+📎 https://finance.naver.com/item/main.naver?code=096530
+
+──────────────────────────────────────────────────
+✅ SIMPAC(+2.34%)
+
+❗ 5일선라이딩 | RSI/MACD
+
+시가총액 : 4,288억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+SIMPAC [합금철 고성장: 영업이익 급증]
+  22.02.28 / 목표가: 
+  이베스트증권
+SIMPAC [프레스 생산 기업]
+  16.11.17 / 목표가: 
+  이베스트투자증권
+SIMPAC [멕시코향 수주 일단락으로 수주 정체 전망]
+  16.03.31 / 목표가: 
+  IBK투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=009160

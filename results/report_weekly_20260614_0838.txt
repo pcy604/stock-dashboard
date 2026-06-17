@@ -1,0 +1,859 @@
+📌 주봉 신호 종목 현황 (2026-06-14 기준)
+시총 높은 순 | 총 337개 종목
+
+🇰🇷 한국 (20개)
+       시총  [주간%]  종목명
+ 65.1조    [+3.5%]  기아  ← 이평선수렴, RSI/MACD
+ 33.2조    [-2.1%]  하나금융지주  ← 이평선수렴, RSI/MACD
+  9.0조   [+38.1%]  원익IPS(역사적)  ← 52주신고가, 이평선수렴
+  8.9조    [+6.0%]  한국타이어앤테크놀로지  ← 이평선수렴, RSI/MACD
+  7.5조   [+28.0%]  이오테크닉스(52주)  ← 52주신고가, RSI/MACD
+  5.9조   [+42.1%]  HPSP(역사적)  ← 52주신고가, RSI/MACD
+  4.5조   [+25.0%]  유진테크(역사적)  ← 52주신고가, 이평선수렴
+  3.8조   [+21.0%]  현대백화점(역사적)  ← 52주신고가, 이평선수렴
+  3.4조   [+20.5%]  에스원  ← 거래량폭발, 이평선수렴
+  3.3조    [+9.6%]  현대해상  ← 이평선수렴, RSI/MACD
+  3.1조   [+17.8%]  HL만도  ← 이평선수렴, RSI/MACD
+  2.9조   [+31.3%]  한전KPS  ← 이평선수렴, RSI/MACD
+  2.4조   [+11.8%]  제일기획  ← 거래량폭발, 이평선수렴
+  1.2조    [+0.0%]  삼성화재우  ← 이평선수렴, RSI/MACD
+6,324억   [+20.9%]  코미팜  ← 이평선수렴, RSI/MACD
+6,109억   [+10.4%]  케이아이엔엑스  ← 이평선수렴, RSI/MACD
+5,608억   [+32.0%]  펨트론  ← 이평선수렴, RSI/MACD
+4,871억   [+45.6%]  에이팩트(52주)  ← 52주신고가, 이평선수렴
+4,744억   [+18.1%]  메카로(역사적)  ← 52주신고가, RSI/MACD
+4,176억    [+7.0%]  HL홀딩스  ← 이평선수렴, RSI/MACD
+
+🇺🇸 미국 (317개)
+       시총  [주간%]  종목명
+$   871B    [+0.2%]  Berkshire Hathaway  ← 컵위드핸들, RSI/MACD
+$   715B    [+0.1%]  Eli Lilly(52주)  ← 52주신고가, 5일선라이딩
+$   525B    [+2.7%]  JPMorgan Chase  ← 이평선수렴, RSI/MACD
+$   355B    [+3.5%]  Johnson & Johnson  ← 이평선수렴, RSI/MACD
+$   319B    [-1.4%]  Merck  ← 컵위드핸들, 이평선수렴
+$   287B    [+0.2%]  AbbVie  ← 5일선라이딩, 이평선수렴
+$   282B    [+4.1%]  Bank of America(52주)  ← 52주신고가, 이평선수렴
+$   251B    [+4.0%]  Coca-Cola(52주)  ← 52주신고가, RSI/MACD
+$   198B    [+2.2%]  Wells Fargo  ← 이평선수렴, RSI/MACD
+$   169B    [+2.2%]  General Electric  ← 이평선수렴, RSI/MACD
+$   143B    [+1.6%]  Amgen  ← 이평선수렴, RSI/MACD
+$   143B    [+0.1%]  Union Pacific Corporation(52주)  ← 52주신고가, RSI/MACD
+$   140B    [+1.0%]  Morgan Stanley(52주)  ← 52주신고가, 5일선라이딩
+$   138B    [+3.4%]  Philip Morris  ← 이평선수렴, RSI/MACD
+$   125B   [+20.9%]  Lam Research(역사적)  ← 52주신고가, 이평선수렴
+$   107B    [+4.8%]  TJX Companies(52주)  ← 52주신고가, 이평선수렴
+$   100B    [-2.5%]  Automatic Data Processing  ← 5일선라이딩, 이평선수렴
+$    89B    [+9.7%]  Southern Copper  ← 이평선수렴, RSI/MACD
+$    79B    [+4.0%]  General Dynamics(52주)  ← 52주신고가, 이평선수렴
+$    77B   [+10.3%]  Target  ← 이평선수렴, RSI/MACD
+$    68B   [+10.8%]  Amphenol  ← 이평선수렴, RSI/MACD
+$    66B    [+2.2%]  FedEx(52주)  ← 52주신고가, RSI/MACD
+$    65B    [+5.8%]  U.S. Bancorp  ← 이평선수렴, RSI/MACD
+$    64B    [+3.6%]  Emerson  ← 이평선수렴, RSI/MACD
+$    60B    [+4.1%]  PNC Financial Services(52주)  ← 52주신고가, 이평선수렴
+$    58B    [+3.7%]  Monster Beverage(52주)  ← 52주신고가, 5일선라이딩
+$    57B    [+1.1%]  Valero Energy(52주)  ← 52주신고가, RSI/MACD
+$    53B    [+3.5%]  Welltower  ← 이평선수렴, RSI/MACD
+$    52B    [+3.4%]  DexCom  ← 이평선수렴, RSI/MACD
+$    52B    [+0.8%]  Hilton Worldwide(52주)  ← 52주신고가, RSI/MACD
+$    51B    [+4.1%]  Carrier  ← 이평선수렴, RSI/MACD
+$    51B    [+5.1%]  MetLife(52주)  ← 52주신고가, 5일선라이딩
+$    51B    [+1.1%]  Fortinet(52주)  ← 52주신고가, 5일선라이딩
+$    51B    [+0.4%]  The Travelers Companies(52주)  ← 52주신고가, 이평선수렴
+$    51B    [+3.0%]  3M  ← 이평선수렴, RSI/MACD
+$    50B    [+5.8%]  D. R. Horton  ← 이평선수렴, RSI/MACD
+$    49B    [+5.0%]  Truist Financial  ← 이평선수렴, RSI/MACD
+$    48B    [+5.3%]  Public Storage  ← 이평선수렴, RSI/MACD
+$    47B    [+1.2%]  W. W. Grainger(52주)  ← 52주신고가, 5일선라이딩
+$    47B    [+4.7%]  Nucor(52주)  ← 52주신고가, 5일선라이딩
+$    46B    [-0.4%]  Aflac(52주)  ← 52주신고가, RSI/MACD
+$    46B    [+4.2%]  Ross Stores(52주)  ← 52주신고가, RSI/MACD
+$    44B    [+0.3%]  Allstate(52주)  ← 52주신고가, RSI/MACD
+$    43B    [-1.1%]  IQVIA  ← 이평선수렴, RSI/MACD
+$    42B    [+0.3%]  Ametek  ← 이평선수렴, RSI/MACD
+$    41B    [+1.1%]  Bank of New York Mellon(52주)  ← 52주신고가, 5일선라이딩
+$    41B    [+3.9%]  Keurig Dr Pepper  ← 5일선라이딩, 이평선수렴
+$    40B    [-0.5%]  Fastenal  ← 컵위드핸들, 이평선수렴
+$    39B    [+3.7%]  Prudential Financial  ← 이평선수렴, RSI/MACD
+$    38B    [+4.6%]  Centene  ← 5일선라이딩, 이평선수렴
+$    38B    [+8.3%]  Humana  ← 5일선라이딩, 이평선수렴
+$    34B    [+0.1%]  Electronic Arts(52주)  ← 52주신고가, 이평선수렴
+$    33B    [+5.1%]  Royal Caribbean  ← 이평선수렴, RSI/MACD
+$    32B    [+4.9%]  PPG Industries  ← 이평선수렴, RSI/MACD
+$    31B    [+3.0%]  Dupont De Nemours  ← 이평선수렴, RSI/MACD
+$    31B    [+3.6%]  Extra Space Storage  ← 이평선수렴, RSI/MACD
+$    29B    [+2.4%]  Biogen  ← 이평선수렴, RSI/MACD
+$    27B    [+4.8%]  Dollar Tree  ← 이평선수렴, RSI/MACD
+$    26B    [-0.5%]  Edison International  ← 이평선수렴, RSI/MACD
+$    26B    [+1.8%]  Wabtec  ← 이평선수렴, RSI/MACD
+$    26B    [+3.4%]  T. Rowe Price  ← 5일선라이딩, 이평선수렴
+$    26B    [+8.8%]  Cardinal Health  ← 이평선수렴, RSI/MACD
+$    24B    [+1.2%]  Dover  ← 이평선수렴, RSI/MACD
+$    24B    [+5.2%]  Fifth Third Bank(52주)  ← 52주신고가, 이평선수렴
+$    24B    [+0.1%]  HEICO  ← 5일선라이딩, 이평선수렴
+$    23B    [+3.6%]  State Street Corporation(52주)  ← 52주신고가, 5일선라이딩
+$    23B    [+1.6%]  First Citizens BancShares  ← 이평선수렴, RSI/MACD
+$    22B    [+4.2%]  M&T Bank(52주)  ← 52주신고가, 이평선수렴
+$    21B    [+3.7%]  Alexandria Real Estate Equities  ← 이평선수렴, RSI/MACD
+$    21B    [+7.6%]  Baxter  ← 이평선수렴, RSI/MACD
+$    19B    [+6.1%]  Huntington Bancshares  ← 이평선수렴, RSI/MACD
+$    19B    [+6.5%]  Carnival Corporation  ← 이평선수렴, RSI/MACD
+$    19B    [+5.6%]  Principal(역사적)  ← 52주신고가, 5일선라이딩
+$    19B    [+2.3%]  Cincinnati Financial  ← 이평선수렴, RSI/MACD
+$    19B    [+9.1%]  Williams-Sonoma(52주)  ← 52주신고가, 이평선수렴
+$    18B    [+6.7%]  Darden Restaurants  ← 컵위드핸들, 이평선수렴
+$    18B    [+2.6%]  Regions Financial  ← 이평선수렴, RSI/MACD
+$    17B    [+2.3%]  Northern Trust(52주)  ← 52주신고가, 5일선라이딩
+$    17B    [+2.5%]  Avantor  ← 이평선수렴, RSI/MACD
+$    17B    [+9.8%]  Best Buy  ← 이평선수렴, RSI/MACD
+$    17B    [+3.9%]  Expeditors(52주)  ← 52주신고가, 5일선라이딩
+$    17B    [+7.0%]  Corebridge Financial  ← 이평선수렴, RSI/MACD
+$    16B    [+9.5%]  Southwest Airlines  ← 이평선수렴, RSI/MACD
+$    16B    [+3.6%]  Synchrony  ← 이평선수렴, RSI/MACD
+$    16B    [+2.4%]  Packaging Corporation of America  ← 컵위드핸들, 이평선수렴
+$    16B    [+6.7%]  Masco  ← 이평선수렴, RSI/MACD
+$    15B    [+3.3%]  Hyatt Hotels(52주)  ← 52주신고가, 5일선라이딩
+$    15B    [+1.0%]  Mid-America Apartment Communities  ← 이평선수렴, RSI/MACD
+$    15B    [+2.0%]  Snap-on  ← 이평선수렴, RSI/MACD
+$    15B    [+5.7%]  Citizens Financial Group(52주)  ← 52주신고가, 이평선수렴
+$    15B    [+1.9%]  Nordson  ← 이평선수렴, RSI/MACD
+$    15B    [+4.3%]  XPO Logistics(52주)  ← 52주신고가, 이평선수렴
+$    14B    [+1.4%]  Quest Diagnostics  ← 이평선수렴, RSI/MACD
+$    14B    [+1.1%]  Host Hotels & Resorts(52주)  ← 52주신고가, 5일선라이딩
+$    14B    [+6.5%]  Stanley Black &amp; Decker  ← 이평선수렴, RSI/MACD
+$    14B    [-1.6%]  Fox Corporation  ← 5일선라이딩, 이평선수렴
+$    14B    [+9.3%]  United Airlines Holdings  ← 이평선수렴, RSI/MACD
+$    14B    [+4.3%]  KeyCorp (KeyBank)  ← 이평선수렴, RSI/MACD
+$    13B    [+0.5%]  UDR Apartments  ← 이평선수렴, RSI/MACD
+$    13B    [+6.7%]  Toll Brothers  ← 이평선수렴, RSI/MACD
+$    12B    [+3.4%]  Charles River Laboratories  ← 이평선수렴, RSI/MACD
+$    12B   [+10.3%]  US Foods  ← 이평선수렴, RSI/MACD
+$    12B    [+2.5%]  Ares Capital  ← 이평선수렴, RSI/MACD
+$    12B    [+2.9%]  Medpace  ← 이평선수렴, RSI/MACD
+$    12B    [+1.3%]  NiSource  ← 이평선수렴, RSI/MACD
+$    12B    [+2.7%]  Reinsurance Group of America  ← 컵위드핸들, 이평선수렴
+$    12B    [+6.0%]  Incyte  ← 이평선수렴, RSI/MACD
+$    12B    [+7.9%]  Equitable Holdings  ← 이평선수렴, RSI/MACD
+$    12B   [+12.5%]  J.M. Smucker Company  ← 이평선수렴, RSI/MACD
+$    11B   [+17.5%]  Casey's General Stores(52주)  ← 52주신고가, RSI/MACD
+$    11B    [-1.5%]  Natera  ← 이평선수렴, RSI/MACD
+$    11B    [+3.9%]  Regal Rexnord  ← 이평선수렴, RSI/MACD
+$    11B    [+7.2%]  Performance Food Group  ← 5일선라이딩, 이평선수렴
+$    11B    [+1.2%]  American Financial Group  ← 이평선수렴, RSI/MACD
+$    10B    [+2.1%]  Camden Property Trust  ← 이평선수렴, RSI/MACD
+$    10B   [+10.2%]  Ralph Lauren(52주)  ← 52주신고가, 이평선수렴
+$    10B    [+6.8%]  Unum(역사적)  ← 52주신고가, 5일선라이딩
+$    10B    [+6.3%]  Boston Properties  ← 이평선수렴, RSI/MACD
+$     9B    [+5.2%]  Tapestry  ← 이평선수렴, RSI/MACD
+$     9B    [+4.9%]  Henry Schein  ← 이평선수렴, RSI/MACD
+$     9B    [+1.4%]  Assurant(52주)  ← 52주신고가, 5일선라이딩
+$     9B   [+27.9%]  Onto Innovation(52주)  ← 52주신고가, RSI/MACD
+$     9B   [+12.5%]  Duolingo  ← 이평선수렴, RSI/MACD
+$     9B   [+10.7%]  Jefferies Financial Group  ← 5일선라이딩, 이평선수렴
+$     9B    [+8.1%]  Woodward  ← 이평선수렴, RSI/MACD
+$     9B    [+1.2%]  Eagle Materials  ← 이평선수렴, RSI/MACD
+$     9B   [+11.7%]  SharkNinja  ← 이평선수렴, RSI/MACD
+$     8B    [+5.2%]  C. H. Robinson  ← 이평선수렴, RSI/MACD
+$     8B    [-0.1%]  TKO Group  ← 5일선라이딩, 이평선수렴
+$     8B    [-1.6%]  Acuity Brands  ← 이평선수렴, RSI/MACD
+$     8B    [+2.3%]  Webster Financial(52주)  ← 52주신고가, 이평선수렴
+$     8B    [+4.1%]  First Horizon National  ← 이평선수렴, RSI/MACD
+$     8B    [+4.1%]  Simpson Manufacturing Company  ← 이평선수렴, RSI/MACD
+$     8B    [+2.3%]  Middleby  ← 이평선수렴, RSI/MACD
+$     8B    [+4.9%]  NOV  ← 이평선수렴, RSI/MACD
+$     8B    [+9.4%]  Crane Co.  ← 이평선수렴, RSI/MACD
+$     7B    [+8.5%]  Lithia Motors  ← 이평선수렴, RSI/MACD
+$     7B   [+13.5%]  Wayfair  ← 이평선수렴, RSI/MACD
+$     7B    [+2.9%]  Axalta  ← 이평선수렴, RSI/MACD
+$     7B    [+6.7%]  Fluor Corporation  ← 이평선수렴, RSI/MACD
+$     7B    [+5.6%]  Cullen/Frost Bankers  ← 컵위드핸들, 이평선수렴
+$     7B    [+4.1%]  STAG Industrial  ← 이평선수렴, RSI/MACD
+$     7B    [+5.7%]  Invesco(52주)  ← 52주신고가, 이평선수렴
+$     7B    [+6.0%]  Watts Water Technologies  ← 이평선수렴, RSI/MACD
+$     7B    [+5.2%]  Commerce Bancshares  ← 이평선수렴, RSI/MACD
+$     7B    [+0.6%]  Dillard's  ← 이평선수렴, RSI/MACD
+$     6B    [+1.6%]  TriNet  ← 이평선수렴, RSI/MACD
+$     6B   [+11.8%]  Allegheny Technologies(역사적)  ← 52주신고가, RSI/MACD
+$     6B    [+4.9%]  Commercial Metals Company  ← 이평선수렴, RSI/MACD
+$     6B    [+0.0%]  Apellis Pharmaceuticals  ← 5일선라이딩, 이평선수렴
+$     6B    [+4.4%]  Western Alliance Bancorporation  ← 이평선수렴, RSI/MACD
+$     6B    [-0.5%]  Boyd Gaming(52주)  ← 52주신고가, 이평선수렴
+$     6B    [+6.2%]  Flowserve  ← 이평선수렴, RSI/MACD
+$     6B    [+1.2%]  Qualys  ← 이평선수렴, RSI/MACD
+$     6B   [+10.0%]  Red Rock Resorts  ← 이평선수렴, RSI/MACD
+$     6B    [+0.5%]  Taylor Morrison  ← 거래량폭발, 이평선수렴
+$     6B    [+6.4%]  Zions Bancorporation  ← 이평선수렴, RSI/MACD
+$     6B    [+3.8%]  South State Corp  ← 이평선수렴, RSI/MACD
+$     6B    [+4.2%]  Wintrust Financial(52주)  ← 52주신고가, 이평선수렴
+$     6B    [+2.7%]  Brunswick Corporation  ← 이평선수렴, RSI/MACD
+$     6B    [+4.8%]  Prosperity Bancshares  ← 이평선수렴, RSI/MACD
+$     6B    [+8.7%]  Vornado Realty Trust  ← 5일선라이딩, 이평선수렴
+$     6B    [+4.2%]  BOK Financial  ← 이평선수렴, RSI/MACD
+$     6B    [+1.0%]  SPX Corporation  ← 이평선수렴, RSI/MACD
+$     6B    [+2.2%]  Zurn Water Solutions  ← 이평선수렴, RSI/MACD
+$     5B    [+5.2%]  Leonardo DRS(52주)  ← 52주신고가, 5일선라이딩
+$     5B    [+5.3%]  Valvoline  ← 이평선수렴, RSI/MACD
+$     5B    [+5.3%]  Affiliated Managers Group(52주)  ← 52주신고가, 이평선수렴
+$     5B   [+14.5%]  Macy's  ← 이평선수렴, RSI/MACD
+$     5B    [+0.3%]  Southwest Gas  ← 이평선수렴, RSI/MACD
+$     5B    [+1.0%]  MSC Industrial Direct(52주)  ← 52주신고가, 5일선라이딩
+$     5B    [+9.6%]  Hexcel(52주)  ← 52주신고가, RSI/MACD
+$     5B    [+4.9%]  Old National Bank  ← 이평선수렴, RSI/MACD
+$     5B    [-2.8%]  Halozyme Therapeutics  ← 이평선수렴, RSI/MACD
+$     5B    [+5.0%]  Bank OZK(52주)  ← 52주신고가, RSI/MACD
+$     5B   [+15.6%]  Ashland  ← 이평선수렴, RSI/MACD
+$     5B    [+5.4%]  F.N.B. Corporation(52주)  ← 52주신고가, 이평선수렴
+$     5B    [+5.1%]  Franklin Electric  ← 컵위드핸들, 이평선수렴
+$     5B    [+4.2%]  Home BancShares  ← 이평선수렴, RSI/MACD
+$     5B    [+5.9%]  Gates Industrial Corp  ← 이평선수렴, RSI/MACD
+$     4B    [+5.8%]  Herc Holdings  ← 이평선수렴, RSI/MACD
+$     4B    [+4.0%]  United Bankshares(52주)  ← 52주신고가, 이평선수렴
+$     4B    [+4.4%]  Biohaven Pharmaceutical  ← 이평선수렴, RSI/MACD
+$     4B    [+5.6%]  Terex  ← 이평선수렴, RSI/MACD
+$     4B   [+35.5%]  Nuvalent(역사적)  ← 52주신고가, 이평선수렴
+$     4B    [+5.9%]  Glacier Bancorp  ← 이평선수렴, RSI/MACD
+$     4B    [+0.6%]  Silicon Labs(52주)  ← 52주신고가, 5일선라이딩
+$     4B    [+9.1%]  Acushnet Holdings  ← 이평선수렴, RSI/MACD
+$     4B    [+4.4%]  Rush Enterprises  ← 이평선수렴, RSI/MACD
+$     4B   [+16.1%]  Carpenter Technology(역사적)  ← 52주신고가, 이평선수렴
+$     4B    [+7.8%]  Matson(52주)  ← 52주신고가, 5일선라이딩
+$     4B    [+4.5%]  Hancock Whitney  ← 이평선수렴, RSI/MACD
+$     4B    [+1.5%]  Independence Realty Trust  ← 이평선수렴, RSI/MACD
+$     4B    [+5.6%]  Columbia Banking System  ← 이평선수렴, RSI/MACD
+$     4B   [+20.2%]  Advanced Energy  ← 이평선수렴, RSI/MACD
+$     3B    [+0.0%]  Tri Pointe Homes(52주)  ← 52주신고가, 5일선라이딩
+$     3B    [+3.2%]  Otter Tail  ← 컵위드핸들, 이평선수렴
+$     3B    [+5.3%]  ManpowerGroup  ← 이평선수렴, RSI/MACD
+$     3B    [+4.8%]  Cousins Properties  ← 5일선라이딩, 이평선수렴
+$     3B    [+9.6%]  Griffon Corporation  ← 이평선수렴, RSI/MACD
+$     3B   [+11.7%]  Surgery Partners  ← 이평선수렴, RSI/MACD
+$     3B    [+3.0%]  Progyny  ← 5일선라이딩, 이평선수렴
+$     3B    [+2.9%]  M/I Homes  ← 이평선수렴, RSI/MACD
+$     3B    [+5.4%]  ServisFirst Bancshares  ← 이평선수렴, RSI/MACD
+$     3B    [+3.6%]  Sotera Health  ← 이평선수렴, RSI/MACD
+$     3B    [+3.7%]  Graham Holdings  ← 이평선수렴, RSI/MACD
+$     3B    [+3.4%]  Travel + Leisure  ← 이평선수렴, RSI/MACD
+$     3B    [+0.2%]  Amicus Therapeutics(52주)  ← 52주신고가, 5일선라이딩
+$     3B    [+7.8%]  Cavco Industries  ← 이평선수렴, RSI/MACD
+$     3B    [+4.1%]  Ameris Bancorp(52주)  ← 52주신고가, 이평선수렴
+$     3B    [+0.1%]  Arcellx(52주)  ← 52주신고가, 5일선라이딩
+$     3B    [+7.3%]  Innospec  ← 5일선라이딩, 이평선수렴
+$     3B    [+6.5%]  Associated Banc-Corp(52주)  ← 52주신고가, 이평선수렴
+$     3B    [+7.5%]  Greif  ← 이평선수렴, RSI/MACD
+$     3B    [+0.6%]  Brighthouse Financial  ← 5일선라이딩, 이평선수렴
+$     3B    [+2.1%]  Federated Hermes(52주)  ← 52주신고가, 이평선수렴
+$     3B    [+9.1%]  Tanger Factory Outlet Centers(역사적)  ← 52주신고가, RSI/MACD
+$     3B    [+6.2%]  Atlantic Union Bankshares  ← 이평선수렴, RSI/MACD
+$     3B    [+2.8%]  Axos Financial  ← 이평선수렴, RSI/MACD
+$     3B    [+5.7%]  McGrath RentCorp  ← 이평선수렴, RSI/MACD
+$     3B    [+0.7%]  Dorman Products  ← 이평선수렴, RSI/MACD
+$     3B    [-0.2%]  Texas Capital Bancshares  ← 이평선수렴, RSI/MACD
+$     3B    [+0.0%]  Avista  ← 이평선수렴, RSI/MACD
+$     3B    [+5.8%]  COPT Defense Properties(52주)  ← 52주신고가, RSI/MACD
+$     3B    [+7.0%]  Highwoods Properties  ← 5일선라이딩, 이평선수렴
+$     3B   [+11.9%]  Grocery Outlet  ← 이평선수렴, RSI/MACD
+$     3B   [+12.0%]  Materion(역사적)  ← 52주신고가, 5일선라이딩
+$     3B    [+4.3%]  First Interstate BancSystem  ← 이평선수렴, RSI/MACD
+$     3B   [+16.8%]  Kohl's  ← 이평선수렴, RSI/MACD
+$     3B    [+4.9%]  Green Brick Partners  ← 이평선수렴, RSI/MACD
+$     2B    [+6.7%]  Central Garden &amp; Pet  ← 이평선수렴, RSI/MACD
+$     2B   [+14.2%]  Corcept Therapeutics  ← 5일선라이딩, 이평선수렴
+$     2B    [+6.4%]  Fulton Financial(52주)  ← 52주신고가, 이평선수렴
+$     2B    [+4.1%]  ICU Medical  ← 이평선수렴, RSI/MACD
+$     2B    [+7.3%]  LGI Homes  ← 이평선수렴, RSI/MACD
+$     2B    [+4.1%]  Bank of Hawaii  ← 이평선수렴, RSI/MACD
+$     2B    [+3.2%]  Vericel  ← 이평선수렴, RSI/MACD
+$     2B    [+4.1%]  Community Bank System  ← 이평선수렴, RSI/MACD
+$     2B    [+8.7%]  Laureate Education  ← 이평선수렴, RSI/MACD
+$     2B    [+3.8%]  First Advantage  ← 5일선라이딩, 이평선수렴
+$     2B    [+4.7%]  Banc of California  ← 이평선수렴, RSI/MACD
+$     2B    [+4.5%]  Eastern Bankshares  ← 이평선수렴, RSI/MACD
+$     2B    [+4.8%]  Guardant Health(52주)  ← 52주신고가, 이평선수렴
+$     2B    [+8.3%]  Privia Health Group  ← 이평선수렴, RSI/MACD
+$     2B    [+8.2%]  Cinemark Theatres  ← 이평선수렴, RSI/MACD
+$     2B   [+16.3%]  Kymera Therapeutics  ← 이평선수렴, RSI/MACD
+$     2B   [+10.6%]  AAR(52주)  ← 52주신고가, 이평선수렴
+$     2B    [+4.6%]  Independent Bank Corp (Massachusetts)  ← 컵위드핸들, 이평선수렴
+$     2B    [+4.4%]  Standex(52주)  ← 52주신고가, RSI/MACD
+$     2B   [+16.6%]  Agilon Health  ← 5일선라이딩, 이평선수렴
+$     2B    [+5.9%]  PTC Therapeutics  ← 이평선수렴, RSI/MACD
+$     2B    [+4.1%]  Park National Corp  ← 이평선수렴, RSI/MACD
+$     2B   [+13.4%]  Brinker International  ← 이평선수렴, RSI/MACD
+$     2B    [+4.5%]  TowneBank  ← 컵위드핸들, 이평선수렴
+$     2B    [+5.4%]  First Merchants Corporation  ← 이평선수렴, RSI/MACD
+$     2B    [+9.6%]  AZZ(52주)  ← 52주신고가, 이평선수렴
+$     2B   [+12.4%]  Geo Group  ← 5일선라이딩, 이평선수렴
+$     2B    [+2.9%]  Hilltop Holdings  ← 이평선수렴, RSI/MACD
+$     2B    [+6.4%]  Seacoast Banking  ← 이평선수렴, RSI/MACD
+$     2B    [+3.9%]  BankUnited  ← 이평선수렴, RSI/MACD
+$     2B    [+3.6%]  Forestar Group  ← 이평선수렴, RSI/MACD
+$     2B    [+2.3%]  NeoGenomics  ← 이평선수렴, RSI/MACD
+$     2B    [+1.9%]  Delek Logistics Partners  ← 이평선수렴, RSI/MACD
+$     2B   [+33.9%]  Payoneer  ← 이평선수렴, RSI/MACD
+$     2B    [+6.0%]  Grosvenor Capital Management  ← 이평선수렴, RSI/MACD
+$     2B    [+4.9%]  UFP Technologies  ← 이평선수렴, RSI/MACD
+$     2B   [+23.1%]  ACM Research(52주)  ← 52주신고가, 이평선수렴
+$     2B   [+13.8%]  The Cheesecake Factory(역사적)  ← 52주신고가, 이평선수렴
+$     2B    [+8.1%]  Mercury Systems(52주)  ← 52주신고가, 이평선수렴
+$     2B    [+4.3%]  Live Oak Bank  ← 이평선수렴, RSI/MACD
+$     2B   [+17.8%]  Amneal Pharmaceuticals(역사적)  ← 52주신고가, 이평선수렴
+$     2B    [+7.0%]  Harmony Biosciences  ← 이평선수렴, RSI/MACD
+$     2B    [-1.0%]  NexPoint Residential  ← 이평선수렴, RSI/MACD
+$     2B    [+4.6%]  InvenTrust Properties(52주)  ← 52주신고가, 거래량폭발
+$     2B    [+9.1%]  Ingevity  ← 이평선수렴, RSI/MACD
+$     2B    [+6.9%]  WesBanco  ← 거래량폭발, 컵위드핸들
+$     2B    [+3.4%]  FB Financial  ← 이평선수렴, RSI/MACD
+$     2B    [-0.9%]  Virtus Investment Partners  ← 이평선수렴, RSI/MACD
+$     2B    [+4.0%]  Trustmark(52주)  ← 52주신고가, 이평선수렴
+$     2B    [+6.0%]  NOW Inc.  ← 이평선수렴, RSI/MACD
+$     2B    [+1.1%]  Distribution Solutions Group  ← 이평선수렴, RSI/MACD
+$     2B    [-2.9%]  Veracyte  ← 5일선라이딩, 이평선수렴
+$     2B    [+6.3%]  World Kinect(52주)  ← 52주신고가, 5일선라이딩
+$     1B    [+3.1%]  City Holding Company  ← 컵위드핸들, RSI/MACD
+$     1B    [+0.1%]  Veris Residential(52주)  ← 52주신고가, 5일선라이딩
+$     1B    [+4.6%]  Enterprise Financial Services Corp(52주)  ← 52주신고가, RSI/MACD
+$     1B    [+0.4%]  CSG International(52주)  ← 52주신고가, 5일선라이딩
+$     1B    [+8.9%]  Skyward Specialty Insurance Group  ← 이평선수렴, RSI/MACD
+$     1B    [+6.8%]  Knowles(52주)  ← 52주신고가, 5일선라이딩
+$     1B    [+6.9%]  V2X(역사적)  ← 52주신고가, 5일선라이딩
+$     1B    [+5.7%]  Victoria's Secret &amp; Co(52주)  ← 52주신고가, 이평선수렴
+$     1B    [+4.2%]  First Bancorp(52주)  ← 52주신고가, 이평선수렴
+$     1B    [+8.5%]  Apogee Enterprises  ← 이평선수렴, RSI/MACD
+$     1B    [+0.7%]  Diebold Nixdorf  ← 이평선수렴, RSI/MACD
+$     1B    [+2.5%]  Saul Centers  ← 이평선수렴, RSI/MACD
+$     1B    [+3.4%]  Stellar Bancorp  ← 이평선수렴, RSI/MACD
+$     1B   [+14.8%]  Arcutis Biotherapeutics  ← 이평선수렴, RSI/MACD
+$     1B    [+6.3%]  Mirum Pharmaceuticals  ← 이평선수렴, RSI/MACD
+$     1B    [+8.2%]  Nicolet Bankshares  ← 거래량폭발, 이평선수렴
+$     1B    [+1.1%]  FRP Holdings  ← 5일선라이딩, 이평선수렴
+$     1B    [+8.9%]  Allegiant Air  ← 이평선수렴, RSI/MACD
+$     1B    [+3.8%]  TriCo Bancshares  ← 컵위드핸들, RSI/MACD
+$     1B    [+4.5%]  Provident Financial Services  ← 이평선수렴, RSI/MACD
+$     1B   [+17.6%]  Perimeter Solutions(52주)  ← 52주신고가, 이평선수렴
+$     1B    [+7.1%]  ScanSource  ← 5일선라이딩, 이평선수렴
+$     1B    [+0.0%]  Golden Entertainment  ← 5일선라이딩, 이평선수렴
+$     1B    [+1.0%]  Ellington Financial  ← 5일선라이딩, 이평선수렴
+$     1B    [+3.0%]  QCR Holdings(52주)  ← 52주신고가, 이평선수렴
+$     1B    [+1.0%]  Innoviva  ← 이평선수렴, RSI/MACD
+$     1B    [+5.7%]  Interface  ← 이평선수렴, RSI/MACD
+$     1B    [+4.8%]  Byline Bancorp(52주)  ← 52주신고가, RSI/MACD
+$     1B    [+5.2%]  LendingClub  ← 이평선수렴, RSI/MACD
+$     1B    [+5.4%]  Beazer Homes USA  ← 이평선수렴, RSI/MACD
+$     1B    [+5.6%]  SunCoke Energy  ← 5일선라이딩, 이평선수렴
+$     1B    [+2.5%]  OceanFirst Financial  ← 이평선수렴, RSI/MACD
+$     1B    [+7.3%]  DXP Enterprises  ← 이평선수렴, RSI/MACD
+$     1B    [+9.9%]  Healthcare Services Group  ← 이평선수렴, RSI/MACD
+
+==================================================
+개별 종목 상세
+==================================================
+
+──────────────────────────────────────────────────
+✅ 기아(+3.54%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 65.1조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+기아 [매력적인 모범생]
+  26.05.14 / 목표가: 
+  대신증권
+기아 [시장 리스크 상쇄할 경쟁력 확인, 미래 사업 ..]
+  26.04.27 / 목표가: 
+  한화투자증권
+기아 [외생변수에 대한 높은 방어력 확인]
+  26.04.27 / 목표가: 
+  DS투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=000270
+
+──────────────────────────────────────────────────
+✅ 하나금융지주(-2.10%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 33.2조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+하나금융지주 [배당 비중 확대]
+  26.04.27 / 목표가: 
+  한화투자증권
+하나금융지주 [1Q26 Review: 이자수익 및 비이자수익 고른 ..]
+  26.04.27 / 목표가: 
+  교보증권
+하나금융지주 [큰폭의 NIM 상승과 대손비용 감소 효과가 만..]
+  26.04.27 / 목표가: 
+  하나증권
+
+📎 https://finance.naver.com/item/main.naver?code=086790
+
+──────────────────────────────────────────────────
+✅ 원익IPS(+38.13%)
+
+❗ 52주신고가 | 이평선수렴 | RSI/MACD
+📌 역사적신고가
+
+시가총액 : 9.0조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+원익IPS [추정치 상향의 서막]
+  26.05.11 / 목표가: 
+  SK증권
+원익IPS [메모리 장비 투자 수혜 확대]
+  26.03.10 / 목표가: 
+  키움증권
+원익IPS [국내 장비 대장]
+  26.02.27 / 목표가: 
+  SK증권
+
+📎 https://finance.naver.com/item/main.naver?code=240810
+
+──────────────────────────────────────────────────
+✅ 한국타이어앤테크놀로지(+6.04%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 8.9조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+한국타이어앤테크놀로지 [이젠 열관리가 타이어에게 힘이 될 때]
+  26.05.20 / 목표가: 
+  한화투자증권
+한국타이어앤테크놀로지 [가던 길 잘 가는 중]
+  26.05.11 / 목표가: 
+  DS투자증권
+한국타이어앤테크놀로지 [수익성은 일시 하락할 것이다. 그러니 주식을..]
+  26.05.11 / 목표가: 
+  하나증권
+
+📎 https://finance.naver.com/item/main.naver?code=161390
+
+──────────────────────────────────────────────────
+✅ 이오테크닉스(+28.03%)
+
+❗ 52주신고가 | RSI/MACD
+📌 52주신고가
+
+시가총액 : 7.5조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+이오테크닉스 [1Q부터 고성장 입증]
+  26.05.18 / 목표가: 
+  신한투자증권
+이오테크닉스 [NAND 고단화 수혜 예상]
+  26.03.19 / 목표가: 
+  iM증권
+이오테크닉스 [기술 변화와 CapEx 낙수 효과를 동시에]
+  26.02.27 / 목표가: 
+  신한투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=039030
+
+──────────────────────────────────────────────────
+✅ HPSP(+42.15%)
+
+❗ 52주신고가 | RSI/MACD
+📌 역사적신고가
+
+시가총액 : 5.9조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+HPSP [확장의 연속]
+  26.05.18 / 목표가: 
+  대신증권
+HPSP [다가오는 재평가의 시간]
+  26.04.22 / 목표가: 
+  대신증권
+HPSP [26년 전방 투자 확대 수혜 기대]
+  25.11.21 / 목표가: 
+  한화투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=403870
+
+──────────────────────────────────────────────────
+✅ 유진테크(+24.98%)
+
+❗ 52주신고가 | 이평선수렴 | RSI/MACD
+📌 역사적신고가
+
+시가총액 : 4.5조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+유진테크 [올해 눈높이 하향]
+  25.05.19 / 목표가: 
+  한화투자증권
+유진테크 [4Q24 Preview: 선단 공정 투자 수혜의 대표주..]
+  25.02.04 / 목표가: 
+  유진투자증권
+유진테크 [이익 개선세 대비 과도한 저평가]
+  24.10.18 / 목표가: 
+  한화투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=084370
+
+──────────────────────────────────────────────────
+✅ 현대백화점(+21.02%)
+
+❗ 52주신고가 | 이평선수렴
+📌 역사적신고가
+
+시가총액 : 3.8조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+현대백화점 [2Q 기존점 +16%, 목표주가 22만원으로 상향]
+  26.06.10 / 목표가: 
+  키움증권
+현대백화점 [이제 키 좀 맞춰볼까?]
+  26.06.05 / 목표가: 
+  한화투자증권
+현대백화점 [1Q26 Review : 백화점도 결국 고정비 비즈니..]
+  26.05.07 / 목표가: 
+  한화투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=069960
+
+──────────────────────────────────────────────────
+✅ 에스원(+20.52%)
+
+❗ 거래량폭발 | 이평선수렴 | RSI/MACD
+
+시가총액 : 3.4조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+에스원 [새로운 성장을 위한 변화]
+  26.05.07 / 목표가: 
+  유안타증권
+에스원 [실적 + 배당성향 60% + 자사주]
+  26.02.02 / 목표가: 
+  유안타증권
+에스원 [DPS 상향에 이어 자사주 소각도 기대됨]
+  26.02.02 / 목표가: 
+  iM증권
+
+📎 https://finance.naver.com/item/main.naver?code=012750
+
+──────────────────────────────────────────────────
+✅ 현대해상(+9.64%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3.3조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+현대해상 [금리 상승 및 관리급여 도입 수혜주]
+  26.06.09 / 목표가: 
+  신한투자증권
+현대해상 [1Q26Review: 보험손익 개선 흐름에 따른 연간..]
+  26.05.18 / 목표가: 
+  교보증권
+현대해상 [드디어 듀레이션 매칭에 성공]
+  26.05.18 / 목표가: 
+  한화투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=001450
+
+──────────────────────────────────────────────────
+✅ HL만도(+17.75%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3.1조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+HL만도 [위기 속 확인된 이익체력]
+  26.05.04 / 목표가: 
+  대신증권
+HL만도 [자동차를 넘어 로봇과 로보택시로 확장]
+  26.04.30 / 목표가: 
+  하나증권
+HL만도 [1Q26 Review: 수주로 보여주는 경쟁력]
+  26.04.30 / 목표가: 
+  교보증권
+
+📎 https://finance.naver.com/item/main.naver?code=204320
+
+──────────────────────────────────────────────────
+✅ 한전KPS(+31.35%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 2.9조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+한전KPS [1Q26 Review: 그래도 안정적인 실적 지속]
+  26.05.15 / 목표가: 
+  교보증권
+한전KPS [국내가 받쳐주고 해외는 곧 계약하고]
+  26.05.13 / 목표가: 
+  유진투자증권
+한전KPS [실적 안정화 확인. 이제는 해외 원전 정비 확..]
+  26.05.12 / 목표가: 
+  대신증권
+
+📎 https://finance.naver.com/item/main.naver?code=051600
+
+──────────────────────────────────────────────────
+✅ 제일기획(+11.81%)
+
+❗ 거래량폭발 | 이평선수렴 | RSI/MACD
+
+시가총액 : 2.4조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+제일기획 [주주환원 우수 기업]
+  26.04.30 / 목표가: 
+  대신증권
+제일기획 [굳건한 고배당주]
+  26.04.27 / 목표가: 
+  대신증권
+제일기획 [곧 좋아질 거야]
+  26.04.27 / 목표가: 
+  유진투자증권
+
+📎 https://finance.naver.com/item/main.naver?code=030000
+
+──────────────────────────────────────────────────
+✅ 삼성화재우(+0.00%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.2조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=000815
+
+──────────────────────────────────────────────────
+✅ 코미팜(+20.90%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,324억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 1건)
+코미팜 [모든 생명의 공존을 위한 바이오산업의 선두..]
+  20.11.05 / 목표가: 
+  한국기업데이터
+
+📎 https://finance.naver.com/item/main.naver?code=041960
+
+──────────────────────────────────────────────────
+✅ 케이아이엔엑스(+10.41%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,109억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+케이아이엔엑스 [아직 두 발 남았다]
+  26.04.30 / 목표가: 
+  미래에셋증권
+케이아이엔엑스 [느리지만 꾸준하게]
+  25.12.15 / 목표가: 
+  신한투자증권
+케이아이엔엑스 [수도권 데이터센터 수요 급증→계약률 상승으..]
+  25.04.07 / 목표가: 
+  iM증권
+
+📎 https://finance.naver.com/item/main.naver?code=093320
+
+──────────────────────────────────────────────────
+✅ 펨트론(+32.03%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5,608억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+펨트론 [SMT에서 반도체로, 체질 개선 본격화]
+  26.04.02 / 목표가: 
+  한국IR협의회
+펨트론 [적층 메모리(HBM, HBF,SOCAMM) 모두 대응 가..]
+  26.02.26 / 목표가: 
+  대신증권
+펨트론 [늘어나는 모멘텀]
+  25.11.27 / 목표가: 
+  키움증권
+
+📎 https://finance.naver.com/item/main.naver?code=168360
+
+──────────────────────────────────────────────────
+✅ 에이팩트(+45.57%)
+
+❗ 52주신고가 | 이평선수렴 | RSI/MACD
+📌 52주신고가
+
+시가총액 : 4,871억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+에이팩트 [[AI] 반도체 후공정 패키징 및 테스트 턴키 ..]
+  26.04.27 / 목표가: 
+  한국IR협의회
+에이팩트 [26년 수주 확대 효과 본격화]
+  26.01.29 / 목표가: 
+  미래에셋증권
+에이팩트 [반등을 넘어 더 큰 성장 조준(feat. SOCAMM2)]
+  25.09.19 / 목표가: 
+  키움증권
+
+📎 https://finance.naver.com/item/main.naver?code=200470
+
+──────────────────────────────────────────────────
+✅ 메카로(+18.15%)
+
+❗ 52주신고가 | RSI/MACD
+📌 역사적신고가
+
+시가총액 : 4,744억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+메카로 [[AI] 반도체 히터블럭 분야의 선도 기업]
+  25.11.14 / 목표가: 
+  한국IR협의회
+메카로 [중국 반도체향 수출 확대와 특수밸브 국산화 ..]
+  24.04.09 / 목표가: 
+  한국IR협의회
+메카로 [반도체용 전구체 및 히터블록 사업과 더불어 ..]
+  22.04.28 / 목표가: 
+  나이스디앤비
+
+📎 https://finance.naver.com/item/main.naver?code=241770
+
+──────────────────────────────────────────────────
+✅ HL홀딩스(+6.98%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 4,176억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+* 증권사 보고서 (최근 3건)
+HL홀딩스 [지분가치 상승을 반영하여 목표주가 상향]
+  26.05.29 / 목표가: 
+  하나증권
+HL홀딩스 [PBR 상승의 트리거→주주환원 및 로봇사업 확..]
+  26.05.18 / 목표가: 
+  iM증권
+HL홀딩스 [주차 로봇 사업에 대한 기대]
+  26.01.08 / 목표가: 
+  한국IR협의회
+
+📎 https://finance.naver.com/item/main.naver?code=060980
