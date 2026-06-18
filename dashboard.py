@@ -1954,24 +1954,35 @@ with tab9:
         st.divider()
         with st.expander("📋 개별 가상매매 기록 (최근 30건)", expanded=False):
             _recent = sorted(_trades, key=lambda t: t['log_date'], reverse=True)[:30]
+            _status_kr = {'open': '보유중', 'closed': '종료'}
+            def _fmt_px(v, mkt):
+                try:
+                    v = float(v)
+                    return f"{int(round(v)):,}" if mkt == 'KR' else f"{v:,.2f}"
+                except Exception:
+                    return '-'
+            def _fmt_ret(v):
+                try:
+                    return f"{float(v):+.1f}%"
+                except Exception:
+                    return '대기'
             _rt = []
             for t in _recent:
                 _r = t.get('realized', {})
                 _rt.append({
                     '진입일': t['log_date'], '시장': t['market'], '종목': t['name'],
-                    '진입가': t['entry_px'], '신호': ', '.join(t.get('signals', [])),
-                    '4주%': _r.get('4w', {}).get('ret', None),
-                    '13주%': _r.get('13w', {}).get('ret', None),
-                    '상태': t['status'],
+                    '진입가': _fmt_px(t['entry_px'], t['market']),
+                    '신호': ', '.join(t.get('signals', [])),
+                    '4주%': _fmt_ret(_r.get('4w', {}).get('ret')),
+                    '13주%': _fmt_ret(_r.get('13w', {}).get('ret')),
+                    '상태': _status_kr.get(t['status'], t['status']),
                 })
             _rtd = pd.DataFrame(_rt)
             def _c_ret(v):
-                try: return 'color:#56d364' if float(v)>=0 else 'color:#f78166'
+                try: return 'color:#56d364' if float(str(v).replace('%','').replace('+',''))>=0 else 'color:#f78166'
                 except: return ''
             st.dataframe(
-                _rtd.style.map(_c_ret, subset=['4주%','13주%'])
-                    .format({'4주%': lambda v: f'{v:+.1f}' if v is not None else '대기',
-                             '13주%': lambda v: f'{v:+.1f}' if v is not None else '대기'}, na_rep='대기'),
+                _rtd.style.map(_c_ret, subset=['4주%','13주%']),
                 use_container_width=True, hide_index=True, height=420)
 
 
