@@ -183,67 +183,66 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
     return signal, cash_min, cash_max, score, details
 
 
-# ════════════════════════════════════════════════════════════════════
-# 오늘의 종합 — 한 페이지 요약 (탭 위에 항상 표시)
-# ════════════════════════════════════════════════════════════════════
-st.title("📊 오늘의 종합")
-
-_sum_paths = [SCREENER_JSON, CANSLIM_JSON, TURNAROUND_JSON, PERF_JSON]
-_sum_mtimes = [m for m in (file_mtime(p) for p in _sum_paths) if m]
-_latest_update = max(_sum_mtimes) if _sum_mtimes else "데이터 없음"
-st.caption(f"🕐 마지막 업데이트: **{_latest_update}**  ·  자동 갱신 매일 06:00  ·  수동 갱신: run_update.bat")
-
-_s_scr  = load_json(SCREENER_JSON) or {}
-_s_can  = load_json(CANSLIM_JSON) or {}
-_s_ta   = load_json(TURNAROUND_JSON) or {}
-
-# 매크로 신호 (best-effort, 네트워크 실패 시 '—')
-try:
-    _fed = fetch_fred('FEDFUNDS', 1)
-    _fed_rate = _fed[-1][1] if _fed else None
-    _m2 = fetch_fred('M2SL', 14)
-    _m2_yoy = round((_m2[-1][1] / _m2[-13][1] - 1) * 100, 1) if len(_m2) >= 13 else None
-    _macro_sig = compute_macro_signal(_fed_rate, _m2_yoy, fetch_spx_yoy())[0]
-except Exception:
-    _macro_sig = "—"
-
-_can_stocks = _s_can.get('stocks') or []
-_mc1, _mc2, _mc3, _mc4, _mc5 = st.columns(5)
-_mc1.metric("시장 방향", _s_can.get('market_dir', '—'))
-_mc2.metric("매크로 신호", _macro_sig)
-_mc3.metric("주봉 신호 종목", f"{_s_scr.get('total', '—')}개", help=f"기준일 {_s_scr.get('date','')}")
-_mc4.metric("CANSLIM 통과", f"{len(_can_stocks)}개" if _can_stocks else "—")
-_mc5.metric("흑자전환", f"{_s_ta.get('total', '—')}개", help=f"기준일 {_s_ta.get('date','')}")
-
-if not _can_stocks:
-    st.warning("⚠️ CANSLIM 결과가 비어있거나 손상됨 → run_update.bat 을 다시 돌려 갱신하세요.")
-
-# 주봉 신호 상위 (신호 많은 순) — 한눈에 후보
-try:
-    _scr_stocks = _s_scr.get('stocks') or []
-    if _scr_stocks:
-        _df_sum = pd.DataFrame(_scr_stocks)
-        _df_sum = _df_sum.sort_values('total_signals', ascending=False).head(12)
-        _cols = [c for c in ['market', 'name', 'sym', 'total_signals',
-                             'pct_change', 'dist_52w', 'sector'] if c in _df_sum.columns]
-        _show = _df_sum[_cols].rename(columns={
-            'market': '시장', 'name': '종목', 'sym': '코드', 'total_signals': '신호수',
-            'pct_change': '등락%', 'dist_52w': '52주고가대비%', 'sector': '섹터'})
-        st.markdown("##### 🔥 주봉 신호 상위 (신호 많은 순) — 자세한 건 아래 탭에서")
-        st.dataframe(_show, use_container_width=True, hide_index=True)
-except Exception as _e:
-    st.caption(f"(요약 표 생략: {_e})")
-
-st.divider()
-
-
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab10, tab11, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
-    "🧭 프로젝트 종합", "🎯 자동추천",
+tab_today, tab10, tab11, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    "📋 오늘의 종합", "🧭 프로젝트 종합", "🎯 자동추천",
     "📈 월간 성과", "📊 주봉 스크리너", "🏆 CANSLIM",
     "🌍 매크로", "🎯 추천 포트", "🔄 흑자전환", "🔍 종목 분석", "💼 포트폴리오",
     "📒 페이퍼 트레이딩"
 ])
+
+
+# ════════════════════════════════════════════════════════════════════
+# 탭: 오늘의 종합 — 한 페이지 요약
+# ════════════════════════════════════════════════════════════════════
+with tab_today:
+    st.header("📋 오늘의 종합")
+
+    _sum_paths = [SCREENER_JSON, CANSLIM_JSON, TURNAROUND_JSON, PERF_JSON]
+    _sum_mtimes = [m for m in (file_mtime(p) for p in _sum_paths) if m]
+    _latest_update = max(_sum_mtimes) if _sum_mtimes else "데이터 없음"
+    st.caption(f"🕐 마지막 업데이트: **{_latest_update}**  ·  자동 갱신 매일 06:00  ·  수동 갱신: run_update.bat")
+
+    _s_scr  = load_json(SCREENER_JSON) or {}
+    _s_can  = load_json(CANSLIM_JSON) or {}
+    _s_ta   = load_json(TURNAROUND_JSON) or {}
+
+    # 매크로 신호 (best-effort, 네트워크 실패 시 '—')
+    try:
+        _fed = fetch_fred('FEDFUNDS', 1)
+        _fed_rate = _fed[-1][1] if _fed else None
+        _m2 = fetch_fred('M2SL', 14)
+        _m2_yoy = round((_m2[-1][1] / _m2[-13][1] - 1) * 100, 1) if len(_m2) >= 13 else None
+        _macro_sig = compute_macro_signal(_fed_rate, _m2_yoy, fetch_spx_yoy())[0]
+    except Exception:
+        _macro_sig = "—"
+
+    _can_stocks = _s_can.get('stocks') or []
+    _mc1, _mc2, _mc3, _mc4, _mc5 = st.columns(5)
+    _mc1.metric("시장 방향", _s_can.get('market_dir', '—'))
+    _mc2.metric("매크로 신호", _macro_sig)
+    _mc3.metric("주봉 신호 종목", f"{_s_scr.get('total', '—')}개", help=f"기준일 {_s_scr.get('date','')}")
+    _mc4.metric("CANSLIM 통과", f"{len(_can_stocks)}개" if _can_stocks else "—")
+    _mc5.metric("흑자전환", f"{_s_ta.get('total', '—')}개", help=f"기준일 {_s_ta.get('date','')}")
+
+    if not _can_stocks:
+        st.warning("⚠️ CANSLIM 결과가 비어있거나 손상됨 → run_update.bat 을 다시 돌려 갱신하세요.")
+
+    # 주봉 신호 상위 (신호 많은 순) — 한눈에 후보
+    try:
+        _scr_stocks = _s_scr.get('stocks') or []
+        if _scr_stocks:
+            _df_sum = pd.DataFrame(_scr_stocks)
+            _df_sum = _df_sum.sort_values('total_signals', ascending=False).head(12)
+            _cols = [c for c in ['market', 'name', 'sym', 'total_signals',
+                                 'pct_change', 'dist_52w', 'sector'] if c in _df_sum.columns]
+            _show = _df_sum[_cols].rename(columns={
+                'market': '시장', 'name': '종목', 'sym': '코드', 'total_signals': '신호수',
+                'pct_change': '등락%', 'dist_52w': '52주고가대비%', 'sector': '섹터'})
+            st.markdown("##### 🔥 주봉 신호 상위 (신호 많은 순) — 자세한 건 다른 탭에서")
+            st.dataframe(_show, use_container_width=True, hide_index=True)
+    except Exception as _e:
+        st.caption(f"(요약 표 생략: {_e})")
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -1399,14 +1398,17 @@ def fetch_stock_data(sym: str, days: int):
                             'currency': 'USD'}
             except: pass
 
-        earn = insid = fin_est = None
+        earn = {'annual': None, 'quarterly': None, 'naver': None}
+        insid = fin_est = None
         yf_sym = f"{code}.KS" if is_kr else sym
         try:
             t = yf.Ticker(yf_sym)
             yi = t.info or {}
             if yi and (yi.get('trailingPE') or yi.get('longName')):
                 info.update({k: v for k, v in yi.items() if v is not None})
-            try: earn = t.quarterly_financials
+            try: earn['annual'] = t.financials
+            except: pass
+            try: earn['quarterly'] = t.quarterly_financials
             except: pass
             if not is_kr:
                 try: insid = t.insider_transactions
@@ -1414,6 +1416,14 @@ def fetch_stock_data(sym: str, days: int):
                 try: fin_est = t.earnings_estimate
                 except: pass
         except: pass
+
+        # 한국 종목: yfinance가 429로 막히는 경우 네이버 실적표로 폴백 (순이익 기준)
+        if is_kr:
+            try:
+                from canslim_run import fetch_naver_earnings_table
+                earn['naver'] = fetch_naver_earnings_table(code)
+            except Exception:
+                pass
 
         return hist, info, earn, insid, fin_est
     except Exception as e:
@@ -1610,19 +1620,70 @@ with tab7:
                     if av >= 1e9:  return f"{s}{ccy}{av/1e9:.2f}B"
                     return f"{s}{ccy}{av/1e6:.0f}M"
 
-                st.subheader("📅 연간 실적")
-                if earn is not None and not earn.empty:
-                    rows_e = []
-                    for col in sorted(earn.columns, reverse=True)[:6]:
-                        rev = earn.get('Total Revenue', pd.Series()).get(col)
-                        net = earn.get('Net Income',    pd.Series()).get(col)
-                        rows_e.append({'날짜': str(col)[:7], '매출': _b(rev), '순이익': _b(net)})
-                    if rows_e:
-                        e_df = pd.DataFrame(rows_e)
-                        st.dataframe(e_df, use_container_width=True, hide_index=True,
-                                     height=36 + 35*len(e_df))
+                st.subheader("📅 실적 (YoY·QoQ 증감)")
+                _emode = st.radio("기간", ["연간", "분기"], horizontal=True, key="earn_mode")
+
+                def _growth(cur, prev):
+                    try:
+                        if cur is None or prev is None or prev == 0 or prev < 0:
+                            return None
+                        return (cur / prev - 1) * 100
+                    except Exception:
+                        return None
+
+                _edict = earn if isinstance(earn, dict) else {}
+                _edf = _edict.get('annual') if _emode == "연간" else _edict.get('quarterly')
+                _naver = _edict.get('naver')
+                rows_e = []
+                _yoy_lag = 1 if _emode == "연간" else 4   # 연간:1칸전=전년 / 분기:4칸전=전년동기
+
+                if _edf is not None and hasattr(_edf, 'empty') and not _edf.empty:
+                    _cols = sorted(_edf.columns, reverse=True)[:7]   # 최신→과거
+
+                    def _cell(keys, col):
+                        for k in ([keys] if isinstance(keys, str) else keys):
+                            if k in _edf.index:
+                                v = _edf.loc[k, col]
+                                try:
+                                    return float(v) if not pd.isna(v) else None
+                                except Exception:
+                                    return None
+                        return None
+
+                    _revs = [_cell('Total Revenue', c) for c in _cols]
+                    _nets = [_cell(['Net Income', 'Net Income Common Stockholders'], c) for c in _cols]
+                    for i, c in enumerate(_cols[:6]):
+                        yoy = _growth(_nets[i], _nets[i + _yoy_lag]) if i + _yoy_lag < len(_nets) else None
+                        qoq = _growth(_nets[i], _nets[i + 1]) if (_emode == "분기" and i + 1 < len(_nets)) else None
+                        rows_e.append({'날짜': str(c)[:7], '매출': _b(_revs[i]), '순이익': _b(_nets[i]),
+                                       'YoY%': f"{yoy:+.0f}%" if yoy is not None else '-',
+                                       'QoQ%': f"{qoq:+.0f}%" if qoq is not None else '-'})
+
+                elif _naver:   # 한국 종목 네이버 폴백 (순이익, 억원)
+                    _arr = list(reversed(_naver['annual'] if _emode == "연간" else _naver['quarterly']))
+                    _nets = [v for _, v in _arr]
+                    for i, (lab, net) in enumerate(_arr[:6]):
+                        yoy = _growth(net, _nets[i + _yoy_lag]) if i + _yoy_lag < len(_nets) else None
+                        qoq = _growth(net, _nets[i + 1]) if (_emode == "분기" and i + 1 < len(_nets)) else None
+                        rows_e.append({'날짜': lab, '매출': '-',
+                                       '순이익': f"{net:,.0f}억" if net is not None else '-',
+                                       'YoY%': f"{yoy:+.0f}%" if yoy is not None else '-',
+                                       'QoQ%': f"{qoq:+.0f}%" if qoq is not None else '-'})
+
+                if rows_e:
+                    _cols_show = ['날짜', '매출', '순이익', 'YoY%'] + (['QoQ%'] if _emode == "분기" else [])
+                    e_df = pd.DataFrame(rows_e)[_cols_show]
+                    def _cg(v):
+                        try:
+                            return 'color:#56d364' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#f78166'
+                        except Exception:
+                            return ''
+                    _gsub = [c for c in ['YoY%', 'QoQ%'] if c in _cols_show]
+                    st.dataframe(e_df.style.map(_cg, subset=_gsub),
+                                 use_container_width=True, hide_index=True,
+                                 height=36 + 35*len(e_df))
                 else:
-                    st.info("실적 데이터 없음")
+                    st.info("실적 데이터 없음 (yfinance/네이버 조회 실패)")
 
                 st.subheader("📈 기간별 수익률")
                 r_df = pd.DataFrame([
