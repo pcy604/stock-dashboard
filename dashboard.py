@@ -238,8 +238,8 @@ st.divider()
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab10, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
-    "🧭 프로젝트 종합",
+tab10, tab11, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    "🧭 프로젝트 종합", "🎯 자동추천",
     "📈 월간 성과", "📊 주봉 스크리너", "🏆 CANSLIM",
     "🌍 매크로", "🎯 추천 포트", "🔄 흑자전환", "🔍 종목 분석", "💼 포트폴리오",
     "📒 페이퍼 트레이딩"
@@ -1984,6 +1984,118 @@ with tab9:
             st.dataframe(
                 _rtd.style.map(_c_ret, subset=['4주%','13주%']),
                 use_container_width=True, hide_index=True, height=420)
+
+
+# ════════════════════════════════════════════════════════════════════
+# 탭11: 자동추천 — 일/주/월 + 손익비 리스크 사이징
+# ════════════════════════════════════════════════════════════════════
+with tab11:
+    st.header("🎯 자동추천 — 일·주·월 + 손익비 사이징")
+    st.caption("신호 → 종목 → 얼마나 살까 → 어디서 자를까. 손익비(R:R)와 1회 리스크를 정하면 수량·손절·목표가 자동 계산.")
+
+    cc1, cc2, cc3, cc4 = st.columns([1.2, 1, 1, 1])
+    with cc1:
+        ar_tf_label = st.radio("타임프레임", ["주간", "월간", "일간"], horizontal=True, key="ar_tf")
+    ar_tf = {"일간": "daily", "주간": "weekly", "월간": "monthly"}[ar_tf_label]
+    with cc2:
+        ar_cap = st.number_input("투자 자본(원)", min_value=0, value=10_000_000,
+                                 step=1_000_000, key="ar_cap")
+    with cc3:
+        ar_mkt = st.selectbox("시장", ["전체", "KR", "US"], key="ar_mkt")
+    with cc4:
+        ar_n = st.slider("최대 종목수", 3, 10, 6, key="ar_n")
+
+    _tf_def = {"daily": (5, 2.0), "weekly": (7, 2.0), "monthly": (10, 2.5)}[ar_tf]
+    rc1, rc2, rc3, rc4 = st.columns(4)
+    with rc1:
+        ar_stop = st.slider("손절폭 -%", 2, 25, _tf_def[0], key="ar_stop",
+                            help="진입가 대비 손절 거리")
+    with rc2:
+        ar_rr = st.slider("손익비 1 : ?", 1.0, 5.0, _tf_def[1], 0.5, key="ar_rr",
+                          help="목표폭 = 손절폭 × 이 값. 2.0이면 손절 -7%일 때 목표 +14%")
+    with rc3:
+        ar_risk = st.slider("1회 리스크 %", 0.5, 5.0, 1.0, 0.5, key="ar_risk",
+                            help="한 종목이 손절당할 때 잃는 자본 비율. 작을수록 보수적")
+    with rc4:
+        ar_cash = st.slider("현금 비중 %", 0, 70, 30, key="ar_cash",
+                            help="매크로 위험에 따라 현금 보유. 나머지를 종목에 배분")
+
+    ar_entry = False
+    if ar_tf == "daily":
+        ar_entry = st.checkbox("일봉 진입타이밍 적용 ('진입적정'만, 느림 ~20초)", value=False, key="ar_entry")
+
+    if st.button("🎯 자동추천 생성", type="primary", key="ar_go"):
+        with st.spinner("추천 생성 중..."):
+            try:
+                import auto_recommend
+                _summary, _recs = auto_recommend.build_recommendations(
+                    timeframe=ar_tf, capital=ar_cap, stop_pct=ar_stop, rr=ar_rr,
+                    risk_per_trade=ar_risk, max_positions=ar_n, market_filter=ar_mkt,
+                    cash_pct=ar_cash / 100, use_entry_timing=ar_entry,
+                )
+                st.session_state['ar_result'] = (_summary, _recs)
+            except Exception as _e:
+                st.error(f"추천 생성 실패: {_e}")
+                st.session_state.pop('ar_result', None)
+
+    if 'ar_result' in st.session_state:
+        _summary, _recs = st.session_state['ar_result']
+        s = _summary
+        st.divider()
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("손절 / 목표", f"-{s['stop_pct']}% / +{s['target_pct']}%")
+        m2.metric("손익비", f"1 : {s['rr']}", help=f"본전 승률 {s['breakeven_wr']}% 이상이면 기대값 +")
+        m3.metric("본전 승률", f"{s['breakeven_wr']}%")
+        m4.metric("포트폴리오 히트", f"{s['portfolio_heat']}%",
+                  help="전 종목이 동시에 손절당할 때 잃는 총 자본 비율")
+
+        if not _recs:
+            st.warning("추천 종목이 없습니다. 데이터가 비었거나(스크리너 갱신 필요) 조건이 빡빡합니다.")
+        else:
+            rows = []
+            for r in _recs:
+                ccy = '₩' if r['market'] == 'KR' else '$'
+                rows.append({
+                    '시장': r['market'], '종목': r['name'], '코드': r['sym'],
+                    '신호': ', '.join(r['signals'][:3]),
+                    '진입': f"{ccy}{r['entry']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['entry']:,.2f}",
+                    '손절': f"{ccy}{r['stop']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['stop']:,.2f}",
+                    '목표': f"{ccy}{r['target']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['target']:,.2f}",
+                    '수량': f"{r['qty']:,.0f}" if r['market'] == 'KR' else f"{r['qty']:,.2f}",
+                    '비중%': r['pos_pct'],
+                    '투입금': f"{r['pos_value']:,.0f}",
+                    '최대손실': f"{r['risk_amt']:,.0f}",
+                    '신뢰계수': r['live_mult'],
+                    '진입등급': r.get('entry_grade', ''),
+                })
+            _ardf = pd.DataFrame(rows)
+            _show_cols = ['시장','종목','코드','신호','진입','손절','목표','수량','비중%','투입금','최대손실','신뢰계수']
+            if ar_tf == 'daily' and any(r.get('진입등급') for r in rows):
+                _show_cols.append('진입등급')
+
+            def _c_mult2(v):
+                try:
+                    f = float(v)
+                    return 'color:#56d364;font-weight:bold' if f >= 1.0 else ('color:#ffa657' if f >= 0.85 else 'color:#f78166')
+                except: return ''
+            st.dataframe(
+                _ardf[_show_cols].style.map(_c_mult2, subset=['신뢰계수'])
+                    .format({'비중%': '{:.1f}%', '신뢰계수': '{:.2f}'}),
+                use_container_width=True, hide_index=True,
+                height=36 + 36 * len(_ardf),
+            )
+
+            sc1, sc2, sc3 = st.columns(3)
+            sc1.metric("총 투입", f"{s['deployed']:,.0f}원 ({s['deployed_pct']}%)")
+            sc2.metric("최대 손실 (전부 손절)", f"-{s['total_risk']:,.0f}원")
+            sc3.metric("최대 수익 (전부 목표)", f"+{s['max_reward']:,.0f}원")
+
+            st.caption(
+                f"📌 {s['tf_label']} 보유 {s['hold']} · 1회 리스크 {s['risk_per_trade']}% · "
+                f"신뢰계수는 페이퍼 트레이딩 실전 성적으로 자동 보정(라쿤 오류수정 루프). "
+                f"손익비 1:{s['rr']} → 실제 승률이 {s['breakeven_wr']}%만 넘으면 기대값 +."
+            )
+            st.info("⚠️ 자동 계산된 제안일 뿐, 매매·책임은 본인. 실투자 전 페이퍼 트레이딩으로 검증 권장.")
 
 
 # ════════════════════════════════════════════════════════════════════
