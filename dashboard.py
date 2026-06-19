@@ -2149,7 +2149,7 @@ with tab11:
     with cc3:
         ar_mkt = st.selectbox("시장", ["전체", "KR", "US"], key="ar_mkt")
     with cc4:
-        ar_n = st.slider("최대 종목수", 3, 10, 6, key="ar_n")
+        ar_n = st.slider("최대 종목수", 3, 20, 10, key="ar_n")
 
     _tf_def = {"daily": (5, 2.0), "weekly": (7, 2.0), "monthly": (10, 2.5)}[ar_tf]
     rc1, rc2, rc3, rc4 = st.columns(4)
