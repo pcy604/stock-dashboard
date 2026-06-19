@@ -93,7 +93,11 @@ def _price(sym, market):
         fdr_sym = code if market == 'KR' else sym
         start = (datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d')
         df = fdr.DataReader(fdr_sym, start)
-        return float(df['Close'].iloc[-1]) if not df.empty else None
+        if df.empty:
+            return None
+        import math
+        v = float(df['Close'].iloc[-1])
+        return v if math.isfinite(v) and v > 0 else None
     except Exception:
         return None
 
@@ -148,6 +152,15 @@ def build_recommendations(timeframe='weekly', capital=10_000_000,
 
     weights = _load(WEIGHTS) if use_live_weights else None
 
+    # 위닝 셋업 스코어로 종목 품질 평가 (백테스트 샤프 기반 복합점수)
+    try:
+        import winning_score as _ws
+        _can_map, _ = _ws._canslim_map()
+        _ws_live = _ws._live_mults()
+    except Exception:
+        _ws = None
+        _can_map, _ws_live = {}, {}
+
     cands = _candidates(timeframe, market_filter)
     scored = []
     for c in cands:
@@ -158,9 +171,18 @@ def build_recommendations(timeframe='weekly', capital=10_000_000,
         c['score'] = score
         c['live_mult'] = mult
         c['adj_score'] = round(score * mult, 2)
+        # 위닝 스코어 (0~100) — screener 호환 dict 구성
+        if _ws is not None:
+            _sd = dict(c['flags']); _sd['dist_52w'] = c.get('dist_52w'); _sd['sym'] = c['sym']
+            ws_score, _, ws_grade, _ = _ws.score_stock(_sd, _can_map.get(c['sym']), _ws_live)
+        else:
+            ws_score, ws_grade = c['adj_score'] * 5, '-'
+        c['win_score'] = ws_score
+        c['grade'] = ws_grade
         scored.append(c)
 
-    scored.sort(key=lambda x: (-x['adj_score'], -x.get('mom', 0)))
+    # 위닝 스코어 우선 정렬 (동점이면 모멘텀)
+    scored.sort(key=lambda x: (-x.get('win_score', 0), -x.get('mom', 0)))
     top = scored[:max_positions]
 
     # 일간: 상위 후보에 일봉 진입타이밍 적용 → '진입적정'만 통과
@@ -190,9 +212,10 @@ def build_recommendations(timeframe='weekly', capital=10_000_000,
 
     recs = []
     cash_used = 0.0
+    import math
     for c in top:
         px = c.get('price')
-        if not px or px <= 0:
+        if px is None or not isinstance(px, (int, float)) or not math.isfinite(px) or px <= 0:
             continue
         size_by_risk = risk_amt / (stop_pct / 100)
         pos_value = min(size_by_risk, per_slot_cap, deployable - cash_used)

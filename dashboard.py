@@ -184,8 +184,8 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab_today, tab10, tab11, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
-    "📋 오늘의 종합", "🧭 프로젝트 종합", "🎯 자동추천",
+tab_today, tab_win, tab10, tab11, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+    "📋 오늘의 종합", "🏅 위닝 스코어", "🧭 프로젝트 종합", "🎯 자동추천",
     "📈 월간 성과", "📊 주봉 스크리너", "🏆 CANSLIM",
     "🌍 매크로", "🎯 추천 포트", "🔄 흑자전환", "🔍 종목 분석", "💼 포트폴리오",
     "📒 페이퍼 트레이딩"
@@ -243,6 +243,91 @@ with tab_today:
             st.dataframe(_show, use_container_width=True, hide_index=True)
     except Exception as _e:
         st.caption(f"(요약 표 생략: {_e})")
+
+
+# ════════════════════════════════════════════════════════════════════
+# 탭: 위닝 셋업 스코어 — 오르는 종목 지문 점수화 (가중치=백테스트 샤프)
+# ════════════════════════════════════════════════════════════════════
+with tab_win:
+    st.header("🏅 위닝 셋업 스코어")
+    st.caption("오르는 종목의 지문(베이스·신고가·거래량·상대강도·실적)을 백테스트 샤프 가중치로 점수화. "
+               "멍거 inversion: 신고가 -25% 이탈주는 감점. 신뢰계수는 페이퍼 실전으로 자동 보정.")
+
+    try:
+        import winning_score as _ws
+        _wc1, _wc2, _wc3 = st.columns([1, 1, 2])
+        _win_mkt = _wc1.selectbox("시장", ["전체", "KR", "US"], key="win_mkt")
+        _win_grade = _wc2.selectbox("최소 등급", ["전체", "B이상", "A이상", "S만"], key="win_grade")
+        _win_n = _wc3.slider("표시 종목수", 10, 60, 30, key="win_n")
+
+        _wrows = _ws.rank_all(_win_mkt)
+        if not _wrows:
+            st.error("데이터 없음 → `python weekly_run.py` 실행 후 새로고침")
+        else:
+            from collections import Counter as _Counter
+            _gc = _Counter(r['grade'] for r in _wrows)
+            _g1, _g2, _g3, _g4 = st.columns(4)
+            _g1.metric("S급 (최상)", f"{_gc['S']}개")
+            _g2.metric("A급", f"{_gc['A']}개")
+            _g3.metric("B급", f"{_gc['B']}개")
+            _g4.metric("분석 종목", f"{len(_wrows)}개")
+
+            _gmin = {'전체': 0, 'B이상': 50, 'A이상': 65, 'S만': 80}[_win_grade]
+            _filt = [r for r in _wrows if r['score'] >= _gmin][:_win_n]
+
+            _secs = _Counter(r['sector'] for r in _filt if r['sector'] and r['sector'] != '기타')
+            if _secs:
+                _ts, _tc = _secs.most_common(1)[0]
+                _tp = _tc / len(_filt) * 100 if _filt else 0
+                if _tp >= 40:
+                    st.warning(f"⚠️ 섹터 집중: 상위 {len(_filt)}개 중 '{_ts}' {_tc}개({_tp:.0f}%) — "
+                               f"한 섹터 몰빵은 '안 망하는 포트폴리오'에 위배. 분산 권장.")
+
+            if not _filt:
+                st.info("해당 등급 종목이 없습니다. 등급 기준을 낮춰보세요.")
+            else:
+                _wrt = []
+                for r in _filt:
+                    bd = r['breakdown']
+                    _wrt.append({
+                        '등급': r['grade'], '점수': r['score'],
+                        '시장': r['market'], '종목': r['name'], '코드': r['sym'],
+                        '섹터': r['sector'][:10] if r['sector'] else '-',
+                        '신고가거리': f"{r['dist_52w']:+.0f}%" if r['dist_52w'] is not None else '-',
+                        '베이스': round(bd.get('maconv', 0) + bd.get('cup', 0), 0),
+                        '신고가': round(bd.get('high52', 0), 0),
+                        'RS': round(bd.get('rs', 0), 0),
+                        '실적': round(bd.get('fund', 0), 0) if r['has_fund'] else None,
+                        '신호': ', '.join(r['signals'][:3]),
+                    })
+                _wdf = pd.DataFrame(_wrt)
+
+                def _c_grade(v):
+                    return {'S': 'background-color:#1a472a;color:white;font-weight:bold',
+                            'A': 'background-color:#2d6a4f;color:white',
+                            'B': 'color:#f0c040', 'C': 'color:#888'}.get(str(v), '')
+                def _c_score(v):
+                    try:
+                        f = float(v)
+                        if f >= 80: return 'color:#56d364;font-weight:bold'
+                        if f >= 65: return 'color:#7ee787'
+                        if f >= 50: return 'color:#f0c040'
+                    except: pass
+                    return 'color:#888'
+
+                st.dataframe(
+                    _wdf.style.map(_c_grade, subset=['등급']).map(_c_score, subset=['점수'])
+                        .format({'점수': '{:.1f}', '베이스': '{:.0f}', '신고가': '{:.0f}',
+                                 'RS': '{:.0f}', '실적': lambda v: f'{v:.0f}' if v is not None else '–'}, na_rep='–'),
+                    use_container_width=True, hide_index=True, height=min(36 + 35 * len(_wdf), 640))
+
+                st.caption("배점: 베이스(이평수렴/컵) 38 · 신고가 18 · RS 12 · 거래량 8 · 라이딩 8 · RSI 6 · 실적(KR) 10 "
+                           "+ 52주×베이스 시너지 8.  → 백테스트 13주 샤프에서 역산. "
+                           "실적 칸 '–'는 US(무료 펀더 데이터 없음)이며 그만큼 재정규화해 불이익 없음.")
+                st.info("⚠️ 점수는 '셋업의 질'이지 미래 보장이 아님. 높은 점수 = 과거 오르던 종목과 닮은 정도. "
+                        "실투자 전 페이퍼로 검증.")
+    except Exception as _we:
+        st.error(f"위닝 스코어 오류: {_we}")
 
 
 # ════════════════════════════════════════════════════════════════════
