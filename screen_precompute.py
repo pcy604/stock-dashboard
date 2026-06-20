@@ -61,36 +61,60 @@ def _mdd(close):
     return float(((close / peak - 1) * 100).min())
 
 
-def _series_for(sym, mkt, start):
-    """start 지정 시 직접 다운로드, 아니면 캐시 읽기."""
-    if start:
-        try:
-            import FinanceDataReader as fdr
-            code = sym
-            fsym = code if mkt == 'KR' else sym
-            df = fdr.DataReader(fsym, start)
-            return df['Close'].dropna() if not df.empty else None
-        except Exception:
-            return None
-    f = CACHE_DIR / f"{sym}.parquet"
-    if not f.exists():
-        return None
+LONG_CACHE = Path('data/longcache')
+
+
+def _series_for(sym, mkt, init_start):
+    """증분 캐시: 기존 데이터는 두고 '새로 생긴 날짜'만 받아 붙인다.
+       data/longcache/{sym}.parquet 에 장기 종가 저장.
+       - 캐시 없으면: init_start(예 2008)부터 전체 다운로드 (최초 1회만 느림)
+       - 캐시 있으면: 마지막 날짜 이후만 받아 append (매번 빠름)
+    """
+    from datetime import timedelta
+    LONG_CACHE.mkdir(parents=True, exist_ok=True)
+    cp = LONG_CACHE / f"{sym}.parquet"
+    fsym = sym if mkt == 'KR' else sym
     try:
-        return pd.read_parquet(f)['Close'].dropna()
+        import FinanceDataReader as fdr
+        if cp.exists():
+            old = pd.read_parquet(cp)
+            last = old.index.max()
+            fstart = (last - timedelta(days=7)).strftime('%Y-%m-%d')   # 7일 겹쳐 받아 누락 방지
+            new = fdr.DataReader(fsym, fstart)
+            if new is not None and not new.empty:
+                add = new[['Close']] if 'Close' in new.columns else new
+                comb = pd.concat([old[['Close']], add])
+                comb = comb[~comb.index.duplicated(keep='last')].sort_index()
+            else:
+                comb = old[['Close']]
+        else:
+            df = fdr.DataReader(fsym, init_start)
+            if df is None or df.empty:
+                return None
+            comb = df[['Close']]
+        comb.to_parquet(cp)
+        return comb['Close'].dropna()
     except Exception:
+        if cp.exists():
+            try:
+                return pd.read_parquet(cp)['Close'].dropna()
+            except Exception:
+                pass
         return None
 
 
 def run(start=None):
+    init_start = start or '2008-01-01'
     names, caps = _enrich_maps()
     syms = [f.stem for f in CACHE_DIR.glob('*.parquet') if not f.stem.startswith('_benchmark')]
-    print(f"  대상 {len(syms)}종목 · 모드: {'장기다운로드 '+start if start else '캐시(5년)'}")
+    _seeded = LONG_CACHE.exists() and any(LONG_CACHE.glob('*.parquet'))
+    print(f"  대상 {len(syms)}종목 · 모드: {'증분 갱신(빠름)' if _seeded else f'최초 다운로드 {init_start}~ (느림, 1회만)'}")
 
     season, mdd = [], []
 
     def _one(sym):
         mkt = 'KR' if (sym.isdigit() and len(sym) == 6) else 'US'
-        close = _series_for(sym, mkt, start)
+        close = _series_for(sym, mkt, init_start)
         if close is None or len(close) < 250:
             return None
         name = names.get(sym, sym)
@@ -116,29 +140,19 @@ def run(start=None):
                    'years': round(len(close) / 252, 1)}
         return s_entry, m_entry
 
-    workers = 8 if start else 1
     done = 0
-    if start:
-        with ThreadPoolExecutor(max_workers=workers) as ex:
-            for fut in as_completed([ex.submit(_one, s) for s in syms]):
-                done += 1
-                if done % 200 == 0: print(f"\r  {done}/{len(syms)}", end='', flush=True)
-                r = fut.result()
-                if r:
-                    if r[0]: season.append(r[0])
-                    mdd.append(r[1])
-    else:
-        for s in syms:
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        for fut in as_completed([ex.submit(_one, s) for s in syms]):
             done += 1
-            if done % 400 == 0: print(f"\r  {done}", end='', flush=True)
-            r = _one(s)
+            if done % 200 == 0: print(f"\r  {done}/{len(syms)}", end='', flush=True)
+            r = fut.result()
             if r:
                 if r[0]: season.append(r[0])
                 mdd.append(r[1])
     print()
 
     SEASON_OUT.write_text(json.dumps({'date': datetime.now().strftime('%Y-%m-%d'),
-        'history': start or '2021~(캐시 5년)', 'stocks': season}, ensure_ascii=False), encoding='utf-8')
+        'history': f'{init_start}~', 'stocks': season}, ensure_ascii=False), encoding='utf-8')
     MDD_OUT.write_text(json.dumps({'date': datetime.now().strftime('%Y-%m-%d'),
         'stocks': mdd}, ensure_ascii=False), encoding='utf-8')
     print(f"  ✅ 계절성 {len(season)} · MDD {len(mdd)}종목 저장")
