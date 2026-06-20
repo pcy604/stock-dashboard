@@ -12,24 +12,51 @@ import json
 from pathlib import Path
 
 SCREENER = Path('results/screener_latest.json')
+PERF = Path('results/perf_latest.json')
 
 
 def _load():
+    """넓은 유니버스(월간 모멘텀, 대형주 포함) 우선. 없으면 주봉 신호 종목."""
     try:
-        return json.loads(SCREENER.read_text(encoding='utf-8'))
+        d = json.loads(PERF.read_text(encoding='utf-8'))
+        # 주봉 신호(dist_52w·signals)를 sym 기준으로 병합
+        try:
+            scr = json.loads(SCREENER.read_text(encoding='utf-8'))
+            smap = {s['sym']: s for s in scr.get('stocks', [])}
+        except Exception:
+            smap = {}
+        for s in d.get('stocks', []):
+            ss = smap.get(s['sym'])
+            if ss:
+                s['dist_52w'] = ss.get('dist_52w')
+                s['signals'] = ss.get('signals', [])
+                s['total_signals'] = ss.get('total_signals', 0)
+            else:
+                s['signals'] = [lab for k, lab in [('now_sig_52w', '52주신고가'),
+                    ('now_sig_maconv', '이평선수렴'), ('now_sig_vol', '거래량폭발'),
+                    ('now_sig_cup', '컵핸들'), ('now_sig_ma5', '5주라이딩'),
+                    ('now_sig_rsimacd', 'RSI/MACD')] if s.get(k)]
+                s['total_signals'] = sum(1 for k in ['now_sig_52w', 'now_sig_vol',
+                    'now_sig_ma5', 'now_sig_cup', 'now_sig_maconv', 'now_sig_rsimacd'] if s.get(k))
+            s['pct_change'] = s.get('ret_1w', 0)
+        return d
     except Exception:
-        return None
+        try:
+            return json.loads(SCREENER.read_text(encoding='utf-8'))
+        except Exception:
+            return None
 
 
 def _stock_strength(s):
-    """종목 강도: 신고가 근접도(주) + 신호수·주간등락(보조)."""
-    dist = s.get('dist_52w')
+    """종목 강도: 4주 모멘텀(주) + 신고가 근접도 + 신호수."""
     rs = 0.0
+    mom = s.get('ret_4w')
+    if mom is not None:
+        rs += max(-20, min(mom, 60))          # 4주 수익률 = 핵심 RS (-20~60)
+    dist = s.get('dist_52w')
     if dist is not None:
-        # 신고가 대비 -0%면 만점(100), -30%면 약함. 양수(돌파)면 100+.
-        rs = max(0.0, 100 + dist) if dist < 0 else 100 + min(dist, 20)
+        rs += (max(0.0, 30 + dist) if dist < 0 else 30 + min(dist, 10)) * 0.5
     rs += s.get('total_signals', 0) * 3
-    rs += max(-5, min(s.get('pct_change', 0), 10)) * 0.5
     return round(rs, 1)
 
 

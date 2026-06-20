@@ -168,6 +168,7 @@ def rank_all(market_filter='전체', regime_mult=1.0):
             'sym': s['sym'], 'name': s['name'], 'market': s['market'],
             'sector': s.get('sector', ''), 'score': score, 'grade': grade,
             'disq': disq, 'dist_52w': s.get('dist_52w'),
+            'marcap': s.get('marcap'),
             'signals': s.get('signals', []), 'breakdown': bd,
             'has_fund': can is not None,
         })
