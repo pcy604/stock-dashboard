@@ -184,8 +184,8 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab_today, tab_win, tab10, tab11, tab1, tab2, tab3, tab4, tab6, tab7, tab8, tab9 = st.tabs([
-    "📋 오늘의 종합", "🏅 위닝 스코어", "🧭 프로젝트 종합", "🎯 자동추천",
+tab_today, tab_win, tab_find, tab10, tab11, tab1, tab2, tab3, tab4, tab6, tab7, tab8, tab9 = st.tabs([
+    "📋 오늘의 종합", "🏅 위닝 스코어", "🔎 발굴+", "🧭 프로젝트 종합", "🎯 자동추천",
     "📈 월간 성과", "📊 주봉 스크리너", "🏆 CANSLIM",
     "🌍 매크로", "🔄 흑자전환", "🔍 종목 분석", "💼 포트폴리오",
     "📒 페이퍼 트레이딩"
@@ -328,6 +328,118 @@ with tab_win:
                         "실투자 전 페이퍼로 검증.")
     except Exception as _we:
         st.error(f"위닝 스코어 오류: {_we}")
+
+
+# ════════════════════════════════════════════════════════════════════
+# 탭: 발굴+ — 주도주 · 계절성 · MDD 바닥 (신규 발굴 통합)
+# ════════════════════════════════════════════════════════════════════
+with tab_find:
+    st.header("🔎 발굴+ — 주도주 · 계절성 · 바닥")
+    _ft1, _ft2, _ft3 = st.tabs(["🚀 주도주", "📅 계절성", "🔄 MDD 바닥"])
+
+    # ── 주도주 (섹터/전체 상대강도) ──
+    with _ft1:
+        st.caption("오닐: 주도주는 주도 섹터와 함께 온다. 신고가에 가장 붙은 + 신호 많은 = 강한 주도주.")
+        _lm = st.selectbox("시장", ["전체", "KR", "US"], key="lead_mkt")
+        try:
+            import leaders as _ld
+            _lr = _ld.find_leaders(_lm)
+            if not _lr:
+                st.error("데이터 없음 → weekly_run.py 실행")
+            else:
+                if _lr['mode'] == 'sector' and _lr['sectors']:
+                    for _sec in _lr['sectors']:
+                        st.markdown(f"**[{_sec['sector']}]** 섹터RS {_sec['sector_rs']} · 신고가근접 {_sec['near_high_pct']:.0f}% ({_sec['n']}종목)")
+                        st.dataframe(pd.DataFrame([{
+                            '시장': m['market'], '종목': m['name'], '코드': m['sym'],
+                            'RS': m['_rs'], '신고가거리': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '-',
+                            '신호': ', '.join(m['signals'][:3])} for m in _sec['leaders']]),
+                            use_container_width=True, hide_index=True)
+                else:
+                    st.info("섹터 데이터가 부족해 전체 상대강도(RS) 랭킹으로 표시합니다.")
+                    st.dataframe(pd.DataFrame([{
+                        '시장': m['market'], '종목': m['name'], '코드': m['sym'],
+                        'RS': m['_rs'], '신고가거리': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '-',
+                        '주간%': m.get('pct_change'), '신호': ', '.join(m['signals'][:3])}
+                        for m in _lr['top']]),
+                        use_container_width=True, hide_index=True, height=560)
+        except Exception as _le:
+            st.error(f"주도주 오류: {_le}")
+
+    # ── 계절성 (월별 승률·수익률) ──
+    with _ft2:
+        st.caption("종목별 '캘린더 월' 과거 평균수익·승률. 특정 달에 잘 오르는 종목을 미리 찾는다.")
+        _seas = load_json(Path('results/seasonality.json'))
+        if not _seas or not _seas.get('stocks'):
+            st.warning("계절성 데이터 계산 중이거나 없음 → `python screen_precompute.py` 실행 후 새로고침")
+        else:
+            from datetime import datetime as _dtt
+            _c1, _c2, _c3 = st.columns(3)
+            _mo = _c1.selectbox("월 선택", list(range(1, 13)),
+                                index=_dtt.now().month - 1, format_func=lambda x: f"{x}월", key="seas_mo")
+            _smkt = _c2.selectbox("시장", ["전체", "KR", "US"], key="seas_mkt")
+            _minwr = _c3.slider("최소 승률 %", 50, 90, 65, key="seas_wr")
+            _rows = []
+            for s in _seas['stocks']:
+                if _smkt != "전체" and s['market'] != _smkt:
+                    continue
+                md = s['months'].get(str(_mo)) or s['months'].get(_mo)
+                if not md or md['n'] < 3 or md['wr'] < _minwr:
+                    continue
+                _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
+                              f'{_mo}월 평균%': md['ret'], '승률%': md['wr'], '표본': md['n']})
+            _rows.sort(key=lambda r: -r[f'{_mo}월 평균%'])
+            if not _rows:
+                st.info("조건에 맞는 종목이 없습니다. 승률 기준을 낮춰보세요.")
+            else:
+                st.subheader(f"📅 {_mo}월에 강한 종목 — {len(_rows)}개 (승률 {_minwr}%+)")
+                _sdf = pd.DataFrame(_rows[:40])
+                def _cs(v):
+                    try: return 'color:#56d364;font-weight:bold' if float(v) >= 0 else 'color:#f78166'
+                    except: return ''
+                st.dataframe(_sdf.style.map(_cs, subset=[f'{_mo}월 평균%'])
+                             .format({f'{_mo}월 평균%': '{:+.1f}%', '승률%': '{:.0f}%'}),
+                             use_container_width=True, hide_index=True, height=min(36 + 35*len(_sdf), 600))
+                st.caption("⚠️ 계절성은 과거 통계적 경향일 뿐 — 표본 적으면 우연. 보조 지표로만.")
+
+    # ── MDD 바닥 (턴어라운드 체리피킹) ──
+    with _ft3:
+        st.caption("많이 빠진 종목 = 턴어라운드 후보. 역대/1년 MDD와 현재 고점대비 낙폭으로 바닥권 탐색.")
+        _mdd = load_json(Path('results/mdd.json'))
+        if not _mdd or not _mdd.get('stocks'):
+            st.warning("MDD 데이터 계산 중이거나 없음 → `python screen_precompute.py` 실행 후 새로고침")
+        else:
+            _m1, _m2 = st.columns(2)
+            _mmkt = _m1.selectbox("시장", ["전체", "KR", "US"], key="mdd_mkt")
+            _ddrange = _m2.slider("현재 고점대비 낙폭 범위 %", -90, 0, (-60, -25), key="mdd_range")
+            _rows = []
+            for s in _mdd['stocks']:
+                if _mmkt != "전체" and s['market'] != _mmkt:
+                    continue
+                cd = s['cur_dd']
+                if cd is None or not (_ddrange[0] <= cd <= _ddrange[1]):
+                    continue
+                _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
+                              '현재가': s['price'], '현재낙폭%': cd,
+                              '1년MDD%': s['mdd_1y'], '역대MDD%': s['mdd_all']})
+            _rows.sort(key=lambda r: r['현재낙폭%'])  # 많이 빠진 순
+            if not _rows:
+                st.info("해당 낙폭 범위 종목이 없습니다.")
+            else:
+                st.subheader(f"🔄 고점대비 {_ddrange[0]}~{_ddrange[1]}% 빠진 종목 — {len(_rows)}개")
+                _mdf = pd.DataFrame(_rows[:50])
+                def _cd(v):
+                    try:
+                        f = float(v)
+                        if f <= -50: return 'color:#f78166;font-weight:bold'
+                        if f <= -30: return 'color:#ffa657'
+                    except: pass
+                    return 'color:#888'
+                st.dataframe(_mdf.style.map(_cd, subset=['현재낙폭%', '1년MDD%', '역대MDD%'])
+                             .format({'현재낙폭%': '{:.0f}%', '1년MDD%': '{:.0f}%', '역대MDD%': '{:.0f}%'}),
+                             use_container_width=True, hide_index=True, height=min(36 + 35*len(_mdf), 600))
+                st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라, 흑자전환·실적개선 확인 후. "
+                           "흑자전환 탭과 교차 확인 권장. 떨어지는 칼 잡지 마라.")
 
 
 # ════════════════════════════════════════════════════════════════════
