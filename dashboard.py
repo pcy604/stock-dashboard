@@ -1772,26 +1772,19 @@ with tab8:
         # ── 🚨 매도 점검 (살아남기 핵심) ──────────────────────────────
         st.divider()
         st.subheader("🚨 매도 점검 — 언제 팔까")
-        st.caption("보유 종목마다 4가지 룰로 자동 점검: 방어손절 · 추세이탈(10주이평) · 분할익절 · 시간매도. "
-                   "백테스트 교훈: 가격 트레일링은 추세장에서 독 → 이평 이탈로만 판단.")
+        st.caption("보유 종목마다 사전 규칙 3가지로 자동 점검: 방어손절 · 분할익절 · 시간매도. "
+                   "이평 이탈 같은 사후적 룰은 배제 — 매도는 미리 정한 손절·목표·시간으로만.")
         if st.button("🔍 지금 매도 신호 점검 (실시간 ~종목당 2초)", key="sell_check"):
             with st.spinner("매도 신호 분석 중..."):
                 try:
                     import sell_signals as _sells
-                    _bear_kr = _sells.benchmark_is_bear('KR')
-                    _bear_us = _sells.benchmark_is_bear('US')
-                    if _bear_kr or _bear_us:
-                        _bm = ', '.join([m for m, b in [('코스피', _bear_kr), ('S&P500', _bear_us)] if b])
-                        st.warning(f"⚠️ 시장 약세장: {_bm} 13주 이평 이탈 — 전반적 비중 축소 고려")
                     _srows = []
                     for pos in positions:
-                        _mkt = pos.get('market', 'US')
                         _ev = _sells.evaluate_sell(
-                            pos['sym'], _mkt, float(pos.get('buy_price', 0)),
+                            pos['sym'], pos.get('market', 'US'), float(pos.get('buy_price', 0)),
                             buy_date=pos.get('buy_date'),
                             stop_pct=float(pos.get('stop_loss_pct', 8)),
                             target_pct=float(pos.get('target_pct', 20)),
-                            regime_bear=(_bear_kr if _mkt == 'KR' else _bear_us),
                         )
                         _srows.append({
                             '종목': pos.get('name', pos['sym']), '코드': pos['sym'],
@@ -1801,22 +1794,21 @@ with tab8:
                     _sdf = pd.DataFrame(_srows)
                     def _c_sell(v):
                         s = str(v)
-                        if '손절' in s:   return 'background-color:#5a1a1a;color:white;font-weight:bold'
-                        if '추세이탈' in s: return 'background-color:#7d4e00;color:white;font-weight:bold'
-                        if '익절' in s:   return 'color:#56d364;font-weight:bold'
-                        if '시간' in s:   return 'color:#f0c040'
-                        if '보유' in s:   return 'color:#7ee787'
+                        if '손절' in s: return 'background-color:#5a1a1a;color:white;font-weight:bold'
+                        if '익절' in s: return 'color:#56d364;font-weight:bold'
+                        if '시간' in s: return 'color:#f0c040'
+                        if '보유' in s: return 'color:#7ee787'
                         return 'color:#888'
                     st.dataframe(
                         _sdf.style.map(_c_sell, subset=['신호'])
                             .format({'수익률': lambda v: f"{v:+.1f}%" if v is not None else '-'}),
                         use_container_width=True, hide_index=True,
                         height=36 + 36 * len(_sdf))
-                    _urgent = [r for r in _srows if '손절' in r['신호'] or '추세이탈' in r['신호']]
+                    _urgent = [r for r in _srows if '손절' in r['신호']]
                     if _urgent:
-                        st.error(f"🔴 즉시 점검: {', '.join(r['종목'] for r in _urgent)} — 추세/손절 위반")
+                        st.error(f"🔴 즉시 점검: {', '.join(r['종목'] for r in _urgent)} — 손절선 이탈")
                     else:
-                        st.success("✅ 긴급 매도 신호 없음 — 이기는 포지션은 그대로 둡니다")
+                        st.success("✅ 손절 위반 없음 — 이기는 포지션은 그대로 둡니다")
                 except Exception as _se:
                     st.error(f"매도 점검 오류: {_se}")
 
