@@ -184,16 +184,17 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab_today, tab_screen, tab_find, tab11, tab4, tab7, tab8, tab9, tab10 = st.tabs([
-    "📋 오늘의 종합", "🔎 종목 발굴", "✨ 발굴+", "🎯 자동추천",
-    "🌍 매크로", "🔍 종목 분석", "💼 포트폴리오", "📒 페이퍼 트레이딩", "🧭 프로젝트 종합"
+tab_today, tab_screen, tab11, tab4, tab7, tab8, tab10 = st.tabs([
+    "📋 오늘의 종합", "🔎 종목 발굴", "🎯 자동추천",
+    "🌍 매크로", "🔍 종목 분석", "💼 포트폴리오", "🧭 프로젝트 종합"
 ])
 
-# 종목 발굴 — 5가지 방식을 한 탭에 서브탭으로 통합 (위닝·주봉·월간·CANSLIM·흑자전환)
+# 종목 발굴 — 발굴 방식을 한 탭에 서브탭으로 통합
 with tab_screen:
-    st.caption("5가지 발굴 방식 — 위닝 스코어(종합점수) · 주봉 신호 · 월간 모멘텀 · CANSLIM · 흑자전환")
-    tab_win, tab2, tab1, tab3, tab6 = st.tabs([
-        "🏅 위닝 스코어", "📊 주봉 스크리너", "📈 월간 성과", "🏆 CANSLIM", "🔄 흑자전환"])
+    st.caption("위닝 스코어 · 주봉 신호 · 월간 모멘텀 · CANSLIM · 주도주 · 계절성 · MDD 바닥")
+    tab_win, tab2, tab1, tab3, t_lead, t_seas, t_mdd = st.tabs([
+        "🏅 위닝 스코어", "📊 주봉 스크리너", "📈 월간 성과", "🏆 CANSLIM",
+        "🚀 주도주", "📅 계절성", "🔄 MDD 바닥"])
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -201,15 +202,15 @@ with tab_screen:
 # ════════════════════════════════════════════════════════════════════
 with tab_today:
     st.header("📋 오늘의 종합")
+    _tmkt = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="today_mkt")
 
-    _sum_paths = [SCREENER_JSON, CANSLIM_JSON, TURNAROUND_JSON, PERF_JSON]
+    _sum_paths = [SCREENER_JSON, CANSLIM_JSON, PERF_JSON]
     _sum_mtimes = [m for m in (file_mtime(p) for p in _sum_paths) if m]
     _latest_update = max(_sum_mtimes) if _sum_mtimes else "데이터 없음"
     st.caption(f"🕐 마지막 업데이트: **{_latest_update}**  ·  자동 갱신 매일 06:00  ·  수동 갱신: run_update.bat")
 
     _s_scr  = load_json(SCREENER_JSON) or {}
     _s_can  = load_json(CANSLIM_JSON) or {}
-    _s_ta   = load_json(TURNAROUND_JSON) or {}
 
     # 매크로 신호 (best-effort, 네트워크 실패 시 '—')
     try:
@@ -221,20 +222,19 @@ with tab_today:
     except Exception:
         _macro_sig = "—"
 
-    _can_stocks = _s_can.get('stocks') or []
-    _mc1, _mc2, _mc3, _mc4, _mc5 = st.columns(5)
+    _scr_all = _s_scr.get('stocks') or []
+    _scr_f = [s for s in _scr_all if _tmkt == "전체" or s.get('market') == _tmkt]
+    _can_stocks = [s for s in (_s_can.get('stocks') or [])
+                   if _tmkt != "US"]  # CANSLIM은 KR 전용
+    _mc1, _mc2, _mc3, _mc4 = st.columns(4)
     _mc1.metric("시장 방향", _s_can.get('market_dir', '—'))
     _mc2.metric("매크로 신호", _macro_sig)
-    _mc3.metric("주봉 신호 종목", f"{_s_scr.get('total', '—')}개", help=f"기준일 {_s_scr.get('date','')}")
+    _mc3.metric("주봉 신호 종목", f"{len(_scr_f)}개", help=f"기준일 {_s_scr.get('date','')}")
     _mc4.metric("CANSLIM 통과", f"{len(_can_stocks)}개" if _can_stocks else "—")
-    _mc5.metric("흑자전환", f"{_s_ta.get('total', '—')}개", help=f"기준일 {_s_ta.get('date','')}")
-
-    if not _can_stocks:
-        st.warning("⚠️ CANSLIM 결과가 비어있거나 손상됨 → run_update.bat 을 다시 돌려 갱신하세요.")
 
     # 주봉 신호 상위 (신호 많은 순) — 한눈에 후보
     try:
-        _scr_stocks = _s_scr.get('stocks') or []
+        _scr_stocks = _scr_f
         if _scr_stocks:
             _df_sum = pd.DataFrame(_scr_stocks)
             _df_sum = _df_sum.sort_values('total_signals', ascending=False).head(12)
@@ -296,6 +296,7 @@ with tab_win:
                     _wrt.append({
                         '등급': r['grade'], '점수': r['score'],
                         '시장': r['market'], '종목': r['name'], '코드': r['sym'],
+                        '시총': fmt_cap(r.get('marcap'), r['market']),
                         '섹터': r['sector'][:10] if r['sector'] else '-',
                         '신고가거리': f"{r['dist_52w']:+.0f}%" if r['dist_52w'] is not None else '-',
                         '베이스': round(bd.get('maconv', 0) + bd.get('cup', 0), 0),
@@ -335,115 +336,112 @@ with tab_win:
 
 
 # ════════════════════════════════════════════════════════════════════
-# 탭: 발굴+ — 주도주 · 계절성 · MDD 바닥 (신규 발굴 통합)
+# 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
 # ════════════════════════════════════════════════════════════════════
-with tab_find:
-    st.header("🔎 발굴+ — 주도주 · 계절성 · 바닥")
-    _ft1, _ft2, _ft3 = st.tabs(["🚀 주도주", "📅 계절성", "🔄 MDD 바닥"])
 
-    # ── 주도주 (섹터/전체 상대강도) ──
-    with _ft1:
-        st.caption("오닐: 주도주는 주도 섹터와 함께 온다. 신고가에 가장 붙은 + 신호 많은 = 강한 주도주.")
-        _lm = st.selectbox("시장", ["전체", "KR", "US"], key="lead_mkt")
-        try:
-            import leaders as _ld
-            _lr = _ld.find_leaders(_lm)
-            if not _lr:
-                st.error("데이터 없음 → weekly_run.py 실행")
-            else:
-                if _lr['mode'] == 'sector' and _lr['sectors']:
-                    for _sec in _lr['sectors']:
-                        st.markdown(f"**[{_sec['sector']}]** 섹터RS {_sec['sector_rs']} · 신고가근접 {_sec['near_high_pct']:.0f}% ({_sec['n']}종목)")
-                        st.dataframe(pd.DataFrame([{
-                            '시장': m['market'], '종목': m['name'], '코드': m['sym'],
-                            'RS': m['_rs'], '신고가거리': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '-',
-                            '신호': ', '.join(m['signals'][:3])} for m in _sec['leaders']]),
-                            use_container_width=True, hide_index=True)
-                else:
-                    st.info("섹터 데이터가 부족해 전체 상대강도(RS) 랭킹으로 표시합니다.")
+# ── 주도주 (섹터/전체 상대강도) ──
+with t_lead:
+    st.caption("오닐: 주도주는 주도 섹터와 함께 온다. 신고가에 가장 붙은 + 신호 많은 = 강한 주도주.")
+    _lm = st.selectbox("시장", ["전체", "KR", "US"], key="lead_mkt")
+    try:
+        import leaders as _ld
+        _lr = _ld.find_leaders(_lm)
+        if not _lr:
+            st.error("데이터 없음 → weekly_run.py 실행")
+        else:
+            if _lr['mode'] == 'sector' and _lr['sectors']:
+                for _sec in _lr['sectors']:
+                    st.markdown(f"**[{_sec['sector']}]** 섹터RS {_sec['sector_rs']} · 신고가근접 {_sec['near_high_pct']:.0f}% ({_sec['n']}종목)")
                     st.dataframe(pd.DataFrame([{
                         '시장': m['market'], '종목': m['name'], '코드': m['sym'],
                         'RS': m['_rs'], '신고가거리': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '-',
-                        '주간%': m.get('pct_change'), '신호': ', '.join(m['signals'][:3])}
-                        for m in _lr['top']]),
-                        use_container_width=True, hide_index=True, height=560)
-        except Exception as _le:
-            st.error(f"주도주 오류: {_le}")
-
-    # ── 계절성 (월별 승률·수익률) ──
-    with _ft2:
-        st.caption("종목별 '캘린더 월' 과거 평균수익·승률. 특정 달에 잘 오르는 종목을 미리 찾는다.")
-        _seas = load_json(Path('results/seasonality.json'))
-        if not _seas or not _seas.get('stocks'):
-            st.warning("계절성 데이터 계산 중이거나 없음 → `python screen_precompute.py` 실행 후 새로고침")
-        else:
-            from datetime import datetime as _dtt
-            _c1, _c2, _c3 = st.columns(3)
-            _mo = _c1.selectbox("월 선택", list(range(1, 13)),
-                                index=_dtt.now().month - 1, format_func=lambda x: f"{x}월", key="seas_mo")
-            _smkt = _c2.selectbox("시장", ["전체", "KR", "US"], key="seas_mkt")
-            _minwr = _c3.slider("최소 승률 %", 50, 90, 65, key="seas_wr")
-            _rows = []
-            for s in _seas['stocks']:
-                if _smkt != "전체" and s['market'] != _smkt:
-                    continue
-                md = s['months'].get(str(_mo)) or s['months'].get(_mo)
-                if not md or md['n'] < 3 or md['wr'] < _minwr:
-                    continue
-                _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
-                              f'{_mo}월 평균%': md['ret'], '승률%': md['wr'], '표본': md['n']})
-            _rows.sort(key=lambda r: -r[f'{_mo}월 평균%'])
-            if not _rows:
-                st.info("조건에 맞는 종목이 없습니다. 승률 기준을 낮춰보세요.")
+                        '신호': ', '.join(m['signals'][:3])} for m in _sec['leaders']]),
+                        use_container_width=True, hide_index=True)
             else:
-                st.subheader(f"📅 {_mo}월에 강한 종목 — {len(_rows)}개 (승률 {_minwr}%+)")
-                _sdf = pd.DataFrame(_rows[:40])
-                def _cs(v):
-                    try: return 'color:#56d364;font-weight:bold' if float(v) >= 0 else 'color:#f78166'
-                    except: return ''
-                st.dataframe(_sdf.style.map(_cs, subset=[f'{_mo}월 평균%'])
-                             .format({f'{_mo}월 평균%': '{:+.1f}%', '승률%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, height=min(36 + 35*len(_sdf), 600))
-                st.caption("⚠️ 계절성은 과거 통계적 경향일 뿐 — 표본 적으면 우연. 보조 지표로만.")
+                st.info("섹터 데이터가 부족해 전체 상대강도(RS) 랭킹으로 표시합니다.")
+                st.dataframe(pd.DataFrame([{
+                    '시장': m['market'], '종목': m['name'], '코드': m['sym'],
+                    'RS': m['_rs'], '신고가거리': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '-',
+                    '주간%': m.get('pct_change'), '신호': ', '.join(m['signals'][:3])}
+                    for m in _lr['top']]),
+                    use_container_width=True, hide_index=True, height=560)
+    except Exception as _le:
+        st.error(f"주도주 오류: {_le}")
 
-    # ── MDD 바닥 (턴어라운드 체리피킹) ──
-    with _ft3:
-        st.caption("많이 빠진 종목 = 턴어라운드 후보. 역대/1년 MDD와 현재 고점대비 낙폭으로 바닥권 탐색.")
-        _mdd = load_json(Path('results/mdd.json'))
-        if not _mdd or not _mdd.get('stocks'):
-            st.warning("MDD 데이터 계산 중이거나 없음 → `python screen_precompute.py` 실행 후 새로고침")
+# ── 계절성 (월별 승률·수익률) ──
+with t_seas:
+    st.caption("종목별 '캘린더 월' 과거 평균수익·승률. 특정 달에 잘 오르는 종목을 미리 찾는다.")
+    _seas = load_json(Path('results/seasonality.json'))
+    if not _seas or not _seas.get('stocks'):
+        st.warning("계절성 데이터 계산 중이거나 없음 → `python screen_precompute.py` 실행 후 새로고침")
+    else:
+        from datetime import datetime as _dtt
+        _c1, _c2, _c3 = st.columns(3)
+        _mo = _c1.selectbox("월 선택", list(range(1, 13)),
+                            index=_dtt.now().month - 1, format_func=lambda x: f"{x}월", key="seas_mo")
+        _smkt = _c2.selectbox("시장", ["전체", "KR", "US"], key="seas_mkt")
+        _minwr = _c3.slider("최소 승률 %", 50, 90, 65, key="seas_wr")
+        _rows = []
+        for s in _seas['stocks']:
+            if _smkt != "전체" and s['market'] != _smkt:
+                continue
+            md = s['months'].get(str(_mo)) or s['months'].get(_mo)
+            if not md or md['n'] < 3 or md['wr'] < _minwr:
+                continue
+            _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
+                          f'{_mo}월 평균%': md['ret'], '승률%': md['wr'], '표본': md['n']})
+        _rows.sort(key=lambda r: -r[f'{_mo}월 평균%'])
+        if not _rows:
+            st.info("조건에 맞는 종목이 없습니다. 승률 기준을 낮춰보세요.")
         else:
-            _m1, _m2 = st.columns(2)
-            _mmkt = _m1.selectbox("시장", ["전체", "KR", "US"], key="mdd_mkt")
-            _ddrange = _m2.slider("현재 고점대비 낙폭 범위 %", -90, 0, (-60, -25), key="mdd_range")
-            _rows = []
-            for s in _mdd['stocks']:
-                if _mmkt != "전체" and s['market'] != _mmkt:
-                    continue
-                cd = s['cur_dd']
-                if cd is None or not (_ddrange[0] <= cd <= _ddrange[1]):
-                    continue
-                _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
-                              '현재가': s['price'], '현재낙폭%': cd,
-                              '1년MDD%': s['mdd_1y'], '역대MDD%': s['mdd_all']})
-            _rows.sort(key=lambda r: r['현재낙폭%'])  # 많이 빠진 순
-            if not _rows:
-                st.info("해당 낙폭 범위 종목이 없습니다.")
-            else:
-                st.subheader(f"🔄 고점대비 {_ddrange[0]}~{_ddrange[1]}% 빠진 종목 — {len(_rows)}개")
-                _mdf = pd.DataFrame(_rows[:50])
-                def _cd(v):
-                    try:
-                        f = float(v)
-                        if f <= -50: return 'color:#f78166;font-weight:bold'
-                        if f <= -30: return 'color:#ffa657'
-                    except: pass
-                    return 'color:#888'
-                st.dataframe(_mdf.style.map(_cd, subset=['현재낙폭%', '1년MDD%', '역대MDD%'])
-                             .format({'현재낙폭%': '{:.0f}%', '1년MDD%': '{:.0f}%', '역대MDD%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, height=min(36 + 35*len(_mdf), 600))
-                st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라, 흑자전환·실적개선 확인 후. "
-                           "흑자전환 탭과 교차 확인 권장. 떨어지는 칼 잡지 마라.")
+            st.subheader(f"📅 {_mo}월에 강한 종목 — {len(_rows)}개 (승률 {_minwr}%+)")
+            _sdf = pd.DataFrame(_rows[:40])
+            def _cs(v):
+                try: return 'color:#56d364;font-weight:bold' if float(v) >= 0 else 'color:#f78166'
+                except: return ''
+            st.dataframe(_sdf.style.map(_cs, subset=[f'{_mo}월 평균%'])
+                         .format({f'{_mo}월 평균%': '{:+.1f}%', '승률%': '{:.0f}%'}),
+                         use_container_width=True, hide_index=True, height=min(36 + 35*len(_sdf), 600))
+            st.caption("⚠️ 계절성은 과거 통계적 경향일 뿐 — 표본 적으면 우연. 보조 지표로만.")
+
+# ── MDD 바닥 (턴어라운드 체리피킹) ──
+with t_mdd:
+    st.caption("많이 빠진 종목 = 턴어라운드 후보. 역대/1년 MDD와 현재 고점대비 낙폭으로 바닥권 탐색.")
+    _mdd = load_json(Path('results/mdd.json'))
+    if not _mdd or not _mdd.get('stocks'):
+        st.warning("MDD 데이터 계산 중이거나 없음 → `python screen_precompute.py` 실행 후 새로고침")
+    else:
+        _m1, _m2 = st.columns(2)
+        _mmkt = _m1.selectbox("시장", ["전체", "KR", "US"], key="mdd_mkt")
+        _ddrange = _m2.slider("현재 고점대비 낙폭 범위 %", -90, 0, (-60, -25), key="mdd_range")
+        _rows = []
+        for s in _mdd['stocks']:
+            if _mmkt != "전체" and s['market'] != _mmkt:
+                continue
+            cd = s['cur_dd']
+            if cd is None or not (_ddrange[0] <= cd <= _ddrange[1]):
+                continue
+            _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
+                          '현재가': s['price'], '현재낙폭%': cd,
+                          '1년MDD%': s['mdd_1y'], '역대MDD%': s['mdd_all']})
+        _rows.sort(key=lambda r: r['현재낙폭%'])  # 많이 빠진 순
+        if not _rows:
+            st.info("해당 낙폭 범위 종목이 없습니다.")
+        else:
+            st.subheader(f"🔄 고점대비 {_ddrange[0]}~{_ddrange[1]}% 빠진 종목 — {len(_rows)}개")
+            _mdf = pd.DataFrame(_rows[:50])
+            def _cd(v):
+                try:
+                    f = float(v)
+                    if f <= -50: return 'color:#f78166;font-weight:bold'
+                    if f <= -30: return 'color:#ffa657'
+                except: pass
+                return 'color:#888'
+            st.dataframe(_mdf.style.map(_cd, subset=['현재낙폭%', '1년MDD%', '역대MDD%'])
+                         .format({'현재낙폭%': '{:.0f}%', '1년MDD%': '{:.0f}%', '역대MDD%': '{:.0f}%'}),
+                         use_container_width=True, hide_index=True, height=min(36 + 35*len(_mdf), 600))
+            st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라, 흑자전환·실적개선 확인 후. "
+                       "실적 개선·턴어라운드 확인 후 진입 권장. 떨어지는 칼 잡지 마라.")
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -885,14 +883,14 @@ def _plotly_line(dfs, labels, colors, title, yformat='{:.2f}', height=260):
         ))
     fig.update_layout(
         title=dict(text=title, font=dict(size=13)),
-        height=height, paper_bgcolor='#0f1117', plot_bgcolor='#0f1117',
+        height=height, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='#8b949e', size=10),
         margin=dict(l=0, r=0, t=35, b=0),
         legend=dict(orientation='h', y=1.18, x=0),
         hovermode='x unified',
     )
-    fig.update_xaxes(gridcolor='#21262d', showgrid=True)
-    fig.update_yaxes(gridcolor='#21262d', showgrid=True)
+    fig.update_xaxes(gridcolor='rgba(128,128,128,0.2)', showgrid=True)
+    fig.update_yaxes(gridcolor='rgba(128,128,128,0.2)', showgrid=True)
     return fig
 
 with tab4:
@@ -976,11 +974,11 @@ with tab4:
             fig_sp.add_trace(go.Bar(x=merged.index, y=merged['스프레드'],
                                     marker_color=colors_sp, name='10Y-2Y'))
             fig_sp.add_hline(y=0, line_color='rgba(110,118,129,0.6)')
-            fig_sp.update_layout(height=220, paper_bgcolor='#0f1117', plot_bgcolor='#0f1117',
+            fig_sp.update_layout(height=220, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                  font=dict(color='#8b949e', size=10),
                                  margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
-            fig_sp.update_xaxes(gridcolor='#21262d')
-            fig_sp.update_yaxes(gridcolor='#21262d')
+            fig_sp.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+            fig_sp.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
             st.plotly_chart(fig_sp, use_container_width=True)
             if spread and spread < 0:
                 st.warning(f"⚠️ 수익률 역전 중 ({spread:+.2f}%) — 역사적으로 12~18개월 후 침체 선행")
@@ -998,11 +996,11 @@ with tab4:
                 mode='lines', line=dict(color='#f59e0b', width=2), name='CPI YoY'))
             fig_cpi.add_hline(y=2, line_color='rgba(86,211,100,0.5)', line_dash='dash',
                               annotation_text=' 목표 2%')
-            fig_cpi.update_layout(height=220, paper_bgcolor='#0f1117', plot_bgcolor='#0f1117',
+            fig_cpi.update_layout(height=220, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                   font=dict(color='#8b949e', size=10),
                                   margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
-            fig_cpi.update_xaxes(gridcolor='#21262d')
-            fig_cpi.update_yaxes(gridcolor='#21262d', ticksuffix='%')
+            fig_cpi.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+            fig_cpi.update_yaxes(gridcolor='rgba(128,128,128,0.2)', ticksuffix='%')
             st.plotly_chart(fig_cpi, use_container_width=True)
 
     st.divider()
@@ -1094,14 +1092,14 @@ with tab4:
         fig_idx.add_hline(y=0, line_color='rgba(110,118,129,0.4)', line_dash='dash')
         fig_idx.update_layout(
             title='주요 지수 상대 성과 (1년 전 = 0%)',
-            height=280, paper_bgcolor='#0f1117', plot_bgcolor='#0f1117',
+            height=280, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='#8b949e', size=10),
             margin=dict(l=0,r=0,t=35,b=0),
             legend=dict(orientation='h', y=1.18, x=0),
             hovermode='x unified', yaxis_ticksuffix='%',
         )
-        fig_idx.update_xaxes(gridcolor='#21262d')
-        fig_idx.update_yaxes(gridcolor='#21262d')
+        fig_idx.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+        fig_idx.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
         st.plotly_chart(fig_idx, use_container_width=True)
 
     st.divider()
@@ -1174,140 +1172,6 @@ def _save_pf(positions: list):
     data = {'updated': datetime.now().strftime('%Y-%m-%d %H:%M'), 'positions': positions}
     PORTFOLIO_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
 
-
-# ════════════════════════════════════════════════════════════════════
-# 탭6: 흑자전환 스크리너
-# ════════════════════════════════════════════════════════════════════
-with tab6:
-    st.header("🔄 흑자전환 스크리너 — 테슬라 2019 Q3 같은 종목")
-    update_badge(TURNAROUND_JSON)
-    ta = load_json(TURNAROUND_JSON)
-
-    if ta is None:
-        st.error("데이터 없음 → `python turnaround_run.py` 실행 후 새로고침")
-        st.info("처음 실행 시 S&P500 전체 재무 데이터 다운로드로 30~60분 소요될 수 있습니다.\n"
-                "이후 실행은 7일 캐시로 5~10분으로 단축됩니다.")
-    else:
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("기준일",       ta['date'])
-        m2.metric("전체 발굴",    f"{ta['total']}개")
-        m3.metric("🇰🇷 KR",       f"{ta['kr']}개")
-        m4.metric("🇺🇸 US",       f"{ta['us']}개")
-
-        st.divider()
-
-        with st.sidebar:
-            st.divider()
-            st.header("🔄 흑자전환 필터")
-            ta_mkt    = st.radio("시장", ["전체","KR","US"], key="ta_mkt")
-            ta_status = st.multiselect("상태",
-                ['흑자전환완료','흑자전환임박','적자개선중'],
-                default=['흑자전환완료','흑자전환임박'],
-                key="ta_status")
-            ta_rev    = st.checkbox("매출 YoY 20%+ 종목만", value=False, key="ta_rev")
-            ta_gm     = st.checkbox("마진 개선 종목만",      value=False, key="ta_gm")
-            ta_sort   = st.selectbox("정렬", ["점수↓","YoY성장↓","매출성장↓","시총↓"], key="ta_sort")
-
-        def status_color(s):
-            if s == '흑자전환완료': return 'background-color:#1a472a;color:white;font-weight:bold'
-            if s == '흑자전환임박': return 'background-color:#7d4e00;color:white'
-            return 'color:#aaa'
-
-        def yoy_color(v):
-            try:
-                f = float(str(v).replace('%',''))
-                if f >= 80: return 'color:#2ecc71;font-weight:bold'
-                if f >= 50: return 'color:#f0c040'
-                if f >= 25: return 'color:#aaa'
-            except: pass
-            return ''
-
-        ta_stocks = ta['stocks']
-        if ta_mkt != "전체":
-            ta_stocks = [s for s in ta_stocks if s['market'] == ta_mkt]
-        if ta_status:
-            ta_stocks = [s for s in ta_stocks if s['status'] in ta_status]
-        if ta_rev:
-            ta_stocks = [s for s in ta_stocks if s.get('rev_growth') and s['rev_growth'] >= 20]
-        if ta_gm:
-            ta_stocks = [s for s in ta_stocks if s.get('gm_improving')]
-
-        rows7 = []
-        for s in ta_stocks:
-            rows7.append({
-                '시장':       s['market'],
-                '종목명':     s['name'],
-                '코드':       s['sym'],
-                '시총':       fmt_cap(s['marcap'], s['market']),
-                '_marcap':    s['marcap'],
-                '상태':       s['status'],
-                '점수':       s['score'],
-                '최근Q NI':   s['q0_ni'],
-                'Q-1 NI':     s['q1_ni'],
-                'Q-2 NI':     s['q2_ni'],
-                'Q-3 NI':     s['q3_ni'],
-                'TTM NI':     s['ttm_ni'],
-                'YoY성장%':   s.get('yoy_imp_pct'),
-                '매출YoY%':   s.get('rev_growth'),
-                '마진개선':   '✅' if s.get('gm_improving') else '·',
-                '최근날짜':   s.get('q0_date',''),
-            })
-
-        df7 = pd.DataFrame(rows7)
-        if df7.empty:
-            st.warning("조건에 맞는 종목이 없습니다.")
-        else:
-            if ta_sort == "점수↓":
-                df7 = df7.sort_values('점수', ascending=False)
-            elif ta_sort == "YoY성장↓":
-                df7 = df7.sort_values('YoY성장%', ascending=False, na_position='last')
-            elif ta_sort == "매출성장↓":
-                df7 = df7.sort_values('매출YoY%', ascending=False, na_position='last')
-            elif ta_sort == "시총↓":
-                df7 = df7.sort_values('_marcap', ascending=False)
-            df7 = df7.reset_index(drop=True)
-            df7.index += 1
-
-            st.subheader(f"총 {len(df7)}개 종목")
-
-            disp7 = ['시장','종목명','코드','시총','상태','점수',
-                     '최근Q NI','Q-1 NI','Q-2 NI','Q-3 NI','TTM NI',
-                     'YoY성장%','매출YoY%','마진개선','최근날짜']
-
-            def fmt_pct(v):
-                try:
-                    return f"{float(v):+.1f}%" if v is not None else '-'
-                except:
-                    return '-'
-
-            styled7 = df7[disp7].style \
-                .map(status_color, subset=['상태']) \
-                .map(yoy_color,   subset=['YoY성장%']) \
-                .map(color_sig,   subset=['마진개선']) \
-                .format({'YoY성장%': fmt_pct, '매출YoY%': fmt_pct}, na_rep='-')
-
-            st.dataframe(styled7, use_container_width=True, height=420)
-
-            st.divider()
-            st.subheader("📊 상태별 요약")
-            sum_rows = []
-            for st_label in ['흑자전환완료','흑자전환임박','적자개선중']:
-                sub = df7[df7['상태'] == st_label]
-                if len(sub) > 0:
-                    sum_rows.append({
-                        '상태':     st_label,
-                        '종목수':   len(sub),
-                        'KR':       len(sub[sub['시장']=='KR']),
-                        'US':       len(sub[sub['시장']=='US']),
-                        '평균점수': round(sub['점수'].mean(), 1),
-                    })
-            if sum_rows:
-                st.dataframe(pd.DataFrame(sum_rows), use_container_width=True, hide_index=True)
-
-            st.caption(
-                "📌 점수 기준: 흑자전환완료=5점 / 흑자전환직전=4점 / 흑자전환임박(YoY≥0%)=3점 / 적자개선중(YoY≥5%)=2점 "
-                "+ 매출YoY>20%=+1 / 마진개선=+1 / TTM개선=+1  ·  YoY성장%: 최근 날짜 전년도 대비 순이익 개선"
-            )
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -1560,15 +1424,15 @@ with tab7:
             ), row=4, col=1)
 
             fig.update_layout(
-                height=780, paper_bgcolor='#0f1117', plot_bgcolor='#0f1117',
+                height=780, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='#8b949e', size=11),
                 xaxis_rangeslider_visible=False,
                 margin=dict(l=0, r=100, t=30, b=0),
                 legend=dict(orientation='h', y=1.02, x=0),
             )
             for i in range(1, 5):
-                fig.update_xaxes(gridcolor='#21262d', row=i, col=1)
-                fig.update_yaxes(gridcolor='#21262d', row=i, col=1)
+                fig.update_xaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
+                fig.update_yaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
             fig.update_yaxes(title_text='RSI', row=2, col=1, range=[0, 100])
 
             st.plotly_chart(fig, use_container_width=True)
@@ -1964,13 +1828,13 @@ with tab8:
             fig_pf.add_vline(x=0, line_color='rgba(110,118,129,0.5)')
             fig_pf.update_layout(
                 height=max(200, 40 * len(chart_df)),
-                paper_bgcolor='#0f1117', plot_bgcolor='#0f1117',
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='#8b949e', size=11),
                 margin=dict(l=0, r=60, t=10, b=0),
                 xaxis_title='수익률(%)',
             )
-            fig_pf.update_xaxes(gridcolor='#21262d')
-            fig_pf.update_yaxes(gridcolor='#21262d')
+            fig_pf.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+            fig_pf.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
             st.plotly_chart(fig_pf, use_container_width=True)
 
         st.divider()
@@ -1986,114 +1850,6 @@ with tab8:
             else:
                 st.error(f"오류: {result.stderr[:200]}")
 
-
-# ════════════════════════════════════════════════════════════════════
-# 탭9: 페이퍼 트레이딩 — 포워드 트랙레코드 + 오류수정 루프
-# ════════════════════════════════════════════════════════════════════
-with tab9:
-    st.header("📒 페이퍼 트레이딩 — 실전 신뢰도 누적")
-    st.caption("신호가 나온다 ≠ 돈 번다. 매주 가상 진입을 기록하고 1·4·13주 뒤 실제 수익으로 백테스트와 대조합니다.")
-
-    import json as _json
-    _ledger_path = Path('results/paper_trades.json')
-    _ledger = load_json(_ledger_path)
-
-    if not _ledger or not _ledger.get('trades'):
-        st.info("아직 기록이 없습니다 → 터미널에서 `python paper_trade.py log` 실행 (또는 weekly_run.py가 자동 기록)")
-    else:
-        _trades = _ledger['trades']
-        _SIG_LABEL = {'sig_52w':'52주신고가','sig_vol':'거래량폭발','sig_ma5':'5주라이딩',
-                      'sig_cup':'컵핸들','sig_maconv':'이평수렴','sig_rsimacd':'RSI/MACD'}
-        _REF = {'sig_52w':{'4w':1.0,'13w':3.3},'sig_vol':{'4w':0.8,'13w':0.8},
-                'sig_ma5':{'4w':0.4,'13w':2.2},'sig_cup':{'4w':0.5,'13w':2.4},
-                'sig_maconv':{'4w':1.6,'13w':4.3},'sig_rsimacd':{'4w':0.9,'13w':2.7}}
-
-        _n_total = len(_trades)
-        _n_4w = sum(1 for t in _trades if '4w' in t.get('realized', {}))
-        _n_13w = sum(1 for t in _trades if t.get('status') == 'closed')
-
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("누적 가상매매", f"{_n_total}건")
-        c2.metric("4주 만기", f"{_n_4w}건")
-        c3.metric("13주 종료", f"{_n_13w}건")
-        _first = min((t['log_date'] for t in _trades), default='-')
-        c4.metric("추적 시작일", _first)
-
-        if _n_4w == 0:
-            from datetime import datetime as _dt, timedelta as _td
-            _ready = (_dt.strptime(_first, '%Y-%m-%d') + _td(days=28)).strftime('%Y-%m-%d')
-            st.warning(f"⏳ 아직 익은 구간이 없습니다. 첫 4주 성적표 예정일: **{_ready}**  "
-                       f"— 그때까지는 '신호가 쌓이는 중'이고, 그 후부터 실전 검증이 시작됩니다.")
-        else:
-            st.divider()
-            for _h in ['4w', '13w']:
-                _rows = []
-                for _flag, _lab in _SIG_LABEL.items():
-                    _rets = [t['realized'][_h]['ret'] for t in _trades
-                             if t['flags'].get(_flag) and _h in t.get('realized', {})]
-                    if not _rets:
-                        continue
-                    _n = len(_rets); _wr = sum(1 for r in _rets if r > 0)/_n*100
-                    _live = sum(_rets)/_n; _ref = _REF[_flag][_h]; _gap = _live - _ref
-                    _raw = max(0.0, min(1.3, _live/_ref)) if _ref > 0 else (1.0 if _live >= 0 else 0.5)
-                    _mult = round((_n*_raw + 10*1.0)/(_n+10), 2)
-                    _rows.append({'신호':_lab,'표본':_n,'실전승률':round(_wr,1),
-                                  '실전EV%':round(_live,2),'백테EV%':_ref,
-                                  '괴리%':round(_gap,2),'신뢰계수':_mult})
-                if _rows:
-                    st.subheader(f"{_h} 보유 · 신호별 실전 vs 백테스트")
-                    _df = pd.DataFrame(_rows)
-                    def _c_gap(v):
-                        try: return 'color:#56d364' if float(v)>=0 else ('color:#ffa657' if float(v)>-1.5 else 'color:#f78166')
-                        except: return ''
-                    def _c_mult(v):
-                        try:
-                            f=float(v)
-                            if f>=1.0: return 'color:#56d364;font-weight:bold'
-                            if f>=0.85: return 'color:#ffa657'
-                            return 'color:#f78166;font-weight:bold'
-                        except: return ''
-                    st.dataframe(
-                        _df.style.map(_c_gap, subset=['괴리%']).map(_c_mult, subset=['신뢰계수'])
-                            .format({'실전승률':'{:.1f}%','실전EV%':'{:+.2f}','백테EV%':'{:+.2f}',
-                                     '괴리%':'{:+.2f}','신뢰계수':'{:.2f}'}),
-                        use_container_width=True, hide_index=True)
-            st.caption("신뢰계수 <1 = 실전이 백테스트에 못 미침 → 추천·사이징에서 비중 자동 축소(대응). "
-                       "표본이 적으면 1.0으로 수축(섣부른 판단 방지).")
-
-        st.divider()
-        with st.expander("📋 개별 가상매매 기록 (최근 30건)", expanded=False):
-            _recent = sorted(_trades, key=lambda t: t['log_date'], reverse=True)[:30]
-            _status_kr = {'open': '보유중', 'closed': '종료'}
-            def _fmt_px(v, mkt):
-                try:
-                    v = float(v)
-                    return f"{int(round(v)):,}" if mkt == 'KR' else f"{v:,.2f}"
-                except Exception:
-                    return '-'
-            def _fmt_ret(v):
-                try:
-                    return f"{float(v):+.1f}%"
-                except Exception:
-                    return '대기'
-            _rt = []
-            for t in _recent:
-                _r = t.get('realized', {})
-                _rt.append({
-                    '진입일': t['log_date'], '시장': t['market'], '종목': t['name'],
-                    '진입가': _fmt_px(t['entry_px'], t['market']),
-                    '신호': ', '.join(t.get('signals', [])),
-                    '4주%': _fmt_ret(_r.get('4w', {}).get('ret')),
-                    '13주%': _fmt_ret(_r.get('13w', {}).get('ret')),
-                    '상태': _status_kr.get(t['status'], t['status']),
-                })
-            _rtd = pd.DataFrame(_rt)
-            def _c_ret(v):
-                try: return 'color:#56d364' if float(str(v).replace('%','').replace('+',''))>=0 else 'color:#f78166'
-                except: return ''
-            st.dataframe(
-                _rtd.style.map(_c_ret, subset=['4주%','13주%']),
-                use_container_width=True, hide_index=True, height=420)
 
 
 # ════════════════════════════════════════════════════════════════════
