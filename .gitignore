@@ -15,3 +15,4 @@ results/*.csv
 
 # 로컬 개발용
 .claude/
+results/*.log
