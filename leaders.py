@@ -43,8 +43,18 @@ def find_leaders(market_filter='전체', top_sectors=6, per_sector=4, min_in_sec
     if not stocks:
         return None
 
+    # 섹터 맵으로 보강 (스크리너의 '기타' → 실제 섹터)
+    try:
+        from sectors import get_sector_map
+        smap = get_sector_map()
+    except Exception:
+        smap = {}
+
     for s in stocks:
         s['_rs'] = _stock_strength(s)
+        mapped = smap.get(s['sym']) or smap.get(str(s['sym']).zfill(6))
+        if mapped:
+            s['sector'] = mapped
 
     # 섹터 데이터가 충분한지 확인 (기타 제외하고 의미있는 섹터가 있나)
     from collections import defaultdict
