@@ -102,23 +102,27 @@ def main():
         ccy = '₩' if market == 'KR' else '$'
         print(f"  [{market}] {name} ({sym}): {ccy}{cur_px:,.1f}  {pnl_pct:+.1f}%  P&L {ccy}{pnl_amt:,.0f}")
 
-        # ── 손절 감시 (-stop%) ────────────────────────────────────────
-        if pnl_pct <= -stop:
-            alerts.append(
-                f"🔴 <b>손절 경고</b>  [{market}] {name} ({sym})\n"
-                f"  매수가: {ccy}{buy_px:,.2f}  현재가: {ccy}{cur_px:,.2f}\n"
-                f"  수익률: <b>{pnl_pct:+.1f}%</b>  손절기준: -{stop}%\n"
-                f"  즉각 매도 검토 필요 ⚠️"
-            )
-
-        # ── 목표가 도달 (+target%) ────────────────────────────────────
-        elif pnl_pct >= target:
-            alerts.append(
-                f"🟢 <b>목표가 도달</b>  [{market}] {name} ({sym})\n"
-                f"  매수가: {ccy}{buy_px:,.2f}  현재가: {ccy}{cur_px:,.2f}\n"
-                f"  수익률: <b>{pnl_pct:+.1f}%</b>  목표: +{target}%\n"
-                f"  분할 익절 또는 손절선 올리기 검토"
-            )
+        # ── 매도 엔진(sell_signals) 3룰 통일: 방어손절·분할익절·시간매도 ──
+        try:
+            import sell_signals
+            ev = sell_signals.evaluate_sell(sym, market, buy_px,
+                                            buy_date=pos.get('buy_date'),
+                                            stop_pct=stop, target_pct=target)
+            sig = ev['signal']
+            if sig not in ('✅ 보유', '⚪ 데이터없음'):
+                alerts.append(
+                    f"{sig}  [{market}] {name} ({sym})\n"
+                    f"  매수가: {ccy}{buy_px:,.2f}  현재가: {ccy}{cur_px:,.2f}\n"
+                    f"  수익률: <b>{pnl_pct:+.1f}%</b>\n"
+                    f"  근거: {ev['reason']}\n"
+                    f"  → {ev['action']}"
+                )
+        except Exception as _e:
+            # 폴백: 기존 손절/목표 단순 감시
+            if pnl_pct <= -stop:
+                alerts.append(f"🔴 <b>손절 경고</b> [{market}] {name} ({sym})  {pnl_pct:+.1f}%")
+            elif pnl_pct >= target:
+                alerts.append(f"🟢 <b>목표가 도달</b> [{market}] {name} ({sym})  {pnl_pct:+.1f}%")
 
         results.append({
             **pos,
