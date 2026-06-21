@@ -103,10 +103,27 @@ def _series_for(sym, mkt, init_start):
         return None
 
 
+def _universe():
+    """종목 목록: 5년 캐시(있으면) ∪ 커밋된 JSON(perf·screener·canslim·longcache).
+       → Actions(캐시 없음)에서도 JSON으로 동작."""
+    syms = set(f.stem for f in CACHE_DIR.glob('*.parquet') if not f.stem.startswith('_benchmark'))
+    syms |= set(f.stem for f in LONG_CACHE.glob('*.parquet')) if LONG_CACHE.exists() else set()
+    for f in ['perf_latest', 'screener_latest', 'canslim_latest']:
+        p = Path(f'results/{f}.json')
+        if p.exists():
+            try:
+                for s in json.loads(p.read_text(encoding='utf-8')).get('stocks', []):
+                    if s.get('sym'):
+                        syms.add(s['sym'])
+            except Exception:
+                pass
+    return sorted(syms)
+
+
 def run(start=None):
     init_start = start or '2008-01-01'
     names, caps = _enrich_maps()
-    syms = [f.stem for f in CACHE_DIR.glob('*.parquet') if not f.stem.startswith('_benchmark')]
+    syms = _universe()
     _seeded = LONG_CACHE.exists() and any(LONG_CACHE.glob('*.parquet'))
     print(f"  대상 {len(syms)}종목 · 모드: {'증분 갱신(빠름)' if _seeded else f'최초 다운로드 {init_start}~ (느림, 1회만)'}")
 
