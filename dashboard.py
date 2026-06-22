@@ -184,8 +184,8 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab_today, tab_screen, tab4, tab7, tab8, tab10 = st.tabs([
-    "📋 오늘의 종합", "🔎 종목 발굴",
+tab_today, tab_screen, tab_guru, tab4, tab7, tab8, tab10 = st.tabs([
+    "📋 오늘의 종합", "🔎 종목 발굴", "🎙️ 구루 인사이트",
     "🌍 매크로", "🔍 종목 분석", "💼 포트폴리오", "🧭 프로젝트 종합"
 ])
 
@@ -195,6 +195,97 @@ with tab_screen:
     tab_win, tab2, tab1, tab3, t_lead, t_prof, tab11 = st.tabs([
         "🏅 위닝 스코어", "📊 주봉 스크리너", "📈 월간 성과", "🏆 CANSLIM",
         "🚀 주도주", "🔬 종목 프로파일", "🎯 자동추천"])
+
+
+# ════════════════════════════════════════════════════════════════════
+# 탭: 구루 인사이트 — 투자 유튜브 채널 영상 일일 요약
+# ════════════════════════════════════════════════════════════════════
+with tab_guru:
+    st.header("🎙️ 구루 인사이트")
+    st.caption("투자 유튜브 영상 일일 요약 — 핵심 · 언급 종목 · 강조 포인트, 클릭하면 해당 발언 시점으로 점프 (Gemini 분석)")
+
+    def _guru_ts(sec):
+        sec = int(sec or 0)
+        h, m, s = sec // 3600, (sec % 3600) // 60, sec % 60
+        return f"{h}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
+
+    _GURU_JSON = Path('results/guru_insights.json')
+    if not _GURU_JSON.exists():
+        st.info("아직 분석된 영상이 없습니다. `python guru_youtube.py` 실행 후 표시됩니다.")
+    else:
+        try:
+            _gdata = json.loads(_GURU_JSON.read_text(encoding='utf-8'))
+        except Exception as _e:
+            _gdata = {'items': []}
+            st.error(f"데이터 로드 실패: {_e}")
+        _gitems = _gdata.get('items', [])
+
+        if _gdata.get('updated'):
+            st.caption(f"마지막 갱신: {_gdata['updated'][:16].replace('T', ' ')}")
+
+        _gchart = Path('results/guru_chart_latest.png')
+        if _gchart.exists():
+            st.image(str(_gchart), caption="구루 언급 종목 가격 추이 (최근 5개월)", use_container_width=True)
+
+        if not _gitems:
+            st.info("분석된 영상이 없습니다.")
+        else:
+            _chans = sorted({i['channel'] for i in _gitems})
+            _gc1, _gc2, _gc3 = st.columns([1, 2, 1])
+            _gsel = _gc1.selectbox("채널", ["전체"] + _chans, key="guru_chan")
+            _gq = _gc2.text_input("종목 / 키워드 검색", key="guru_q",
+                                  placeholder="예: 테슬라, 엔비디아, 금리").strip()
+            _ginv = _gc3.checkbox("투자 영상만", value=True, key="guru_inv")
+
+            _view = _gitems
+            if _gsel != "전체":
+                _view = [i for i in _view if i['channel'] == _gsel]
+            if _ginv:
+                _view = [i for i in _view if i.get('analysis', {}).get('relevant', True)]
+            if _gq:
+                _ql = _gq.lower()
+                _view = [i for i in _view
+                         if _ql in json.dumps(i.get('analysis', {}), ensure_ascii=False).lower()
+                         or _ql in i.get('title', '').lower()]
+
+            st.caption(f"{len(_view)}개 영상")
+            for _it in _view:
+                _a = _it.get('analysis', {})
+                _url = _it['url']
+                _tag = "" if _a.get('relevant', True) else "  〔비투자〕"
+                _hdr = f"[{_it['channel']}] {_it['title']}  ·  {_it.get('published', '')[:10]}{_tag}"
+                with st.expander(_hdr):
+                    if _a.get('one_liner'):
+                        st.markdown(f"**💡 {_a['one_liner']}**")
+                    if _a.get('summary'):
+                        st.markdown("**핵심 요약**")
+                        for _s in _a['summary']:
+                            st.markdown(f"- {_s}")
+                    if _a.get('tickers'):
+                        st.markdown("**📌 언급 종목**  _(시점 클릭 → 영상 점프)_")
+                        _mk = {'긍정': '🟢', '부정': '🔴'}
+                        for _t in _a['tickers']:
+                            _m = _mk.get(_t.get('view', ''), '⚪')
+                            _code = f" `{_t['ticker']}`" if _t.get('ticker') else ''
+                            _sec = _t.get('t')
+                            _jump = f" · [{_guru_ts(_sec)}]({_url}&t={int(_sec)}s)" if _sec else ''
+                            st.markdown(f"- {_m} **{_t.get('name','')}**{_code} — {_t.get('context','')}{_jump}")
+                    if _a.get('key_points'):
+                        st.markdown("**강조 포인트**")
+                        for _kp in _a['key_points']:
+                            if isinstance(_kp, dict):
+                                _sec = _kp.get('t')
+                                _jump = f" [{_guru_ts(_sec)}]({_url}&t={int(_sec)}s)" if _sec else ''
+                                st.markdown(f"- {_kp.get('point','')}{_jump}")
+                            else:
+                                st.markdown(f"- {_kp}")
+                    if _a.get('actionable'):
+                        st.markdown("**✅ 체크 액션**")
+                        for _s in _a['actionable']:
+                            st.markdown(f"- {_s}")
+                    _src = {'transcript': '자막 기반', 'video': '영상 직접 분석', 'fail': '분석 실패'}.get(_it.get('source', ''), '')
+                    st.markdown(f"[▶️ 전체 영상]({_url})  ·  <small>{_src}</small>",
+                                unsafe_allow_html=True)
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -821,24 +912,26 @@ with tab3:
                 df3[disp3].style
                     .map(color_score3, subset=['점수/7'])
                     .map(color_cell3,  subset=sig3c),
-                use_container_width=True, height=380,
+                use_container_width=True,
+                height=min(38 + 35 * len(df3), 760),   # 종목 수만큼 길게 (최대 760)
             )
 
             st.divider()
-            st.subheader("📊 항목별 통과율 (현재 슬라이더 기준)")
-            total3 = len(rows3)
-            pr_counts = {
-                'C 분기실적': sum(1 for r in rows3 if '✅' in str(r['C 분기%'])),
-                'A 연간실적': sum(1 for r in rows3 if '✅' in str(r['A 연간%'])),
-                'S 거래량':   sum(1 for r in rows3 if '✅' in str(r['S 배수'])),
-                'I 기관수급': sum(1 for r in rows3 if '✅' in str(r['I 순매수'])),
-            }
-            pr_df = pd.DataFrame({
-                '항목': list(pr_counts.keys()),
-                '통과수': list(pr_counts.values()),
-                '통과율(%)': [round(v/total3*100,1) for v in pr_counts.values()],
-            })
-            st.dataframe(pr_df, use_container_width=True, hide_index=True)
+            with st.expander("📊 항목별 통과율 (현재 슬라이더 기준)", expanded=False):
+                total3 = len(rows3)
+                pr_counts = {
+                    'C 분기실적': sum(1 for r in rows3 if '✅' in str(r['C 분기%'])),
+                    'A 연간실적': sum(1 for r in rows3 if '✅' in str(r['A 연간%'])),
+                    'S 거래량':   sum(1 for r in rows3 if '✅' in str(r['S 배수'])),
+                    'I 기관수급': sum(1 for r in rows3 if '✅' in str(r['I 순매수'])),
+                }
+                pr_df = pd.DataFrame({
+                    '항목': list(pr_counts.keys()),
+                    '통과수': list(pr_counts.values()),
+                    '통과율(%)': [round(v/total3*100, 1) for v in pr_counts.values()],
+                })
+                st.dataframe(pr_df, use_container_width=False, hide_index=True,
+                             height=36 + 35 * len(pr_df))
 
 
 # ════════════════════════════════════════════════════════════════════
