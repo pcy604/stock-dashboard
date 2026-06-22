@@ -1378,10 +1378,17 @@ def fetch_stock_data(sym: str, days: int):
             yi = t.info or {}
             if yi and (yi.get('trailingPE') or yi.get('longName')):
                 info.update({k: v for k, v in yi.items() if v is not None})
-            try: earn['annual'] = t.financials
-            except: pass
-            try: earn['quarterly'] = t.quarterly_financials
-            except: pass
+            def _first_nonempty(*attrs):
+                for a in attrs:
+                    try:
+                        d = getattr(t, a)
+                        if d is not None and hasattr(d, 'empty') and not d.empty:
+                            return d
+                    except Exception:
+                        pass
+                return None
+            earn['annual'] = _first_nonempty('financials', 'income_stmt')
+            earn['quarterly'] = _first_nonempty('quarterly_financials', 'quarterly_income_stmt')
             if not is_kr:
                 try: insid = t.insider_transactions
                 except: pass
@@ -1651,9 +1658,7 @@ with tab7:
                         except Exception:
                             return ''
                     _gsub = [c for c in ['YoY%', 'QoQ%'] if c in _cols_show]
-                    st.dataframe(e_df.style.map(_cg, subset=_gsub),
-                                 use_container_width=True, hide_index=True,
-                                 height=36 + 35*len(e_df))
+                    st.table(e_df.style.hide(axis="index").map(_cg, subset=_gsub))
                 else:
                     st.info("실적 데이터 없음 (yfinance/네이버 조회 실패)")
 
@@ -1667,9 +1672,7 @@ with tab7:
                         f = float(str(v).replace('%','').replace('+',''))
                         return 'color:#56d364' if f >= 0 else 'color:#f78166'
                     except: return ''
-                st.dataframe(r_df.style.map(_cr, subset=['수익률']),
-                             use_container_width=True, hide_index=True,
-                             height=36 + 35*len(r_df))
+                st.table(r_df.style.hide(axis="index").map(_cr, subset=['수익률']))
 
             with right8:
                 st.subheader("💹 밸류에이션")
@@ -1694,8 +1697,7 @@ with tab7:
 
                 all_val = val_rows + [(k, f"{v:.1f}x" if 'PER' in k or 'PBR' in k else f"{v}%") for k, v in yf_val.items() if v]
                 v_df = pd.DataFrame([{'지표': k, '값': v} for k, v in all_val])
-                st.dataframe(v_df, use_container_width=True, hide_index=True,
-                             height=36 + 35*len(v_df))
+                st.table(v_df.style.hide(axis="index"))
 
                 if insid is not None and not insid.empty:
                     st.subheader("👤 내부자 거래")
