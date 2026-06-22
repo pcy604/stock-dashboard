@@ -8,3 +8,6 @@ finance-datareader>=0.9.50
 beautifulsoup4>=4.12
 lxml>=5.0
 pyarrow>=15.0
+google-genai>=1.0
+youtube-transcript-api>=0.6
+matplotlib>=3.7

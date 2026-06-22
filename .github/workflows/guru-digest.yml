@@ -1,0 +1,44 @@
+# 구루 유튜브 일일 요약 — 체슬라TV·삼프로TV 신규 영상 → Gemini 분석
+#   → results/guru_insights.json 커밋 → Streamlit Cloud 자동반영 + 텔레그램 전송
+#
+# 활성화 전 GitHub repo → Settings → Secrets and variables → Actions 에 등록:
+#   GEMINI_API_KEY (필수),  TELEGRAM_TOKEN · TELEGRAM_CHAT_ID (텔레그램 전송용)
+name: guru-digest
+
+on:
+  workflow_dispatch:          # 수동 실행 버튼
+  schedule:
+    - cron: '0 */2 * * *'     # 2시간마다 (UTC). 신규 영상 있을 때만 분석·전송
+
+permissions:
+  contents: write
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GEMINI_KEY:       ${{ secrets.GEMINI_API_KEY }}
+      TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      GURU_CHAT:        ${{ secrets.GURU_CHAT }}     # 공개 채널이면 @username (선택)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - run: pip install -r requirements.txt
+
+      - name: 구루 유튜브 요약 + 텔레그램
+        run: python guru_youtube.py
+
+      - name: 변경분 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add results/guru_insights.json results/guru_chart_latest.png 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "auto: 구루 인사이트 갱신 $(date -u +%Y-%m-%d)"
+          git push

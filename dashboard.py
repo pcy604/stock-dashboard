@@ -209,6 +209,44 @@ with tab_guru:
         h, m, s = sec // 3600, (sec % 3600) // 60, sec % 60
         return f"{h}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
 
+    with st.expander("➕ 분석 채널 관리 (유튜브 채널 URL로 추가)"):
+        import guru_youtube as _gy
+        _chfile = Path('data/guru_channels.json')
+        _chans_cfg = None
+        if _chfile.exists():
+            try:
+                _chans_cfg = json.loads(_chfile.read_text(encoding='utf-8'))
+            except Exception:
+                _chans_cfg = None
+        if not _chans_cfg:
+            try:
+                import config as _cfg
+                _chans_cfg = [dict(c) for c in _cfg.GURU_CHANNELS]
+            except Exception:
+                _chans_cfg = []
+        st.caption("현재 채널: " + (" · ".join(c['name'] for c in _chans_cfg) or "없음"))
+        _ac1, _ac2 = st.columns([2, 3])
+        _newname = _ac1.text_input("채널 이름", key="guru_addname", placeholder="예: 연합인포맥스")
+        _newurl = _ac2.text_input("채널 URL / @핸들", key="guru_addurl",
+                                  placeholder="https://www.youtube.com/@yna_news")
+        if st.button("채널 추가", key="guru_addbtn"):
+            if not _newname.strip() or not _newurl.strip():
+                st.warning("이름과 URL을 모두 입력하세요.")
+            else:
+                _cid = _gy.resolve_channel_id(_newurl.strip())
+                if not _cid:
+                    st.error("채널 ID를 찾지 못했습니다. (영상이 아닌 '채널' URL인지 확인)")
+                elif any(c.get('id') == _cid for c in _chans_cfg):
+                    st.info(f"이미 등록된 채널입니다 ({_cid}).")
+                else:
+                    _chans_cfg.append({"name": _newname.strip(), "id": _cid})
+                    _chfile.parent.mkdir(parents=True, exist_ok=True)
+                    _chfile.write_text(json.dumps(_chans_cfg, ensure_ascii=False, indent=2),
+                                       encoding='utf-8')
+                    st.success(f"추가됨: {_newname.strip()} ({_cid})")
+                    st.info("⚠️ 클라우드 자동 분석에 반영하려면 `data/guru_channels.json` 을 git push 하세요.")
+        st.caption("삭제·필터(include/exclude)는 data/guru_channels.json 직접 편집.")
+
     _GURU_JSON = Path('results/guru_insights.json')
     if not _GURU_JSON.exists():
         st.info("아직 분석된 영상이 없습니다. `python guru_youtube.py` 실행 후 표시됩니다.")
