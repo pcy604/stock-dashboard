@@ -18,6 +18,18 @@ def send_message(token: str, chat_id: str, text: str) -> bool:
         return False
 
 
+def send_photo(token: str, chat_id: str, photo_path: str, caption: str = '') -> bool:
+    url = f"https://api.telegram.org/bot{token}/sendPhoto"
+    try:
+        with open(photo_path, 'rb') as f:
+            r = requests.post(url, data={'chat_id': chat_id, 'caption': caption[:1024]},
+                              files={'photo': f}, timeout=30)
+        return r.status_code == 200
+    except Exception as e:
+        print(f"  [텔레그램 사진 오류] {e}")
+        return False
+
+
 def build_message(hits: list, date_str: str) -> str:
     """hits: list of (market, symbol, name, result, earnings, tf_label)"""
     lines = [f"<b>📊 주식 스크리너 | {date_str}</b>"]

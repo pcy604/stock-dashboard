@@ -3,6 +3,7 @@ data/.telegram_token
 data/.telegram_chat
 data/.finnhub_key
 data/.fred_key
+data/.gemini_key
 .streamlit/secrets.toml
 
 # 캐시/결과 (대용량, 재생성 가능)

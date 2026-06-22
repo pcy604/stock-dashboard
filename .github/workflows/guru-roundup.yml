@@ -1,0 +1,30 @@
+# 구루 아침 종합 — 매일 06시(폴란드, 여름 CEST 기준) 지난 24시간 투자 영상 한 번에 정리.
+#   재분석 없음(guru-digest가 이미 분석·커밋한 results/guru_insights.json을 읽어 종합 발송).
+# 활성화 전 Secrets: TELEGRAM_TOKEN · TELEGRAM_CHAT_ID (필수), GURU_CHAT (브로드캐스트 시)
+name: guru-roundup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'       # UTC 04시 = 폴란드 여름(CEST) 06시 / 겨울(CET) 05시
+
+permissions:
+  contents: read
+
+jobs:
+  roundup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      GURU_CHAT:        ${{ secrets.GURU_CHAT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: 아침 종합 전송
+        run: python guru_youtube.py roundup
