@@ -1,6 +1,24 @@
 {
   "items": [
     {
+      "video_id": "nunLrYxo1uU",
+      "title": "엇갈린 기술주 주가에 뉴욕증시 혼조 마감...메모리↑·SPCX↓_26.06.23 | 여도은, 박명석, 한상희 [월스트리트 모닝브리핑]",
+      "channel": "삼프로TV",
+      "published": "2026-06-22T20:30:47+00:00",
+      "url": "https://www.youtube.com/watch?v=nunLrYxo1uU",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+      },
+      "source": "fail",
+      "analyzed_at": "2026-06-23T06:57:55.814202+09:00"
+    },
+    {
       "video_id": "m_S5W3b7RiQ",
       "title": "높아진 벨류에이션, 시장 지표 속 기본을 잡는 투자 전략을 세워봅니다 | 체슬리투자자문 최일호 부사장",
       "channel": "체슬리TV",
@@ -387,5 +405,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-22T00:36:22.371808+09:00"
+  "updated": "2026-06-23T06:57:57.449011+09:00"
 }
