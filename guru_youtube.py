@@ -32,6 +32,7 @@ RESULT_PATH      = Path('results/guru_insights.json')
 LOOKBACK_HOURS   = 6           # 최근 N시간 내 영상만 (2시간 주기 + 누락슬롯 여유). 중복은 video_id로 차단
 MAX_PER_CHANNEL  = 5           # 채널당 1회 최대 분석 영상 수
 MAX_HISTORY      = 200         # JSON에 보관할 분석 기록 최대 개수
+MAX_ROUNDUP      = 12          # 아침 종합에 표시할 최대 영상 수 (삼프로 다작 대비)
 GEMINI_MODEL     = 'gemini-2.5-flash'
 TRANSCRIPT_LANGS = ['ko', 'en']
 OUTPUT_LANG      = getattr(config, 'GURU_OUTPUT_LANG', '한국어')   # 요약 출력 언어
@@ -396,9 +397,12 @@ def roundup(hours: int = 24):
     if not recent:
         print('지난 24시간 투자 영상 없음 — 종합 생략')
         return
+    total = len(recent)
     recent.sort(key=lambda x: x.get('published', ''), reverse=True)
-    print(f'종합 대상 {len(recent)}개')
-    header = f'<b>🌅 오늘 아침 종합 | {date_str}</b>\n지난 {hours}시간 투자 영상 {len(recent)}개'
+    recent = recent[:MAX_ROUNDUP]
+    print(f'종합 대상 {total}개 (표시 {len(recent)}개)')
+    extra = f' (최신 {len(recent)}개)' if total > len(recent) else ''
+    header = f'<b>🌅 오늘 아침 종합 | {date_str}</b>\n지난 {hours}시간 투자 영상 {total}개{extra}'
     _send_digest(recent, date_str, header=header)
 
 
