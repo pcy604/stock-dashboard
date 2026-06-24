@@ -1,6 +1,78 @@
 {
   "items": [
     {
+      "video_id": "wuZU_G0-lik",
+      "title": "박병창 대표가 말하는 하반기 5대 핵심 리스크 | 홍선애, 박병창 MP파트너스 대표 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-06-24T09:23:44+00:00",
+      "url": "https://www.youtube.com/watch?v=wuZU_G0-lik",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "Server disconnected without sending a response."
+      },
+      "source": "fail",
+      "analyzed_at": "2026-06-24T19:47:02.790184+09:00"
+    },
+    {
+      "video_id": "fC4njYtz0DY",
+      "title": "[6월 24일 마감시황] 반도체 다시 살아날까? 마이크론 실적 발표 전 꼭 봐야 할 시장 흐름ㅣ홍선애, 이권희, 장우진 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-06-24T08:27:33+00:00",
+      "url": "https://www.youtube.com/watch?v=fC4njYtz0DY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "analyzed_at": "2026-06-24T19:47:13.745395+09:00"
+    },
+    {
+      "video_id": "FXWRM4AgiN4",
+      "title": "흔들리는 시장보다 지금 먼저 봐야 할 것이 있습니다. | 오종태의 투자병법",
+      "channel": "오종태의투자병법",
+      "published": "2026-06-24T08:15:28+00:00",
+      "url": "https://www.youtube.com/watch?v=FXWRM4AgiN4",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "Server disconnected without sending a response."
+      },
+      "source": "fail",
+      "analyzed_at": "2026-06-24T19:50:46.684911+09:00"
+    },
+    {
+      "video_id": "1vOWBVkQ38I",
+      "title": "\"성지순례 왔습니다\" 반도체 폭락 맞춘 애널리스트의 설명 | 이재만 & 빈센트 & 정프로 [더블밸류업]",
+      "channel": "삼프로TV",
+      "published": "2026-06-24T08:12:59+00:00",
+      "url": "https://www.youtube.com/watch?v=1vOWBVkQ38I",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+      },
+      "source": "fail",
+      "analyzed_at": "2026-06-24T19:48:37.681232+09:00"
+    },
+    {
       "video_id": "XKTbWI5z8k0",
       "title": "“꼬리가 몸통 흔든다”…증시 흔드는 레버리지 ETF의 그늘",
       "channel": "체슬리TV",
@@ -3011,5 +3083,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-24T16:56:49.357833+09:00"
+  "updated": "2026-06-24T19:50:47.884958+09:00"
 }
