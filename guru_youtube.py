@@ -351,18 +351,24 @@ def _send_digest(items: list, date_str: str, header: str | None = None):
     """텍스트 다이제스트 + 종목 차트를 텔레그램으로. (브로드캐스트 채널 설정 시 그쪽)"""
     if not getattr(config, 'TELEGRAM_ENABLED', False):
         return
+    token = config.TELEGRAM_TOKEN
+    if not token:
+        print('⚠️ TELEGRAM_TOKEN 미설정 — 텔레그램 발송 불가. '
+              'GitHub repo Settings→Secrets and variables→Actions 에 TELEGRAM_TOKEN 등록 필요.')
+        return
     tg_chat = getattr(config, 'GURU_BROADCAST_CHAT', '') or config.TELEGRAM_CHAT_ID
     msg = build_telegram(items, date_str, header=header)
+    ok = True
     for chunk in [msg[i:i + 3800] for i in range(0, len(msg), 3800)]:
-        send_message(config.TELEGRAM_TOKEN, tg_chat, chunk)
-    print(f'✅ 텔레그램 전송 → {tg_chat}')
+        ok = send_message(token, tg_chat, chunk) and ok
+    print(f'{"✅ 텔레그램 전송 성공" if ok else "❌ 텔레그램 전송 실패(토큰/chat_id 확인)"} → {tg_chat}')
     try:
         import guru_charts
         from telegram_notifier import send_photo
         path, series = guru_charts.build_chart(items)
         if path:
-            send_photo(config.TELEGRAM_TOKEN, tg_chat, path, guru_charts.build_caption(series))
-            print(f'📊 종목 차트 전송: {path} ({len(series)}종목)')
+            sok = send_photo(token, tg_chat, path, guru_charts.build_caption(series))
+            print(f'{"📊 차트 전송 성공" if sok else "❌ 차트 전송 실패"}: {len(series)}종목')
     except Exception as e:
         print(f'차트 생성 스킵: {e}')
 
