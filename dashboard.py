@@ -1835,6 +1835,9 @@ with tab8:
                     '매수일':   pos.get('buy_date',''),
                     '메모':     pos.get('note',''),
                     '_id':      pos.get('id',''),
+                    '_cur':     cur,
+                    '_value':   (cur * qty) if cur else None,
+                    '_qty':     qty,
                 })
 
         df_pf = pd.DataFrame(rows_pf)
@@ -1861,6 +1864,70 @@ with tab8:
             m5.metric("⚠️ 손절 경고", f"{n_warn}개",
                       delta="즉시 확인" if n_warn > 0 else None,
                       delta_color="inverse")
+
+        # ════════════════════════════════════════════════════════════
+        # 🛡️ 원칙 가드레일 — 감정이 아니라 규칙이 포지션을 강제한다
+        # ════════════════════════════════════════════════════════════
+        st.divider()
+        st.subheader("🛡️ 원칙 가드레일")
+        st.caption("내가 정한 원칙대로 — 상위 2종목만 20%, 나머지는 더 작게, 30% 넘으면 줄이고, "
+                   "레버리지·손절·현금을 기계가 강제합니다. (1억 손실 후 정립한 규칙)")
+
+        with st.expander("⚙️ 원칙 설정 (한 번 정하면 끝)", expanded=False):
+            _ga, _gb, _gc = st.columns(3)
+            _g_top  = _ga.slider("상위 2종목 최대 비중 %", 10, 30, 20, key="g_top")
+            _g_low  = _gb.slider("3위~ 종목 최대 비중 %", 5, 20, 12, key="g_low")
+            _g_trim = _gc.slider("자동 축소 임계 %", 20, 50, 30, key="g_trim")
+            _gd, _ge, _gf = st.columns(3)
+            _g_lev  = _gd.slider("레버리지 합계 한도 %", 0, 50, 10, key="g_lev")
+            _g_stop = _ge.slider("손절선 -%", 3, 20, 8, key="g_stop")
+            _g_holdval = int(sum(r['_value'] for r in rows_pf if r.get('_value')))
+            _g_cap  = _gf.number_input("총 자본(현금 포함, 원) — 현금비중 점검용", min_value=0,
+                                       value=_g_holdval, step=1_000_000, key="g_cap",
+                                       help="보유 평가액보다 크게 입력하면 그 차액을 현금으로 봅니다")
+
+        # 매크로 현금 권고 밴드
+        try:
+            _gfed = fetch_fred('FEDFUNDS', 1); _gfr = _gfed[-1][1] if _gfed else None
+            _gm2 = fetch_fred('M2SL', 14)
+            _gm2y = round((_gm2[-1][1] / _gm2[-13][1] - 1) * 100, 1) if len(_gm2) >= 13 else None
+            _, _gcmin, _gcmax, _, _ = compute_macro_signal(_gfr, _gm2y, fetch_spx_yoy())
+        except Exception:
+            _gcmin, _gcmax = 25, 40
+
+        _gpos = [{'sym': r['코드'], 'name': r['종목명'], 'market': r['시장'],
+                  'value': r['_value'], 'pnl_pct': r['수익률'],
+                  'cur_price': r['_cur'], 'qty': r['_qty']}
+                 for r in rows_pf if r.get('_value')]
+        try:
+            import guardrail as _grd
+            _gr = _grd.evaluate(_gpos, total_capital=(_g_cap or None),
+                                top_cap=_g_top, lower_cap=_g_low, trim_threshold=_g_trim,
+                                lev_cap=_g_lev, stop_pct=_g_stop,
+                                cash_min=_gcmin, cash_max=_gcmax)
+            _gs = _gr['summary']
+            _gx1, _gx2, _gx3, _gx4 = st.columns(4)
+            _gx1.metric("원칙 점검", _gr['grade'])
+            _gx2.metric("상위2 비중", f"{_gs.get('top2', 0):.0f}%",
+                        help=f"한도 {_g_top*2}% (각 {_g_top}%)")
+            _gx3.metric("레버리지", f"{_gs.get('lev_pct', 0):.0f}%", help=f"한도 {_g_lev}%")
+            _gx4.metric("현금", f"{_gs['cash_pct']:.0f}%" if _gs.get('cash_pct') is not None else "—",
+                        help=f"매크로 권고 {_gcmin}~{_gcmax}%")
+
+            if not _gr['violations']:
+                st.success("🟢 원칙 준수 중 — 잘하고 있어요. 감정 흔들려도 이 규칙만 지키면 됩니다.")
+            else:
+                st.error(f"**{_gr['grade']}** — {_gs['msg']}")
+                _vrows = [{'': v['sev'], '항목': v['rule'], '조치': v['msg'],
+                           '줄일 금액': f"{v['trim_value']:,.0f}원" if v.get('trim_value') else '-',
+                           '수량': f"{v['qty_cut']:,.0f}주" if v.get('qty_cut') else '-'}
+                          for v in _gr['violations']]
+                st.dataframe(pd.DataFrame(_vrows), use_container_width=True, hide_index=True,
+                             height=36 + 35 * len(_vrows))
+                st.caption("⚠️ 자동 주문은 안 합니다 — '무엇을 얼마나' 알려줄 뿐, 실행은 본인이. "
+                           "근데 이 지시대로만 하면 6월 같은 일은 안 생겨요.")
+        except Exception as _ge2:
+            st.caption(f"(가드레일 계산 생략: {_ge2})")
 
         st.divider()
 
