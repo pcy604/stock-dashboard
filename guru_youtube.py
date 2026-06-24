@@ -304,6 +304,19 @@ def _esc(s: str) -> str:
     return (s or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
 
+def _html_chunks(text: str, limit: int = 3800) -> list:
+    """줄 단위로 묶어 limit 이하 청크 생성. <a> 태그가 중간에 잘리지 않게."""
+    chunks, cur = [], ''
+    for line in text.split('\n'):
+        if cur and len(cur) + len(line) + 1 > limit:
+            chunks.append(cur)
+            cur = ''
+        cur += line + '\n'
+    if cur.strip():
+        chunks.append(cur)
+    return chunks
+
+
 def _kp_text(kp) -> str:
     return kp.get('point', '') if isinstance(kp, dict) else str(kp)
 
@@ -360,7 +373,7 @@ def _send_digest(items: list, date_str: str, header: str | None = None):
     tg_chat = getattr(config, 'GURU_BROADCAST_CHAT', '') or config.TELEGRAM_CHAT_ID
     msg = build_telegram(items, date_str, header=header)
     ok = True
-    for chunk in [msg[i:i + 3800] for i in range(0, len(msg), 3800)]:
+    for chunk in _html_chunks(msg, 3800):
         ok = send_message(token, tg_chat, chunk) and ok
     print(f'{"✅ 텔레그램 전송 성공" if ok else "❌ 텔레그램 전송 실패(토큰/chat_id 확인)"} → {tg_chat}')
     try:
