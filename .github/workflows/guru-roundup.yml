@@ -6,7 +6,7 @@ name: guru-roundup
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 * * *'       # UTC 04시 = 폴란드 여름(CEST) 06시 / 겨울(CET) 05시
+    - cron: '40 4 * * *'      # UTC 04:40 = 폴란드 여름(CEST) 06:40 / 겨울 05:40 (정시 혼잡 회피)
 
 permissions:
   contents: read

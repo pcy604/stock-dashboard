@@ -305,6 +305,16 @@ def _esc(s: str) -> str:
     return (s or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
 
+def _fmt_published(iso: str) -> str:
+    """RSS published(ISO, UTC) → 'YYYY-MM-DD HH:MM' (KST)."""
+    if not iso:
+        return ''
+    try:
+        return datetime.fromisoformat(iso.replace('Z', '+00:00')).astimezone(KST).strftime('%Y-%m-%d %H:%M')
+    except Exception:
+        return iso[:16].replace('T', ' ')
+
+
 def _html_chunks(text: str, limit: int = 3800) -> list:
     """줄 단위로 묶어 limit 이하 청크 생성. <a> 태그가 중간에 잘리지 않게."""
     chunks, cur = [], ''
@@ -343,6 +353,9 @@ def build_telegram(new_items: list, date_str: str, header: str | None = None) ->
         a = it.get('analysis', {})
         url = it['url']
         lines.append(f"<b>[{it['channel']}] {_esc(it['title'])}</b>")
+        pub = _fmt_published(it.get('published', ''))
+        if pub:
+            lines.append(f"🕐 업로드 {pub} KST")
         if a.get('one_liner'):
             lines.append(f"💡 {_esc(a['one_liner'])}")
         for kp in a.get('key_points', [])[:4]:
