@@ -161,6 +161,27 @@ def build_recommendations(timeframe='weekly', capital=10_000_000,
         _ws = None
         _can_map, _ws_live = {}, {}
 
+    def _fund_score(can):
+        """기본적 점수 0~100 (CANSLIM 실적: 분기순이익·연간·매출·영업익 증감). KR만."""
+        if not can:
+            return None
+        s = 0.0
+        cg = can.get('c_growth_pct')
+        if cg == '흑자전환':
+            s += 22
+        elif isinstance(cg, (int, float)):
+            s += max(0, min(cg, 60)) / 60 * 30
+        a1 = can.get('a_growth_y1')
+        if isinstance(a1, (int, float)):
+            s += max(0, min(a1, 40)) / 40 * 25
+        rev = can.get('rev_growth')
+        if isinstance(rev, (int, float)):
+            s += max(0, min(rev, 30)) / 30 * 20
+        op = can.get('op_growth')
+        if isinstance(op, (int, float)):
+            s += max(0, min(op, 50)) / 50 * 25
+        return round(min(s, 100), 1)
+
     cands = _candidates(timeframe, market_filter)
     scored = []
     for c in cands:
@@ -171,18 +192,21 @@ def build_recommendations(timeframe='weekly', capital=10_000_000,
         c['score'] = score
         c['live_mult'] = mult
         c['adj_score'] = round(score * mult, 2)
-        # 위닝 스코어 (0~100) — screener 호환 dict 구성
+        _can = _can_map.get(c['sym'])
         if _ws is not None:
             _sd = dict(c['flags']); _sd['dist_52w'] = c.get('dist_52w'); _sd['sym'] = c['sym']
-            ws_score, _, ws_grade, _ = _ws.score_stock(_sd, _can_map.get(c['sym']), _ws_live)
+            ws_score, _, ws_grade, _ = _ws.score_stock(_sd, _can, _ws_live)
         else:
             ws_score, ws_grade = c['adj_score'] * 5, '-'
         c['win_score'] = ws_score
         c['grade'] = ws_grade
+        fs = _fund_score(_can)
+        c['fund_score'] = fs
+        c['total_score'] = round(0.6 * ws_score + 0.4 * fs, 1) if fs is not None else ws_score
         scored.append(c)
 
-    # 위닝 스코어 우선 정렬 (동점이면 모멘텀)
-    scored.sort(key=lambda x: (-x.get('win_score', 0), -x.get('mom', 0)))
+    # 종합점수(기술60+기본40) 우선 정렬 (동점이면 모멘텀)
+    scored.sort(key=lambda x: (-x.get('total_score', 0), -x.get('mom', 0)))
     top = scored[:max_positions]
 
     # 일간: 상위 후보에 일봉 진입타이밍 적용 → '진입적정'만 통과
@@ -243,6 +267,9 @@ def build_recommendations(timeframe='weekly', capital=10_000_000,
             'risk_amt': round(actual_risk),
             'reward_amt': round(reward_amt),
             'entry_grade': c.get('entry_grade', ''),
+            'win_score': c.get('win_score'),
+            'fund_score': c.get('fund_score'),
+            'total_score': c.get('total_score'),
         })
 
     total_risk = sum(r['risk_amt'] for r in recs)
