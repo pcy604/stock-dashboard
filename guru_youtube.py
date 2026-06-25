@@ -29,7 +29,7 @@ from telegram_notifier import send_message
 # ── 설정 ────────────────────────────────────────────────────────────
 KST              = timezone(timedelta(hours=9))
 RESULT_PATH      = Path('results/guru_insights.json')
-LOOKBACK_HOURS   = 6           # 최근 N시간 내 영상만 (2시간 주기 + 누락슬롯 여유). 중복은 video_id로 차단
+LOOKBACK_HOURS   = 12          # 최근 N시간 내 영상 (라이브 자막 늦게 생기는 것 재시도 runway 확보). 중복은 video_id로 차단
 MAX_PER_CHANNEL  = 5           # 채널당 1회 최대 분석 영상 수
 MAX_HISTORY      = 200         # JSON에 보관할 분석 기록 최대 개수
 MAX_ROUNDUP      = 12          # 아침 종합에 표시할 최대 영상 수 (삼프로 다작 대비)
