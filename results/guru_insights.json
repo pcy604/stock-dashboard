@@ -83,7 +83,7 @@
     },
     {
       "video_id": "9xmnsvGAO3c",
-      "title": "랠리는 아직 안 끝났다? 반도체 7월부터가 진짜입니다ㅣ명민준, 박가영, 유영화 [주린이 구조대]",
+      "title": "땡큐 마이크론! 7월 삼전닉스 실적 기대해 봐도 될까?ㅣ명민준, 박가영, 유영화 [주린이 구조대]",
       "channel": "삼프로TV",
       "published": "2026-06-25T12:30:25+00:00",
       "url": "https://www.youtube.com/watch?v=9xmnsvGAO3c",
@@ -97,7 +97,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "analyzed_at": "2026-06-25T23:13:37.782649+09:00"
+      "analyzed_at": "2026-06-26T03:05:22.543152+09:00",
+      "attempts": 1
     },
     {
       "video_id": "xui5zZ2FWEM",
@@ -300,7 +301,7 @@
     },
     {
       "video_id": "ZGk0LeHt9zg",
-      "title": "[6월 25일 마감시황] 반도체 독주는 끝나는 것이 아니다. 극단적 쏠림으로 향한다ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
+      "title": "[6월 25일 마감시황] 반도체 독주는 끝이 아니라 더 극단적 쏠림으로 간다ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
       "channel": "삼프로TV",
       "published": "2026-06-25T08:35:51+00:00",
       "url": "https://www.youtube.com/watch?v=ZGk0LeHt9zg",
@@ -314,7 +315,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "analyzed_at": "2026-06-25T19:38:59.703227+09:00"
+      "analyzed_at": "2026-06-26T03:05:43.148895+09:00",
+      "attempts": 1
     },
     {
       "video_id": "A6vZVYO1i7s",
@@ -4267,5 +4269,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-25T23:16:56.121385+09:00"
+  "updated": "2026-06-26T03:05:44.550305+09:00"
 }
