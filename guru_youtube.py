@@ -33,6 +33,7 @@ LOOKBACK_HOURS   = 6           # 최근 N시간 내 영상만 (2시간 주기 + 
 MAX_PER_CHANNEL  = 5           # 채널당 1회 최대 분석 영상 수
 MAX_HISTORY      = 200         # JSON에 보관할 분석 기록 최대 개수
 MAX_ROUNDUP      = 12          # 아침 종합에 표시할 최대 영상 수 (삼프로 다작 대비)
+RETRY_MAX        = 4           # 분석 실패 영상 재시도 한도 (라이브는 자막이 늦게 생김)
 GEMINI_MODEL     = 'gemini-2.5-flash'
 TRANSCRIPT_LANGS = ['ko', 'en']
 OUTPUT_LANG      = getattr(config, 'GURU_OUTPUT_LANG', '한국어')   # 요약 출력 언어
@@ -321,8 +322,15 @@ def _kp_text(kp) -> str:
     return kp.get('point', '') if isinstance(kp, dict) else str(kp)
 
 
+def _has_content(a: dict) -> bool:
+    """분석이 실제 내용을 담고 있는지 (빈 요약=분석 실패 구분용)."""
+    return bool(a.get('one_liner') or a.get('summary') or a.get('tickers') or a.get('key_points'))
+
+
 def build_telegram(new_items: list, date_str: str, header: str | None = None) -> str:
-    shown = [it for it in new_items if it.get('analysis', {}).get('relevant', True)]
+    shown = [it for it in new_items
+             if it.get('analysis', {}).get('relevant', True)
+             and _has_content(it.get('analysis', {}))]
     if header:
         head = header
     else:
@@ -406,7 +414,9 @@ def roundup(hours: int = 24):
     print(f"\n🌅 아침 종합  |  {date_str}  (지난 {hours}시간)")
     history = load_history()
     recent = [it for it in history['items']
-              if it.get('analysis', {}).get('relevant', True) and _within_hours(it, hours)]
+              if it.get('analysis', {}).get('relevant', True)
+              and _has_content(it.get('analysis', {}))
+              and _within_hours(it, hours)]
     if not recent:
         print('지난 24시간 투자 영상 없음 — 종합 생략')
         return
@@ -430,10 +440,13 @@ def main():
         return
 
     history = load_history()
-    seen = {it['video_id'] for it in history['items']}
+    by_id = {it['video_id']: it for it in history['items']}
+    # '완료'= 요약 내용이 있거나 재시도 한도 초과. 실패 영상은 미완료로 두고 다음 런에서 재시도
+    done = {vid for vid, it in by_id.items()
+            if _has_content(it.get('analysis', {})) or it.get('attempts', 0) >= RETRY_MAX}
 
     client = _gemini_client()
-    new_items = []
+    fresh = []   # 이번 런에 새로 요약 성공한 항목만 발송
 
     for ch in channels:
         name = ch['name']
@@ -442,35 +455,42 @@ def main():
             print(f'⚠️  [{name}] 채널 ID 해석 실패 — 건너뜀 (id="{ch["id"]}")')
             continue
         vids = fetch_recent_videos(cid, name, ch.get('include'), ch.get('exclude'))
-        vids = [v for v in vids if v['video_id'] not in seen][:MAX_PER_CHANNEL]
-        print(f'📺 [{name}] 신규 분석 대상 {len(vids)}개')
+        vids = [v for v in vids if v['video_id'] not in done][:MAX_PER_CHANNEL]
+        if vids:
+            print(f'📺 [{name}] 분석 대상 {len(vids)}개 (신규+실패재시도)')
 
         for v in vids:
             print(f'   ▶ {v["title"][:50]}')
             analysis, source = analyze(client, v)
+            prev = by_id.get(v['video_id'])
+            attempts = (prev.get('attempts', 0) if prev else 0) + 1
             v['analysis'] = analysis
             v['source'] = source
+            v['attempts'] = attempts
             v['analyzed_at'] = datetime.now(KST).isoformat()
-            rel = '✓' if analysis.get('relevant', True) else '✗비투자'
-            print(f'      [{source}] 관련성:{rel} 종목:{len(analysis.get("tickers",[]))} 포인트:{len(analysis.get("key_points",[]))}')
-            new_items.append(v)
-            seen.add(v['video_id'])
+            if prev:                       # 이전 실패건 → 제자리 갱신
+                prev.update(v)
+                item = prev
+            else:                          # 신규 → 맨 앞에 추가
+                item = v
+                by_id[v['video_id']] = item
+                history['items'].insert(0, item)
+            ok = _has_content(analysis)
+            tag = '✓' if ok else f'✗빈요약(시도 {attempts}/{RETRY_MAX}, 자막대기)'
+            print(f'      [{source}] {tag} 종목{len(analysis.get("tickers",[]))}')
+            if ok:
+                fresh.append(item)
             time.sleep(1)
 
-    if not new_items:
-        print('\n신규 영상 없음 — 종료')
-        return
-
-    new_items.sort(key=lambda x: x['published'], reverse=True)
-    history['items'] = new_items + history['items']
     save_history(history)
     print(f'\n💾 저장: {RESULT_PATH}  (총 {len(history["items"])}개 보관)')
 
-    relevant = [it for it in new_items if it.get('analysis', {}).get('relevant', True)]
+    relevant = [it for it in fresh if it.get('analysis', {}).get('relevant', True)]
     if not relevant:
-        print('투자 관련 신규 영상 없음 — 텔레그램 생략')
+        print('새로 요약된 투자 영상 없음 — 텔레그램 생략')
         return
-    _send_digest(new_items, date_str)
+    fresh.sort(key=lambda x: x.get('published', ''), reverse=True)
+    _send_digest(fresh, date_str)
 
 
 if __name__ == '__main__':
