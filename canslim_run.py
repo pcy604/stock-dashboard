@@ -186,15 +186,6 @@ def fetch_naver_earnings_table(sym):
     # 통상 연간 4개 + 분기 6개
     n_annual = 4 if len(date_heads) >= 10 else len(date_heads) - 6
 
-    ni_vals = None
-    for row in tb.select('tbody tr'):
-        th = row.select_one('th')
-        if th and '당기순이익' in th.get_text():
-            ni_vals = [td.get_text(strip=True) for td in row.select('td')]
-            break
-    if ni_vals is None:
-        return None
-
     def parse_num(s):
         s = s.replace(',', '').strip()
         if not s or s == '-':
@@ -204,10 +195,54 @@ def fetch_naver_earnings_table(sym):
         except:
             return None
 
-    pairs = list(zip(date_heads, [parse_num(v) for v in ni_vals]))
-    annual    = [(l, v) for l, v in pairs[:n_annual] if '(E)' not in l and v is not None]
-    quarterly = [(l, v) for l, v in pairs[n_annual:] if '(E)' not in l and v is not None]
-    return {'annual': annual, 'quarterly': quarterly}
+    def _row(keyword):
+        for row in tb.select('tbody tr'):
+            th = row.select_one('th')
+            if th and keyword in th.get_text():
+                return [parse_num(td.get_text(strip=True)) for td in row.select('td')]
+        return None
+
+    ni_vals  = _row('당기순이익')
+    rev_vals = _row('매출액')
+    op_vals  = _row('영업이익')
+    if ni_vals is None:
+        return None
+
+    def _split(vals):
+        if vals is None:
+            return [], []
+        pr = list(zip(date_heads, vals))
+        a = [(l, v) for l, v in pr[:n_annual] if '(E)' not in l and v is not None]
+        q = [(l, v) for l, v in pr[n_annual:] if '(E)' not in l and v is not None]
+        return a, q
+
+    ni_a, ni_q = _split(ni_vals)
+    rev_a, rev_q = _split(rev_vals)
+    op_a, op_q = _split(op_vals)
+    return {'annual': ni_a, 'quarterly': ni_q,
+            'rev_annual': rev_a, 'rev_q': rev_q,
+            'op_annual': op_a, 'op_q': op_q}
+
+
+def _latest_yoy(pairs):
+    """연간 pairs(과거→최신) 최신년 YoY %. 전년 음수/0이면 None."""
+    if not pairs or len(pairs) < 2:
+        return None
+    cur = pairs[-1][1]; prev = pairs[-2][1]
+    if cur is None or prev is None or prev <= 0:
+        return None
+    return round((cur / prev - 1) * 100, 1)
+
+
+def check_rev_op(sym):
+    """매출·영업이익 연간 YoY 증감률 (네이버). 반환 (rev_growth, op_growth)."""
+    try:
+        d = _get_naver_table(sym)
+        if not d:
+            return None, None
+        return _latest_yoy(d.get('rev_annual')), _latest_yoy(d.get('op_annual'))
+    except Exception:
+        return None, None
 
 
 _naver_cache = {}
@@ -358,6 +393,7 @@ def scan(pairs):
         c_ok, c_det = check_c(sym)
         a_y1, a_y2  = check_a_yf(sym)
         i_inst      = check_i(sym)
+        rev_g, op_g = check_rev_op(sym)
 
         c_str = f"C:{c_det.get('growth')}%" if c_det and c_det.get('growth') is not None else "C:?"
         a_str = f"A:{a_y1}/{a_y2}%"
@@ -378,6 +414,8 @@ def scan(pairs):
             'a_growth_y1': a_y1,
             'a_growth_y2': a_y2,
             'i_inst_pct':  i_inst,
+            'rev_growth':  rev_g,
+            'op_growth':   op_g,
         })
 
     return hits
@@ -481,6 +519,8 @@ def main():
                 'a_growth_y1':  h.get('a_growth_y1'),
                 'a_growth_y2':  h.get('a_growth_y2'),
                 'i_inst_pct':   h.get('i_inst_pct'),
+                'rev_growth':   h.get('rev_growth'),
+                'op_growth':    h.get('op_growth'),
             })
         except Exception as e:
             print(f"  [직렬화 오류] {h.get('sym','?')}: {e}")
