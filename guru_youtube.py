@@ -369,8 +369,9 @@ def build_telegram(new_items: list, date_str: str, header: str | None = None) ->
     return '\n'.join(lines)
 
 
-def _send_digest(items: list, date_str: str, header: str | None = None):
-    """텍스트 다이제스트 + 종목 차트를 텔레그램으로. (브로드캐스트 채널 설정 시 그쪽)"""
+def _send_digest(items: list, date_str: str, header: str | None = None, chat: str | None = None):
+    """텍스트 다이제스트 + 종목 차트를 텔레그램으로. chat 지정 시 그 채팅으로,
+    아니면 브로드캐스트 채널(설정 시) → 개인 챗 순."""
     if not getattr(config, 'TELEGRAM_ENABLED', False):
         return
     token = config.TELEGRAM_TOKEN
@@ -378,7 +379,7 @@ def _send_digest(items: list, date_str: str, header: str | None = None):
         print('⚠️ TELEGRAM_TOKEN 미설정 — 텔레그램 발송 불가. '
               'GitHub repo Settings→Secrets and variables→Actions 에 TELEGRAM_TOKEN 등록 필요.')
         return
-    tg_chat = getattr(config, 'GURU_BROADCAST_CHAT', '') or config.TELEGRAM_CHAT_ID
+    tg_chat = chat or getattr(config, 'GURU_BROADCAST_CHAT', '') or config.TELEGRAM_CHAT_ID
     msg = build_telegram(items, date_str, header=header)
     ok = True
     for chunk in _html_chunks(msg, 3800):
