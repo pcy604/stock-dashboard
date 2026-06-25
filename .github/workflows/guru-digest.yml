@@ -8,7 +8,7 @@ name: guru-digest
 on:
   workflow_dispatch:          # 수동 실행 버튼
   schedule:
-    - cron: '0 */2 * * *'     # 2시간마다 (UTC). 신규 영상 있을 때만 분석·전송
+    - cron: '37 * * * *'      # 매시간 :37 (정시 혼잡 회피 + 슬롯 누락 보완). 신규 영상 있을 때만 전송
 
 permissions:
   contents: write

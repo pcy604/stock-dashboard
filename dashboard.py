@@ -209,6 +209,15 @@ with tab_guru:
         h, m, s = sec // 3600, (sec % 3600) // 60, sec % 60
         return f"{h}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
 
+    def _guru_pub(iso):
+        if not iso:
+            return ''
+        try:
+            from datetime import timezone as _tz
+            return datetime.fromisoformat(iso.replace('Z', '+00:00')).astimezone(_tz(timedelta(hours=9))).strftime('%Y-%m-%d %H:%M')
+        except Exception:
+            return iso[:16].replace('T', ' ')
+
     with st.expander("➕ 분석 채널 관리 (유튜브 채널 URL로 추가)"):
         import guru_youtube as _gy
         _chfile = Path('data/guru_channels.json')
@@ -291,7 +300,7 @@ with tab_guru:
                 _a = _it.get('analysis', {})
                 _url = _it['url']
                 _tag = "" if _a.get('relevant', True) else "  〔비투자〕"
-                _hdr = f"[{_it['channel']}] {_it['title']}  ·  {_it.get('published', '')[:10]}{_tag}"
+                _hdr = f"[{_it['channel']}] {_it['title']}  ·  {_guru_pub(_it.get('published', '')) or _it.get('published', '')[:10]} KST{_tag}"
                 with st.expander(_hdr):
                     if _a.get('one_liner'):
                         st.markdown(f"**💡 {_a['one_liner']}**")
@@ -2206,7 +2215,9 @@ with tab11:
                 ccy = '₩' if r['market'] == 'KR' else '$'
                 rows.append({
                     '시장': r['market'], '종목': r['name'], '코드': r['sym'],
-                    '신호': ', '.join(r['signals'][:3]),
+                    '종합': r.get('total_score'), '기술': r.get('win_score'),
+                    '기본': r.get('fund_score'),
+                    '신호': ', '.join(r['signals'][:2]),
                     '진입': f"{ccy}{r['entry']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['entry']:,.2f}",
                     '손절': f"{ccy}{r['stop']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['stop']:,.2f}",
                     '목표': f"{ccy}{r['target']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['target']:,.2f}",
@@ -2218,7 +2229,7 @@ with tab11:
                     '진입등급': r.get('entry_grade', ''),
                 })
             _ardf = pd.DataFrame(rows)
-            _show_cols = ['시장','종목','코드','신호','진입','손절','목표','수량','비중%','투입금','최대손실','신뢰계수']
+            _show_cols = ['시장','종목','코드','종합','기술','기본','신호','진입','손절','목표','수량','비중%','투입금','최대손실','신뢰계수']
             if ar_tf == 'daily' and any(r.get('진입등급') for r in rows):
                 _show_cols.append('진입등급')
 
