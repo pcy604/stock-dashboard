@@ -191,9 +191,9 @@ tab_today, tab_screen, tab_guru, tab4, tab7, tab8, tab10 = st.tabs([
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 with tab_screen:
-    st.caption("위닝 스코어 · 주봉 신호 · 월간 모멘텀 · CANSLIM · 주도주 · 종목 프로파일 · 자동추천")
-    tab_win, tab2, tab1, tab3, t_lead, t_prof, tab11 = st.tabs([
-        "🏅 위닝 스코어", "📊 주봉 스크리너", "📈 월간 성과", "🏆 CANSLIM",
+    st.caption("위닝 스코어 · 상승 상위 · 주봉 신호 · 월간 모멘텀 · CANSLIM · 주도주 · 종목 프로파일 · 자동추천")
+    tab_win, t_gain, tab2, tab1, tab3, t_lead, t_prof, tab11 = st.tabs([
+        "🏅 위닝 스코어", "🔥 상승 상위", "📊 주봉 스크리너", "📈 월간 성과", "🏆 CANSLIM",
         "🚀 주도주", "🔬 종목 프로파일", "🎯 자동추천"])
 
 
@@ -469,6 +469,80 @@ with tab_win:
 # ════════════════════════════════════════════════════════════════════
 # 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
 # ════════════════════════════════════════════════════════════════════
+
+# ── 🔥 상승 상위 (기간 상승률 + CANSLIM점수 + 실적증감 + 계절성) ──
+with t_gain:
+    st.caption("기간별 상승 상위 종목 + CANSLIM 점수 · 매출/영업익 증감 · 당월 포함 향후 2개월 계절성 평균.")
+    _perf = load_json(PERF_JSON)
+    if not _perf or not _perf.get('stocks'):
+        st.error("데이터 없음 → `python perf_run.py` 실행 후 새로고침")
+    else:
+        _gc1, _gc2, _gc3 = st.columns(3)
+        _gper = _gc1.selectbox("상승률 기간", ["4주", "1주"], key="gain_per")
+        _gmkt = _gc2.selectbox("시장", ["전체", "KR", "US"], key="gain_mkt")
+        _gn = _gc3.slider("표시 종목수", 10, 60, 30, key="gain_n")
+        _retkey = 'ret_4w' if _gper == "4주" else 'ret_1w'
+
+        # CANSLIM 점수 + 실적증감 맵 (KR)
+        _canj = load_json(CANSLIM_JSON) or {}
+        _mok = _canj.get('market_ok', True)
+        _canmap = {}
+        for s in _canj.get('stocks', []):
+            n = s.get('n_dist_pct'); rs = s.get('rs_pct', 0)
+            cg = s.get('c_growth_pct'); a1 = s.get('a_growth_y1'); ii = s.get('i_inst_pct')
+            vol = s.get('s_vol_ratio'); bd = s.get('s_body_pct'); bull = s.get('s_bull')
+            score = sum([bool(_mok), (n is not None and n >= -5), rs >= 70,
+                         (vol is not None and vol >= 1.5 and bd is not None and bd >= 40 and bool(bull)),
+                         (cg == '흑자전환' or (isinstance(cg, (int, float)) and cg >= 20)),
+                         (isinstance(a1, (int, float)) and a1 >= 20),
+                         (isinstance(ii, (int, float)) and ii > 0)])
+            _canmap[s['sym']] = {'score': score, 'rev': s.get('rev_growth'), 'op': s.get('op_growth')}
+
+        # 계절성: 당월 + 익월 평균
+        from datetime import datetime as _gdt
+        _cmo = _gdt.now().month; _nmo = _cmo % 12 + 1
+        _seasj = load_json(Path('results/seasonality.json')) or {}
+        _seasmap = {}
+        for s in _seasj.get('stocks', []):
+            m = s.get('months', {})
+            vals = [m[str(x)]['ret'] for x in (_cmo, _nmo) if m.get(str(x))]
+            if vals:
+                _seasmap[s['sym']] = round(sum(vals) / len(vals), 1)
+
+        _grows = []
+        for s in _perf['stocks']:
+            if _gmkt != "전체" and s['market'] != _gmkt:
+                continue
+            ret = s.get(_retkey)
+            if ret is None:
+                continue
+            cm = _canmap.get(s['sym'], {})
+            _grows.append({
+                '시장': s['market'], '종목': s['name'], '코드': s['sym'],
+                '시총': fmt_cap(s.get('marcap'), s['market']),
+                'CANSLIM': f"{cm['score']}/7" if cm.get('score') is not None else '-',
+                '매출증감': f"{cm['rev']:+.0f}%" if isinstance(cm.get('rev'), (int, float)) else '-',
+                '영업익증감': f"{cm['op']:+.0f}%" if isinstance(cm.get('op'), (int, float)) else '-',
+                f'{_gper}상승': ret,
+                '향후2개월계절성': _seasmap.get(s['sym']),
+            })
+        _grows.sort(key=lambda r: -(r[f'{_gper}상승'] or -999))
+        _grows = _grows[:_gn]
+
+        st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 ({_cmo}·{_nmo}월 계절성 동반)")
+        _gdf = pd.DataFrame(_grows)
+        def _cg2(v):
+            try: return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#dc2626'
+            except: return ''
+        _gsub = [c for c in [f'{_gper}상승', '향후2개월계절성', '매출증감', '영업익증감'] if c in _gdf.columns]
+        st.dataframe(
+            _gdf.style.map(_cg2, subset=_gsub)
+                .format({f'{_gper}상승': '{:+.1f}%',
+                         '향후2개월계절성': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
+            use_container_width=True, hide_index=True, height=min(36 + 35 * len(_gdf), 720))
+        st.caption("CANSLIM·매출/영업익 증감은 KR 한정(네이버). 계절성은 과거 통계 — 보조 지표로만. "
+                   "⚠️ 상승률 상위 = '이미 오른' 종목. 추격 주의, 손익비·가드레일 확인.")
+
 
 # ── 주도주 (섹터/전체 상대강도) ──
 with t_lead:
