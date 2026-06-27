@@ -340,54 +340,86 @@ with tab_guru:
 # 탭: 오늘의 종합 — 한 페이지 요약
 # ════════════════════════════════════════════════════════════════════
 with tab_today:
-    st.header("📋 오늘의 종합")
     _tmkt = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="today_mkt")
-
     _sum_paths = [SCREENER_JSON, CANSLIM_JSON, PERF_JSON]
-    _sum_mtimes = [m for m in (file_mtime(p) for p in _sum_paths) if m]
-    _latest_update = max(_sum_mtimes) if _sum_mtimes else "데이터 없음"
-    st.caption(f"🕐 마지막 업데이트: **{_latest_update}**  ·  자동 갱신 매일 06:00  ·  수동 갱신: run_update.bat")
+    _latest_update = max([m for m in (file_mtime(p) for p in _sum_paths) if m], default="데이터 없음")
+    st.caption(f"🕐 마지막 업데이트: {_latest_update} · 자동 갱신 매일 06:00")
 
     _s_scr  = load_json(SCREENER_JSON) or {}
     _s_can  = load_json(CANSLIM_JSON) or {}
-
-    # 매크로 신호 (best-effort, 네트워크 실패 시 '—')
     try:
-        _fed = fetch_fred('FEDFUNDS', 1)
-        _fed_rate = _fed[-1][1] if _fed else None
+        from sectors import get_sector_map as _gsm
+        _secmap = _gsm()
+    except Exception:
+        _secmap = {}
+
+    # 매크로 신호 + 현금 권고
+    try:
+        _fed = fetch_fred('FEDFUNDS', 1); _fed_rate = _fed[-1][1] if _fed else None
         _m2 = fetch_fred('M2SL', 14)
         _m2_yoy = round((_m2[-1][1] / _m2[-13][1] - 1) * 100, 1) if len(_m2) >= 13 else None
-        _macro_sig = compute_macro_signal(_fed_rate, _m2_yoy, fetch_spx_yoy())[0]
+        _macro_sig, _gcmin, _gcmax, _, _ = compute_macro_signal(_fed_rate, _m2_yoy, fetch_spx_yoy())
     except Exception:
-        _macro_sig = "—"
+        _macro_sig, _gcmin, _gcmax = "—", 25, 40
 
     _scr_all = _s_scr.get('stocks') or []
     _scr_f = [s for s in _scr_all if _tmkt == "전체" or s.get('market') == _tmkt]
-    _can_stocks = [s for s in (_s_can.get('stocks') or [])
-                   if _tmkt != "US"]  # CANSLIM은 KR 전용
     _mc1, _mc2, _mc3, _mc4 = st.columns(4)
     _mc1.metric("시장 방향", _s_can.get('market_dir', '—'))
     _mc2.metric("매크로 신호", _macro_sig)
-    _mc3.metric("주봉 신호 종목", f"{len(_scr_f)}개", help=f"기준일 {_s_scr.get('date','')}")
-    _mc4.metric("CANSLIM 통과", f"{len(_can_stocks)}개" if _can_stocks else "—")
+    _mc3.metric("주봉 신호 종목", f"{len(_scr_f)}개")
+    _mc4.metric("권고 현금", f"{_gcmin}~{_gcmax}%", help="매크로 위험도 기반 현금 비중 권고")
 
-    # 주봉 신호 상위 (신호 많은 순) — 한눈에 후보
+    # ── 🔥 상승 상위 (기간 선택) ──
+    st.markdown("##### 🔥 상승 상위")
+    _retj = load_json(Path('results/returns.json')) or {}
+    _p1map = {s['sym']: s.get('ret_1w') for s in (load_json(PERF_JSON) or {}).get('stocks', [])}
+    _tper = st.radio("기간", ["1주", "1개월", "3개월", "6개월", "YTD"], horizontal=True, key="today_per")
+    _tk = {'1주': None, '1개월': 'ret_1m', '3개월': 'ret_3m', '6개월': 'ret_6m', 'YTD': 'ret_ytd'}[_tper]
+    _gr = []
+    for s in _retj.get('stocks', []):
+        if _tmkt != "전체" and s['market'] != _tmkt:
+            continue
+        v = _p1map.get(s['sym']) if _tper == "1주" else s.get(_tk)
+        if v is None:
+            continue
+        _gr.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
+                    '시총': fmt_cap(s.get('marcap'), s['market']), f'{_tper}상승%': v})
+    _gr.sort(key=lambda r: -r[f'{_tper}상승%'])
+    _gr = _gr[:10]
+    if _gr:
+        _gd = pd.DataFrame(_gr); _gd.insert(0, 'No', range(1, len(_gd) + 1))
+        st.dataframe(_gd.style.map(
+            lambda v: 'color:#16a34a;font-weight:bold' if isinstance(v, (int, float)) and v >= 0 else ('color:#dc2626' if isinstance(v, (int, float)) else ''),
+            subset=[f'{_tper}상승%']).format({f'{_tper}상승%': '{:+.1f}%'}),
+            use_container_width=True, hide_index=True, height=36 + 35 * len(_gd))
+
+    # ── 🎯 주봉 신호 포착 (신호 매트릭스) ──
+    st.markdown("##### 🎯 주봉 신호 포착 (신호 많은 순)")
+    _SIGM = [('sig_52w', '52주'), ('sig_vol', '거래량'), ('sig_maconv', '이평수렴'),
+             ('sig_cup', '컵핸들'), ('sig_ma5', '5주'), ('sig_rsimacd', 'RSI')]
     try:
-        _scr_stocks = _scr_f
-        if _scr_stocks:
-            _df_sum = pd.DataFrame(_scr_stocks)
-            _df_sum = _df_sum.sort_values('total_signals', ascending=False).head(12)
-            if 'marcap' in _df_sum.columns:
-                _df_sum['시총'] = _df_sum.apply(lambda r: fmt_cap(r.get('marcap'), r.get('market')), axis=1)
-            _cols = [c for c in ['market', 'name', 'sym', '시총', 'total_signals',
-                                 'pct_change', 'dist_52w', 'sector'] if c in _df_sum.columns]
-            _show = _df_sum[_cols].rename(columns={
-                'market': '시장', 'name': '종목', 'sym': '코드', 'total_signals': '신호수',
-                'pct_change': '등락%', 'dist_52w': '52주고가대비%', 'sector': '섹터'})
-            st.markdown("##### 🔥 주봉 신호 상위 (신호 많은 순) — 자세한 건 다른 탭에서")
-            st.dataframe(_show, use_container_width=True, hide_index=True)
+        _top = sorted(_scr_f, key=lambda s: -s.get('total_signals', 0))[:15]
+        _rows = []
+        for s in _top:
+            _sec = _secmap.get(s['sym']) or _secmap.get(str(s['sym']).zfill(6)) or s.get('sector') or '-'
+            row = {'시장': s['market'], '종목': s['name'], '코드': s['sym'],
+                   '시총': fmt_cap(s.get('marcap'), s['market']), '섹터': str(_sec)[:10]}
+            for k, lab in _SIGM:
+                row[lab] = '✓' if s.get(k) else ''
+            row['신호수'] = s.get('total_signals', 0)
+            row['등락%'] = s.get('pct_change')
+            _rows.append(row)
+        if _rows:
+            _md = pd.DataFrame(_rows); _md.insert(0, 'No', range(1, len(_md) + 1))
+            def _c_sig(v):
+                return 'color:#16a34a;font-weight:bold;text-align:center' if v == '✓' else ''
+            st.dataframe(
+                _md.style.map(_c_sig, subset=[lab for _, lab in _SIGM])
+                    .format({'등락%': lambda v: f'{v:+.1f}%' if v is not None else '-'}),
+                use_container_width=True, hide_index=True, height=36 + 35 * len(_md))
     except Exception as _e:
-        st.caption(f"(요약 표 생략: {_e})")
+        st.caption(f"(신호 표 생략: {_e})")
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -2147,34 +2179,29 @@ with tab10:
 """, unsafe_allow_html=True)
 
 
-# ── 사이드바 하단 ─────────────────────────────────────────────────────
-st.sidebar.divider()
-_KEY_FILE = Path('data/.finnhub_key')
-if 'fh_key' not in st.session_state:
-    try:
-        if _KEY_FILE.exists():
-            st.session_state['fh_key'] = _KEY_FILE.read_text().strip()
-        else:
+# ── 화면 하단 설정 (사이드바 제거 → 페이지 맨 아래) ───────────────────
+st.divider()
+with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", expanded=False):
+    _KEY_FILE = Path('data/.finnhub_key')
+    if 'fh_key' not in st.session_state:
+        try:
+            st.session_state['fh_key'] = _KEY_FILE.read_text().strip() if _KEY_FILE.exists() else ''
+        except Exception:
             st.session_state['fh_key'] = ''
-    except:
-        st.session_state['fh_key'] = ''
-
-st.sidebar.subheader("🔑 Finnhub API 키")
-fh_input = st.sidebar.text_input("키 입력 (선택)", type="password",
-    value=st.session_state.get('fh_key',''),
-    placeholder="finnhub.io 무료 발급",
-    key="fh_key_input")
-if fh_input and fh_input != st.session_state.get('fh_key',''):
-    st.session_state['fh_key'] = fh_input
-    try:
-        _KEY_FILE.parent.mkdir(exist_ok=True)
-        _KEY_FILE.write_text(fh_input)
-    except: pass
-st.sidebar.caption("입력 시 종목 분석 탭에서\nPER·EPS·내부자거래 추가 표시")
-
-st.sidebar.divider()
-if st.sidebar.button("🔄 전체 새로고침"):
-    st.cache_data.clear()
-    st.rerun()
-
-st.sidebar.caption("perf_run.py → 월간성과\nweekly_run.py → 주봉스크리너\ncanslim_run.py → CANSLIM\nturnaround_run.py → 흑자전환")
+    _set1, _set2 = st.columns([2, 1])
+    with _set1:
+        fh_input = st.text_input("Finnhub API 키 (선택 · finnhub.io 무료 · 종목분석 PER·내부자거래용)",
+                                 type="password", value=st.session_state.get('fh_key', ''),
+                                 key="fh_key_input")
+        if fh_input and fh_input != st.session_state.get('fh_key', ''):
+            st.session_state['fh_key'] = fh_input
+            try:
+                _KEY_FILE.parent.mkdir(exist_ok=True); _KEY_FILE.write_text(fh_input)
+            except Exception:
+                pass
+    with _set2:
+        st.write("")
+        if st.button("🔄 전체 새로고침", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
+    st.caption("데이터 갱신은 매일 06:00 자동(GitHub Actions). 수동: weekly_run·perf_run·canslim_run·screen_precompute")
