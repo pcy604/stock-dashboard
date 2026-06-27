@@ -341,9 +341,6 @@ with tab_guru:
 # ════════════════════════════════════════════════════════════════════
 with tab_today:
     _tmkt = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="today_mkt")
-    _sum_paths = [SCREENER_JSON, CANSLIM_JSON, PERF_JSON]
-    _latest_update = max([m for m in (file_mtime(p) for p in _sum_paths) if m], default="데이터 없음")
-    st.caption(f"🕐 마지막 업데이트: {_latest_update} · 자동 갱신 매일 06:00")
 
     _s_scr  = load_json(SCREENER_JSON) or {}
     _s_can  = load_json(CANSLIM_JSON) or {}
@@ -370,56 +367,43 @@ with tab_today:
     _mc3.metric("주봉 신호 종목", f"{len(_scr_f)}개")
     _mc4.metric("권고 현금", f"{_gcmin}~{_gcmax}%", help="매크로 위험도 기반 현금 비중 권고")
 
-    # ── 🔥 상승 상위 (기간 선택) ──
-    st.markdown("##### 🔥 상승 상위")
-    _retj = load_json(Path('results/returns.json')) or {}
+    # ── 🎯 신호 + 상승 종합 (신호 종목을 기간 상승률순) ──
+    st.markdown("##### 🎯 신호 종목 — 상승률 순")
+    _retmap = {s['sym']: s for s in (load_json(Path('results/returns.json')) or {}).get('stocks', [])}
     _p1map = {s['sym']: s.get('ret_1w') for s in (load_json(PERF_JSON) or {}).get('stocks', [])}
-    _tper = st.radio("기간", ["1주", "1개월", "3개월", "6개월", "YTD"], horizontal=True, key="today_per")
-    _tk = {'1주': None, '1개월': 'ret_1m', '3개월': 'ret_3m', '6개월': 'ret_6m', 'YTD': 'ret_ytd'}[_tper]
-    _gr = []
-    for s in _retj.get('stocks', []):
-        if _tmkt != "전체" and s['market'] != _tmkt:
-            continue
-        v = _p1map.get(s['sym']) if _tper == "1주" else s.get(_tk)
-        if v is None:
-            continue
-        _gr.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
-                    '시총': fmt_cap(s.get('marcap'), s['market']), f'{_tper}상승%': v})
-    _gr.sort(key=lambda r: -r[f'{_tper}상승%'])
-    _gr = _gr[:10]
-    if _gr:
-        _gd = pd.DataFrame(_gr); _gd.insert(0, 'No', range(1, len(_gd) + 1))
-        st.dataframe(_gd.style.map(
-            lambda v: 'color:#16a34a;font-weight:bold' if isinstance(v, (int, float)) and v >= 0 else ('color:#dc2626' if isinstance(v, (int, float)) else ''),
-            subset=[f'{_tper}상승%']).format({f'{_tper}상승%': '{:+.1f}%'}),
-            use_container_width=True, hide_index=True, height=36 + 35 * len(_gd))
-
-    # ── 🎯 주봉 신호 포착 (신호 매트릭스) ──
-    st.markdown("##### 🎯 주봉 신호 포착 (신호 많은 순)")
+    _PER = {'1주': None, '1개월': 'ret_1m', '3개월': 'ret_3m', '6개월': 'ret_6m', '1년': 'ret_12m', 'YTD': 'ret_ytd'}
+    _tc1, _tc2 = st.columns([3, 1])
+    _tper = _tc1.radio("기간", list(_PER.keys()), index=1, horizontal=True, key="today_per")
+    _tn = _tc2.slider("표시 수", 10, 60, 20, key="today_n")
+    _tk = _PER[_tper]
     _SIGM = [('sig_52w', '52주'), ('sig_vol', '거래량'), ('sig_maconv', '이평수렴'),
              ('sig_cup', '컵핸들'), ('sig_ma5', '5주'), ('sig_rsimacd', 'RSI')]
     try:
-        _top = sorted(_scr_f, key=lambda s: -s.get('total_signals', 0))[:15]
         _rows = []
-        for s in _top:
-            _sec = _secmap.get(s['sym']) or _secmap.get(str(s['sym']).zfill(6)) or s.get('sector') or '-'
-            row = {'시장': s['market'], '종목': s['name'], '코드': s['sym'],
+        for s in _scr_f:
+            sym = s['sym']
+            ret = _p1map.get(sym) if _tper == "1주" else (_retmap.get(sym, {}) or {}).get(_tk)
+            _sec = _secmap.get(sym) or _secmap.get(str(sym).zfill(6)) or s.get('sector') or '-'
+            row = {'시장': s['market'], '종목': s['name'], '코드': sym,
                    '시총': fmt_cap(s.get('marcap'), s['market']), '섹터': str(_sec)[:10]}
             for k, lab in _SIGM:
                 row[lab] = '✓' if s.get(k) else ''
             row['신호수'] = s.get('total_signals', 0)
-            row['등락%'] = s.get('pct_change')
+            row[f'{_tper}상승%'] = ret
             _rows.append(row)
+        _rows.sort(key=lambda r: (r[f'{_tper}상승%'] is None, -(r[f'{_tper}상승%'] or 0)))
+        _rows = _rows[:_tn]
         if _rows:
             _md = pd.DataFrame(_rows); _md.insert(0, 'No', range(1, len(_md) + 1))
             def _c_sig(v):
-                return 'color:#16a34a;font-weight:bold;text-align:center' if v == '✓' else ''
+                return 'color:#16a34a;font-weight:bold' if v == '✓' else ''
+            st.caption(f"총 {len(_scr_f)}개 신호 종목 중 상위 {len(_md)} ({_tper} 상승률순)")
             st.dataframe(
                 _md.style.map(_c_sig, subset=[lab for _, lab in _SIGM])
-                    .format({'등락%': lambda v: f'{v:+.1f}%' if v is not None else '-'}),
+                    .format({f'{_tper}상승%': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
                 use_container_width=True, hide_index=True, height=36 + 35 * len(_md))
     except Exception as _e:
-        st.caption(f"(신호 표 생략: {_e})")
+        st.caption(f"(표 생략: {_e})")
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -2205,3 +2189,9 @@ with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", exp
             st.cache_data.clear()
             st.rerun()
     st.caption("데이터 갱신은 매일 06:00 자동(GitHub Actions). 수동: weekly_run·perf_run·canslim_run·screen_precompute")
+
+# ── 페이지 최하단: 데이터 출처·업데이트 시각 ──
+_foot_upd = max([m for m in (file_mtime(p) for p in [SCREENER_JSON, CANSLIM_JSON, PERF_JSON,
+                 Path('results/returns.json'), Path('results/seasonality.json')]) if m], default="—")
+st.caption(f"📅 마지막 데이터 업데이트: {_foot_upd} (KST)  ·  자동 갱신 매일 06:00  ·  "
+           f"출처: FinanceDataReader(가격)·네이버금융(실적)·FRED(매크로)·KRX/S&P500(섹터)")
