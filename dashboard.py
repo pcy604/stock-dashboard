@@ -191,9 +191,10 @@ tab_today, tab_screen, tab_guru, tab4, tab7, tab8, tab10 = st.tabs([
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 with tab_screen:
-    st.caption("위닝 스코어 · 상승 상위(신호 통합) · 월간 모멘텀 · CANSLIM · 주도주 · 종목 프로파일 · 자동추천")
-    tab_win, t_gain, tab1, tab3, t_lead, t_prof, tab11 = st.tabs([
-        "🏅 위닝 스코어", "🔥 상승 상위", "📈 월간 성과", "🏆 CANSLIM",
+    _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
+    st.caption("위닝 스코어 · 상승 상위(신호 통합) · CANSLIM · 주도주 · 종목 프로파일 · 자동추천 — 시장 필터는 위 하나로 전 서브탭 공통")
+    tab_win, t_gain, tab3, t_lead, t_prof, tab11 = st.tabs([
+        "🏅 위닝 스코어", "🔥 상승 상위", "🏆 CANSLIM",
         "🚀 주도주", "🔬 종목 프로파일", "🎯 자동추천"])
 
 
@@ -399,8 +400,8 @@ with tab_win:
 
     try:
         import winning_score as _ws
-        _wc1, _wc2, _wc3 = st.columns([1, 1, 2])
-        _win_mkt = _wc1.selectbox("시장", ["전체", "KR", "US"], key="win_mkt")
+        _win_mkt = _GMKT
+        _wc2, _wc3 = st.columns([1, 2])
         _win_grade = _wc2.selectbox("최소 등급", ["전체", "B이상", "A이상", "S만"], key="win_grade")
         _win_n = _wc3.slider("표시 종목수", 10, 60, 30, key="win_n")
 
@@ -489,9 +490,9 @@ with t_gain:
     else:
         _PERIODS = {'1주': ('perf', 'ret_1w'), '1개월': ('ret', 'ret_1m'), '3개월': ('ret', 'ret_3m'),
                     '6개월': ('ret', 'ret_6m'), '1년': ('ret', 'ret_12m'), 'YTD': ('ret', 'ret_ytd')}
-        _gc1, _gc2, _gc3, _gc4 = st.columns([1.2, 1, 1, 1])
+        _gmkt = _GMKT
+        _gc1, _gc3, _gc4 = st.columns([1.2, 1, 1])
         _gper = _gc1.selectbox("상승률 기간", list(_PERIODS.keys()), index=1, key="gain_per")
-        _gmkt = _gc2.selectbox("시장", ["전체", "KR", "US"], key="gain_mkt")
         _gsig = _gc3.checkbox("신호 있는 종목만", value=False, key="gain_sigonly")
         _gn = _gc4.slider("표시 종목수", 10, 60, 30, key="gain_n")
         _src, _retkey = _PERIODS[_gper]
@@ -573,7 +574,7 @@ with t_gain:
 # ── 주도주 (섹터/전체 상대강도) ──
 with t_lead:
     st.caption("오닐: 주도주는 주도 섹터와 함께 온다. 신고가에 가장 붙은 + 신호 많은 = 강한 주도주.")
-    _lm = st.selectbox("시장", ["전체", "KR", "US"], key="lead_mkt")
+    _lm = _GMKT
     try:
         import leaders as _ld
         _lr = _ld.find_leaders(_lm)
@@ -615,10 +616,10 @@ with t_prof:
             st.caption(f"표본 기간: {_seas.get('history', '5년')}  ·  더 깊게: "
                        "`python screen_precompute.py --start 2008-01-01` (수십 년 표본)")
             from datetime import datetime as _dtt
-            _c1, _c2, _c3 = st.columns(3)
+            _smkt = _GMKT
+            _c1, _c3 = st.columns(2)
             _mo = _c1.selectbox("월 선택", list(range(1, 13)),
                                 index=_dtt.now().month - 1, format_func=lambda x: f"{x}월", key="seas_mo")
-            _smkt = _c2.selectbox("시장", ["전체", "KR", "US"], key="seas_mkt")
             _minwr = _c3.slider("최소 승률 %", 50, 90, 65, key="seas_wr")
             _rows = []
             for s in _seas['stocks']:
@@ -649,9 +650,8 @@ with t_prof:
         if not _mdd or not _mdd.get('stocks'):
             st.warning("MDD 데이터 없음 → `python screen_precompute.py` 실행 후 새로고침")
         else:
-            _m1, _m2 = st.columns(2)
-            _mmkt = _m1.selectbox("시장", ["전체", "KR", "US"], key="mdd_mkt")
-            _ddrange = _m2.slider("현재 고점대비 낙폭 범위 %", -90, 0, (-60, -25), key="mdd_range")
+            _mmkt = _GMKT
+            _ddrange = st.slider("현재 고점대비 낙폭 범위 %", -90, 0, (-60, -25), key="mdd_range")
             _rows = []
             for s in _mdd['stocks']:
                 if _mmkt != "전체" and s['market'] != _mmkt:
@@ -682,138 +682,6 @@ with t_prof:
                 st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라 실적 개선·턴어라운드 확인 후 진입.")
 
 
-# ════════════════════════════════════════════════════════════════════
-# 탭1: 월간 성과 분석
-# ════════════════════════════════════════════════════════════════════
-with tab1:
-    st.header("📈 월간 성과 분석 — 상승률 순위")
-    update_badge(PERF_JSON)
-    perf = load_json(PERF_JSON)
-
-    if perf is None:
-        st.error("데이터 없음 → `python perf_run.py` 실행 후 새로고침")
-    else:
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("기준일", perf['date'])
-        col2.metric("분석 종목", f"{perf['total']:,}개")
-        stocks = perf['stocks']
-        col3.metric("🇰🇷 KR", f"{sum(1 for s in stocks if s['market']=='KR'):,}개")
-        col4.metric("🇺🇸 US", f"{sum(1 for s in stocks if s['market']=='US'):,}개")
-
-        st.divider()
-
-        with st.sidebar:
-            st.header("📈 월간성과 필터")
-            mkt1 = st.radio("시장", ["전체","KR","US"], key="perf_mkt")
-            min_ret = st.slider("최소 4주 수익률(%)", -50, 100, -100, key="perf_minret")
-            max_ret = st.slider("최대 4주 수익률(%)", -50, 200, 200, key="perf_maxret")
-            st.markdown("**4주 전 신호 있었던 종목만**")
-            fp52w    = st.checkbox("52주신고가", key="fp52w")
-            fpvol    = st.checkbox("거래량폭발",  key="fpvol")
-            fpmaconv = st.checkbox("이평수렴",    key="fpmaconv")
-            fpcup    = st.checkbox("컵위드핸들",  key="fpcup")
-            st.markdown("**현재 신호 있는 종목만**")
-            fn52w    = st.checkbox("52주신고가",  key="fn52w")
-            fnmaconv = st.checkbox("이평수렴",    key="fnmaconv")
-            sort_p   = st.selectbox("정렬", ["4주수익률↓","1주수익률↓","시총↓"], key="perf_sort")
-
-        rows = []
-        for s in stocks:
-            rows.append({
-                '시장':      s['market'],
-                '종목명':    s['name'],
-                '코드':      s['sym'],
-                '시총':      fmt_cap(s['marcap'], s['market']),
-                '_marcap':   s['marcap'],
-                '4주수익률': s['ret_4w'],
-                '1주수익률': s['ret_1w'],
-                '4주전신호': ', '.join(s['sigs_past']) if s['sigs_past'] else '없음',
-                '현재신호':  ', '.join(s['sigs_now'])  if s['sigs_now']  else '없음',
-                '4w_52주': tag(s.get('past_sig_52w')),
-                '4w_거래량':tag(s.get('past_sig_vol')),
-                '4w_이평':  tag(s.get('past_sig_maconv')),
-                '4w_컵':    tag(s.get('past_sig_cup')),
-                '4w_라이딩':tag(s.get('past_sig_ma5')),
-                '4w_RSI':   tag(s.get('past_sig_rsimacd')),
-                '현_52주':  tag(s.get('now_sig_52w')),
-                '현_이평':  tag(s.get('now_sig_maconv')),
-                '현_컵':    tag(s.get('now_sig_cup')),
-                '_p52w':    s.get('past_sig_52w', False),
-                '_pvol':    s.get('past_sig_vol',  False),
-                '_pmaconv': s.get('past_sig_maconv',False),
-                '_pcup':    s.get('past_sig_cup',  False),
-                '_n52w':    s.get('now_sig_52w',   False),
-                '_nmaconv': s.get('now_sig_maconv', False),
-            })
-
-        df1 = pd.DataFrame(rows)
-
-        if mkt1 != "전체":
-            df1 = df1[df1['시장'] == mkt1]
-        df1 = df1[(df1['4주수익률'] >= min_ret) & (df1['4주수익률'] <= max_ret)]
-        if fp52w:    df1 = df1[df1['_p52w']]
-        if fpvol:    df1 = df1[df1['_pvol']]
-        if fpmaconv: df1 = df1[df1['_pmaconv']]
-        if fpcup:    df1 = df1[df1['_pcup']]
-        if fn52w:    df1 = df1[df1['_n52w']]
-        if fnmaconv: df1 = df1[df1['_nmaconv']]
-
-        if sort_p == "4주수익률↓":   df1 = df1.sort_values('4주수익률', ascending=False)
-        elif sort_p == "1주수익률↓": df1 = df1.sort_values('1주수익률', ascending=False)
-        elif sort_p == "시총↓":       df1 = df1.sort_values('_marcap',   ascending=False)
-        df1 = df1.reset_index(drop=True)
-        df1.index += 1
-
-        st.subheader(f"총 {len(df1):,}개 종목")
-
-        show_detail = st.toggle("신호 상세 보기 (4주전 / 현재)", value=False)
-
-        if show_detail:
-            disp_cols = ['시장','종목명','코드','시총','4주수익률','1주수익률',
-                         '4w_52주','4w_거래량','4w_이평','4w_컵','4w_라이딩','4w_RSI',
-                         '현_52주','현_이평','현_컵']
-        else:
-            disp_cols = ['시장','종목명','코드','시총','4주수익률','1주수익률','4주전신호','현재신호']
-
-        sig_display = ['4w_52주','4w_거래량','4w_이평','4w_컵','4w_라이딩','4w_RSI','현_52주','현_이평','현_컵']
-
-        styled1 = df1[disp_cols].style \
-            .map(color_ret, subset=['4주수익률','1주수익률']) \
-            .format({'4주수익률': '{:+.1f}%', '1주수익률': '{:+.1f}%'})
-
-        if show_detail:
-            existing_sig_cols = [c for c in sig_display if c in disp_cols]
-            if existing_sig_cols:
-                styled1 = styled1.map(color_sig, subset=existing_sig_cols)
-
-        st.dataframe(styled1, use_container_width=True, height=420)
-
-        st.divider()
-        st.subheader("📊 4주 전 신호별 평균 수익률")
-        df_all = pd.DataFrame(rows)
-        if mkt1 != "전체":
-            df_all = df_all[df_all['시장'] == mkt1]
-
-        sig_perf = []
-        sig_keys = [('_p52w','52주신고가'),('_pvol','거래량폭발'),('_pmaconv','이평수렴'),
-                    ('_pcup','컵위드핸들')]
-        for key, label in sig_keys:
-            sub = df_all[df_all[key] == True]
-            if len(sub) >= 5:
-                sig_perf.append({
-                    '신호': label,
-                    '종목수': len(sub),
-                    '평균4주수익률': round(sub['4주수익률'].mean(), 2),
-                    '중앙값': round(sub['4주수익률'].median(), 2),
-                    '승률(>0%)': f"{(sub['4주수익률'] > 0).mean()*100:.1f}%",
-                })
-        if sig_perf:
-            sp_df = pd.DataFrame(sig_perf).sort_values('평균4주수익률', ascending=False)
-            st.dataframe(sp_df.style.map(color_ret, subset=['평균4주수익률','중앙값']),
-                         use_container_width=True, hide_index=True)
-            st.bar_chart(sp_df.set_index('신호')['평균4주수익률'])
-
-
 
 # ════════════════════════════════════════════════════════════════════
 # 탭3: CANSLIM (슬라이더 실시간 조정)
@@ -836,10 +704,7 @@ with tab3:
 
         m_ok = canslim['market_ok']
 
-        with st.sidebar:
-            st.divider()
-            st.header("🏆 CANSLIM 기준 조정")
-            st.caption("슬라이더로 각 항목 기준을 실시간으로 바꿔보세요")
+        with st.expander("⚙️ CANSLIM 기준 조정 (슬라이더로 실시간)", expanded=False):
             th_N    = st.slider("N  52주 신고가 허용거리 (%)", -30, 0, -5, key="th_N",
                                 help="예: -5 = 신고가 대비 5% 이내")
             th_S    = st.slider("S  거래량 배수 (60일 평균 대비)", 1.0, 4.0, 1.5, 0.1, key="th_S")
@@ -2067,16 +1932,15 @@ with tab11:
     st.header("🎯 자동추천 — 일·주·월 + 손익비 사이징")
     st.caption("신호 → 종목 → 얼마나 살까 → 어디서 자를까. 손익비(R:R)와 1회 리스크를 정하면 수량·손절·목표가 자동 계산.")
 
-    cc1, cc2, cc3, cc4 = st.columns([1.2, 1, 1, 1])
+    cc1, cc2, cc3 = st.columns([1.4, 1, 1])
     with cc1:
         ar_tf_label = st.radio("타임프레임", ["주간", "월간", "일간"], horizontal=True, key="ar_tf")
     ar_tf = {"일간": "daily", "주간": "weekly", "월간": "monthly"}[ar_tf_label]
     with cc2:
         ar_cap = st.number_input("투자 자본(원)", min_value=0, value=10_000_000,
                                  step=1_000_000, key="ar_cap")
+    ar_mkt = _GMKT
     with cc3:
-        ar_mkt = st.selectbox("시장", ["전체", "KR", "US"], key="ar_mkt")
-    with cc4:
         ar_n = st.slider("최대 종목수", 3, 20, 10, key="ar_n")
 
     _tf_def = {"daily": (5, 2.0), "weekly": (7, 2.0), "monthly": (10, 2.5)}[ar_tf]
