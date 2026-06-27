@@ -191,9 +191,9 @@ tab_today, tab_screen, tab_guru, tab4, tab7, tab8, tab10 = st.tabs([
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 with tab_screen:
-    st.caption("위닝 스코어 · 상승 상위 · 주봉 신호 · 월간 모멘텀 · CANSLIM · 주도주 · 종목 프로파일 · 자동추천")
-    tab_win, t_gain, tab2, tab1, tab3, t_lead, t_prof, tab11 = st.tabs([
-        "🏅 위닝 스코어", "🔥 상승 상위", "📊 주봉 스크리너", "📈 월간 성과", "🏆 CANSLIM",
+    st.caption("위닝 스코어 · 상승 상위(신호 통합) · 월간 모멘텀 · CANSLIM · 주도주 · 종목 프로파일 · 자동추천")
+    tab_win, t_gain, tab1, tab3, t_lead, t_prof, tab11 = st.tabs([
+        "🏅 위닝 스코어", "🔥 상승 상위", "📈 월간 성과", "🏆 CANSLIM",
         "🚀 주도주", "🔬 종목 프로파일", "🎯 자동추천"])
 
 
@@ -479,20 +479,32 @@ with tab_win:
 # 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
 # ════════════════════════════════════════════════════════════════════
 
-# ── 🔥 상승 상위 (기간 상승률 + CANSLIM점수 + 실적증감 + 계절성) ──
+# ── 🔥 상승 상위 (기간 상승률 + 신호 + CANSLIM + 실적증감 + 계절성) — 주봉 스크리너 통합 ──
 with t_gain:
-    st.caption("기간별 상승 상위 종목 + CANSLIM 점수 · 매출/영업익 증감 · 당월 포함 향후 2개월 계절성 평균.")
-    _perf = load_json(PERF_JSON)
-    if not _perf or not _perf.get('stocks'):
-        st.error("데이터 없음 → `python perf_run.py` 실행 후 새로고침")
+    st.caption("기간별 상승 상위 + 주봉 신호 · CANSLIM · 매출/영업익 증감 · 당월 포함 향후 2개월 계절성. (주봉 스크리너 통합)")
+    _retj = load_json(Path('results/returns.json'))
+    _perf = load_json(PERF_JSON) or {}
+    if not _retj or not _retj.get('stocks'):
+        st.error("기간 수익률 데이터 없음 → `python screen_precompute.py` 실행 후 새로고침")
     else:
-        _gc1, _gc2, _gc3 = st.columns(3)
-        _gper = _gc1.selectbox("상승률 기간", ["4주", "1주"], key="gain_per")
+        _PERIODS = {'1주': ('perf', 'ret_1w'), '1개월': ('ret', 'ret_1m'), '3개월': ('ret', 'ret_3m'),
+                    '6개월': ('ret', 'ret_6m'), '1년': ('ret', 'ret_12m'), 'YTD': ('ret', 'ret_ytd')}
+        _gc1, _gc2, _gc3, _gc4 = st.columns([1.2, 1, 1, 1])
+        _gper = _gc1.selectbox("상승률 기간", list(_PERIODS.keys()), index=1, key="gain_per")
         _gmkt = _gc2.selectbox("시장", ["전체", "KR", "US"], key="gain_mkt")
-        _gn = _gc3.slider("표시 종목수", 10, 60, 30, key="gain_n")
-        _retkey = 'ret_4w' if _gper == "4주" else 'ret_1w'
+        _gsig = _gc3.checkbox("신호 있는 종목만", value=False, key="gain_sigonly")
+        _gn = _gc4.slider("표시 종목수", 10, 60, 30, key="gain_n")
+        _src, _retkey = _PERIODS[_gper]
 
-        # CANSLIM 점수 + 실적증감 맵 (KR)
+        # perf 맵: 1주 수익률 + 현재 신호
+        _SIGL = [('now_sig_52w', '52주신고가'), ('now_sig_vol', '거래량'), ('now_sig_maconv', '이평수렴'),
+                 ('now_sig_cup', '컵핸들'), ('now_sig_ma5', '5주라이딩'), ('now_sig_rsimacd', 'RSI/MACD')]
+        _perfmap = {}
+        for s in _perf.get('stocks', []):
+            sigs = [lab for k, lab in _SIGL if s.get(k)]
+            _perfmap[s['sym']] = {'ret_1w': s.get('ret_1w'), 'sigs': sigs, 'nsig': len(sigs)}
+
+        # CANSLIM 점수 + 실적증감
         _canj = load_json(CANSLIM_JSON) or {}
         _mok = _canj.get('market_ok', True)
         _canmap = {}
@@ -518,24 +530,29 @@ with t_gain:
             if vals:
                 _seasmap[s['sym']] = round(sum(vals) / len(vals), 1)
 
+        _retc = f'{_gper}상승'
         _grows = []
-        for s in _perf['stocks']:
+        for s in _retj['stocks']:
             if _gmkt != "전체" and s['market'] != _gmkt:
                 continue
-            ret = s.get(_retkey)
+            pm = _perfmap.get(s['sym'], {})
+            ret = pm.get('ret_1w') if _src == 'perf' else s.get(_retkey)
             if ret is None:
+                continue
+            if _gsig and pm.get('nsig', 0) == 0:
                 continue
             cm = _canmap.get(s['sym'], {})
             _grows.append({
                 '시장': s['market'], '종목': s['name'], '코드': s['sym'],
                 '시총': fmt_cap(s.get('marcap'), s['market']),
+                '신호': ', '.join(pm.get('sigs', [])[:3]) or '-',
                 'CANSLIM': f"{cm['score']}/7" if cm.get('score') is not None else '-',
-                '매출증감': f"{cm['rev']:+.0f}%" if isinstance(cm.get('rev'), (int, float)) else '-',
-                '영업익증감': f"{cm['op']:+.0f}%" if isinstance(cm.get('op'), (int, float)) else '-',
-                f'{_gper}상승': ret,
-                '향후2개월계절성': _seasmap.get(s['sym']),
+                '매출%': f"{cm['rev']:+.0f}" if isinstance(cm.get('rev'), (int, float)) else '-',
+                '영업익%': f"{cm['op']:+.0f}" if isinstance(cm.get('op'), (int, float)) else '-',
+                _retc: ret,
+                '향후2M계절성': _seasmap.get(s['sym']),
             })
-        _grows.sort(key=lambda r: -(r[f'{_gper}상승'] or -999))
+        _grows.sort(key=lambda r: -(r[_retc] if r[_retc] is not None else -999))
         _grows = _grows[:_gn]
 
         st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 ({_cmo}·{_nmo}월 계절성 동반)")
@@ -543,14 +560,14 @@ with t_gain:
         def _cg2(v):
             try: return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#dc2626'
             except: return ''
-        _gsub = [c for c in [f'{_gper}상승', '향후2개월계절성', '매출증감', '영업익증감'] if c in _gdf.columns]
+        _gsub = [c for c in [_retc, '향후2M계절성'] if c in _gdf.columns]
         st.dataframe(
             _gdf.style.map(_cg2, subset=_gsub)
-                .format({f'{_gper}상승': '{:+.1f}%',
-                         '향후2개월계절성': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
-            use_container_width=True, hide_index=True, height=min(36 + 35 * len(_gdf), 720))
-        st.caption("CANSLIM·매출/영업익 증감은 KR 한정(네이버). 계절성은 과거 통계 — 보조 지표로만. "
-                   "⚠️ 상승률 상위 = '이미 오른' 종목. 추격 주의, 손익비·가드레일 확인.")
+                .format({_retc: '{:+.1f}%',
+                         '향후2M계절성': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
+            use_container_width=True, hide_index=True, height=min(36 + 35 * len(_gdf), 640))
+        st.caption("신호=주봉(현재). CANSLIM·매출/영업익은 KR 한정. 계절성·1주는 perf 기준. "
+                   "⚠️ 상승률 상위 = '이미 오른' 종목 — 추격 주의, 손익비·가드레일 확인.")
 
 
 # ── 주도주 (섹터/전체 상대강도) ──
@@ -796,107 +813,6 @@ with tab1:
                          use_container_width=True, hide_index=True)
             st.bar_chart(sp_df.set_index('신호')['평균4주수익률'])
 
-
-# ════════════════════════════════════════════════════════════════════
-# 탭2: 주봉 스크리너
-# ════════════════════════════════════════════════════════════════════
-with tab2:
-    st.header("📊 주봉 스크리너 — 현재 신호 종목")
-    update_badge(SCREENER_JSON)
-    screener = load_json(SCREENER_JSON)
-
-    if screener is None:
-        st.error("데이터 없음 → `python weekly_run.py` 실행 후 새로고침")
-    else:
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("기준일", screener['date'])
-        col2.metric("신호 종목", f"{screener['total']}개")
-        stocks2 = screener['stocks']
-        col3.metric("🇰🇷 KR", f"{sum(1 for s in stocks2 if s['market']=='KR')}개")
-        col4.metric("🇺🇸 US", f"{sum(1 for s in stocks2 if s['market']=='US')}개")
-
-        st.divider()
-
-        with st.sidebar:
-            st.divider()
-            st.header("📊 스크리너 필터")
-            mkt2     = st.radio("시장", ["전체","KR","US"], key="scr_mkt")
-            min_sigs = st.slider("최소 신호 수", 1, 6, 1, key="scr_minsig")
-            sort2    = st.selectbox("정렬", ["시총↓","주간수익률↓","신호수↓"], key="scr_sort")
-
-        rows2 = []
-        for s in stocks2:
-            rows2.append({
-                '시장':    s['market'],
-                '종목명':  s['name'],
-                '코드':    s['sym'],
-                '시총':    fmt_cap(s['marcap'], s['market']),
-                '_marcap': s['marcap'],
-                '주간%':   s['pct_change'],
-                '신호수':  s['total_signals'],
-                '신호':    ', '.join(s['signals']),
-                '52주신고가': tag(s.get('sig_52w')),
-                '거래량':    tag(s.get('sig_vol')),
-                '5일라이딩': tag(s.get('sig_ma5')),
-                '컵위드핸들':tag(s.get('sig_cup')),
-                '이평수렴':  tag(s.get('sig_maconv')),
-                'RSI/MACD':  tag(s.get('sig_rsimacd')),
-                '고가유형':  s.get('high_type',''),
-            })
-
-        df2 = pd.DataFrame(rows2)
-        if mkt2 != "전체":
-            df2 = df2[df2['시장'] == mkt2]
-        df2 = df2[df2['신호수'] >= min_sigs]
-
-        if sort2 == "시총↓":          df2 = df2.sort_values('_marcap', ascending=False)
-        elif sort2 == "주간수익률↓":  df2 = df2.sort_values('주간%',   ascending=False)
-        elif sort2 == "신호수↓":      df2 = df2.sort_values('신호수',  ascending=False)
-        df2 = df2.reset_index(drop=True)
-        df2.index += 1
-
-        st.subheader(f"총 {len(df2)}개 종목")
-
-        show_entry = st.toggle("📍 일봉 진입 타이밍 표시 (느림 ~30초)", value=False, key="show_entry")
-        if show_entry:
-            with st.spinner("일봉 데이터 조회 중..."):
-                try:
-                    from entry_timing import batch_check
-                    stocks_for_check = [
-                        {'sym': row['코드'], 'market': row['시장']}
-                        for _, row in df2.iterrows()
-                    ]
-                    entry_results = batch_check(stocks_for_check[:30])
-                    df2['진입'] = df2['코드'].map(
-                        lambda s: entry_results.get(s, {}).get('grade', '⚪')
-                    )
-                except Exception as e:
-                    st.warning(f"진입 타이밍 조회 실패: {e}")
-                    df2['진입'] = '⚪'
-        else:
-            df2['진입'] = ''
-
-        disp2 = ['시장','종목명','코드','시총','주간%']
-        if show_entry:
-            disp2.append('진입')
-        disp2 += ['52주신고가','거래량','5일라이딩','컵위드핸들','이평수렴','RSI/MACD','신호수','고가유형']
-
-        sig2_cols = ['52주신고가','거래량','5일라이딩','컵위드핸들','이평수렴','RSI/MACD']
-
-        def color_entry(v):
-            if '진입적정' in str(v): return 'color:#56d364;font-weight:bold'
-            if '눌림대기' in str(v): return 'color:#ffa657'
-            if '추격위험' in str(v): return 'color:#f78166'
-            return 'color:#555'
-
-        styled2 = df2[disp2].style \
-            .map(color_sig, subset=sig2_cols) \
-            .map(color_ret, subset=['주간%']) \
-            .format({'주간%': '{:+.1f}%'})
-        if show_entry and '진입' in disp2:
-            styled2 = styled2.map(color_entry, subset=['진입'])
-
-        st.dataframe(styled2, use_container_width=True, height=420)
 
 
 # ════════════════════════════════════════════════════════════════════

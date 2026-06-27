@@ -127,15 +127,26 @@ def run(start=None):
     _seeded = LONG_CACHE.exists() and any(LONG_CACHE.glob('*.parquet'))
     print(f"  대상 {len(syms)}종목 · 모드: {'증분 갱신(빠름)' if _seeded else f'최초 다운로드 {init_start}~ (느림, 1회만)'}")
 
-    season, mdd = [], []
+    season, mdd, rets = [], [], []
+    _cy = datetime.now().year
 
     def _one(sym):
         mkt = 'KR' if (sym.isdigit() and len(sym) == 6) else 'US'
         close = _series_for(sym, mkt, init_start)
-        if close is None or len(close) < 250:
+        if close is None or len(close) < 30:
             return None
         name = names.get(sym, sym)
         marcap = caps.get(sym)
+        # 기간 수익률 (1·3·6·12개월 + YTD)
+        def _p(nd):
+            return round((close.iloc[-1] / close.iloc[-nd] - 1) * 100, 1) if len(close) > nd else None
+        _cyc = close[close.index >= f'{_cy}-01-01']
+        _ytd = round((close.iloc[-1] / _cyc.iloc[0] - 1) * 100, 1) if len(_cyc) > 1 else None
+        r_entry = {'sym': sym, 'name': name, 'market': mkt, 'marcap': marcap,
+                   'ret_1m': _p(21), 'ret_3m': _p(63), 'ret_6m': _p(126),
+                   'ret_12m': _p(252), 'ret_ytd': _ytd}
+        if len(close) < 250:
+            return None, None, r_entry
         # 계절성
         mclose = close.resample('ME').last().dropna()
         mret = mclose.pct_change().dropna() * 100
@@ -155,7 +166,7 @@ def run(start=None):
                    'mdd_all': round(_mdd(close), 1), 'mdd_1y': round(_mdd(close.tail(252)), 1),
                    'cur_dd': round((cur / peak - 1) * 100, 1), 'price': round(cur, 2),
                    'years': round(len(close) / 252, 1)}
-        return s_entry, m_entry
+        return s_entry, m_entry, r_entry
 
     done = 0
     with ThreadPoolExecutor(max_workers=8) as ex:
@@ -165,14 +176,17 @@ def run(start=None):
             r = fut.result()
             if r:
                 if r[0]: season.append(r[0])
-                mdd.append(r[1])
+                if r[1]: mdd.append(r[1])
+                if r[2]: rets.append(r[2])
     print()
 
     SEASON_OUT.write_text(json.dumps({'date': datetime.now().strftime('%Y-%m-%d'),
         'history': f'{init_start}~', 'stocks': season}, ensure_ascii=False), encoding='utf-8')
     MDD_OUT.write_text(json.dumps({'date': datetime.now().strftime('%Y-%m-%d'),
         'stocks': mdd}, ensure_ascii=False), encoding='utf-8')
-    print(f"  ✅ 계절성 {len(season)} · MDD {len(mdd)}종목 저장")
+    Path('results/returns.json').write_text(json.dumps({'date': datetime.now().strftime('%Y-%m-%d'),
+        'stocks': rets}, ensure_ascii=False), encoding='utf-8')
+    print(f"  ✅ 계절성 {len(season)} · MDD {len(mdd)} · 수익률 {len(rets)}종목 저장")
 
 
 if __name__ == '__main__':
