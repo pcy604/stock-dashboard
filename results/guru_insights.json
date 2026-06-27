@@ -34,11 +34,11 @@
         "key_points": [],
         "actionable": [],
         "_parse_error": true,
-        "_raw": ""
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"한국 반도체 산업의 미래 경쟁력은 전력 공급 안정성, 특히 재생에너지 확보에 달려있으며, 이를 위한 정책적, 사회적, 기술적 과제 해결이 시급합니다.\",\n  \"summary\": [\n    \"애플(Apple) 등 글로벌 기업들이 2030년까지 협력업체에 100% 청정에너지 사용을 요구하며 국내 반도체 기업들의 RE100(재생에너지 100%) 이행 압박이 커지고 있습니다. [00:00]\",\n    \"AI와 반도체 산업의 폭발적인 성장은 막대한 전력 소비를 동반하지만, 전력 인프라 구축은 AI 모델 개발 속도에 비해 '안드로메다급'으로 느려 전력난이 병목 현상을 일으킬 수 있습니다. [07:46]\",\n    \"특히 용인 클러스터와 같은 대규모 반도체 생산 기지는 20GW 이상의 전기를 필요로 하는데, 이는 평상시 한국 전체 전력 사용량의 1/4에 달하는 막대한 양이며, 재생에너지로 충당하기 어렵습니다. [11:46]\",\n"
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-06-27T17:20:40.318665+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-06-27T19:39:09.836539+09:00"
     },
     {
       "video_id": "LIiSUm7iXAU",
@@ -265,8 +265,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-06-27T17:20:53.801871+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-06-27T19:39:37.642397+09:00"
     },
     {
       "video_id": "Y3_Kf6QqaHQ",
@@ -6164,5 +6164,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-27T17:22:57.388495+09:00"
+  "updated": "2026-06-27T19:39:39.071370+09:00"
 }
