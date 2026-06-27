@@ -58,16 +58,19 @@ GURU_OUTPUT_LANG = "한국어"
 #   include: 제목에 이 단어 중 하나라도 있어야 분석 (비우면 전체)
 #   exclude: 제목에 이 단어가 있으면 제외
 # 투자 무관 영상은 Gemini가 relevant=false로 판단해 다이제스트에서 자동 제외됨.
+# ★ 순서 = 분석 우선순위. 알짜(체슬리·오종태) 먼저 → 무료 할당량 소진 전에 처리.
+#   삼프로는 다작이라 마지막(남은 할당량으로). 자막없는 긴 라이브(영상분석=비쌈)가
+#   할당량 부족(429)으로 밀리던 문제 대응.
 GURU_CHANNELS = [
-    {"name": "삼프로TV", "id": "UChlv4GSd7OQl3js-jkLOnFA",
-     "exclude": ["쇼츠", "shorts", "예고", "다시보기", "라이브 다시"]},
-    {"name": "체슬리TV", "id": "UCXST0Hq6CAmG0dmo3jgrlEw"},          # 박세익 체슬리투자자문
+    {"name": "체슬리TV", "id": "UCXST0Hq6CAmG0dmo3jgrlEw"},          # 박세익 체슬리투자자문 (알짜 라이브)
     {"name": "오종태의투자병법", "id": "UCSVtOfGvhtz2QosSIM_3WoQ"},   # 오종태 이사
     # 유안타증권: 유동원 본부장 영상이 이름으로 제목이 안 달려 키워드 불가 →
     #   마케팅(광고·릴스·CF·홍보)만 exclude로 거르고 분석영상은 relevant 필터로 정리
     {"name": "유안타증권", "id": "UCGHG_gTZ780LicZmc-WUVPQ",
      "exclude": ["릴스", "쇼츠", "shorts", "예고", "CF", "광고", "보이스피싱",
                  "프렌즈", "원픽", "습관", "낭독", "월드컵", "이벤트", "안내"]},
+    {"name": "삼프로TV", "id": "UChlv4GSd7OQl3js-jkLOnFA",          # 다작 → 마지막
+     "exclude": ["쇼츠", "shorts", "예고", "다시보기", "라이브 다시"]},
 ]
 
 # 출력
