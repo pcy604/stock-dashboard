@@ -16,8 +16,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-06-28T17:42:29.219003+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-06-28T19:54:52.634379+09:00"
     },
     {
       "video_id": "KDW7AtjGSIw",
@@ -35,8 +35,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-06-28T17:42:04.429052+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-06-28T19:54:10.681648+09:00"
     },
     {
       "video_id": "4lJrK8Z_pj0",
@@ -7098,5 +7098,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-28T17:42:30.219270+09:00"
+  "updated": "2026-06-28T19:54:53.634594+09:00"
 }
