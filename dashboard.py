@@ -1664,6 +1664,34 @@ with tab7:
                 v_df = pd.DataFrame([{'지표': k, '값': v} for k, v in all_val])
                 st.table(v_df.style.hide(axis="index"))
 
+                # PER(올해·내년) + 영업이익률(OPM) 연도별
+                st.subheader("📊 PER · 영업이익률(OPM)")
+                _pe_now = yf_val.get('PER (TTM)'); _pe_fwd = yf_val.get('PER (선행)')
+                _pe_rows = [
+                    {'항목': 'PER 올해(TTM)',     '값': f"{_pe_now:.1f}x" if _pe_now else '-'},
+                    {'항목': 'PER 내년(컨센서스)', '값': f"{_pe_fwd:.1f}x" if _pe_fwd else '-'},
+                ]
+                _ann = (earn or {}).get('annual') if isinstance(earn, dict) else None
+                if _ann is not None and hasattr(_ann, 'empty') and not _ann.empty:
+                    def _ac(keys, col):
+                        for k in ([keys] if isinstance(keys, str) else keys):
+                            if k in _ann.index:
+                                v = _ann.loc[k, col]
+                                try:
+                                    return float(v) if not pd.isna(v) else None
+                                except Exception:
+                                    return None
+                        return None
+                    for c in sorted(_ann.columns, reverse=True)[:3]:
+                        oi = _ac(['Operating Income', 'Operating Income Or Loss', 'EBIT'], c)
+                        rev = _ac('Total Revenue', c)
+                        opm = round(oi / rev * 100, 1) if (oi and rev) else None
+                        _pe_rows.append({'항목': f'OPM {str(c)[:4]}',
+                                         '값': f"{opm:+.1f}%" if opm is not None else '-'})
+                st.table(pd.DataFrame(_pe_rows).style.hide(axis="index"))
+                st.caption("내년 PER = yfinance 선행(컨센서스 기반). OPM=영업이익/매출. "
+                           "전년 PER·내년 OPM 컨센서스는 무료 데이터 한계로 생략. KR은 yfinance 제약으로 빌 수 있음.")
+
                 if insid is not None and not insid.empty:
                     st.subheader("👤 내부자 거래")
                     st.dataframe(insid.head(8), use_container_width=True, hide_index=True)
