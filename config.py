@@ -71,6 +71,8 @@ GURU_CHANNELS = [
                  "프렌즈", "원픽", "습관", "낭독", "월드컵", "이벤트", "안내"]},
     {"name": "삼프로TV", "id": "UChlv4GSd7OQl3js-jkLOnFA",          # 다작 → 마지막
      "exclude": ["쇼츠", "shorts", "예고", "다시보기", "라이브 다시"]},
+    {"name": "와이스트릿", "id": "UCupslRq5jW95UGzPjOZz0FA",        # 지식과 자산의 복리효과
+     "exclude": ["쇼츠", "shorts", "예고", "광고", "릴스"]},
 ]
 
 # 출력
