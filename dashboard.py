@@ -336,6 +336,28 @@ with tab_guru:
                                 unsafe_allow_html=True)
 
 
+@st.cache_data(ttl=1800, show_spinner=False)
+def _returns_since(syms_markets, start_date):
+    """사용자 지정 시작일~현재 상승률 (라이브 FDR, 캐시). syms_markets=((sym,mkt),...)."""
+    import FinanceDataReader as fdr
+    from concurrent.futures import ThreadPoolExecutor
+    def _one(sm):
+        sym, mkt = sm
+        try:
+            code = sym.replace('.KS', '').replace('.KQ', '')
+            fsym = code if mkt == 'KR' else sym
+            df = fdr.DataReader(fsym, start_date)
+            c = df['Close'].dropna()
+            return sym, (round((c.iloc[-1] / c.iloc[0] - 1) * 100, 1) if len(c) >= 2 else None)
+        except Exception:
+            return sym, None
+    out = {}
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        for sym, v in ex.map(_one, syms_markets):
+            out[sym] = v
+    return out
+
+
 # ════════════════════════════════════════════════════════════════════
 # 탭: 오늘의 종합 — 한 페이지 요약
 # ════════════════════════════════════════════════════════════════════
@@ -371,36 +393,61 @@ with tab_today:
     st.markdown("##### 🎯 신호 종목 — 상승률 순")
     _retmap = {s['sym']: s for s in (load_json(Path('results/returns.json')) or {}).get('stocks', [])}
     _p1map = {s['sym']: s.get('ret_1w') for s in (load_json(PERF_JSON) or {}).get('stocks', [])}
-    _PER = {'1주': None, '1개월': 'ret_1m', '3개월': 'ret_3m', '6개월': 'ret_6m', '1년': 'ret_12m', 'YTD': 'ret_ytd'}
-    _tc1, _tc2 = st.columns([3, 1])
+    _PER = {'1주': None, '1개월': 'ret_1m', '3개월': 'ret_3m', '6개월': 'ret_6m',
+            '1년': 'ret_12m', 'YTD': 'ret_ytd', '사용자 지정': 'custom'}
+    _tc1, _tc2, _tc3 = st.columns([2.6, 1, 1])
     _tper = _tc1.radio("기간", list(_PER.keys()), index=1, horizontal=True, key="today_per")
-    _tn = _tc2.slider("표시 수", 10, 60, 20, key="today_n")
+    _tsort = _tc2.selectbox("정렬", ["상승률↓", "시총↓", "시총↑"], key="today_sort")
+    _tn = _tc3.slider("표시 수", 10, 60, 20, key="today_n")
     _tk = _PER[_tper]
+
+    _custmap = {}
+    if _tper == "사용자 지정":
+        from datetime import datetime as _cdt, timedelta as _ctd
+        _cstart = st.date_input("시작일 — 이 날짜 대비 현재까지 상승률",
+                                value=(_cdt.now() - _ctd(days=30)).date(), key="today_cust")
+        with st.spinner("기간 수익률 계산 중 (첫 조회 ~1분, 이후 캐시)..."):
+            _custmap = _returns_since(tuple((s['sym'], s['market']) for s in _scr_f), str(_cstart))
+
     _SIGM = [('sig_52w', '52주'), ('sig_vol', '거래량'), ('sig_maconv', '이평수렴'),
              ('sig_cup', '컵핸들'), ('sig_ma5', '5주'), ('sig_rsimacd', 'RSI')]
     try:
         _rows = []
         for s in _scr_f:
             sym = s['sym']
-            ret = _p1map.get(sym) if _tper == "1주" else (_retmap.get(sym, {}) or {}).get(_tk)
+            if _tper == "1주":
+                ret = _p1map.get(sym)
+            elif _tper == "사용자 지정":
+                ret = _custmap.get(sym)
+            else:
+                ret = (_retmap.get(sym, {}) or {}).get(_tk)
             _sec = _secmap.get(sym) or _secmap.get(str(sym).zfill(6)) or s.get('sector') or '-'
-            row = {'시장': s['market'], '종목': s['name'], '코드': sym,
+            row = {'_mc': s.get('marcap') or 0,
+                   '시장': s['market'], '종목': s['name'], '코드': sym,
                    '시총': fmt_cap(s.get('marcap'), s['market']), '섹터': str(_sec)[:10]}
             for k, lab in _SIGM:
                 row[lab] = '✓' if s.get(k) else ''
             row['신호수'] = s.get('total_signals', 0)
-            row[f'{_tper}상승%'] = ret
+            row['상승%'] = ret
             _rows.append(row)
-        _rows.sort(key=lambda r: (r[f'{_tper}상승%'] is None, -(r[f'{_tper}상승%'] or 0)))
+        # 정렬 (파이썬에서 — 시총은 실제 숫자 기준)
+        if _tsort == "시총↓":
+            _rows.sort(key=lambda r: -r['_mc'])
+        elif _tsort == "시총↑":
+            _rows.sort(key=lambda r: r['_mc'])
+        else:
+            _rows.sort(key=lambda r: (r['상승%'] is None, -(r['상승%'] or 0)))
         _rows = _rows[:_tn]
         if _rows:
-            _md = pd.DataFrame(_rows); _md.insert(0, 'No', range(1, len(_md) + 1))
+            _md = pd.DataFrame(_rows).drop(columns=['_mc'])
+            _md.insert(0, 'No', range(1, len(_md) + 1))   # 항상 1부터
             def _c_sig(v):
                 return 'color:#16a34a;font-weight:bold' if v == '✓' else ''
-            st.caption(f"총 {len(_scr_f)}개 신호 종목 중 상위 {len(_md)} ({_tper} 상승률순)")
+            st.caption(f"총 {len(_scr_f)}개 신호 종목 중 상위 {len(_md)} · 기간 {_tper} · 정렬 {_tsort}  "
+                       f"(컬럼 헤더 클릭 정렬 시 No는 흐트러질 수 있음 → 위 '정렬' 사용 권장)")
             st.dataframe(
                 _md.style.map(_c_sig, subset=[lab for _, lab in _SIGM])
-                    .format({f'{_tper}상승%': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
+                    .format({'상승%': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
                 use_container_width=True, hide_index=True, height=36 + 35 * len(_md))
     except Exception as _e:
         st.caption(f"(표 생략: {_e})")
