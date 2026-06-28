@@ -21,7 +21,7 @@
     },
     {
       "video_id": "KDW7AtjGSIw",
-      "title": "한국인 99%가 모르는 진실...한국인이 가장 똑똑하고 가장 불행햐 이유 / 홍대선 (풀버전)",
+      "title": "한국인이 가장 똑똑하고 가장 불행햐 이유 / 홍대선 (풀버전)",
       "channel": "와이스트릿",
       "published": "2026-06-28T03:00:37+00:00",
       "url": "https://www.youtube.com/watch?v=KDW7AtjGSIw",
@@ -35,8 +35,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-06-28T19:54:10.681648+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-06-28T22:04:33.500217+09:00"
     },
     {
       "video_id": "4lJrK8Z_pj0",
@@ -7098,5 +7098,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-28T19:54:53.634594+09:00"
+  "updated": "2026-06-28T22:04:34.500466+09:00"
 }
