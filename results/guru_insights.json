@@ -1,6 +1,106 @@
 {
   "items": [
     {
+      "video_id": "lMES84se7wI",
+      "title": "알파벳, 테슬라 급등에 나스닥 랠리…반도체 변동성 지속 [월가 뉴스레터]",
+      "channel": "삼프로TV",
+      "published": "2026-06-29T21:58:01+00:00",
+      "url": "https://www.youtube.com/watch?v=lMES84se7wI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-06-30T08:41:00.211746+09:00"
+    },
+    {
+      "video_id": "zcJSWiwAYjI",
+      "title": "삼성전자·SK하이닉스 대규모 투자, 걱정 안 해도 되는 이유! | 이권희 위즈웨이브 대표 [글로벌 인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-06-29T22:48:20+00:00",
+      "url": "https://www.youtube.com/watch?v=zcJSWiwAYjI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-06-30T08:40:27.646094+09:00"
+    },
+    {
+      "video_id": "o28_OLQ_tLk",
+      "title": "[체슬리모닝브리프] 뉴욕증시, 기술주 반등에 일제히 상승…다우 사상 최고·테슬라 8.46%↑ [26/06/30]",
+      "channel": "체슬리TV",
+      "published": "2026-06-29T22:13:48+00:00",
+      "url": "https://www.youtube.com/watch?v=o28_OLQ_tLk",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "뉴욕 증시가 기술주 반등에 힘입어 다우지수 사상 최고치를 경신하고 테슬라가 급등하는 등 전반적으로 강세를 보였습니다.",
+        "summary": [
+          "뉴욕 증시는 기술주 반등에 힘입어 다우지수가 사상 최고치를 경신하는 등 전반적으로 상승 마감했습니다.",
+          "특히 테슬라(TSLA)는 8.46% 급등하며 기술주 강세를 견인했습니다.",
+          "AI 및 반도체 관련 기술주들의 상승세가 시장 전반의 긍정적인 투자 심리를 이끌었습니다.",
+          "향후 시장은 금리 인하 기대감과 주요 기업의 실적 발표에 주목할 것으로 예상됩니다."
+        ],
+        "tickers": [
+          {
+            "name": "Tesla",
+            "ticker": "TSLA",
+            "context": "기술주 반등을 주도하며 8.46% 급등",
+            "view": "긍정",
+            "t": 60
+          },
+          {
+            "name": "Dow Jones Industrial Average",
+            "ticker": "",
+            "context": "뉴욕 증시 전반의 강세를 보여주며 사상 최고치 경신",
+            "view": "긍정",
+            "t": 40
+          }
+        ],
+        "key_points": [
+          {
+            "point": "뉴욕 증시가 기술주 중심의 반등에 힘입어 전반적인 강세장을 형성했습니다.",
+            "t": 20
+          },
+          {
+            "point": "다우존스 산업평균지수가 사상 최고치를 경신하며 시장의 긍정적 모멘텀을 확인했습니다.",
+            "t": 40
+          },
+          {
+            "point": "테슬라를 포함한 주요 기술주들의 강한 회복세가 시장 상승을 견인했습니다.",
+            "t": 60
+          },
+          {
+            "point": "인공지능(AI) 관련 기술주 모멘텀이 지속되며 성장주 투자 심리를 자극하고 있습니다.",
+            "t": 80
+          },
+          {
+            "point": "향후 금리 인하 기대감과 주요 기업 실적 발표가 시장 방향성의 중요한 변수가 될 전망입니다.",
+            "t": 100
+          }
+        ],
+        "actionable": [
+          "기술주 중심의 성장주 포트폴리오 비중을 점검하고, 개별 기업의 실적 및 성장성을 재평가할 필요가 있습니다.",
+          "미국 연방준비제도(Fed)의 금리 정책 변화 가능성과 거시 경제 지표 발표에 지속적으로 주목해야 합니다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-06-30T08:39:54.682175+09:00"
+    },
+    {
       "video_id": "CVFtZV4WEJM",
       "title": "기술주 강세 속 뉴욕증시 상승 마감...테슬라·구글 '급등'_26.06.30 | 여도은, 박명석, 이권희 [월스트리트 모닝브리핑]",
       "channel": "삼프로TV",
@@ -9345,5 +9445,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-30T06:59:09.842016+09:00"
+  "updated": "2026-06-30T08:41:01.392516+09:00"
 }
