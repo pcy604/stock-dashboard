@@ -16,8 +16,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-06-30T01:32:09.004280+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-06-30T03:33:46.743647+09:00"
     },
     {
       "video_id": "ZqN0tOnE-Us",
@@ -170,11 +170,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-06-30T01:33:13.325799+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-06-30T03:34:59.207298+09:00"
     },
     {
       "video_id": "D_cUNa7nZWQ",
@@ -233,8 +233,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-06-30T01:32:40.785842+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-06-30T03:34:08.859807+09:00"
     },
     {
       "video_id": "Rrr_s8X6nTs",
@@ -511,8 +511,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-06-30T01:27:31.989886+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-06-30T03:33:14.601942+09:00"
     },
     {
       "video_id": "GelQ0IM97uA",
@@ -9285,5 +9285,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-30T01:33:14.326060+09:00"
+  "updated": "2026-06-30T03:35:00.207581+09:00"
 }
