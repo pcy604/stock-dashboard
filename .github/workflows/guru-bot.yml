@@ -1,0 +1,35 @@
+# 구루 봇 인바운드 폴링 — /add 명령으로 채널 추가. 웹훅/서버 없이 크론 폴링.
+#   getUpdates로 명령 수신 → data/guru_channels.json 갱신 → 커밋(다음 요약에 반영).
+# 필요 Secrets: TELEGRAM_TOKEN · TELEGRAM_CHAT_ID
+name: guru-bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'    # 15분마다 인바운드 폴링 (가벼움)
+
+permissions:
+  contents: write
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: 인바운드 폴링
+        run: python guru_bot_poll.py
+      - name: 변경분 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add data/guru_channels.json data/.bot_offset 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "bot: 채널 구독 갱신 $(date -u +%H:%M)"
+          git push
