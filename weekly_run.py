@@ -231,6 +231,17 @@ def main():
     except Exception as e:
         print(f'⚠️ 페이퍼 트레이딩 기록 건너뜀: {e}')
 
+    # 주간 추천 포트폴리오 10선·20선 생성 + 히스토리 누적 (격리)
+    try:
+        import weekly_portfolio
+        _cash = weekly_portfolio._macro_cash_pct()
+        _p10 = weekly_portfolio.generate(10, cash_pct=_cash)
+        _p20 = weekly_portfolio.generate(20, cash_pct=_cash)
+        weekly_portfolio.save_snapshot(_p10, _p20)
+        print(f'주간 포트폴리오 생성: 10선/20선 · 현금 {_cash*100:.0f}%')
+    except Exception as e:
+        print(f'⚠️ 주간 포트폴리오 생성 건너뜀: {e}')
+
     # 텔레그램 전송 (요약만, 4096자 제한)
     if config.TELEGRAM_ENABLED:
         chunks = [summary[i:i+4000] for i in range(0, len(summary), 4000)]
