@@ -1,0 +1,499 @@
+{
+  "updated": "2026-06-29 14:01",
+  "p10": {
+    "date": "2026-06-29",
+    "week": "2026-W27",
+    "n": 10,
+    "market": "전체",
+    "cash_pct": 32.0,
+    "deployed_pct": 60.8,
+    "positions": [
+      {
+        "sym": "EXPD",
+        "name": "Expeditors",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 160.73,
+        "total_score": 72.3,
+        "win_score": 72.3,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 149.48,
+        "target": 183.23
+      },
+      {
+        "sym": "LLY",
+        "name": "Eli Lilly",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 1208.12,
+        "total_score": 71.0,
+        "win_score": 71.0,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 1123.55,
+        "target": 1377.26
+      },
+      {
+        "sym": "NUVL",
+        "name": "Nuvalent",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 123.52,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 114.87,
+        "target": 140.81
+      },
+      {
+        "sym": "AMRX",
+        "name": "Amneal Pharmaceuticals",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 17.23,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 16.02,
+        "target": 19.64
+      },
+      {
+        "sym": "AIR",
+        "name": "AAR",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 143.14,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 133.12,
+        "target": 163.18
+      },
+      {
+        "sym": "RL",
+        "name": "Ralph Lauren",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 411.16,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 382.38,
+        "target": 468.72
+      },
+      {
+        "sym": "WSM",
+        "name": "Williams-Sonoma",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 239.19,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 222.45,
+        "target": 272.68
+      },
+      {
+        "sym": "ASB",
+        "name": "Associated Banc-Corp",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 31.34,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 29.15,
+        "target": 35.73
+      },
+      {
+        "sym": "FULT",
+        "name": "Fulton Financial",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 24.21,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 22.52,
+        "target": 27.6
+      }
+    ]
+  },
+  "p20": {
+    "date": "2026-06-29",
+    "week": "2026-W27",
+    "n": 20,
+    "market": "전체",
+    "cash_pct": 32.0,
+    "deployed_pct": 64.1,
+    "positions": [
+      {
+        "sym": "EXPD",
+        "name": "Expeditors",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 160.73,
+        "total_score": 72.3,
+        "win_score": 72.3,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 149.48,
+        "target": 183.23
+      },
+      {
+        "sym": "LLY",
+        "name": "Eli Lilly",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 1208.12,
+        "total_score": 71.0,
+        "win_score": 71.0,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 1123.55,
+        "target": 1377.26
+      },
+      {
+        "sym": "NUVL",
+        "name": "Nuvalent",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 123.52,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 114.87,
+        "target": 140.81
+      },
+      {
+        "sym": "AMRX",
+        "name": "Amneal Pharmaceuticals",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 17.23,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 16.02,
+        "target": 19.64
+      },
+      {
+        "sym": "AIR",
+        "name": "AAR",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 143.14,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 133.12,
+        "target": 163.18
+      },
+      {
+        "sym": "RL",
+        "name": "Ralph Lauren",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 411.16,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 382.38,
+        "target": 468.72
+      },
+      {
+        "sym": "WSM",
+        "name": "Williams-Sonoma",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 239.19,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 222.45,
+        "target": 272.68
+      },
+      {
+        "sym": "ASB",
+        "name": "Associated Banc-Corp",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 31.34,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 29.15,
+        "target": 35.73
+      },
+      {
+        "sym": "FULT",
+        "name": "Fulton Financial",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 24.21,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 22.52,
+        "target": 27.6
+      },
+      {
+        "sym": "AMG",
+        "name": "Affiliated Managers Group",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 341.98,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 318.04,
+        "target": 389.86
+      },
+      {
+        "sym": "TJX",
+        "name": "TJX Companies",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 155.43,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 144.55,
+        "target": 177.19
+      },
+      {
+        "sym": "QCRH",
+        "name": "QCR Holdings",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 98.27,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 91.39,
+        "target": 112.03
+      },
+      {
+        "sym": "WBS",
+        "name": "Webster Financial",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 75.6,
+        "total_score": 70.4,
+        "win_score": 70.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 70.31,
+        "target": 86.18
+      },
+      {
+        "sym": "TRMK",
+        "name": "Trustmark",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 46.59,
+        "total_score": 70.3,
+        "win_score": 70.3,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 43.33,
+        "target": 53.11
+      },
+      {
+        "sym": "AZZ",
+        "name": "AZZ",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 156.64,
+        "total_score": 70.2,
+        "win_score": 70.2,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 145.68,
+        "target": 178.57
+      },
+      {
+        "sym": "UBSI",
+        "name": "United Bankshares",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 46.21,
+        "total_score": 70.1,
+        "win_score": 70.1,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 42.98,
+        "target": 52.68
+      },
+      {
+        "sym": "FITB",
+        "name": "Fifth Third Bank",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 56.31,
+        "total_score": 69.8,
+        "win_score": 69.8,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 52.37,
+        "target": 64.19
+      },
+      {
+        "sym": "FBNC",
+        "name": "First Bancorp",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 63.53,
+        "total_score": 69.7,
+        "win_score": 69.7,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 59.08,
+        "target": 72.42
+      },
+      {
+        "sym": "CFG",
+        "name": "Citizens Financial Group",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 70.4,
+        "total_score": 69.6,
+        "win_score": 69.6,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 65.47,
+        "target": 80.26
+      }
+    ]
+  }
+}
