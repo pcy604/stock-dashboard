@@ -1,6 +1,146 @@
 {
   "items": [
     {
+      "video_id": "UQ-Hz9FDEiA",
+      "title": "주도주 아직 안 꺾였다? 반도체 쏠림장에서 팔아야 할 순간ㅣ명민준, 강아랑, 황유현 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-06-30T12:30:30+00:00",
+      "url": "https://www.youtube.com/watch?v=UQ-Hz9FDEiA",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-01T00:23:53.599097+09:00"
+    },
+    {
+      "video_id": "-WB7i4l8apU",
+      "title": "지금 시장에서 살아남는 법, 주도섹터 최선호주 공개!ㅣ명민준, 강아랑, 정태근 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-06-30T13:30:00+00:00",
+      "url": "https://www.youtube.com/watch?v=-WB7i4l8apU",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "2026년 6월 말 연기금 리밸런싱이 시장의 변동성을 키웠지만, 이는 일시적 현상으로 7월 시장은 양호할 것이며, 삼성전자와 SK하이닉스 위주의 주도주 투자는 여전히 유효하다.",
+        "summary": [
+          "2026년 6월 시장의 변동성 증가는 국내외 기관투자자들의 리밸런싱과 윈도우 드레싱(Window Dressing)이 겹친 영향이다.",
+          "특히 외국인 투자자들은 국내 주식 비중이 늘어나면서 매도했지만, 이는 한국 시장에 대한 부정적인 시그널이 아닌 비중 조절 목적이다.",
+          "삼성전자와 SK하이닉스는 여전히 시장을 이끄는 주도주이며, 외국인 투자자들은 직접 매수가 어려울 경우 레버리지 ETF 등을 통해 우회적으로 매수하고 있다.",
+          "7월 이후 한국은행의 금리 인상 가능성과 미국 증시 상승은 해외 주식 및 국내 채권 비중을 높여 국민연금이 국내 주식을 매도해야 할 부담을 줄여줄 것이다.",
+          "애플의 가격 인상은 반도체 가격 상승을 핑계 삼은 '양아치' 같은 행태이며, 애플발 메모리 수급 우려는 가격 인상을 위한 핑계로 실제 영향은 제한적이다.",
+          "코스닥은 당분간 불확실성이 크므로 투자에 주의해야 하며, KOSPI 주도주 중심의 투자가 바람직하다."
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "6월 시장 상승 후 주춤했지만, 여전히 주도주이며 외국인들이 레버리지 ETF 등을 통해 우회 매수 중이다. 목표가 400,000원 이상 시 매도 준비가 필요하다.",
+            "view": "긍정",
+            "t": 1294
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "6월 시장 상승 후 주춤했지만, 여전히 주도주이며 외국인들이 레버리지 ETF 등을 통해 우회 매수 중이다. 목표가 3,500,000원 이상 시 매도를 고려해야 한다.",
+            "view": "긍정",
+            "t": 1301
+          },
+          {
+            "name": "현대차",
+            "ticker": "005380",
+            "context": "2011년 차화정(자동차, 화학, 정유) 장세의 주도주 중 하나로, 과거 시장 상승을 이끌었음.",
+            "view": "중립",
+            "t": 3944
+          },
+          {
+            "name": "LG에너지솔루션",
+            "ticker": "373220",
+            "context": "2022년 BBIG(바이오, 배터리, 인터넷, 게임) 장세의 주도주 중 하나로, 과거 시장 상승을 이끌었음.",
+            "view": "중립",
+            "t": 3954
+          },
+          {
+            "name": "POSCO홀딩스",
+            "ticker": "005490",
+            "context": "2011년 차화정 장세 당시 언급되었으며, 주도섹터가 무너지면 다른 섹터도 동반 하락했음.",
+            "view": "중립",
+            "t": 3944
+          },
+          {
+            "name": "현대모비스",
+            "ticker": "012330",
+            "context": "2011년 차화정 장세 당시 언급되었으며, 주도섹터가 무너지면 다른 섹터도 동반 하락했음.",
+            "view": "중립",
+            "t": 3944
+          },
+          {
+            "name": "기아",
+            "ticker": "000270",
+            "context": "2011년 차화정 장세 당시 언급되었으며, 주도섹터가 무너지면 다른 섹터도 동반 하락했음.",
+            "view": "중립",
+            "t": 3944
+          },
+          {
+            "name": "LG화학",
+            "ticker": "051910",
+            "context": "2022년 BBIG 장세 당시 언급되었으며, 주도섹터가 무너지면 다른 섹터도 동반 하락했음.",
+            "view": "중립",
+            "t": 3954
+          },
+          {
+            "name": "SK스퀘어",
+            "ticker": "402340",
+            "context": "2026년 반도체 독주 장세 예상 언급. (SK하이닉스의 대주주)",
+            "view": "중립",
+            "t": 4044
+          },
+          {
+            "name": "삼성전자(우)",
+            "ticker": "005935",
+            "context": "삼성전자 직접 매수가 어려울 때 대안으로 매수할 수 있는 종목이다.",
+            "view": "긍정",
+            "t": 1410
+          }
+        ],
+        "key_points": [
+          {
+            "point": "시장 변동성은 국내외 기관의 리밸런싱 및 윈도우 드레싱 때문이며, 패시브 펀드의 리밸런싱은 마무리되었으나, 수익을 우선하는 기관들의 리밸런싱은 6월 말까지 지속되었다.",
+            "t": 730
+          },
+          {
+            "point": "외국인 투자자들의 한국 주식 매도는 비중 조절 목적이며, 국내 시장이 나빠서 파는 것이 아니다. 오히려 레버리지 ETF 등을 통해 우회적으로 주도주에 투자하고 있다.",
+            "t": 1230
+          },
+          {
+            "point": "국민연금의 국내 주식 목표 비중 유예가 2026년 6월 말에 종료되면서 매도 물량이 나올 수 있지만, 미국 증시의 상승과 한국은행의 금리 인상 가능성이 해외 주식 및 국내 채권 비중을 높여 국내 주식 매도 압력을 줄여줄 것이다.",
+            "t": 1805
+          },
+          {
+            "point": "KOSPI 시장은 주도주인 삼성전자와 SK하이닉스를 중심으로 상반기 시장을 이끌었으며, KOSDAQ은 당분간 투자에 주의가 필요하다.",
+            "t": 2733
+          },
+          {
+            "point": "기금형 퇴직연금 도입으로 대규모의 퇴직연금 적립금이 주식시장으로 옮겨올 것으로 예상되어 증시 안정판 역할을 할 수 있을 것이라는 기대가 있다.",
+            "t": 2430
+          }
+        ],
+        "actionable": [
+          "포트에 삼성전자와 SK하이닉스 주식을 담아두고 섣불리 매도하지 말 것.",
+          "SK하이닉스가 3,500,000원 이상, 삼성전자가 400,000원 이상에 도달할 경우 매도를 고려할 것.",
+          "KOSDAQ 종목은 당분간 투자에 주의할 것."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-01T00:23:19.923703+09:00"
+    },
+    {
       "video_id": "OEBCOi9TmfU",
       "title": "홍명보와 JTBC에게 배울 점을 찾았습니다! / [야식잡썰 EP.268] / 이대호 기자",
       "channel": "와이스트릿",
@@ -167,12 +307,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"SK하이닉스 ADR의 나스닥 100 지수 편입 가능성이 연말 패시브 자금 유입과 밸류에이션 상승을 통해 주가에 긍정적인 영향을 줄 것으로 전망된다.\",\n  \"summary\": [\n    \"SK하이닉스 ADR이 나스닥 100 지수에 편입될 가능성이 언급되었으며, 이는 연말 주요 투자 모멘텀이 될 수 있다.\",\n    \"나스닥 100 특례 편입을 위해서는 약 200조 원의 시가총액이 필요하지만, 현재 ADR 시총은 약 50조 원 수준으로 단기 특례 편입은 어려울 것으로 보인다.\",\n    \"하지만 11월 말 기준으로 12월에 진행될 정기 편입에는 충분히 가능성이 있으며, 이때 대규모 패시브 자금 유입이 기대된다.\",\n    \"미국 투자자들이 SK하이닉스를 마이크론 수준으로 평가한다면 주가 상승 여지가 크며, 이는 한국 본주에도 긍정적 영향을 미칠 것이다.\",\n    \"기업이 본연의 역할을 잘 수행한다면 연말까지 미국의 "
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-06-30T21:08:02.753208+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-07-01T00:24:26.155560+09:00"
     },
     {
       "video_id": "fgqjHb7oFGE",
@@ -787,12 +926,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"AI 시장의 성장으로 GPU, CPU, 대역폭 등 물리적 인프라를 분산형 네트워크(DePIN)로 제공하는 3세대 DePIN 프로젝트들이 실제 매출을 창출하며 주목받고 있습니다.\",\n  \"tickers\": [\n    {\n      \"name\": \"Filecoin\",\n      \"ticker\": \"FIL\",\n      \"context\": \"1세대 DePIN 저장 공간 프로젝트로, 이전 세대 DePIN은 수익성 문제로 지속 가능하지 못했습니다.\",\n      \"view\": \"부정\",\n      \"t\": 707\n    },\n    {\n      \"name\": \"Helium\",\n      \"ticker\": \"HNT\",\n      \"context\": \"2세대 DePIN 사물 인터넷 프로젝트로, 이전 세대 DePIN은 수익성 문제로 지속 가능하지 못했습니다.\",\n      \"view\": \"부정\",\n      \"t\": 731\n  "
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-06-30T17:49:11.064463+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-07-01T00:25:31.520342+09:00"
     },
     {
       "video_id": "Ip4Ia4yblfU",
@@ -807,11 +945,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-06-30T21:11:19.451299+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-01T00:24:58.919129+09:00"
     },
     {
       "video_id": "Cv-gi8-Kn9o",
@@ -985,8 +1123,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-06-30T21:00:19.873469+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-01T00:17:58.758350+09:00"
     },
     {
       "video_id": "lMES84se7wI",
@@ -10433,5 +10571,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-06-30T21:14:51.417677+09:00"
+  "updated": "2026-07-01T00:25:32.966949+09:00"
 }
