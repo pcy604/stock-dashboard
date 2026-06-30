@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T00:23:53.599097+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-01T02:27:56.281543+09:00"
     },
     {
       "video_id": "-WB7i4l8apU",
@@ -302,16 +302,45 @@
       "url": "https://www.youtube.com/watch?v=hxt8OHob-mM",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "SK하이닉스의 미국 ADR 상장은 나스닥 100 편입 가능성과 함께 막대한 해외 자금 유입을 기대하게 하여 본주 주가에도 긍정적인 영향을 미칠 수 있습니다.",
+        "summary": [
+          "SK하이닉스의 ADR(미국 주식예탁증서)이 나스닥 100 지수에 편입될 가능성이 있습니다.",
+          "나스닥 100 특례 편입 조건(상위 40위권, 약 200조 원 시가총액)에는 미달하지만, 11월 말 기준 시총을 바탕으로 한 12월 정기 편입은 가능성이 있습니다.",
+          "ADR의 현재 시가총액은 약 50조 원 수준입니다.",
+          "나스닥 100 편입 시 패시브 자금은 물론 액티브 펀드의 매수세가 유입될 수 있습니다.",
+          "미국 투자자들이 SK하이닉스를 마이크론과 유사한 밸류로 평가할 경우 상당한 주가 상승 여력이 있을 것으로 전망됩니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "ADR의 나스닥 100 편입 가능성 및 이에 따른 자금 유입 기대로 본주 주가 상승 기대",
+            "view": "긍정",
+            "t": 3
+          }
+        ],
+        "key_points": [
+          {
+            "point": "SK하이닉스 ADR의 나스닥 100 편입 가능성은 특별 편입(상위 40위권 진입)보다는 11월 말 기준으로 심사되는 12월 정기 편입에 무게가 실립니다.",
+            "t": 13
+          },
+          {
+            "point": "나스닥 100 편입은 지수를 추종하는 패시브 펀드와 함께, 기업의 성장성을 보고 투자하는 액티브 펀드의 매수세까지 끌어들여 대규모 자금 유입을 기대할 수 있습니다.",
+            "t": 46
+          },
+          {
+            "point": "미국 시장 투자자들이 SK하이닉스의 가치를 마이크론과 동등하게 평가한다면, 현재보다 훨씬 높은 주가 수준까지 상승할 여지가 충분합니다.",
+            "t": 50
+          }
+        ],
+        "actionable": [
+          "SK하이닉스의 ADR 시가총액 추이 및 11월 말까지의 시장 성과를 주시하여 12월 나스닥 100 정기 편입 여부를 확인하십시오.",
+          "미국 투자자들의 시각에서 SK하이닉스의 밸류에이션이 마이크론 등 동종 업계 미국 기업들과 어떻게 비교되는지 분석하십시오."
+        ]
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-01T00:24:26.155560+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-01T02:28:41.452262+09:00"
     },
     {
       "video_id": "fgqjHb7oFGE",
@@ -945,11 +974,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-01T00:24:58.919129+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-01T02:29:18.900653+09:00"
     },
     {
       "video_id": "Cv-gi8-Kn9o",
@@ -1123,8 +1152,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-01T00:17:58.758350+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-01T02:27:37.201163+09:00"
     },
     {
       "video_id": "lMES84se7wI",
@@ -10571,5 +10600,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-07-01T00:25:32.966949+09:00"
+  "updated": "2026-07-01T02:29:19.931082+09:00"
 }
