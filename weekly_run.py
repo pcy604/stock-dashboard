@@ -242,12 +242,17 @@ def main():
     except Exception as e:
         print(f'⚠️ 주간 포트폴리오 생성 건너뜀: {e}')
 
-    # 텔레그램 전송 (요약만, 4096자 제한)
-    if config.TELEGRAM_ENABLED:
+    # 텔레그램 전송 — 비활성화(2026-07): daily-refresh 워크플로가 이 스크립트를
+    # 매일 돌려서 "주간 신호종목" 요약이 매일 발송되던 스팸을 차단.
+    # 매도 알림은 portfolio_monitor.py에서 별도 발송되므로 영향 없음.
+    # 다시 켜려면 config.WEEKLY_SIGNAL_TELEGRAM=True (기본 False).
+    if config.TELEGRAM_ENABLED and getattr(config, 'WEEKLY_SIGNAL_TELEGRAM', False):
         chunks = [summary[i:i+4000] for i in range(0, len(summary), 4000)]
         for chunk in chunks:
             send_message(config.TELEGRAM_TOKEN, config.TELEGRAM_CHAT_ID, chunk)
         print('✅ 텔레그램 전송 완료')
+    else:
+        print('ⓘ 주간 신호 텔레그램 발송 생략 (WEEKLY_SIGNAL_TELEGRAM=False)')
 
 
 if __name__ == '__main__':
