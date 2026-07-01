@@ -1,6 +1,55 @@
 {
   "items": [
     {
+      "video_id": "27IgpvrKjDI",
+      "title": "메타발 악재에 '흔들' 뉴욕증시 하락 마감...필·반지수 -6% '급락'_26.07.02 | 여도은, 박명석, 이권희 [월스트리트 모닝브리핑]",
+      "channel": "삼프로TV",
+      "published": "2026-07-01T20:23:42+00:00",
+      "url": "https://www.youtube.com/watch?v=27IgpvrKjDI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "메타(Meta) 관련 악재로 뉴욕 증시가 하락 마감했으며, 특히 필라델피아 반도체 지수가 6% 급락하며 시장에 큰 충격을 주었습니다.",
+        "summary": [
+          "뉴욕 증시가 메타(Meta)발 악재의 영향으로 전반적으로 하락 마감했습니다. (t=0)",
+          "특히 반도체 섹터는 필라델피아 반도체 지수가 6% 급락하는 등 크게 흔들리는 모습을 보였습니다. (t=0)",
+          "이번 '월스트리트 모닝브리핑'에서는 이러한 시장 하락의 원인과 반도체 섹터에 미친 충격에 대한 분석이 다루어졌습니다. (t=0)"
+        ],
+        "tickers": [
+          {
+            "name": "Meta Platforms",
+            "ticker": "META",
+            "context": "뉴욕 증시 하락의 주요 원인인 '메타발 악재'로 언급되었으며, 시장 전반에 부정적인 영향을 미쳤습니다.",
+            "view": "부정",
+            "t": 0
+          },
+          {
+            "name": "필라델피아 반도체 지수",
+            "ticker": "",
+            "context": "이날 6% 급락하며 시장 하락을 주도한 핵심 지수로, 반도체 섹터의 광범위한 하락을 나타냈습니다.",
+            "view": "부정",
+            "t": 0
+          }
+        ],
+        "key_points": [
+          {
+            "point": "메타(Meta) 관련 악재는 특정 기업을 넘어 뉴욕 증시 전반의 투자 심리를 위축시키는 주요 요인으로 작용했습니다. (t=0)",
+            "t": 0
+          },
+          {
+            "point": "필라델피아 반도체 지수의 6% 급락은 반도체 산업 전반에 대한 우려를 심화시키며, 기술주 중심의 시장에 큰 부담을 안겨주었습니다. (t=0)",
+            "t": 0
+          }
+        ],
+        "actionable": [
+          "메타(Meta) 관련 악재의 구체적인 내용과 파급력을 파악하기 위해 관련 뉴스 및 기업 공시를 면밀히 주시해야 합니다. (t=0)",
+          "반도체 섹터의 추가적인 변동성 가능성에 대비하여 관련 기업들의 펀더멘털과 기술적 지표를 재점검하고 투자 전략을 신중하게 수립해야 합니다. (t=0)"
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-02T06:11:58.105404+09:00"
+    },
+    {
       "video_id": "TYQXc_QzIEY",
       "title": "분명히 팔아야 하는데...머리와 가슴이 따로 논다..ㅣ빈센트 & 정프로 [더블밸류업]",
       "channel": "삼프로TV",
@@ -281,8 +330,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-02T04:24:58.363988+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-02T06:17:46.382384+09:00"
     },
     {
       "video_id": "2xrjkNNNPig",
@@ -335,11 +384,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-02T04:24:25.915489+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-02T06:17:13.493374+09:00"
     },
     {
       "video_id": "Cgh9cGbhVLg",
@@ -357,8 +406,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-02T04:23:53.462335+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-02T06:12:20.242045+09:00"
     },
     {
       "video_id": "Mgzh4FjWhCc",
@@ -11864,5 +11913,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-07-02T04:26:07.147144+09:00"
+  "updated": "2026-07-02T06:17:47.559199+09:00"
 }
