@@ -1,6 +1,87 @@
 {
   "items": [
     {
+      "video_id": "PkpH-HpFJAQ",
+      "title": "폭력적인 변동성 장세...내가 쓴 레버리지가 부메랑이 된다? | 명민준, 강아랑, 송재경 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-01T14:00:16+00:00",
+      "url": "https://www.youtube.com/watch?v=PkpH-HpFJAQ",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "한국 주식시장은 AI 특수에 따른 레버리지 투자 급증으로 폭력적인 변동성을 보이며 유효 현금비율이 역대 최저 수준으로 하락, 향후 매도 압력에 취약해 투자자들의 신중한 대응이 필요합니다.",
+        "summary": [
+          "현재 시장은 레버리지 투자로 인한 변동성이 크게 증가하고 있으며, 이러한 위험 요소는 아직 해소되지 않고 오히려 심화되고 있습니다.",
+          "한국과 대만의 레버리지 ETF 투자 규모는 불과 5개월 만에 약 6배 증가하여 시장 상승에 크게 기여했지만, 이는 양날의 검처럼 하락 시 급격한 손실로 이어질 수 있습니다.",
+          "코스피 지수와 변동성 지수(빅스, 공포지수)가 역사적으로 반대로 움직였던 것과 달리, 최근 동반 상승하는 이례적인 현상은 시장의 높은 불안감과 비합리적인 과열을 시사합니다.",
+          "한국 시장의 시가총액 대비 현금성 자산 및 M2 통화량 비율이 역대 최저 수준으로 떨어져, 시장 내 충격을 흡수할 수 있는 여력이 크게 줄어들고 매도 압력에 취약한 상황입니다.",
+          "개인 투자자, 특히 초보 투자자('주린이')는 탐욕을 경계하고, 예측 불가능한 시장 변동성에 대비하여 포트폴리오 리밸런싱을 주기적으로 실시하며 적정 수준의 현금 비중을 유지하는 것이 중요합니다."
+        ],
+        "tickers": [
+          {
+            "name": "KOSPI",
+            "ticker": "",
+            "context": "코스피 지수가 변동성 지수와 동반 상승하는 이례적 현상. 시장 전체의 현금성 자산 대비 시가총액 비율이 급락.",
+            "view": "중립",
+            "t": 848
+          },
+          {
+            "name": "KOSPI 200",
+            "ticker": "",
+            "context": "변동성 지수(V-KOSPI) 계산의 기초가 되는 대형주 지수.",
+            "view": "중립",
+            "t": 941
+          },
+          {
+            "name": "TSMC",
+            "ticker": "TSM",
+            "context": "AI 랠리를 이끈 대만 기업으로 언급됨.",
+            "view": "긍정",
+            "t": 450
+          },
+          {
+            "name": "SK 하이닉스",
+            "ticker": "000660",
+            "context": "AI 밸류체인에 포함된 한국 기업으로 시가총액이 크게 성장함.",
+            "view": "긍정",
+            "t": 2390
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "AI 밸류체인에 포함된 한국 기업으로 시가총액이 크게 성장함.",
+            "view": "긍정",
+            "t": 2304
+          }
+        ],
+        "key_points": [
+          {
+            "point": "[1:06] 현재 시장은 레버리지 투자로 인한 변동성이 크게 증가하고 있으며, 이러한 위험 요소는 아직 해소되지 않고 오히려 심화되고 있습니다.",
+            "t": 66
+          },
+          {
+            "point": "[3:11] 한국과 대만의 레버리지 ETF 투자 규모는 불과 5개월 만에 약 6배 증가하여 시장 상승에 크게 기여했지만, 이는 양날의 검처럼 하락 시 급격한 손실로 이어질 수 있습니다.",
+            "t": 311
+          },
+          {
+            "point": "[8:48] 코스피 지수와 변동성 지수(빅스, 공포지수)가 역사적으로 반대로 움직였던 것과 달리, 최근 동반 상승하는 이례적인 현상은 시장의 높은 불안감과 비합리적인 과열을 시사합니다. 변동성 지수는 2008년 금융 위기 수준을 넘어섰습니다.",
+            "t": 848
+          },
+          {
+            "point": "[12:11] 한국 시장의 시가총액 대비 현금성 자산 및 M2 통화량 비율이 역대 최저 수준으로 떨어져, 시장 내 충격을 흡수할 수 있는 여력이 크게 줄어들고 매도 압력에 취약한 상황입니다.",
+            "t": 1211
+          }
+        ],
+        "actionable": [
+          "시장 상황에 대한 정확한 판단을 위해 V-KOSPI와 같은 변동성 지수를 꾸준히 살피고 이해하려 노력해야 합니다. (t: 252)",
+          "향후 시장 난이도 상승을 예상하며, 위험 관리를 위한 '리밸런싱' 전략을 적극적으로 활용하여 과열된 종목은 비중을 줄이고 덜 오른 종목으로 기계적으로 교체하는 것을 고려해야 합니다. (t: 1399)",
+          "시장 참여자들은 최소 10%에서 20%의 현금 비중을 항상 유지하여 시장 하락 시 추가 매수 기회를 잡거나 손실을 방어할 '쿠션'을 확보하는 것이 권고됩니다. (t: 3844)"
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-02T02:05:35.703648+09:00"
+    },
+    {
       "video_id": "Bin9rgOj8JU",
       "title": "삼성전자 하이닉스가 웃돈 주고 다 사버리는 '이 시장' #에너지산업 #한국전력주식 #에너지관련주 #에너지주",
       "channel": "와이스트릿",
@@ -159,11 +240,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T23:05:06.079525+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-02T02:07:29.726074+09:00"
     },
     {
       "video_id": "FkQS6kYq_YI",
@@ -181,8 +262,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T23:02:42.399306+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-02T02:06:57.267998+09:00"
     },
     {
       "video_id": "2xrjkNNNPig",
@@ -235,12 +316,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"7월 실적 발표 시즌을 맞아 삼성전자와 하이닉스의 변동성이 확대되는 가운데, 시장의 심리적 요인과 기업의 본질적 가치(이익) 사이의 괴리 및 코스닥 활성화 가능성이 중요하게 작용할 것으로 분석됩니다.\",\n  \"summary\": [\n    \"시장은 지난주 금요일부터 높은 변동성을 보이며 투자자들의 혼란을 가중시키고 있으며, 삼성전자와 SK하이닉스 등 대형 반도체주의 움직임이 특히 주목됩니다.\",\n    \"블랙록이 한국 시장의 반도체 쏠림 현상에 우려를 표했으나, 기업 이익이 뒷받침된다면 단기 변동성은 극복될 수 있을 것으로 예상됩니다.\",\n    \"코스닥 시장은 정부의 활성화 정책과 실적 시즌 도래로 긍정적인 변화를 맞이할 수 있으나, 동시에 부실 기업 정리 및 증자 이슈 등 해결해야 할 숙제도 안고 있습니다.\",\n    \"환율, 금리, 변동성과 같은 악재 요인들이 상존하며 시장의 심리적 지표를 흔들 수 있으나, 실적"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T23:01:55.812179+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-07-02T02:06:24.494002+09:00"
     },
     {
       "video_id": "Cgh9cGbhVLg",
@@ -258,8 +338,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T22:58:59.353744+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-02T02:05:51.861749+09:00"
     },
     {
       "video_id": "Mgzh4FjWhCc",
@@ -435,8 +515,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T22:54:23.253300+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-02T02:01:54.919344+09:00"
     },
     {
       "video_id": "CTHMrzXPH1E",
@@ -11765,5 +11845,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-07-01T23:12:20.418284+09:00"
+  "updated": "2026-07-02T02:07:30.927452+09:00"
 }
