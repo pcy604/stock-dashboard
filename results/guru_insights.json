@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "TYQXc_QzIEY",
+      "title": "분명히 팔아야 하는데...머리와 가슴이 따로 논다..ㅣ빈센트 & 정프로 [더블밸류업]",
+      "channel": "삼프로TV",
+      "published": "2026-07-01T08:19:43+00:00",
+      "url": "https://www.youtube.com/watch?v=TYQXc_QzIEY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-02T04:26:05.963521+09:00"
+    },
+    {
       "video_id": "PkpH-HpFJAQ",
       "title": "폭력적인 변동성 장세...내가 쓴 레버리지가 부메랑이 된다? | 명민준, 강아랑, 송재경 [주린이 구조대]",
       "channel": "삼프로TV",
@@ -240,11 +259,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-02T02:07:29.726074+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-02T04:25:30.928608+09:00"
     },
     {
       "video_id": "FkQS6kYq_YI",
@@ -262,8 +281,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-02T02:06:57.267998+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-02T04:24:58.363988+09:00"
     },
     {
       "video_id": "2xrjkNNNPig",
@@ -319,8 +338,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-02T02:06:24.494002+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-02T04:24:25.915489+09:00"
     },
     {
       "video_id": "Cgh9cGbhVLg",
@@ -338,8 +357,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-02T02:05:51.861749+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-02T04:23:53.462335+09:00"
     },
     {
       "video_id": "Mgzh4FjWhCc",
@@ -515,8 +534,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-02T02:01:54.919344+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-02T04:23:35.772962+09:00"
     },
     {
       "video_id": "CTHMrzXPH1E",
@@ -11845,5 +11864,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-07-02T02:07:30.927452+09:00"
+  "updated": "2026-07-02T04:26:07.147144+09:00"
 }
