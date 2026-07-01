@@ -24,6 +24,24 @@ section[data-testid="stSidebar"] * { font-size: 12px !important; }
 h1 { font-size: 19px !important; margin-bottom: 6px !important; }
 h2 { font-size: 16px !important; margin-bottom: 5px !important; }
 h3 { font-size: 14px !important; margin-bottom: 4px !important; }
+
+/* ── 모바일 반응형 (≤640px) ───────────────────────────────────
+   Streamlit은 좁은 화면에서 st.columns를 자동으로 쌓지 않아 카드/표가
+   찌그러진다. 좁은 화면에선 컬럼을 세로로 쌓고 여백·탭을 조정. */
+@media (max-width: 640px) {
+  /* 컬럼 행을 줄바꿈 + 각 컬럼 전체폭으로 → 세로 스택 */
+  [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
+  [data-testid="stHorizontalBlock"] > div { flex: 1 1 100% !important; min-width: 100% !important; }
+  /* 본문 좌우 여백 축소해 화면폭 최대 활용 */
+  .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; padding-top: 2.5rem !important; }
+  /* 탭 라벨 촘촘하게 (가로 스크롤은 유지) */
+  .stTabs [data-baseweb="tab"] { padding: 5px 9px !important; font-size: 12px !important; }
+  /* 메트릭 값/표 폰트 약간 축소 */
+  [data-testid="stMetricValue"] { font-size: 16px !important; }
+  .stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 11px !important; }
+  /* 넓은 정적표(st.table)가 넘칠 때 가로 스크롤 허용 */
+  [data-testid="stTable"] { overflow-x: auto !important; display: block !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -184,17 +202,36 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab_today, tab_screen, tab_guru, tab4, tab7, tab8, tab10 = st.tabs([
-    "📋 오늘의 종합", "🔎 종목 발굴", "🎙️ 구루 인사이트",
-    "🌍 매크로", "🔍 종목 분석", "💼 포트폴리오", "🧭 프로젝트 종합"
+tab_screen, tab7, tab4, tab_guru, tab10 = st.tabs([
+    "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로",
+    "🎙️ 구루 인사이트", "🧭 프로젝트 종합"
 ])
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 with tab_screen:
     _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
-    st.caption("위닝 스코어 · 상승 상위(신호 통합) · CANSLIM · 주도주 · 종목 프로파일 · 자동추천 — 시장 필터는 위 하나로 전 서브탭 공통")
-    tab_win, t_gain, tab3, t_lead, t_prof, tab11 = st.tabs([
-        "🏅 위닝 스코어", "🔥 상승 상위", "🏆 CANSLIM",
+
+    # ── 매크로 요약 스트립 (구 '오늘의 종합' 카드 이관) ──
+    _s_can_h = load_json(CANSLIM_JSON) or {}
+    _s_scr_h = load_json(SCREENER_JSON) or {}
+    _scr_fh = [s for s in (_s_scr_h.get('stocks') or [])
+               if _GMKT == "전체" or s.get('market') == _GMKT]
+    try:
+        _fed_h = fetch_fred('FEDFUNDS', 1); _fed_r = _fed_h[-1][1] if _fed_h else None
+        _m2_h = fetch_fred('M2SL', 14)
+        _m2y = round((_m2_h[-1][1] / _m2_h[-13][1] - 1) * 100, 1) if len(_m2_h) >= 13 else None
+        _msig, _cmn, _cmx, _, _ = compute_macro_signal(_fed_r, _m2y, fetch_spx_yoy())
+    except Exception:
+        _msig, _cmn, _cmx = "—", 25, 40
+    _hm1, _hm2, _hm3, _hm4 = st.columns(4)
+    _hm1.metric("시장 방향", _s_can_h.get('market_dir', '—'))
+    _hm2.metric("매크로 신호", _msig)
+    _hm3.metric("주봉 신호 종목", f"{len(_scr_fh)}개")
+    _hm4.metric("권고 현금", f"{_cmn}~{_cmx}%", help="매크로 위험도 기반 현금 비중 권고 · 상세는 🌍 매크로 탭")
+
+    st.caption("상승 상위(위닝 점수·신호 통합) · CANSLIM · 주도주 · 종목 프로파일 · 자동추천 — 시장 필터는 위 하나로 전 서브탭 공통")
+    t_gain, tab3, t_lead, t_prof, tab11 = st.tabs([
+        "🔥 상승 상위", "🏆 CANSLIM",
         "🚀 주도주", "🔬 종목 프로파일", "🎯 자동추천"])
 
 
@@ -359,187 +396,6 @@ def _returns_since(syms_markets, start_date):
 
 
 # ════════════════════════════════════════════════════════════════════
-# 탭: 오늘의 종합 — 한 페이지 요약
-# ════════════════════════════════════════════════════════════════════
-with tab_today:
-    _tmkt = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="today_mkt")
-
-    _s_scr  = load_json(SCREENER_JSON) or {}
-    _s_can  = load_json(CANSLIM_JSON) or {}
-    try:
-        from sectors import get_sector_map as _gsm
-        _secmap = _gsm()
-    except Exception:
-        _secmap = {}
-
-    # 매크로 신호 + 현금 권고
-    try:
-        _fed = fetch_fred('FEDFUNDS', 1); _fed_rate = _fed[-1][1] if _fed else None
-        _m2 = fetch_fred('M2SL', 14)
-        _m2_yoy = round((_m2[-1][1] / _m2[-13][1] - 1) * 100, 1) if len(_m2) >= 13 else None
-        _macro_sig, _gcmin, _gcmax, _, _ = compute_macro_signal(_fed_rate, _m2_yoy, fetch_spx_yoy())
-    except Exception:
-        _macro_sig, _gcmin, _gcmax = "—", 25, 40
-
-    _scr_all = _s_scr.get('stocks') or []
-    _scr_f = [s for s in _scr_all if _tmkt == "전체" or s.get('market') == _tmkt]
-    _mc1, _mc2, _mc3, _mc4 = st.columns(4)
-    _mc1.metric("시장 방향", _s_can.get('market_dir', '—'))
-    _mc2.metric("매크로 신호", _macro_sig)
-    _mc3.metric("주봉 신호 종목", f"{len(_scr_f)}개")
-    _mc4.metric("권고 현금", f"{_gcmin}~{_gcmax}%", help="매크로 위험도 기반 현금 비중 권고")
-
-    # ── 🎯 신호 + 상승 종합 (신호 종목을 기간 상승률순) ──
-    st.markdown("##### 🎯 신호 종목 — 상승률 순")
-    _retmap = {s['sym']: s for s in (load_json(Path('results/returns.json')) or {}).get('stocks', [])}
-    _p1map = {s['sym']: s.get('ret_1w') for s in (load_json(PERF_JSON) or {}).get('stocks', [])}
-    _PER = {'1주': None, '1개월': 'ret_1m', '3개월': 'ret_3m', '6개월': 'ret_6m',
-            '1년': 'ret_12m', 'YTD': 'ret_ytd', '사용자 지정': 'custom'}
-    _tc1, _tc2, _tc3 = st.columns([2.6, 1, 1])
-    _tper = _tc1.radio("기간", list(_PER.keys()), index=1, horizontal=True, key="today_per")
-    _tsort = _tc2.selectbox("정렬", ["상승률↓", "시총↓", "시총↑"], key="today_sort")
-    _tn = _tc3.slider("표시 수", 10, 60, 20, key="today_n")
-    _tk = _PER[_tper]
-
-    _custmap = {}
-    if _tper == "사용자 지정":
-        from datetime import datetime as _cdt, timedelta as _ctd
-        _cstart = st.date_input("시작일 — 이 날짜 대비 현재까지 상승률",
-                                value=(_cdt.now() - _ctd(days=30)).date(), key="today_cust")
-        with st.spinner("기간 수익률 계산 중 (첫 조회 ~1분, 이후 캐시)..."):
-            _custmap = _returns_since(tuple((s['sym'], s['market']) for s in _scr_f), str(_cstart))
-
-    _SIGM = [('sig_52w', '52주'), ('sig_vol', '거래량'), ('sig_maconv', '이평수렴'),
-             ('sig_cup', '컵핸들'), ('sig_ma5', '5주'), ('sig_rsimacd', 'RSI')]
-    try:
-        _rows = []
-        for s in _scr_f:
-            sym = s['sym']
-            if _tper == "1주":
-                ret = _p1map.get(sym)
-            elif _tper == "사용자 지정":
-                ret = _custmap.get(sym)
-            else:
-                ret = (_retmap.get(sym, {}) or {}).get(_tk)
-            _sec = _secmap.get(sym) or _secmap.get(str(sym).zfill(6)) or s.get('sector') or '-'
-            row = {'_mc': s.get('marcap') or 0,
-                   '시장': s['market'], '종목': s['name'], '코드': sym,
-                   '시총': fmt_cap(s.get('marcap'), s['market']), '섹터': str(_sec)[:10]}
-            for k, lab in _SIGM:
-                row[lab] = '✓' if s.get(k) else ''
-            row['신호수'] = s.get('total_signals', 0)
-            row['상승%'] = ret
-            _rows.append(row)
-        # 정렬 (파이썬에서 — 시총은 실제 숫자 기준)
-        if _tsort == "시총↓":
-            _rows.sort(key=lambda r: -r['_mc'])
-        elif _tsort == "시총↑":
-            _rows.sort(key=lambda r: r['_mc'])
-        else:
-            _rows.sort(key=lambda r: (r['상승%'] is None, -(r['상승%'] or 0)))
-        _rows = _rows[:_tn]
-        if _rows:
-            _md = pd.DataFrame(_rows).drop(columns=['_mc'])
-            _md.insert(0, 'No', range(1, len(_md) + 1))   # 항상 1부터
-            def _c_sig(v):
-                return 'color:#16a34a;font-weight:bold' if v == '✓' else ''
-            st.caption(f"총 {len(_scr_f)}개 신호 종목 중 상위 {len(_md)} · 기간 {_tper} · 정렬 {_tsort}  "
-                       f"(컬럼 헤더 클릭 정렬 시 No는 흐트러질 수 있음 → 위 '정렬' 사용 권장)")
-            st.dataframe(
-                _md.style.map(_c_sig, subset=[lab for _, lab in _SIGM])
-                    .format({'상승%': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
-                use_container_width=True, hide_index=True, height=36 + 35 * len(_md))
-    except Exception as _e:
-        st.caption(f"(표 생략: {_e})")
-
-
-# ════════════════════════════════════════════════════════════════════
-# 탭: 위닝 셋업 스코어 — 오르는 종목 지문 점수화 (가중치=백테스트 샤프)
-# ════════════════════════════════════════════════════════════════════
-with tab_win:
-    st.header("🏅 위닝 셋업 스코어")
-    st.caption("오르는 종목의 지문(베이스·신고가·거래량·상대강도·실적)을 백테스트 샤프 가중치로 점수화. "
-               "멍거 inversion: 신고가 -25% 이탈주는 감점. 신뢰계수는 페이퍼 실전으로 자동 보정.")
-
-    try:
-        import winning_score as _ws
-        _win_mkt = _GMKT
-        _wc2, _wc3 = st.columns([1, 2])
-        _win_grade = _wc2.selectbox("최소 등급", ["전체", "B이상", "A이상", "S만"], key="win_grade")
-        _win_n = _wc3.slider("표시 종목수", 10, 60, 30, key="win_n")
-
-        _wrows = _ws.rank_all(_win_mkt)
-        if not _wrows:
-            st.error("데이터 없음 → `python weekly_run.py` 실행 후 새로고침")
-        else:
-            from collections import Counter as _Counter
-            _gc = _Counter(r['grade'] for r in _wrows)
-            _g1, _g2, _g3, _g4 = st.columns(4)
-            _g1.metric("S급 (최상)", f"{_gc['S']}개")
-            _g2.metric("A급", f"{_gc['A']}개")
-            _g3.metric("B급", f"{_gc['B']}개")
-            _g4.metric("분석 종목", f"{len(_wrows)}개")
-
-            _gmin = {'전체': 0, 'B이상': 50, 'A이상': 65, 'S만': 80}[_win_grade]
-            _filt = [r for r in _wrows if r['score'] >= _gmin][:_win_n]
-
-            _secs = _Counter(r['sector'] for r in _filt if r['sector'] and r['sector'] != '기타')
-            if _secs:
-                _ts, _tc = _secs.most_common(1)[0]
-                _tp = _tc / len(_filt) * 100 if _filt else 0
-                if _tp >= 40:
-                    st.warning(f"⚠️ 섹터 집중: 상위 {len(_filt)}개 중 '{_ts}' {_tc}개({_tp:.0f}%) — "
-                               f"한 섹터 몰빵은 '안 망하는 포트폴리오'에 위배. 분산 권장.")
-
-            if not _filt:
-                st.info("해당 등급 종목이 없습니다. 등급 기준을 낮춰보세요.")
-            else:
-                _wrt = []
-                for r in _filt:
-                    bd = r['breakdown']
-                    _wrt.append({
-                        '등급': r['grade'], '점수': r['score'],
-                        '시장': r['market'], '종목': r['name'], '코드': r['sym'],
-                        '시총': fmt_cap(r.get('marcap'), r['market']),
-                        '섹터': r['sector'][:10] if r['sector'] else '-',
-                        '신고가거리': f"{r['dist_52w']:+.0f}%" if r['dist_52w'] is not None else '-',
-                        '베이스': round(bd.get('maconv', 0) + bd.get('cup', 0), 0),
-                        '신고가': round(bd.get('high52', 0), 0),
-                        'RS': round(bd.get('rs', 0), 0),
-                        '실적': round(bd.get('fund', 0), 0) if r['has_fund'] else None,
-                        '신호': ', '.join(r['signals'][:3]),
-                    })
-                _wdf = pd.DataFrame(_wrt)
-
-                def _c_grade(v):
-                    return {'S': 'background-color:#1a472a;color:white;font-weight:bold',
-                            'A': 'background-color:#2d6a4f;color:white',
-                            'B': 'color:#f0c040', 'C': 'color:#888'}.get(str(v), '')
-                def _c_score(v):
-                    try:
-                        f = float(v)
-                        if f >= 80: return 'color:#56d364;font-weight:bold'
-                        if f >= 65: return 'color:#7ee787'
-                        if f >= 50: return 'color:#f0c040'
-                    except: pass
-                    return 'color:#888'
-
-                st.dataframe(
-                    _wdf.style.map(_c_grade, subset=['등급']).map(_c_score, subset=['점수'])
-                        .format({'점수': '{:.1f}', '베이스': '{:.0f}', '신고가': '{:.0f}',
-                                 'RS': '{:.0f}', '실적': lambda v: f'{v:.0f}' if v is not None else '–'}, na_rep='–'),
-                    use_container_width=True, hide_index=True, height=min(36 + 35 * len(_wdf), 640))
-
-                st.caption("배점: 베이스(이평수렴/컵) 38 · 신고가 18 · RS 12 · 거래량 8 · 라이딩 8 · RSI 6 · 실적(KR) 10 "
-                           "+ 52주×베이스 시너지 8.  → 백테스트 13주 샤프에서 역산. "
-                           "실적 칸 '–'는 US(무료 펀더 데이터 없음)이며 그만큼 재정규화해 불이익 없음.")
-                st.info("⚠️ 점수는 '셋업의 질'이지 미래 보장이 아님. 높은 점수 = 과거 오르던 종목과 닮은 정도. "
-                        "실투자 전 페이퍼로 검증.")
-    except Exception as _we:
-        st.error(f"위닝 스코어 오류: {_we}")
-
-
-# ════════════════════════════════════════════════════════════════════
 # 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
 # ════════════════════════════════════════════════════════════════════
 
@@ -554,11 +410,21 @@ with t_gain:
         _PERIODS = {'1주': ('perf', 'ret_1w'), '1개월': ('ret', 'ret_1m'), '3개월': ('ret', 'ret_3m'),
                     '6개월': ('ret', 'ret_6m'), '1년': ('ret', 'ret_12m'), 'YTD': ('ret', 'ret_ytd')}
         _gmkt = _GMKT
-        _gc1, _gc3, _gc4 = st.columns([1.2, 1, 1])
+        _gc1, _gc2, _gc3, _gc4 = st.columns([1.2, 1.2, 1, 1])
         _gper = _gc1.selectbox("상승률 기간", list(_PERIODS.keys()), index=1, key="gain_per")
+        _gsort = _gc2.selectbox("정렬", ["상승률", "위닝점수"], key="gain_sort")
         _gsig = _gc3.checkbox("신호 있는 종목만", value=False, key="gain_sigonly")
         _gn = _gc4.slider("표시 종목수", 10, 60, 30, key="gain_n")
         _src, _retkey = _PERIODS[_gper]
+
+        # 위닝 셋업 스코어 흡수 (점수/등급) — JSON 기반이라 가벼움
+        _winmap = {}
+        try:
+            import winning_score as _ws
+            for _wr in _ws.rank_all(_gmkt):
+                _winmap[_wr['sym']] = {'score': _wr['score'], 'grade': _wr['grade']}
+        except Exception:
+            pass
 
         # perf 맵: 1주 수익률 + 현재 신호
         _SIGL = [('now_sig_52w', '52주신고가'), ('now_sig_vol', '거래량'), ('now_sig_maconv', '이평수렴'),
@@ -606,9 +472,12 @@ with t_gain:
             if _gsig and pm.get('nsig', 0) == 0:
                 continue
             cm = _canmap.get(s['sym'], {})
+            wm = _winmap.get(s['sym'], {})
             _grows.append({
                 '시장': s['market'], '종목': s['name'], '코드': s['sym'],
                 '시총': fmt_cap(s.get('marcap'), s['market']),
+                '등급': wm.get('grade', '-'),
+                '위닝점수': wm.get('score'),
                 '신호': ', '.join(pm.get('sigs', [])[:3]) or '-',
                 'CANSLIM': f"{cm['score']}/7" if cm.get('score') is not None else '-',
                 '매출%': f"{cm['rev']:+.0f}" if isinstance(cm.get('rev'), (int, float)) else '-',
@@ -616,22 +485,41 @@ with t_gain:
                 _retc: ret,
                 '향후2M계절성': _seasmap.get(s['sym']),
             })
-        _grows.sort(key=lambda r: -(r[_retc] if r[_retc] is not None else -999))
+        if _gsort == "위닝점수":
+            _grows.sort(key=lambda r: -(r['위닝점수'] if r['위닝점수'] is not None else -999))
+        else:
+            _grows.sort(key=lambda r: -(r[_retc] if r[_retc] is not None else -999))
         _grows = _grows[:_gn]
 
-        st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 ({_cmo}·{_nmo}월 계절성 동반)")
+        _slab = "위닝점수순" if _gsort == "위닝점수" else f"{_gper}상승순"
+        st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 · {_slab} ({_cmo}·{_nmo}월 계절성 동반)")
         _gdf = pd.DataFrame(_grows)
         def _cg2(v):
             try: return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#dc2626'
             except: return ''
+        def _cg_grade(v):
+            return {'S': 'background-color:#1a472a;color:white;font-weight:bold',
+                    'A': 'background-color:#2d6a4f;color:white',
+                    'B': 'color:#f0c040', 'C': 'color:#888'}.get(str(v), '')
+        def _cg_score(v):
+            try:
+                f = float(v)
+                if f >= 80: return 'color:#56d364;font-weight:bold'
+                if f >= 65: return 'color:#7ee787'
+                if f >= 50: return 'color:#f0c040'
+            except: pass
+            return 'color:#888'
         _gsub = [c for c in [_retc, '향후2M계절성'] if c in _gdf.columns]
         st.dataframe(
             _gdf.style.map(_cg2, subset=_gsub)
+                .map(_cg_grade, subset=['등급']).map(_cg_score, subset=['위닝점수'])
                 .format({_retc: '{:+.1f}%',
+                         '위닝점수': lambda v: f'{v:.1f}' if v is not None else '–',
                          '향후2M계절성': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
             use_container_width=True, hide_index=True, height=min(36 + 35 * len(_gdf), 640))
-        st.caption("신호=주봉(현재). CANSLIM·매출/영업익은 KR 한정. 계절성·1주는 perf 기준. "
-                   "⚠️ 상승률 상위 = '이미 오른' 종목 — 추격 주의, 손익비·가드레일 확인.")
+        st.caption("위닝점수=백테스트 샤프 가중 셋업 점수(S≥80·A≥65·B≥50). 신호=주봉(현재). "
+                   "CANSLIM·매출/영업익은 KR 한정. 계절성·1주는 perf 기준. "
+                   "⚠️ 상승률 상위 = '이미 오른' 종목, 점수 = '셋업의 질'(미래 보장 아님) — 추격 주의, 손익비·가드레일 확인.")
 
 
 # ── 주도주 (섹터/전체 상대강도) ──
@@ -1640,37 +1528,57 @@ with tab7:
                 st.table(r_df.style.hide(axis="index").map(_cr, subset=['수익률']))
 
             with right8:
-                st.subheader("💹 밸류에이션")
-                val_rows = [
-                    ('52주 고점',  f"{price_unit}{yr_h:,.0f}" if is_kr_sym else f"${yr_h:.2f}"),
-                    ('52주 저점',  f"{price_unit}{yr_l:,.0f}" if is_kr_sym else f"${yr_l:.2f}"),
-                    ('52주 위치',  f"{(price_now-yr_l)/(yr_h-yr_l)*100:.1f}%" if yr_h > yr_l else '-'),
-                    ('연간 변동성', f"{vol_20:.1f}%"),
-                ]
-                yf_val = {}
+                st.subheader("💹 밸류에이션 · 재무")
+                yi2 = {}
                 try:
                     t_yf = yf.Ticker(f"{sym8_clean}.KS" if is_kr_sym else sym8_clean)
                     yi2 = t_yf.info or {}
-                    yf_val = {
-                        'PER (TTM)':   yi2.get('trailingPE'),
-                        'PER (선행)':  yi2.get('forwardPE'),
-                        'PBR':         yi2.get('priceToBook'),
-                        'ROE (%)':     round(yi2.get('returnOnEquity',0)*100,1) if yi2.get('returnOnEquity') else None,
-                        '영업마진 (%)': round(yi2.get('operatingMargins',0)*100,1) if yi2.get('operatingMargins') else None,
-                    }
-                except: pass
+                except Exception:
+                    yi2 = {}
 
-                all_val = val_rows + [(k, f"{v:.1f}x" if 'PER' in k or 'PBR' in k else f"{v}%") for k, v in yf_val.items() if v]
-                v_df = pd.DataFrame([{'지표': k, '값': v} for k, v in all_val])
-                st.table(v_df.style.hide(axis="index"))
+                def _pcur(v):   # 통화 포맷
+                    if v is None: return '-'
+                    return f"{price_unit}{v:,.0f}" if is_kr_sym else f"${v:.2f}"
+                def _fx(v, suffix='', mult=1, dp=1):  # 숫자 포맷 (None 안전)
+                    if v is None: return '-'
+                    try: return f"{v*mult:.{dp}f}{suffix}"
+                    except Exception: return '-'
 
-                # PER(올해·내년) + 영업이익률(OPM) 연도별
-                st.subheader("📊 PER · 영업이익률(OPM)")
-                _pe_now = yf_val.get('PER (TTM)'); _pe_fwd = yf_val.get('PER (선행)')
-                _pe_rows = [
-                    {'항목': 'PER 올해(TTM)',     '값': f"{_pe_now:.1f}x" if _pe_now else '-'},
-                    {'항목': 'PER 내년(컨센서스)', '값': f"{_pe_fwd:.1f}x" if _pe_fwd else '-'},
+                _tgt = yi2.get('targetMeanPrice')
+                _upside = (_tgt/price_now - 1)*100 if (_tgt and price_now) else None
+                _peg = yi2.get('trailingPegRatio') or yi2.get('pegRatio')
+
+                # 지표: (라벨, 표시값)  — 없으면 '-'
+                val_rows = [
+                    ('52주 고점',   _pcur(yr_h)),
+                    ('52주 저점',   _pcur(yr_l)),
+                    ('52주 위치',   f"{(price_now-yr_l)/(yr_h-yr_l)*100:.1f}%" if yr_h > yr_l else '-'),
+                    ('연간 변동성',  _fx(vol_20, '%')),
+                    ('PER (TTM)',   _fx(yi2.get('trailingPE'), 'x')),
+                    ('PER (선행)',  _fx(yi2.get('forwardPE'), 'x')),
+                    ('PBR',         _fx(yi2.get('priceToBook'), 'x')),
+                    ('PSR',         _fx(yi2.get('priceToSalesTrailing12Months'), 'x')),
+                    ('PEG',         _fx(_peg, '', dp=2)),
+                    ('배당수익률',   _fx(yi2.get('dividendYield'), '%', mult=100, dp=2)),
+                    ('EPS (TTM)',   _fx(yi2.get('trailingEps'), '', dp=2)),
+                    ('EPS (선행)',  _fx(yi2.get('forwardEps'), '', dp=2)),
+                    ('ROE',         _fx(yi2.get('returnOnEquity'), '%', mult=100)),
+                    ('ROA',         _fx(yi2.get('returnOnAssets'), '%', mult=100)),
+                    ('영업마진',     _fx(yi2.get('operatingMargins'), '%', mult=100)),
+                    ('순이익률',     _fx(yi2.get('profitMargins'), '%', mult=100)),
+                    ('매출성장(YoY)', _fx(yi2.get('revenueGrowth'), '%', mult=100)),
+                    ('부채비율(D/E)', _fx(yi2.get('debtToEquity'), '%')),
+                    ('애널 목표가',   _pcur(_tgt)),
+                    ('목표가 여력',   _fx(_upside, '%')),
                 ]
+                v_df = pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows])
+                st.table(v_df.style.hide(axis="index"))
+                st.caption("PER/PBR/PSR·ROE·마진·배당·목표가 = yfinance(무료). KR(.KS)은 일부 항목이 빌 수 있음('-'). "
+                           "PEG<1·PBR낮음·ROE높음·부채비율낮음 = 저평가/우량 신호.")
+
+                # 영업이익률(OPM) 연도별 추이
+                st.subheader("📊 영업이익률(OPM) 추이")
+                _pe_rows = []
                 _ann = (earn or {}).get('annual') if isinstance(earn, dict) else None
                 if _ann is not None and hasattr(_ann, 'empty') and not _ann.empty:
                     def _ac(keys, col):
@@ -1688,9 +1596,11 @@ with tab7:
                         opm = round(oi / rev * 100, 1) if (oi and rev) else None
                         _pe_rows.append({'항목': f'OPM {str(c)[:4]}',
                                          '값': f"{opm:+.1f}%" if opm is not None else '-'})
-                st.table(pd.DataFrame(_pe_rows).style.hide(axis="index"))
-                st.caption("내년 PER = yfinance 선행(컨센서스 기반). OPM=영업이익/매출. "
-                           "전년 PER·내년 OPM 컨센서스는 무료 데이터 한계로 생략. KR은 yfinance 제약으로 빌 수 있음.")
+                if _pe_rows:
+                    st.table(pd.DataFrame(_pe_rows).style.hide(axis="index"))
+                    st.caption("OPM=영업이익/매출. 최근 3개 회계연도. US 위주(KR은 yfinance 제약으로 빌 수 있음).")
+                else:
+                    st.caption("OPM 데이터 없음 (yfinance 재무제표 조회 실패 — KR 종목에서 흔함).")
 
                 if insid is not None and not insid.empty:
                     st.subheader("👤 내부자 거래")
@@ -1698,322 +1608,90 @@ with tab7:
                 elif is_kr_sym:
                     st.info("한국 종목 내부자 거래는 제공하지 않습니다")
 
+            # ════════════════════════════════════════════════════════════
+            # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
+            # ════════════════════════════════════════════════════════════
+            st.divider()
+            _mstat, _gcdc = st.columns(2)
+
+            with _mstat:
+                st.subheader("📆 월별 상승률 통계")
+                _mclose = hist['Close'].resample('ME').last()
+                _mret = _mclose.pct_change().dropna() * 100
+                if len(_mret) >= 12:
+                    _mrows = []
+                    for _mo in range(1, 13):
+                        _v = _mret[_mret.index.month == _mo]
+                        if len(_v) == 0:
+                            continue
+                        _mrows.append({'월': f"{_mo}월", '평균%': round(float(_v.mean()), 1),
+                                       '승률%': round(float((_v > 0).mean() * 100), 0),
+                                       '표본': int(len(_v)),
+                                       '최고%': round(float(_v.max()), 1),
+                                       '최저%': round(float(_v.min()), 1)})
+                    _msdf = pd.DataFrame(_mrows)
+                    def _cmm(v):
+                        try: return 'color:#56d364;font-weight:bold' if float(v) >= 0 else 'color:#f78166'
+                        except Exception: return ''
+                    st.dataframe(
+                        _msdf.style.map(_cmm, subset=['평균%', '최고%', '최저%'])
+                            .format({'평균%': '{:+.1f}%', '승률%': '{:.0f}%',
+                                     '최고%': '{:+.1f}%', '최저%': '{:+.1f}%'}),
+                        use_container_width=True, hide_index=True,
+                        height=36 + 35 * len(_msdf))
+                    _best = max(_mrows, key=lambda r: r['평균%'])
+                    _worst = min(_mrows, key=lambda r: r['평균%'])
+                    st.caption(f"과거 {len(_mret)}개월 표본. 강한 달 **{_best['월']}**(평균 {_best['평균%']:+.1f}%), "
+                               f"약한 달 **{_worst['월']}**({_worst['평균%']:+.1f}%). "
+                               "표본 늘리려면 기간을 '5y'로. ⚠️ 계절성은 통계 경향일 뿐 보조지표.")
+                else:
+                    st.info("월별 통계 표본 부족 — 기간을 '3y'나 '5y'로 늘려주세요.")
+
+            with _gcdc:
+                st.subheader("⚡ 골든/데드크로스 매매 성과")
+                _gpair = st.radio("이평 조합", ["50/200 (정통)", "20/60 (단기)"],
+                                  horizontal=True, key="gcdc_pair")
+                _ff, _ss = (50, 200) if _gpair.startswith("50") else (20, 60)
+                _maf = closes.rolling(_ff).mean()
+                _mas = closes.rolling(_ss).mean()
+                _rel = (_maf > _mas).astype(float)
+                _rel[_maf.isna() | _mas.isna()] = float('nan')
+                _cross = _rel.diff()   # +1 골든크로스, -1 데드크로스
+                _ent = list(hist.index[_cross == 1])
+                _exs = list(hist.index[_cross == -1])
+                _trades = []
+                for _e in _ent:
+                    _later = [x for x in _exs if x > _e]
+                    _xd = _later[0] if _later else hist.index[-1]
+                    _pe = float(closes.loc[_e]); _px = float(closes.loc[_xd])
+                    if _pe > 0:
+                        _trades.append({'ret': (_px / _pe - 1) * 100,
+                                        'days': (_xd - _e).days,
+                                        'open': not _later})
+                if _trades:
+                    _rets = [t['ret'] for t in _trades]
+                    _wins = sum(1 for r in _rets if r > 0)
+                    _bh = (float(closes.iloc[-1]) / float(closes.iloc[0]) - 1) * 100
+                    _srows = [
+                        {'항목': '거래 횟수', '값': f"{len(_trades)}회"},
+                        {'항목': '승률', '값': f"{_wins/len(_trades)*100:.0f}%"},
+                        {'항목': '평균 수익', '값': f"{sum(_rets)/len(_rets):+.1f}%"},
+                        {'항목': '최고 / 최저', '값': f"{max(_rets):+.0f}% / {min(_rets):+.0f}%"},
+                        {'항목': '평균 보유', '값': f"{sum(t['days'] for t in _trades)//len(_trades)}일"},
+                        {'항목': '비교: 매수후보유', '값': f"{_bh:+.1f}%"},
+                    ]
+                    st.table(pd.DataFrame(_srows).style.hide(axis="index"))
+                    _cur_gc = "🟢 골든(정배열)" if (_rel.iloc[-1] == 1) else "🔴 데드(역배열)"
+                    _openmsg = " · 현재 진입 중(미청산)" if _trades[-1]['open'] else ""
+                    st.caption(f"현재 상태: **{_cur_gc}**{_openmsg}. 골든크로스 진입→다음 데드크로스 청산 기준 "
+                               f"(MA{_ff}/MA{_ss}). ⚠️ 후행지표라 횡보장선 잦은 손실(휩쏘). 추세장에서만 유효.")
+                else:
+                    st.info(f"교차 신호 없음 — 기간이 짧거나(현 기간 < MA{_ss}) 교차 미발생. '5y'로 늘려보세요.")
+
     elif not sym8:
         st.info("👆 종목코드를 입력하고 분석 버튼을 누르세요\n\n"
                 "**US**: TSLA · AAPL · NVDA · MSFT · QCOM\n\n"
                 "**KR**: 005930.KS (삼성전자) · 000660.KS (SK하이닉스)")
-
-
-# ════════════════════════════════════════════════════════════════════
-# 탭8: 포트폴리오 관리
-# ════════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=300)
-def _fetch_price(sym: str, market: str):
-    try:
-        import FinanceDataReader as fdr
-        code = sym.replace('.KS','').replace('.KQ','')
-        fdr_sym = code if market == 'KR' else sym
-        start = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
-        df = fdr.DataReader(fdr_sym, start)
-        return float(df['Close'].iloc[-1]) if not df.empty else None
-    except: return None
-
-with tab8:
-    st.header("💼 포트폴리오 관리")
-    update_badge(PORTFOLIO_RESULT)
-
-    with st.expander("➕ 종목 추가", expanded=False):
-        fc1, fc2, fc3, fc4, fc5, fc6 = st.columns([2,1,1,1,1,1])
-        with fc1: p_sym  = st.text_input("티커",         key="p_sym",  placeholder="TSLA / 005930")
-        with fc2: p_name = st.text_input("이름(선택)",   key="p_name", placeholder="Tesla")
-        with fc3: p_mkt  = st.selectbox("시장",          ["US","KR"],  key="p_mkt")
-        with fc4: p_qty  = st.number_input("수량",       min_value=0.0, step=1.0,  key="p_qty")
-        with fc5: p_buy  = st.number_input("매수가",     min_value=0.0, step=0.01, key="p_buy", format="%.2f")
-        with fc6: p_date = st.date_input("매수일", key="p_date")
-
-        fc7, fc8, fc9 = st.columns([1,1,2])
-        with fc7: p_stop   = st.number_input("손절%", value=7.0,  min_value=1.0, max_value=50.0, key="p_stop")
-        with fc8: p_target = st.number_input("목표%", value=20.0, min_value=1.0, max_value=500.0, key="p_target")
-        with fc9: p_note   = st.text_input("메모", key="p_note", placeholder="52주신고가+이평수렴")
-
-        if st.button("추가", key="p_add"):
-            if p_sym and p_buy > 0 and p_qty > 0:
-                positions = _load_pf()
-                positions.append({
-                    'id':         f"{p_sym}_{p_date}_{len(positions)}",
-                    'sym':        p_sym.upper().strip(),
-                    'name':       p_name or p_sym.upper(),
-                    'market':     p_mkt,
-                    'qty':        float(p_qty),
-                    'buy_price':  float(p_buy),
-                    'buy_date':   str(p_date),
-                    'stop_loss_pct':  float(p_stop),
-                    'target_pct':     float(p_target),
-                    'note':       p_note,
-                })
-                _save_pf(positions)
-                st.cache_data.clear()
-                st.success(f"✅ {p_sym.upper()} 추가 완료")
-                st.rerun()
-            else:
-                st.error("티커·매수가·수량을 모두 입력하세요")
-
-    positions = _load_pf()
-
-    if not positions:
-        st.info("👆 '종목 추가'에서 보유 종목을 입력하세요\n\n"
-                "입력 후 매일 06:00 자동으로 현재가 조회 + 손절 경고를 텔레그램으로 전송합니다.")
-    else:
-        with st.spinner("현재가 조회 중..."):
-            rows_pf = []
-            for pos in positions:
-                cur = _fetch_price(pos['sym'], pos.get('market','US'))
-                buy = float(pos.get('buy_price', 0))
-                qty = float(pos.get('qty', 0))
-                pnl_pct = (cur / buy - 1) * 100 if cur and buy > 0 else None
-                pnl_amt = (cur - buy) * qty      if cur and buy > 0 else None
-                stop_px = buy * (1 - float(pos.get('stop_loss_pct', 7)) / 100)
-                tgt_px  = buy * (1 + float(pos.get('target_pct', 20)) / 100)
-                ccy     = '₩' if pos.get('market') == 'KR' else '$'
-
-                rows_pf.append({
-                    '시장':     pos.get('market','US'),
-                    '종목명':   pos.get('name', pos['sym']),
-                    '코드':     pos['sym'],
-                    '수량':     qty,
-                    '매수가':   f"{ccy}{buy:,.2f}",
-                    '현재가':   f"{ccy}{cur:,.2f}" if cur else '조회실패',
-                    '수익률':   pnl_pct,
-                    'P&L':      pnl_amt,
-                    '손절가':   f"{ccy}{stop_px:,.2f}",
-                    '목표가':   f"{ccy}{tgt_px:,.2f}",
-                    '매수일':   pos.get('buy_date',''),
-                    '메모':     pos.get('note',''),
-                    '_id':      pos.get('id',''),
-                    '_cur':     cur,
-                    '_value':   (cur * qty) if cur else None,
-                    '_qty':     qty,
-                })
-
-        df_pf = pd.DataFrame(rows_pf)
-
-        valid_pf = [r for r in rows_pf if r['P&L'] is not None]
-        if valid_pf:
-            total_pnl = sum(r['P&L'] for r in valid_pf)
-            total_inv = sum(
-                float(pos.get('buy_price',0)) * float(pos.get('qty',0))
-                for pos in positions
-            )
-            total_pnl_pct = total_pnl / total_inv * 100 if total_inv > 0 else 0
-            n_profit = sum(1 for r in valid_pf if r['수익률'] and r['수익률'] >= 0)
-            n_loss   = len(valid_pf) - n_profit
-            n_warn   = sum(1 for r in valid_pf
-                          if r['수익률'] and r['수익률'] <= -float(
-                              next((p['stop_loss_pct'] for p in positions if p['sym']==r['코드']), 7)))
-
-            m1, m2, m3, m4, m5 = st.columns(5)
-            m1.metric("총 손익금액",  f"{total_pnl:+,.0f}")
-            m2.metric("수익률",       f"{total_pnl_pct:+.1f}%")
-            m3.metric("수익 종목",    f"{n_profit}개")
-            m4.metric("손실 종목",    f"{n_loss}개")
-            m5.metric("⚠️ 손절 경고", f"{n_warn}개",
-                      delta="즉시 확인" if n_warn > 0 else None,
-                      delta_color="inverse")
-
-        # ════════════════════════════════════════════════════════════
-        # 🛡️ 원칙 가드레일 — 감정이 아니라 규칙이 포지션을 강제한다
-        # ════════════════════════════════════════════════════════════
-        st.divider()
-        st.subheader("🛡️ 원칙 가드레일")
-        st.caption("내가 정한 원칙대로 — 상위 2종목만 20%, 나머지는 더 작게, 30% 넘으면 줄이고, "
-                   "레버리지·손절·현금을 기계가 강제합니다. (1억 손실 후 정립한 규칙)")
-
-        with st.expander("⚙️ 원칙 설정 (한 번 정하면 끝)", expanded=False):
-            _ga, _gb, _gc = st.columns(3)
-            _g_top  = _ga.slider("상위 2종목 최대 비중 %", 10, 30, 20, key="g_top")
-            _g_low  = _gb.slider("3위~ 종목 최대 비중 %", 5, 20, 12, key="g_low")
-            _g_trim = _gc.slider("자동 축소 임계 %", 20, 50, 30, key="g_trim")
-            _gd, _ge, _gf = st.columns(3)
-            _g_lev  = _gd.slider("레버리지 합계 한도 %", 0, 50, 10, key="g_lev")
-            _g_stop = _ge.slider("손절선 -%", 3, 20, 8, key="g_stop")
-            _g_holdval = int(sum(r['_value'] for r in rows_pf if r.get('_value')))
-            _g_cap  = _gf.number_input("총 자본(현금 포함, 원) — 현금비중 점검용", min_value=0,
-                                       value=_g_holdval, step=1_000_000, key="g_cap",
-                                       help="보유 평가액보다 크게 입력하면 그 차액을 현금으로 봅니다")
-
-        # 매크로 현금 권고 밴드
-        try:
-            _gfed = fetch_fred('FEDFUNDS', 1); _gfr = _gfed[-1][1] if _gfed else None
-            _gm2 = fetch_fred('M2SL', 14)
-            _gm2y = round((_gm2[-1][1] / _gm2[-13][1] - 1) * 100, 1) if len(_gm2) >= 13 else None
-            _, _gcmin, _gcmax, _, _ = compute_macro_signal(_gfr, _gm2y, fetch_spx_yoy())
-        except Exception:
-            _gcmin, _gcmax = 25, 40
-
-        _gpos = [{'sym': r['코드'], 'name': r['종목명'], 'market': r['시장'],
-                  'value': r['_value'], 'pnl_pct': r['수익률'],
-                  'cur_price': r['_cur'], 'qty': r['_qty']}
-                 for r in rows_pf if r.get('_value')]
-        try:
-            import guardrail as _grd
-            _gr = _grd.evaluate(_gpos, total_capital=(_g_cap or None),
-                                top_cap=_g_top, lower_cap=_g_low, trim_threshold=_g_trim,
-                                lev_cap=_g_lev, stop_pct=_g_stop,
-                                cash_min=_gcmin, cash_max=_gcmax)
-            _gs = _gr['summary']
-            _gx1, _gx2, _gx3, _gx4 = st.columns(4)
-            _gx1.metric("원칙 점검", _gr['grade'])
-            _gx2.metric("상위2 비중", f"{_gs.get('top2', 0):.0f}%",
-                        help=f"한도 {_g_top*2}% (각 {_g_top}%)")
-            _gx3.metric("레버리지", f"{_gs.get('lev_pct', 0):.0f}%", help=f"한도 {_g_lev}%")
-            _gx4.metric("현금", f"{_gs['cash_pct']:.0f}%" if _gs.get('cash_pct') is not None else "—",
-                        help=f"매크로 권고 {_gcmin}~{_gcmax}%")
-
-            if not _gr['violations']:
-                st.success("🟢 원칙 준수 중 — 잘하고 있어요. 감정 흔들려도 이 규칙만 지키면 됩니다.")
-            else:
-                st.error(f"**{_gr['grade']}** — {_gs['msg']}")
-                _vrows = [{'': v['sev'], '항목': v['rule'], '조치': v['msg'],
-                           '줄일 금액': f"{v['trim_value']:,.0f}원" if v.get('trim_value') else '-',
-                           '수량': f"{v['qty_cut']:,.0f}주" if v.get('qty_cut') else '-'}
-                          for v in _gr['violations']]
-                st.dataframe(pd.DataFrame(_vrows), use_container_width=True, hide_index=True,
-                             height=36 + 35 * len(_vrows))
-                st.caption("⚠️ 자동 주문은 안 합니다 — '무엇을 얼마나' 알려줄 뿐, 실행은 본인이. "
-                           "근데 이 지시대로만 하면 6월 같은 일은 안 생겨요.")
-        except Exception as _ge2:
-            st.caption(f"(가드레일 계산 생략: {_ge2})")
-
-        st.divider()
-
-        def _color_pnl(v):
-            if v is None: return ''
-            try:
-                f = float(v)
-                if f >= 10:  return 'color:#ff2222;font-weight:bold'
-                if f >= 0:   return 'color:#56d364'
-                if f >= -7:  return 'color:#ffa657'
-                return 'color:#ff4444;font-weight:bold'
-            except: return ''
-
-        def _color_pnl_amt(v):
-            if v is None: return ''
-            try:
-                return 'color:#56d364' if float(v) >= 0 else 'color:#ff4444'
-            except: return ''
-
-        disp_pf = ['시장','종목명','코드','수량','매수가','현재가','수익률','P&L','손절가','목표가','매수일','메모']
-        styled_pf = df_pf[disp_pf].style \
-            .map(_color_pnl,     subset=['수익률']) \
-            .map(_color_pnl_amt, subset=['P&L']) \
-            .format({'수익률': lambda v: f"{v:+.1f}%" if v is not None else '-',
-                     'P&L':    lambda v: f"{v:+,.0f}" if v is not None else '-',
-                     '수량':    '{:.0f}'})
-
-        st.dataframe(styled_pf, use_container_width=True, hide_index=True,
-                     height=36 + 35 * len(df_pf))
-
-        # ── 🚨 매도 점검 (살아남기 핵심) ──────────────────────────────
-        st.divider()
-        st.subheader("🚨 매도 점검 — 언제 팔까")
-        st.caption("보유 종목마다 사전 규칙 3가지로 자동 점검: 방어손절 · 분할익절 · 시간매도. "
-                   "이평 이탈 같은 사후적 룰은 배제 — 매도는 미리 정한 손절·목표·시간으로만.")
-        if st.button("🔍 지금 매도 신호 점검 (실시간 ~종목당 2초)", key="sell_check"):
-            with st.spinner("매도 신호 분석 중..."):
-                try:
-                    import sell_signals as _sells
-                    _srows = []
-                    for pos in positions:
-                        _ev = _sells.evaluate_sell(
-                            pos['sym'], pos.get('market', 'US'), float(pos.get('buy_price', 0)),
-                            buy_date=pos.get('buy_date'),
-                            stop_pct=float(pos.get('stop_loss_pct', 8)),
-                            target_pct=float(pos.get('target_pct', 20)),
-                        )
-                        _srows.append({
-                            '종목': pos.get('name', pos['sym']), '코드': pos['sym'],
-                            '신호': _ev['signal'], '수익률': _ev['pnl_pct'],
-                            '근거': _ev['reason'], '조치': _ev['action'],
-                        })
-                    _sdf = pd.DataFrame(_srows)
-                    def _c_sell(v):
-                        s = str(v)
-                        if '손절' in s: return 'background-color:#5a1a1a;color:white;font-weight:bold'
-                        if '익절' in s: return 'color:#56d364;font-weight:bold'
-                        if '시간' in s: return 'color:#f0c040'
-                        if '보유' in s: return 'color:#7ee787'
-                        return 'color:#888'
-                    st.dataframe(
-                        _sdf.style.map(_c_sell, subset=['신호'])
-                            .format({'수익률': lambda v: f"{v:+.1f}%" if v is not None else '-'}),
-                        use_container_width=True, hide_index=True,
-                        height=36 + 36 * len(_sdf))
-                    _urgent = [r for r in _srows if '손절' in r['신호']]
-                    if _urgent:
-                        st.error(f"🔴 즉시 점검: {', '.join(r['종목'] for r in _urgent)} — 손절선 이탈")
-                    else:
-                        st.success("✅ 손절 위반 없음 — 이기는 포지션은 그대로 둡니다")
-                except Exception as _se:
-                    st.error(f"매도 점검 오류: {_se}")
-
-        st.divider()
-        col_del1, col_del2 = st.columns([3, 1])
-        with col_del1:
-            del_name = st.selectbox("종목 삭제",
-                [f"{r['코드']} ({r['종목명']})" for r in rows_pf],
-                key="del_pos")
-        with col_del2:
-            st.write("")
-            if st.button("🗑️ 삭제", key="do_del"):
-                del_sym = del_name.split(' ')[0]
-                new_pos = [p for p in positions if p['sym'] != del_sym]
-                _save_pf(new_pos)
-                st.cache_data.clear()
-                st.success(f"{del_sym} 삭제 완료")
-                st.rerun()
-
-        if valid_pf:
-            st.divider()
-            st.subheader("📊 종목별 수익률")
-            chart_df = pd.DataFrame([
-                {'종목': r['종목명'], '수익률(%)': r['수익률']}
-                for r in valid_pf if r['수익률'] is not None
-            ]).sort_values('수익률(%)', ascending=True)
-
-            fig_pf = go.Figure(go.Bar(
-                x=chart_df['수익률(%)'],
-                y=chart_df['종목'],
-                orientation='h',
-                marker_color=[
-                    'rgba(86,211,100,0.8)' if v >= 0 else 'rgba(247,129,102,0.8)'
-                    for v in chart_df['수익률(%)']
-                ],
-            ))
-            fig_pf.add_vline(x=0, line_color='rgba(110,118,129,0.5)')
-            fig_pf.update_layout(
-                height=max(200, 40 * len(chart_df)),
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='#8b949e', size=11),
-                margin=dict(l=0, r=60, t=10, b=0),
-                xaxis_title='수익률(%)',
-            )
-            fig_pf.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
-            fig_pf.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
-            st.plotly_chart(fig_pf, use_container_width=True)
-
-        st.divider()
-        if st.button("📲 지금 텔레그램으로 포트폴리오 전송", key="tg_now"):
-            import subprocess, sys as _sys
-            result = subprocess.run(
-                [_sys.executable, 'portfolio_monitor.py'],
-                capture_output=True, text=True,
-                cwd=str(Path(__file__).parent),
-            )
-            if result.returncode == 0:
-                st.success("✅ 텔레그램 전송 완료!")
-            else:
-                st.error(f"오류: {result.stderr[:200]}")
-
 
 
 # ════════════════════════════════════════════════════════════════════
