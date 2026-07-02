@@ -117,6 +117,25 @@ def financials(corp_code, year, period='annual'):
     return out
 
 
+def insiders(corp_code, limit=15):
+    """임원·주요주주 특정증권 소유변동(내부자 매수/매도).
+    [{date, name, position, change, holdings}] 최신순. change>0=취득 <0=처분."""
+    try:
+        j = _get(f"{BASE}/elestock.json", {'crtfc_key': _key(), 'corp_code': corp_code}).json()
+    except Exception:
+        return []
+    if j.get('status') != '000':
+        return []
+    rows = []
+    for x in j.get('list', []):
+        rows.append({'date': x.get('rcept_dt'), 'name': x.get('repror'),
+                     'position': x.get('isu_exctv_ofcps') or x.get('isu_main_shrholdr') or '-',
+                     'change': _to_num(x.get('sp_stock_lmp_irds_cnt')),
+                     'holdings': _to_num(x.get('sp_stock_lmp_cnt'))})
+    rows.sort(key=lambda r: (r['date'] or ''), reverse=True)
+    return rows[:limit]
+
+
 _CF = {'op_cf': '영업활동', 'inv_cf': '투자활동', 'fin_cf': '재무활동'}
 
 
