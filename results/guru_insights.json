@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "6tKyBJVi0Rk",
+      "title": "코스피의 착시효과...찐 바닥 오면 '이 주식'부터 당장 정리ㅣ정프로, 명민준, 박가영, 유창희 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-02T13:00:26+00:00",
+      "url": "https://www.youtube.com/watch?v=6tKyBJVi0Rk",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "Server disconnected without sending a response."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-03T00:07:19.257293+09:00"
+    },
+    {
+      "video_id": "j0XzQOKipfM",
+      "title": "수익 나는 계좌의 결정적 차이. 우상향의 진짜 공식이 있다ㅣ정프로, 명민준, 박가영, 차영주 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-02T13:30:07+00:00",
+      "url": "https://www.youtube.com/watch?v=j0XzQOKipfM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "Server disconnected without sending a response."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-03T00:02:30.692890+09:00"
+    },
+    {
       "video_id": "DvpDgBGGxYs",
       "title": "'30만전자', '250만닉스' 결국 깨졌다! 추가 하락 염두에 둬야 할까? | 박지훈, 여도은, 허재무 [아침N투자]",
       "channel": "삼프로TV",
@@ -1023,11 +1061,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-02T21:38:32.004304+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-03T00:07:51.642217+09:00"
     },
     {
       "video_id": "gj3sgoyEZp0",
@@ -1254,8 +1292,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-02T21:31:57.617531+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-02T23:57:46.420384+09:00"
     },
     {
       "video_id": "-l1ZRfeuNt4",
@@ -13893,5 +13931,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-07-02T21:51:25.091114+09:00"
+  "updated": "2026-07-03T00:07:52.860768+09:00"
 }
