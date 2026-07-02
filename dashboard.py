@@ -1557,6 +1557,71 @@ with tab7:
                            "금액 KR=억원·US=USD. 멀티플은 현재 시총÷공식 실적.")
                 st.divider()
 
+            # ── 🏅 CANSLIM 스코어카드 (체슬라투자자문 방식) ──
+            if _off and len(_off) >= 2:
+                st.subheader("🏅 CANSLIM 스코어카드 (체슬리식)")
+                _op = [r.get('op_income') for r in _off]
+
+                def _grow_score(cur, base, yrs):
+                    """min(25, 성장률% − 5). 체슬리 C·A 방식. base 적자면 흑자전환 처리."""
+                    if cur is None or base is None:
+                        return None
+                    if base <= 0:
+                        return 25.0 if cur and cur > 0 else -10.0
+                    g = ((cur / base) ** (1 / yrs) - 1) * 100
+                    return round(min(25.0, g - 5), 1)
+
+                _nb = min(3, len(_op) - 1)
+                _A = _grow_score(_op[0], _op[_nb], _nb)          # A: 영업이익 3년 CAGR
+                _C = _grow_score(_op[0], _op[1], 1)              # C: 영업이익 최근 YoY
+
+                # L: 시장대비 6개월 초과수익 (10%p당 +5점)
+                _stk6 = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
+                _mkt6 = None
+                try:
+                    _idf = fetch_index_history('KS11' if is_kr_sym else 'SPY', 200)
+                    if len(_idf) > 127:
+                        _mkt6 = (float(_idf.iloc[-1].values[0]) / float(_idf.iloc[-127].values[0]) - 1) * 100
+                except Exception:
+                    pass
+                _exc = (_stk6 - _mkt6) if (_stk6 is not None and _mkt6 is not None) else None
+                _L = round(max(0.0, min(25.0, _exc * 0.5)), 1) if _exc is not None else None
+
+                # M: 시장국면
+                try:
+                    _fr = fetch_fred('FEDFUNDS', 1); _frr = _fr[-1][1] if _fr else None
+                    _m2m = fetch_fred('M2SL', 14)
+                    _m2yy = round((_m2m[-1][1] / _m2m[-13][1] - 1) * 100, 1) if len(_m2m) >= 13 else None
+                    _Mlabel = compute_macro_signal(_frr, _m2yy, fetch_spx_yoy())[0]
+                except Exception:
+                    _Mlabel = '—'
+
+                st.caption("정성 항목(N·S·I)은 체슬리 엑셀처럼 직접 입력 — 경영진·자사주·기관수급 판단")
+                _sc1, _sc2, _sc3 = st.columns(3)
+                _N = _sc1.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
+                _S = _sc2.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
+                _I = _sc3.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
+
+                _parts = [('C', _C, '영업익 최근 YoY − 5'), ('A', _A, '영업익 3년 CAGR − 5'),
+                          ('N', float(_N), '신성장·경영진 (입력)'), ('S', float(_S), '자사주·수급 (입력)'),
+                          ('L', _L, (f'시장대비 6M {_exc:+.0f}%p' if _exc is not None else '데이터 없음')),
+                          ('I', float(_I), '기관 보유증가 (입력)')]
+                _total = round(sum(v for _, v, _ in _parts if isinstance(v, (int, float))), 1)
+                _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
+                          else 'C' if _total >= 30 else 'D')
+
+                _cc1, _cc2 = st.columns([1, 2])
+                _cc1.metric("CANSLIM 총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
+                _cc1.metric("등급", _grade)
+                _cc1.caption(f"시장국면 M: {_Mlabel}")
+                _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
+                                       '근거': d} for k, v, d in _parts])
+                _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, height=36 + 35 * len(_scdf))
+                st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
+                           "N·S·I=정성 입력 · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심. "
+                           "각 항목 max 25 (C·A는 음수 가능).")
+                st.divider()
+
             left8, right8 = st.columns(2)
 
             yr1  = hist.tail(252)
