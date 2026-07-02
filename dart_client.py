@@ -117,6 +117,73 @@ def financials(corp_code, year, period='annual'):
     return out
 
 
+_YOY_KEYS = {'net_income': ['당기순이익'], 'revenue': ['매출액', '수익(매출액)', '영업수익'],
+             'op_income': ['영업이익']}
+
+
+def financials_yoy(corp_code, year, period='annual'):
+    """IS 항목의 당기 + 전년동기(frmtrm). {net_income, net_income_prev, revenue, ...}.
+    DART 보고서가 전년동기 컬럼을 주므로 1콜로 YoY 계산 가능. 연결(CFS) 우선."""
+    try:
+        j = _get(f"{BASE}/fnlttSinglAcnt.json",
+                 {'crtfc_key': _key(), 'corp_code': corp_code, 'bsns_year': str(year),
+                  'reprt_code': REPRT.get(period, '11011')}).json()
+    except Exception:
+        return {}
+    if j.get('status') != '000':
+        return {}
+    out = {}
+    for pref in ('CFS', 'OFS'):        # 연결 우선, 없으면 개별
+        for row in j.get('list', []):
+            if row.get('fs_div') != pref:
+                continue
+            nm = row.get('account_nm', '')
+            for key, names in _YOY_KEYS.items():
+                if key not in out and any(n in nm for n in names):
+                    out[key] = _to_num(row.get('thstrm_amount'))
+                    out[key + '_prev'] = _to_num(row.get('frmtrm_amount'))
+        if out:
+            break
+    return out
+
+
+def _yoy_pct(cur, prev):
+    """YoY %. 전년 적자면 '흑자전환'(흑자일 때)/None, 0이면 None."""
+    if cur is None or prev is None or prev == 0:
+        return None
+    if prev < 0:
+        return '흑자전환' if cur > 0 else None
+    return round((cur / prev - 1) * 100, 1)
+
+
+def canslim_growth(corp_code):
+    """CANSLIM C·A용 공식 성장률. 반환:
+    {c_growth(최근분기 순익 YoY), a_growth_y1, a_growth_y2(연간 순익 YoY), rev_growth, op_growth}."""
+    from datetime import datetime as _dt
+    y = _dt.now().year
+    out = {'c_growth': None, 'a_growth_y1': None, 'a_growth_y2': None,
+           'rev_growth': None, 'op_growth': None}
+    # C: 최근 확정 분기(누적) 순이익 YoY
+    for yy in (y, y - 1):
+        for per in ('q3', 'half', 'q1'):
+            fy = financials_yoy(corp_code, yy, per)
+            if fy.get('net_income') is not None and fy.get('net_income_prev') is not None:
+                out['c_growth'] = _yoy_pct(fy['net_income'], fy['net_income_prev'])
+                break
+        if out['c_growth'] is not None:
+            break
+    # A: 최근 확정 연도(Y-1) 사업보고서 → 순익/매출/영업익 YoY(g1), 그리고 Y-2 → g2
+    a1 = financials_yoy(corp_code, y - 1, 'annual')
+    if a1:
+        out['a_growth_y1'] = _yoy_pct(a1.get('net_income'), a1.get('net_income_prev'))
+        out['rev_growth'] = _yoy_pct(a1.get('revenue'), a1.get('revenue_prev'))
+        out['op_growth'] = _yoy_pct(a1.get('op_income'), a1.get('op_income_prev'))
+    a2 = financials_yoy(corp_code, y - 2, 'annual')
+    if a2:
+        out['a_growth_y2'] = _yoy_pct(a2.get('net_income'), a2.get('net_income_prev'))
+    return out
+
+
 def insiders(corp_code, limit=15):
     """임원·주요주주 특정증권 소유변동(내부자 매수/매도).
     [{date, name, position, change, holdings}] 최신순. change>0=취득 <0=처분."""
