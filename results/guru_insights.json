@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "9zVArT4CW54",
+      "title": "마이너스 50%라고요?  #박세익",
+      "channel": "체슬리TV",
+      "published": "2026-07-02T03:00:23+00:00",
+      "url": "https://www.youtube.com/watch?v=9zVArT4CW54",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-02T14:43:17.666587+09:00"
+    },
+    {
+      "video_id": "TcUlbcact20",
+      "title": "국민연금 리밸런싱 첫날…삼성전자 팔고 '이 종목' 담았다",
+      "channel": "체슬리TV",
+      "published": "2026-07-02T05:03:08+00:00",
+      "url": "https://www.youtube.com/watch?v=TcUlbcact20",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-02T14:42:45.379331+09:00"
+    },
+    {
       "video_id": "-l1ZRfeuNt4",
       "title": "삼전닉스 하락 어디까지? '쉬는 장'이냐 '상승장의 끝'이냐의 기준은? | 이권희 위즈웨이브 대표 [글로벌 인터뷰]",
       "channel": "삼프로TV",
@@ -12636,5 +12674,5 @@
       "analyzed_at": "2026-06-22T00:35:52.308406+09:00"
     }
   ],
-  "updated": "2026-07-02T10:49:11.523039+09:00"
+  "updated": "2026-07-02T14:43:19.247571+09:00"
 }
