@@ -1451,7 +1451,7 @@ with tab7:
             st.plotly_chart(fig, use_container_width=True)
 
             fib_ext_lvls = _fib_ext(fib_high, fib_low)
-            with st.expander("📐 피보나치 레벨 상세 (최근 60일 기준)", expanded=False):
+            with st.expander("📐 피보나치 레벨 상세 (최근 60일 기준)", expanded=True):
                 fc1, fc2 = st.columns(2)
                 def _fmt_p(v): return f"₩{v:,.0f}" if is_kr_sym else f"${v:.2f}"
                 def _fmt_chg(v): return f"{(v/price_now-1)*100:+.1f}%"
