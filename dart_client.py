@@ -30,11 +30,12 @@ REPRT = {'annual': '11011', 'half': '11012', 'q1': '11013', 'q3': '11014'}
 
 # 재무 항목 매칭(계정명에 포함되면 채택). IFRS 표기 변형 대응.
 _ACCOUNTS = {
-    'revenue':    ['매출액', '수익(매출액)', '영업수익'],
-    'op_income':  ['영업이익'],
-    'net_income': ['당기순이익'],
-    'equity':     ['자본총계'],
-    'assets':     ['자산총계'],
+    'revenue':     ['매출액', '수익(매출액)', '영업수익'],
+    'op_income':   ['영업이익'],
+    'net_income':  ['당기순이익'],
+    'equity':      ['자본총계'],
+    'assets':      ['자산총계'],
+    'liabilities': ['부채총계'],
 }
 
 
@@ -113,6 +114,34 @@ def financials(corp_code, year, period='annual'):
                 # 연결재무제표 우선
                 if row.get('fs_div', 'CFS') == 'CFS' or out[key] is None:
                     out[key] = val
+    return out
+
+
+_CF = {'op_cf': '영업활동', 'inv_cf': '투자활동', 'fin_cf': '재무활동'}
+
+
+def cashflow(corp_code, year, period='annual'):
+    """현금흐름표 {op_cf, inv_cf, fin_cf} (원). fnlttSinglAcntAll(전체재무제표) 사용."""
+    out = {k: None for k in _CF}
+    for fs in ('CFS', 'OFS'):        # 연결 우선, 없으면 개별
+        try:
+            r = _get(f"{BASE}/fnlttSinglAcntAll.json",
+                     {'crtfc_key': _key(), 'corp_code': corp_code, 'bsns_year': str(year),
+                      'reprt_code': REPRT.get(period, '11011'), 'fs_div': fs})
+            j = r.json()
+        except Exception:
+            continue
+        if j.get('status') != '000':
+            continue
+        for row in j.get('list', []):
+            if row.get('sj_div') != 'CF':
+                continue
+            nm = row.get('account_nm', '')
+            for key, kw in _CF.items():
+                if out[key] is None and kw in nm:
+                    out[key] = _to_num(row.get('thstrm_amount'))
+        if any(out.values()):
+            break
     return out
 
 
