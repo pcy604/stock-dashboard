@@ -1301,6 +1301,17 @@ def official_financials(sym, is_kr):
         return []
 
 
+@st.cache_data(ttl=6 * 3600)
+def kr_insiders(sym):
+    """KR 내부자(임원·주요주주) 매수/매도 — DART 공식. [{date,name,position,change,holdings}]."""
+    try:
+        import dart_client
+        cc = dart_client.corp_map().get(sym)
+        return dart_client.insiders(cc, 10) if cc else []
+    except Exception:
+        return []
+
+
 with tab7:
     st.header("🔍 종목 분석")
     st.caption("US: TSLA · AAPL · NVDA  |  KR: 005930 또는 005930.KS")
@@ -1715,11 +1726,24 @@ with tab7:
                 else:
                     st.caption("OPM 데이터 없음 (yfinance 재무제표 조회 실패 — KR 종목에서 흔함).")
 
-                if insid is not None and not insid.empty:
+                if is_kr_sym:
+                    _kins = kr_insiders(sym8_clean)
+                    if _kins:
+                        st.subheader("👤 내부자 거래 (DART 공식)")
+                        _kidf = pd.DataFrame([{
+                            '일자': x['date'], '보고자': x['name'], '직위': x['position'],
+                            '구분': '🟢매수' if (x['change'] or 0) > 0 else ('🔴매도' if (x['change'] or 0) < 0 else '변동0'),
+                            '증감': f"{x['change']:+,.0f}" if x['change'] is not None else '-',
+                            '보유': f"{x['holdings']:,.0f}" if x['holdings'] is not None else '-'}
+                            for x in _kins])
+                        st.dataframe(_kidf, use_container_width=True, hide_index=True,
+                                     height=36 + 35 * min(len(_kidf), 8))
+                        st.caption("출처: DART 임원·주요주주 특정증권 소유상황보고(공식). 증감>0=취득·<0=처분.")
+                    else:
+                        st.info("내부자 거래 내역 없음 (DART)")
+                elif insid is not None and not insid.empty:
                     st.subheader("👤 내부자 거래")
                     st.dataframe(insid.head(8), use_container_width=True, hide_index=True)
-                elif is_kr_sym:
-                    st.info("한국 종목 내부자 거래는 제공하지 않습니다")
 
             # ════════════════════════════════════════════════════════════
             # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
