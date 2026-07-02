@@ -1278,10 +1278,13 @@ def official_financials(sym, is_kr):
                 f = dart_client.financials(cc, y, 'annual')
                 if not any(f.get(k) for k in ('revenue', 'net_income', 'op_income')):
                     continue
+                cf = dart_client.cashflow(cc, y, 'annual')
                 ni, eq = f.get('net_income'), f.get('equity')
                 out.append({'period': str(y), 'revenue': f.get('revenue'), 'op_income': f.get('op_income'),
-                            'net_income': ni, 'equity': eq, 'assets': f.get('assets'), 'eps': None,
-                            'roe': round(ni / eq * 100, 1) if (ni and eq) else None})
+                            'net_income': ni, 'equity': eq, 'assets': f.get('assets'),
+                            'liabilities': f.get('liabilities'),
+                            'op_cf': cf.get('op_cf'), 'inv_cf': cf.get('inv_cf'), 'fin_cf': cf.get('fin_cf'),
+                            'eps': None, 'roe': round(ni / eq * 100, 1) if (ni and eq) else None})
             return out
         else:
             import edgar_client
@@ -1290,7 +1293,9 @@ def official_financials(sym, is_kr):
                 return []
             return [{'period': y, 'revenue': d.get('revenue'), 'op_income': d.get('op_income'),
                      'net_income': d.get('net_income'), 'equity': d.get('equity'),
-                     'assets': d.get('assets'), 'eps': d.get('eps'), 'roe': d.get('roe')}
+                     'assets': d.get('assets'), 'liabilities': d.get('liabilities'),
+                     'op_cf': d.get('op_cf'), 'inv_cf': d.get('inv_cf'), 'fin_cf': d.get('fin_cf'),
+                     'eps': d.get('eps'), 'roe': d.get('roe')}
                     for y, d in list(fa.items())[:5]]
     except Exception:
         return []
@@ -1469,11 +1474,12 @@ with tab7:
 
             st.divider()
 
-            # ── 📊 공식 재무제표 (KR=DART / US=EDGAR) — 스크래핑 아닌 공식 제출 데이터 ──
+            # ── 📊 공식 재무제표 3표 + 공식 멀티플 (KR=DART / US=EDGAR) ──
             _off = official_financials(sym8_clean, is_kr_sym)
             if _off:
                 _osrc = 'DART 전자공시' if is_kr_sym else 'SEC EDGAR'
                 st.subheader(f"📊 공식 재무제표 · 연간 ({_osrc})")
+
                 def _amt(v):
                     if v is None:
                         return '-'
@@ -1485,6 +1491,23 @@ with tab7:
                         return f"{(cur/prev-1)*100:+.0f}%"
                     except Exception:
                         return '-'
+
+                # 공식 멀티플 = 가격 ÷ 가치 (시총 ÷ 공식 순익/자본/매출) — 두 세계를 잇는 다리
+                _lt = _off[0]
+                _mc = info.get('marketCap') or 0
+                def _mult(den):
+                    try:
+                        return f"{_mc/den:.1f}x" if (_mc and den and den > 0) else '-'
+                    except Exception:
+                        return '-'
+                if _mc:
+                    st.markdown(
+                        f"⚖️ **공식 멀티플** (가격÷가치): PER **{_mult(_lt.get('net_income'))}** · "
+                        f"PBR **{_mult(_lt.get('equity'))}** · PSR **{_mult(_lt.get('revenue'))}** "
+                        f"<span style='color:#8b949e;font-size:11px'>· {_lt['period']} 공식 실적 기준 "
+                        f"(적자면 '-')</span>", unsafe_allow_html=True)
+
+                # ① 손익계산서
                 _orows = []
                 for _i, _r in enumerate(_off):
                     _p = _off[_i + 1] if _i + 1 < len(_off) else {}
@@ -1500,10 +1523,27 @@ with tab7:
                         return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%', '').replace('+', '')) >= 0 else 'color:#dc2626'
                     except Exception:
                         return ''
+                st.caption("① 손익계산서")
                 st.dataframe(_odf.style.map(_ocg, subset=['매출YoY', '순익YoY']),
                              use_container_width=True, hide_index=True, height=36 + 35 * len(_odf))
+
+                # ② 대차대조표 · ③ 현금흐름표
+                with st.expander("② 대차대조표 · ③ 현금흐름표 (연간)", expanded=False):
+                    _bs = pd.DataFrame([{'연도': r['period'], '자산총계': _amt(r.get('assets')),
+                                         '부채총계': _amt(r.get('liabilities')), '자본총계': _amt(r.get('equity')),
+                                         '부채비율': (f"{r['liabilities']/r['equity']*100:.0f}%"
+                                                   if (r.get('liabilities') and r.get('equity')) else '-')}
+                                        for r in _off])
+                    st.caption("② 대차대조표")
+                    st.dataframe(_bs, use_container_width=True, hide_index=True, height=36 + 35 * len(_bs))
+                    _cfd = pd.DataFrame([{'연도': r['period'], '영업활동': _amt(r.get('op_cf')),
+                                          '투자활동': _amt(r.get('inv_cf')), '재무활동': _amt(r.get('fin_cf'))}
+                                         for r in _off])
+                    st.caption("③ 현금흐름표 (영업>0 & 투자<0 = 건강한 성장기업 신호)")
+                    st.dataframe(_cfd, use_container_width=True, hide_index=True, height=36 + 35 * len(_cfd))
+
                 st.caption(f"출처: {_osrc} 공식 제출 재무제표(연결·연간). 무료·공식, 네이버/yfinance 스크래핑 아님. "
-                           "매출/영업익/순익은 KR=억원·US=USD.")
+                           "금액 KR=억원·US=USD. 멀티플은 현재 시총÷공식 실적.")
                 st.divider()
 
             left8, right8 = st.columns(2)

@@ -80,13 +80,19 @@ def facts(ticker):
     ni = _annual_series(f, 'NetIncomeLoss')
     op = _annual_series(f, 'OperatingIncomeLoss')
     assets = _annual_series(f, 'Assets')
+    liab = _annual_series(f, 'Liabilities')
     eq = _annual_series(f, 'StockholdersEquity')
     eps = _annual_series(f, 'EarningsPerShareDiluted')
+    ocf = _annual_series(f, 'NetCashProvidedByUsedInOperatingActivities')
+    icf = _annual_series(f, 'NetCashProvidedByUsedInInvestingActivities')
+    fcf = _annual_series(f, 'NetCashProvidedByUsedInFinancingActivities')
     years = sorted(set(rev) | set(ni) | set(assets) | set(eq), reverse=True)
     out = {}
     for y in years:
         out[y] = {'revenue': rev.get(y), 'op_income': op.get(y), 'net_income': ni.get(y),
-                  'assets': assets.get(y), 'equity': eq.get(y), 'eps': eps.get(y),
+                  'assets': assets.get(y), 'liabilities': liab.get(y), 'equity': eq.get(y),
+                  'eps': eps.get(y),
+                  'op_cf': ocf.get(y), 'inv_cf': icf.get(y), 'fin_cf': fcf.get(y),
                   'roe': round(ni[y] / eq[y] * 100, 2) if (ni.get(y) and eq.get(y)) else None}
     return out
 
