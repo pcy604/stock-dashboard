@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 55
     env:
       FRED_KEY: ${{ secrets.FRED_KEY }}
+      DART_KEY: ${{ secrets.DART_KEY }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:

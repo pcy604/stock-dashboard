@@ -337,6 +337,43 @@ def check_i(sym):
 
 # ── 메인 스캔 ────────────────────────────────────────────────────────
 
+_cmap_cache = None
+
+def _cmap():
+    """DART 종목코드→corp_code 매핑 (1회 로드·메모이즈). 키 없으면 {}."""
+    global _cmap_cache
+    if _cmap_cache is None:
+        try:
+            import dart_client
+            _cmap_cache = dart_client.corp_map()
+        except Exception:
+            _cmap_cache = {}
+    return _cmap_cache
+
+
+def get_growth(sym):
+    """C/A/매출/영업익 성장률 — DART 공식 우선, 실패 시 네이버 폴백.
+    반환: (c_ok, c_det, a_y1, a_y2, rev_g, op_g)"""
+    cc = _cmap().get(sym) or _cmap().get(str(sym).zfill(6))
+    if cc:
+        try:
+            import dart_client
+            g = dart_client.canslim_growth(cc)
+            cg = g.get('c_growth')
+            if cg is not None or g.get('a_growth_y1') is not None:
+                c_ok = (cg == '흑자전환') or (isinstance(cg, (int, float)) and cg >= C_MIN_GROWTH)
+                return (c_ok, {'growth': cg, 'quarter': 'DART'},
+                        g.get('a_growth_y1'), g.get('a_growth_y2'),
+                        g.get('rev_growth'), g.get('op_growth'))
+        except Exception:
+            pass
+    # 폴백: 네이버
+    c_ok, c_det = check_c(sym)
+    a_y1, a_y2 = check_a_yf(sym)
+    rev_g, op_g = check_rev_op(sym)
+    return c_ok, c_det, a_y1, a_y2, rev_g, op_g
+
+
 def scan(pairs):
     total = len(pairs)
     counter = [0]
@@ -390,10 +427,8 @@ def scan(pairs):
         name = r['name']
         print(f"  [{i+1}/{len(candidates)}] {name}({sym}) ...", end=' ', flush=True)
 
-        c_ok, c_det = check_c(sym)
-        a_y1, a_y2  = check_a_yf(sym)
+        c_ok, c_det, a_y1, a_y2, rev_g, op_g = get_growth(sym)   # DART 공식 우선
         i_inst      = check_i(sym)
-        rev_g, op_g = check_rev_op(sym)
 
         c_str = f"C:{c_det.get('growth')}%" if c_det and c_det.get('growth') is not None else "C:?"
         a_str = f"A:{a_y1}/{a_y2}%"
