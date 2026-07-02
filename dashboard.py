@@ -1261,6 +1261,41 @@ def fetch_stock_data(sym: str, days: int):
     except Exception as e:
         return None, {}, None, None, None
 
+
+@st.cache_data(ttl=6 * 3600)
+def official_financials(sym, is_kr):
+    """공식 재무제표: KR=DART(전자공시), US=EDGAR(SEC). 스크래핑 아님.
+    반환: [{period, revenue, op_income, net_income, equity, assets, eps, roe}] 최신순."""
+    try:
+        if is_kr:
+            import dart_client
+            from datetime import datetime as _dt
+            cc = dart_client.corp_map().get(sym)
+            if not cc:
+                return []
+            out = []
+            for y in [_dt.now().year - 1 - i for i in range(4)]:
+                f = dart_client.financials(cc, y, 'annual')
+                if not any(f.get(k) for k in ('revenue', 'net_income', 'op_income')):
+                    continue
+                ni, eq = f.get('net_income'), f.get('equity')
+                out.append({'period': str(y), 'revenue': f.get('revenue'), 'op_income': f.get('op_income'),
+                            'net_income': ni, 'equity': eq, 'assets': f.get('assets'), 'eps': None,
+                            'roe': round(ni / eq * 100, 1) if (ni and eq) else None})
+            return out
+        else:
+            import edgar_client
+            fa = edgar_client.facts(sym)
+            if not isinstance(fa, dict) or fa.get('_err'):
+                return []
+            return [{'period': y, 'revenue': d.get('revenue'), 'op_income': d.get('op_income'),
+                     'net_income': d.get('net_income'), 'equity': d.get('equity'),
+                     'assets': d.get('assets'), 'eps': d.get('eps'), 'roe': d.get('roe')}
+                    for y, d in list(fa.items())[:5]]
+    except Exception:
+        return []
+
+
 with tab7:
     st.header("🔍 종목 분석")
     st.caption("US: TSLA · AAPL · NVDA  |  KR: 005930 또는 005930.KS")
@@ -1433,6 +1468,44 @@ with tab7:
                     )
 
             st.divider()
+
+            # ── 📊 공식 재무제표 (KR=DART / US=EDGAR) — 스크래핑 아닌 공식 제출 데이터 ──
+            _off = official_financials(sym8_clean, is_kr_sym)
+            if _off:
+                _osrc = 'DART 전자공시' if is_kr_sym else 'SEC EDGAR'
+                st.subheader(f"📊 공식 재무제표 · 연간 ({_osrc})")
+                def _amt(v):
+                    if v is None:
+                        return '-'
+                    return f"{v/1e8:,.0f}억" if is_kr_sym else f"${v/1e9:.1f}B"
+                def _yoy(cur, prev):
+                    if cur is None or not prev:
+                        return '-'
+                    try:
+                        return f"{(cur/prev-1)*100:+.0f}%"
+                    except Exception:
+                        return '-'
+                _orows = []
+                for _i, _r in enumerate(_off):
+                    _p = _off[_i + 1] if _i + 1 < len(_off) else {}
+                    _orows.append({'연도': _r['period'], '매출': _amt(_r['revenue']),
+                                   '매출YoY': _yoy(_r['revenue'], _p.get('revenue')),
+                                   '영업익': _amt(_r['op_income']), '순이익': _amt(_r['net_income']),
+                                   '순익YoY': _yoy(_r['net_income'], _p.get('net_income')),
+                                   'ROE': f"{_r['roe']:.1f}%" if _r['roe'] is not None else '-',
+                                   'EPS': f"{_r['eps']:.2f}" if _r.get('eps') is not None else '-'})
+                _odf = pd.DataFrame(_orows)
+                def _ocg(v):
+                    try:
+                        return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%', '').replace('+', '')) >= 0 else 'color:#dc2626'
+                    except Exception:
+                        return ''
+                st.dataframe(_odf.style.map(_ocg, subset=['매출YoY', '순익YoY']),
+                             use_container_width=True, hide_index=True, height=36 + 35 * len(_odf))
+                st.caption(f"출처: {_osrc} 공식 제출 재무제표(연결·연간). 무료·공식, 네이버/yfinance 스크래핑 아님. "
+                           "매출/영업익/순익은 KR=억원·US=USD.")
+                st.divider()
+
             left8, right8 = st.columns(2)
 
             yr1  = hist.tail(252)

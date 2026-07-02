@@ -4,7 +4,17 @@ data/.telegram_chat
 data/.finnhub_key
 data/.fred_key
 data/.gemini_key
+data/.dart_key
+data/.kis_appkey
+data/.kis_appsecret
+data/.kis_token
+data/.kis_env
 .streamlit/secrets.toml
+
+# 중앙 DB (로컬 적재본, 대용량·재생성 가능)
+data/market.db
+data/market.db-shm
+data/market.db-wal
 
 # 캐시/결과 (대용량, 재생성 가능)
 data/price_cache/
