@@ -1771,38 +1771,54 @@ with tab7:
             # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
             # ════════════════════════════════════════════════════════════
             st.divider()
-            _mstat, _gcdc = st.columns(2)
+            _mstat = st.container()
+            _gcdc = st.container()
 
             with _mstat:
-                st.subheader("📆 월별 상승률 통계")
+                st.subheader("📆 월별 상승률 통계 (연도 × 월)")
                 _mclose = hist['Close'].resample('ME').last()
-                _mret = _mclose.pct_change().dropna() * 100
+                _mret = (_mclose.pct_change() * 100).dropna()
                 if len(_mret) >= 12:
-                    _mrows = []
-                    for _mo in range(1, 13):
-                        _v = _mret[_mret.index.month == _mo]
-                        if len(_v) == 0:
-                            continue
-                        _mrows.append({'월': f"{_mo}월", '평균%': round(float(_v.mean()), 1),
-                                       '승률%': round(float((_v > 0).mean() * 100), 0),
-                                       '표본': int(len(_v)),
-                                       '최고%': round(float(_v.max()), 1),
-                                       '최저%': round(float(_v.min()), 1)})
-                    _msdf = pd.DataFrame(_mrows)
-                    def _cmm(v):
-                        try: return 'color:#56d364;font-weight:bold' if float(v) >= 0 else 'color:#f78166'
-                        except Exception: return ''
+                    _md = _mret.to_frame('ret')
+                    _md['y'] = _md.index.year
+                    _md['m'] = _md.index.month
+                    _pv = _md.pivot_table(index='y', columns='m', values='ret', aggfunc='first')
+                    _yret = (hist['Close'].resample('YE').last().pct_change() * 100)
+                    _ymap = {d.year: v for d, v in _yret.items()}
+                    _moncols = [f'{m}월' for m in range(1, 13)] + ['연간']
+
+                    def _cell(yr, m):
+                        if m in _pv.columns and yr in _pv.index and pd.notna(_pv.loc[yr, m]):
+                            return float(_pv.loc[yr, m])
+                        return None
+                    _rows = []
+                    for _yr in sorted(_pv.index, reverse=True)[:10]:
+                        _row = {'연도': str(int(_yr))}
+                        for _m in range(1, 13):
+                            _row[f'{_m}월'] = _cell(_yr, _m)
+                        _row['연간'] = _ymap.get(_yr)
+                        _rows.append(_row)
+                    # 하단 요약: 월평균 · 승률
+                    _avg = {'연도': '평균'}; _win = {'연도': '승률'}
+                    for _m in range(1, 13):
+                        _col = _pv[_m].dropna() if _m in _pv.columns else pd.Series(dtype=float)
+                        _avg[f'{_m}월'] = float(_col.mean()) if len(_col) else None
+                        _win[f'{_m}월'] = float((_col > 0).mean() * 100) if len(_col) else None
+                    _avg['연간'] = float(_yret.dropna().mean()) if len(_yret.dropna()) else None
+                    _win['연간'] = None
+                    _mm = pd.DataFrame(_rows + [_avg, _win])
+
+                    def _cmat(v):
+                        try:
+                            return 'color:#16a34a;font-weight:bold' if float(v) >= 0 else 'color:#dc2626'
+                        except Exception:
+                            return ''
                     st.dataframe(
-                        _msdf.style.map(_cmm, subset=['평균%', '최고%', '최저%'])
-                            .format({'평균%': '{:+.1f}%', '승률%': '{:.0f}%',
-                                     '최고%': '{:+.1f}%', '최저%': '{:+.1f}%'}),
-                        use_container_width=True, hide_index=True,
-                        height=36 + 35 * len(_msdf))
-                    _best = max(_mrows, key=lambda r: r['평균%'])
-                    _worst = min(_mrows, key=lambda r: r['평균%'])
-                    st.caption(f"과거 {len(_mret)}개월 표본. 강한 달 **{_best['월']}**(평균 {_best['평균%']:+.1f}%), "
-                               f"약한 달 **{_worst['월']}**({_worst['평균%']:+.1f}%). "
-                               "표본 늘리려면 기간을 '5y'로. ⚠️ 계절성은 통계 경향일 뿐 보조지표.")
+                        _mm.style.map(_cmat, subset=_moncols)
+                           .format({c: (lambda v: f'{v:+.0f}' if pd.notna(v) else '·') for c in _moncols}),
+                        use_container_width=True, hide_index=True, height=36 + 35 * len(_mm))
+                    st.caption("연도×월 수익률(%). 하단 **평균**=월별 계절성, **승률**=상승 빈도(%). "
+                               "엑셀 '주가 추이 분석' 방식. ⚠️ 표본 적으면 우연 — 기간 '5y' 권장.")
                 else:
                     st.info("월별 통계 표본 부족 — 기간을 '3y'나 '5y'로 늘려주세요.")
 
