@@ -31,13 +31,25 @@ def _get(url, tries=4):
     last = None
     for i in range(tries):
         try:
-            r = requests.get(url, headers=UA, timeout=20)
+            r = requests.get(url, headers=UA, timeout=30)
             r.raise_for_status()
             return r
         except Exception as e:
             last = e
             time.sleep(0.4 * (i + 1))
     raise last
+
+
+# companyfacts는 종목당 10~20MB — facts()/statements()가 같은 걸 두 번 받지 않게 메모이즈
+_FACTS_MEMO = {}
+
+
+def _companyfacts(cik):
+    if cik not in _FACTS_MEMO:
+        _FACTS_MEMO[cik] = _get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json").json()
+        if len(_FACTS_MEMO) > 12:                       # 메모리 보호
+            _FACTS_MEMO.pop(next(iter(_FACTS_MEMO)))
+    return _FACTS_MEMO[cik]
 
 
 def cik_map(refresh=False):
@@ -71,7 +83,7 @@ def facts(ticker):
     cik = cik_map().get(ticker.upper())
     if not cik:
         return {'_err': f'CIK 없음: {ticker}'}
-    j = _get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json").json()
+    j = _companyfacts(cik)
     f = j.get('facts', {})
     rev = {}
     for c in _REV:
@@ -160,7 +172,7 @@ def statements(ticker, freq='annual', n=6):
     if not cik:
         return []
     try:
-        j = _get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json").json()
+        j = _companyfacts(cik)
     except Exception:
         return []
     ug = j.get('facts', {}).get('us-gaap', {})
