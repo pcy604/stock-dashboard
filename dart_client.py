@@ -184,6 +184,69 @@ def canslim_growth(corp_code):
     return out
 
 
+_STMT_KEYS = {
+    'revenue':     ['매출액', '수익(매출액)', '영업수익'],
+    'gross':       ['매출총이익'],
+    'sga':         ['판매비와관리비', '판매비및관리비'],
+    'op_income':   ['영업이익'],
+    'net_income':  ['당기순이익'],
+    'assets':      ['자산총계'], 'liabilities': ['부채총계'], 'equity': ['자본총계'],
+    'op_cf':       ['영업활동현금흐름', '영업활동으로인한현금흐름'],
+    'inv_cf':      ['투자활동현금흐름', '투자활동으로인한현금흐름'],
+    'fin_cf':      ['재무활동현금흐름', '재무활동으로인한현금흐름'],
+}
+
+
+def _acnt_all(corp_code, year, reprt):
+    for fs in ('CFS', 'OFS'):
+        try:
+            j = _get(f"{BASE}/fnlttSinglAcntAll.json",
+                     {'crtfc_key': _key(), 'corp_code': corp_code, 'bsns_year': str(year),
+                      'reprt_code': reprt, 'fs_div': fs}).json()
+        except Exception:
+            continue
+        if j.get('status') == '000':
+            return j
+    return None
+
+
+def _extract_all(j):
+    out = {k: None for k in _STMT_KEYS}
+    out['gross'] = None; out['capex'] = None
+    for row in j.get('list', []):
+        nm = (row.get('account_nm') or '').strip()
+        for key, names in _STMT_KEYS.items():
+            if out[key] is None and any(n == nm or n in nm for n in names):
+                out[key] = _to_num(row.get('thstrm_amount'))
+        if out['capex'] is None and row.get('sj_div') == 'CF' and '유형자산' in nm and '취득' in nm:
+            out['capex'] = _to_num(row.get('thstrm_amount'))
+    return out
+
+
+def statements(corp_code, freq='annual', n=5):
+    """통합 재무표 rows(최신순). 분기는 DART 누적(cumulative) 기준."""
+    from datetime import datetime as _d
+    y = _d.now().year
+    rows = []
+    if freq == 'annual':
+        for yy in range(y - 1, y - 1 - n, -1):
+            j = _acnt_all(corp_code, yy, '11011')
+            if j:
+                e = _extract_all(j); e['period'] = str(yy); e['eps'] = None
+                rows.append(e)
+    else:
+        combos = [(yy, rp, lab) for yy in (y, y - 1, y - 2)
+                  for rp, lab in (('11014', '3Q'), ('11012', '2Q'), ('11013', '1Q'))]
+        for yy, rp, lab in combos:
+            if len(rows) >= n:
+                break
+            j = _acnt_all(corp_code, yy, rp)
+            if j:
+                e = _extract_all(j); e['period'] = f'{yy}.{lab}'; e['eps'] = None
+                rows.append(e)
+    return rows
+
+
 def insiders(corp_code, limit=15):
     """임원·주요주주 특정증권 소유변동(내부자 매수/매도).
     [{date, name, position, change, holdings}] 최신순. change>0=취득 <0=처분."""

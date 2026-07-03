@@ -1312,6 +1312,32 @@ def kr_insiders(sym):
         return []
 
 
+@st.cache_data(ttl=6 * 3600)
+def unified_statements(sym, is_kr, freq):
+    """통합 재무표 rows — KR=DART, US=EDGAR. freq='annual'|'quarter'. 최신순."""
+    try:
+        if is_kr:
+            import dart_client
+            cc = dart_client.corp_map().get(sym)
+            return dart_client.statements(cc, freq, 5) if cc else []
+        import edgar_client
+        return edgar_client.statements(sym, freq, 6)
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=3 * 3600)
+def consensus_scenarios(sym, is_kr):
+    """컨센서스 목표주가 BEAR/BASE/BULL + 선행 EPS/PER (yfinance, 불안정)."""
+    try:
+        yi = yf.Ticker(f"{sym}.KS" if is_kr else sym).info or {}
+        return {'bear': yi.get('targetLowPrice'), 'base': yi.get('targetMeanPrice'),
+                'bull': yi.get('targetHighPrice'), 'n': yi.get('numberOfAnalystOpinions'),
+                'fwd_eps': yi.get('forwardEps'), 'fwd_pe': yi.get('forwardPE')}
+    except Exception:
+        return {}
+
+
 with tab7:
     st.header("🔍 종목 분석")
     st.caption("US: TSLA · AAPL · NVDA  |  KR: 005930 또는 005930.KS")
@@ -1485,27 +1511,24 @@ with tab7:
 
             st.divider()
 
-            # ── 📊 공식 재무제표 3표 + 공식 멀티플 (KR=DART / US=EDGAR) ──
-            _off = official_financials(sym8_clean, is_kr_sym)
+            # ── 📊 공식 재무제표 통합표 (연도 가로 × 3표 세로 · 연간/분기 토글) ──
+            _off = official_financials(sym8_clean, is_kr_sym)   # 연간(멀티플·스코어카드용)
             if _off:
                 _osrc = 'DART 전자공시' if is_kr_sym else 'SEC EDGAR'
-                st.subheader(f"📊 공식 재무제표 · 연간 ({_osrc})")
+                st.subheader(f"📊 공식 재무제표 ({_osrc})")
+                _mc = info.get('marketCap') or 0
 
                 def _amt(v):
                     if v is None:
                         return '-'
-                    return f"{v/1e8:,.0f}억" if is_kr_sym else f"${v/1e9:.1f}B"
-                def _yoy(cur, prev):
-                    if cur is None or not prev:
-                        return '-'
-                    try:
-                        return f"{(cur/prev-1)*100:+.0f}%"
-                    except Exception:
-                        return '-'
+                    if is_kr_sym:
+                        return f"{v/1e12:.1f}조" if abs(v) >= 1e12 else f"{v/1e8:,.0f}억"
+                    return f"${v/1e9:.1f}B" if abs(v) >= 1e9 else f"${v/1e6:,.0f}M"
 
-                # 공식 멀티플 = 가격 ÷ 가치 (시총 ÷ 공식 순익/자본/매출) — 두 세계를 잇는 다리
+                def _pct(v):
+                    return f"{v*100:.1f}%" if isinstance(v, (int, float)) else '-'
+
                 _lt = _off[0]
-                _mc = info.get('marketCap') or 0
                 def _mult(den):
                     try:
                         return f"{_mc/den:.1f}x" if (_mc and den and den > 0) else '-'
@@ -1513,48 +1536,79 @@ with tab7:
                         return '-'
                 if _mc:
                     st.markdown(
-                        f"⚖️ **공식 멀티플** (가격÷가치): PER **{_mult(_lt.get('net_income'))}** · "
+                        f"⚖️ **공식 멀티플**: PER **{_mult(_lt.get('net_income'))}** · "
                         f"PBR **{_mult(_lt.get('equity'))}** · PSR **{_mult(_lt.get('revenue'))}** "
-                        f"<span style='color:#8b949e;font-size:11px'>· {_lt['period']} 공식 실적 기준 "
-                        f"(적자면 '-')</span>", unsafe_allow_html=True)
+                        f"<span style='color:#8b949e;font-size:11px'>· {_lt['period']} 연간 기준</span>",
+                        unsafe_allow_html=True)
 
-                # ① 손익계산서
-                _orows = []
-                for _i, _r in enumerate(_off):
-                    _p = _off[_i + 1] if _i + 1 < len(_off) else {}
-                    _orows.append({'연도': _r['period'], '매출': _amt(_r['revenue']),
-                                   '매출YoY': _yoy(_r['revenue'], _p.get('revenue')),
-                                   '영업익': _amt(_r['op_income']), '순이익': _amt(_r['net_income']),
-                                   '순익YoY': _yoy(_r['net_income'], _p.get('net_income')),
-                                   'ROE': f"{_r['roe']:.1f}%" if _r['roe'] is not None else '-',
-                                   'EPS': f"{_r['eps']:.2f}" if _r.get('eps') is not None else '-'})
-                _odf = pd.DataFrame(_orows)
-                def _ocg(v):
-                    try:
-                        return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%', '').replace('+', '')) >= 0 else 'color:#dc2626'
-                    except Exception:
-                        return ''
-                st.caption("① 손익계산서")
-                st.dataframe(_odf.style.map(_ocg, subset=['매출YoY', '순익YoY']),
-                             use_container_width=True, hide_index=True, height=36 + 35 * len(_odf))
+                _freq = st.radio("기준", ["연간", "분기"], horizontal=True, key=f"fin_freq_{sym8_clean}")
+                _stm = unified_statements(sym8_clean, is_kr_sym, 'annual' if _freq == "연간" else 'quarter')
+                if _stm:
+                    for _r in _stm:
+                        _rv = _r.get('revenue')
+                        _r['gpm'] = (_r['gross'] / _rv) if (_r.get('gross') and _rv) else None
+                        _r['opm'] = (_r['op_income'] / _rv) if (_r.get('op_income') and _rv) else None
+                        _r['roe'] = (_r['net_income'] / _r['equity']) if (_r.get('net_income') and _r.get('equity')) else None
+                    _periods = [r['period'] for r in _stm]
+                    _gl = "YoY" if _freq == "연간" else "QoQ"
+                    _items = [('손익', '매출', 'revenue', 'amt'), ('손익', '매출총이익', 'gross', 'amt'),
+                              ('손익', 'GPM', 'gpm', 'pct'), ('손익', '영업이익', 'op_income', 'amt'),
+                              ('손익', 'OPM', 'opm', 'pct'), ('손익', '순이익', 'net_income', 'amt'),
+                              ('손익', 'SG&A', 'sga', 'amt'), ('손익', 'ROE', 'roe', 'pct'),
+                              ('대차', '자산', 'assets', 'amt'), ('대차', '부채', 'liabilities', 'amt'),
+                              ('대차', '자본', 'equity', 'amt'),
+                              ('현금', '영업활동', 'op_cf', 'amt'), ('현금', '투자활동', 'inv_cf', 'amt'),
+                              ('현금', '재무활동', 'fin_cf', 'amt'), ('현금', 'Capex', 'capex', 'amt')]
+                    _trows = []
+                    for _grp, _lab, _key, _typ in _items:
+                        _row = {'구분': _grp, '항목': _lab}
+                        for _ix, _rr in enumerate(_stm):
+                            _v = _rr.get(_key)
+                            _row[_periods[_ix]] = _pct(_v) if _typ == 'pct' else _amt(_v)
+                        _cur = _stm[0].get(_key); _prev = _stm[1].get(_key) if len(_stm) > 1 else None
+                        if _typ == 'pct':
+                            _row[_gl] = (f"{(_cur-_prev)*100:+.1f}%p"
+                                         if (isinstance(_cur, (int, float)) and isinstance(_prev, (int, float))) else '-')
+                        else:
+                            _row[_gl] = f"{(_cur/_prev-1)*100:+.0f}%" if (_cur and _prev and _prev > 0) else '-'
+                        _trows.append(_row)
+                    _tdf = pd.DataFrame(_trows)
+                    def _cgg(v):
+                        try:
+                            return 'color:#16a34a' if float(str(v).replace('%', '').replace('p', '').replace('+', '')) >= 0 else 'color:#dc2626'
+                        except Exception:
+                            return ''
+                    st.dataframe(_tdf.style.map(_cgg, subset=[_gl]),
+                                 use_container_width=True, hide_index=True, height=36 + 35 * len(_tdf))
+                    _qn = ("누적(YTD)" if is_kr_sym else "3개월") if _freq == "분기" else "회계연도"
+                    st.caption(f"출처: {_osrc} 공식({_qn}). GPM=매출총이익률·OPM=영업이익률·ROE=순익/자본. "
+                               f"{_gl}=최근 증감(마진은 %p). 금액 KR=조/억·US=USD.")
+                else:
+                    st.caption("통합 재무표 데이터 없음 (해당 기준).")
 
-                # ② 대차대조표 · ③ 현금흐름표
-                with st.expander("② 대차대조표 · ③ 현금흐름표 (연간)", expanded=False):
-                    _bs = pd.DataFrame([{'연도': r['period'], '자산총계': _amt(r.get('assets')),
-                                         '부채총계': _amt(r.get('liabilities')), '자본총계': _amt(r.get('equity')),
-                                         '부채비율': (f"{r['liabilities']/r['equity']*100:.0f}%"
-                                                   if (r.get('liabilities') and r.get('equity')) else '-')}
-                                        for r in _off])
-                    st.caption("② 대차대조표")
-                    st.dataframe(_bs, use_container_width=True, hide_index=True, height=36 + 35 * len(_bs))
-                    _cfd = pd.DataFrame([{'연도': r['period'], '영업활동': _amt(r.get('op_cf')),
-                                          '투자활동': _amt(r.get('inv_cf')), '재무활동': _amt(r.get('fin_cf'))}
-                                         for r in _off])
-                    st.caption("③ 현금흐름표 (영업>0 & 투자<0 = 건강한 성장기업 신호)")
-                    st.dataframe(_cfd, use_container_width=True, hide_index=True, height=36 + 35 * len(_cfd))
-
-                st.caption(f"출처: {_osrc} 공식 제출 재무제표(연결·연간). 무료·공식, 네이버/yfinance 스크래핑 아님. "
-                           "금액 KR=억원·US=USD. 멀티플은 현재 시총÷공식 실적.")
+                # 🎯 컨센서스 BEAR / BASE / BULL (목표주가)
+                _cons = consensus_scenarios(sym8_clean, is_kr_sym)
+                if _cons.get('base'):
+                    _cu = '₩' if is_kr_sym else '$'
+                    def _pr(t):
+                        try:
+                            return f"{_cu}{t:,.0f}" if t else '-'
+                        except Exception:
+                            return '-'
+                    def _up(t):
+                        try:
+                            return f" ({(t/price_now-1)*100:+.0f}%)" if t else ''
+                        except Exception:
+                            return ''
+                    _fpe = f"{_cons['fwd_pe']:.1f}x" if _cons.get('fwd_pe') else '-'
+                    st.markdown(
+                        f"🎯 **컨센서스 목표주가** · 🐻 BEAR {_pr(_cons.get('bear'))}{_up(_cons.get('bear'))} · "
+                        f"⚖️ BASE {_pr(_cons.get('base'))}{_up(_cons.get('base'))} · "
+                        f"🐂 BULL {_pr(_cons.get('bull'))}{_up(_cons.get('bull'))} "
+                        f"<span style='color:#8b949e;font-size:11px'>· 애널 {_cons.get('n') or '?'}명 · 선행PER {_fpe}</span>",
+                        unsafe_allow_html=True)
+                else:
+                    st.caption("🎯 컨센서스: 데이터 없음 (yfinance 제한 · KR 소형주 등).")
                 st.divider()
 
             # ── 🏅 CANSLIM 스코어카드 (체슬라투자자문 방식) ──
@@ -1633,77 +1687,6 @@ with tab7:
             vol_20  = hist['Close'].pct_change().tail(20).std() * (252**0.5) * 100
 
             with left8:
-                def _b(v, ccy='$'):
-                    if v is None: return '-'
-                    av = abs(v)
-                    s = '-' if v < 0 else ''
-                    if av >= 1e12: return f"{s}{ccy}{av/1e12:.2f}T"
-                    if av >= 1e9:  return f"{s}{ccy}{av/1e9:.2f}B"
-                    return f"{s}{ccy}{av/1e6:.0f}M"
-
-                st.subheader("📅 실적 (YoY·QoQ 증감)")
-                _emode = st.radio("기간", ["연간", "분기"], horizontal=True, key="earn_mode")
-
-                def _growth(cur, prev):
-                    try:
-                        if cur is None or prev is None or prev == 0 or prev < 0:
-                            return None
-                        return (cur / prev - 1) * 100
-                    except Exception:
-                        return None
-
-                _edict = earn if isinstance(earn, dict) else {}
-                _edf = _edict.get('annual') if _emode == "연간" else _edict.get('quarterly')
-                _naver = _edict.get('naver')
-                rows_e = []
-                _yoy_lag = 1 if _emode == "연간" else 4   # 연간:1칸전=전년 / 분기:4칸전=전년동기
-
-                if _edf is not None and hasattr(_edf, 'empty') and not _edf.empty:
-                    _cols = sorted(_edf.columns, reverse=True)[:7]   # 최신→과거
-
-                    def _cell(keys, col):
-                        for k in ([keys] if isinstance(keys, str) else keys):
-                            if k in _edf.index:
-                                v = _edf.loc[k, col]
-                                try:
-                                    return float(v) if not pd.isna(v) else None
-                                except Exception:
-                                    return None
-                        return None
-
-                    _revs = [_cell('Total Revenue', c) for c in _cols]
-                    _nets = [_cell(['Net Income', 'Net Income Common Stockholders'], c) for c in _cols]
-                    for i, c in enumerate(_cols[:6]):
-                        yoy = _growth(_nets[i], _nets[i + _yoy_lag]) if i + _yoy_lag < len(_nets) else None
-                        qoq = _growth(_nets[i], _nets[i + 1]) if (_emode == "분기" and i + 1 < len(_nets)) else None
-                        rows_e.append({'날짜': str(c)[:7], '매출': _b(_revs[i]), '순이익': _b(_nets[i]),
-                                       'YoY%': f"{yoy:+.0f}%" if yoy is not None else '-',
-                                       'QoQ%': f"{qoq:+.0f}%" if qoq is not None else '-'})
-
-                elif _naver:   # 한국 종목 네이버 폴백 (순이익, 억원)
-                    _arr = list(reversed(_naver['annual'] if _emode == "연간" else _naver['quarterly']))
-                    _nets = [v for _, v in _arr]
-                    for i, (lab, net) in enumerate(_arr[:6]):
-                        yoy = _growth(net, _nets[i + _yoy_lag]) if i + _yoy_lag < len(_nets) else None
-                        qoq = _growth(net, _nets[i + 1]) if (_emode == "분기" and i + 1 < len(_nets)) else None
-                        rows_e.append({'날짜': lab, '매출': '-',
-                                       '순이익': f"{net:,.0f}억" if net is not None else '-',
-                                       'YoY%': f"{yoy:+.0f}%" if yoy is not None else '-',
-                                       'QoQ%': f"{qoq:+.0f}%" if qoq is not None else '-'})
-
-                if rows_e:
-                    _cols_show = ['날짜', '매출', '순이익', 'YoY%'] + (['QoQ%'] if _emode == "분기" else [])
-                    e_df = pd.DataFrame(rows_e)[_cols_show]
-                    def _cg(v):
-                        try:
-                            return 'color:#56d364' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#f78166'
-                        except Exception:
-                            return ''
-                    _gsub = [c for c in ['YoY%', 'QoQ%'] if c in _cols_show]
-                    st.table(e_df.style.hide(axis="index").map(_cg, subset=_gsub))
-                else:
-                    st.info("실적 데이터 없음 (yfinance/네이버 조회 실패)")
-
                 st.subheader("📈 기간별 수익률")
                 r_df = pd.DataFrame([
                     {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
@@ -1764,32 +1747,6 @@ with tab7:
                 st.table(v_df.style.hide(axis="index"))
                 st.caption("PER/PBR/PSR·ROE·마진·배당·목표가 = yfinance(무료). KR(.KS)은 일부 항목이 빌 수 있음('-'). "
                            "PEG<1·PBR낮음·ROE높음·부채비율낮음 = 저평가/우량 신호.")
-
-                # 영업이익률(OPM) 연도별 추이
-                st.subheader("📊 영업이익률(OPM) 추이")
-                _pe_rows = []
-                _ann = (earn or {}).get('annual') if isinstance(earn, dict) else None
-                if _ann is not None and hasattr(_ann, 'empty') and not _ann.empty:
-                    def _ac(keys, col):
-                        for k in ([keys] if isinstance(keys, str) else keys):
-                            if k in _ann.index:
-                                v = _ann.loc[k, col]
-                                try:
-                                    return float(v) if not pd.isna(v) else None
-                                except Exception:
-                                    return None
-                        return None
-                    for c in sorted(_ann.columns, reverse=True)[:3]:
-                        oi = _ac(['Operating Income', 'Operating Income Or Loss', 'EBIT'], c)
-                        rev = _ac('Total Revenue', c)
-                        opm = round(oi / rev * 100, 1) if (oi and rev) else None
-                        _pe_rows.append({'항목': f'OPM {str(c)[:4]}',
-                                         '값': f"{opm:+.1f}%" if opm is not None else '-'})
-                if _pe_rows:
-                    st.table(pd.DataFrame(_pe_rows).style.hide(axis="index"))
-                    st.caption("OPM=영업이익/매출. 최근 3개 회계연도. US 위주(KR은 yfinance 제약으로 빌 수 있음).")
-                else:
-                    st.caption("OPM 데이터 없음 (yfinance 재무제표 조회 실패 — KR 종목에서 흔함).")
 
                 if is_kr_sym:
                     _kins = kr_insiders(sym8_clean)

@@ -97,6 +97,98 @@ def facts(ticker):
     return out
 
 
+from datetime import datetime as _dt
+
+# 통합 재무표용 개념 매핑 (우선순위대로)
+_CONCEPTS = {
+    'revenue':     ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues', 'SalesRevenueNet'],
+    'cogs':        ['CostOfRevenue', 'CostOfGoodsAndServicesSold'],
+    'gross':       ['GrossProfit'],
+    'sga':         ['SellingGeneralAndAdministrativeExpense'],
+    'op_income':   ['OperatingIncomeLoss'],
+    'net_income':  ['NetIncomeLoss'],
+    'eps':         ['EarningsPerShareDiluted'],
+    'assets':      ['Assets'],
+    'liabilities': ['Liabilities'],
+    'equity':      ['StockholdersEquity'],
+    'op_cf':       ['NetCashProvidedByUsedInOperatingActivities'],
+    'inv_cf':      ['NetCashProvidedByUsedInInvestingActivities'],
+    'fin_cf':      ['NetCashProvidedByUsedInFinancingActivities'],
+    'capex':       ['PaymentsToAcquirePropertyPlantAndEquipment', 'PaymentsToAcquireProductiveAssets',
+                    'PaymentsForCapitalImprovements', 'PaymentsToAcquireOtherPropertyPlantAndEquipment'],
+}
+
+
+def _series(node, freq):
+    """concept node → {period_key: val}. freq='annual'(10-K, 흐름은 연간) or 'quarter'(10-Q, 3개월)."""
+    if not node:
+        return {}
+    out = {}
+    for arr in node.get('units', {}).values():
+        for x in arr:
+            end = x.get('end')
+            if not end:
+                continue
+            form, start = x.get('form'), x.get('start')
+            if freq == 'annual':
+                if form != '10-K':
+                    continue
+                if start:                       # 흐름 항목: 연간 기간만
+                    try:
+                        if (_dt.strptime(end, '%Y-%m-%d') - _dt.strptime(start, '%Y-%m-%d')).days < 300:
+                            continue
+                    except Exception:
+                        continue
+                out[end[:4]] = x['val']         # 키=연도
+            else:
+                if form != '10-Q':
+                    continue
+                if start:                       # 흐름 항목: 3개월만(누적 제외)
+                    try:
+                        d = (_dt.strptime(end, '%Y-%m-%d') - _dt.strptime(start, '%Y-%m-%d')).days
+                        if not (60 < d < 100):
+                            continue
+                    except Exception:
+                        continue
+                out[end[:7]] = x['val']         # 키=YYYY-MM
+    return out
+
+
+def statements(ticker, freq='annual', n=6):
+    """통합 재무표 rows(최신순). 각 row: period + 손익/대차/현금흐름 라인아이템."""
+    cik = cik_map().get(ticker.upper())
+    if not cik:
+        return []
+    try:
+        j = _get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json").json()
+    except Exception:
+        return []
+    ug = j.get('facts', {}).get('us-gaap', {})
+    ser = {}
+    for key, concepts in _CONCEPTS.items():
+        d = {}
+        for c in concepts:
+            for p, v in _series(ug.get(c), freq).items():
+                d.setdefault(p, v)
+        ser[key] = d
+    keyset = set()
+    for k in ('revenue', 'net_income', 'op_income', 'assets'):
+        keyset |= set(ser[k])
+    periods = sorted(keyset, reverse=True)[:n]
+    rows = []
+    for p in periods:
+        g = lambda k: ser[k].get(p)
+        rev, gp, cogs = g('revenue'), g('gross'), g('cogs')
+        if gp is None and rev is not None and cogs is not None:
+            gp = rev - cogs
+        rows.append({'period': p, 'revenue': rev, 'gross': gp, 'sga': g('sga'),
+                     'op_income': g('op_income'), 'net_income': g('net_income'), 'eps': g('eps'),
+                     'assets': g('assets'), 'liabilities': g('liabilities'), 'equity': g('equity'),
+                     'op_cf': g('op_cf'), 'inv_cf': g('inv_cf'), 'fin_cf': g('fin_cf'),
+                     'capex': g('capex')})
+    return rows
+
+
 def filings(ticker, form=None, limit=15):
     """최근 공시 목록 [{date, form, title, url}]. form='8-K' 등으로 필터."""
     cik = cik_map().get(ticker.upper())
