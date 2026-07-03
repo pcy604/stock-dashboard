@@ -214,7 +214,7 @@ def _extract_all(j):
     out = {k: None for k in _STMT_KEYS}
     out['gross'] = None; out['capex'] = None
     for row in j.get('list', []):
-        nm = (row.get('account_nm') or '').strip()
+        nm = (row.get('account_nm') or '').replace(' ', '').strip()   # 공백 정규화 ('재무활동 현금흐름' 대응)
         for key, names in _STMT_KEYS.items():
             if out[key] is None and any(n == nm or n in nm for n in names):
                 out[key] = _to_num(row.get('thstrm_amount'))

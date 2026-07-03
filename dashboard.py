@@ -1425,18 +1425,21 @@ def ai_business_summary(name, text):
         return f"(AI 요약 실패: {str(e)[:80]})"
 
 
+def _dfh(n, cap=700):
+    """dataframe 높이 — 행수에 딱 맞게(빈 필러 행 방지), 길면 내부 스크롤."""
+    return int(min(33 * n + 38, cap))
+
+
 with tab7:
     st.header("🔍 종목 분석")
     st.caption("US: TSLA · AAPL · NVDA  |  KR: 005930 또는 005930.KS")
 
-    c_in, c_tf, c_btn = st.columns([3, 2, 1])
+    c_in, c_btn, _csp = st.columns([2.2, 0.9, 4.9])   # 필요한 만큼만 좁게 (#3)
     with c_in:
-        sym8 = st.text_input("종목코드", placeholder="TSLA", label_visibility="collapsed", key="sym8")
-    with c_tf:
-        tf8  = st.selectbox("기간", ["1y (단기)", "3y (중기)", "5y (장기)"], key="tf8",
-                             label_visibility="collapsed")
+        sym8 = st.text_input("종목코드", placeholder="TSLA / 005930",
+                             label_visibility="collapsed", key="sym8")
     with c_btn:
-        go8  = st.button("분석", use_container_width=True, key="go8")
+        go8 = st.button("분석", use_container_width=True, key="go8")
 
     st.markdown(
         " ".join([f'<span style="background:#1c2128;padding:2px 8px;border-radius:12px;'
@@ -1445,12 +1448,15 @@ with tab7:
         unsafe_allow_html=True,
     )
 
+    # 분석 종목을 세션에 고정 — 라디오/슬라이더 조작(rerun)에도 분석 화면 유지 (#7)
     if sym8 and go8:
-        days_map = {"1y (단기)": 365, "3y (중기)": 365*3, "5y (장기)": 365*5}
-        days_sel = days_map[tf8]
-        sym8_clean = sym8.strip().upper()
+        st.session_state['analyze_sym'] = sym8.strip().upper()
+    _asym = st.session_state.get('analyze_sym')
+
+    if _asym:
+        sym8_clean = _asym
         with st.spinner(f"{sym8_clean} 데이터 조회..."):
-            hist, info, earn, insid, fin_est = fetch_stock_data(sym8_clean, days_sel)
+            hist, info, earn, insid, fin_est = fetch_stock_data(sym8_clean, 365 * 5)  # 항상 5y, 차트에서 조절 (#2)
 
         if hist is None or hist.empty:
             st.error(f"데이터 없음 ({sym8_clean}). 종목코드 확인 — KR: 005930 · US: TSLA")
@@ -1460,7 +1466,7 @@ with tab7:
             chg_pct   = (price_now / price_prev - 1) * 100
 
             h1, h2, h3, h4, h5 = st.columns(5)
-            h1.metric("종목명", info.get('longName', sym8)[:20])
+            h1.metric("종목명", info.get('longName', sym8_clean)[:20])
             h2.metric("현재가", f"${price_now:.2f}" if info.get('currency','') != 'KRW' else f"₩{price_now:,.0f}")
             h3.metric("일일대비", f"{chg_pct:+.2f}%")
             mc = info.get('marketCap', 0)
@@ -1529,38 +1535,62 @@ with tab7:
                         _r['roe'] = (_r['net_income'] / _r['equity']) if (_r.get('net_income') and _r.get('equity')) else None
                     _periods = [r['period'] for r in _stm]
                     _gl = "YoY" if _freq == "연간" else "QoQ"
-                    _items = [('손익', '매출', 'revenue', 'amt'), ('손익', '매출총이익', 'gross', 'amt'),
-                              ('손익', 'GPM', 'gpm', 'pct'), ('손익', '영업이익', 'op_income', 'amt'),
-                              ('손익', 'OPM', 'opm', 'pct'), ('손익', '순이익', 'net_income', 'amt'),
-                              ('손익', 'SG&A', 'sga', 'amt'), ('손익', 'ROE', 'roe', 'pct'),
-                              ('대차', '자산', 'assets', 'amt'), ('대차', '부채', 'liabilities', 'amt'),
-                              ('대차', '자본', 'equity', 'amt'),
-                              ('현금', '영업활동', 'op_cf', 'amt'), ('현금', '투자활동', 'inv_cf', 'amt'),
-                              ('현금', '재무활동', 'fin_cf', 'amt'), ('현금', 'Capex', 'capex', 'amt')]
-                    _trows = []
-                    for _grp, _lab, _key, _typ in _items:
-                        _row = {'구분': _grp, '항목': _lab}
-                        for _ix, _rr in enumerate(_stm):
-                            _v = _rr.get(_key)
-                            _row[_periods[_ix]] = _pct(_v) if _typ == 'pct' else _amt(_v)
-                        _cur = _stm[0].get(_key); _prev = _stm[1].get(_key) if len(_stm) > 1 else None
-                        if _typ == 'pct':
-                            _row[_gl] = (f"{(_cur-_prev)*100:+.1f}%p"
-                                         if (isinstance(_cur, (int, float)) and isinstance(_prev, (int, float))) else '-')
-                        else:
-                            _row[_gl] = f"{(_cur/_prev-1)*100:+.0f}%" if (_cur and _prev and _prev > 0) else '-'
-                        _trows.append(_row)
-                    _tdf = pd.DataFrame(_trows)
-                    def _cgg(v):
-                        try:
-                            return 'color:#16a34a' if float(str(v).replace('%', '').replace('p', '').replace('+', '')) >= 0 else 'color:#dc2626'
-                        except Exception:
-                            return ''
-                    st.dataframe(_tdf.style.map(_cgg, subset=[_gl]),
-                                 use_container_width=True, hide_index=True, height=36 + 35 * len(_tdf))
+                    _np = len(_stm)
+                    _dcols = [f'Δ{_periods[_i]}' for _i in range(_np - 1)]   # 연도 사이 증감 컬럼
+
+                    def _delta(cur, prev, typ):
+                        if typ == 'pct':
+                            return (f"{(cur-prev)*100:+.1f}%p"
+                                    if (isinstance(cur, (int, float)) and isinstance(prev, (int, float))) else '-')
+                        if cur is not None and prev:
+                            try:
+                                if prev < 0:
+                                    return '흑전' if cur > 0 else '-'
+                                return f"{(cur/prev-1)*100:+.0f}%"
+                            except Exception:
+                                return '-'
+                        return '-'
+
+                    def _stmt_table(title, items):
+                        _rows = []
+                        for _lab, _key, _typ in items:
+                            _row = {'항목': _lab}
+                            for _ix in range(_np):
+                                _v = _stm[_ix].get(_key)
+                                _row[_periods[_ix]] = _pct(_v) if _typ == 'pct' else _amt(_v)
+                                if _ix < _np - 1:        # 사이사이 증감 (#5)
+                                    _row[_dcols[_ix]] = _delta(_v, _stm[_ix + 1].get(_key), _typ)
+                            _rows.append(_row)
+                        _df = pd.DataFrame(_rows)
+                        # 컬럼 순서: 항목, p0, Δ, p1, Δ, ..., pN
+                        _order = ['항목']
+                        for _ix in range(_np):
+                            _order.append(_periods[_ix])
+                            if _ix < _np - 1:
+                                _order.append(_dcols[_ix])
+                        _df = _df[_order]
+                        def _cgg(v):
+                            try:
+                                _f = float(str(v).replace('%', '').replace('p', '').replace('+', ''))
+                                return 'color:#16a34a' if _f >= 0 else 'color:#dc2626'
+                            except Exception:
+                                return 'color:#16a34a' if str(v) == '흑전' else ''
+                        st.caption(title)
+                        st.dataframe(_df.style.map(_cgg, subset=_dcols),
+                                     use_container_width=True, hide_index=True, height=_dfh(len(_df)))
+
+                    # 대차 → 손익 → 현금 순서 (#5), '구분' 컬럼 제거 (#8)
+                    _stmt_table("① 대차대조표", [('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
+                                               ('자본', 'equity', 'amt')])
+                    _stmt_table("② 손익계산서", [('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
+                                               ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
+                                               ('OPM', 'opm', 'pct'), ('순이익', 'net_income', 'amt'),
+                                               ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct')])
+                    _stmt_table("③ 현금흐름표", [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
+                                               ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
                     _qn = ("누적(YTD)" if is_kr_sym else "3개월") if _freq == "분기" else "회계연도"
-                    st.caption(f"출처: {_osrc} 공식({_qn}). GPM=매출총이익률·OPM=영업이익률·ROE=순익/자본. "
-                               f"{_gl}=최근 증감(마진은 %p). 금액 KR=조/억·US=USD.")
+                    st.caption(f"출처: {_osrc} 공식({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
+                               "금액 KR=조/억·US=USD.")
                 else:
                     st.caption("통합 재무표 데이터 없음 (해당 기준).")
 
@@ -1659,8 +1689,13 @@ with tab7:
                 ('애널 목표가',   _pcur(_tgt)),
                 ('목표가 여력',   _fx(_upside, '%')),
             ]
-            v_df = pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows])
-            st.table(v_df.style.hide(axis="index"))
+            # 2단 분할 — 세로로 긴 표 대신 컴팩트 배치 (#10)
+            _vhalf = (len(val_rows) + 1) // 2
+            _vc1, _vc2 = st.columns(2)
+            _vc1.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[:_vhalf]]),
+                           use_container_width=True, hide_index=True, height=_dfh(_vhalf))
+            _vc2.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[_vhalf:]]),
+                           use_container_width=True, hide_index=True, height=_dfh(len(val_rows) - _vhalf))
             st.caption("PER/PBR/PSR·ROE·마진·배당·목표가 = yfinance(무료). KR(.KS)은 일부 항목이 빌 수 있음('-'). "
                        "PEG<1·PBR낮음·ROE높음·부채비율낮음 = 저평가/우량 신호.")
 
@@ -1698,7 +1733,7 @@ with tab7:
                 vertical_spacing=0.02,
                 subplot_titles=('캔들 · 이동평균 · 피보나치', 'RSI (14)', 'MACD (12·26·9)', '거래량'),
             )
-            disp = hist.tail(min(252, len(hist)))
+            disp = hist                                   # 전체 5y — 차트 기간버튼으로 직접 조절 (#2)
 
 
             fig.add_trace(go.Candlestick(
@@ -1754,6 +1789,18 @@ with tab7:
                 margin=dict(l=0, r=100, t=30, b=0),
                 legend=dict(orientation='h', y=1.02, x=0),
             )
+            # 기간 버튼(1m·6m·YTD·1y·3y·전체) — 셀렉트박스 대신 차트에서 직접 조절 (#2)
+            fig.update_layout(xaxis=dict(rangeselector=dict(
+                buttons=[dict(count=1, label='1m', step='month', stepmode='backward'),
+                         dict(count=6, label='6m', step='month', stepmode='backward'),
+                         dict(count=1, label='YTD', step='year', stepmode='todate'),
+                         dict(count=1, label='1y', step='year', stepmode='backward'),
+                         dict(count=3, label='3y', step='year', stepmode='backward'),
+                         dict(step='all', label='전체')],
+                bgcolor='rgba(30,35,42,0.9)', activecolor='rgba(56,139,253,0.6)',
+                font=dict(color='#c9d1d9', size=11), y=1.08)))
+            if len(hist) > 252:                           # 초기 화면은 최근 1년
+                fig.update_xaxes(range=[hist.index[-252], hist.index[-1]], row=1, col=1)
             for i in range(1, 5):
                 fig.update_xaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
                 fig.update_yaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
@@ -1761,38 +1808,39 @@ with tab7:
 
             st.plotly_chart(fig, use_container_width=True)
 
+            # 📐 피보나치 레벨 (expander 제거 — 바로 표시, #4)
             fib_ext_lvls = _fib_ext(fib_high, fib_low)
-            with st.expander("📐 피보나치 레벨 상세 (최근 60일 기준)", expanded=True):
-                fc1, fc2 = st.columns(2)
-                def _fmt_p(v): return f"₩{v:,.0f}" if is_kr_sym else f"${v:.2f}"
-                def _fmt_chg(v): return f"{(v/price_now-1)*100:+.1f}%"
+            st.markdown("**📐 피보나치 레벨** (최근 60일 기준)")
+            fc1, fc2 = st.columns(2)
+            def _fmt_p(v): return f"₩{v:,.0f}" if is_kr_sym else f"${v:.2f}"
+            def _fmt_chg(v): return f"{(v/price_now-1)*100:+.1f}%"
 
-                with fc1:
-                    st.caption("📉 되돌림(지지선)")
-                    ret_df = pd.DataFrame([
-                        {'레벨': k, '가격': _fmt_p(v), '현재 대비': _fmt_chg(v)}
-                        for k, v in fib_lvls.items()
-                    ])
-                    st.dataframe(ret_df, use_container_width=True, hide_index=True,
-                                 height=36 + 35 * len(ret_df))
+            with fc1:
+                st.caption("📉 되돌림(지지선)")
+                ret_df = pd.DataFrame([
+                    {'레벨': k, '가격': _fmt_p(v), '현재 대비': _fmt_chg(v)}
+                    for k, v in fib_lvls.items()
+                ])
+                st.dataframe(ret_df, use_container_width=True, hide_index=True,
+                             height=_dfh(len(ret_df)))
 
-                with fc2:
-                    st.caption("📈 연장 (목표가격)")
-                    ext_df = pd.DataFrame([
-                        {'레벨': k, '목표가': _fmt_p(v), '현재 대비': _fmt_chg(v)}
-                        for k, v in fib_ext_lvls.items()
-                    ])
-                    def _color_ext(v):
-                        try:
-                            pct = float(str(v).replace('%','').replace('+',''))
-                            if pct > 0: return 'color:#56d364'
-                        except: pass
-                        return ''
-                    st.dataframe(
-                        ext_df.style.map(_color_ext, subset=['현재 대비']),
-                        use_container_width=True, hide_index=True,
-                        height=36 + 35 * len(ext_df),
-                    )
+            with fc2:
+                st.caption("📈 연장 (목표가격)")
+                ext_df = pd.DataFrame([
+                    {'레벨': k, '목표가': _fmt_p(v), '현재 대비': _fmt_chg(v)}
+                    for k, v in fib_ext_lvls.items()
+                ])
+                def _color_ext(v):
+                    try:
+                        pct = float(str(v).replace('%','').replace('+',''))
+                        if pct > 0: return 'color:#56d364'
+                    except: pass
+                    return ''
+                st.dataframe(
+                    ext_df.style.map(_color_ext, subset=['현재 대비']),
+                    use_container_width=True, hide_index=True,
+                    height=_dfh(len(ext_df)),
+                )
 
             st.divider()
 
@@ -1849,7 +1897,7 @@ with tab7:
                         _mm.style.map(_cmat, subset=_moncols)
                            .format({c: (lambda v: f'{v:+.0f}' if pd.notna(v) else '·') for c in _moncols}),
                         use_container_width=True, hide_index=True,
-                        height=min(36 + 35 * len(_mm), 700))
+                        height=_dfh(len(_mm)))
                     st.caption("연도×월 수익률(%). 하단 **평균**=월별 계절성, **승률**=상승 빈도(%). "
                                "엑셀 '주가 추이 분석' 방식. ⚠️ 표본 적으면 우연 — 기간 '5y' 권장.")
                 else:
@@ -1897,18 +1945,6 @@ with tab7:
                     st.info(f"교차 신호 없음 — 기간이 짧거나(현 기간 < MA{_ss}) 교차 미발생. '5y'로 늘려보세요.")
 
 
-            st.subheader("📈 기간별 수익률")
-            r_df = pd.DataFrame([
-                {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
-                for k, v in [('1개월', ret_1m),('3개월', ret_3m),('6개월', ret_6m),('1년', ret_1y)]
-            ])
-            def _cr(v):
-                try:
-                    f = float(str(v).replace('%','').replace('+',''))
-                    return 'color:#56d364' if f >= 0 else 'color:#f78166'
-                except: return ''
-            st.table(r_df.style.hide(axis="index").map(_cr, subset=['수익률']))
-
             if is_kr_sym:
                 _kins = kr_insiders(sym8_clean)
                 if _kins:
@@ -1920,7 +1956,7 @@ with tab7:
                         '보유': f"{x['holdings']:,.0f}" if x['holdings'] is not None else '-'}
                         for x in _kins])
                     st.dataframe(_kidf, use_container_width=True, hide_index=True,
-                                 height=36 + 35 * min(len(_kidf), 8))
+                                 height=_dfh(min(len(_kidf), 8)))
                     st.caption("출처: DART 임원·주요주주 특정증권 소유상황보고(공식). 증감>0=취득·<0=처분.")
                 else:
                     st.info("내부자 거래 내역 없음 (DART)")
@@ -1987,19 +2023,33 @@ with tab7:
                 _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
                           else 'C' if _total >= 30 else 'D')
 
-                _cc1, _cc2 = st.columns([1, 2])
+                _cc1, _cc2, _cc3 = st.columns([0.9, 1.7, 1.4])   # 스코어카드 반폭 + 우측 수익률 (#9)
                 _cc1.metric("CANSLIM 총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
                 _cc1.metric("등급", _grade)
                 _cc1.caption(f"시장국면 M: {_Mlabel}")
                 _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
                                        '근거': d} for k, v, d in _parts])
-                _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, height=36 + 35 * len(_scdf))
+                _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, height=_dfh(len(_scdf)))
+                with _cc3:
+                    st.caption("📈 기간별 수익률")
+                    r_df = pd.DataFrame([
+                        {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
+                        for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]
+                    ])
+                    def _cr(v):
+                        try:
+                            _f = float(str(v).replace('%', '').replace('+', ''))
+                            return 'color:#56d364' if _f >= 0 else 'color:#f78166'
+                        except Exception:
+                            return ''
+                    st.dataframe(r_df.style.map(_cr, subset=['수익률']),
+                                 use_container_width=True, hide_index=True, height=_dfh(len(r_df)))
                 st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
                            "N·S·I=정성 입력 · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심. "
                            "각 항목 max 25 (C·A는 음수 가능).")
                 st.divider()
 
-    elif not sym8:
+    else:
         st.info("👆 종목코드를 입력하고 분석 버튼을 누르세요\n\n"
                 "**US**: TSLA · AAPL · NVDA · MSFT · QCOM\n\n"
                 "**KR**: 005930.KS (삼성전자) · 000660.KS (SK하이닉스)")
