@@ -1338,6 +1338,57 @@ def consensus_scenarios(sym, is_kr):
         return {}
 
 
+@st.cache_data(ttl=12 * 3600)
+def company_profile(sym, is_kr):
+    """기업 개요: 사업설명·경영진·홈페이지·공식공시 링크(EDGAR/DART/Form4)."""
+    out = {'summary': None, 'officers': [], 'website': None,
+           'edgar_url': None, 'form4_url': None, 'dart_url': None}
+    try:
+        yi = yf.Ticker(f"{sym}.KS" if is_kr else sym).info or {}
+        out['summary'] = yi.get('longBusinessSummary')
+        out['website'] = yi.get('website')
+        out['officers'] = [{'name': o.get('name'), 'title': o.get('title')}
+                           for o in (yi.get('companyOfficers') or [])[:6] if o.get('name')]
+    except Exception:
+        pass
+    try:
+        if is_kr:
+            import dart_client
+            if dart_client.corp_map().get(sym):
+                out['dart_url'] = f"https://dart.fss.or.kr/dsab007/main.do?textCrpNm={sym}"
+        else:
+            import edgar_client
+            cik = edgar_client.cik_map().get(sym.upper())
+            if cik:
+                out['edgar_url'] = (f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
+                                    f"&CIK={cik}&type=10-K&dateb=&owner=include&count=20")
+                out['form4_url'] = (f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
+                                    f"&CIK={cik}&type=4&dateb=&owner=include&count=40")
+    except Exception:
+        pass
+    return out
+
+
+def ai_business_summary(name, text):
+    """Gemini로 사업 요약(핵심사업·성장동력/로드맵·리스크). 실패 시 안내문."""
+    try:
+        import config
+        from google import genai
+        key = getattr(config, 'GEMINI_KEY', '') or ''
+        if not key:
+            return "(Gemini 키 미설정 — 서버 시크릿 GEMINI_KEY 필요)"
+        if not text:
+            return "(사업 설명 데이터 없음 — yfinance 제한/미제공)"
+        prompt = (f"다음은 '{name}'의 공식 사업 설명이다. 투자자 관점에서 한국어로 간결히 요약하라.\n"
+                  "형식(불릿):\n**핵심 사업**: 2~3줄\n**성장 동력·로드맵**: 2~3줄\n**리스크**: 1~2줄\n"
+                  "과장·추측 금지, 사실 기반.\n\n" + str(text)[:7000])
+        r = genai.Client(api_key=key).models.generate_content(
+            model='gemini-2.5-flash', contents=prompt)
+        return (r.text or '').strip() or "(요약 생성 실패)"
+    except Exception as e:
+        return f"(AI 요약 실패: {str(e)[:80]})"
+
+
 with tab7:
     st.header("🔍 종목 분석")
     st.caption("US: TSLA · AAPL · NVDA  |  KR: 005930 또는 005930.KS")
@@ -1676,6 +1727,31 @@ with tab7:
                            "각 항목 max 25 (C·A는 음수 가능).")
                 st.divider()
 
+            # ── 🏢 기업 개요 · IR · 공식 공시 (item 7) ──
+            _prof = company_profile(sym8_clean, is_kr_sym)
+            st.subheader("🏢 기업 개요 · IR")
+            _lnk = []
+            if _prof.get('website'):
+                _lnk.append(f"[🌐 홈페이지/IR]({_prof['website']})")
+            if _prof.get('edgar_url'):
+                _lnk.append(f"[📄 EDGAR 10-K]({_prof['edgar_url']})")
+            if _prof.get('form4_url'):
+                _lnk.append(f"[👤 EDGAR Form4(내부자)]({_prof['form4_url']})")
+            if _prof.get('dart_url'):
+                _lnk.append(f"[📄 DART 공시]({_prof['dart_url']})")
+            if _lnk:
+                st.markdown("**공식 공시·IR**: " + "  ·  ".join(_lnk))
+            if _prof.get('officers'):
+                st.markdown("**주요 경영진**: " + ", ".join(
+                    f"{o['name']}({o['title']})" if o.get('title') else o['name']
+                    for o in _prof['officers']))
+            if st.button("🤖 AI 사업 요약 생성 (Gemini)", key=f"aisum_{sym8_clean}"):
+                with st.spinner("공식 사업설명 요약 중..."):
+                    st.markdown(ai_business_summary(info.get('longName', sym8_clean), _prof.get('summary')))
+            st.caption("공시·목표가는 공식/컨센서스 기반. AI 요약은 공식 사업설명(yfinance longBusinessSummary) "
+                       "기반 best-effort — 서버에선 GEMINI_KEY 시크릿 필요. 홈페이지 스크래핑 아님.")
+            st.divider()
+
             left8, right8 = st.columns(2)
 
             yr1  = hist.tail(252)
@@ -1764,8 +1840,10 @@ with tab7:
                     else:
                         st.info("내부자 거래 내역 없음 (DART)")
                 elif insid is not None and not insid.empty:
-                    st.subheader("👤 내부자 거래")
+                    st.subheader("👤 내부자 거래 (SEC Form 4 기반)")
                     st.dataframe(insid.head(8), use_container_width=True, hide_index=True)
+                    st.caption("출처: yfinance(SEC Form 4 집계). 10-K엔 내부자거래 없음 — Form 4/5가 원천. "
+                               "정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
 
             # ════════════════════════════════════════════════════════════
             # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
