@@ -51,6 +51,10 @@ jobs:
         run: python canslim_run.py
         continue-on-error: true
 
+      - name: 주도주 v2 (지문 기반)
+        run: python leaders_run.py
+        continue-on-error: true
+
       - name: 포트폴리오 모니터 + 매도 알림(텔레그램)
         run: python portfolio_monitor.py
         continue-on-error: true
