@@ -1690,6 +1690,11 @@ def ai_business_summary(name, text, src='공식 사업설명'):
         import config
         from google import genai
         key = getattr(config, 'GEMINI_KEY', '') or ''
+        if not key:                       # Streamlit Secrets 직접 조회 (재시작 없이 반영)
+            try:
+                key = st.secrets.get('GEMINI_KEY', '')
+            except Exception:
+                key = ''
         if not key:
             return "(Gemini 키 미설정 — Streamlit Secrets에 GEMINI_KEY 추가 필요)"
         if not text:
