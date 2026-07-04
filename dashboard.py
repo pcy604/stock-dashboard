@@ -228,10 +228,9 @@ with tab_screen:
         _msig, _cmn, _cmx, _, _ = compute_macro_signal(_fed_r, _m2y, fetch_spx_yoy())
     except Exception:
         _msig, _cmn, _cmx = "—", 25, 40
-    _hm1, _hm2, _hm3, _hm4 = st.columns(4)
+    _hm1, _hm2, _hm4 = st.columns(3)
     _hm1.metric("시장 방향", _s_can_h.get('market_dir', '—'))
     _hm2.metric("매크로 신호", _msig)
-    _hm3.metric("주봉 신호 종목", f"{len(_scr_fh)}개")
     _hm4.metric("권고 현금", f"{_cmn}~{_cmx}%", help="매크로 위험도 기반 현금 비중 권고 · 상세는 🌍 매크로 탭")
 
     st.caption("상승 상위(위닝 점수·신호 통합) · CANSLIM · 주도주 · 종목 프로파일 · 자동추천 — 시장 필터는 위 하나로 전 서브탭 공통")
@@ -1570,19 +1569,47 @@ def company_profile(sym, is_kr):
     return out
 
 
-def ai_business_summary(name, text):
-    """Gemini로 사업 요약(핵심사업·성장동력/로드맵·리스크). 실패 시 안내문."""
+@st.cache_data(ttl=24 * 3600)
+def official_business_text(sym, is_kr):
+    """공식 사업 텍스트 — US: 최신 10-K 본문(Item 1 사업내용부터), KR: None(yfinance 폴백).
+    홈페이지 스크래핑 대신 공식 제출문서 사용 (정확·안정)."""
+    try:
+        if not is_kr:
+            import re as _re
+            import edgar_client
+            fl = edgar_client.filings(sym, form='10-K', limit=1)
+            if fl:
+                html = edgar_client._get(fl[0]['url']).text
+                txt = _re.sub(r'<[^>]+>', ' ', html)
+                txt = _re.sub(r'&[a-zA-Z#0-9]+;', ' ', txt)
+                txt = _re.sub(r'\s+', ' ', txt)
+                m = _re.search(r'Item\s*1\s*[.:]?\s*Business', txt, _re.I)
+                if m:
+                    txt = txt[m.start():]
+                if len(txt) > 3000:
+                    return txt[:18000]
+    except Exception:
+        pass
+    return None
+
+
+def ai_business_summary(name, text, src='공식 사업설명'):
+    """Gemini로 사업·비전·마스터플랜 요약. 실패 시 안내문."""
     try:
         import config
         from google import genai
         key = getattr(config, 'GEMINI_KEY', '') or ''
         if not key:
-            return "(Gemini 키 미설정 — 서버 시크릿 GEMINI_KEY 필요)"
+            return "(Gemini 키 미설정 — Streamlit Secrets에 GEMINI_KEY 추가 필요)"
         if not text:
-            return "(사업 설명 데이터 없음 — yfinance 제한/미제공)"
-        prompt = (f"다음은 '{name}'의 공식 사업 설명이다. 투자자 관점에서 한국어로 간결히 요약하라.\n"
-                  "형식(불릿):\n**핵심 사업**: 2~3줄\n**성장 동력·로드맵**: 2~3줄\n**리스크**: 1~2줄\n"
-                  "과장·추측 금지, 사실 기반.\n\n" + str(text)[:7000])
+            return "(사업 설명 데이터 없음)"
+        prompt = (f"다음은 '{name}'의 {src}이다. 투자자 관점에서 한국어로 요약하라.\n"
+                  "형식(불릿, 굵은 소제목):\n"
+                  "**핵심 사업**: 무엇으로 돈을 버나 (2~3줄)\n"
+                  "**비전·마스터플랜**: 회사가 공식적으로 밝힌 장기 방향·로드맵 (2~3줄)\n"
+                  "**성장 동력**: 향후 실적을 끌어올릴 요인 (2~3줄)\n"
+                  "**리스크**: 공식 문서에 명시된 핵심 리스크 (1~2줄)\n"
+                  "과장·추측 금지, 문서에 있는 사실만.\n\n" + str(text)[:16000])
         r = genai.Client(api_key=key).models.generate_content(
             model='gemini-2.5-flash', contents=prompt)
         return (r.text or '').strip() or "(요약 생성 실패)"
@@ -1600,13 +1627,6 @@ with tab7:
                              label_visibility="collapsed", key="sym8")
     with c_btn:
         go8 = st.button("분석", use_container_width=True, key="go8")
-
-    st.markdown(
-        " ".join([f'<span style="background:#1c2128;padding:2px 8px;border-radius:12px;'
-                   f'font-size:12px;color:#8b949e">{s}</span>'
-                  for s in ['TSLA','AAPL','NVDA','MSFT','QCOM','CRWD','005930','000660']]),
-        unsafe_allow_html=True,
-    )
 
     # 분석 종목을 세션에 고정 — 라디오/슬라이더 조작(rerun)에도 분석 화면 유지 (#7)
     if sym8 and go8:
@@ -1656,15 +1676,15 @@ with tab7:
                 _lnk.append(f"[📄 DART 공시]({_prof['dart_url']})")
             if _lnk:
                 st.markdown("**공식 공시·IR**: " + "  ·  ".join(_lnk))
-            if _prof.get('officers'):
-                st.markdown("**주요 경영진**: " + ", ".join(
-                    f"{o['name']}({o['title']})" if o.get('title') else o['name']
-                    for o in _prof['officers']))
-            if st.button("🤖 AI 사업 요약 생성 (Gemini)", key=f"aisum_{sym8_clean}"):
-                with st.spinner("공식 사업설명 요약 중..."):
-                    st.markdown(ai_business_summary(info.get('longName', sym8_clean), _prof.get('summary')))
-            st.caption("공시·목표가는 공식/컨센서스 기반. AI 요약은 공식 사업설명(yfinance longBusinessSummary) "
-                       "기반 best-effort — 서버에선 GEMINI_KEY 시크릿 필요. 홈페이지 스크래핑 아님.")
+            if st.button("🤖 AI 사업·비전 요약 (Gemini)", key=f"aisum_{sym8_clean}"):
+                with st.spinner("공식 문서(10-K/사업설명)에서 비전·마스터플랜 요약 중..."):
+                    _btxt = official_business_text(sym8_clean, is_kr_sym)
+                    _bsrc = '10-K 공식 사업보고(Item 1~)' if _btxt else '공식 사업설명(yfinance)'
+                    st.markdown(ai_business_summary(info.get('longName', sym8_clean),
+                                                    _btxt or _prof.get('summary'), _bsrc))
+                    st.caption(f"요약 원천: {_bsrc}")
+            st.caption("AI 요약 원천: US=최신 10-K 본문(공식), KR=공식 사업설명. "
+                       "서버에서 쓰려면 Streamlit Secrets에 GEMINI_KEY 필요.")
             st.divider()
 
             # ── 📊 공식 재무제표 통합표 (연도 가로 × 3표 세로 · 연간/분기 토글) ──
@@ -1696,7 +1716,8 @@ with tab7:
                     _periods = [r['period'] for r in _stm]
                     _gl = "YoY" if _freq == "연간" else "QoQ"
                     _np = len(_stm)
-                    _dcols = [f'Δ{_periods[_i]}' for _i in range(_np - 1)]   # 연도 사이 증감 컬럼
+                    # 증감 컬럼 헤더는 전부 'YoY'/'QoQ'로 보이게 (공백 패딩으로 중복 회피)
+                    _dcols = [f'{_gl}{" " * _i}' for _i in range(_np - 1)]
 
                     def _delta(cur, prev, typ):
                         if typ == 'pct':
@@ -1719,13 +1740,13 @@ with tab7:
                         return _amt(_v)
 
                     def _stmt_table(title, items, est=None):
-                        _ecols = ['올해E', '내년E'] if est else []
+                        _ecols = ['내년E', '올해E'] if est else []   # 미래→과거 방향 통일 (#1)
                         _rows = []
                         for _lab, _key, _typ in items:
                             _row = {'항목': _lab}
-                            if est:                       # 컨센서스 (올해/내년) — #1
-                                _row['올해E'] = _fmt_v(est.get(f'{_key}_0y'), _typ) if est.get(f'{_key}_0y') else '-'
+                            if est:                       # 컨센서스 (내년/올해)
                                 _row['내년E'] = _fmt_v(est.get(f'{_key}_1y'), _typ) if est.get(f'{_key}_1y') else '-'
+                                _row['올해E'] = _fmt_v(est.get(f'{_key}_0y'), _typ) if est.get(f'{_key}_0y') else '-'
                             for _ix in range(_np):
                                 _v = _stm[_ix].get(_key)
                                 _row[_periods[_ix]] = _fmt_v(_v, _typ)
@@ -1733,7 +1754,7 @@ with tab7:
                                     _row[_dcols[_ix]] = _delta(_v, _stm[_ix + 1].get(_key), _typ)
                             _rows.append(_row)
                         _df = pd.DataFrame(_rows)
-                        # 컬럼 순서: 항목, [올해E, 내년E,] p0, Δ, p1, Δ, ..., pN
+                        # 컬럼 순서: 항목, [내년E, 올해E,] p0, YoY, p1, YoY, ..., pN
                         _order = ['항목'] + _ecols
                         for _ix in range(_np):
                             _order.append(_periods[_ix])
@@ -1750,8 +1771,8 @@ with tab7:
                         _sty = _df.style.map(_cgg, subset=_dcols)
                         if _ecols:
                             _sty = _sty.set_properties(subset=_ecols, color='#79c0ff')
-                        st.dataframe(_sty, use_container_width=True, hide_index=True,
-                                     row_height=27, height=_dfh(len(_df)))
+                        # 높이 지정 없이 내용에 맞춤 → 세 표의 행간 완전 동일 (#2)
+                        st.dataframe(_sty, use_container_width=True, hide_index=True, row_height=27)
 
                     _est = forward_estimates(sym8_clean, is_kr_sym) if _freq == "연간" else None
                     # 대차 → 손익 → 현금 순서 (#5), '구분' 컬럼 제거 (#8)
