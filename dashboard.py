@@ -535,34 +535,70 @@ with t_gain:
 
 # ── 주도주 (섹터/전체 상대강도) ──
 with t_lead:
-    st.caption("오닐: 주도주는 주도 섹터와 함께 온다. 신고가에 가장 붙은 + 신호 많은 = 강한 주도주.")
-    _lm = _GMKT
-    try:
-        import leaders as _ld
-        _lr = _ld.find_leaders(_lm)
-        if not _lr:
-            st.error("데이터 없음 → weekly_run.py 실행")
+    _lv2 = load_json(Path('results/leaders_v2.json'))
+    if _lv2 and _lv2.get('all'):
+        _lm = _GMKT
+        _cr = _lv2.get('criteria', {})
+        st.caption("**주도주 지문**: ①이익 변곡(흑자전환/영익 YoY≥+100%, 공식 DART·EDGAR) ②RS≥85(12개월 수익률 백분위) "
+                   "③52주 신고가 -15% 이내 ④시총 상위(KR150·US300). "
+                   "TSLA 20-21 · NVDA 23-24 · PLTR 24-25 · 삼전닉스/MU 25-26 공통 패턴에서 역산.")
+
+        def _lrow(m):
+            _og = m.get('op_growth')
+            _ogs = _og if isinstance(_og, str) else (f"{_og:+.0f}%" if _og is not None else '?')
+            return {'시장': m['market'], '종목': m['name'], '코드': m['sym'],
+                    '시총': fmt_cap(m.get('marcap'), m['market']),
+                    'RS': m['rs'],
+                    '12개월': f"{m['ret_12m']:+.0f}%" if m.get('ret_12m') is not None else '-',
+                    '신고가': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '?',
+                    '영익변곡': _ogs,
+                    '매출가속': ('✅' if m.get('rev_accel') else ('❌' if m.get('rev_accel') is False else '-')),
+                    '섹터': str(m.get('sector', '-'))[:12]}
+
+        _f_all = [m for m in _lv2['all'] if _lm == "전체" or m['market'] == _lm]
+        _themes = [t for t in _lv2.get('themes', [])
+                   if _lm == "전체" or any(m['market'] == _lm for m in t['members'])]
+
+        if _themes:
+            st.markdown("##### 🔥 주도 테마 (같은 섹터 2개+ 통과 = 무리로 온다)")
+            for _t in _themes[:4]:
+                _mem = [m for m in _t['members'] if _lm == "전체" or m['market'] == _lm]
+                st.markdown(f"**[{_t['sector']}]** {len(_mem)}종목")
+                _tdf9 = pd.DataFrame([_lrow(m) for m in _mem])
+                st.dataframe(_tdf9, use_container_width=True, hide_index=True,
+                             row_height=27, height=_dfh(len(_tdf9)))
+
+        _pass = [m for m in _f_all if m.get('inflection') is True]
+        _unk = [m for m in _f_all if m.get('inflection') is None]
+        st.markdown(f"##### 🏆 주도주 — 지문 4개 전부 통과 {len(_pass)}개")
+        if _pass:
+            _ldf = pd.DataFrame([_lrow(m) for m in _pass])
+            st.dataframe(_ldf, use_container_width=True, hide_index=True,
+                         row_height=27, height=_dfh(len(_ldf)))
         else:
-            if _lr['mode'] == 'sector' and _lr['sectors']:
-                for _sec in _lr['sectors']:
-                    st.markdown(f"**[{_sec['sector']}]** 섹터RS {_sec['sector_rs']} · 신고가근접 {_sec['near_high_pct']:.0f}% ({_sec['n']}종목)")
-                    st.dataframe(pd.DataFrame([{
-                        '시장': m['market'], '종목': m['name'], '코드': m['sym'],
-                        '시총': fmt_cap(m.get('marcap'), m['market']),
-                        'RS': m['_rs'], '신고가거리': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '-',
-                        '신호': ', '.join(m['signals'][:3])} for m in _sec['leaders']]),
-                        use_container_width=True, hide_index=True)
-            else:
-                st.info("섹터 데이터가 부족해 전체 상대강도(RS) 랭킹으로 표시합니다.")
+            st.info("현재 지문 전부 통과 종목 없음 — 기준이 엄격한 게 정상 (주도주는 드묾).")
+        if _unk:
+            with st.expander(f"⚠️ RS·신고가 통과 + 이익 데이터 미확인 {len(_unk)}개 (수동 확인 필요)", expanded=False):
+                _udf = pd.DataFrame([_lrow(m) for m in _unk])
+                st.dataframe(_udf, use_container_width=True, hide_index=True,
+                             row_height=27, height=_dfh(len(_udf)))
+        st.caption(f"생성: {_lv2.get('generated', '?')} · 매일 자동 갱신(daily-refresh). "
+                   "⚠️ 신규상장·스핀오프(BE·SNDK류)는 data/leaders_watch.txt에 추가하면 유니버스에 포함.")
+    else:
+        # 폴백: 구버전 로직
+        st.caption("주도주 v2 데이터 없음 → `python leaders_run.py` 실행 후 새로고침. (임시로 구버전 표시)")
+        try:
+            import leaders as _ld
+            _lr = _ld.find_leaders(_GMKT)
+            if _lr:
                 st.dataframe(pd.DataFrame([{
                     '시장': m['market'], '종목': m['name'], '코드': m['sym'],
                     '시총': fmt_cap(m.get('marcap'), m['market']),
-                    'RS': m['_rs'], '신고가거리': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '-',
-                    '주간%': m.get('pct_change'), '신호': ', '.join(m['signals'][:3])}
+                    'RS': m['_rs'], '신호': ', '.join(m['signals'][:3])}
                     for m in _lr['top']]),
-                    use_container_width=True, hide_index=True, height=560)
-    except Exception as _le:
-        st.error(f"주도주 오류: {_le}")
+                    use_container_width=True, hide_index=True, row_height=27, height=_dfh(20))
+        except Exception as _le:
+            st.error(f"주도주 오류: {_le}")
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 with t_prof:

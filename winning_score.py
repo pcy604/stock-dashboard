@@ -109,11 +109,12 @@ def score_stock(s, can=None, live=None):
     else:
         bd['high52'] = 0.0
 
-    # ── 상대강도 RS ──
-    avail += W['rs']
+    # ── 상대강도 RS (데이터 없으면 배점에서 제외 → 재정규화, 불이익 방지) ──
     if can and can.get('rs_pct') is not None:
+        avail += W['rs']
         bd['rs'] = round(W['rs'] * (can['rs_pct'] / 100), 1)        # KR: CANSLIM 퍼센타일
     elif dist is not None:
+        avail += W['rs']
         # 프록시: 신고가에 가까울수록 강함 (0% → 만점, -25% → 0)
         bd['rs'] = round(W['rs'] * max(0, 1 - abs(min(dist, 0)) / 25), 1)
     else:
@@ -151,14 +152,41 @@ def score_stock(s, can=None, live=None):
     return score, bd, grade, disq
 
 
+_PERF = Path('results/perf_latest.json')
+_PSIG = [('now_sig_52w', 'sig_52w', '52주신고가'), ('now_sig_vol', 'sig_vol', '거래량'),
+         ('now_sig_maconv', 'sig_maconv', '이평수렴'), ('now_sig_cup', 'sig_cup', '컵핸들'),
+         ('now_sig_ma5', 'sig_ma5', '5주라이딩'), ('now_sig_rsimacd', 'sig_rsimacd', 'RSI/MACD')]
+
+
+def _universe():
+    """스코어링 유니버스: 주봉 신호 종목 + perf 전 종목(근사 — dist_52w 없음, 재정규화로 공정 비교)."""
+    scr = _load(SCREENER) or {}
+    uni = {s['sym']: s for s in scr.get('stocks', [])}
+    perf = _load(_PERF) or {}
+    for p in perf.get('stocks', []):
+        if p['sym'] in uni:
+            continue
+        s = {'sym': p['sym'], 'name': p.get('name'), 'market': p.get('market'),
+             'marcap': p.get('marcap'), 'sector': p.get('sector', ''),
+             'dist_52w': None, 'vol_ratio': None, '_approx': True}
+        sigs = []
+        for pk, sk, lab in _PSIG:
+            s[sk] = bool(p.get(pk))
+            if s[sk]:
+                sigs.append(lab)
+        s['signals'] = sigs
+        uni[p['sym']] = s
+    return list(uni.values())
+
+
 def rank_all(market_filter='전체', regime_mult=1.0):
-    scr = _load(SCREENER)
-    if not scr:
+    stocks = _universe()
+    if not stocks:
         return []
     can_map, market_ok = _canslim_map()
     live = _live_mults()
     rows = []
-    for s in scr['stocks']:
+    for s in stocks:
         if market_filter != '전체' and s['market'] != market_filter:
             continue
         can = can_map.get(s['sym'])
@@ -171,6 +199,7 @@ def rank_all(market_filter='전체', regime_mult=1.0):
             'marcap': s.get('marcap'),
             'signals': s.get('signals', []), 'breakdown': bd,
             'has_fund': can is not None,
+            'approx': bool(s.get('_approx')),
         })
     rows.sort(key=lambda x: -x['score'])
     return rows
