@@ -129,12 +129,46 @@ def _inflection_us(sym):
         return None, None, None
 
 
+_GICS_KO = {'Information Technology': 'IT·반도체', 'Health Care': '헬스케어',
+            'Consumer Staples': '필수소비재', 'Consumer Discretionary': '임의소비재',
+            'Industrials': '산업재', 'Materials': '소재', 'Energy': '에너지',
+            'Financials': '금융', 'Communication Services': '커뮤니케이션',
+            'Utilities': '유틸리티', 'Real Estate': '부동산'}
+
+_JUNK_SECTORS = {'중견기업부', '우량기업부', '벤처기업부', '기술성장기업부', '기타', '미분류'}
+
+
 def _sector_map():
+    """섹터맵 — KR: KRX-DESC 'Industry'(진짜 업종명; 'Sector' 컬럼은 소속부 쓰레기값),
+    US: S&P500 GICS(한글 변환). 폴백: 기존 sectors.json(소속부 값 필터)."""
+    m = {}
+    try:
+        import FinanceDataReader as fdr
+        desc = fdr.StockListing('KRX-DESC')
+        for _, r in desc.iterrows():
+            c = str(r.get('Code', '')).zfill(6)
+            ind = r.get('Industry')
+            if c.isdigit() and isinstance(ind, str) and ind.strip():
+                m[c] = ind.strip()
+    except Exception:
+        pass
+    try:
+        import FinanceDataReader as fdr
+        sp = fdr.StockListing('S&P500')
+        for _, r in sp.iterrows():
+            sec = r.get('Sector')
+            if isinstance(sec, str) and sec.strip():
+                m[str(r.get('Symbol', '')).upper()] = _GICS_KO.get(sec.strip(), sec.strip())
+    except Exception:
+        pass
     try:
         from sectors import get_sector_map
-        return get_sector_map()
+        for k, v in get_sector_map().items():
+            if isinstance(v, str) and v.strip() and v.strip() not in _JUNK_SECTORS:
+                m.setdefault(k, v.strip())
     except Exception:
-        return {}
+        pass
+    return m
 
 
 def run():
