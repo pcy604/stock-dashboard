@@ -55,6 +55,16 @@ jobs:
         run: python leaders_run.py
         continue-on-error: true
 
+      - name: US CANSLIM
+        run: python canslim_us_run.py
+        continue-on-error: true
+
+      - name: DART 재무 적재(시총 상위) → 가치 스냅샷
+        run: |
+          python ingest_dart.py --top 250 --years 2
+          python value_export.py
+        continue-on-error: true
+
       - name: 포트폴리오 모니터 + 매도 알림(텔레그램)
         run: python portfolio_monitor.py
         continue-on-error: true
