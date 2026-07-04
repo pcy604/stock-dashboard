@@ -58,6 +58,11 @@ SIG_LABELS    = ['52주신고가','거래량폭발','5일라이딩','컵위드�
 
 
 # ── 공통 헬퍼 ────────────────────────────────────────────────────────
+def _dfh(n, cap=620):
+    """dataframe 높이 — 행 27px에 딱 맞게(빈 필러 행 방지), 길면 내부 스크롤. row_height=27과 세트."""
+    return int(min(27 * n + 37, cap))
+
+
 def fmt_cap(marcap, market):
     if not marcap:
         return 'N/A'
@@ -473,11 +478,12 @@ with t_gain:
                 continue
             cm = _canmap.get(s['sym'], {})
             wm = _winmap.get(s['sym'], {})
+            _ws_v = wm.get('score')
             _grows.append({
                 '시장': s['market'], '종목': s['name'], '코드': s['sym'],
                 '시총': fmt_cap(s.get('marcap'), s['market']),
                 '등급': wm.get('grade', '-'),
-                '위닝점수': wm.get('score'),
+                '위닝점수': _ws_v if _ws_v is not None else None,   # 정렬용 원값
                 '신호': ', '.join(pm.get('sigs', [])[:3]) or '-',
                 'CANSLIM': f"{cm['score']}/7" if cm.get('score') is not None else '-',
                 '매출%': f"{cm['rev']:+.0f}" if isinstance(cm.get('rev'), (int, float)) else '-',
@@ -490,6 +496,9 @@ with t_gain:
         else:
             _grows.sort(key=lambda r: -(r[_retc] if r[_retc] is not None else -999))
         _grows = _grows[:_gn]
+        for r in _grows:                                 # 표시용 변환 (None → '-')
+            r['위닝점수'] = f"{r['위닝점수']:.1f}" if r['위닝점수'] is not None else '-'
+            r['향후2M계절성'] = f"{r['향후2M계절성']:+.1f}%" if r['향후2M계절성'] is not None else '-'
 
         _slab = "위닝점수순" if _gsort == "위닝점수" else f"{_gper}상승순"
         st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 · {_slab} ({_cmo}·{_nmo}월 계절성 동반)")
@@ -513,10 +522,12 @@ with t_gain:
         st.dataframe(
             _gdf.style.map(_cg2, subset=_gsub)
                 .map(_cg_grade, subset=['등급']).map(_cg_score, subset=['위닝점수'])
-                .format({_retc: '{:+.1f}%',
-                         '위닝점수': lambda v: f'{v:.1f}' if v is not None else '–',
-                         '향후2M계절성': lambda v: f'{v:+.1f}%' if v is not None else '-'}, na_rep='-'),
-            use_container_width=True, hide_index=True, height=min(36 + 35 * len(_gdf), 640))
+                .format({_retc: '{:+.1f}%'}, na_rep='-'),
+            use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_gdf)))
+        _ncov = sum(1 for r in _grows if r['등급'] != '-')
+        st.caption(f"ℹ️ 위닝점수·신호·CANSLIM은 **주봉 신호 유니버스(337종목)**에만 계산돼 있어 "
+                   f"급등 소형주는 '-'가 많음 (현재 표시 {len(_grows)}개 중 {_ncov}개 커버). "
+                   "커버리지 확대(전 종목 스코어링)는 로드맵 항목.")
         st.caption("위닝점수=백테스트 샤프 가중 셋업 점수(S≥80·A≥65·B≥50). 신호=주봉(현재). "
                    "CANSLIM·매출/영업익은 KR 한정. 계절성·1주는 perf 기준. "
                    "⚠️ 상승률 상위 = '이미 오른' 종목, 점수 = '셋업의 질'(미래 보장 아님) — 추격 주의, 손익비·가드레일 확인.")
@@ -593,7 +604,7 @@ with t_prof:
                     except: return ''
                 st.dataframe(_sdf.style.map(_cs, subset=[f'{_mo}월 평균%'])
                              .format({f'{_mo}월 평균%': '{:+.1f}%', '승률%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, height=min(36 + 35*len(_sdf), 600))
+                             use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_sdf)))
                 st.caption("⚠️ 계절성은 과거 통계적 경향일 뿐 — 표본 적으면 우연. 보조 지표로만.")
 
     else:
@@ -629,7 +640,7 @@ with t_prof:
                     return 'color:#888'
                 st.dataframe(_mdf.style.map(_cd, subset=['현재낙폭%', '1년MDD%', '역대MDD%'])
                              .format({'현재낙폭%': '{:.0f}%', '1년MDD%': '{:.0f}%', '역대MDD%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, height=min(36 + 35*len(_mdf), 600))
+                             use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_mdf)))
                 st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라 실적 개선·턴어라운드 확인 후 진입.")
 
 
@@ -757,8 +768,10 @@ with tab3:
                 if '❌' in s: return 'color:#f78166'
                 return 'color:#8b949e'
 
-            disp3 = ['종목명','코드','시총','점수/7','RS','N 거리%','S 배수','C 분기%','A 연간%','I 순매수']
-            sig3c = ['RS','N 거리%','S 배수','C 분기%','A 연간%','I 순매수']
+            # 컬럼을 CANSLIM 글자 순서(C→A→N→S→L→I)로 (#3)
+            disp3 = ['종목명','코드','시총','점수/7','C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수']
+            df3 = df3.rename(columns={'RS': 'RS (L)'})
+            sig3c = ['C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수']
 
             st.subheader(f"총 {len(df3)}개 종목 | N✅ L✅ 필수, C/A/S/I는 슬라이더 기준으로 색상 표시")
             st.dataframe(
@@ -766,8 +779,27 @@ with tab3:
                     .map(color_score3, subset=['점수/7'])
                     .map(color_cell3,  subset=sig3c),
                 use_container_width=True,
-                height=min(38 + 35 * len(df3), 760),   # 종목 수만큼 길게 (최대 760)
+                row_height=27, height=_dfh(len(df3), cap=760),
             )
+            with st.expander("📖 CANSLIM 각 항목 기준·설명", expanded=False):
+                st.dataframe(pd.DataFrame([
+                    {'글자': 'C', '이름': '분기 실적', '컬럼': 'C 분기%',
+                     '기준': '최근 분기 순이익 YoY ≥ +20% (흑자전환 포함)', '출처': 'DART 공식(폴백 네이버)'},
+                    {'글자': 'A', '이름': '연간 실적', '컬럼': 'A 연간%',
+                     '기준': '연간 순이익 YoY ≥ +20% × 2개년 (최근년/전년)', '출처': 'DART 공식(폴백 네이버)'},
+                    {'글자': 'N', '이름': '신고가 근접', '컬럼': 'N 거리%',
+                     '기준': '52주 신고가 대비 거리 — 0%에 가까울수록(신고가 부근) 강함', '출처': '주가'},
+                    {'글자': 'S', '이름': '수급(거래량)', '컬럼': 'S 배수',
+                     '기준': '거래량이 평균 대비 몇 배 터졌나 (≥1.5x + 양봉 몸통)', '출처': '주가·거래량'},
+                    {'글자': 'L', '이름': '주도주(상대강도)', '컬럼': 'RS (L)',
+                     '기준': 'RS = 최근 수익률의 시장 내 백분위(0~100). 90p = 상위 10% 강자', '출처': '주가(상대비교)'},
+                    {'글자': 'I', '이름': '기관 수급', '컬럼': 'I 순매수',
+                     '기준': '최근 20거래일 기관+외국인 합산 순매수(억원) > 0 = 매집', '출처': 'KRX(pykrx)'},
+                    {'글자': 'M', '이름': '시장 방향', '컬럼': '상단 배지',
+                     '기준': '지수가 상승추세인가 — 하락장에선 아무리 좋아도 무리하지 않음', '출처': '지수'},
+                ]), use_container_width=True, hide_index=True, row_height=27, height=_dfh(7))
+                st.caption("오닐 CANSLIM: '이익이 급증(C·A)하는 신고가 부근(N) 주도주(L)를 "
+                           "거래량(S)·기관(I)이 받쳐주고 시장(M)이 우호적일 때 산다.'")
 
             st.divider()
             with st.expander("📊 항목별 통과율 (현재 슬라이더 기준)", expanded=False):
@@ -784,7 +816,7 @@ with tab3:
                     '통과율(%)': [round(v/total3*100, 1) for v in pr_counts.values()],
                 })
                 st.dataframe(pr_df, use_container_width=False, hide_index=True,
-                             height=36 + 35 * len(pr_df))
+                             row_height=27, height=_dfh(len(pr_df)))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -1029,7 +1061,7 @@ with tab4:
         st.dataframe(
             idx_df.style.map(_ci_chg, subset=['전일대비','YoY']),
             use_container_width=True, hide_index=True,
-            height=36 + 35*len(idx_df),
+            row_height=27, height=_dfh(len(idx_df)),
         )
 
     valid_idx = [(df, l, c) for df, l, c in idx_chart_dfs if not df.empty]
@@ -1081,7 +1113,7 @@ with tab4:
              '전략':'비중 축소 — 손절 룰 강화, 신규매수 자제'},
         ]
         st.dataframe(pd.DataFrame(scenario_data), use_container_width=True, hide_index=True,
-                     height=36+35*3)
+                     row_height=27, height=_dfh(3))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -1520,11 +1552,6 @@ def ai_business_summary(name, text):
         return (r.text or '').strip() or "(요약 생성 실패)"
     except Exception as e:
         return f"(AI 요약 실패: {str(e)[:80]})"
-
-
-def _dfh(n, cap=620):
-    """dataframe 높이 — 행 27px에 딱 맞게(빈 필러 행 방지), 길면 내부 스크롤. row_height=27과 세트."""
-    return int(min(27 * n + 37, cap))
 
 
 with tab7:
@@ -2275,7 +2302,7 @@ with tab11:
                 _ardf[_show_cols].style.map(_c_mult2, subset=['신뢰계수'])
                     .format({'비중%': '{:.1f}%', '신뢰계수': '{:.2f}'}),
                 use_container_width=True, hide_index=True,
-                height=36 + 36 * len(_ardf),
+                row_height=27, height=_dfh(len(_ardf)),
             )
 
             sc1, sc2, sc3 = st.columns(3)

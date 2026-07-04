@@ -5,6 +5,7 @@ requests>=2.31
 plotly>=5.20
 yfinance>=0.2.40
 finance-datareader>=0.9.50
+pykrx>=1.0.45
 beautifulsoup4>=4.12
 lxml>=5.0
 pyarrow>=15.0
