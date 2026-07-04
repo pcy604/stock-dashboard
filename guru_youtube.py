@@ -140,6 +140,20 @@ def fetch_recent_videos(channel_id: str, channel_name: str,
 
 
 # ── 자막 추출 (타임스탬프 포함) ──────────────────────────────────────
+def _ytt_instance():
+    """YouTubeTranscriptApi 인스턴스. config.YT_PROXY 있으면 프록시 경유
+    (GitHub Actions 데이터센터 IP는 유튜브가 자막 API를 차단 → 레지던셜 프록시 필요)."""
+    from youtube_transcript_api import YouTubeTranscriptApi
+    proxy = getattr(config, 'YT_PROXY', '') or ''
+    if proxy:
+        try:
+            from youtube_transcript_api.proxies import GenericProxyConfig
+            return YouTubeTranscriptApi(proxy_config=GenericProxyConfig(http_url=proxy, https_url=proxy))
+        except Exception as e:
+            print(f'    [프록시 설정 실패, 직결 시도] {e}')
+    return YouTubeTranscriptApi()
+
+
 def get_transcript_segments(video_id: str) -> list | None:
     """[(start_sec, text), ...] 반환. 실패 시 None."""
     try:
@@ -148,13 +162,13 @@ def get_transcript_segments(video_id: str) -> list | None:
         print(f'    [자막 모듈 없음] {e}')
         return None
     try:
-        # 0.x: 정적 메서드 / 1.x: 인스턴스 메서드 둘 다 대응
+        # 1.x 인스턴스(.fetch, 프록시 지원) 우선, 안 되면 0.x 정적
         try:
+            fetched = _ytt_instance().fetch(video_id, languages=TRANSCRIPT_LANGS)
+            segs = [(float(getattr(s, 'start', 0)), getattr(s, 'text', '')) for s in fetched]
+        except AttributeError:
             raw = YouTubeTranscriptApi.get_transcript(video_id, languages=TRANSCRIPT_LANGS)
             segs = [(float(s.get('start', 0)), s.get('text', '')) for s in raw]
-        except AttributeError:
-            fetched = YouTubeTranscriptApi().fetch(video_id, languages=TRANSCRIPT_LANGS)
-            segs = [(float(getattr(s, 'start', 0)), getattr(s, 'text', '')) for s in fetched]
         segs = [(t, x) for t, x in segs if x]
         return segs or None
     except Exception as e:

@@ -22,6 +22,7 @@ jobs:
       TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       GURU_CHAT:        ${{ secrets.GURU_CHAT }}     # 공개 채널이면 @username (선택)
+      YT_PROXY:         ${{ secrets.YT_PROXY }}      # 레지던셜 프록시 (자막 IP차단 우회, 필수급)
     steps:
       - uses: actions/checkout@v4
 
