@@ -1706,8 +1706,8 @@ def ai_business_summary(name, text, src='공식 사업설명'):
                   "**성장 동력**: 향후 실적을 끌어올릴 요인 (2~3줄)\n"
                   "**리스크**: 공식 문서에 명시된 핵심 리스크 (1~2줄)\n"
                   "과장·추측 금지, 문서에 있는 사실만.\n\n" + str(text)[:16000])
-        r = genai.Client(api_key=key).models.generate_content(
-            model='gemini-2.5-flash', contents=prompt)
+        client = genai.Client(api_key=key)   # 임시객체로 쓰면 요청 중 GC로 닫힘("client has been closed")
+        r = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
         return (r.text or '').strip() or "(요약 생성 실패)"
     except Exception as e:
         return f"(AI 요약 실패: {str(e)[:80]})"
