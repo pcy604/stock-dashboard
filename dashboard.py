@@ -1408,11 +1408,67 @@ def _fwd_est_cached(sym, is_kr):
     return out
 
 
+@st.cache_data(ttl=6 * 3600)
+def _kr_naver_consensus_cached(sym):
+    """KR 컨센서스 폴백 — 네이버 '기업실적분석' (E) 컬럼(증권사 추정 평균).
+    yfinance에 없는 영업이익 추정까지 제공. 반환 단위: 원(EPS는 원 그대로)."""
+    import re
+    from bs4 import BeautifulSoup
+    from datetime import datetime as _d
+    r = requests.get(f'https://finance.naver.com/item/main.naver?code={sym}',
+                     headers={'User-Agent': 'Mozilla/5.0'}, timeout=8)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    tb = soup.select_one('div.cop_analysis table')
+    if tb is None:
+        raise RuntimeError('no table')
+    heads = [th.get_text(' ', strip=True) for th in tb.select('thead th')]
+    dh = [h for h in heads if re.match(r'\d{4}\.\d{2}', h)]
+    n_annual = 4 if len(dh) >= 10 else max(len(dh) - 6, 0)
+    ynow = _d.now().year
+    emap = {}                             # 연간 (E) 컬럼 인덱스 → 0y(올해)/1y(내년)
+    for i, h in enumerate(dh[:n_annual]):
+        if '(E)' in h:
+            emap[i] = '0y' if int(h[:4]) <= ynow else '1y'
+    if not emap:
+        raise RuntimeError('no E cols')
+
+    def _num(s):
+        s = s.replace(',', '').strip()
+        try:
+            return float(s)
+        except Exception:
+            return None
+
+    out = {}
+    for kw, key, mult in [('매출액', 'revenue', 1e8), ('영업이익', 'op_income', 1e8),
+                          ('당기순이익', 'net_income', 1e8), ('EPS', 'eps', 1.0)]:
+        for row in tb.select('tbody tr'):
+            th = row.select_one('th')
+            if th and kw in th.get_text():
+                vals = [_num(td.get_text(strip=True)) for td in row.select('td')]
+                for i, lab in emap.items():
+                    if i < len(vals) and vals[i] is not None:
+                        out[f'{key}_{lab}'] = vals[i] * mult
+                break
+    if not out:
+        raise RuntimeError('empty')
+    return out
+
+
 def forward_estimates(sym, is_kr):
+    """올해E/내년E 컨센서스 — US=yfinance, KR=yfinance→네이버 폴백(영업이익 포함)."""
+    out = {}
     try:
-        return _fwd_est_cached(sym, is_kr)
+        out = dict(_fwd_est_cached(sym, is_kr))
     except Exception:
-        return {}
+        out = {}
+    if is_kr:
+        try:
+            for k, v in _kr_naver_consensus_cached(sym).items():
+                out.setdefault(k, v)      # yfinance 값 우선, 빈 곳만 네이버로 보충
+        except Exception:
+            pass
+    return out
 
 
 @st.cache_data(ttl=12 * 3600)
@@ -1649,7 +1705,7 @@ with tab7:
                                                ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
                     _qn = ("누적(YTD)" if is_kr_sym else "3개월") if _freq == "분기" else "회계연도"
                     st.caption(f"출처: {_osrc} 공식({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
-                               "금액 KR=조/억·US=USD.")
+                               "금액 KR=조/억·US=USD. 올해E·내년E=컨센서스(US: yfinance / KR: 네이버 증권사 추정 — 참고용).")
                 else:
                     st.caption("통합 재무표 데이터 없음 (해당 기준).")
 
