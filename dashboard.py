@@ -63,6 +63,8 @@ def _dfh(n, cap=620):
     return int(min(27 * n + 37, cap))
 
 
+
+
 def fmt_cap(marcap, market):
     if not marcap:
         return 'N/A'
@@ -233,10 +235,10 @@ with tab_screen:
     _hm2.metric("매크로 신호", _msig)
     _hm4.metric("권고 현금", f"{_cmn}~{_cmx}%", help="매크로 위험도 기반 현금 비중 권고 · 상세는 🌍 매크로 탭")
 
-    st.caption("상승 상위(위닝 점수·신호 통합) · CANSLIM · 주도주 · 종목 프로파일 · 자동추천 — 시장 필터는 위 하나로 전 서브탭 공통")
-    t_gain, tab3, t_lead, t_prof, tab11 = st.tabs([
+    st.caption("상승 상위 · CANSLIM(KR/US) · 주도주 · 💎가치(뭘 살까) · ⚡타이밍(언제 살까) — 시장 필터는 위 하나로 전 서브탭 공통")
+    t_gain, tab3, t_lead, t_value, t_prof = st.tabs([
         "🔥 상승 상위", "🏆 CANSLIM",
-        "🚀 주도주", "🔬 종목 프로파일", "🎯 자동추천"])
+        "🚀 주도주", "💎 가치 발굴", "⚡ 타이밍 발굴"])
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -600,8 +602,59 @@ with t_lead:
             st.error(f"주도주 오류: {_le}")
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
+# ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
+with t_value:
+    st.caption("💎 공식 지표(KRX)로 '싸고(저PER·저PBR) 돈 잘 버는(ROE·성장·배당)' 종목 발굴 — 가격이 아니라 가치 기준.")
+    if _GMKT == "US":
+        st.info("US 가치 스크린은 EDGAR 벌크 적재 후 제공 예정 — 지금은 KR만. "
+                "(US 개별 종목 밸류는 🔍 종목 분석에서 공식 멀티플로 확인)")
+    else:
+        _vj = load_json(Path('results/value_kr.json'))
+        if not _vj or not _vj.get('stocks'):
+            st.warning("가치 데이터 없음 → `python value_export.py` 실행 후 새로고침.")
+        else:
+            _vc1, _vc2, _vc3, _vc4 = st.columns(4)
+            _vper = _vc1.slider("PER ≤", 1, 30, 10, key="val_per")
+            _vpbr = _vc2.slider("PBR ≤", 0.2, 5.0, 1.5, 0.1, key="val_pbr")
+            _vroe = _vc3.slider("ROE ≥ %", 0, 30, 8, key="val_roe")
+            _vgrw = _vc4.slider("영업익 성장 ≥ %", -50, 100, 0, key="val_grw",
+                                help="'흑자전환'은 항상 통과")
+            _vrows = []
+            for s in _vj['stocks']:
+                _per, _pbr, _roe = s.get('per'), s.get('pbr'), s.get('roe')
+                if not (_per and 0 < _per <= _vper and _pbr and 0 < _pbr <= _vpbr):
+                    continue
+                if _roe is None or _roe < _vroe:
+                    continue
+                _og9 = s.get('op_growth')
+                _og_ok = (_og9 == '흑자전환') or (isinstance(_og9, (int, float)) and _og9 >= _vgrw)
+                if not _og_ok:
+                    continue
+                _vrows.append({'종목': s['name'], '코드': s['sym'],
+                               '시총': fmt_cap(s.get('marcap'), 'KR'),
+                               'PER': _per, 'PBR': _pbr, 'PSR': s.get('psr'),
+                               'ROE%': _roe,
+                               '매출성장%': s.get('rev_growth') if not isinstance(s.get('rev_growth'), str) else s.get('rev_growth'),
+                               '영업익성장%': _og9,
+                               '12개월%': s.get('ret_12m'), '기준': s.get('period')})
+            _vrows.sort(key=lambda r: r['PER'])
+            st.subheader(f"💎 저평가·우량 — {len(_vrows)}개 (PER≤{_vper} · PBR≤{_vpbr} · ROE≥{_vroe}% · 영업익≥{_vgrw}%)")
+            if _vrows:
+                _vdf9 = pd.DataFrame(_vrows[:50])
+                st.dataframe(_vdf9.style.format({'PER': '{:.1f}', 'PBR': '{:.2f}', 'PSR': '{:.2f}',
+                                                 'ROE%': '{:.1f}', '12개월%': '{:+.0f}'}, na_rep='-'),
+                             use_container_width=True, hide_index=True,
+                             row_height=27, height=_dfh(min(len(_vdf9), 20)))
+                st.caption(f"커버리지 {_vj.get('coverage')}종목(시총 상위, DART 공식 재무 × 실시간 시총 — 자체 DB). "
+                           "PER=시총/순익·PBR=시총/자본·PSR=시총/매출. "
+                           "⚠️ 저PER 함정 주의 — 경기순환주는 이익 고점에서 PER이 가장 쌈. 성장·현금흐름 같이 봐야.")
+            else:
+                st.info("조건 통과 종목 없음 — 기준을 완화해보세요.")
+
+
+# ── ⚡ 타이밍 발굴 — 기술적 분석 기준 (언제 살까) ──
 with t_prof:
-    st.caption("종목의 과거 통계 성격 — 언제 오르나(계절성) · 얼마나 빠지나(MDD 낙폭)")
+    st.caption("⚡ 언제 오르나(계절성) · 얼마나 빠지나(MDD 낙폭) — 기술·통계 기준 타이밍. 하단에 포지션 사이징 계산기.")
     _pmode = st.radio("분석", ["📅 계절성 (월별 강세)", "🔄 MDD 낙폭 (바닥 탐색)"],
                       horizontal=True, key="prof_mode")
 
@@ -678,18 +731,49 @@ with t_prof:
                              use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_mdf)))
                 st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라 실적 개선·턴어라운드 확인 후 진입.")
 
+    # 🧮 포지션 사이징 계산기 — ③ '어떻게' 단계 (자동추천 탭 흡수)
+    st.divider()
+    st.markdown("##### 🧮 포지션 사이징 계산기 — 얼마나 살까·어디서 자를까")
+    _zc1, _zc2, _zc3, _zc4, _zc5 = st.columns(5)
+    _z_cap = _zc1.number_input("투자 자본(원)", min_value=0, value=10_000_000, step=1_000_000, key="sz_cap")
+    _z_risk = _zc2.slider("1회 리스크 %", 0.5, 5.0, 1.0, 0.5, key="sz_risk",
+                          help="이 매매에서 잃어도 되는 최대 금액 = 자본 × 리스크%")
+    _z_entry = _zc3.number_input("진입가", min_value=0.0, value=10000.0, step=100.0, key="sz_entry")
+    _z_stop = _zc4.slider("손절 %", 3, 15, 8, key="sz_stop", help="오닐 룰: -7~8%")
+    _z_rr = _zc5.slider("손익비 R:R", 1.0, 5.0, 2.0, 0.5, key="sz_rr")
+    if _z_entry > 0 and _z_cap > 0:
+        _z_stopp = _z_entry * (1 - _z_stop / 100)
+        _z_riskamt = _z_cap * _z_risk / 100
+        _z_qty = int(_z_riskamt / (_z_entry - _z_stopp)) if _z_entry > _z_stopp else 0
+        _z_invest = _z_qty * _z_entry
+        _z_target = _z_entry * (1 + _z_stop / 100 * _z_rr)
+        _zm1, _zm2, _zm3, _zm4 = st.columns(4)
+        _zm1.metric("매수 수량", f"{_z_qty:,}주", f"투입 {_z_invest:,.0f}원")
+        _zm2.metric("손절가", f"{_z_stopp:,.0f}", f"-{_z_stop}%")
+        _zm3.metric("목표가", f"{_z_target:,.0f}", f"+{_z_stop * _z_rr:.0f}%")
+        _zm4.metric("최대 손실", f"{_z_riskamt:,.0f}원", f"자본의 {_z_risk}%")
+        if _z_invest > _z_cap:
+            st.warning(f"⚠️ 필요 투입({_z_invest:,.0f}원)이 자본을 초과 — 손절폭이 좁아 수량이 과대. "
+                       "리스크%를 낮추거나 손절폭을 넓히세요.")
+    st.caption("'얼마나'는 감이 아니라 산수: 수량 = (자본×리스크%) ÷ (진입가−손절가). "
+               "손익비 2:1 = 손절 -8%면 목표 +16%. 목표 도달 전 추세 꺾이면 룰대로 청산.")
 
 
 # ════════════════════════════════════════════════════════════════════
 # 탭3: CANSLIM (슬라이더 실시간 조정)
 # ════════════════════════════════════════════════════════════════════
 with tab3:
-    st.header("🏆 CANSLIM 스크리너 (한국)")
-    update_badge(CANSLIM_JSON)
-    canslim = load_json(CANSLIM_JSON)
+    _cs_mkt = st.radio("시장", ["🇰🇷 한국", "🇺🇸 미국"], horizontal=True, key="canslim_mkt")
+    _cs_kr = _cs_mkt.endswith("한국")
+    _CS_JSON = CANSLIM_JSON if _cs_kr else Path('results/canslim_us_latest.json')
+    st.header(f"🏆 CANSLIM 스크리너 ({'한국' if _cs_kr else '미국'})")
+    update_badge(_CS_JSON)
+    canslim = load_json(_CS_JSON)
+    if not _cs_kr:
+        st.caption("US: C·A=SEC EDGAR 공식 재무 · I(기관 수급)는 무료 일간 소스가 없어 '?'(13F는 분기 지연) — I 필수 체크 비권장")
 
     if canslim is None:
-        st.error("데이터 없음 → `python canslim_run.py` 실행 후 새로고침")
+        st.error(f"데이터 없음 → `python {'canslim_run.py' if _cs_kr else 'canslim_us_run.py'}` 실행 후 새로고침")
     else:
         col1, col2, col3 = st.columns(3)
         col1.metric("기준일", canslim['date'])
@@ -697,7 +781,7 @@ with tab3:
         col3.metric("후보 종목", f"{len(canslim['stocks'])}개 (N+RS 사전필터)")
 
         if not canslim['market_ok']:
-            st.warning("⚠️ KOSPI 하락추세 — 신규매수 주의")
+            st.warning(f"⚠️ {'KOSPI' if _cs_kr else 'S&P500'} 하락추세 — 신규매수 주의")
 
         m_ok = canslim['market_ok']
 
@@ -740,14 +824,15 @@ with tab3:
             a_y2   = s.get('a_growth_y2')
             i_inst = s.get('i_inst_pct')
 
+            def _ge(v, th):        # 숫자 비교 ('흑자전환' 문자열=통과)
+                return (v == '흑자전환') or (isinstance(v, (int, float)) and v >= th)
             n_ok = n_dist is not None and n_dist >= th_N
             s_ok = (vol is not None and vol >= th_S and
                     body is not None and body >= th_Sb and
                     (not th_Sbull or bull))
             l_ok = rs >= th_L
-            c_ok = (c_g == '흑자전환') or (isinstance(c_g, (int, float)) and c_g >= th_C)
-            a_ok = (a_y1 is not None and a_y1 >= th_A1 and
-                    a_y2 is not None and a_y2 >= th_A2)
+            c_ok = _ge(c_g, th_C)
+            a_ok = _ge(a_y1, th_A1) and _ge(a_y2, th_A2)
             i_ok = i_inst is not None and i_inst >= th_I
 
             if not n_ok or not l_ok: continue
@@ -758,18 +843,24 @@ with tab3:
 
             score = sum([bool(m_ok), n_ok, l_ok, s_ok, c_ok, a_ok, i_ok])
 
-            cap = s['marcap'] // 100_000_000
+            if _cs_kr:
+                cap = s['marcap'] // 100_000_000
+                _cap_str = f"{cap/10000:.1f}조" if cap >= 10000 else f"{cap:,}억"
+            else:
+                _cap_str = fmt_cap(s.get('marcap'), 'US')
+            def _gtxt(v):
+                return v if isinstance(v, str) else (f"{v:+.0f}%" if v is not None else '??')
             if a_y1 is not None and a_y2 is not None:
-                a_tag = f"{'✅' if a_ok else '❌'} {a_y1:+.0f}%/{a_y2:+.0f}%"
+                a_tag = f"{'✅' if a_ok else '❌'} {_gtxt(a_y1)}/{_gtxt(a_y2)}"
             elif a_y1 is not None:
-                a_tag = f"{'✅' if a_y1>=th_A1 else '❌'} {a_y1:+.0f}%/??"
+                a_tag = f"{'✅' if _ge(a_y1, th_A1) else '❌'} {_gtxt(a_y1)}/??"
             else:
                 a_tag = '?'
 
             rows3.append({
                 '종목명':  s['name'],
                 '코드':    s['sym'],
-                '시총':    f"{cap/10000:.1f}조" if cap >= 10000 else f"{cap:,}억",
+                '시총':    _cap_str,
                 '점수/7':  score,
                 'RS':      _tag3(rs,     th_L,  '{:.0f}p'),
                 'N 거리%': _tag3(n_dist, th_N,  '{:+.1f}%'),
@@ -2260,119 +2351,6 @@ with tab7:
         st.info("👆 종목코드를 입력하고 분석 버튼을 누르세요\n\n"
                 "**US**: TSLA · AAPL · NVDA · MSFT · QCOM\n\n"
                 "**KR**: 005930.KS (삼성전자) · 000660.KS (SK하이닉스)")
-
-
-# ════════════════════════════════════════════════════════════════════
-# 탭11: 자동추천 — 일/주/월 + 손익비 리스크 사이징
-# ════════════════════════════════════════════════════════════════════
-with tab11:
-    st.header("🎯 자동추천 — 일·주·월 + 손익비 사이징")
-    st.caption("신호 → 종목 → 얼마나 살까 → 어디서 자를까. 손익비(R:R)와 1회 리스크를 정하면 수량·손절·목표가 자동 계산.")
-
-    cc1, cc2, cc3 = st.columns([1.4, 1, 1])
-    with cc1:
-        ar_tf_label = st.radio("타임프레임", ["주간", "월간", "일간"], horizontal=True, key="ar_tf")
-    ar_tf = {"일간": "daily", "주간": "weekly", "월간": "monthly"}[ar_tf_label]
-    with cc2:
-        ar_cap = st.number_input("투자 자본(원)", min_value=0, value=10_000_000,
-                                 step=1_000_000, key="ar_cap")
-    ar_mkt = _GMKT
-    with cc3:
-        ar_n = st.slider("최대 종목수", 3, 20, 10, key="ar_n")
-
-    _tf_def = {"daily": (5, 2.0), "weekly": (7, 2.0), "monthly": (10, 2.5)}[ar_tf]
-    rc1, rc2, rc3, rc4 = st.columns(4)
-    with rc1:
-        ar_stop = st.slider("손절폭 -%", 2, 25, _tf_def[0], key="ar_stop",
-                            help="진입가 대비 손절 거리")
-    with rc2:
-        ar_rr = st.slider("손익비 1 : ?", 1.0, 5.0, _tf_def[1], 0.5, key="ar_rr",
-                          help="목표폭 = 손절폭 × 이 값. 2.0이면 손절 -7%일 때 목표 +14%")
-    with rc3:
-        ar_risk = st.slider("1회 리스크 %", 0.5, 5.0, 1.0, 0.5, key="ar_risk",
-                            help="한 종목이 손절당할 때 잃는 자본 비율. 작을수록 보수적")
-    with rc4:
-        ar_cash = st.slider("현금 비중 %", 0, 70, 30, key="ar_cash",
-                            help="매크로 위험에 따라 현금 보유. 나머지를 종목에 배분")
-
-    ar_entry = False
-    if ar_tf == "daily":
-        ar_entry = st.checkbox("일봉 진입타이밍 적용 ('진입적정'만, 느림 ~20초)", value=False, key="ar_entry")
-
-    if st.button("🎯 자동추천 생성", type="primary", key="ar_go"):
-        with st.spinner("추천 생성 중..."):
-            try:
-                import auto_recommend
-                _summary, _recs = auto_recommend.build_recommendations(
-                    timeframe=ar_tf, capital=ar_cap, stop_pct=ar_stop, rr=ar_rr,
-                    risk_per_trade=ar_risk, max_positions=ar_n, market_filter=ar_mkt,
-                    cash_pct=ar_cash / 100, use_entry_timing=ar_entry,
-                )
-                st.session_state['ar_result'] = (_summary, _recs)
-            except Exception as _e:
-                st.error(f"추천 생성 실패: {_e}")
-                st.session_state.pop('ar_result', None)
-
-    if 'ar_result' in st.session_state:
-        _summary, _recs = st.session_state['ar_result']
-        s = _summary
-        st.divider()
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("손절 / 목표", f"-{s['stop_pct']}% / +{s['target_pct']}%")
-        m2.metric("손익비", f"1 : {s['rr']}", help=f"본전 승률 {s['breakeven_wr']}% 이상이면 기대값 +")
-        m3.metric("본전 승률", f"{s['breakeven_wr']}%")
-        m4.metric("포트폴리오 히트", f"{s['portfolio_heat']}%",
-                  help="전 종목이 동시에 손절당할 때 잃는 총 자본 비율")
-
-        if not _recs:
-            st.warning("추천 종목이 없습니다. 데이터가 비었거나(스크리너 갱신 필요) 조건이 빡빡합니다.")
-        else:
-            rows = []
-            for r in _recs:
-                ccy = '₩' if r['market'] == 'KR' else '$'
-                rows.append({
-                    '시장': r['market'], '종목': r['name'], '코드': r['sym'],
-                    '종합': r.get('total_score'), '기술': r.get('win_score'),
-                    '기본': r.get('fund_score'),
-                    '신호': ', '.join(r['signals'][:2]),
-                    '진입': f"{ccy}{r['entry']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['entry']:,.2f}",
-                    '손절': f"{ccy}{r['stop']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['stop']:,.2f}",
-                    '목표': f"{ccy}{r['target']:,.0f}" if r['market'] == 'KR' else f"{ccy}{r['target']:,.2f}",
-                    '수량': f"{r['qty']:,.0f}" if r['market'] == 'KR' else f"{r['qty']:,.2f}",
-                    '비중%': r['pos_pct'],
-                    '투입금': f"{r['pos_value']:,.0f}",
-                    '최대손실': f"{r['risk_amt']:,.0f}",
-                    '신뢰계수': r['live_mult'],
-                    '진입등급': r.get('entry_grade', ''),
-                })
-            _ardf = pd.DataFrame(rows)
-            _show_cols = ['시장','종목','코드','종합','기술','기본','신호','진입','손절','목표','수량','비중%','투입금','최대손실','신뢰계수']
-            if ar_tf == 'daily' and any(r.get('진입등급') for r in rows):
-                _show_cols.append('진입등급')
-
-            def _c_mult2(v):
-                try:
-                    f = float(v)
-                    return 'color:#56d364;font-weight:bold' if f >= 1.0 else ('color:#ffa657' if f >= 0.85 else 'color:#f78166')
-                except: return ''
-            st.dataframe(
-                _ardf[_show_cols].style.map(_c_mult2, subset=['신뢰계수'])
-                    .format({'비중%': '{:.1f}%', '신뢰계수': '{:.2f}'}),
-                use_container_width=True, hide_index=True,
-                row_height=27, height=_dfh(len(_ardf)),
-            )
-
-            sc1, sc2, sc3 = st.columns(3)
-            sc1.metric("총 투입", f"{s['deployed']:,.0f}원 ({s['deployed_pct']}%)")
-            sc2.metric("최대 손실 (전부 손절)", f"-{s['total_risk']:,.0f}원")
-            sc3.metric("최대 수익 (전부 목표)", f"+{s['max_reward']:,.0f}원")
-
-            st.caption(
-                f"📌 {s['tf_label']} 보유 {s['hold']} · 1회 리스크 {s['risk_per_trade']}% · "
-                f"신뢰계수는 페이퍼 트레이딩 실전 성적으로 자동 보정(라쿤 오류수정 루프). "
-                f"손익비 1:{s['rr']} → 실제 승률이 {s['breakeven_wr']}%만 넘으면 기대값 +."
-            )
-            st.info("⚠️ 자동 계산된 제안일 뿐, 매매·책임은 본인. 실투자 전 페이퍼 트레이딩으로 검증 권장.")
 
 
 # ════════════════════════════════════════════════════════════════════
