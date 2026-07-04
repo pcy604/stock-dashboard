@@ -553,7 +553,7 @@ with t_lead:
                     '신고가': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '?',
                     '영익변곡': _ogs,
                     '매출가속': ('✅' if m.get('rev_accel') else ('❌' if m.get('rev_accel') is False else '-')),
-                    '섹터': str(m.get('sector', '-'))[:12]}
+                    '섹터': str(m.get('sector', '-'))[:14]}
 
         _f_all = [m for m in _lv2['all'] if _lm == "전체" or m['market'] == _lm]
         _themes = [t for t in _lv2.get('themes', [])
