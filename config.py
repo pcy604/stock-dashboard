@@ -58,6 +58,11 @@ GURU_BROADCAST_CHAT = _secret(".guru_chat")
 # 요약 출력 언어. 예: "한국어", "English", "日本語". 영상 원어와 무관하게 이 언어로 출력.
 GURU_OUTPUT_LANG = "한국어"
 
+# 자막 프록시 (GitHub Actions 데이터센터 IP는 유튜브 자막 API 차단됨 → 레지던셜 프록시).
+# 형식: "http://user:pass@host:port". data/.yt_proxy 파일 또는 환경변수 YT_PROXY.
+# 비우면 직결(로컬은 됨, CI는 자막 실패→영상폴백).
+YT_PROXY = _secret(".yt_proxy")
+
 # 분석할 채널. 'id'=채널ID(UC...) 또는 핸들(@xxx). 채널별 제목필터(선택):
 #   include: 제목에 이 단어 중 하나라도 있어야 분석 (비우면 전체)
 #   exclude: 제목에 이 단어가 있으면 제외
