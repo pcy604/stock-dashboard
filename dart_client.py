@@ -187,6 +187,7 @@ def canslim_growth(corp_code):
 _STMT_KEYS = {
     'revenue':     ['매출액', '수익(매출액)', '영업수익'],
     'gross':       ['매출총이익'],
+    'net_income_q': ['분기순이익', '반기순이익'],   # 분기·반기보고서의 순이익 명칭
     'sga':         ['판매비와관리비', '판매비및관리비'],
     'op_income':   ['영업이익'],
     'net_income':  ['당기순이익'],
@@ -223,8 +224,14 @@ def _extract_all(j):
     return out
 
 
+_IS_KEYS = ['revenue', 'gross', 'sga', 'op_income', 'net_income']   # 분기보고서에 3개월치로 실림
+_CF_KEYS = ['op_cf', 'inv_cf', 'fin_cf', 'capex']                   # 분기보고서에 누적으로만 실림
+
+
 def statements(corp_code, freq='annual', n=5):
-    """통합 재무표 rows(최신순). 분기는 DART 누적(cumulative) 기준."""
+    """통합 재무표 rows(최신순). 분기는 **3개월 환산**:
+    손익은 분기보고서의 당기 3개월치 그대로, 현금흐름은 누적 차감,
+    Q4는 연간−(1~3Q 합/3Q 누적)으로 도출. 잔액(자산/부채/자본)은 기말치."""
     from datetime import datetime as _d
     y = _d.now().year
     rows = []
@@ -234,16 +241,48 @@ def statements(corp_code, freq='annual', n=5):
             if j:
                 e = _extract_all(j); e['period'] = str(yy); e['eps'] = None
                 rows.append(e)
-    else:
-        combos = [(yy, rp, lab) for yy in (y, y - 1, y - 2)
-                  for rp, lab in (('11014', '3Q'), ('11012', '2Q'), ('11013', '1Q'))]
-        for yy, rp, lab in combos:
-            if len(rows) >= n:
-                break
-            j = _acnt_all(corp_code, yy, rp)
+        return rows
+
+    for yy in (y, y - 1, y - 2):
+        reps = {}
+        for code, lab in (('11013', '1Q'), ('11012', '2Q'), ('11014', '3Q'), ('11011', 'FY')):
+            j = _acnt_all(corp_code, yy, code)
             if j:
-                e = _extract_all(j); e['period'] = f'{yy}.{lab}'; e['eps'] = None
-                rows.append(e)
+                r_ = _extract_all(j)
+                if r_.get('net_income') is None and r_.get('net_income_q') is not None:
+                    r_['net_income'] = r_['net_income_q']       # '분기/반기순이익' 폴백
+                reps[lab] = r_
+
+        out_q = []
+        if 'FY' in reps:                        # 4Q = 연간 − (1~3Q)
+            q4 = dict(reps['FY'])
+            for k in _IS_KEYS:
+                a = reps['FY'].get(k)
+                vals = [reps.get(l, {}).get(k) for l in ('1Q', '2Q', '3Q')]
+                q4[k] = (a - sum(vals)) if (a is not None and all(v is not None for v in vals)) else None
+            for k in _CF_KEYS:
+                a, b = reps['FY'].get(k), reps.get('3Q', {}).get(k)
+                q4[k] = (a - b) if (a is not None and b is not None) else None
+            q4['period'] = f'{yy}.4Q'
+            out_q.append(q4)
+        for cur, prev in (('3Q', '2Q'), ('2Q', '1Q'), ('1Q', None)):
+            if cur not in reps:
+                continue
+            e = dict(reps[cur])                 # 손익=3개월치 그대로 · 잔액=기말치
+            if prev is not None:
+                pv = reps.get(prev)
+                for k in _CF_KEYS:              # 현금흐름만 누적 차감
+                    a = reps[cur].get(k)
+                    b = pv.get(k) if pv else None
+                    e[k] = (a - b) if (a is not None and b is not None) else None
+            e['period'] = f'{yy}.{cur}'
+            out_q.append(e)
+        for e in out_q:
+            e['eps'] = None
+            e.pop('net_income_q', None)
+            rows.append(e)
+            if len(rows) >= n:
+                return rows
     return rows
 
 

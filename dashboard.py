@@ -59,8 +59,8 @@ SIG_LABELS    = ['52주신고가','거래량폭발','5일라이딩','컵위드�
 
 # ── 공통 헬퍼 ────────────────────────────────────────────────────────
 def _dfh(n, cap=620):
-    """dataframe 높이 — 행 27px에 딱 맞게(빈 필러 행 방지), 길면 내부 스크롤. row_height=27과 세트."""
-    return int(min(27 * n + 37, cap))
+    """dataframe 높이 — 행 27px에 딱 맞게(빈 필러 행 방지), 길면 내부 스크롤. row_height=25과 세트."""
+    return int(min(25 * n + 36, cap))
 
 
 
@@ -524,7 +524,7 @@ with t_gain:
             _gdf.style.map(_cg2, subset=_gsub)
                 .map(_cg_grade, subset=['등급']).map(_cg_score, subset=['위닝점수'])
                 .format({_retc: '{:+.1f}%'}, na_rep='-'),
-            use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_gdf)))
+            use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_gdf)))
         _ncov = sum(1 for r in _grows if r['등급'] != '-')
         st.caption(f"ℹ️ 위닝점수·신호·CANSLIM은 **주봉 신호 유니버스(337종목)**에만 계산돼 있어 "
                    f"급등 소형주는 '-'가 많음 (현재 표시 {len(_grows)}개 중 {_ncov}개 커버). "
@@ -567,7 +567,7 @@ with t_lead:
                 st.markdown(f"**[{_t['sector']}]** {len(_mem)}종목")
                 _tdf9 = pd.DataFrame([_lrow(m) for m in _mem])
                 st.dataframe(_tdf9, use_container_width=True, hide_index=True,
-                             row_height=27, height=_dfh(len(_tdf9)))
+                             row_height=25, height=_dfh(len(_tdf9)))
 
         _pass = [m for m in _f_all if m.get('inflection') is True]
         _unk = [m for m in _f_all if m.get('inflection') is None]
@@ -575,14 +575,14 @@ with t_lead:
         if _pass:
             _ldf = pd.DataFrame([_lrow(m) for m in _pass])
             st.dataframe(_ldf, use_container_width=True, hide_index=True,
-                         row_height=27, height=_dfh(len(_ldf)))
+                         row_height=25, height=_dfh(len(_ldf)))
         else:
             st.info("현재 지문 전부 통과 종목 없음 — 기준이 엄격한 게 정상 (주도주는 드묾).")
         if _unk:
             with st.expander(f"⚠️ RS·신고가 통과 + 이익 데이터 미확인 {len(_unk)}개 (수동 확인 필요)", expanded=False):
                 _udf = pd.DataFrame([_lrow(m) for m in _unk])
                 st.dataframe(_udf, use_container_width=True, hide_index=True,
-                             row_height=27, height=_dfh(len(_udf)))
+                             row_height=25, height=_dfh(len(_udf)))
         st.caption(f"생성: {_lv2.get('generated', '?')} · 매일 자동 갱신(daily-refresh). "
                    "⚠️ 신규상장·스핀오프(BE·SNDK류)는 data/leaders_watch.txt에 추가하면 유니버스에 포함.")
     else:
@@ -597,7 +597,7 @@ with t_lead:
                     '시총': fmt_cap(m.get('marcap'), m['market']),
                     'RS': m['_rs'], '신호': ', '.join(m['signals'][:3])}
                     for m in _lr['top']]),
-                    use_container_width=True, hide_index=True, row_height=27, height=_dfh(20))
+                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(20))
         except Exception as _le:
             st.error(f"주도주 오류: {_le}")
 
@@ -644,7 +644,7 @@ with t_value:
                 st.dataframe(_vdf9.style.format({'PER': '{:.1f}', 'PBR': '{:.2f}', 'PSR': '{:.2f}',
                                                  'ROE%': '{:.1f}', '12개월%': '{:+.0f}'}, na_rep='-'),
                              use_container_width=True, hide_index=True,
-                             row_height=27, height=_dfh(min(len(_vdf9), 20)))
+                             row_height=25, height=_dfh(min(len(_vdf9), 20)))
                 st.caption(f"커버리지 {_vj.get('coverage')}종목(시총 상위, DART 공식 재무 × 실시간 시총 — 자체 DB). "
                            "PER=시총/순익·PBR=시총/자본·PSR=시총/매출. "
                            "⚠️ 저PER 함정 주의 — 경기순환주는 이익 고점에서 PER이 가장 쌈. 성장·현금흐름 같이 봐야.")
@@ -692,7 +692,7 @@ with t_prof:
                     except: return ''
                 st.dataframe(_sdf.style.map(_cs, subset=[f'{_mo}월 평균%'])
                              .format({f'{_mo}월 평균%': '{:+.1f}%', '승률%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_sdf)))
+                             use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_sdf)))
                 st.caption("⚠️ 계절성은 과거 통계적 경향일 뿐 — 표본 적으면 우연. 보조 지표로만.")
 
     else:
@@ -728,7 +728,7 @@ with t_prof:
                     return 'color:#888'
                 st.dataframe(_mdf.style.map(_cd, subset=['현재낙폭%', '1년MDD%', '역대MDD%'])
                              .format({'현재낙폭%': '{:.0f}%', '1년MDD%': '{:.0f}%', '역대MDD%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_mdf)))
+                             use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_mdf)))
                 st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라 실적 개선·턴어라운드 확인 후 진입.")
 
     # 🧮 포지션 사이징 계산기 — ③ '어떻게' 단계 (자동추천 탭 흡수)
@@ -905,7 +905,7 @@ with tab3:
                     .map(color_score3, subset=['점수/7'])
                     .map(color_cell3,  subset=sig3c),
                 use_container_width=True,
-                row_height=27, height=_dfh(len(df3), cap=760),
+                row_height=25, height=_dfh(len(df3), cap=760),
             )
             with st.expander("📖 CANSLIM 각 항목 기준·설명", expanded=False):
                 st.dataframe(pd.DataFrame([
@@ -923,7 +923,7 @@ with tab3:
                      '기준': '최근 20거래일 기관+외국인 합산 순매수(억원) > 0 = 매집', '출처': 'KRX(pykrx)'},
                     {'글자': 'M', '이름': '시장 방향', '컬럼': '상단 배지',
                      '기준': '지수가 상승추세인가 — 하락장에선 아무리 좋아도 무리하지 않음', '출처': '지수'},
-                ]), use_container_width=True, hide_index=True, row_height=27, height=_dfh(7))
+                ]), use_container_width=True, hide_index=True, row_height=25, height=_dfh(7))
                 st.caption("오닐 CANSLIM: '이익이 급증(C·A)하는 신고가 부근(N) 주도주(L)를 "
                            "거래량(S)·기관(I)이 받쳐주고 시장(M)이 우호적일 때 산다.'")
 
@@ -942,7 +942,7 @@ with tab3:
                     '통과율(%)': [round(v/total3*100, 1) for v in pr_counts.values()],
                 })
                 st.dataframe(pr_df, use_container_width=False, hide_index=True,
-                             row_height=27, height=_dfh(len(pr_df)))
+                             row_height=25, height=_dfh(len(pr_df)))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -1187,7 +1187,7 @@ with tab4:
         st.dataframe(
             idx_df.style.map(_ci_chg, subset=['전일대비','YoY']),
             use_container_width=True, hide_index=True,
-            row_height=27, height=_dfh(len(idx_df)),
+            row_height=25, height=_dfh(len(idx_df)),
         )
 
     valid_idx = [(df, l, c) for df, l, c in idx_chart_dfs if not df.empty]
@@ -1239,7 +1239,7 @@ with tab4:
              '전략':'비중 축소 — 손절 룰 강화, 신규매수 자제'},
         ]
         st.dataframe(pd.DataFrame(scenario_data), use_container_width=True, hide_index=True,
-                     row_height=27, height=_dfh(3))
+                     row_height=25, height=_dfh(3))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -1861,18 +1861,27 @@ with tab7:
                         return _amt(_v)
 
                     def _stmt_table(title, items, est=None):
-                        _ecols = ['내년E', '올해E'] if est else []   # 미래→과거 방향 통일 (#1)
+                        _ecols = ['내년E', '올해E'] if est else []   # 미래→과거 방향 통일
                         _rows = []
                         for _lab, _key, _typ in items:
                             _row = {'항목': _lab}
-                            if est:                       # 컨센서스 (내년/올해)
-                                _row['내년E'] = _fmt_v(est.get(f'{_key}_1y'), _typ) if est.get(f'{_key}_1y') else '-'
-                                _row['올해E'] = _fmt_v(est.get(f'{_key}_0y'), _typ) if est.get(f'{_key}_0y') else '-'
+                            if est:                       # 컨센서스 (내년/올해) — mult면 Fwd 멀티플
+                                for _el, _sfx in (('내년E', '1y'), ('올해E', '0y')):
+                                    _ev = est.get(f'{_key}_{_sfx}')
+                                    if _typ == 'mult':
+                                        _row[_el] = (f"{_mc/_ev:.1f}x" if (_mc and _ev and _ev > 0) else '-')
+                                    else:
+                                        _row[_el] = _fmt_v(_ev, _typ) if _ev else '-'
                             for _ix in range(_np):
                                 _v = _stm[_ix].get(_key)
-                                _row[_periods[_ix]] = _fmt_v(_v, _typ)
-                                if _ix < _np - 1:        # 사이사이 증감 (#5)
-                                    _row[_dcols[_ix]] = _delta(_v, _stm[_ix + 1].get(_key), _typ)
+                                if _typ == 'mult':        # 현재 시총 ÷ 각 기간 실적 (#4)
+                                    _row[_periods[_ix]] = (f"{_mc/_v:.1f}x" if (_mc and _v and _v > 0) else '-')
+                                    if _ix < _np - 1:
+                                        _row[_dcols[_ix]] = '·'
+                                else:
+                                    _row[_periods[_ix]] = _fmt_v(_v, _typ)
+                                    if _ix < _np - 1:    # 사이사이 증감
+                                        _row[_dcols[_ix]] = _delta(_v, _stm[_ix + 1].get(_key), _typ)
                             _rows.append(_row)
                         _df = pd.DataFrame(_rows)
                         # 컬럼 순서: 항목, [내년E, 올해E,] p0, YoY, p1, YoY, ..., pN
@@ -1892,30 +1901,120 @@ with tab7:
                         _sty = _df.style.map(_cgg, subset=_dcols)
                         if _ecols:
                             _sty = _sty.set_properties(subset=_ecols, color='#79c0ff')
-                        # 높이 지정 없이 내용에 맞춤 → 세 표의 행간 완전 동일 (#2)
-                        st.dataframe(_sty, use_container_width=True, hide_index=True, row_height=27)
+                        # 행높이·표높이 명시 → 세 표의 행간 완전 동일 + 빈 공간 없음 (#1,#2)
+                        st.dataframe(_sty, use_container_width=True, hide_index=True,
+                                     row_height=25, height=_dfh(len(_df)))
 
                     _est = forward_estimates(sym8_clean, is_kr_sym) if _freq == "연간" else None
-                    # 대차 → 손익 → 현금 순서 (#5), '구분' 컬럼 제거 (#8)
+                    # 대차 → 손익 → 현금. 멀티플 행: 현재 시총÷각 기간 실적(밴드 감각), E열=Fwd (#4)
                     _stmt_table("① 대차대조표", [('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
-                                               ('자본', 'equity', 'amt')])
+                                               ('자본', 'equity', 'amt'),
+                                               ('PBR (현시총÷자본)', 'equity', 'mult')])
                     _stmt_table("② 손익계산서 (올해E·내년E=컨센서스)", [
                                                ('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
                                                ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
                                                ('OPM', 'opm', 'pct'), ('순이익', 'net_income', 'amt'),
                                                ('EPS', 'eps', 'eps'),
-                                               ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct')],
+                                               ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct'),
+                                               ('PER (현시총÷순익)', 'net_income', 'mult'),
+                                               ('PSR (현시총÷매출)', 'revenue', 'mult')],
                                 est=(_est or None))
                     _stmt_table("③ 현금흐름표", [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
                                                ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
-                    _qn = ("누적(YTD)" if is_kr_sym else "3개월") if _freq == "분기" else "회계연도"
+                    _qn = "3개월 환산" if _freq == "분기" else "회계연도"
                     st.caption(f"출처: {_osrc} 공식({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
-                               "금액 KR=조/억·US=USD. 올해E·내년E=컨센서스(US: yfinance / KR: 네이버 증권사 추정 — 참고용).")
+                               "금액 KR=조/억·US=USD. PER/PBR/PSR 행=현재 시총÷각 기간 실적(최신 기간=트레일링, "
+                               "E열=Fwd 컨센서스, 과거 기간=밴드 감각). 분기 멀티플은 3개월 실적 기준이라 참고용.")
                 else:
                     st.caption("통합 재무표 데이터 없음 (해당 기준).")
 
 
 
+            st.divider()
+            st.markdown("## 🏅 CANSLIM 스코어카드 — 종합 판단")
+            ret_1m = (price_now / hist['Close'].iloc[-22] - 1) * 100 if len(hist) > 22 else None
+            ret_3m = (price_now / hist['Close'].iloc[-66] - 1) * 100 if len(hist) > 66 else None
+            ret_6m = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
+            ret_1y = (price_now / hist['Close'].iloc[-252] - 1) * 100 if len(hist) > 252 else None
+            st.caption("가치(C·A) × 가격(L·M) × 정성(N·S·I) 종합")
+
+            # ── 🏅 CANSLIM 스코어카드 (체슬라투자자문 방식) ──
+            if _off and len(_off) >= 2:
+                _op = [r.get('op_income') for r in _off]
+
+                def _grow_score(cur, base, yrs):
+                    """min(25, 성장률% − 5). 체슬리 C·A 방식. base 적자면 흑자전환 처리."""
+                    if cur is None or base is None:
+                        return None
+                    if base <= 0:
+                        return 25.0 if cur and cur > 0 else -10.0
+                    g = ((cur / base) ** (1 / yrs) - 1) * 100
+                    return round(min(25.0, g - 5), 1)
+
+                _nb = min(3, len(_op) - 1)
+                _A = _grow_score(_op[0], _op[_nb], _nb)          # A: 영업이익 3년 CAGR
+                _C = _grow_score(_op[0], _op[1], 1)              # C: 영업이익 최근 YoY
+
+                # L: 시장대비 6개월 초과수익 (10%p당 +5점)
+                _stk6 = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
+                _mkt6 = None
+                try:
+                    _idf = fetch_index_history('KS11' if is_kr_sym else 'SPY', 200)
+                    if len(_idf) > 127:
+                        _mkt6 = (float(_idf.iloc[-1].values[0]) / float(_idf.iloc[-127].values[0]) - 1) * 100
+                except Exception:
+                    pass
+                _exc = (_stk6 - _mkt6) if (_stk6 is not None and _mkt6 is not None) else None
+                _L = round(max(0.0, min(25.0, _exc * 0.5)), 1) if _exc is not None else None
+
+                # M: 시장국면
+                try:
+                    _fr = fetch_fred('FEDFUNDS', 1); _frr = _fr[-1][1] if _fr else None
+                    _m2m = fetch_fred('M2SL', 14)
+                    _m2yy = round((_m2m[-1][1] / _m2m[-13][1] - 1) * 100, 1) if len(_m2m) >= 13 else None
+                    _Mlabel = compute_macro_signal(_frr, _m2yy, fetch_spx_yoy())[0]
+                except Exception:
+                    _Mlabel = '—'
+
+                st.caption("정성 항목(N·S·I)은 체슬리 엑셀처럼 직접 입력 — 경영진·자사주·기관수급 판단")
+                _sc1, _sc2, _sc3 = st.columns(3)
+                _N = _sc1.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
+                _S = _sc2.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
+                _I = _sc3.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
+
+                _parts = [('C', _C, '영업익 최근 YoY − 5'), ('A', _A, '영업익 3년 CAGR − 5'),
+                          ('N', float(_N), '신성장·경영진 (입력)'), ('S', float(_S), '자사주·수급 (입력)'),
+                          ('L', _L, (f'시장대비 6M {_exc:+.0f}%p' if _exc is not None else '데이터 없음')),
+                          ('I', float(_I), '기관 보유증가 (입력)')]
+                _total = round(sum(v for _, v, _ in _parts if isinstance(v, (int, float))), 1)
+                _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
+                          else 'C' if _total >= 30 else 'D')
+
+                _cc1, _cc2, _cc3 = st.columns([0.9, 1.7, 1.4])   # 스코어카드 반폭 + 우측 수익률 (#9)
+                _cc1.metric("CANSLIM 총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
+                _cc1.metric("등급", _grade)
+                _cc1.caption(f"시장국면 M: {_Mlabel}")
+                _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
+                                       '근거': d} for k, v, d in _parts])
+                _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_scdf)))
+                with _cc3:
+                    st.caption("📈 기간별 수익률")
+                    r_df = pd.DataFrame([
+                        {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
+                        for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]
+                    ])
+                    def _cr(v):
+                        try:
+                            _f = float(str(v).replace('%', '').replace('+', ''))
+                            return 'color:#56d364' if _f >= 0 else 'color:#f78166'
+                        except Exception:
+                            return ''
+                    st.dataframe(r_df.style.map(_cr, subset=['수익률']),
+                                 use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(r_df)))
+                st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
+                           "N·S·I=정성 입력 · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심. "
+                           "각 항목 max 25 (C·A는 음수 가능).")
+                st.divider()
             st.divider()
             st.markdown("## ⚖️ ② 멀티플 · 컨센서스 — 가격÷가치")
             st.caption("공식 멀티플(시총÷공식실적) · BEAR/BASE/BULL 목표주가 · 밸류에이션")
@@ -2021,9 +2120,9 @@ with tab7:
             _vhalf = (len(val_rows) + 1) // 2
             _vc1, _vc2 = st.columns(2)
             _vc1.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[:_vhalf]]),
-                           use_container_width=True, hide_index=True, row_height=27, height=_dfh(_vhalf))
+                           use_container_width=True, hide_index=True, row_height=25, height=_dfh(_vhalf))
             _vc2.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[_vhalf:]]),
-                           use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(val_rows) - _vhalf))
+                           use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(val_rows) - _vhalf))
             st.caption("PER/PBR/PSR·ROE·마진·배당·목표가 = yfinance(무료). KR(.KS)은 일부 항목이 빌 수 있음('-'). "
                        "PEG<1·PBR낮음·ROE높음·부채비율낮음 = 저평가/우량 신호.")
 
@@ -2150,7 +2249,7 @@ with tab7:
                     for k, v in fib_lvls.items()
                 ])
                 st.dataframe(ret_df, use_container_width=True, hide_index=True,
-                             row_height=27, height=_dfh(len(ret_df)))
+                             row_height=25, height=_dfh(len(ret_df)))
 
             with fc2:
                 st.caption("📈 연장 (목표가격)")
@@ -2167,7 +2266,7 @@ with tab7:
                 st.dataframe(
                     ext_df.style.map(_color_ext, subset=['현재 대비']),
                     use_container_width=True, hide_index=True,
-                    row_height=27, height=_dfh(len(ext_df)),
+                    row_height=25, height=_dfh(len(ext_df)),
                 )
 
             st.divider()
@@ -2225,7 +2324,7 @@ with tab7:
                         _mm.style.map(_cmat, subset=_moncols)
                            .format({c: (lambda v: f'{v:+.0f}' if pd.notna(v) else '·') for c in _moncols}),
                         use_container_width=True, hide_index=True,
-                        row_height=27, height=_dfh(len(_mm)))
+                        row_height=25, height=_dfh(len(_mm)))
                     st.caption("연도×월 수익률(%). 하단 **평균**=월별 계절성, **승률**=상승 빈도(%). "
                                "엑셀 '주가 추이 분석' 방식. ⚠️ 표본 적으면 우연 — 기간 '5y' 권장.")
                 else:
@@ -2284,7 +2383,7 @@ with tab7:
                         '보유': f"{x['holdings']:,.0f}" if x['holdings'] is not None else '-'}
                         for x in _kins])
                     st.dataframe(_kidf, use_container_width=True, hide_index=True,
-                                 row_height=27, height=_dfh(min(len(_kidf), 8)))
+                                 row_height=25, height=_dfh(min(len(_kidf), 8)))
                     st.caption("출처: DART 임원·주요주주 특정증권 소유상황보고(공식). 증감>0=취득·<0=처분.")
                 else:
                     st.info("내부자 거래 내역 없음 (DART)")
@@ -2295,87 +2394,6 @@ with tab7:
                            "정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
 
 
-            st.divider()
-            st.markdown("## 🏅 ④ 종합 판단 — CANSLIM 스코어카드")
-            st.caption("가치(C·A) × 가격(L·M) × 정성(N·S·I) 종합")
-
-            # ── 🏅 CANSLIM 스코어카드 (체슬라투자자문 방식) ──
-            if _off and len(_off) >= 2:
-                _op = [r.get('op_income') for r in _off]
-
-                def _grow_score(cur, base, yrs):
-                    """min(25, 성장률% − 5). 체슬리 C·A 방식. base 적자면 흑자전환 처리."""
-                    if cur is None or base is None:
-                        return None
-                    if base <= 0:
-                        return 25.0 if cur and cur > 0 else -10.0
-                    g = ((cur / base) ** (1 / yrs) - 1) * 100
-                    return round(min(25.0, g - 5), 1)
-
-                _nb = min(3, len(_op) - 1)
-                _A = _grow_score(_op[0], _op[_nb], _nb)          # A: 영업이익 3년 CAGR
-                _C = _grow_score(_op[0], _op[1], 1)              # C: 영업이익 최근 YoY
-
-                # L: 시장대비 6개월 초과수익 (10%p당 +5점)
-                _stk6 = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
-                _mkt6 = None
-                try:
-                    _idf = fetch_index_history('KS11' if is_kr_sym else 'SPY', 200)
-                    if len(_idf) > 127:
-                        _mkt6 = (float(_idf.iloc[-1].values[0]) / float(_idf.iloc[-127].values[0]) - 1) * 100
-                except Exception:
-                    pass
-                _exc = (_stk6 - _mkt6) if (_stk6 is not None and _mkt6 is not None) else None
-                _L = round(max(0.0, min(25.0, _exc * 0.5)), 1) if _exc is not None else None
-
-                # M: 시장국면
-                try:
-                    _fr = fetch_fred('FEDFUNDS', 1); _frr = _fr[-1][1] if _fr else None
-                    _m2m = fetch_fred('M2SL', 14)
-                    _m2yy = round((_m2m[-1][1] / _m2m[-13][1] - 1) * 100, 1) if len(_m2m) >= 13 else None
-                    _Mlabel = compute_macro_signal(_frr, _m2yy, fetch_spx_yoy())[0]
-                except Exception:
-                    _Mlabel = '—'
-
-                st.caption("정성 항목(N·S·I)은 체슬리 엑셀처럼 직접 입력 — 경영진·자사주·기관수급 판단")
-                _sc1, _sc2, _sc3 = st.columns(3)
-                _N = _sc1.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
-                _S = _sc2.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
-                _I = _sc3.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
-
-                _parts = [('C', _C, '영업익 최근 YoY − 5'), ('A', _A, '영업익 3년 CAGR − 5'),
-                          ('N', float(_N), '신성장·경영진 (입력)'), ('S', float(_S), '자사주·수급 (입력)'),
-                          ('L', _L, (f'시장대비 6M {_exc:+.0f}%p' if _exc is not None else '데이터 없음')),
-                          ('I', float(_I), '기관 보유증가 (입력)')]
-                _total = round(sum(v for _, v, _ in _parts if isinstance(v, (int, float))), 1)
-                _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
-                          else 'C' if _total >= 30 else 'D')
-
-                _cc1, _cc2, _cc3 = st.columns([0.9, 1.7, 1.4])   # 스코어카드 반폭 + 우측 수익률 (#9)
-                _cc1.metric("CANSLIM 총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
-                _cc1.metric("등급", _grade)
-                _cc1.caption(f"시장국면 M: {_Mlabel}")
-                _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
-                                       '근거': d} for k, v, d in _parts])
-                _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(_scdf)))
-                with _cc3:
-                    st.caption("📈 기간별 수익률")
-                    r_df = pd.DataFrame([
-                        {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
-                        for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]
-                    ])
-                    def _cr(v):
-                        try:
-                            _f = float(str(v).replace('%', '').replace('+', ''))
-                            return 'color:#56d364' if _f >= 0 else 'color:#f78166'
-                        except Exception:
-                            return ''
-                    st.dataframe(r_df.style.map(_cr, subset=['수익률']),
-                                 use_container_width=True, hide_index=True, row_height=27, height=_dfh(len(r_df)))
-                st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
-                           "N·S·I=정성 입력 · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심. "
-                           "각 항목 max 25 (C·A는 음수 가능).")
-                st.divider()
 
     else:
         st.info("👆 종목코드를 입력하고 분석 버튼을 누르세요\n\n"
