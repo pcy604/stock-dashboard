@@ -1662,10 +1662,15 @@ def company_profile(sym, is_kr):
 
 @st.cache_data(ttl=24 * 3600)
 def official_business_text(sym, is_kr):
-    """공식 사업 텍스트 — US: 최신 10-K 본문(Item 1 사업내용부터), KR: None(yfinance 폴백).
+    """공식 사업 텍스트 — US: 최신 10-K(Item 1 사업 + Item 7 MD&A), KR: DART 사업보고서 원문.
     홈페이지 스크래핑 대신 공식 제출문서 사용 (정확·안정)."""
     try:
-        if not is_kr:
+        if is_kr:
+            import dart_client
+            cc = dart_client.corp_map().get(sym)
+            if cc:
+                return dart_client.business_text(cc, max_chars=80000)
+        else:
             import re as _re
             import edgar_client
             fl = edgar_client.filings(sym, form='10-K', limit=1)
@@ -1674,11 +1679,16 @@ def official_business_text(sym, is_kr):
                 txt = _re.sub(r'<[^>]+>', ' ', html)
                 txt = _re.sub(r'&[a-zA-Z#0-9]+;', ' ', txt)
                 txt = _re.sub(r'\s+', ' ', txt)
-                m = _re.search(r'Item\s*1\s*[.:]?\s*Business', txt, _re.I)
-                if m:
-                    txt = txt[m.start():]
-                if len(txt) > 3000:
-                    return txt[:18000]
+                m1 = _re.search(r'Item\s*1\s*[.:]?\s*Business', txt, _re.I)
+                body = txt[m1.start():] if m1 else txt
+                # 사업(Item 1~) 60k + 경영진 분석(MD&A, Item 7~) 25k 결합
+                m7 = _re.search(r"Item\s*7\s*[.:]?\s*Management[’'`]?s?\s*Discussion", body, _re.I)
+                if m7:
+                    combined = body[:60000] + "\n\n[MD&A 경영진 분석]\n" + body[m7.start():m7.start() + 25000]
+                else:
+                    combined = body[:80000]
+                if len(combined) > 3000:
+                    return combined
     except Exception:
         pass
     return None
@@ -1699,16 +1709,31 @@ def ai_business_summary(name, text, src='공식 사업설명'):
             return "(Gemini 키 미설정 — Streamlit Secrets에 GEMINI_KEY 추가 필요)"
         if not text:
             return "(사업 설명 데이터 없음)"
-        prompt = (f"다음은 '{name}'의 {src}이다. 투자자 관점에서 한국어로 요약하라.\n"
-                  "형식(불릿, 굵은 소제목):\n"
-                  "**핵심 사업**: 무엇으로 돈을 버나 (2~3줄)\n"
-                  "**비전·마스터플랜**: 회사가 공식적으로 밝힌 장기 방향·로드맵 (2~3줄)\n"
-                  "**성장 동력**: 향후 실적을 끌어올릴 요인 (2~3줄)\n"
-                  "**리스크**: 공식 문서에 명시된 핵심 리스크 (1~2줄)\n"
-                  "과장·추측 금지, 문서에 있는 사실만.\n\n" + str(text)[:16000])
+        prompt = (
+            f"너는 20년차 기업분석 애널리스트다. 아래는 '{name}'의 {src} 원문이다. "
+            "펀드매니저에게 브리핑하듯 한국어로 요약하라.\n\n"
+            "형식 (각 소제목 굵게, 개조식 불릿, 문서의 구체적 숫자·제품명·고객명을 반드시 인용):\n"
+            "**🎯 한 줄 정의**: 이 회사를 한 문장으로.\n"
+            "**🏭 사업 구조**: 세그먼트별로 무엇을 팔아 돈을 버나 — 부문명·주요제품·매출 비중(문서에 있으면 숫자로) (3~5줄)\n"
+            "**🧭 비전·마스터플랜**: 경영진이 공식적으로 밝힌 장기 방향·투자 계획·로드맵 (2~4줄)\n"
+            "**🚀 성장 동력**: 향후 실적을 끌어올릴 구체적 요인 — 신제품·증설·신시장 (2~4줄)\n"
+            "**🏰 경쟁·해자**: 경쟁 구도와 이 회사의 우위(기술·점유율·전환비용) (2~3줄)\n"
+            "**⚠️ 핵심 리스크**: 문서에 명시된 리스크 중 투자판단에 중요한 것 (2~3줄)\n"
+            "**✅ 체크포인트**: 투자자가 다음 분기에 확인해야 할 지표·이벤트 2~3개\n\n"
+            "규칙: 과장·추측 금지, 문서에 있는 사실만. 일반론('경쟁이 치열함' 같은 말) 금지 — "
+            "구체적 이름과 숫자로. 문서에 없는 항목은 '문서에 언급 없음'으로.\n\n"
+            + str(text)[:100000])
         client = genai.Client(api_key=key)   # 임시객체로 쓰면 요청 중 GC로 닫힘("client has been closed")
-        r = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-        return (r.text or '').strip() or "(요약 생성 실패)"
+        import time as _t
+        last = None
+        for _model in ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']:
+            try:
+                r = client.models.generate_content(model=_model, contents=prompt)
+                return (r.text or '').strip() or "(요약 생성 실패)"
+            except Exception as _e:          # 503(과부하) 등 → 재시도/경량모델 폴백
+                last = _e
+                _t.sleep(2)
+        return f"(AI 요약 실패 — Gemini 서버 혼잡. 잠시 후 다시 눌러줘. [{str(last)[:60]}])"
     except Exception as e:
         return f"(AI 요약 실패: {str(e)[:80]})"
 
@@ -2362,6 +2387,13 @@ with tab7:
 # 탭10: 프로젝트 종합 — 여정 · 목표 · 검증 로드맵
 # ════════════════════════════════════════════════════════════════════
 with tab10:
+    # 📖 사용설명서 (GUIDE.md) — 홈페이지에서 바로 열람
+    with st.expander("📖 사용설명서 — 처음이라면 여기부터 (프레임·탭 안내·개념 사전·데이터 출처)", expanded=False):
+        try:
+            st.markdown(Path('GUIDE.md').read_text(encoding='utf-8'))
+        except Exception:
+            st.caption("GUIDE.md 없음 — 저장소에서 확인.")
+
     # 페이퍼 트레이딩 진행 상황을 종합 장표에 실시간 반영
     _pl = load_json(Path('results/paper_trades.json'))
     _pt_total = len(_pl['trades']) if _pl and _pl.get('trades') else 0
