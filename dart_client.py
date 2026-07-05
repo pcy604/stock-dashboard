@@ -247,6 +247,34 @@ def statements(corp_code, freq='annual', n=5):
     return rows
 
 
+def business_text(corp_code, max_chars=80000):
+    """최신 사업/정기보고서 원문에서 '사업의 내용'부터 텍스트 추출 (AI 요약 입력용)."""
+    import io
+    import re
+    import zipfile
+    from datetime import datetime as _d, timedelta as _td
+    end = _d.now().strftime('%Y%m%d')
+    bgn = (_d.now() - _td(days=400)).strftime('%Y%m%d')
+    j = _get(f"{BASE}/list.json", {'crtfc_key': _key(), 'corp_code': corp_code,
+                                   'pblntf_ty': 'A', 'bgn_de': bgn, 'end_de': end,
+                                   'page_count': 20}).json()
+    lst = j.get('list', []) if j.get('status') == '000' else []
+    if not lst:
+        return None
+    tgt = next((x for x in lst if '사업보고서' in x.get('report_nm', '')), lst[0])
+    r = _get(f"{BASE}/document.xml", {'crtfc_key': _key(), 'rcept_no': tgt['rcept_no']})
+    zf = zipfile.ZipFile(io.BytesIO(r.content))
+    best = max(zf.namelist(), key=lambda n: zf.getinfo(n).file_size)
+    xml = zf.read(best).decode('utf-8', 'replace')
+    txt = re.sub(r'<[^>]+>', ' ', xml)
+    txt = re.sub(r'&[a-zA-Z#0-9]+;', ' ', txt)
+    txt = re.sub(r'\s+', ' ', txt)
+    i = txt.find('사업의 내용')
+    if i > 0:
+        txt = txt[i:]
+    return (f"[출처: {tgt.get('report_nm')} ({tgt.get('rcept_dt')})]\n" + txt[:max_chars]) if txt else None
+
+
 def insiders(corp_code, limit=15):
     """임원·주요주주 특정증권 소유변동(내부자 매수/매도).
     [{date, name, position, change, holdings}] 최신순. change>0=취득 <0=처분."""
