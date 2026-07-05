@@ -131,38 +131,62 @@ _CONCEPTS = {
 }
 
 
+def _days(a, b):
+    try:
+        return (_dt.strptime(b, '%Y-%m-%d') - _dt.strptime(a, '%Y-%m-%d')).days
+    except Exception:
+        return None
+
+
 def _series(node, freq):
-    """concept node → {period_key: val}. freq='annual'(10-K, 흐름은 연간) or 'quarter'(10-Q, 3개월)."""
+    """concept node → {period_key: val}.
+    annual: 10-K 연간. quarter: **모든 분기 완결** —
+      · 잔액(instant): 10-Q/10-K 모두 수용 (10-Q 비교표·10-K 연말치)
+      · 흐름(duration): 같은 회계연도 시작(start) 그룹에서 누적 차감 →
+        10-Q 누적 현금흐름도 3개월 환산, Q4(10-Q 미제출)는 연간−9개월로 도출"""
     if not node:
         return {}
-    out = {}
+    if freq == 'annual':
+        out = {}
+        for arr in node.get('units', {}).values():
+            for x in arr:
+                end, form, start = x.get('end'), x.get('form'), x.get('start')
+                if not end or form != '10-K':
+                    continue
+                if start and ((_days(start, end) or 0) < 300):
+                    continue
+                out[end[:4]] = x['val']
+        return out
+
+    inst, flows = {}, {}
     for arr in node.get('units', {}).values():
         for x in arr:
-            end = x.get('end')
-            if not end:
+            end, form, start = x.get('end'), x.get('form'), x.get('start')
+            if not end or form not in ('10-Q', '10-K'):
                 continue
-            form, start = x.get('form'), x.get('start')
-            if freq == 'annual':
-                if form != '10-K':
-                    continue
-                if start:                       # 흐름 항목: 연간 기간만
-                    try:
-                        if (_dt.strptime(end, '%Y-%m-%d') - _dt.strptime(start, '%Y-%m-%d')).days < 300:
-                            continue
-                    except Exception:
-                        continue
-                out[end[:4]] = x['val']         # 키=연도
+            if not start:                       # 잔액: 그대로 (분기말·연말)
+                inst[end[:7]] = x['val']
             else:
-                if form != '10-Q':
+                d = _days(start, end)
+                if d is None or d > 400:
                     continue
-                if start:                       # 흐름 항목: 3개월만(누적 제외)
-                    try:
-                        d = (_dt.strptime(end, '%Y-%m-%d') - _dt.strptime(start, '%Y-%m-%d')).days
-                        if not (60 < d < 100):
-                            continue
-                    except Exception:
-                        continue
-                out[end[:7]] = x['val']         # 키=YYYY-MM
+                flows.setdefault(start, {}).setdefault(end, x['val'])
+    if inst and not flows:
+        return inst
+    out = {}
+    for start, m in flows.items():              # 같은 start = 같은 누적 묶음
+        prev_v, prev_end = 0.0, None
+        for e in sorted(m):
+            seg = (_days(prev_end, e) if prev_end else _days(start, e)) or 0
+            v = m[e]
+            try:
+                q = v - prev_v if prev_end else v
+            except Exception:
+                prev_v, prev_end = v, e
+                continue
+            if 45 <= seg <= 135:                # 3개월 구간만 채택
+                out.setdefault(e[:7], q)
+            prev_v, prev_end = v, e
     return out
 
 
