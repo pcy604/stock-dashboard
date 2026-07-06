@@ -25,6 +25,16 @@ h1 { font-size: 19px !important; margin-bottom: 6px !important; }
 h2 { font-size: 16px !important; margin-bottom: 5px !important; }
 h3 { font-size: 14px !important; margin-bottom: 4px !important; }
 
+/* ── 전역 컴팩트: 요소 사이 세로 간격·여백 축소 ── */
+[data-testid="stVerticalBlock"] { gap: 0.5rem !important; }
+[data-testid="stVerticalBlockBorderWrapper"] { gap: 0.5rem !important; }
+hr { margin: 0.45rem 0 !important; }
+[data-testid="stMetric"] { padding: 0 !important; }
+div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem !important; }
+[data-testid="stCaptionContainer"] p { margin-bottom: 0.1rem !important; }
+[data-testid="stRadio"] > label { margin-bottom: 0 !important; }
+[data-testid="stExpander"] details { padding: 0 !important; }
+
 /* ── 모바일 반응형 (≤640px) ───────────────────────────────────
    Streamlit은 좁은 화면에서 st.columns를 자동으로 쌓지 않아 카드/표가
    찌그러진다. 좁은 화면에선 컬럼을 세로로 쌓고 여백·탭을 조정. */
@@ -1598,8 +1608,11 @@ def _kr_naver_consensus_cached(sym):
             return None
 
     out = {}
-    for kw, key, mult in [('매출액', 'revenue', 1e8), ('영업이익', 'op_income', 1e8),
-                          ('당기순이익', 'net_income', 1e8), ('EPS', 'eps', 1.0)]:
+    for kw, key, mult in [('매출액', 'revenue', 1e8), ('영업이익률', 'opm', 0.01),
+                          ('영업이익', 'op_income', 1e8),
+                          ('당기순이익', 'net_income', 1e8), ('ROE', 'roe', 0.01),
+                          ('부채비율', 'debt_ratio', 0.01), ('EPS', 'eps', 1.0),
+                          ('PER', 'per_dir', 1.0), ('PBR', 'pbr_dir', 1.0)]:
         for row in tb.select('tbody tr'):
             th = row.select_one('th')
             if th and kw in th.get_text():
@@ -1834,6 +1847,7 @@ with tab7:
                         _r['gpm'] = (_r['gross'] / _rv) if (_r.get('gross') and _rv) else None
                         _r['opm'] = (_r['op_income'] / _rv) if (_r.get('op_income') and _rv) else None
                         _r['roe'] = (_r['net_income'] / _r['equity']) if (_r.get('net_income') and _r.get('equity')) else None
+                        _r['debt_ratio'] = (_r['liabilities'] / _r['equity']) if (_r.get('liabilities') and _r.get('equity')) else None
                     _periods = [r['period'] for r in _stm]
                     _gl = "YoY" if _freq == "연간" else "QoQ"
                     _np = len(_stm)
@@ -1863,10 +1877,16 @@ with tab7:
                     def _stmt_table(title, items, est=None):
                         _ecols = ['내년E', '올해E'] if est else []   # 미래→과거 방향 통일
                         _rows = []
-                        for _lab, _key, _typ in items:
+                        for _it in items:
+                            _lab, _key, _typ = _it[0], _it[1], _it[2]
+                            _dk = _it[3] if len(_it) > 3 else None   # 직접 추정키(네이버 PER/PBR E 등)
                             _row = {'항목': _lab}
                             if est:                       # 컨센서스 (내년/올해) — mult면 Fwd 멀티플
                                 for _el, _sfx in (('내년E', '1y'), ('올해E', '0y')):
+                                    if _dk and est.get(f'{_dk}_{_sfx}') is not None:
+                                        _dv = est[f'{_dk}_{_sfx}']
+                                        _row[_el] = f"{_dv:.1f}x" if _typ == 'mult' else _fmt_v(_dv, _typ)
+                                        continue
                                     _ev = est.get(f'{_key}_{_sfx}')
                                     if _typ == 'mult':
                                         _row[_el] = (f"{_mc/_ev:.1f}x" if (_mc and _ev and _ev > 0) else '-')
@@ -1906,25 +1926,30 @@ with tab7:
                                      row_height=25, height=_dfh(len(_df)))
 
                     _est = forward_estimates(sym8_clean, is_kr_sym) if _freq == "연간" else None
+                    _est = _est or None
                     # 대차 → 손익 → 현금. 멀티플 행: 현재 시총÷각 기간 실적(밴드 감각), E열=Fwd (#4)
-                    _stmt_table("① 대차대조표", [('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
+                    _stmt_table("① 대차대조표 (E=컨센서스)", [
+                                               ('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
                                                ('자본', 'equity', 'amt'),
-                                               ('PBR (현시총÷자본)', 'equity', 'mult')])
-                    _stmt_table("② 손익계산서 (올해E·내년E=컨센서스)", [
+                                               ('부채비율', 'debt_ratio', 'pct'),
+                                               ('PBR (현시총÷자본)', 'equity', 'mult', 'pbr_dir')],
+                                est=_est)
+                    _stmt_table("② 손익계산서 (E=컨센서스)", [
                                                ('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
                                                ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
                                                ('OPM', 'opm', 'pct'), ('순이익', 'net_income', 'amt'),
                                                ('EPS', 'eps', 'eps'),
                                                ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct'),
-                                               ('PER (현시총÷순익)', 'net_income', 'mult'),
+                                               ('PER (현시총÷순익)', 'net_income', 'mult', 'per_dir'),
                                                ('PSR (현시총÷매출)', 'revenue', 'mult')],
-                                est=(_est or None))
+                                est=_est)
                     _stmt_table("③ 현금흐름표", [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
                                                ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
                     _qn = "3개월 환산" if _freq == "분기" else "회계연도"
                     st.caption(f"출처: {_osrc} 공식({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
-                               "금액 KR=조/억·US=USD. PER/PBR/PSR 행=현재 시총÷각 기간 실적(최신 기간=트레일링, "
-                               "E열=Fwd 컨센서스, 과거 기간=밴드 감각). 분기 멀티플은 3개월 실적 기준이라 참고용.")
+                               "금액 KR=조/억·US=USD. PER/PBR/PSR 행=현재 시총÷각 기간 실적(최신=트레일링, E열=Fwd). "
+                               "컨센서스 커버: KR=매출·영업익·OPM·순익·ROE·부채비율·EPS·PER·PBR(네이버) / "
+                               "US=매출·순익·EPS(yfinance). ⚠️ 현금흐름·자산 추정치는 애널 컨센서스가 배포되지 않아 '-'.")
                 else:
                     st.caption("통합 재무표 데이터 없음 (해당 기준).")
 
@@ -1976,11 +2001,11 @@ with tab7:
                 except Exception:
                     _Mlabel = '—'
 
-                st.caption("정성 항목(N·S·I)은 체슬리 엑셀처럼 직접 입력 — 경영진·자사주·기관수급 판단")
-                _sc1, _sc2, _sc3 = st.columns(3)
-                _N = _sc1.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
-                _S = _sc2.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
-                _I = _sc3.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
+                # 콤팩트 1행 배치: 총점 | 점수표 | 수익률 | 정성 슬라이더(세로) — #2
+                _cc0, _cc2, _cc3, _cc4 = st.columns([0.7, 1.6, 0.9, 1.3])
+                _N = _cc4.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
+                _S = _cc4.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
+                _I = _cc4.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
 
                 _parts = [('C', _C, '영업익 최근 YoY − 5'), ('A', _A, '영업익 3년 CAGR − 5'),
                           ('N', float(_N), '신성장·경영진 (입력)'), ('S', float(_S), '자사주·수급 (입력)'),
@@ -1990,15 +2015,13 @@ with tab7:
                 _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
                           else 'C' if _total >= 30 else 'D')
 
-                _cc1, _cc2, _cc3 = st.columns([0.9, 1.7, 1.4])   # 스코어카드 반폭 + 우측 수익률 (#9)
-                _cc1.metric("CANSLIM 총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
-                _cc1.metric("등급", _grade)
-                _cc1.caption(f"시장국면 M: {_Mlabel}")
+                _cc0.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
+                _cc0.metric("등급", _grade)
+                _cc0.caption(f"M: {_Mlabel}")
                 _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
                                        '근거': d} for k, v, d in _parts])
                 _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_scdf)))
                 with _cc3:
-                    st.caption("📈 기간별 수익률")
                     r_df = pd.DataFrame([
                         {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
                         for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]
@@ -2012,8 +2035,7 @@ with tab7:
                     st.dataframe(r_df.style.map(_cr, subset=['수익률']),
                                  use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(r_df)))
                 st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
-                           "N·S·I=정성 입력 · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심. "
-                           "각 항목 max 25 (C·A는 음수 가능).")
+                           "N·S·I=정성 입력(체슬리 엑셀 방식) · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심.")
                 st.divider()
             st.divider()
             st.markdown("## ⚖️ ② 멀티플 · 컨센서스 — 가격÷가치")
@@ -2389,8 +2411,27 @@ with tab7:
                     st.info("내부자 거래 내역 없음 (DART)")
             elif insid is not None and not insid.empty:
                 st.subheader("👤 내부자 거래 (SEC Form 4 기반)")
-                st.dataframe(insid.head(8), use_container_width=True, hide_index=True)
-                st.caption("출처: yfinance(SEC Form 4 집계). 10-K엔 내부자거래 없음 — Form 4/5가 원천. "
+                _uins = []
+                for _, _ri in insid.head(10).iterrows():
+                    _utxt = str(_ri.get('Text') or '')
+                    if 'Sale' in _utxt:
+                        _ukind = '🔴 매도'
+                    elif 'Purchase' in _utxt or 'Buy' in _utxt:
+                        _ukind = '🟢 매수'
+                    elif 'onversion' in _utxt or 'xercise' in _utxt:
+                        _ukind = '⚙️ 행사/전환'
+                    else:
+                        _ukind = '-'
+                    _ush, _uval = _ri.get('Shares'), _ri.get('Value')
+                    _uins.append({'일자': str(_ri.get('Start Date'))[:10],
+                                  '보고자': _ri.get('Insider'), '직위': _ri.get('Position'),
+                                  '구분': _ukind,
+                                  '주수': f"{_ush:,.0f}" if pd.notna(_ush) else '-',
+                                  '금액': f"${_uval:,.0f}" if pd.notna(_uval) else '-'})
+                _udf = pd.DataFrame(_uins)
+                st.dataframe(_udf, use_container_width=True, hide_index=True,
+                             row_height=25, height=_dfh(len(_udf)))
+                st.caption("출처: yfinance(SEC Form 4 집계). 금액=거래대금(USD). "
                            "정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
 
 
