@@ -16,8 +16,8 @@
         "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-08T01:13:11.884246+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-08T03:40:22.892072+09:00"
     },
     {
       "video_id": "C7o-TKKkLAU",
@@ -262,11 +262,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-08T01:17:34.582377+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-08T03:40:55.657623+09:00"
     },
     {
       "video_id": "_f8Fy_8wxyM",
@@ -695,8 +695,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-08T01:18:25.395930+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-08T03:41:34.356939+09:00"
     },
     {
       "video_id": "ElMUd1KZjy8",
@@ -975,8 +975,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-08T01:08:51.217860+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-08T03:35:19.083563+09:00"
     },
     {
       "video_id": "-hL6VXX8PEE",
@@ -14961,5 +14961,5 @@
       "analyzed_at": "2026-06-27T02:29:37.795848+09:00"
     }
   ],
-  "updated": "2026-07-08T01:18:26.545158+09:00"
+  "updated": "2026-07-08T03:41:35.486657+09:00"
 }
