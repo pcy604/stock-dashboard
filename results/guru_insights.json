@@ -1,6 +1,61 @@
 {
   "items": [
     {
+      "video_id": "jNDQUssfMz4",
+      "title": "반도체 동반 '하락'·유가 5%대 '급등' 속 뉴욕증시 하락 마감_26.07.08 | 여도은, 박명석, 이권희 [월스트리트 모닝브리핑]",
+      "channel": "삼프로TV",
+      "published": "2026-07-07T20:25:01+00:00",
+      "url": "https://www.youtube.com/watch?v=jNDQUssfMz4",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "뉴욕 증시는 반도체 섹터의 동반 하락과 유가 급등의 영향으로 하락 마감했습니다.",
+        "summary": [
+          "뉴욕 증시가 전반적으로 하락세를 보이며 마감했습니다.",
+          "반도체 섹터가 동반 하락하며 시장 전반에 부정적인 영향을 미쳤습니다.",
+          "국제 유가가 5%대 급등하며 인플레이션 우려를 키웠습니다.",
+          "이러한 요인들이 복합적으로 작용하여 시장 약세의 주된 원인이 되었습니다."
+        ],
+        "tickers": [
+          {
+            "name": "반도체 섹터",
+            "ticker": "",
+            "context": "반도체 관련 기업들의 주가가 동반 하락하며 뉴욕 증시 하락을 주도했습니다.",
+            "view": "부정",
+            "t": 0
+          },
+          {
+            "name": "국제유가",
+            "ticker": "",
+            "context": "유가가 5%대 급등하며 시장의 인플레이션 우려와 경기 둔화 가능성을 높였습니다.",
+            "view": "부정",
+            "t": 0
+          }
+        ],
+        "key_points": [
+          {
+            "point": "특정 핵심 섹터(반도체)의 부진이 광범위한 시장 하락으로 이어질 수 있음을 인지해야 합니다.",
+            "t": 0
+          },
+          {
+            "point": "글로벌 유가 변동은 인플레이션 압력 및 기업 비용에 직접적인 영향을 미치므로 주요 모니터링 대상입니다.",
+            "t": 0
+          },
+          {
+            "point": "현재 시장은 반도체 약세와 유가 상승이라는 복합적인 거시경제 요인에 의해 압력을 받고 있습니다.",
+            "t": 0
+          }
+        ],
+        "actionable": [
+          "반도체 관련 기업들의 실적 및 산업 전망을 면밀히 분석하고 포트폴리오 비중을 재점검하십시오.",
+          "국제 유가 동향과 에너지 섹터에 대한 투자 노출도를 평가하여 변동성에 대비하십시오.",
+          "거시경제 지표(인플레이션, 금리 인상 가능성) 변화에 따른 시장의 추가적인 반응을 주시하십시오."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-08T07:00:11.366898+09:00"
+    },
+    {
       "video_id": "NV0XRdZtfTI",
       "title": "역대급 조정 뒤에 역대급 랠리 온다! 역사가 증명하는 주도주의 법칙ㅣ명민준, 강아랑, 이지환 [주린이 구조대]",
       "channel": "삼프로TV",
@@ -15125,26 +15180,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-06-26T17:48:35.319711+09:00"
-    },
-    {
-      "video_id": "Ixtt_n9adoA",
-      "title": "“1만5천피’ 간다”…조정 때 주워담으라는 JP모건",
-      "channel": "체슬리TV",
-      "published": "2026-06-26T07:44:30+00:00",
-      "url": "https://www.youtube.com/watch?v=Ixtt_n9adoA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-06-27T02:29:37.795848+09:00"
     }
   ],
-  "updated": "2026-07-08T05:38:26.108741+09:00"
+  "updated": "2026-07-08T07:00:12.411176+09:00"
 }
