@@ -16,8 +16,8 @@
         "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-09T03:10:22.459075+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-09T05:12:37.807259+09:00"
     },
     {
       "video_id": "TsD4ukx9kdc",
@@ -170,8 +170,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-09T03:10:47.594442+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-09T05:13:06.327406+09:00"
     },
     {
       "video_id": "HyJT2sm8c7Y",
@@ -14307,5 +14307,5 @@
       "analyzed_at": "2026-06-29T11:09:02.243934+09:00"
     }
   ],
-  "updated": "2026-07-09T03:11:42.167498+09:00"
+  "updated": "2026-07-09T05:13:07.518014+09:00"
 }
