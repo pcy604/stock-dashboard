@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-09T00:54:14.080627+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-09T03:10:22.459075+09:00"
     },
     {
       "video_id": "TsD4ukx9kdc",
@@ -170,8 +170,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-09T00:55:04.967884+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-09T03:10:47.594442+09:00"
     },
     {
       "video_id": "HyJT2sm8c7Y",
@@ -434,11 +434,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-09T00:59:01.339595+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-09T03:11:40.935941+09:00"
     },
     {
       "video_id": "KHFMn5J5yuo",
@@ -664,8 +664,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-09T00:53:40.795612+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-09T03:05:25.833555+09:00"
     },
     {
       "video_id": "squaHS8ETME",
@@ -14307,5 +14307,5 @@
       "analyzed_at": "2026-06-29T11:09:02.243934+09:00"
     }
   ],
-  "updated": "2026-07-09T00:59:34.898577+09:00"
+  "updated": "2026-07-09T03:11:42.167498+09:00"
 }
