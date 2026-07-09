@@ -1,6 +1,86 @@
 {
   "items": [
     {
+      "video_id": "qshSD9QW8wY",
+      "title": "반도체 고점이라고요? 이때까지는 안심하세요 #노근창 #반도체 #메모리 #고점 #변동성 #시장 #주가",
+      "channel": "와이스트릿",
+      "published": "2026-07-09T22:00:10+00:00",
+      "url": "https://www.youtube.com/watch?v=qshSD9QW8wY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-10T07:54:42.142706+09:00"
+    },
+    {
+      "video_id": "rmdYvncBR-s",
+      "title": "메타, 내년까지 컴퓨팅 파워 2배 확대…AMAT CEO \"향후 수년간 반도체 호황\" [월가 뉴스레터]",
+      "channel": "삼프로TV",
+      "published": "2026-07-09T22:02:35+00:00",
+      "url": "https://www.youtube.com/watch?v=rmdYvncBR-s",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-10T07:54:09.812887+09:00"
+    },
+    {
+      "video_id": "b1mLaVoNwWg",
+      "title": "[모닝브리프] SK하이닉스 상장 앞두고 반도체 랠리…일제히 상승 마감 [26/07/10]",
+      "channel": "체슬리TV",
+      "published": "2026-07-09T22:19:30+00:00",
+      "url": "https://www.youtube.com/watch?v=b1mLaVoNwWg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "SK하이닉스의 상장 이슈와 함께 반도체 섹터 전반의 강력한 랠리가 펼쳐지며 시장이 일제히 상승 마감했습니다.",
+        "summary": [
+          "SK하이닉스와 관련하여 시장의 주목을 끄는 '상장' 이슈가 제기되었습니다.",
+          "반도체 섹터 전반에 걸쳐 강한 상승세(랠리)가 나타났습니다.",
+          "반도체 섹터의 견고한 상승에 힘입어 전반적인 시장이 일제히 상승 마감했습니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "미래 시점(2026년 7월 10일)의 모닝브리프에서 상장(또는 이와 유사한 중대 이벤트)이 임박한 것으로 언급되며 반도체 랠리를 주도하는 핵심 종목으로 부상.",
+            "view": "긍정",
+            "t": 0
+          }
+        ],
+        "key_points": [
+          {
+            "point": "SK하이닉스의 상장(또는 그에 준하는 중대 이벤트)이 임박했다는 점이 부각되며 반도체 섹터에 대한 투자 심리가 전반적으로 강하게 개선되었습니다.",
+            "t": 0
+          },
+          {
+            "point": "반도체 관련 종목들이 광범위하게 상승하며 전체 시장의 상승세를 견인하는 핵심 동력으로 작용했습니다.",
+            "t": 0
+          }
+        ],
+        "actionable": [
+          "SK하이닉스의 구체적인 '상장' 관련 내용(예: 자회사 IPO, 사업부 분할 상장 등)을 면밀히 파악하고 예상되는 기업가치 변화를 분석하십시오.",
+          "반도체 섹터 전반의 랠리가 지속될 가능성이 높으므로, 관련 ETF나 핵심 반도체 기업들에 대한 투자 비중 및 포트폴리오 조정을 고려하십시오."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-10T07:53:36.474302+09:00"
+    },
+    {
       "video_id": "C4VUZP2h24Y",
       "title": "기술주 전반 강세 속 뉴욕증시 일제히 상승...미국 반도체지수 +3%_26.07.10 | 여도은, 박명석, 이선엽 [월스트리트 모닝브리핑]",
       "channel": "삼프로TV",
@@ -14314,125 +14394,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-06-30T17:52:29.484898+09:00"
-    },
-    {
-      "video_id": "LGf6jWKC8oc",
-      "title": "남는 컴퓨팅 파워 빌려주는 '이 섹터' AI 수요 타고 매출이 터졌다 | 서동주, 김동환, 조동현 언디파인드랩스 대표",
-      "channel": "삼프로TV",
-      "published": "2026-06-30T04:30:35+00:00",
-      "url": "https://www.youtube.com/watch?v=LGf6jWKC8oc",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-01T00:25:31.520342+09:00"
-    },
-    {
-      "video_id": "Ip4Ia4yblfU",
-      "title": "삼전닉스가 쉬면 기회? 7월 반도체 장세에서 놓치면 안 될 포인트ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
-      "channel": "삼프로TV",
-      "published": "2026-06-30T08:26:47+00:00",
-      "url": "https://www.youtube.com/watch?v=Ip4Ia4yblfU",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-01T02:29:18.900653+09:00"
-    },
-    {
-      "video_id": "Cv-gi8-Kn9o",
-      "title": "김장열의 반도체·테크 세션ㅣ김장열 유니스토리자산운용 리서치센터장 [집중 오늘의 주식]",
-      "channel": "삼프로TV",
-      "published": "2026-06-30T05:30:13+00:00",
-      "url": "https://www.youtube.com/watch?v=Cv-gi8-Kn9o",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "반도체 및 테크 산업의 AI 기반 성장 사이클을 분석하고, 핵심 기업들의 투자 관점과 전략을 제시합니다.",
-        "summary": [
-          "반도체 산업은 AI 수요를 기반으로 새로운 성장 사이클에 진입하고 있으며, 특히 HBM(고대역폭 메모리)과 AI GPU 관련 기업들의 성장 잠재력이 매우 크다고 강조됩니다.",
-          "메모리 반도체는 HBM을 중심으로 실적 개선이 기대되며, 범용 DRAM의 가격 회복도 점진적으로 나타날 것으로 전망되어 전반적인 업황 개선이 예상됩니다.",
-          "파운드리 분야는 첨단 공정 경쟁이 심화되고 있으며, TSMC와 삼성전자의 기술력 격차 및 투자 전략이 산업의 주요 변수로 작용할 것입니다.",
-          "미국 빅테크 기업들은 AI 인프라 투자 확대로 인해 중장기적인 성장을 이어갈 것으로 보이며, 이와 연관된 소프트웨어 및 서비스 기업들도 주목할 필요가 있습니다.",
-          "전반적인 투자 전략은 AI 관련 핵심 기술을 보유한 기업과 안정적인 현금흐름을 가진 우량 기업을 중심으로 포트폴리오를 구성하는 것이 유효하다고 조언됩니다."
-        ],
-        "tickers": [
-          {
-            "name": "NVIDIA",
-            "ticker": "NVDA",
-            "context": "AI GPU 시장의 독보적 선두주자로, HBM 수요를 견인하며 AI 시대의 핵심 수혜주로 부각됩니다.",
-            "view": "긍정",
-            "t": 120
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "HBM 시장을 선도하며 메모리 반도체 업황 회복의 핵심 주역으로 평가받습니다.",
-            "view": "긍정",
-            "t": 240
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "HBM 생산 능력 확대 및 파운드리 경쟁력 강화를 통해 AI 시대의 기회를 모색하고 있습니다.",
-            "view": "중립",
-            "t": 300
-          },
-          {
-            "name": "TSMC",
-            "ticker": "TSM",
-            "context": "첨단 파운드리 기술력을 바탕으로 AI 칩 생산을 주도하며 글로벌 반도체 생태계의 핵심 역할을 합니다.",
-            "view": "긍정",
-            "t": 360
-          },
-          {
-            "name": "ASML",
-            "ticker": "ASML",
-            "context": "EUV 노광 장비 독점 공급으로 첨단 반도체 투자 확대의 최대 수혜주이며, 장기적인 성장성이 기대됩니다.",
-            "view": "긍정",
-            "t": 420
-          }
-        ],
-        "key_points": [
-          {
-            "point": "AI 기술 발전이 반도체 산업의 새로운 성장 패러다임을 형성하고 있으며, 과거의 전통적인 반도체 사이클 분석만으로는 현재 시장을 완전히 이해하기 어렵습니다.",
-            "t": 60
-          },
-          {
-            "point": "고대역폭 메모리(HBM)는 AI 시대의 핵심 부품으로, 일반 DRAM 대비 높은 수익성과 기술 진입장벽을 가지고 있어 관련 기업들의 가치 재평가가 필요합니다.",
-            "t": 180
-          },
-          {
-            "point": "파운드리 경쟁은 수율과 첨단 공정 기술에서 판가름 날 것이며, 장기적으로는 GAA(Gate-All-Around)와 같은 차세대 신기술 도입이 중요해질 것입니다.",
-            "t": 390
-          },
-          {
-            "point": "거시 경제 불확실성에도 불구하고, AI 관련 투자는 구조적인 성장 동력을 제공하며 기업들의 설비 투자(Capex) 지출을 지속적으로 견인할 것으로 예상됩니다.",
-            "t": 480
-          }
-        ],
-        "actionable": [
-          "AI 관련 핵심 반도체(HBM, AI GPU) 및 장비 기업에 대한 비중을 확대하고, 포트폴리오 내 기술 섹터 비중을 점진적으로 늘려나갈 것을 고려하십시오.",
-          "메모리 업황 회복 기대감으로 단기적인 주가 변동성이 클 수 있으므로, 분할 매수 전략을 고려하여 투자 리스크를 효과적으로 관리하십시오."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-06-30T17:45:58.989466+09:00"
     }
   ],
-  "updated": "2026-07-10T06:10:36.458984+09:00"
+  "updated": "2026-07-10T07:54:43.143001+09:00"
 }
