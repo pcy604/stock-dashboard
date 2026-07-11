@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "OjK0qoDT3Cw",
+      "title": "'최악의 호르무즈 재봉쇄...?' 협상 결렬의 진짜 이유 | 박현도·성일광 서강대 유로메나연구소 교수 [주말인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-07-11T06:00:18+00:00",
+      "url": "https://www.youtube.com/watch?v=OjK0qoDT3Cw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-11T16:26:53.310690+09:00"
+    },
+    {
       "video_id": "807g2Nl0zYg",
       "title": "반도체 폭등도 폭락도 결국 '이것'에 달렸다 / 김열매 대표 (풀버전)",
       "channel": "와이스트릿",
@@ -13,11 +32,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-11T13:55:07.522151+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-11T16:29:07.718960+09:00"
     },
     {
       "video_id": "GLJr3kvI_9I",
@@ -27,17 +46,107 @@
       "url": "https://www.youtube.com/watch?v=GLJr3kvI_9I",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"AI 산업은 독점적 인프라 구축을 위한 치열한 경쟁 단계에 있으며, 이는 메모리 수요 증가로 이어져 반도체 시장의 공급 과잉 우려를 해소하고 있지만, 급격한 변동성은 투자자의 객관적인 판단을 요구합니다.\",\n  \"summary\": [\n    \"AI 시대의 핵심은 플랫폼 독점을 위한 '치킨 게임'으로, 선두 기업들은 막대한 투자를 통해 성능 향상과 가격 인하를 병행하며 시장을 장악하고 있습니다. 이는 과거 닷컴 버블이나 2차전지 시장과 달리 실제 수익을 기반으로 한다는 점에서 차이가 있습니다.\",\n    \"메타(Meta)와 오픈AI(OpenAI) 등 주요 AI 기업들은 컴퓨팅 파워 부족을 호소하며 데이터센터 건설 및 메모리 확대를 공식 발표하고 있으며, 이는 AI 인프라 구축을 위한 수요가 여전히 공급을 초과하고 있음을 시사합니다.\",\n    \"메모리 부족 현상이 지속되면서, 마이크론(Micron) 등 메모리 기업들도"
+        "one_liner": "최근 반도체/AI 시장의 조정은 과거 거품과 다르며, 핵심은 지속적인 이익 증가와 객관적인 데이터 분석을 통한 침착한 투자 대응입니다.",
+        "summary": [
+          "최근 반도체/AI 시장의 하락은 과거 닷컴 버블이나 2차전지 과열과 달리, 실적 성장세가 견고한 가운데 과도한 시장 쏠림과 레버리지 청산, 포트폴리오 리밸런싱 등 수급 요인에 기인한 것입니다.",
+          "주요 AI 기업(OpenAI, Meta 등)들은 컴퓨팅 자원 부족을 겪으며 막대한 자본을 투자하여 AI 인프라 확장을 가속화하고 있으며, 이는 AI 반도체에 대한 강력한 수요를 시사합니다.",
+          "Nvidia의 사례에서 보듯, 매출 성장률이 일시적으로 꺾이더라도 순이익이 지속적으로 증가하면 결국 주가는 다시 상승하며, 현재 AI 관련 기업들도 이익 증가세를 유지하고 있습니다.",
+          "미국의 물가 및 유가 안정화 조짐과 하이퍼스케일러들의 낮은 금리 조달 가능성은 AI 투자를 위한 우호적인 거시 환경을 조성하고 있습니다.",
+          "극심한 시장 변동성은 과거 금융 위기 수준에 비견되지만, 이에 대한 감정적 대응보다는 객관적인 데이터와 기업의 장기적인 이익 성장 가능성에 집중하는 것이 중요합니다."
+        ],
+        "tickers": [
+          {
+            "name": "Samsung",
+            "ticker": "",
+            "context": "반도체 시장의 핵심 기업으로 최근 시장 쏠림과 조정의 영향을 받았지만, AI 수요 증가는 장기적으로 긍정적입니다.",
+            "view": "중립"
+          },
+          {
+            "name": "SK Hynix",
+            "ticker": "",
+            "context": "반도체 시장의 핵심 기업으로 최근 시장 쏠림과 조정의 영향을 받았지만, AI 수요 증가는 장기적으로 긍정적입니다. ADR 상장을 위한 자금 조달 과정에서 기존 반도체 주식 매도가 발생했습니다.",
+            "view": "중립"
+          },
+          {
+            "name": "Apple",
+            "ticker": "",
+            "context": "메타와 함께 AI 관련 이슈가 시장을 휩쓴 주체 중 하나로 언급되며, 플랫폼 기업으로서 독점적 사업 구조를 지향합니다.",
+            "view": "중립"
+          },
+          {
+            "name": "Meta",
+            "ticker": "",
+            "context": "AI 컴퓨팅 파워 부족을 인정하고 데이터센터 건설 및 설비 투자를 확대하고 있으며, 이는 AI 인프라 수요가 공급 우려보다 강하다는 신호입니다.",
+            "view": "긍정"
+          },
+          {
+            "name": "Google",
+            "ticker": "",
+            "context": "플랫폼 기업의 독점적 승자 사례로 언급되며, AI 시대에도 유사한 경쟁 구도를 보입니다.",
+            "view": "긍정"
+          },
+          {
+            "name": "Amazon",
+            "ticker": "",
+            "context": "플랫폼 기업의 독점적 승자 사례로 언급되며, AI 시대에도 유사한 경쟁 구도를 보입니다.",
+            "view": "긍정"
+          },
+          {
+            "name": "Microsoft",
+            "ticker": "",
+            "context": "플랫폼 기업의 독점적 승자 사례로 언급되며, AI 시대에도 유사한 경쟁 구도를 보입니다.",
+            "view": "긍정"
+          },
+          {
+            "name": "Nvidia",
+            "ticker": "",
+            "context": "매출 성장률의 굴곡에도 불구하고 순이익이 지속적으로 증가하며 주가 상승을 이끌었던 사례로, AI 시대 실적의 중요성을 보여줍니다.",
+            "view": "긍정"
+          },
+          {
+            "name": "Micron",
+            "ticker": "",
+            "context": "AI 수요 증가에 따라 추가 투자 계획을 발표하여 메모리 시장의 공급 부족을 뒷받침하는 근거가 됩니다.",
+            "view": "긍정"
+          },
+          {
+            "name": "OpenAI",
+            "ticker": "",
+            "context": "AI 모델 개발을 위해 컴퓨팅 자원(토큰) 부족을 겪고 있으며, 인프라 확장을 위한 막대한 투자를 예고했습니다.",
+            "view": "긍정"
+          }
+        ],
+        "key_points": [
+          {
+            "point": "AI 시대의 산업 구조는 '독점적 플랫폼' 형태로, 시장 지배를 위한 '치킨 게임'이 필연적이며, 단기 수익성보다 생존과 점유율 확보가 우선시됩니다.",
+            "t": 487
+          },
+          {
+            "point": "현재 AI 시장의 가장 큰 우려는 공급 과잉이 아니라, AI 기술 발전에 필요한 컴퓨팅 자원(메모리, GPU 등)의 '공급 부족'입니다.",
+            "t": 1228
+          },
+          {
+            "point": "외국인 투자자들의 한국 시장 내 반도체 주식 매도는 펀더멘털 악화보다 높은 비중을 조절하는 '리밸런싱' 성격이 강하며, 재조정 이후 매수세가 재개되고 있습니다.",
+            "t": 1957
+          },
+          {
+            "point": "과거 닷컴 버블이나 2차전지 급등기처럼 실적 없는 기대감으로 오른 것이 아니라, 현재 AI 관련 기업들은 견조한 실적 성장을 보이고 있으며, 시장의 고민은 이 성장세의 지속성 여부입니다.",
+            "t": 315
+          },
+          {
+            "point": "미국의 물가 및 유가 안정화 추세는 향후 중앙은행의 금리 인상 속도 조절 기대를 높여, 기업들의 자본 조달 비용 부담을 완화하고 AI 투자에 긍정적인 영향을 줄 수 있습니다.",
+            "t": 2828
+          }
+        ],
+        "actionable": [
+          "AI 관련 주식 투자 시, 단기적인 변동성에 일희일비하기보다 기업의 장기적인 이익 성장세와 인프라 투자 동향에 주목해야 합니다.",
+          "급격한 시장 쏠림이나 레버리지 투자는 높은 변동성을 초래할 수 있으므로, 포트폴리오를 다변화하고 리스크 관리를 철저히 해야 합니다.",
+          "주요 AI 기업들의 실적 발표와 투자 계획, 매크로 지표의 변화(유가, 물가, 금리)를 지속적으로 객관적인 시각으로 분석하여 투자 판단에 활용해야 합니다."
+        ]
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-11T13:54:34.907942+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-11T16:28:33.473526+09:00"
     },
     {
       "video_id": "e2KponuJ1Uc",
@@ -14146,26 +14255,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-01T22:54:36.348626+09:00"
-    },
-    {
-      "video_id": "dj2AfyaNkd0",
-      "title": "“국민연금 74조 매도폭탄설, 터무니 없다”…김성주 “점진적 리밸런싱”",
-      "channel": "체슬리TV",
-      "published": "2026-07-01T08:32:09+00:00",
-      "url": "https://www.youtube.com/watch?v=dj2AfyaNkd0",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-02T04:23:35.772962+09:00"
     }
   ],
-  "updated": "2026-07-11T13:55:47.553712+09:00"
+  "updated": "2026-07-11T16:29:08.719258+09:00"
 }
