@@ -1,6 +1,45 @@
 {
   "items": [
     {
+      "video_id": "807g2Nl0zYg",
+      "title": "반도체 폭등도 폭락도 결국 '이것'에 달렸다 / 김열매 대표 (풀버전)",
+      "channel": "와이스트릿",
+      "published": "2026-07-11T03:00:04+00:00",
+      "url": "https://www.youtube.com/watch?v=807g2Nl0zYg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-11T13:55:07.522151+09:00"
+    },
+    {
+      "video_id": "GLJr3kvI_9I",
+      "title": "\"지금 폭락이 AI 거품 때문이라고?\" 진짜 이유는 따로 있습니다 | 이선엽 AFW파트너스 대표 [주말인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-07-11T02:00:29+00:00",
+      "url": "https://www.youtube.com/watch?v=GLJr3kvI_9I",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"AI 산업은 독점적 인프라 구축을 위한 치열한 경쟁 단계에 있으며, 이는 메모리 수요 증가로 이어져 반도체 시장의 공급 과잉 우려를 해소하고 있지만, 급격한 변동성은 투자자의 객관적인 판단을 요구합니다.\",\n  \"summary\": [\n    \"AI 시대의 핵심은 플랫폼 독점을 위한 '치킨 게임'으로, 선두 기업들은 막대한 투자를 통해 성능 향상과 가격 인하를 병행하며 시장을 장악하고 있습니다. 이는 과거 닷컴 버블이나 2차전지 시장과 달리 실제 수익을 기반으로 한다는 점에서 차이가 있습니다.\",\n    \"메타(Meta)와 오픈AI(OpenAI) 등 주요 AI 기업들은 컴퓨팅 파워 부족을 호소하며 데이터센터 건설 및 메모리 확대를 공식 발표하고 있으며, 이는 AI 인프라 구축을 위한 수요가 여전히 공급을 초과하고 있음을 시사합니다.\",\n    \"메모리 부족 현상이 지속되면서, 마이크론(Micron) 등 메모리 기업들도"
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-11T13:54:34.907942+09:00"
+    },
+    {
       "video_id": "e2KponuJ1Uc",
       "title": "트럼프 아니어도 미국은 무너진다. 위대한 미국은 잊어라 / 이정민 기자 (풀버전) [성공예감 별책부록]",
       "channel": "와이스트릿",
@@ -66,17 +105,105 @@
       "url": "https://www.youtube.com/watch?v=A0oBOw6WrSU",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"2026년 7월 한국 및 글로벌 주식시장은 전반적으로 강세 추세이나, 가파른 상승으로 인해 단기 조정 가능성이 있으며 코스닥 시장은 약세장이 지속될 것으로 전망됩니다.\",\n  \"summary\": [\n    \"KOSPI와 S&P500/NASDAQ은 강세 추세에 있으나, 코스닥은 2개월 연속 5개월 이동평균선(MA) 하회로 약세장 진입이 진단되었으며 보수적 운용이 권고됩니다.\",\n    \"반도체 지수는 가파른 상승을 보였으나, KOSPI 및 NASDAQ 시장은 일부 지표(MACD 오실레이터, VIX, 이격도)에서 과열 신호와 단기 조정 가능성이 포착됩니다.\",\n    \"주요 경제 지표(미국 고용, PMI, CPI, 유가 등)는 대체로 긍정적이거나 안정적인 모습을 보이며 증시의 하방 경직성을 지지하지만, 금리 인상 리스크는 여전히 존재합니다.\",\n    \"외국인 투자자들은 KOSPI에서 대규모 순매도 기조를 유지하며, 신"
+        "one_liner": "7월 주식 시장은 가파른 상승 후 단기 조정 가능성이 있으며, 특히 코스닥은 약세장을 이어갈 것으로 예상되므로 현금 비중을 확보하고 유망 섹터에 선별적으로 접근하는 보수적 전략이 필요합니다.",
+        "summary": [
+          "코스피는 6월에 예측 범위 내에서 등락 후 보합 마감했으며, 7월에도 망치형 음봉 가능성을 염두에 두어야 합니다.",
+          "코스닥은 5월부터 하락 추세로 전환하여 6월까지 크게 하락했으며, 첼슬리AI는 40~70% 수준의 '보수적 운용'을 권고했습니다.",
+          "미국 제조업 구인건수와 PMI 지표가 반등세를 보이며 긍정적인 경제 신호를 주지만, 10년물 국채 금리의 향방과 미국의 실업률 지표 변화는 주식 시장 변동성의 주요 요인이 될 수 있습니다.",
+          "엔화 약세 지속, 금 가격 하락, 비트코인 등 초위험 자산의 부진은 자산 시장의 위험 회피 심리가 여전함을 보여줍니다.",
+          "SK하이닉스 ADR 상장 추진과 FOMC 금리 인상 가능성, 신용잔고 증가 등은 7월 시장의 주요 이벤트 및 조정 트리거가 될 수 있습니다.",
+          "외국인은 6월 중순 이후 한국 주식 현물과 선물을 대규모 매도하며 시장의 약세 전환에 영향을 미치고 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "KOSPI",
+            "ticker": "KOSPI",
+            "context": "6월 등락 후 보합 마감, 7월 망치형 음봉 예상, 장기적으로는 상승 추세 지속 전망",
+            "view": "중립",
+            "t": 46
+          },
+          {
+            "name": "NASDAQ",
+            "ticker": "NASDAQ",
+            "context": "5월, 6월 하락하며 약세장 진입. 보수적 운용 권고. 과거와 유사한 조정 패턴 가능성.",
+            "view": "부정",
+            "t": 216
+          },
+          {
+            "name": "S&P 500",
+            "ticker": "S&P500",
+            "context": "RSI 과열 양상이나 정배열 유지 중. 다소 조정 가능성 있으나 당장은 급락할 정도는 아님.",
+            "view": "중립",
+            "t": 2345
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "AI 인프라 투자 경쟁 속 구조적 성장 및 HBM 1등 지위 확보로 크게 상승했으나 최근 조정. 7월 10일 나스닥 시장 ADR 상장 추진 예정.",
+            "view": "중립",
+            "t": 1926
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "영업이익률 가파르게 상승, 2026년 2Q OPM 50.2% 기록 예상. 최근 조정 받았으나 강한 랠리 이어감. 5월 27일 레버리지 ETF 출시.",
+            "view": "긍정",
+            "t": 1899
+          },
+          {
+            "name": "마이크론 테크놀로지",
+            "ticker": "MU",
+            "context": "최근 조정 받았으나 환율 상승으로 시가총액은 증가.",
+            "view": "중립",
+            "t": 2049
+          },
+          {
+            "name": "샌디스크",
+            "ticker": "SNDK",
+            "context": "2025년 4월 저점 대비 84배 상승. (과거 주가 차트 인용)",
+            "view": "긍정",
+            "t": 2101
+          }
+        ],
+        "key_points": [
+          {
+            "point": "KOSPI는 2025년 4월부터 2026년 6월 현재까지 14개월째 상승장(랠리)을 이어가고 있으나, 단기적으로는 MACD 오실레이터 과열 등으로 인해 조정 가능성이 상존합니다.",
+            "t": 0
+          },
+          {
+            "point": "2026년 6월 코스피 시장은 고점 대비 -12.76%에서 +10.73%를 오가는 큰 변동성 끝에 시가와 종가가 동일한 '망치형 음봉'으로 마감하여 다음 달의 방향성에 대한 불확실성을 높였습니다.",
+            "t": 47
+          },
+          {
+            "point": "코스닥 시장은 2026년 5월 -9.86%, 6월 -14.76% 하락하며 약세장으로 진입했으며, 첼슬리 AI는 2개월 연속 5개월 이동평균선(MA) 1033pt를 하회하여 '보수적 운용'을 권고했습니다.",
+            "t": 216
+          },
+          {
+            "point": "주식 시장의 강세장에서는 조정이 짧고 상승이 길게 나타나는 경향이 있으며, 이러한 '조정은 짧고 상승은 긴 강세장' 패턴이 최근 코스피에서 연출되고 있습니다.",
+            "t": 250
+          },
+          {
+            "point": "미국의 고용 시장은 최근 3년간 '울퉁불퉁'했지만 우상향 추세를 보이고 있으며, 제조업 구인건수 또한 상승 국면으로 KOSPI 강세장의 우호적인 배경으로 작용합니다.",
+            "t": 1512
+          },
+          {
+            "point": "7월 말에 있을 창신메모리 상장(IPO)과 7월 29일 FOMC 회의에서의 금리 인상 가능성은 시장에 단기적인 조정(트리거)을 가져올 수 있습니다.",
+            "t": 2849
+          },
+          {
+            "point": "외국인 투자자들은 6월 중순 이후 현물 및 선물 시장에서 매도를 강화하고 있으며, 이러한 매도세는 KOSPI 시장의 약세 전환에 큰 영향을 미치고 있습니다.",
+            "t": 2516
+          }
+        ],
+        "actionable": [
+          "가파른 상승 이후 단기 조정 가능성이 있으므로, 현금 비중을 일부 확보하여 시장 변동성에 대비하고 급락 시 매수 기회로 활용하는 역발상 투자 전략을 고려하십시오.",
+          "KOSDAQ 시장은 약세장에 진입했으며 5개월 이동평균선 아래에서 움직이고 있어 '보수적 운용'을 지속하는 것이 중요합니다.",
+          "SK하이닉스 ADR 상장 추진, FOMC 금리 결정 등 7월 주요 이벤트 전후의 시장 반응을 면밀히 주시하고, 유가와 미국 CPI 지표 변화를 통해 거시경제 상황을 점검하십시오."
+        ]
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-11T10:09:38.898337+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-11T13:50:48.683941+09:00"
     },
     {
       "video_id": "P5GRg50_UOM",
@@ -86,16 +213,33 @@
       "url": "https://www.youtube.com/watch?v=P5GRg50_UOM",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "one_liner": "영상은 문재인 대통령의 지지율 하락이 강남 집값 상승보다는 전월세 가격 폭등에 따른 서민들의 불안감 때문이었음을 지적하며, 전월세 시장의 중요성을 강조합니다.",
+        "summary": [
+          "문재인 대통령의 지지율은 2019년까지 높았으나, 2020년부터 임대차 3법(2+2 계약갱신청구 등) 시행과 함께 하락하기 시작했습니다.",
+          "많은 이들이 지지율 하락의 원인을 부동산 집값 상승으로 보지만, 실제로는 전월세 가격의 폭등이 더 큰 영향을 미쳤습니다.",
+          "강남 집값 상승은 강 건너 불 구경 같았지만, 전월세 가격의 폭등은 서민들의 삶에 직접적인 영향을 주며 불안감을 야기했습니다.",
+          "전세집 부족, 월세 및 전세 가격 상승, 대출 어려움 등 주거 불안은 유권자들의 표심에 부정적인 영향을 미쳤습니다.",
+          "따라서 강남 집값 등 고가 주택 시장보다 서민 주거와 직결되는 전월세 시장의 안정성이 정치적 지지 및 민심에 훨씬 더 중요한 요소로 작용합니다."
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "key_points": [
+          {
+            "point": "일반 서민의 주거 안정과 직결되는 전월세 가격 변동이 고가 주택 가격 변동보다 대중의 심리와 정치적 지지에 훨씬 더 큰 영향을 미칩니다.",
+            "t": 34
+          },
+          {
+            "point": "부동산 정책이 실제 주택 시장, 특히 전월세 시장에 미치는 직접적인 영향은 국민들의 불안감을 증폭시키고 표심 변화로 이어질 수 있음을 인지해야 합니다.",
+            "t": 24
+          }
+        ],
+        "actionable": [
+          "부동산 관련 투자 결정 시, 강남 등 특정 고가 시장의 동향뿐만 아니라 전월세 시장의 전반적인 가격 변동성과 주거 안정성 지표를 함께 분석하여 폭넓은 시장 흐름을 파악해야 합니다.",
+          "정부의 주택 관련 정책, 특히 임대차 시장에 영향을 미치는 규제나 지원책의 변화를 면밀히 주시하여, 정책이 전월세 시장에 미칠 파급 효과를 예측하고 투자 전략에 반영해야 합니다."
+        ]
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-11T10:15:28.466940+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-11T13:55:46.553462+09:00"
     },
     {
       "video_id": "uFPmu-d0hwM",
@@ -14021,45 +14165,7 @@
       "source": "fail",
       "attempts": 3,
       "analyzed_at": "2026-07-02T04:23:35.772962+09:00"
-    },
-    {
-      "video_id": "CTHMrzXPH1E",
-      "title": "완벽한 LNG 밸류체인, 직접 캐고 저장한다! [지구확장의여정]",
-      "channel": "삼프로TV",
-      "published": "2026-06-30T23:00:33+00:00",
-      "url": "https://www.youtube.com/watch?v=CTHMrzXPH1E",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T11:06:52.109178+09:00"
-    },
-    {
-      "video_id": "O-szWnndpBQ",
-      "title": "엔화 40년 만에 최저·원달러 1550원 돌파…한·일 동반 약세 | 광주 이어 해남·고창…삼성·SK, 반도체 팹·AI 데이터센터 건설 | 권순우 삼프로TV 기자 [뉴스3]",
-      "channel": "삼프로TV",
-      "published": "2026-06-30T23:36:34+00:00",
-      "url": "https://www.youtube.com/watch?v=O-szWnndpBQ",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T11:06:19.965762+09:00"
     }
   ],
-  "updated": "2026-07-11T10:15:29.467167+09:00"
+  "updated": "2026-07-11T13:55:47.553712+09:00"
 }
