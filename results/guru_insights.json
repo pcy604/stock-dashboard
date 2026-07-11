@@ -1,6 +1,24 @@
 {
   "items": [
     {
+      "video_id": "Ysj9aitzqVE",
+      "title": "[별주부전] 체슬리TV 주말 라이브 with 소현철 박사님 | 2026.07.11",
+      "channel": "체슬리TV",
+      "published": "2026-07-11T07:43:27+00:00",
+      "url": "https://www.youtube.com/watch?v=Ysj9aitzqVE",
+      "analysis": {
+        "relevant": false,
+        "one_liner": "제공된 영상 내용(음성 또는 자막)이 없어 구체적인 투자 핵심을 파악할 수 없습니다.",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": []
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-11T18:10:01.576443+09:00"
+    },
+    {
       "video_id": "OjK0qoDT3Cw",
       "title": "'최악의 호르무즈 재봉쇄...?' 협상 결렬의 진짜 이유 | 박현도·성일광 서강대 유로메나연구소 교수 [주말인터뷰]",
       "channel": "삼프로TV",
@@ -16,8 +34,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-11T16:26:53.310690+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-11T18:10:14.182191+09:00"
     },
     {
       "video_id": "807g2Nl0zYg",
@@ -35,8 +53,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-11T16:29:07.718960+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-11T18:10:29.559555+09:00"
     },
     {
       "video_id": "GLJr3kvI_9I",
@@ -14210,52 +14228,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-01T22:58:45.675499+09:00"
-    },
-    {
-      "video_id": "aTI6ModgwYQ",
-      "title": "이렇게 물리면 답이 없습니다 #박세익",
-      "channel": "체슬리TV",
-      "published": "2026-07-01T03:00:13+00:00",
-      "url": "https://www.youtube.com/watch?v=aTI6ModgwYQ",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "투자자는 잡주를 피하고 우량 성장주에 투자해야 하며, 물려도 회복 가능한 좋은 자산에 투자해야 합니다.",
-        "summary": [
-          "한 투자자가 7년간 보유했던 잡주를 분할 매도하여 수익으로 탈출한 경험을 공유했습니다. [0:00]",
-          "해당 투자자는 과거 잡주 매매로 상장폐지를 당했던 경험도 있었습니다. [0:24]",
-          "이 경험을 통해 투자자는 이제 시가총액이 큰 성장주에만 투자하겠다고 결심했습니다. [0:10]",
-          "연사는 주식 투자는 장기 투자뿐만 아니라 트레이딩을 하더라도 좋은 자산으로 해야 함을 강조했습니다. [0:33]",
-          "좋은 자산은 물리더라도 기다리면 결국 올라오지만, 잡주는 물리면 회복이 어렵거나 불가능하여 답이 없다고 경고했습니다. [0:37]"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "장기 보유 잡주에서 수익 탈출 사례를 언급하며, 잡주 투자의 위험성을 경고했습니다. [0:00]",
-            "t": 0
-          },
-          {
-            "point": "과거 상장폐지 경험과 이번 잡주 수익 탈출 경험을 통해 우량 성장주 투자로 전환하려는 투자자의 결정을 긍정적으로 평가했습니다. [0:10]",
-            "t": 10
-          },
-          {
-            "point": "주식 투자는 단기 트레이딩을 포함하여 어떠한 형태든 '좋은 자산'으로 해야 한다고 강조했습니다. [0:30]",
-            "t": 30
-          },
-          {
-            "point": "우량 자산은 일시적으로 물리더라도 결국 회복될 가능성이 높지만, 잡주는 물리면 회복이 불가능할 수 있다는 점을 강력히 경고했습니다. [0:37]",
-            "t": 37
-          }
-        ],
-        "actionable": [
-          "잡주(junk stocks) 투자를 피하고 기업의 근본 가치가 탄탄한 우량주에 집중하여 투자 전략을 수립하십시오.",
-          "단기 트레이딩을 하더라도 기업의 성장성과 안정성을 고려하여 좋은 자산 위주로 매매하십시오.",
-          "장기적으로 물릴 가능성까지 대비하여, 손실을 보더라도 회복 가능성이 있는 자산에 투자하여 리스크를 관리하십시오."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-01T22:54:36.348626+09:00"
     }
   ],
-  "updated": "2026-07-11T16:29:08.719258+09:00"
+  "updated": "2026-07-11T18:10:30.559827+09:00"
 }
