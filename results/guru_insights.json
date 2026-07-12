@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "qm8NLzqXcUE",
+      "title": "반도체 매도 모르겠다면 딱 3가지 신호만 보세요 /전병서 소장 (풀버전)",
+      "channel": "와이스트릿",
+      "published": "2026-07-12T00:00:20+00:00",
+      "url": "https://www.youtube.com/watch?v=qm8NLzqXcUE",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-12T10:13:52.325674+09:00"
+    },
+    {
       "video_id": "zN7_ZAaxgVg",
       "title": "지점 3개로 시작한 은행, 어떻게 국내 최대 종합금융그룹이 됐을까 ❘ 금융보국의 꿈 [2부]",
       "channel": "삼프로TV",
@@ -14230,26 +14249,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-01T23:02:09.986932+09:00"
-    },
-    {
-      "video_id": "BLbwcim7Vcg",
-      "title": "반도체 쏠림 끝났나? 삼전닉스 공포 구간, 실적 발표가 답을 줍니다ㅣ차영주 와이즈경제연구소 소장 [집중 오늘의 주식]",
-      "channel": "삼프로TV",
-      "published": "2026-07-01T12:00:25+00:00",
-      "url": "https://www.youtube.com/watch?v=BLbwcim7Vcg",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "Server disconnected without sending a response."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-02T06:17:13.493374+09:00"
     }
   ],
-  "updated": "2026-07-12T08:38:20.429793+09:00"
+  "updated": "2026-07-12T10:13:53.325960+09:00"
 }
