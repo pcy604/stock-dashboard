@@ -156,30 +156,48 @@ def _get_secret(name, default=''):
 FRED_KEY = _get_secret('FRED_KEY')
 
 @st.cache_data(ttl=3600)
-def fetch_fred(series_id: str, limit: int = 24):
-    url = f'https://api.stlouisfed.org/fred/series/observations'
+def _fetch_fred_cached(series_id: str, limit: int):
+    """실패 시 예외 → 캐시에 실패가 박제되지 않음 (핵심: 빈 결과 1시간 캐싱 버그 방지)."""
+    url = 'https://api.stlouisfed.org/fred/series/observations'
     params = dict(series_id=series_id, api_key=FRED_KEY, file_type='json',
                   sort_order='desc', limit=limit)
+    last = None
+    for _ in range(2):                       # 일시 오류 재시도
+        try:
+            r = requests.get(url, params=params, timeout=10)
+            r.raise_for_status()
+            obs = r.json()['observations']
+            data = [(o['date'], float(o['value'])) for o in obs if o['value'] != '.']
+            if data:
+                return sorted(data)
+            last = RuntimeError('empty')
+        except Exception as e:
+            last = e
+    raise last
+
+
+def fetch_fred(series_id: str, limit: int = 24):
     try:
-        r = requests.get(url, params=params, timeout=10)
-        obs = r.json()['observations']
-        data = [(o['date'], float(o['value'])) for o in obs if o['value'] != '.']
-        return sorted(data)
-    except:
+        return _fetch_fred_cached(series_id, limit)
+    except Exception:
         return []
 
 @st.cache_data(ttl=3600)
+def _fetch_spx_yoy_cached():
+    url = 'https://stooq.com/q/d/l/?s=^spx&i=m'
+    df = pd.read_csv(url, parse_dates=['Date'])
+    df = df.sort_values('Date').tail(15)
+    if len(df) < 13:
+        raise RuntimeError('short')
+    latest = float(df['Close'].iloc[-1])
+    yr_ago = float(df['Close'].iloc[-13])
+    return round((latest / yr_ago - 1) * 100, 2)
+
+
 def fetch_spx_yoy():
     try:
-        url = 'https://stooq.com/q/d/l/?s=^spx&i=m'
-        df = pd.read_csv(url, parse_dates=['Date'])
-        df = df.sort_values('Date').tail(15)
-        if len(df) < 13:
-            return None
-        latest = float(df['Close'].iloc[-1])
-        yr_ago = float(df['Close'].iloc[-13])
-        return round((latest / yr_ago - 1) * 100, 2)
-    except:
+        return _fetch_spx_yoy_cached()
+    except Exception:
         return None
 
 def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
@@ -629,6 +647,10 @@ with t_value:
             _vroe = _vc3.slider("ROE ≥ %", 0, 30, 8, key="val_roe")
             _vgrw = _vc4.slider("영업익 성장 ≥ %", -50, 100, 0, key="val_grw",
                                 help="'흑자전환'은 항상 통과")
+            def _fmt_growth(v):
+                # 숫자·'흑자전환' 문자열 혼재 컬럼 → 균일 문자열 (Arrow 직렬화 오류 방지)
+                if isinstance(v, str): return v
+                return f"{v:+.0f}" if v is not None else '-'
             _vrows = []
             for s in _vj['stocks']:
                 _per, _pbr, _roe = s.get('per'), s.get('pbr'), s.get('roe')
@@ -644,8 +666,8 @@ with t_value:
                                '시총': fmt_cap(s.get('marcap'), 'KR'),
                                'PER': _per, 'PBR': _pbr, 'PSR': s.get('psr'),
                                'ROE%': _roe,
-                               '매출성장%': s.get('rev_growth') if not isinstance(s.get('rev_growth'), str) else s.get('rev_growth'),
-                               '영업익성장%': _og9,
+                               '매출성장%': _fmt_growth(s.get('rev_growth')),
+                               '영업익성장%': _fmt_growth(_og9),
                                '12개월%': s.get('ret_12m'), '기준': s.get('period')})
             _vrows.sort(key=lambda r: r['PER'])
             st.subheader(f"💎 저평가·우량 — {len(_vrows)}개 (PER≤{_vper} · PBR≤{_vpbr} · ROE≥{_vroe}% · 영업익≥{_vgrw}%)")
@@ -959,29 +981,36 @@ with tab3:
 # 탭4: 글로벌 매크로
 # ════════════════════════════════════════════════════════════════════
 @st.cache_data(ttl=3600)
+def _fetch_fred_history_cached(series_id: str, limit: int):
+    """실패 시 예외 → 빈 DataFrame이 캐시에 박제되지 않음."""
+    data = _fetch_fred_cached(series_id, limit)      # 재시도·성공만 캐싱 공유
+    df = pd.DataFrame(data, columns=['date', series_id])
+    df['date'] = pd.to_datetime(df['date'])
+    return df.set_index('date')
+
+
 def fetch_fred_history(series_id: str, limit: int = 60):
-    url = 'https://api.stlouisfed.org/fred/series/observations'
-    params = dict(series_id=series_id, api_key=FRED_KEY, file_type='json',
-                  sort_order='desc', limit=limit)
     try:
-        r = requests.get(url, params=params, timeout=10)
-        obs = r.json()['observations']
-        data = [(o['date'], float(o['value'])) for o in obs if o['value'] != '.']
-        df = pd.DataFrame(sorted(data), columns=['date', series_id])
-        df['date'] = pd.to_datetime(df['date'])
-        return df.set_index('date')
-    except:
+        return _fetch_fred_history_cached(series_id, limit)
+    except Exception:
         return pd.DataFrame()
 
+
 @st.cache_data(ttl=3600)
+def _fetch_index_history_cached(symbol: str, days: int):
+    import FinanceDataReader as fdr
+    start = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
+    df = fdr.DataReader(symbol, start)[['Close']].rename(columns={'Close': symbol})
+    if df is None or df.empty:
+        raise RuntimeError('empty')
+    df.index = pd.to_datetime(df.index).tz_localize(None)
+    return df
+
+
 def fetch_index_history(symbol: str, days: int = 365):
     try:
-        import FinanceDataReader as fdr
-        start = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-        df = fdr.DataReader(symbol, start)[['Close']].rename(columns={'Close': symbol})
-        df.index = pd.to_datetime(df.index).tz_localize(None)
-        return df
-    except:
+        return _fetch_index_history_cached(symbol, days)
+    except Exception:
         return pd.DataFrame()
 
 def _fred_latest(series_id: str):
@@ -1050,14 +1079,18 @@ with tab4:
 
     spread = round(dgs10 - dgs2, 2) if dgs10 and dgs2 else None
 
+    if all(v is None for v in (fed_rate, ecb_rate, kr_rate, m2_yoy, cpi_yoy_us, unrate)):
+        st.warning("⚠️ FRED 데이터 일시 조회 실패 — 신호·차트가 비어 보일 수 있어요. "
+                   "잠시 후 새로고침하면 복구됩니다. (실패는 더 이상 캐싱되지 않음)")
+
     snap_cols = st.columns(7)
     snap_data = [
         ("Fed",    f"{fed_rate:.2f}%" if fed_rate else '-',  '❌' if fed_rate and fed_rate > 4.5 else '✅'),
         ("ECB",    f"{ecb_rate:.2f}%" if ecb_rate else '-',  '❌' if ecb_rate and ecb_rate > 3.5 else '✅'),
         ("BoK",    f"{kr_rate:.2f}%"  if kr_rate  else '-',  '⚠️'),
-        ("M2 YoY", f"{m2_yoy:+.1f}%" if m2_yoy   else '-',  '✅' if m2_yoy and m2_yoy >= 5 else ('❌' if m2_yoy and m2_yoy < 0 else '⚠️')),
-        ("10Y-2Y", f"{spread:+.2f}%"  if spread   else '-',  '🔴' if spread and spread < 0 else '✅'),
-        ("CPI YoY",f"{cpi_yoy_us:+.1f}%" if cpi_yoy_us else '-', '✅' if cpi_yoy_us and cpi_yoy_us < 3 else '❌'),
+        ("M2 YoY", f"{m2_yoy:+.1f}%" if m2_yoy is not None else '-',  '✅' if m2_yoy is not None and m2_yoy >= 5 else ('❌' if m2_yoy is not None and m2_yoy < 0 else '⚠️')),
+        ("10Y-2Y", f"{spread:+.2f}%"  if spread is not None else '-',  '🔴' if spread is not None and spread < 0 else '✅'),
+        ("CPI YoY",f"{cpi_yoy_us:+.1f}%" if cpi_yoy_us is not None else '-', '✅' if cpi_yoy_us is not None and cpi_yoy_us < 3 else '❌'),
         ("실업률", f"{unrate:.1f}%"   if unrate   else '-',  '✅'),
     ]
     for col, (label, val, flag) in zip(snap_cols, snap_data):
@@ -1103,7 +1136,9 @@ with tab4:
             fig_sp.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
             fig_sp.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
             st.plotly_chart(fig_sp, use_container_width=True)
-            if spread and spread < 0:
+            if spread is None:
+                st.info("스프레드 계산 불가 (금리 데이터 일시 조회 실패)")
+            elif spread < 0:
                 st.warning(f"⚠️ 수익률 역전 중 ({spread:+.2f}%) — 역사적으로 12~18개월 후 침체 선행")
             else:
                 st.success(f"✅ 정상 곡선 ({spread:+.2f}%)")
