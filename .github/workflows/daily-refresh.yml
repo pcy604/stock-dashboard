@@ -77,6 +77,10 @@ jobs:
         run: |
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
-          git add results/*.json data/sectors.json data/portfolio.json 2>/dev/null || true
+          # ⚠️ 경로를 한 줄에 몰면 안 됨: git add는 pathspec 하나라도 없으면 전체가 실패
+          #    (data/portfolio.json 부재로 한 달간 아무것도 커밋 안 된 사고의 원인)
+          git add results/*.json || true
+          git add data/sectors.json || true
+          git add data/portfolio.json 2>/dev/null || true
           # 구루 워크플로가 실행 중(수십 분) 푸시할 수 있으므로 rebase 후 푸시 (레이스 방지)
           git diff --staged --quiet || { git commit -m "auto: 데이터 갱신 $(date -u +%Y-%m-%d)"; git pull --rebase origin main; git push; }

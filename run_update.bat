@@ -22,7 +22,10 @@ echo [5/6] 포트폴리오 모니터링...
 
 echo [6/6] 신선도 검사 + 결과 동기화(푸시)...
 %PYTHON% pipeline_health.py
-git add results/*.json data/sectors.json data/portfolio.json 2>nul
+rem 경로 분리 필수: git add는 pathspec 하나라도 없으면 전체 실패 (portfolio.json 부재 함정)
+git add results/*.json 2>nul
+git add data/sectors.json 2>nul
+git add data/portfolio.json 2>nul
 git diff --staged --quiet || (git commit -m "auto: 로컬 데이터 갱신 %date:~0,10%" && git pull --rebase origin main && git push origin main)
 
 echo [%date% %time%] ===== 업데이트 완료 =====
