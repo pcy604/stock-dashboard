@@ -263,10 +263,10 @@ with tab_screen:
     _hm2.metric("매크로 신호", _msig)
     _hm4.metric("권고 현금", f"{_cmn}~{_cmx}%", help="매크로 위험도 기반 현금 비중 권고 · 상세는 🌍 매크로 탭")
 
-    st.caption("상승 상위 · CANSLIM(KR/US) · 주도주 · 💎가치(뭘 살까) · ⚡타이밍(언제 살까) — 시장 필터는 위 하나로 전 서브탭 공통")
-    t_gain, tab3, t_lead, t_value, t_prof = st.tabs([
+    st.caption("상승 상위 · CANSLIM(KR/US) · 주도주 · 💎가치(뭘 살까) · ⚡타이밍(언제 살까) · 📒성적표(추천이 맞았나) — 시장 필터는 위 하나로 전 서브탭 공통")
+    t_gain, tab3, t_lead, t_value, t_prof, t_track = st.tabs([
         "🔥 상승 상위", "🏆 CANSLIM",
-        "🚀 주도주", "💎 가치 발굴", "⚡ 타이밍 발굴"])
+        "🚀 주도주", "💎 가치 발굴", "⚡ 타이밍 발굴", "📒 성적표"])
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -789,6 +789,88 @@ with t_prof:
                        "리스크%를 낮추거나 손절폭을 넓히세요.")
     st.caption("'얼마나'는 감이 아니라 산수: 수량 = (자본×리스크%) ÷ (진입가−손절가). "
                "손익비 2:1 = 손절 -8%면 목표 +16%. 목표 도달 전 추세 꺾이면 룰대로 청산.")
+
+
+# ── 📒 성적표 — 추천 사후분석 (포워드 트랙레코드) ──
+@st.cache_data(ttl=3600, show_spinner=False)
+def _wp_analyze_cached():
+    import weekly_portfolio as _wp
+    return _wp.analyze()
+
+with t_track:
+    st.caption("📒 시스템 추천을 이후 실제 가격으로 채점 — '신호가 나온다 ≠ 돈 번다'의 증거를 쌓는 곳. "
+               "가상매매(신호별 정확도)와 주간 포트폴리오(종합 성과 vs 시장)로 나눠 본다.")
+    import paper_trade as _pt
+    _ptd = _pt._load()
+    _ptr = _ptd.get('trades', [])
+    _n4t = sum(1 for t in _ptr if '4w' in t.get('realized', {}))
+    _n13t = sum(1 for t in _ptr if '13w' in t.get('realized', {}))
+    _lastlog = max((t['log_date'] for t in _ptr), default=None)
+    _tk1, _tk2, _tk3, _tk4 = st.columns(4)
+    _tk1.metric("누적 가상매매", f"{len(_ptr)}건")
+    _tk2.metric("4주 만기", f"{_n4t}건")
+    _tk3.metric("13주 종료", f"{_n13t}건")
+    _tk4.metric("마지막 기록", _lastlog or '-')
+    if _lastlog:
+        _staled = (datetime.now() - datetime.strptime(_lastlog, '%Y-%m-%d')).days
+        if _staled > 10:
+            st.error(f"⚠️ 가상매매 기록이 **{_staled}일째 정지** — daily-refresh의 weekly_run이 "
+                     "신호를 생산하지 못하고 있음. 파이프라인부터 살려야 성적표가 쌓임.")
+
+    st.markdown("##### 🎯 신호별 실전 성적 vs 백테스트 (가상매매)")
+    _hz_pick = st.radio("보유 기간", ["4주", "13주"], horizontal=True, key="track_hz")
+    _hz = '4w' if _hz_pick == "4주" else '13w'
+    _agg9 = _pt._agg_by_signal(_ptr, _hz)
+    _trows = []
+    for _f in _pt.SIG_FLAGS:
+        _v = _agg9.get(_f)
+        _ref = _pt.BACKTEST_REF[_f][_hz]
+        if _v is None:
+            _trows.append({'신호': _pt.SIG_LABEL[_f], '표본': 0, '실전승률': '-', '실전EV': '-',
+                           '백테EV': f"{_ref:+.1f}%", '괴리': '-', '신뢰계수': '1.00 (중립)'})
+        else:
+            _gap = _v['live_ev'] - _ref
+            _mult = _pt._reliability_mult(_v['live_ev'], _ref, _v['n'])
+            _trows.append({'신호': _pt.SIG_LABEL[_f], '표본': _v['n'],
+                           '실전승률': f"{_v['wr']:.0f}%", '실전EV': f"{_v['live_ev']:+.2f}%",
+                           '백테EV': f"{_ref:+.1f}%", '괴리': f"{_gap:+.2f}%p",
+                           '신뢰계수': f"{_mult:.2f}"})
+    _tdf = pd.DataFrame(_trows)
+    def _c_gap(v):
+        try:
+            f = float(str(v).replace('%', '').replace('p', '').replace('+', ''))
+            return 'color:#56d364' if f >= 0 else ('color:#f0c040' if f > -1.5 else 'color:#f78166;font-weight:bold')
+        except Exception:
+            return ''
+    st.dataframe(_tdf.style.map(_c_gap, subset=['괴리']),
+                 use_container_width=True, hide_index=True,
+                 row_height=25, height=_dfh(len(_tdf)))
+    st.caption("신뢰계수 = 실전EV/백테EV를 표본수로 수축 보정(적으면 1.0으로 수렴, 상한 1.3) — "
+               "**auto_recommend·위닝점수가 이 계수로 신호 비중을 자동 가감** (results/signal_live_weights.json). "
+               "괴리가 크게 음수인 신호 = 과최적화 의심 → 표본 30건+ 쌓이면 강등 검토.")
+
+    st.divider()
+    st.markdown("##### 📊 주간 추천 포트폴리오 사후분석 (진입가 → 현재, vs 시장)")
+    _wpres = _wp_analyze_cached()
+    if not _wpres:
+        st.info("주간 포트폴리오 히스토리 없음 — weekly_run이 매주 스냅샷을 쌓으면 여기 채워짐.")
+    else:
+        _wrows = [{'주차': r['week'], '세트': '10선' if r['set'] == 'p10' else '20선',
+                   '종목수': r['n'], '현금%': f"{r['cash_pct']:.0f}",
+                   '포트수익': f"{r['port_return']:+.2f}%",
+                   '벤치(KOSPI·SPY)': f"{r['bench_return']:+.2f}%" if r.get('bench_return') is not None else '-',
+                   '알파': f"{r['alpha']:+.2f}%p" if r.get('alpha') is not None else '-'}
+                  for r in _wpres]
+        _wdf9 = pd.DataFrame(_wrows)
+        st.dataframe(_wdf9.style.map(_c_gap, subset=['포트수익', '알파']),
+                     use_container_width=True, hide_index=True,
+                     row_height=25, height=_dfh(len(_wdf9)))
+        with st.expander("종목별 상세 (스냅샷별 수익률)", expanded=False):
+            for r in _wpres:
+                _dt = ' · '.join(f"{n} {v:+.1f}%" for n, v in r.get('details', []))
+                st.caption(f"**{r['week']} [{'10선' if r['set']=='p10' else '20선'}]** {_dt}")
+        st.caption("벤치마크 = 스냅샷의 KR/US 비중대로 KOSPI·SPY를 섞은 같은 기간 수익률. "
+                   "알파>0 = 시장을 이겼다는 뜻. 표본이 몇 주 쌓이기 전엔 소음이 큼 — 4주·13주 누적으로 판단.")
 
 
 # ════════════════════════════════════════════════════════════════════

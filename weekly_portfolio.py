@@ -104,8 +104,29 @@ def _cur_price(sym, market):
         return None
 
 
+_BENCH_MEMO = {}
+
+def _bench_ret(bench_sym, start_date_str):
+    """벤치마크 지수의 start_date→현재 수익률 %. (스냅샷·세트 간 재사용 메모)"""
+    key = (bench_sym, start_date_str)
+    if key in _BENCH_MEMO:
+        return _BENCH_MEMO[key]
+    ret = None
+    try:
+        import FinanceDataReader as fdr
+        df = fdr.DataReader(bench_sym, start_date_str)
+        c = df['Close'].dropna()
+        if len(c) >= 2:
+            ret = round((float(c.iloc[-1]) / float(c.iloc[0]) - 1) * 100, 2)
+    except Exception:
+        pass
+    _BENCH_MEMO[key] = ret
+    return ret
+
+
 def analyze():
-    """과거 스냅샷별 비중가중 포트폴리오 수익률(진입가 대비 현재가)."""
+    """과거 스냅샷별 비중가중 포트폴리오 수익률(진입가 대비 현재가) + 벤치마크 대비 알파.
+       벤치마크 = 포지션의 KR/US 비중대로 KOSPI·SPY를 섞은 같은 기간 수익률."""
     if not HISTORY.exists():
         return []
     hist = json.loads(HISTORY.read_text(encoding='utf-8'))
@@ -127,8 +148,20 @@ def analyze():
                 wret += w * ret; tot_w += w
                 details.append((p['name'], round(ret, 1)))
             if tot_w > 0:
-                out.append({'week': h['week'], 'set': key, 'n': len(poss),
-                            'port_return': round(wret / tot_w, 2),
+                port_ret = round(wret / tot_w, 2)
+                # 벤치마크: KR/US 비중 가중 (KOSPI·SPY, 같은 기간)
+                kr_w = sum(p['weight_pct'] for p in poss if p.get('market') == 'KR')
+                us_w = sum(p['weight_pct'] for p in poss if p.get('market') == 'US')
+                kr_b = _bench_ret('KS11', h['date']) if kr_w else None
+                us_b = _bench_ret('SPY', h['date']) if us_w else None
+                bw, br = 0.0, 0.0
+                for w, b in ((kr_w, kr_b), (us_w, us_b)):
+                    if w and b is not None:
+                        bw += w; br += w * b
+                bench = round(br / bw, 2) if bw > 0 else None
+                out.append({'week': h['week'], 'date': h['date'], 'set': key, 'n': len(poss),
+                            'port_return': port_ret, 'bench_return': bench,
+                            'alpha': round(port_ret - bench, 2) if bench is not None else None,
                             'cash_pct': port.get('cash_pct'), 'details': details})
     return out
 
@@ -141,8 +174,9 @@ def _main():
             return
         print("\n📊 주간 포트폴리오 사후분석 (비중가중 수익률)")
         for r in res:
+            _b = f" · 벤치 {r['bench_return']:+.2f}% · 알파 {r['alpha']:+.2f}%p" if r.get('bench_return') is not None else ""
             print(f"  {r['week']} [{r['set']}] {r['n']}종목 · 현금{r['cash_pct']:.0f}% "
-                  f"→ 포트 수익률 {r['port_return']:+.2f}%")
+                  f"→ 포트 수익률 {r['port_return']:+.2f}%{_b}")
         return
 
     cash = _macro_cash_pct()
