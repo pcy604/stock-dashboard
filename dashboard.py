@@ -1887,7 +1887,10 @@ with tab7:
     if _asym:
         sym8_clean = _asym
         with st.spinner(f"{sym8_clean} 데이터 조회..."):
-            hist, info, earn, insid, fin_est = fetch_stock_data(sym8_clean, 365 * 5)  # 항상 5y, 차트에서 조절 (#2)
+            # 최대한 길게 요청 — US(FDR)는 상장일까지 실제로 나옴(AAPL 1980~ 확인).
+            # KR은 무료소스(FDR/pykrx 비로그인) 자체가 최근 ~3000거래일(~12y)로 캡핑돼 있어
+            # 20y를 요청해도 KR은 그 한계까지만 나옴 — 아래 캡션에서 사실대로 안내.
+            hist, info, earn, insid, fin_est = fetch_stock_data(sym8_clean, 365 * 20)
 
         if hist is None or hist.empty:
             st.error(f"데이터 없음 ({sym8_clean}). 종목코드 확인 — KR: 005930 · US: TSLA")
@@ -2298,7 +2301,7 @@ with tab7:
                 row_heights=[0.46, 0.135, 0.135, 0.135, 0.135],
                 vertical_spacing=0.02,
                 subplot_titles=('캔들 · 이동평균 · 피보나치', 'RSI (14)', 'MACD (12·26·9)', '거래량',
-                                'MDD 낙폭 (전고점 대비 %, 5y 기준)'),
+                                f'MDD 낙폭 (전고점 대비 %, 조회기간 {(hist.index[-1]-hist.index[0]).days/365.25:.1f}y 기준)'),
             )
             disp = hist                                   # 전체 5y — 차트 기간버튼으로 직접 조절 (#2)
 
@@ -2390,8 +2393,11 @@ with tab7:
             st.plotly_chart(fig, use_container_width=True)
             _dd_cur = float(_dd.iloc[-1]) if len(_dd) else 0.0
             _dd_all = float(_dd.min()) if len(_dd) else 0.0
-            st.caption(f"📉 MDD: 현재 낙폭 **{_dd_cur:.1f}%** · 1년 최대 {_dd_1y:.1f}% · 5년 최대 {_dd_all:.1f}% — "
+            _yrs = (hist.index[-1] - hist.index[0]).days / 365.25
+            st.caption(f"📉 MDD: 현재 낙폭 **{_dd_cur:.1f}%** · 1년 최대 {_dd_1y:.1f}% · 조회기간({_yrs:.1f}년) 최대 {_dd_all:.1f}% — "
                        "역대 낙폭 범위 안에서 현재 위치를 보는 용도 (낙폭 깊다 ≠ 싸다, 추세·펀더멘털과 같이 볼 것).")
+            if sym8_clean.replace('.KS','').replace('.KQ','').isdigit() and _yrs < 15:
+                st.caption("ℹ️ 한국 종목은 무료 데이터소스 한계로 최근 ~12년까지만 조회됨 (실제 상장일과 무관한 소스 제약)")
 
             # 📐 피보나치 레벨 (expander 제거 — 바로 표시, #4)
             fib_ext_lvls = _fib_ext(fib_high, fib_low)
