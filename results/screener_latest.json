@@ -4,10 +4,10 @@
   "stocks": [
     {
       "market": "KR",
-      "sym": "105560",
-      "name": "KB금융",
-      "marcap": 66042856070800,
-      "pct_change": 8.95,
+      "sym": "055550",
+      "name": "신한지주",
+      "marcap": 51974652529500,
+      "pct_change": 0.74,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -20,16 +20,16 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -1.9,
+      "dist_52w": -2.1,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "055550",
-      "name": "신한지주",
-      "marcap": 51547463604600,
-      "pct_change": 0.84,
+      "sym": "086790",
+      "name": "하나금융지주",
+      "marcap": 37094519529600,
+      "pct_change": 7.72,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -42,7 +42,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -2.9,
+      "dist_52w": 0.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -50,8 +50,8 @@
       "market": "KR",
       "sym": "138040",
       "name": "메리츠금융지주",
-      "marcap": 19579630941000,
-      "pct_change": 4.09,
+      "marcap": 19261671122300,
+      "pct_change": 0.7,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -64,16 +64,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.9,
+      "dist_52w": -23.1,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "010950",
-      "name": "S-Oil",
-      "marcap": 15705299484000,
-      "pct_change": 19.33,
+      "sym": "005830",
+      "name": "DB손해보험",
+      "marcap": 10597956468200,
+      "pct_change": 8.46,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -86,7 +86,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.2,
+      "dist_52w": -23.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -94,8 +94,8 @@
       "market": "KR",
       "sym": "138930",
       "name": "BNK금융지주",
-      "marcap": 5635538919280,
-      "pct_change": -2.42,
+      "marcap": 5765876273140,
+      "pct_change": 0.6,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -108,29 +108,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "175330",
-      "name": "JB금융지주",
-      "marcap": 5271100352000,
-      "pct_change": 7.28,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -27.3,
+      "dist_52w": -19.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -138,8 +116,8 @@
       "market": "KR",
       "sym": "003690",
       "name": "코리안리",
-      "marcap": 2461723961830,
-      "pct_change": 2.43,
+      "marcap": 2428146965940,
+      "pct_change": 1.24,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -152,7 +130,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -9.5,
+      "dist_52w": -9.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -160,8 +138,8 @@
       "market": "KR",
       "sym": "089860",
       "name": "롯데렌탈",
-      "marcap": 1241781069600,
-      "pct_change": 8.4,
+      "marcap": 1265382171800,
+      "pct_change": 7.52,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -174,16 +152,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -29.0,
+      "dist_52w": -27.2,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "241710",
-      "name": "코스메카코리아",
-      "marcap": 947316000000,
-      "pct_change": 7.38,
+      "sym": "000400",
+      "name": "롯데손해보험",
+      "marcap": 726186988800,
+      "pct_change": 14.83,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -196,7 +174,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -16.6,
+      "dist_52w": -41.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -204,8 +182,8 @@
       "market": "KR",
       "sym": "092730",
       "name": "네오팜",
-      "marcap": 306134589900,
-      "pct_change": 4.37,
+      "marcap": 303730391550,
+      "pct_change": -4.25,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -218,7 +196,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -15.7,
+      "dist_52w": -16.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3466,7 +3444,7 @@
       "sym": "ONB",
       "name": "Old National Bank",
       "marcap": 5007723008,
-      "pct_change": -0.47,
+      "pct_change": -0.45,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -4192,6 +4170,28 @@
       "sig_maconv": false,
       "sig_rsimacd": false,
       "dist_52w": -2.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "FINN",
+      "name": "First National of Nebraska",
+      "marcap": 3082289920,
+      "pct_change": 0.13,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -1.4,
       "vol_ratio": null,
       "sector": "기타"
     },
