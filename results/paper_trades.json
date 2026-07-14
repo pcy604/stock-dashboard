@@ -3165,6 +3165,890 @@
       ],
       "status": "open",
       "realized": {}
+    },
+    {
+      "id": "SNA_2026-07-14",
+      "sym": "SNA",
+      "name": "Snap-on",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 404.62,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HESM_2026-07-14",
+      "sym": "HESM",
+      "name": "Hess Midstream",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 39.85,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SSB_2026-07-14",
+      "sym": "SSB",
+      "name": "South State Corp",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 100.68,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "컵위드핸들",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "NMIH_2026-07-14",
+      "sym": "NMIH",
+      "name": "NMI Holdings",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 41.91,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WMB_2026-07-14",
+      "sym": "WMB",
+      "name": "Williams Companies",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 75.98,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "FAST_2026-07-14",
+      "sym": "FAST",
+      "name": "Fastenal",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 45.74,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PRU_2026-07-14",
+      "sym": "PRU",
+      "name": "Prudential Financial",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 114.79,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HUM_2026-07-14",
+      "sym": "HUM",
+      "name": "Humana",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 406.77,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SYY_2026-07-14",
+      "sym": "SYY",
+      "name": "Sysco",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 82.85,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "GIS_2026-07-14",
+      "sym": "GIS",
+      "name": "General Mills",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 36.46,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "FANG_2026-07-14",
+      "sym": "FANG",
+      "name": "Diamondback Energy",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 190.69,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "LNG_2026-07-14",
+      "sym": "LNG",
+      "name": "Cheniere Energy",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 265.03,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "EXC_2026-07-14",
+      "sym": "EXC",
+      "name": "Exelon Corporation",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 46.92,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PCG_2026-07-14",
+      "sym": "PCG",
+      "name": "Pacific Gas and Electric",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 17.44,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "DG_2026-07-14",
+      "sym": "DG",
+      "name": "Dollar General",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 120.14,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "XYL_2026-07-14",
+      "sym": "XYL",
+      "name": "Xylem",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 121.55,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ED_2026-07-14",
+      "sym": "ED",
+      "name": "Consolidated Edison",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 111.96,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MTD_2026-07-14",
+      "sym": "MTD",
+      "name": "Mettler-Toledo",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 1314.83,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "TROW_2026-07-14",
+      "sym": "TROW",
+      "name": "T. Rowe Price",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 116.07,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WEC_2026-07-14",
+      "sym": "WEC",
+      "name": "WEC Energy Group",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 115.05,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ALGN_2026-07-14",
+      "sym": "ALGN",
+      "name": "Align Technology",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 178.46,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "FITB_2026-07-14",
+      "sym": "FITB",
+      "name": "Fifth Third Bank",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 57.05,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "STT_2026-07-14",
+      "sym": "STT",
+      "name": "State Street Corporation",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 183.65,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CQP_2026-07-14",
+      "sym": "CQP",
+      "name": "Cheniere Energy",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 64.47,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MTB_2026-07-14",
+      "sym": "MTB",
+      "name": "M&T Bank",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 241.85,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ETR_2026-07-14",
+      "sym": "ETR",
+      "name": "Entergy",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 115.41,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "FE_2026-07-14",
+      "sym": "FE",
+      "name": "FirstEnergy",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 49.23,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WRB_2026-07-14",
+      "sym": "WRB",
+      "name": "W. R. Berkley",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 71.98,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ES_2026-07-14",
+      "sym": "ES",
+      "name": "Eversource Energy",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 74.64,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WBD_2026-07-14",
+      "sym": "WBD",
+      "name": "Warner Bros. Discovery",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 27.48,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HBAN_2026-07-14",
+      "sym": "HBAN",
+      "name": "Huntington Bancshares",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 17.85,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PFG_2026-07-14",
+      "sym": "PFG",
+      "name": "Principal",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 112.92,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MKL_2026-07-14",
+      "sym": "MKL",
+      "name": "Markel",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 1943.22,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "OMC_2026-07-14",
+      "sym": "OMC",
+      "name": "Omnicom",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 80.75,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "EXPE_2026-07-14",
+      "sym": "EXPE",
+      "name": "Expedia Group",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 266.28,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RF_2026-07-14",
+      "sym": "RF",
+      "name": "Regions Financial",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 30.92,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "LH_2026-07-14",
+      "sym": "LH",
+      "name": "LabCorp",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 275.68,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "VTR_2026-07-14",
+      "sym": "VTR",
+      "name": "Ventas",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 92.4,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CMS_2026-07-14",
+      "sym": "CMS",
+      "name": "CMS Energy",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 75.08,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "NTRS_2026-07-14",
+      "sym": "NTRS",
+      "name": "Northern Trust",
+      "market": "US",
+      "log_date": "2026-07-14",
+      "entry_px": 186.64,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
     }
   ]
 }
