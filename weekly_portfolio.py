@@ -30,8 +30,13 @@ HISTORY = Path('results/weekly_portfolio_history.json')
 def _macro_cash_pct():
     """매크로 신호 기반 현금비중(중앙값, 0~1). 실패 시 0.30."""
     try:
-        import requests
-        FRED = '7c2403fc4ee8a087ed80776a259b9273'
+        import os, requests
+        FRED = os.environ.get('FRED_KEY', '')
+        if not FRED:
+            _kf = Path('data/.fred_key')
+            FRED = _kf.read_text(encoding='utf-8').strip() if _kf.exists() else ''
+        if not FRED:
+            return 0.30
         def fred(s, n):
             r = requests.get('https://api.stlouisfed.org/fred/series/observations',
                              params=dict(series_id=s, api_key=FRED, file_type='json',
