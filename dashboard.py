@@ -2294,10 +2294,11 @@ with tab7:
             fib_lvls = _fib(fib_high, fib_low)
 
             fig = make_subplots(
-                rows=4, cols=1, shared_xaxes=True,
-                row_heights=[0.55, 0.15, 0.15, 0.15],
+                rows=5, cols=1, shared_xaxes=True,
+                row_heights=[0.46, 0.135, 0.135, 0.135, 0.135],
                 vertical_spacing=0.02,
-                subplot_titles=('캔들 · 이동평균 · 피보나치', 'RSI (14)', 'MACD (12·26·9)', '거래량'),
+                subplot_titles=('캔들 · 이동평균 · 피보나치', 'RSI (14)', 'MACD (12·26·9)', '거래량',
+                                'MDD 낙폭 (전고점 대비 %, 5y 기준)'),
             )
             disp = hist                                   # 전체 5y — 차트 기간버튼으로 직접 조절 (#2)
 
@@ -2348,8 +2349,21 @@ with tab7:
                 marker_color='rgba(56,139,253,0.35)', showlegend=False,
             ), row=4, col=1)
 
+            # MDD 낙폭(underwater): 전고점(5y 누적 최고 종가) 대비 %
+            _dd = (disp['Close'] / disp['Close'].cummax() - 1) * 100
+            fig.add_trace(go.Scatter(
+                x=disp.index, y=_dd, mode='lines', name='낙폭',
+                line=dict(color='#f78166', width=1.2),
+                fill='tozeroy', fillcolor='rgba(247,129,102,0.25)', showlegend=False,
+                hovertemplate='낙폭: %{y:.1f}%<extra></extra>',
+            ), row=5, col=1)
+            _dd_1y = float(_dd.tail(252).min()) if len(_dd) else 0.0
+            fig.add_hline(y=_dd_1y, line_color='rgba(240,192,64,0.5)', line_dash='dot',
+                          annotation_text=f' 1y MDD {_dd_1y:.0f}%',
+                          annotation_position='right', row=5, col=1)
+
             fig.update_layout(
-                height=780, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                height=900, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='#8b949e', size=11),
                 xaxis_rangeslider_visible=False,
                 margin=dict(l=0, r=100, t=30, b=0),
@@ -2367,12 +2381,17 @@ with tab7:
                 font=dict(color='#c9d1d9', size=11), y=1.08)))
             if len(hist) > 252:                           # 초기 화면은 최근 1년
                 fig.update_xaxes(range=[hist.index[-252], hist.index[-1]], row=1, col=1)
-            for i in range(1, 5):
+            for i in range(1, 6):
                 fig.update_xaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
                 fig.update_yaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
             fig.update_yaxes(title_text='RSI', row=2, col=1, range=[0, 100])
+            fig.update_yaxes(ticksuffix='%', row=5, col=1)
 
             st.plotly_chart(fig, use_container_width=True)
+            _dd_cur = float(_dd.iloc[-1]) if len(_dd) else 0.0
+            _dd_all = float(_dd.min()) if len(_dd) else 0.0
+            st.caption(f"📉 MDD: 현재 낙폭 **{_dd_cur:.1f}%** · 1년 최대 {_dd_1y:.1f}% · 5년 최대 {_dd_all:.1f}% — "
+                       "역대 낙폭 범위 안에서 현재 위치를 보는 용도 (낙폭 깊다 ≠ 싸다, 추세·펀더멘털과 같이 볼 것).")
 
             # 📐 피보나치 레벨 (expander 제거 — 바로 표시, #4)
             fib_ext_lvls = _fib_ext(fib_high, fib_low)
