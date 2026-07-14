@@ -44,6 +44,13 @@ CHECKS = [
     ('results/value_kr.json',         _generic_date,  4,  '가치 스냅샷(DART)'),
 ]
 
+# 2종 감시: 위는 '멈춤'(날짜 안 늙음), 아래는 '조용한 저하'(매일 갱신되지만
+# 내용이 나빠지는 것 — 예: 소스 차단으로 대부분 종목이 데이터수집 실패)
+DEGRADE_MAX_FAIL_PCT = 30
+
+def _screener_fail_pct(p):
+    return json.loads(p.read_text(encoding='utf-8')).get('fetch_fail_pct', {})
+
 
 def check():
     today = datetime.now()
@@ -63,6 +70,16 @@ def check():
                 stale.append(f"{label}: {age}일 정지 (마지막 {ds[:10]}, 허용 {max_days}일)")
         except Exception as e:
             stale.append(f"{label}: 검사 실패 ({e})")
+
+    p = Path('results/screener_latest.json')
+    if p.exists():
+        try:
+            for market, pct in _screener_fail_pct(p).items():
+                if pct > DEGRADE_MAX_FAIL_PCT:
+                    stale.append(f"주봉 스크리너[{market}]: 데이터수집 실패율 {pct}% "
+                                 f"(허용 {DEGRADE_MAX_FAIL_PCT}%) — 파일은 갱신되나 내용 저하, 소스 차단 의심")
+        except Exception as e:
+            stale.append(f"주봉 스크리너 실패율 검사 실패 ({e})")
     return stale
 
 
