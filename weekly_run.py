@@ -51,10 +51,14 @@ _PRIMARY = ('52w_high', 'ma_convergence', 'cup_handle')
 _print_lock = threading.Lock()
 
 
-def _process_one(sym, market, name, marcap):
+def _process_one(sym, market, name, marcap, fail_counter=None):
     time.sleep(0.05)
     df = fetch(sym, is_kr=(market == 'KR'))
     if df is None:
+        # '신호 없음'과 구분되는 진짜 데이터수집 실패 — 소스 차단/레이트리밋 조기감지용 (#2)
+        if fail_counter is not None:
+            with _print_lock:
+                fail_counter[0] += 1
         return None
     try:
         wdf = df.resample('W').agg(
@@ -93,12 +97,13 @@ def _process_one(sym, market, name, marcap):
 def screen(symbols, market, name_map=None, marcap_map=None):
     hits = []
     counter = [0]
+    fail_counter = [0]
     total = len(symbols)
 
     def _run(sym):
         name = name_map.get(sym, sym) if name_map else sym
         marcap = marcap_map.get(sym, 0) if marcap_map else 0
-        result = _process_one(sym, market, name, marcap)
+        result = _process_one(sym, market, name, marcap, fail_counter)
         with _print_lock:
             counter[0] += 1
             print(f"\r  [{market}] {counter[0]}/{total} {sym}          ", end='', flush=True)
@@ -110,6 +115,12 @@ def screen(symbols, market, name_map=None, marcap_map=None):
                 hits.append(item)
 
     print()
+    fail_pct = round(fail_counter[0] / total * 100, 1) if total else 0.0
+    if fail_pct > 30:
+        print(f"  ⚠️ [{market}] 데이터 수집 실패율 {fail_pct}% ({fail_counter[0]}/{total}) — "
+              "평소보다 높음, 소스 차단/레이트리밋 의심")
+    screen.last_fail_pct = getattr(screen, 'last_fail_pct', {})
+    screen.last_fail_pct[market] = fail_pct
     return hits
 
 
@@ -218,7 +229,9 @@ def main():
     os.makedirs('results', exist_ok=True)
     json_path = 'results/screener_latest.json'
     with open(json_path, 'w', encoding='utf-8') as f:
-        json.dump({'date': DATE_STR, 'total': len(stocks_json), 'stocks': stocks_json}, f, ensure_ascii=False, indent=2)
+        json.dump({'date': DATE_STR, 'total': len(stocks_json), 'stocks': stocks_json,
+                   'fetch_fail_pct': getattr(screen, 'last_fail_pct', {})},
+                  f, ensure_ascii=False, indent=2)
     print(f'JSON 저장: {json_path}')
 
     # 포워드 페이퍼 트레이딩: 이번 주 신호를 가상 진입 기록 + 만기분 실현 갱신
