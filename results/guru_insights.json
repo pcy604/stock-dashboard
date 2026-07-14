@@ -1,6 +1,63 @@
 {
   "items": [
     {
+      "video_id": "FCfUFhSSGbM",
+      "title": "이런 시장에서 누가 어떻게 버팁니까 #국장 #변동성 #레버리지 #야식잡썰 #이대호",
+      "channel": "와이스트릿",
+      "published": "2026-07-14T11:38:59+00:00",
+      "url": "https://www.youtube.com/watch?v=FCfUFhSSGbM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-14T21:54:39.634600+09:00"
+    },
+    {
+      "video_id": "kusArgj7avo",
+      "title": "하이닉스보다 삼전이 억울한 진짜 이유, 그리고 폭락장 속 기관들이 진짜 사 모으는 독점 소부장ㅣ김장열 유니스토리자산운용 리서치센터장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-07-14T11:30:34+00:00",
+      "url": "https://www.youtube.com/watch?v=kusArgj7avo",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-14T21:53:06.439283+09:00"
+    },
+    {
+      "video_id": "ziNh804Rd_I",
+      "title": "역대급 거래량 터졌다! 외국인이 띄운 '반등 시그널' 방심은 금물ㅣ명민준, 박가영, 황유현 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-14T12:30:17+00:00",
+      "url": "https://www.youtube.com/watch?v=ziNh804Rd_I",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-14T21:52:34.039638+09:00"
+    },
+    {
       "video_id": "2808v_PeuGc",
       "title": "\"7000도 깨진 코스피...\" 파도라기엔 너무 높고 깊지 않나요? | 백인재 부센터장 [더블 크루]",
       "channel": "삼프로TV",
@@ -183,11 +240,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-14T20:20:07.576390+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-14T21:54:06.834036+09:00"
     },
     {
       "video_id": "_A4kx-HuLBQ",
@@ -413,8 +470,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-14T20:12:04.830723+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-14T21:52:01.152922+09:00"
     },
     {
       "video_id": "ZjztKEX_gEM",
@@ -729,8 +786,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-14T20:12:26.921156+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-14T21:53:34.092209+09:00"
     },
     {
       "video_id": "5NZsj5hk71Y",
@@ -1143,11 +1200,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-14T20:29:36.963280+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-14T21:55:12.109203+09:00"
     },
     {
       "video_id": "uMI65SsMbxY",
@@ -14119,178 +14176,7 @@
       "source": "video",
       "attempts": 4,
       "analyzed_at": "2026-07-04T23:15:25.394433+09:00"
-    },
-    {
-      "video_id": "sxpnZCREQqQ",
-      "title": "정답 나왔다. 단타 vs 장투 / 앉아서 부자되기 [EP.13]  / 주린이 다 모여라!",
-      "channel": "와이스트릿",
-      "published": "2026-07-04T00:00:22+00:00",
-      "url": "https://www.youtube.com/watch?v=sxpnZCREQqQ",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "성공적인 투자를 위해서는 '무엇을 위해 투자하는가'(Why)를 명확히 하고, 이에 맞춰 장기 투자와 단기 투자를 분리하며, 지속적인 학습으로 자신만의 투자 체질과 체력을 길러야 합니다.",
-        "summary": [
-          "모든 투자에는 '왜 이 주식을 샀는가'(Why)라는 명확한 목적이 있어야 하며, 이 목적이 있어야만 '어떻게 투자할 것인가'(How)에 대한 방법론이 자연스럽게 도출됩니다.",
-          "단타를 목적으로 했으나 손실을 보고 비자발적 장기 투자로 전환하거나, 장기 투자를 목적으로 했으나 단기 수익에 혹하여 매도하여 큰 수익 기회를 놓치는 행위는 최악의 투자 형태입니다.",
-          "투자 목표에 따라 자금을 분리하여 계좌를 나누고 각 계좌에 맞는 원칙을 세우는 것이 중요하며, 예를 들어 초기에는 장기 투자에 90%, 단기 투자에 10%를 할당하는 것이 좋습니다.",
-          "워런 버핏의 '10년 투자' 조언처럼 투자는 회사 자체를 인수하듯 깊이 이해하는 것이 중요하며, 한국 기업의 사이클 특성을 고려하여 맹목적인 장기 투자가 아닌 산업 라이프사이클에 대한 이해가 필요합니다.",
-          "투자자의 '뿌리, 체질, 체력'을 튼튼히 하는 것이 중요하며, 이는 깊은 지식(뿌리), 명확한 투자 철학(체질), 그리고 시장 변동성을 견딜 수 있는 정신적 강인함(체력)을 의미합니다.",
-          "운으로 얻은 큰 수익은 자신의 실력으로 착각하게 만들어 투자자를 위험에 빠뜨릴 수 있으므로, 꾸준히 재현 가능한 투자 실력을 갖추는 것이 중요합니다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "대기업의 다음 먹거리 고민의 예시로 언급되었습니다.",
-            "view": "중립",
-            "t": 1540
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "대기업의 다음 먹거리 고민의 예시로 언급되었습니다.",
-            "view": "중립",
-            "t": 1541
-          }
-        ],
-        "key_points": [
-          {
-            "point": "투자의 핵심은 자신의 'Why'를 아는 것이며, 이를 통해 'How'를 결정하고 시장 변동성에 흔들리지 않는 중심을 잡는 것입니다.",
-            "t": 54
-          },
-          {
-            "point": "투자의 목적을 상실한 '비자발적 장기 투자'나 '단기 이익 실현 후 대세 상승 놓치기'는 투자의 최악의 시나리오이며, 인간의 욕심이 개입될 때 발생합니다.",
-            "t": 246
-          },
-          {
-            "point": "단타와 장투는 좋고 나쁨이 있는 것이 아니라, 투자자의 목적에 따른 '수단'일 뿐이며, 투자금의 비중을 조절하고 계좌를 분리하여 관리하는 것이 중요합니다.",
-            "t": 506
-          },
-          {
-            "point": "진정한 투자 실력은 '뿌리(근본 지식), 체질(투자 철학), 체력(정신적 강인함)'을 길러 반복 가능한 성공을 만드는 것이며, 시장이 흔들릴 때 진정한 실력이 드러납니다.",
-            "t": 1128
-          }
-        ],
-        "actionable": [
-          "각 투자 건에 대해 명확한 투자 목적(Why)을 설정하고 기록합니다.",
-          "투자 포트폴리오를 장기 투자용과 단기 투자용으로 나누어 별도의 계좌로 관리하고, 각 계좌의 원칙을 철저히 준수합니다.",
-          "기업의 라이프사이클과 산업 사이클을 꾸준히 학습하여 투자하는 회사의 본질적 가치와 시장의 흐름을 이해하는 데 집중합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-04T10:16:02.992056+09:00"
-    },
-    {
-      "video_id": "EBsWAB7YD9Q",
-      "title": "조립을 넘어 연결로 자동차를 완성하는 하나의 길 | 지구 확장의 여정",
-      "channel": "삼프로TV",
-      "published": "2026-07-03T22:57:23+00:00",
-      "url": "https://www.youtube.com/watch?v=EBsWAB7YD9Q",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "포스코인터내셔널은 글로벌 전기차 배터리 소재 및 구동모터코어 핵심 부품 공급망을 수직 통합하여 미래 모빌리티 산업의 안정적이고 효율적인 생산 체계를 구축하고 있습니다.",
-        "summary": [
-          "전 세계 자동차 산업은 희토류, 흑연 등 핵심 광물 공급망 불안정으로 인해 전례 없는 패닉 상태에 직면해 있으며, 이는 반도체나 엔진 문제보다 더 근본적인 위협으로 작용하고 있습니다.",
-          "포스코인터내셔널은 탄자니아 마헨게 흑연 광산 확보 및 포스코퓨처엠과의 시너지를 통해 배터리 음극재 원료부터 최종 소재 생산까지 외부 흔들림 없는 독자적인 공급망을 완성하고 있습니다.",
-          "전기차 모터 효율을 결정하는 핵심 부품인 구동모터코아의 초박판(0.2mm) 기술 및 셀프본딩(Self-Bonding) 적층 기술을 통해 전기차의 주행거리를 늘리고 에너지 효율을 극대화하고 있습니다.",
-          "북미(멕시코, 미국)와 유럽(폴란드) 등 주요 시장에 구동모터코아 및 희토류 영구자석 통합 생산 거점을 구축하여 'Local-to-Local' 전략으로 글로벌 완성차 기업들의 현지 조달 요구에 대응하고 있습니다.",
-          "미국 에너지부, 국방부 등과의 협력을 통해 희토류 공급망의 핵심 파트너로 인식되며, 이는 포스코인터내셔널이 다른 상사나 부품사가 갖지 못한 압도적인 유연성과 산업 주권을 확보하고 있음을 보여줍니다."
-        ],
-        "tickers": [
-          {
-            "name": "POSCO INTERNATIONAL",
-            "ticker": "047050",
-            "context": "전기차 핵심 원료 및 부품 공급망 구축을 선도하며 그룹사 시너지를 창출하는 주체",
-            "view": "긍정",
-            "t": 47
-          },
-          {
-            "name": "POSCO Future M",
-            "ticker": "003670",
-            "context": "포스코인터내셔널과 협력하여 흑연 가공 기술 및 음극재 생산을 담당",
-            "view": "긍정",
-            "t": 492
-          },
-          {
-            "name": "Hyundai Motor",
-            "ticker": "005380",
-            "context": "글로벌 완성차 기업의 하나로, 현지 조달 가능성과 효율성 높은 부품 공급의 필요성을 강조하는 예시",
-            "view": "중립",
-            "t": 745
-          }
-        ],
-        "key_points": [
-          {
-            "point": "글로벌 자동차 산업은 핵심 광물 공급망의 안정성이 기업의 생존과 경쟁력을 좌우하는 시대로 진입했습니다. 특히 희토류와 흑연은 전기차 모터와 배터리의 핵심으로서 전략적 중요성이 매우 큽니다.",
-            "t": 0
-          },
-          {
-            "point": "포스코인터내셔널은 단순한 원자재 조달을 넘어, 광산 개발부터 가공, 부품 생산까지 아우르는 수직 계열화된 밸류체인을 구축하여 원가 안정성 확보와 공급 리스크 최소화를 추구하고 있습니다.",
-            "t": 115
-          },
-          {
-            "point": "중국의 흑연 수출 통제와 같은 자원 민족주의 강화는 글로벌 전기차 산업에 큰 위협이 되고 있으며, 이에 대응하기 위한 비중국계 공급망 다변화가 시급합니다.",
-            "t": 306
-          },
-          {
-            "point": "포스코인터내셔널은 탄자니아 마헨게 흑연 광산과 미국 내 희토류/영구자석 통합 생산 단지 구축을 통해 핵심 광물의 안정적인 조달 기반을 마련하고, 글로벌 시장에서 산업 주권을 강화하고 있습니다.",
-            "t": 427
-          },
-          {
-            "point": "전기차 모터 코아의 초정밀 가공 기술과 글로벌 거점 생산 체계 구축은 전기차의 효율성과 주행거리를 결정짓는 핵심 경쟁력이며, 포스코인터내셔널은 이를 통해 글로벌 완성차 기업들에게 신뢰할 수 있는 파트너로 자리매김하고 있습니다.",
-            "t": 533
-          }
-        ],
-        "actionable": [
-          "희토류 및 흑연 등 핵심 광물의 글로벌 공급망 동향과 관련된 포스코인터내셔널의 추가적인 투자 및 파트너십 발표를 주시하고, 이러한 사업 확장이 기업 실적에 미칠 영향을 분석하세요.",
-          "포스코인터내셔널의 북미, 유럽, 인도 등 해외 현지 생산 거점 구축 진행 상황을 모니터링하고, 글로벌 완성차 기업들과의 'Local-to-Local' 공급망 강화가 시장 점유율 및 수익성에 어떤 영향을 미치는지 평가하세요.",
-          "포스코그룹 내 포스코퓨처엠과의 시너지 효과와 전기차 배터리 소재 및 부품 기술 개발 현황을 지속적으로 추적하여, 그룹 전체의 2차전지 및 모빌리티 사업 경쟁력 변화를 파악하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-04T10:14:53.880658+09:00"
-    },
-    {
-      "video_id": "y10W85H-yz4",
-      "title": "\"미국 기술? 없어도 되잖아!\" 전 세계 천재 보유국 1위는 여깁니다 #중국 #이철  #AI #경제 #딥시크 #과학 #미국 #천재 #신질생산력 #시진핑",
-      "channel": "와이스트릿",
-      "published": "2026-07-03T22:00:13+00:00",
-      "url": "https://www.youtube.com/watch?v=y10W85H-yz4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "중국은 외부 지원이나 미국 기술 없이도 자국의 '딥시크' 천재 인재를 통해 '신질생산력'을 달성하며 전 세계에서 천재를 가장 많이 보유한 1위 국가로 부상하고 있다는 주장.",
-        "summary": [
-          "중국의 '딥시크' 인재들은 미국 기술 지원이나 자금 없이 순수 국내 역량으로 성과를 내고 있다. [8]",
-          "전 세계 천재 청년 및 청소년 100명 중 30~40명은 중국에 있을 것이며, 중국은 전 세계 천재 보유 1위 국가다. [24]",
-          "시진핑 주석이 강조하는 '신질생산력'은 이러한 자국 인재를 기반으로 미국 기술이나 외부 자금 지원 없이도 달성 가능하다고 본다. [37]",
-          "중국의 성공에 필요한 핵심 요소는 '인재'이며, 이들이 미국 기술이나 자본 없이도 스스로 해내고 있다는 것이 이 주장의 근거다. [46]"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "중국은 외부 지원 없이 자국의 천재 소년들이 기술적 성과를 달성하고 있으며, 이들은 대부분 젊고 알려지지 않은 인물들이다. [17]",
-            "t": 17
-          },
-          {
-            "point": "전 세계 천재 인재의 상당수가 중국에 집중되어 있으며, 이는 중국이 미국의 기술적 지배에서 벗어나 독자적인 기술 발전을 이룰 수 있는 기반이 된다. [32]",
-            "t": 32
-          },
-          {
-            "point": "시진핑의 '신질생산력' 전략은 단순한 경제 성장 모델이 아니라, 자국 내재적 역량과 인재를 통한 기술 자립 및 발전을 의미하며, 중국은 이미 이를 실현하고 있다고 주장한다. [37]",
-            "t": 37
-          }
-        ],
-        "actionable": [
-          "중국의 인재 육성 정책 및 기술 자립 노력에 대한 지속적인 모니터링을 통해 장기적인 투자 기회를 탐색한다.",
-          "미중 기술 경쟁 구도에서 중국의 '신질생산력' 정책이 글로벌 기술 산업 및 공급망에 미칠 잠재적 변화를 분석한다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-04T07:45:08.829147+09:00"
     }
   ],
-  "updated": "2026-07-14T20:29:37.963481+09:00"
+  "updated": "2026-07-14T21:55:13.109489+09:00"
 }
