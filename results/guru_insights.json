@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-15T00:11:36.893849+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-15T01:54:32.560779+09:00"
     },
     {
       "video_id": "FCfUFhSSGbM",
@@ -35,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-15T00:13:55.021744+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-15T02:03:36.365421+09:00"
     },
     {
       "video_id": "kusArgj7avo",
@@ -46,16 +46,85 @@
       "url": "https://www.youtube.com/watch?v=kusArgj7avo",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "한국 반도체 시장은 헤게모니 싸움, 빅테크 투자 및 2배 ETF 변동성 등 외부 요인에 영향을 받지만, PSK와 PSK홀딩스는 독점 기술력과 안정적인 고객 확보로 장기적 가치가 높으며, 삼성전자와 SK하이닉스도 저평가 국면에서 회복 기대감이 있다.",
+        "summary": [
+          "**반도체 업황 및 투자 전략**: 최근 반도체 시장은 변동성이 컸지만, PSK, PSK홀딩스, 테스 같은 소부장 기업들은 독점적인 기술력을 바탕으로 안정적인 가치를 유지하고 있으며, 가격 조정 시 분할 매수를 통한 장기 투자를 조언한다.",
+          "**PSK의 기술력**: PSK는 드라이 스트립(Dry Strip) 장비 분야에서 20년 이상 글로벌 시장 점유율 1위를 유지하고 있으며, 미세 공정에서 손상을 최소화하는 플라즈마 기반 기술을 통해 포토레지스트(PR) 잔여물을 제거하며 경쟁력을 확보하고 있다.",
+          "**PSK홀딩스의 경쟁력**: PSK홀딩스는 후공정 패키징에서 리플로우(Reflow) 및 데스컴(Descum) 장비에서 독점적 지위를 가지고 있으며, 특히 잔류물이 없는 플럭스리스(Fluxless) 리플로우 기술로 HBM 등 첨단 패키징 분야에 필수적인 기술을 제공하며 높은 성장성을 가짐.",
+          "**주요 반도체 기업의 밸류에이션 및 시장 심리**: SK하이닉스와 삼성전자는 현재 2027년 기준 PER 4배 초반으로 평가받으며, 이는 미국 시장 대비 저평가된 상태로, 미국 투자자들의 선호가 뚜렷하며 ADR이 높은 프리미엄으로 거래되는 등 시장의 비효율성이 존재한다.",
+          "**거시경제 및 시장 역학**: 금리 인상 우려와 지정학적 리스크, 그리고 2배 레버리지 ETF의 높은 변동성 등이 시장에 불안정성을 더하고 있어 투자에 신중해야 하며, 수급적인 요인과 헤게모니 싸움이 주가에 큰 영향을 미친다."
+        ],
+        "tickers": [
+          {
+            "name": "PSK",
+            "ticker": "031980",
+            "context": "드라이 스트립(Dry Strip) 장비의 글로벌 시장 점유율 1위 기업으로, 미세 공정에서 플라즈마 기반 기술을 통해 포토레지스트(PR) 잔여물을 제거하며 경쟁력을 확보함. 최근 목표 주가가 크게 상향 조정됨.",
+            "view": "긍정",
+            "t": 306
+          },
+          {
+            "name": "PSK홀딩스",
+            "ticker": "031980",
+            "context": "후공정 패키징에서 리플로우(Reflow) 및 데스컴(Descum) 장비 분야에서 독점적 지위를 가진 PSK의 모회사. 특히 플럭스리스(Fluxless) 리플로우 기술로 HBM 등 첨단 패키징에 필수적인 기술을 제공하며 높은 성장성을 가짐.",
+            "view": "긍정",
+            "t": 1405
+          },
+          {
+            "name": "테스",
+            "ticker": "095610",
+            "context": "전공정 식각 장비와 증착 장비를 다루는 기업으로 밸류에이션이 안정적이며 학습할 만한 주식으로 언급됨.",
+            "view": "중립",
+            "t": 126
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "최근 주가가 미국 ADR 대비 23.8% 낮은 상태로, 2027년 기준 PER 4.2배에 거래되고 있으며, 이는 미국 투자자들이 더 높게 평가하고 있음을 시사한다. 2분기 실적은 좀 아쉬웠다.",
+            "view": "중립",
+            "t": 2742
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "2027년 기준 PER 3.9배로 SK하이닉스보다 저평가되어 있으며, 2분기 실적은 좋았다. ADR과의 괴리도 존재한다. 하이닉스를 쫓아가는 것이 타당하다고 본다.",
+            "view": "중립",
+            "t": 2744
+          },
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "2027년 기준 PER 6.25배로 SK하이닉스(PER 5.2배, ADR 기준) 대비 여전히 높은 밸류에이션을 유지하고 있으며, 미국 주식 선호 경향을 보여준다.",
+            "view": "중립",
+            "t": 3199
+          }
+        ],
+        "key_points": [
+          {
+            "point": "**반도체 소부장 독점 기술력 (00:41)**: PSK의 Dry Strip 및 PSK홀딩스의 Fluxless Reflow/Descum 기술은 미세 공정과 첨단 패키징 시대에 핵심 경쟁력으로 작용하며 글로벌 시장에서 독점적 지위를 확보하고 있다.",
+            "t": 41
+          },
+          {
+            "point": "**시장 심리 및 수급의 중요성 (01:14)**: 현재 시장은 거시경제 불확실성과 2배 ETF와 같은 파생상품의 영향으로 변동성이 크므로, 기업의 본질적 가치와 밸류에이션 괴리가 발생할 때 분할 매수로 접근하는 보수적 투자가 필요하다.",
+            "t": 74
+          },
+          {
+            "point": "**한국 반도체 기업의 밸류에이션 괴리 (27:32)**: SK하이닉스와 삼성전자는 국내 시장에서 미국 시장 대비 저평가되어 있으며, 특히 SK하이닉스의 ADR은 국내 주식 대비 높은 프리미엄을 형성하고 있다.",
+            "t": 2732
+          },
+          {
+            "point": "**헤게모니 싸움과 빅테크 투자 영향 (26:24)**: 반도체 산업은 미국과 중국 간의 헤게모니 싸움, 그리고 빅테크 기업들의 AI 투자 방향성에 따라 크게 좌우되며, 이는 국내 반도체 기업들의 주가 흐름에 중요한 변수로 작용한다.",
+            "t": 2624
+          }
+        ],
+        "actionable": [
+          "**소부장 주식 분할 매수 고려**: PSK, PSK홀딩스, 테스 등 기술력이 있는 소부장 주식의 주가 하락 시, 목표 주가 대비 0.7~0.8배 이하에서 10~20차례에 걸쳐 분할 매수를 고려할 것. (01:14)",
+          "**대형 반도체 주식의 밸류에이션 괴리 주시**: SK하이닉스와 삼성전자의 국내 주식과 미국 ADR 간의 밸류에이션 괴리 및 해외 투자자들의 움직임을 면밀히 분석하여 저가 매수 기회를 포착할 것. (27:32)",
+          "**시장 변동성 관리**: 2배 ETF 등 파생상품이 야기하는 수급 변동성과 불확실성에 대응하기 위해 포트폴리오의 리스크를 관리하고, 시장의 흐름 변화를 인내심 있게 기다리는 전략을 유지할 것. (02:44)"
+        ]
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-15T00:12:48.952380+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-15T02:03:03.824510+09:00"
     },
     {
       "video_id": "ziNh804Rd_I",
@@ -70,11 +139,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-15T00:12:16.219095+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-15T01:59:01.568419+09:00"
     },
     {
       "video_id": "2808v_PeuGc",
@@ -489,8 +558,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-15T00:11:03.565169+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-15T01:50:14.133199+09:00"
     },
     {
       "video_id": "ZjztKEX_gEM",
@@ -14102,5 +14171,5 @@
       "analyzed_at": "2026-07-04T14:36:38.143084+09:00"
     }
   ],
-  "updated": "2026-07-15T00:13:56.022010+09:00"
+  "updated": "2026-07-15T02:03:37.365689+09:00"
 }
