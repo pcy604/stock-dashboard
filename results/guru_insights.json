@@ -16,8 +16,8 @@
         "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-15T01:54:32.560779+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-15T03:49:59.532923+09:00"
     },
     {
       "video_id": "FCfUFhSSGbM",
@@ -35,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-15T02:03:36.365421+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-15T03:55:28.030661+09:00"
     },
     {
       "video_id": "kusArgj7avo",
@@ -142,8 +142,8 @@
         "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-15T01:59:01.568419+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-15T03:54:55.406367+09:00"
     },
     {
       "video_id": "2808v_PeuGc",
@@ -14171,5 +14171,5 @@
       "analyzed_at": "2026-07-04T14:36:38.143084+09:00"
     }
   ],
-  "updated": "2026-07-15T02:03:37.365689+09:00"
+  "updated": "2026-07-15T03:55:29.030916+09:00"
 }
