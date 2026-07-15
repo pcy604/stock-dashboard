@@ -1,6 +1,84 @@
 {
   "items": [
     {
+      "video_id": "5EyjzvbLgS0",
+      "title": "반도체 아직 싸다고요? 실적보다 먼저 꺾이는 ‘이 신호’ 확인하세요ㅣ명민준, 박가영, 정태근 [주린이구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-15T13:30:33+00:00",
+      "url": "https://www.youtube.com/watch?v=5EyjzvbLgS0",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "반도체 주식은 AI 메가트렌드에 힘입어 상승했으나, 과거 시장 패턴과 DRAM 수출 증가율 둔화 등을 고려할 때 단기적 조정 가능성에 대비해 현금 확보를 권고합니다.",
+        "summary": [
+          "반도체 섹터는 현재 PER 기준 저평가되어 있지만, 과거 '지수장세' 사례를 볼 때 주도 섹터의 단기적 모멘텀 둔화 시 시장 전체가 동반 조정될 가능성이 있습니다. [03:30]",
+          "최근 DRAM 수출액은 전년 대비 높은 성장률을 보였지만, 월별 증가율은 둔화(2026년 6월 0.3%)되고 있어 이는 시장 조정의 빌미가 될 수 있습니다. [12:30]",
+          "AI 산업의 장기적인 성장성(빅테크의 공격적인 투자)은 분명하지만, 주식 시장의 속성상 단기적인 비상식적 움직임이 나타날 수 있으며, 실적에 대한 시장의 반응과 하이퍼스케일러들의 발언이 중요합니다. [18:00]",
+          "2021년 '메모리 겨울 온다'던 모건스탠리 리포트 등 과거에도 낙관적 전망 속에서 시장이 급락했던 사례가 있었으며, 현재 시장 상황이 이와 유사합니다. [15:30]",
+          "현재 한국 증시의 밸류에이션은 역사적으로 저평가 구간이지만, 급등한 종목은 단기 과열 양상일 수 있습니다. [20:00]"
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "메모리 3사 선행 PER 업데이트 기준 4.5배를 기록 중이며, 2021년 모건스탠리의 매도 의견과 이후의 주가 움직임을 예시로 들어 현재 상황과 비교",
+            "view": "중립",
+            "t": 437
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "메모리 3사 선행 PER 업데이트 기준 4.7배를 기록 중이며, 2025년 5월 이후 주가 1800% 상승 (예상치) 차트와 함께 모건스탠리의 목표주가 하향 조정 사례를 언급",
+            "view": "중립",
+            "t": 437
+          },
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "메모리 3사 선행 PER 업데이트 기준 6.8배를 기록 중",
+            "view": "중립",
+            "t": 437
+          },
+          {
+            "name": "에코프로",
+            "ticker": "086520",
+            "context": "2023년 이차전지 주도 '지수장세' 시기에 에코프로가 꺾이면서 코스피와 코스닥이 동반 하락했던 사례로 언급",
+            "view": "중립",
+            "t": 442
+          }
+        ],
+        "key_points": [
+          {
+            "point": "과거 주식 시장은 주도 섹터가 시장을 이끄는 '지수장세'와 개별 종목이 순환하는 '종목장세'로 나뉘며, 현재 반도체 시장은 지수장세의 특징을 보입니다. [03:30]",
+            "t": 330
+          },
+          {
+            "point": "지수장세에서는 주도 섹터가 하락하면 시장 전체가 함께 꺾이는 경향이 있으며, 이는 2023년 이차전지, 2021년 반도체 시장 등 과거 사례에서 반복되었습니다. [03:30]",
+            "t": 330
+          },
+          {
+            "point": "메모리 반도체의 전년 대비 수출액 증가율 둔화(전월대비 0.3% 증가)는 외형적 실적 성장에도 불구하고 시장 조정의 빌미가 될 수 있습니다. [12:30]",
+            "t": 1230
+          },
+          {
+            "point": "빅테크 기업들의 AI 투자는 미래 산업의 필수불가결한 요소이나, 과도한 단기 투심은 시장의 불확실성과 함께 언제든 조정으로 이어질 수 있습니다. [18:00]",
+            "t": 1800
+          },
+          {
+            "point": "주식 투자는 과거 주식 역사와 심리학적 측면을 이해하는 것이 중요하며, 논리적 근거가 빈약한 논조는 위험할 수 있습니다. [30:41]",
+            "t": 3041
+          }
+        ],
+        "actionable": [
+          "DRAM 수출액 월별 증가율을 지속적으로 관찰하여 성장 둔화 조짐이 보이면 현금 비중을 확대하는 등 위험 관리를 고려하세요. [12:30]",
+          "현재 반도체 주가가 전고점 수준에 도달할 경우, 추가 상승 여력이 제한적일 수 있으므로 단기적으로 현금화를 고려할 수 있습니다. [36:00]",
+          "매크로 지표(달러화, 기술적 과매도 구간 등)와 밸류에이션(PER 등)을 함께 고려하여 비상식적인 시장 움직임에 대비하는 보수적인 관점을 유지하세요. [35:45]"
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-16T00:14:24.770246+09:00"
+    },
+    {
       "video_id": "HiuuS6mWYKM",
       "title": "반등이 와도 무조건 버티면 안 되는 이유ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
       "channel": "삼프로TV",
@@ -16,12 +94,12 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-15T21:58:14.899653+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-16T00:19:30.053826+09:00"
     },
     {
       "video_id": "9z0A_m2yep8",
-      "title": "외국인 돌아왔지만 아직 안심은 이르다…삼전닉스 반등, 진짜 추세 전환은 내일 결정된다ㅣ명민준, 박가영, 이권희 [주린이구조대]",
+      "title": "외국인 돌아왔지만 아직 안심은 이르다…삼전닉스 반등, 진짜 추세 전환은 내일 결정된다ㅣ명민준, 박가영, 이권희 [주린이 구조대]",
       "channel": "삼프로TV",
       "published": "2026-07-15T12:30:13+00:00",
       "url": "https://www.youtube.com/watch?v=9z0A_m2yep8",
@@ -32,11 +110,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-15T21:57:42.295977+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-16T00:18:57.607669+09:00"
     },
     {
       "video_id": "vU5Nn2ck5hY",
@@ -478,8 +556,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-15T22:03:55.939443+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-16T00:20:35.184484+09:00"
     },
     {
       "video_id": "6ODGLkKOunA",
@@ -696,8 +774,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-15T21:58:47.328641+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-16T00:20:02.478685+09:00"
     },
     {
       "video_id": "S_Oait-Qnm4",
@@ -1033,8 +1111,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-15T21:57:09.061675+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-16T00:10:49.830522+09:00"
     },
     {
       "video_id": "6xIGPpdMgqI",
@@ -14290,26 +14368,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-06T18:48:36.140434+09:00"
-    },
-    {
-      "video_id": "jtLxuKRXtnI",
-      "title": "2분기 실적·나스닥 상장… 반도체 투톱 ‘운명의 한주’",
-      "channel": "체슬리TV",
-      "published": "2026-07-06T08:55:59+00:00",
-      "url": "https://www.youtube.com/watch?v=jtLxuKRXtnI",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "Server disconnected without sending a response."
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-07T04:28:21.784664+09:00"
     }
   ],
-  "updated": "2026-07-15T22:03:56.939694+09:00"
+  "updated": "2026-07-16T00:20:36.184751+09:00"
 }
