@@ -91,11 +91,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"이재규 SK증권 PB 차장은 반도체 중심의 국내 증시가 단기 과매도 상태이며, 개인의 투자 '호흡'에 맞춰 주도 섹터에 대한 장기적 관점의 투자 기회를 엿볼 수 있다고 강조합니다.\",\n  \"summary\": [\n    \"미국 선물 지수 하락에도 국내 증시가 기술적 반등을 보였으며, 차트상으로는 하락장이 우려되지만 실적 대비 저평가된 상황입니다.\",\n    \"반도체 섹터는 현재 단기적으로 많이 하락했지만, 장기적으로는 우상향 가능성이 높다고 판단하며, 아직 보유하지 않았다면 매수 기회, 비중이 적으면 추가 매수를, 비중이 높으면 반등 시 일부 매도를 고려해야 합니다.\",\n    \"증시의 '호흡'을 강조하며, 시장의 단기 변동성에 유연하게 대응할 수 있는 투자자라면 반도체를, 장기 보유 관점이라면 반도체 외 실적 우량 업종을 고려할 것을 조언합니다.\",\n    \"매크로 지표가 시장에 큰 부담을 줄 정도는 아니며, 주가 "
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-16T00:19:30.053826+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-16T02:02:24.580325+09:00"
     },
     {
       "video_id": "9z0A_m2yep8",
@@ -113,8 +114,8 @@
         "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-16T00:18:57.607669+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-16T01:58:46.350764+09:00"
     },
     {
       "video_id": "vU5Nn2ck5hY",
@@ -14370,5 +14371,5 @@
       "analyzed_at": "2026-07-06T18:48:36.140434+09:00"
     }
   ],
-  "updated": "2026-07-16T00:20:36.184751+09:00"
+  "updated": "2026-07-16T02:02:25.805962+09:00"
 }
