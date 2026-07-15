@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "HiuuS6mWYKM",
+      "title": "반등이 와도 무조건 버티면 안 되는 이유ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-07-15T11:30:18+00:00",
+      "url": "https://www.youtube.com/watch?v=HiuuS6mWYKM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-15T21:58:14.899653+09:00"
+    },
+    {
+      "video_id": "9z0A_m2yep8",
+      "title": "외국인 돌아왔지만 아직 안심은 이르다…삼전닉스 반등, 진짜 추세 전환은 내일 결정된다ㅣ명민준, 박가영, 이권희 [주린이구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-15T12:30:13+00:00",
+      "url": "https://www.youtube.com/watch?v=9z0A_m2yep8",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-15T21:57:42.295977+09:00"
+    },
+    {
       "video_id": "vU5Nn2ck5hY",
       "title": "\"또 코스피 폭등 시작하나?\" 그러나 걱정인 것은...| 윤정식 바로자산운용 상무 [더블 체크]",
       "channel": "삼프로TV",
@@ -97,12 +135,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"중국 창신메모리(CXMT) 상장은 국내 시장에 직접적인 위협이 되지 않으며, 중국 자본이 기술 집약적 산업으로 몰리는 추세를 보여주는 동시에 과열된 탐욕으로 인한 장기적 공급 과잉의 리스크를 내포하고 있습니다.\",\n  \"summary\": [\n    \"중국 창신메모리(CXMT)의 상장은 국내외 반도체 시장에 큰 관심을 받고 있으며, 중국의 기술 자립 목표와 자본 시장의 동향을 보여주는 중요한 지표입니다.\",\n    \"CXMT의 공모가와 예상 시가총액은 당초 예상보다 높게 형성되었고, 올해 순이익 기준 PER이 6배, 작년 기준 300배에 달하는 등 중국 투자자들의 '탐욕'이 과열된 양상을 보였습니다.\",\n    \"중국 내 자본 흐름은 기존 부동산 및 구경제 중심에서 반도체, 장치 산업, 자본재 등 신기술 및 제조업 분야로 이동하고 있으며, 이는 장기적으로 공급 과잉을 초래할 수 있습니다.\",\n    \"국내 시장에 미치"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-15T20:23:12.826626+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-07-15T22:03:23.508142+09:00"
     },
     {
       "video_id": "lKayUz5-4tM",
@@ -112,17 +149,104 @@
       "url": "https://www.youtube.com/watch?v=lKayUz5-4tM",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_parse_error": true,
-        "_raw": ""
+        "one_liner": "반도체 시장은 실적과 수급 논리 따라 움직이며, 장기 공급 계약으로 이익 변동성이 축소된 하이닉스와 안정적인 삼성전자, 그리고 K-원전 및 AI 관련 투자 기회에 주목해야 합니다.",
+        "summary": [
+          "반도체 시장은 과거와 달리 장기 공급 계약(LTA)을 통한 이익 변동성 축소가 진행 중이며, 특히 SK하이닉스는 HBM 공급 계약으로 인한 긍정적 전망과 주주환원 여력이 있습니다.",
+          "삼성전자 [0:00:07]는 DDR5 등 레거시 디램의 가격 상승 및 마진 개선으로 내년까지 SK하이닉스 대비 안정적인 실적을 보일 것으로 예상됩니다.",
+          "개인 투자자들의 신용융자 [0:00:15] 정리와 외국인들의 순매수 전환이 국내 증시의 긍정적인 수급 요인으로 작용하고 있으며, 향후 기관 투자자들의 유입도 기대됩니다.",
+          "데이터센터 슈퍼사이클과 AI 기술 발전 [0:00:25]은 K-원전 [0:00:25], 전력기기 (두산에너빌리티 [0:03:23], LS일렉 [0:03:48], HD현대일렉 [0:03:36] 등), AI 반도체 [0:02:46] 등 관련 산업에 구조적인 성장 기회를 제공합니다.",
+          "현재 주식 시장은 3~4월의 학습 효과를 상기할 필요가 있으며, 과도한 쏠림 현상보다는 어닝에 기반한 종목 확산 전략이 유효할 수 있습니다.",
+          "미국 CPI [0:00:10] 하락 둔화 및 유가 [0:00:09] 변동성에도 불구하고 물가 고점 통과 및 연내 금리 동결 가능성을 지지하는 거시 경제 지표들이 많아 시장 심리가 개선될 여지가 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "ADR의 급등과 HBM 장기 공급 계약으로 이익 변동성 축소 및 주주환원 여력이 부각되고 있음.",
+            "view": "긍정",
+            "t": 607
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "레거시 디램 가격 상승으로 SK하이닉스 대비 내년 상반기까지 어닝이 더 비트할 가능성 언급.",
+            "view": "긍정",
+            "t": 1351
+          },
+          {
+            "name": "두산에너빌리티",
+            "ticker": "034020",
+            "context": "K-원전 관련 주요 종목으로, 고점 대비 많이 빠졌으며 데이터센터의 전력 생산 수요와 연결되어 장기 수주 기대.",
+            "view": "긍정",
+            "t": 323
+          },
+          {
+            "name": "한국전력",
+            "ticker": "015760",
+            "context": "K-원전 관련 주요 종목으로, 고점 대비 많이 빠졌으며 데이터센터의 전력 생산 수요와 연결되어 장기 수주 기대.",
+            "view": "긍정",
+            "t": 326
+          },
+          {
+            "name": "효성중공업",
+            "ticker": "298040",
+            "context": "전력기기 관련 종목으로, 고점 대비 많이 빠져 있으며 수주 기대.",
+            "view": "긍정",
+            "t": 334
+          },
+          {
+            "name": "LS일렉트릭",
+            "ticker": "000680",
+            "context": "전력기기 관련 종목으로, 고점 대비 많이 빠져 있으며 수주 기대.",
+            "view": "긍정",
+            "t": 348
+          },
+          {
+            "name": "HD현대일렉트릭",
+            "ticker": "267260",
+            "context": "전력기기 관련 종목으로, 고점 대비 많이 빠져 있으며 수주 기대.",
+            "view": "긍정",
+            "t": 336
+          },
+          {
+            "name": "엔비디아",
+            "ticker": "NVDA",
+            "context": "AI 성장성에도 불구하고 주가 흐름이 더딜 수 있으며, 어닝 상승에도 주가는 못 가는 이탈 현상 발생.",
+            "view": "중립",
+            "t": 1622
+          }
+        ],
+        "key_points": [
+          {
+            "point": "반도체 산업의 장기 공급 계약(LTA) 확대는 과거 단기 계약 위주에서 벗어나 이익 변동성을 줄이는 긍정적 변화입니다. 이는 SK하이닉스 ADR [0:06:07]의 급등에서도 나타났습니다.",
+            "t": 643
+          },
+          {
+            "point": "데이터센터 슈퍼사이클과 AI 기술 발전은 K-원전 [0:02:37], 전력기기 [0:02:38] 등 에너지 인프라 관련 산업에 큰 투자 기회를 제공하며, 미국 정부도 이 분야에 속도를 내고 있습니다.",
+            "t": 233
+          },
+          {
+            "point": "미국 경제 지표 (실질 가처분 소득 감소 [0:01:58], 고용 시장 둔화 [0:04:10], 물가 [0:00:09] 하락 둔화)는 연준의 연내 금리 동결 [0:01:28] 가능성을 높여주는 근거로 활용될 수 있습니다.",
+            "t": 127
+          },
+          {
+            "point": "현재 한국 시장의 개인 투자자 [0:02:05]들의 신용융자 [0:02:05] 정리는 단기적으로 불안정해 보이지만, 외국인 투자자 [0:00:10]들의 현물/선물 매수 전환은 시장의 긍정적인 수급 전환 신호로 해석됩니다.",
+            "t": 2211
+          },
+          {
+            "point": "기업 이익 상승을 '구조적 성장' [0:03:00]으로 볼지, 과거와 같은 '사이클 패턴' [0:03:00]으로 볼지에 따라 PER [0:03:00]과 PBR [0:03:00] 밸류에이션 판단이 달라지므로, 투자자 본인의 명확한 선택이 중요합니다.",
+            "t": 3022
+          }
+        ],
+        "actionable": [
+          "반도체 대형주 (SK하이닉스, 삼성전자)의 단기 주가 움직임보다는 LTA를 통한 이익 안정화 여부와 HBM, 레거시 디램 가격 추이에 주목하여 장기적인 관점에서 접근하는 것이 좋습니다.",
+          "K-원전 및 전력기기 [0:02:37] 관련 종목들은 데이터센터의 에너지 수요 증가 및 미국 정부의 정책적 지원에 힘입어 장기적인 성장 잠재력을 가지고 있으므로, 관련 기업들의 수주 및 캐펙스 투자 계획을 지속적으로 모니터링해야 합니다.",
+          "매크로 지표의 단기 변동성(CPI, 유가)에 일희일비하기보다는, 미국 고용 시장과 물가 [0:00:09] 지표를 종합적으로 판단하여 연준의 금리 동결 가능성을 염두에 둔 투자 전략을 수립하는 것이 중요합니다."
+        ]
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-15T20:22:06.303745+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-15T22:02:50.721640+09:00"
     },
     {
       "video_id": "qPI9R6scIOg",
@@ -351,11 +475,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-15T20:26:50.591483+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-15T22:03:55.939443+09:00"
     },
     {
       "video_id": "6ODGLkKOunA",
@@ -569,11 +693,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-15T20:14:36.879186+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-15T21:58:47.328641+09:00"
     },
     {
       "video_id": "S_Oait-Qnm4",
@@ -909,8 +1033,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-15T20:14:13.987966+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-15T21:57:09.061675+09:00"
     },
     {
       "video_id": "6xIGPpdMgqI",
@@ -14185,87 +14309,7 @@
       "source": "fail",
       "attempts": 3,
       "analyzed_at": "2026-07-07T04:28:21.784664+09:00"
-    },
-    {
-      "video_id": "wmBiT7-5uWw",
-      "title": "[긴급LIVE] 체감 증시 금융위기다! 박세익 라이브 \"구해줘 체슬리\" / 박세익 대표",
-      "channel": "와이스트릿",
-      "published": "2026-07-06T06:25:28+00:00",
-      "url": "https://www.youtube.com/watch?v=wmBiT7-5uWw",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "박세익 대표는 현재 증시 상황을 체감상 금융위기 수준으로 진단하며, 고금리 장기화와 경기 침체 가능성에 대비한 현금 확보 및 가치주 중심의 보수적 투자 전략을 강조합니다.",
-        "summary": [
-          "현재 증시 상황은 단순히 어려운 정도를 넘어 체감상 2008년 금융위기와 같은 수준으로 심각하다는 진단입니다.",
-          "미국의 고금리 정책과 양적 긴축(QT)이 장기화될 가능성이 높으며, 이로 인한 경기 침체 우려가 증폭되고 있습니다.",
-          "고금리 환경에서는 테슬라와 같은 고성장 기술주의 밸류에이션 부담이 커지며 급격한 주가 하락을 경험할 수 있습니다.",
-          "한국 증시 대장주인 삼성전자 및 반도체, 2차전지 등 주요 산업의 업황 둔화 우려가 제기되고 있습니다.",
-          "불확실성이 높은 시기에는 현금 비중을 확대하고 부채를 축소하며, 현금 흐름이 견고한 가치주나 배당주에 주목해야 합니다.",
-          "단기적인 시장 변동성에 흔들리지 않고 장기적인 관점에서 우량 기업을 저가에 모아갈 기회로 삼아야 합니다."
-        ],
-        "tickers": [
-          {
-            "name": "Tesla",
-            "ticker": "TSLA",
-            "context": "고금리 환경에서 고성장 기술주가 겪는 가치 하락의 대표적인 예시로 언급되었습니다.",
-            "view": "중립",
-            "t": 80
-          },
-          {
-            "name": "Samsung Electronics",
-            "ticker": "005930",
-            "context": "한국 증시의 대장주로서 시장 전반의 침체와 반도체 업황 둔화를 보여주는 지표로 언급되었습니다.",
-            "view": "중립",
-            "t": 120
-          }
-        ],
-        "key_points": [
-          {
-            "point": "현재 증시 상황이 체감상 금융위기 수준으로 심각하며, 과거 저금리 시대와 달리 고금리 환경에 장기간 노출될 것입니다.",
-            "t": 15
-          },
-          {
-            "point": "미국 금리 인상과 양적 긴축이 장기화될 것으로 예상되며, 이로 인한 경기 침체 가능성이 높아지고 있습니다.",
-            "t": 40
-          },
-          {
-            "point": "반도체 및 2차전지 등 주요 성장 산업의 단기적 업황 둔화 우려가 있습니다.",
-            "t": 150
-          },
-          {
-            "point": "단기 시장 변동성에 일희일비하기보다 장기적인 관점에서 우량 기업을 저가에 매수할 기회로 삼아야 합니다.",
-            "t": 260
-          }
-        ],
-        "actionable": [
-          "가계 및 기업의 부채를 적극적으로 줄이고 현금 비중을 늘려 유동성을 확보해야 합니다.",
-          "현금 흐름이 견고하고 배당을 꾸준히 지급하는 가치주에 주목하고, 고평가된 성장주 투자에는 신중해야 합니다.",
-          "불확실성이 큰 시기에는 빚을 내어 투자하는 '빚투'를 절대 피해야 합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-07-06T18:53:03.536369+09:00"
-    },
-    {
-      "video_id": "17vXCf8931k",
-      "title": "\"운명의 7월 7일\" 삼성전자 실적발표, 핵심 세 가지 | 손수연 하나증권 용산WM센터 PB [더블 크루",
-      "channel": "삼프로TV",
-      "published": "2026-07-06T01:46:50+00:00",
-      "url": "https://www.youtube.com/watch?v=17vXCf8931k",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-06T14:05:31.739667+09:00"
     }
   ],
-  "updated": "2026-07-15T20:31:05.091314+09:00"
+  "updated": "2026-07-15T22:03:56.939694+09:00"
 }
