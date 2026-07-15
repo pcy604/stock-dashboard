@@ -4049,6 +4049,917 @@
       ],
       "status": "open",
       "realized": {}
+    },
+    {
+      "id": "RUSHA_2026-07-15",
+      "sym": "RUSHA",
+      "name": "Rush Enterprises",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 76.18,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "017890_2026-07-15",
+      "sym": "017890",
+      "name": "한국알콜",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 14440.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RTX_2026-07-15",
+      "sym": "RTX",
+      "name": "Raytheon Technologies",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 195.89,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SCHW_2026-07-15",
+      "sym": "SCHW",
+      "name": "Charles Schwab",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 102.79,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ITW_2026-07-15",
+      "sym": "ITW",
+      "name": "Illinois Tool Works",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 271.41,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SO_2026-07-15",
+      "sym": "SO",
+      "name": "Southern Company",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 94.6,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PSX_2026-07-15",
+      "sym": "PSX",
+      "name": "Phillips 66",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 196.16,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PCAR_2026-07-15",
+      "sym": "PCAR",
+      "name": "Paccar",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 123.15,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ET_2026-07-15",
+      "sym": "ET",
+      "name": "Energy Transfer Partners",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 19.91,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BRO_2026-07-15",
+      "sym": "BRO",
+      "name": "Brown &amp; Brown",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 66.86,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SNA_2026-07-15",
+      "sym": "SNA",
+      "name": "Snap-on",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 403.7,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RGA_2026-07-15",
+      "sym": "RGA",
+      "name": "Reinsurance Group of America",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 234.23,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "DCI_2026-07-15",
+      "sym": "DCI",
+      "name": "Donaldson",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 89.27,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "JLL_2026-07-15",
+      "sym": "JLL",
+      "name": "Jones Lang LaSalle",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 327.91,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AM_2026-07-15",
+      "sym": "AM",
+      "name": "Antero Midstream",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 22.42,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AGNC_2026-07-15",
+      "sym": "AGNC",
+      "name": "AGNC Investment",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 11.32,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SSB_2026-07-15",
+      "sym": "SSB",
+      "name": "South State Corp",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 101.15,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "컵위드핸들",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BOKF_2026-07-15",
+      "sym": "BOKF",
+      "name": "BOK Financial",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 139.33,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "JXN_2026-07-15",
+      "sym": "JXN",
+      "name": "Jackson Financial",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 124.27,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HOMB_2026-07-15",
+      "sym": "HOMB",
+      "name": "Home BancShares",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 29.29,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "컵위드핸들",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CRNX_2026-07-15",
+      "sym": "CRNX",
+      "name": "Crinetics Pharmaceuticals",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 83.9,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "OTTR_2026-07-15",
+      "sym": "OTTR",
+      "name": "Otter Tail",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 90.18,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BHF_2026-07-15",
+      "sym": "BHF",
+      "name": "Brighthouse Financial",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 65.08,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CGON_2026-07-15",
+      "sym": "CGON",
+      "name": "CG Oncology",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 73.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "EBC_2026-07-15",
+      "sym": "EBC",
+      "name": "Eastern Bankshares",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 22.68,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PARR_2026-07-15",
+      "sym": "PARR",
+      "name": "Par Pacific Holdings",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 73.21,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "TOWN_2026-07-15",
+      "sym": "TOWN",
+      "name": "TowneBank",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 36.1,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "컵위드핸들",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "EE_2026-07-15",
+      "sym": "EE",
+      "name": "Excelerate Energy",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 38.48,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CHCO_2026-07-15",
+      "sym": "CHCO",
+      "name": "City Holding Company",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 134.38,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "컵위드핸들"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MDXG_2026-07-15",
+      "sym": "MDXG",
+      "name": "MiMedx Group",
+      "market": "US",
+      "log_date": "2026-07-15",
+      "entry_px": 4.27,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "086790_2026-07-15",
+      "sym": "086790",
+      "name": "하나금융지주",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 136800.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "138040_2026-07-15",
+      "sym": "138040",
+      "name": "메리츠금융지주",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 116900.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "010950_2026-07-15",
+      "sym": "010950",
+      "name": "S-Oil",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 140400.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "005830_2026-07-15",
+      "sym": "005830",
+      "name": "DB손해보험",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 162500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "138930_2026-07-15",
+      "sym": "138930",
+      "name": "BNK금융지주",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 18220.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "175330_2026-07-15",
+      "sym": "175330",
+      "name": "JB금융지주",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 27900.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "003690_2026-07-15",
+      "sym": "003690",
+      "name": "코리안리",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 13880.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "089860_2026-07-15",
+      "sym": "089860",
+      "name": "롯데렌탈",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 34000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "006120_2026-07-15",
+      "sym": "006120",
+      "name": "SK디스커버리",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 56500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "000400_2026-07-15",
+      "sym": "000400",
+      "name": "롯데손해보험",
+      "market": "KR",
+      "log_date": "2026-07-15",
+      "entry_px": 2650.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
     }
   ]
 }
