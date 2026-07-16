@@ -1,7 +1,7 @@
 {
-  "updated": "2026-07-15 21:57",
+  "updated": "2026-07-16 22:03",
   "p10": {
-    "date": "2026-07-15",
+    "date": "2026-07-16",
     "week": "2026-W29",
     "n": 10,
     "market": "전체",
@@ -9,11 +9,11 @@
     "deployed_pct": 67.5,
     "positions": [
       {
-        "sym": "CHCO",
-        "name": "City Holding Company",
+        "sym": "FRME",
+        "name": "First Merchants Corporation",
         "market": "US",
         "weight_pct": 6.8,
-        "entry": 134.38,
+        "entry": 45.23,
         "total_score": 46.8,
         "win_score": 46.8,
         "fund_score": null,
@@ -22,34 +22,99 @@
           "5일선라이딩",
           "컵위드핸들"
         ],
-        "stop": 124.97,
-        "target": 153.19
+        "stop": 42.06,
+        "target": 51.56
       },
       {
         "sym": "TOWN",
         "name": "TowneBank",
         "market": "US",
         "weight_pct": 6.8,
-        "entry": 36.1,
-        "total_score": 39.4,
-        "win_score": 39.4,
+        "entry": 36.99,
+        "total_score": 43.2,
+        "win_score": 43.2,
         "fund_score": null,
         "signals": [
           "5일선라이딩",
           "컵위드핸들",
           "이평선수렴"
         ],
-        "stop": 33.57,
-        "target": 41.15
+        "stop": 34.4,
+        "target": 42.17
+      },
+      {
+        "sym": "GTY",
+        "name": "Getty Realty",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 35.98,
+        "total_score": 41.3,
+        "win_score": 41.3,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들",
+          "RSI/MACD"
+        ],
+        "stop": 33.46,
+        "target": 41.02
+      },
+      {
+        "sym": "NNN",
+        "name": "NNN REIT",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 49.22,
+        "total_score": 40.4,
+        "win_score": 40.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들"
+        ],
+        "stop": 45.77,
+        "target": 56.11
+      },
+      {
+        "sym": "OZK",
+        "name": "Bank OZK",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 53.09,
+        "total_score": 40.2,
+        "win_score": 40.2,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들"
+        ],
+        "stop": 49.37,
+        "target": 60.52
+      },
+      {
+        "sym": "GHC",
+        "name": "Graham Holdings",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 1202.05,
+        "total_score": 39.8,
+        "win_score": 39.8,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들"
+        ],
+        "stop": 1117.91,
+        "target": 1370.34
       },
       {
         "sym": "RUSHA",
         "name": "Rush Enterprises",
         "market": "US",
         "weight_pct": 6.8,
-        "entry": 76.18,
-        "total_score": 38.8,
-        "win_score": 38.8,
+        "entry": 79.66,
+        "total_score": 39.3,
+        "win_score": 39.3,
         "fund_score": null,
         "signals": [
           "52주신고가",
@@ -57,15 +122,33 @@
           "이평선수렴",
           "RSI/MACD"
         ],
-        "stop": 70.85,
-        "target": 86.85
+        "stop": 74.08,
+        "target": 90.81
       },
       {
-        "sym": "RGA",
-        "name": "Reinsurance Group of America",
+        "sym": "IDA",
+        "name": "Idacorp",
         "market": "US",
         "weight_pct": 6.8,
-        "entry": 234.23,
+        "entry": 151.11,
+        "total_score": 38.1,
+        "win_score": 38.1,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 140.53,
+        "target": 172.27
+      },
+      {
+        "sym": "EBC",
+        "name": "Eastern Bankshares",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 23.46,
         "total_score": 38.0,
         "win_score": 38.0,
         "fund_score": null,
@@ -74,114 +157,30 @@
           "5일선라이딩",
           "이평선수렴"
         ],
-        "stop": 217.83,
-        "target": 267.02
+        "stop": 21.82,
+        "target": 26.74
       },
       {
-        "sym": "EBC",
-        "name": "Eastern Bankshares",
+        "sym": "NIC",
+        "name": "Nicolet Bankshares",
         "market": "US",
         "weight_pct": 6.8,
-        "entry": 22.68,
-        "total_score": 37.6,
-        "win_score": 37.6,
+        "entry": 171.88,
+        "total_score": 38.0,
+        "win_score": 38.0,
         "fund_score": null,
         "signals": [
           "52주신고가",
           "5일선라이딩",
           "이평선수렴"
         ],
-        "stop": 21.09,
-        "target": 25.86
-      },
-      {
-        "sym": "SNA",
-        "name": "Snap-on",
-        "market": "US",
-        "weight_pct": 6.8,
-        "entry": 403.7,
-        "total_score": 36.7,
-        "win_score": 36.7,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "5일선라이딩",
-          "이평선수렴"
-        ],
-        "stop": 375.44,
-        "target": 460.22
-      },
-      {
-        "sym": "HOMB",
-        "name": "Home BancShares",
-        "market": "US",
-        "weight_pct": 6.8,
-        "entry": 29.29,
-        "total_score": 34.1,
-        "win_score": 34.1,
-        "fund_score": null,
-        "signals": [
-          "5일선라이딩",
-          "컵위드핸들",
-          "이평선수렴"
-        ],
-        "stop": 27.24,
-        "target": 33.39
-      },
-      {
-        "sym": "SSB",
-        "name": "South State Corp",
-        "market": "US",
-        "weight_pct": 6.8,
-        "entry": 101.15,
-        "total_score": 33.9,
-        "win_score": 33.9,
-        "fund_score": null,
-        "signals": [
-          "5일선라이딩",
-          "컵위드핸들",
-          "이평선수렴"
-        ],
-        "stop": 94.07,
-        "target": 115.31
-      },
-      {
-        "sym": "079940",
-        "name": "가비아",
-        "market": "KR",
-        "weight_pct": 6.8,
-        "entry": 32800.0,
-        "total_score": 33.8,
-        "win_score": 19.2,
-        "fund_score": 55.8,
-        "signals": [
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 30504.0,
-        "target": 37392.0
-      },
-      {
-        "sym": "SO",
-        "name": "Southern Company",
-        "market": "US",
-        "weight_pct": 6.8,
-        "entry": 94.6,
-        "total_score": 32.7,
-        "win_score": 32.7,
-        "fund_score": null,
-        "signals": [
-          "컵위드핸들",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 87.98,
-        "target": 107.84
+        "stop": 159.85,
+        "target": 195.94
       }
     ]
   },
   "p20": {
-    "date": "2026-07-15",
+    "date": "2026-07-16",
     "week": "2026-W29",
     "n": 20,
     "market": "전체",
@@ -189,11 +188,11 @@
     "deployed_pct": 67.5,
     "positions": [
       {
-        "sym": "CHCO",
-        "name": "City Holding Company",
+        "sym": "FRME",
+        "name": "First Merchants Corporation",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 134.38,
+        "entry": 45.23,
         "total_score": 46.8,
         "win_score": 46.8,
         "fund_score": null,
@@ -202,34 +201,99 @@
           "5일선라이딩",
           "컵위드핸들"
         ],
-        "stop": 124.97,
-        "target": 153.19
+        "stop": 42.06,
+        "target": 51.56
       },
       {
         "sym": "TOWN",
         "name": "TowneBank",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 36.1,
-        "total_score": 39.4,
-        "win_score": 39.4,
+        "entry": 36.99,
+        "total_score": 43.2,
+        "win_score": 43.2,
         "fund_score": null,
         "signals": [
           "5일선라이딩",
           "컵위드핸들",
           "이평선수렴"
         ],
-        "stop": 33.57,
-        "target": 41.15
+        "stop": 34.4,
+        "target": 42.17
+      },
+      {
+        "sym": "GTY",
+        "name": "Getty Realty",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 35.98,
+        "total_score": 41.3,
+        "win_score": 41.3,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들",
+          "RSI/MACD"
+        ],
+        "stop": 33.46,
+        "target": 41.02
+      },
+      {
+        "sym": "NNN",
+        "name": "NNN REIT",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 49.22,
+        "total_score": 40.4,
+        "win_score": 40.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들"
+        ],
+        "stop": 45.77,
+        "target": 56.11
+      },
+      {
+        "sym": "OZK",
+        "name": "Bank OZK",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 53.09,
+        "total_score": 40.2,
+        "win_score": 40.2,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들"
+        ],
+        "stop": 49.37,
+        "target": 60.52
+      },
+      {
+        "sym": "GHC",
+        "name": "Graham Holdings",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 1202.05,
+        "total_score": 39.8,
+        "win_score": 39.8,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "컵위드핸들"
+        ],
+        "stop": 1117.91,
+        "target": 1370.34
       },
       {
         "sym": "RUSHA",
         "name": "Rush Enterprises",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 76.18,
-        "total_score": 38.8,
-        "win_score": 38.8,
+        "entry": 79.66,
+        "total_score": 39.3,
+        "win_score": 39.3,
         "fund_score": null,
         "signals": [
           "52주신고가",
@@ -237,15 +301,33 @@
           "이평선수렴",
           "RSI/MACD"
         ],
-        "stop": 70.85,
-        "target": 86.85
+        "stop": 74.08,
+        "target": 90.81
       },
       {
-        "sym": "RGA",
-        "name": "Reinsurance Group of America",
+        "sym": "IDA",
+        "name": "Idacorp",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 234.23,
+        "entry": 151.11,
+        "total_score": 38.1,
+        "win_score": 38.1,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 140.53,
+        "target": 172.27
+      },
+      {
+        "sym": "EBC",
+        "name": "Eastern Bankshares",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 23.46,
         "total_score": 38.0,
         "win_score": 38.0,
         "fund_score": null,
@@ -254,32 +336,117 @@
           "5일선라이딩",
           "이평선수렴"
         ],
-        "stop": 217.83,
-        "target": 267.02
+        "stop": 21.82,
+        "target": 26.74
       },
       {
-        "sym": "EBC",
-        "name": "Eastern Bankshares",
+        "sym": "NIC",
+        "name": "Nicolet Bankshares",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 22.68,
-        "total_score": 37.6,
-        "win_score": 37.6,
+        "entry": 171.88,
+        "total_score": 38.0,
+        "win_score": 38.0,
         "fund_score": null,
         "signals": [
           "52주신고가",
           "5일선라이딩",
           "이평선수렴"
         ],
-        "stop": 21.09,
-        "target": 25.86
+        "stop": 159.85,
+        "target": 195.94
+      },
+      {
+        "sym": "RGA",
+        "name": "Reinsurance Group of America",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 239.91,
+        "total_score": 38.0,
+        "win_score": 38.0,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 223.12,
+        "target": 273.5
       },
       {
         "sym": "SNA",
         "name": "Snap-on",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 403.7,
+        "entry": 414.97,
+        "total_score": 38.0,
+        "win_score": 38.0,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 385.92,
+        "target": 473.07
+      },
+      {
+        "sym": "WSBC",
+        "name": "WesBanco",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 41.18,
+        "total_score": 37.8,
+        "win_score": 37.8,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 38.3,
+        "target": 46.95
+      },
+      {
+        "sym": "AX",
+        "name": "Axos Financial",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 100.94,
+        "total_score": 37.4,
+        "win_score": 37.4,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 93.87,
+        "target": 115.07
+      },
+      {
+        "sym": "NMIH",
+        "name": "NMI Holdings",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 42.51,
+        "total_score": 37.1,
+        "win_score": 37.1,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 39.53,
+        "target": 48.46
+      },
+      {
+        "sym": "MTG",
+        "name": "MGIC Investment",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 29.24,
         "total_score": 36.7,
         "win_score": 36.7,
         "fund_score": null,
@@ -288,242 +455,76 @@
           "5일선라이딩",
           "이평선수렴"
         ],
-        "stop": 375.44,
-        "target": 460.22
+        "stop": 27.19,
+        "target": 33.33
       },
       {
-        "sym": "HOMB",
-        "name": "Home BancShares",
+        "sym": "V",
+        "name": "Visa",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 29.29,
-        "total_score": 34.1,
-        "win_score": 34.1,
+        "entry": 365.14,
+        "total_score": 36.6,
+        "win_score": 36.6,
         "fund_score": null,
         "signals": [
+          "52주신고가",
           "5일선라이딩",
-          "컵위드핸들",
           "이평선수렴"
         ],
-        "stop": 27.24,
-        "target": 33.39
+        "stop": 339.58,
+        "target": 416.26
+      },
+      {
+        "sym": "CNA",
+        "name": "CNA Financial",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 51.42,
+        "total_score": 36.6,
+        "win_score": 36.6,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴"
+        ],
+        "stop": 47.82,
+        "target": 58.62
       },
       {
         "sym": "SSB",
         "name": "South State Corp",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 101.15,
-        "total_score": 33.9,
-        "win_score": 33.9,
+        "entry": 104.22,
+        "total_score": 35.2,
+        "win_score": 35.2,
         "fund_score": null,
         "signals": [
           "5일선라이딩",
           "컵위드핸들",
           "이평선수렴"
         ],
-        "stop": 94.07,
-        "target": 115.31
-      },
-      {
-        "sym": "079940",
-        "name": "가비아",
-        "market": "KR",
-        "weight_pct": 3.4,
-        "entry": 32800.0,
-        "total_score": 33.8,
-        "win_score": 19.2,
-        "fund_score": 55.8,
-        "signals": [
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 30504.0,
-        "target": 37392.0
+        "stop": 96.92,
+        "target": 118.81
       },
       {
         "sym": "SO",
         "name": "Southern Company",
         "market": "US",
         "weight_pct": 3.4,
-        "entry": 94.6,
-        "total_score": 32.7,
-        "win_score": 32.7,
+        "entry": 96.07,
+        "total_score": 35.1,
+        "win_score": 35.1,
         "fund_score": null,
         "signals": [
           "컵위드핸들",
           "이평선수렴",
           "RSI/MACD"
         ],
-        "stop": 87.98,
-        "target": 107.84
-      },
-      {
-        "sym": "JXN",
-        "name": "Jackson Financial",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 124.27,
-        "total_score": 32.1,
-        "win_score": 32.1,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 115.57,
-        "target": 141.67
-      },
-      {
-        "sym": "PARR",
-        "name": "Par Pacific Holdings",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 73.21,
-        "total_score": 32.1,
-        "win_score": 32.1,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 68.09,
-        "target": 83.46
-      },
-      {
-        "sym": "PSX",
-        "name": "Phillips 66",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 196.16,
-        "total_score": 32.1,
-        "win_score": 32.1,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 182.43,
-        "target": 223.62
-      },
-      {
-        "sym": "CRNX",
-        "name": "Crinetics Pharmaceuticals",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 83.9,
-        "total_score": 32.1,
-        "win_score": 32.1,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 78.03,
-        "target": 95.65
-      },
-      {
-        "sym": "BOKF",
-        "name": "BOK Financial",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 139.33,
-        "total_score": 31.2,
-        "win_score": 31.2,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 129.58,
-        "target": 158.84
-      },
-      {
-        "sym": "017890",
-        "name": "한국알콜",
-        "market": "KR",
-        "weight_pct": 3.4,
-        "entry": 14440.0,
-        "total_score": 31.1,
-        "win_score": 31.1,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 13429.0,
-        "target": 16462.0
-      },
-      {
-        "sym": "ET",
-        "name": "Energy Transfer Partners",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 19.91,
-        "total_score": 31.0,
-        "win_score": 31.0,
-        "fund_score": null,
-        "signals": [
-          "컵위드핸들",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 18.52,
-        "target": 22.7
-      },
-      {
-        "sym": "FA",
-        "name": "First Advantage",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 21.17,
-        "total_score": 30.8,
-        "win_score": 30.8,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴"
-        ],
-        "stop": 19.69,
-        "target": 24.13
-      },
-      {
-        "sym": "GBTG",
-        "name": "Global Business Travel Group",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 9.4,
-        "total_score": 29.8,
-        "win_score": 29.8,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴"
-        ],
-        "stop": 8.74,
-        "target": 10.72
-      },
-      {
-        "sym": "236200",
-        "name": "슈프리마",
-        "market": "KR",
-        "weight_pct": 3.4,
-        "entry": 49000.0,
-        "total_score": 29.7,
-        "win_score": 16.2,
-        "fund_score": 50.0,
-        "signals": [
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 45570.0,
-        "target": 55860.0
+        "stop": 89.35,
+        "target": 109.52
       }
     ]
   }
