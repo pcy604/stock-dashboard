@@ -147,11 +147,21 @@ def analyze():
             for p in poss:
                 cur = _cur_price(p['sym'], p['market'])
                 if cur is None or not p.get('entry'):
+                    details.append({'sym': p['sym'], 'name': p['name'], 'market': p.get('market'),
+                                    'weight_pct': p['weight_pct'], 'entry': p.get('entry'),
+                                    'cur': None, 'ret': None, 'signals': p.get('signals', []),
+                                    'stop': p.get('stop'), 'target': p.get('target')})
                     continue
                 ret = (cur / p['entry'] - 1) * 100
                 w = p['weight_pct']
                 wret += w * ret; tot_w += w
-                details.append((p['name'], round(ret, 1)))
+                hit_stop = p.get('stop') and cur <= p['stop']
+                hit_target = p.get('target') and cur >= p['target']
+                details.append({'sym': p['sym'], 'name': p['name'], 'market': p.get('market'),
+                                'weight_pct': w, 'entry': p['entry'], 'cur': round(cur, 4),
+                                'ret': round(ret, 1), 'signals': p.get('signals', []),
+                                'stop': p.get('stop'), 'target': p.get('target'),
+                                'hit_stop': bool(hit_stop), 'hit_target': bool(hit_target)})
             if tot_w > 0:
                 port_ret = round(wret / tot_w, 2)
                 # 벤치마크: KR/US 비중 가중 (KOSPI·SPY, 같은 기간)
