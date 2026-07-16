@@ -1,6 +1,45 @@
 {
   "items": [
     {
+      "video_id": "cFc2c5AsO8I",
+      "title": "반도체 수급 꼬인 진짜 이유! 삼전닉스 주주라면 지금 '이 전략' 무조건 확인하세요ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-16T11:30:39+00:00",
+      "url": "https://www.youtube.com/watch?v=cFc2c5AsO8I",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-16T22:10:49.543018+09:00"
+    },
+    {
+      "video_id": "HNPFSW8Bago",
+      "title": "노이즈는 이제 다 왔다, 비반도체 회복의 시그널 포착! 하반기에는ㅣ명민준, 박가영, 박지훈 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-16T12:30:30+00:00",
+      "url": "https://www.youtube.com/watch?v=HNPFSW8Bago",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"애널리스트는 현재 시장을 시스템적 붕괴 또는 과대평가 조정으로 진단하며, 반도체 및 화장품 섹터의 펀더멘털은 견조하나 시장 노이즈와 레버리지 문제가 투자 심리를 위축시키고 있어, 8월 시장 반등을 위해 하이퍼스케일러 실적 발표와 CPI 지표를 주시하며 분산 투자를 통해 살아남는 것이 중요하다고 강조합니다.\",\n  \"summary\": [\n    \"현재 시장은 시스템적 붕괴와 과대평가 조정 사이에서 불안정한 상태를 보이며, 특히 반도체 섹터는 과도한 밸류에이션 논란과 일부 외인 매도세에 직면해 있습니다.\",\n    \"마이크론(Micron)과 같은 주요 메모리 기업의 밸류에이션이 PER 기준 저평가된 반면, PBR 기준 고평가되는 이중적 상황이 투자자들의 혼란을 가중시키고 있습니다.\",\n    \"삼성전자와 SK하이닉스 등 국내 주요 반도체 기업은 고성능 HBM 전환과정에서 레거시(범용) D램 시장의 중국 CXMT 등장, "
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-16T22:10:17.197877+09:00"
+    },
+    {
       "video_id": "tprCX5OaoA4",
       "title": "레버리지 도박 계속 하라는 거죠? 단일종목 레버리지 ETF 이게 대책인가 도대체가... / [야식잡썰 EP.271] / 이대호 기자",
       "channel": "와이스트릿",
@@ -16,8 +55,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-16T20:34:15.572860+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-16T22:11:54.391948+09:00"
     },
     {
       "video_id": "rUfTZ2IdzJ8",
@@ -620,11 +659,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-16T20:26:24.979719+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-16T22:11:21.935661+09:00"
     },
     {
       "video_id": "0HaGXv1eerU",
@@ -642,8 +681,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-16T20:22:03.362598+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-16T22:06:01.499105+09:00"
     },
     {
       "video_id": "efJVySEyBSc",
@@ -14852,85 +14891,7 @@
       "source": "video",
       "attempts": 3,
       "analyzed_at": "2026-07-08T01:17:53.493942+09:00"
-    },
-    {
-      "video_id": "NCsgyj0L-Eg",
-      "title": "\"100조 영업이익\"에도 주가가 떨어지는 이유ㅣ유창희 & 빈센트 & 정프로",
-      "channel": "삼프로TV",
-      "published": "2026-07-07T06:40:55+00:00",
-      "url": "https://www.youtube.com/watch?v=NCsgyj0L-Eg",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "높은 영업이익에도 불구하고 반도체 주가가 하락하는 현상은 사이클 정점 논란, 과잉 공급 우려, 그리고 레버리지 상품으로 인한 시장 노이즈 때문이라는 분석입니다.",
-        "summary": [
-          "마이크론 실적 발표 이후 대규모 증설 계획과 CXMT 상장 우려 등으로 반도체 사이클 정점 논란이 발생했습니다.",
-          "수요 측면에서는 메타 등의 투자가 우려되는 가운데, 한국의 대규모 메모리 투자도 사이클 정점 논란을 가중시켰습니다.",
-          "7월 말에 발표될 하이퍼스케일러의 실적 발표가 현재의 반도체 시장 불확실성을 해소할 주요 전환점이 될 것으로 전망됩니다.",
-          "유가 등 거시 경제 지표는 안정세를 보이지만, AI 산업에 대한 개별 기업 이슈가 우려를 키우고 있습니다.",
-          "세계 1위 영업이익에도 불구하고 나타나는 주가 하락은 노이즈에 불과하며, 최근 출시된 2배 레버리지 같은 단일 종목 파생상품이 주가 변동성을 키우는 요인으로 작용하고 있습니다."
-        ],
-        "tickers": [
-          {
-            "name": "Micron",
-            "ticker": "MU",
-            "context": "실적 발표 이후 반도체 사이클 정점 논란의 시작점이 됨",
-            "view": "중립",
-            "t": 7
-          },
-          {
-            "name": "CXMT",
-            "ticker": "",
-            "context": "상장 후 공급 과잉 가능성 우려",
-            "view": "부정",
-            "t": 15
-          }
-        ],
-        "key_points": [
-          {
-            "point": "현재 반도체 시장은 '3대 메가프로젝트'와 같은 대규모 증설, CXMT 상장 가능성으로 인한 공급 과잉 우려, 그리고 수요 측면의 불안감(예: 메타)으로 인해 사이클 정점 논란에 직면해 있습니다.",
-            "t": 10
-          },
-          {
-            "point": "7월 말에 예정된 하이퍼스케일러 기업들의 실적 발표가 현재 반도체 시장의 불확실성을 해소하고 방향성을 결정하는 중요한 지표가 될 것입니다.",
-            "t": 28
-          },
-          {
-            "point": "유가 하락 등 거시 경제 지표는 개선되고 있으나, AI 산업 전반에 대한 개별 기업들의 이슈가 불안감을 유발하며 시장의 주요 우려 사항으로 작용하고 있습니다.",
-            "t": 36
-          },
-          {
-            "point": "강력한 영업이익에도 불구하고 나타나는 급격한 주가 하락은 본질적인 시장 훼손이라기보다는 '노이즈'로 판단되며, 최근 등장한 2배 레버리지 상품이 단기적인 시장 변동성을 증폭시키는 '뜨거운 감자' 역할을 하고 있습니다.",
-            "t": 59
-          }
-        ],
-        "actionable": [
-          "7월 말 하이퍼스케일러 기업들의 실적 발표를 주의 깊게 관찰하여 반도체 산업의 수요 전망과 사이클에 대한 추가적인 힌트를 얻으세요.",
-          "반도체 관련 종목의 단기적인 가격 변동이 레버리지 상품 등에 의한 '노이즈'일 가능성을 염두에 두고, 기업의 펀더멘털과 장기적인 가치를 기준으로 투자 결정을 내리세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-07T19:14:49.596269+09:00"
-    },
-    {
-      "video_id": "wx-epufnzXg",
-      "title": "[7월 7일 마감시황] 삼전 역대급 실적도 무용지물...수급 꼬인 폭락장의 전말ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
-      "channel": "삼프로TV",
-      "published": "2026-07-07T08:30:12+00:00",
-      "url": "https://www.youtube.com/watch?v=wx-epufnzXg",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-08T03:41:34.356939+09:00"
     }
   ],
-  "updated": "2026-07-16T20:34:16.573153+09:00"
+  "updated": "2026-07-16T22:11:55.392176+09:00"
 }
