@@ -237,8 +237,8 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-tab_screen, tab7, tab4, tab_guru, tab10 = st.tabs([
-    "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로",
+tab_screen, tab7, tab_pf, tab4, tab_guru, tab10 = st.tabs([
+    "🔎 종목 발굴", "🔍 종목 분석", "💼 포트폴리오", "🌍 매크로",
     "🎙️ 구루 인사이트", "🧭 프로젝트 종합"
 ])
 
@@ -2582,6 +2582,291 @@ with tab7:
         st.info("👆 종목코드를 입력하고 분석 버튼을 누르세요\n\n"
                 "**US**: TSLA · AAPL · NVDA · MSFT · QCOM\n\n"
                 "**KR**: 005930.KS (삼성전자) · 000660.KS (SK하이닉스)")
+
+
+# ════════════════════════════════════════════════════════════════════
+# 탭: 포트폴리오 관리 + 🛡️ 원칙 가드레일
+# (2026-07-02 탭 재편 때 대시보드에서 12일간 빠져 있었음 — 2026-07-14 복원 + 준수이력 추가)
+# ════════════════════════════════════════════════════════════════════
+@st.cache_data(ttl=300)
+def _fetch_pf_price(sym: str, market: str):
+    try:
+        import FinanceDataReader as fdr
+        code = sym.replace('.KS', '').replace('.KQ', '')
+        fdr_sym = code if market == 'KR' else sym
+        start = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
+        df = fdr.DataReader(fdr_sym, start)
+        return float(df['Close'].iloc[-1]) if not df.empty else None
+    except Exception:
+        return None
+
+with tab_pf:
+    st.header("💼 포트폴리오 관리")
+    update_badge(PORTFOLIO_RESULT)
+
+    with st.expander("➕ 종목 추가", expanded=False):
+        fc1, fc2, fc3, fc4, fc5, fc6 = st.columns([2, 1, 1, 1, 1, 1])
+        with fc1: p_sym  = st.text_input("티커", key="p_sym", placeholder="TSLA / 005930")
+        with fc2: p_name = st.text_input("이름(선택)", key="p_name", placeholder="Tesla")
+        with fc3: p_mkt  = st.selectbox("시장", ["US", "KR"], key="p_mkt")
+        with fc4: p_qty  = st.number_input("수량", min_value=0.0, step=1.0, key="p_qty")
+        with fc5: p_buy  = st.number_input("매수가", min_value=0.0, step=0.01, key="p_buy", format="%.2f")
+        with fc6: p_date = st.date_input("매수일", key="p_date")
+
+        fc7, fc8, fc9 = st.columns([1, 1, 2])
+        with fc7: p_stop   = st.number_input("손절%", value=7.0, min_value=1.0, max_value=50.0, key="p_stop")
+        with fc8: p_target = st.number_input("목표%", value=20.0, min_value=1.0, max_value=500.0, key="p_target")
+        with fc9: p_note   = st.text_input("메모", key="p_note", placeholder="52주신고가+이평수렴")
+
+        if st.button("추가", key="p_add"):
+            if p_sym and p_buy > 0 and p_qty > 0:
+                positions = _load_pf()
+                positions.append({
+                    'id': f"{p_sym}_{p_date}_{len(positions)}",
+                    'sym': p_sym.upper().strip(), 'name': p_name or p_sym.upper(), 'market': p_mkt,
+                    'qty': float(p_qty), 'buy_price': float(p_buy), 'buy_date': str(p_date),
+                    'stop_loss_pct': float(p_stop), 'target_pct': float(p_target), 'note': p_note,
+                })
+                _save_pf(positions)
+                st.cache_data.clear()
+                st.success(f"✅ {p_sym.upper()} 추가 완료")
+                st.rerun()
+            else:
+                st.error("티커·매수가·수량을 모두 입력하세요")
+
+    positions = _load_pf()
+
+    if not positions:
+        st.info("👆 '종목 추가'에서 보유 종목을 입력하세요\n\n"
+                "입력하면 daily-refresh가 매일 현재가 조회 + 손절 경고(텔레그램) + "
+                "가드레일 준수 이력을 자동으로 쌓습니다.")
+    else:
+        with st.spinner("현재가 조회 중..."):
+            rows_pf = []
+            for pos in positions:
+                cur = _fetch_pf_price(pos['sym'], pos.get('market', 'US'))
+                buy = float(pos.get('buy_price', 0))
+                qty = float(pos.get('qty', 0))
+                pnl_pct = (cur / buy - 1) * 100 if cur and buy > 0 else None
+                pnl_amt = (cur - buy) * qty if cur and buy > 0 else None
+                stop_px = buy * (1 - float(pos.get('stop_loss_pct', 7)) / 100)
+                tgt_px  = buy * (1 + float(pos.get('target_pct', 20)) / 100)
+                ccy = '₩' if pos.get('market') == 'KR' else '$'
+                rows_pf.append({
+                    '시장': pos.get('market', 'US'), '종목명': pos.get('name', pos['sym']),
+                    '코드': pos['sym'], '수량': qty,
+                    '매수가': f"{ccy}{buy:,.2f}", '현재가': f"{ccy}{cur:,.2f}" if cur else '조회실패',
+                    '수익률': pnl_pct, 'P&L': pnl_amt,
+                    '손절가': f"{ccy}{stop_px:,.2f}", '목표가': f"{ccy}{tgt_px:,.2f}",
+                    '매수일': pos.get('buy_date', ''), '메모': pos.get('note', ''),
+                    '_id': pos.get('id', ''), '_cur': cur, '_value': (cur * qty) if cur else None, '_qty': qty,
+                })
+
+        df_pf = pd.DataFrame(rows_pf)
+        valid_pf = [r for r in rows_pf if r['P&L'] is not None]
+        if valid_pf:
+            total_pnl = sum(r['P&L'] for r in valid_pf)
+            total_inv = sum(float(pos.get('buy_price', 0)) * float(pos.get('qty', 0)) for pos in positions)
+            total_pnl_pct = total_pnl / total_inv * 100 if total_inv > 0 else 0
+            n_profit = sum(1 for r in valid_pf if r['수익률'] and r['수익률'] >= 0)
+            n_loss   = len(valid_pf) - n_profit
+            n_warn   = sum(1 for r in valid_pf if r['수익률'] and r['수익률'] <= -float(
+                next((p['stop_loss_pct'] for p in positions if p['sym'] == r['코드']), 7)))
+            m1, m2, m3, m4, m5 = st.columns(5)
+            m1.metric("총 손익금액", f"{total_pnl:+,.0f}")
+            m2.metric("수익률", f"{total_pnl_pct:+.1f}%")
+            m3.metric("수익 종목", f"{n_profit}개")
+            m4.metric("손실 종목", f"{n_loss}개")
+            m5.metric("⚠️ 손절 경고", f"{n_warn}개",
+                      delta="즉시 확인" if n_warn > 0 else None, delta_color="inverse")
+
+        # ── 🛡️ 원칙 가드레일 ──
+        st.divider()
+        st.subheader("🛡️ 원칙 가드레일")
+        st.caption("내가 정한 원칙대로 — 상위 2종목만 20%, 나머지는 더 작게, 30% 넘으면 줄이고, "
+                   "레버리지·손절·현금을 기계가 강제합니다. (1억 손실 후 정립한 규칙)")
+
+        with st.expander("⚙️ 원칙 설정 (한 번 정하면 끝)", expanded=False):
+            _ga, _gb, _gc = st.columns(3)
+            _g_top  = _ga.slider("상위 2종목 최대 비중 %", 10, 30, 20, key="g_top")
+            _g_low  = _gb.slider("3위~ 종목 최대 비중 %", 5, 20, 12, key="g_low")
+            _g_trim = _gc.slider("자동 축소 임계 %", 20, 50, 30, key="g_trim")
+            _gd, _ge, _gf = st.columns(3)
+            _g_lev  = _gd.slider("레버리지 합계 한도 %", 0, 50, 10, key="g_lev")
+            _g_stop = _ge.slider("손절선 -%", 3, 20, 8, key="g_stop")
+            _g_holdval = int(sum(r['_value'] for r in rows_pf if r.get('_value')))
+            _g_cap  = _gf.number_input("총 자본(현금 포함, 원) — 현금비중 점검용", min_value=0,
+                                       value=_g_holdval, step=1_000_000, key="g_cap",
+                                       help="보유 평가액보다 크게 입력하면 그 차액을 현금으로 봅니다")
+
+        try:
+            _gfed = fetch_fred('FEDFUNDS', 1); _gfr = _gfed[-1][1] if _gfed else None
+            _gm2 = fetch_fred('M2SL', 14)
+            _gm2y = round((_gm2[-1][1] / _gm2[-13][1] - 1) * 100, 1) if len(_gm2) >= 13 else None
+            _, _gcmin, _gcmax, _, _ = compute_macro_signal(_gfr, _gm2y, fetch_spx_yoy())
+        except Exception:
+            _gcmin, _gcmax = 25, 40
+
+        _gpos = [{'sym': r['코드'], 'name': r['종목명'], 'market': r['시장'],
+                  'value': r['_value'], 'pnl_pct': r['수익률'], 'cur_price': r['_cur'], 'qty': r['_qty']}
+                 for r in rows_pf if r.get('_value')]
+        try:
+            import guardrail as _grd
+            _gr = _grd.evaluate(_gpos, total_capital=(_g_cap or None),
+                                top_cap=_g_top, lower_cap=_g_low, trim_threshold=_g_trim,
+                                lev_cap=_g_lev, stop_pct=_g_stop, cash_min=_gcmin, cash_max=_gcmax)
+            _gs = _gr['summary']
+            _gx1, _gx2, _gx3, _gx4 = st.columns(4)
+            _gx1.metric("원칙 점검", _gr['grade'])
+            _gx2.metric("상위2 비중", f"{_gs.get('top2', 0):.0f}%", help=f"한도 {_g_top*2}% (각 {_g_top}%)")
+            _gx3.metric("레버리지", f"{_gs.get('lev_pct', 0):.0f}%", help=f"한도 {_g_lev}%")
+            _gx4.metric("현금", f"{_gs['cash_pct']:.0f}%" if _gs.get('cash_pct') is not None else "—",
+                        help=f"매크로 권고 {_gcmin}~{_gcmax}%")
+            if not _gr['violations']:
+                st.success("🟢 원칙 준수 중 — 잘하고 있어요. 감정 흔들려도 이 규칙만 지키면 됩니다.")
+            else:
+                st.error(f"**{_gr['grade']}** — {_gs['msg']}")
+                _vrows = [{'': v['sev'], '항목': v['rule'], '조치': v['msg'],
+                           '줄일 금액': f"{v['trim_value']:,.0f}원" if v.get('trim_value') else '-',
+                           '수량': f"{v['qty_cut']:,.0f}주" if v.get('qty_cut') else '-'}
+                          for v in _gr['violations']]
+                st.dataframe(pd.DataFrame(_vrows), use_container_width=True, hide_index=True,
+                             row_height=25, height=_dfh(len(_vrows)))
+                st.caption("⚠️ 자동 주문은 안 합니다 — '무엇을 얼마나' 알려줄 뿐, 실행은 본인이. "
+                           "근데 이 지시대로만 하면 6월 같은 일은 안 생겨요.")
+        except Exception as _ge2:
+            st.caption(f"(가드레일 계산 생략: {_ge2})")
+
+        # ── 🛡️ 가드레일 준수 이력 (daily-refresh가 매일 스냅샷, portfolio_monitor.py) ──
+        _ghist = _grd.load_history() if '_grd' in dir() else []
+        if _ghist:
+            with st.expander(f"📈 가드레일 준수 이력 ({len(_ghist)}일 기록됨)", expanded=False):
+                _gstat = _grd.compliance_stats(_ghist)
+                _hc1, _hc2, _hc3 = st.columns(3)
+                _hc1.metric("최근 30일 준수율", f"{_gstat.get('green_pct', 0):.0f}%",
+                            help="🟢(위반 0건)인 날의 비율")
+                _hc2.metric("위반 있었던 날", f"{_gstat.get('red_days', 0)}일 / {_gstat.get('n_days', 0)}일")
+                _hc3.metric("현재 연속 준수", f"{_gstat.get('cur_streak_green', 0)}일")
+                _hdf = pd.DataFrame([{'날짜': r['date'], '등급': r['grade'],
+                                      '위반(🔴/🟠)': f"{r.get('n_red',0)}/{r.get('n_org',0)}",
+                                      '상위2비중': f"{r.get('top2',0):.0f}%",
+                                      '레버리지': f"{r.get('lev_pct',0):.0f}%"}
+                                     for r in reversed(_ghist[-30:])])
+                st.dataframe(_hdf, use_container_width=True, hide_index=True,
+                             row_height=25, height=_dfh(len(_hdf)))
+                st.caption("이 표는 종목선정이 아니라 '규칙을 지켰는가'를 채점함 — "
+                           "신호 성적표와 같은 원리, 대상만 '나 자신의 규율'.")
+        else:
+            st.caption("ℹ️ 가드레일 준수 이력 없음 — daily-refresh가 매일 자동으로 쌓기 시작하면 여기 표시됩니다.")
+
+        st.divider()
+
+        def _color_pnl(v):
+            if v is None: return ''
+            try:
+                f = float(v)
+                if f >= 10: return 'color:#ff2222;font-weight:bold'
+                if f >= 0:  return 'color:#56d364'
+                if f >= -7: return 'color:#ffa657'
+                return 'color:#ff4444;font-weight:bold'
+            except Exception:
+                return ''
+
+        def _color_pnl_amt(v):
+            if v is None: return ''
+            try:
+                return 'color:#56d364' if float(v) >= 0 else 'color:#ff4444'
+            except Exception:
+                return ''
+
+        disp_pf = ['시장', '종목명', '코드', '수량', '매수가', '현재가', '수익률', 'P&L', '손절가', '목표가', '매수일', '메모']
+        styled_pf = df_pf[disp_pf].style \
+            .map(_color_pnl, subset=['수익률']) \
+            .map(_color_pnl_amt, subset=['P&L']) \
+            .format({'수익률': lambda v: f"{v:+.1f}%" if v is not None else '-',
+                     'P&L': lambda v: f"{v:+,.0f}" if v is not None else '-',
+                     '수량': '{:.0f}'})
+        st.dataframe(styled_pf, use_container_width=True, hide_index=True,
+                     row_height=25, height=_dfh(len(df_pf)))
+
+        # ── 🚨 매도 점검 ──
+        st.divider()
+        st.subheader("🚨 매도 점검 — 언제 팔까")
+        st.caption("보유 종목마다 사전 규칙 3가지로 자동 점검: 방어손절 · 분할익절 · 시간매도.")
+        if st.button("🔍 지금 매도 신호 점검 (실시간 ~종목당 2초)", key="sell_check"):
+            with st.spinner("매도 신호 분석 중..."):
+                try:
+                    import sell_signals as _sells
+                    _srows = []
+                    for pos in positions:
+                        _ev = _sells.evaluate_sell(
+                            pos['sym'], pos.get('market', 'US'), float(pos.get('buy_price', 0)),
+                            buy_date=pos.get('buy_date'),
+                            stop_pct=float(pos.get('stop_loss_pct', 8)),
+                            target_pct=float(pos.get('target_pct', 20)))
+                        _srows.append({'종목': pos.get('name', pos['sym']), '코드': pos['sym'],
+                                      '신호': _ev['signal'], '수익률': _ev['pnl_pct'],
+                                      '근거': _ev['reason'], '조치': _ev['action']})
+                    _sdf = pd.DataFrame(_srows)
+                    def _c_sell(v):
+                        s = str(v)
+                        if '손절' in s: return 'background-color:#5a1a1a;color:white;font-weight:bold'
+                        if '익절' in s: return 'color:#56d364;font-weight:bold'
+                        if '시간' in s: return 'color:#f0c040'
+                        if '보유' in s: return 'color:#7ee787'
+                        return 'color:#888'
+                    st.dataframe(_sdf.style.map(_c_sell, subset=['신호'])
+                                 .format({'수익률': lambda v: f"{v:+.1f}%" if v is not None else '-'}),
+                                 use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_sdf)))
+                    _urgent = [r for r in _srows if '손절' in r['신호']]
+                    if _urgent:
+                        st.error(f"🔴 즉시 점검: {', '.join(r['종목'] for r in _urgent)} — 손절선 이탈")
+                    else:
+                        st.success("✅ 손절 위반 없음 — 이기는 포지션은 그대로 둡니다")
+                except Exception as _se:
+                    st.error(f"매도 점검 오류: {_se}")
+
+        st.divider()
+        col_del1, col_del2 = st.columns([3, 1])
+        with col_del1:
+            del_name = st.selectbox("종목 삭제", [f"{r['코드']} ({r['종목명']})" for r in rows_pf], key="del_pos")
+        with col_del2:
+            st.write("")
+            if st.button("🗑️ 삭제", key="do_del"):
+                del_sym = del_name.split(' ')[0]
+                new_pos = [p for p in positions if p['sym'] != del_sym]
+                _save_pf(new_pos)
+                st.cache_data.clear()
+                st.success(f"{del_sym} 삭제 완료")
+                st.rerun()
+
+        if valid_pf:
+            st.divider()
+            st.subheader("📊 종목별 수익률")
+            chart_df = pd.DataFrame([{'종목': r['종목명'], '수익률(%)': r['수익률']}
+                                      for r in valid_pf if r['수익률'] is not None]).sort_values('수익률(%)')
+            fig_pf = go.Figure(go.Bar(
+                x=chart_df['수익률(%)'], y=chart_df['종목'], orientation='h',
+                marker_color=['rgba(86,211,100,0.8)' if v >= 0 else 'rgba(247,129,102,0.8)'
+                              for v in chart_df['수익률(%)']]))
+            fig_pf.add_vline(x=0, line_color='rgba(110,118,129,0.5)')
+            fig_pf.update_layout(height=max(200, 40 * len(chart_df)),
+                                 paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                 font=dict(color='#8b949e', size=11), margin=dict(l=0, r=60, t=10, b=0),
+                                 xaxis_title='수익률(%)')
+            fig_pf.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+            fig_pf.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
+            st.plotly_chart(fig_pf, use_container_width=True)
+
+        st.divider()
+        if st.button("📲 지금 텔레그램으로 포트폴리오 전송", key="tg_now"):
+            import subprocess, sys as _sys
+            result = subprocess.run([_sys.executable, 'portfolio_monitor.py'],
+                                    capture_output=True, text=True, cwd=str(Path(__file__).parent))
+            if result.returncode == 0:
+                st.success("✅ 텔레그램 전송 완료!")
+            else:
+                st.error(f"오류: {result.stderr[:200]}")
 
 
 # ════════════════════════════════════════════════════════════════════

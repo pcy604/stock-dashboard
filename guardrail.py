@@ -9,7 +9,17 @@
 
 "인간의 비이성적 판단을 없애고, 정한 원칙대로." — 이 엔진의 목적.
 실제 매매는 사용자가 실행(자동 주문 아님). 엔진은 '무엇을 얼마나' 정확히 지시한다.
+
+준수율 추적(2026-07-14): 이 UI 섹션이 2026-07-02 탭 재편 때 대시보드에서
+빠진 채 12일간 방치됐던 것을 발견 — 복원하며 이력 기록도 함께 추가.
+매일 portfolio_monitor.py가 append_snapshot()으로 그날의 평가를 남겨,
+"규칙을 얼마나 지켰는가"를 신호 성적표처럼 실측 가능하게 한다.
 """
+import json
+from datetime import datetime
+from pathlib import Path
+
+HISTORY_FILE = Path('results/guardrail_history.jsonl')
 
 # 대표적 레버리지/인버스 ETF (미국). 필요시 추가.
 LEVERAGED = {
@@ -125,3 +135,75 @@ def evaluate(positions, total_capital=None,
         'n_red': n_red, 'n_org': n_org, 'msg': gmsg,
     }
     return {'grade': grade, 'holdings': holds, 'violations': violations, 'summary': summary}
+
+
+def append_snapshot(result: dict, path: Path = HISTORY_FILE):
+    """그날의 가드레일 평가를 이력에 남긴다. 같은 날 재실행되면 마지막 것으로 덮어씀
+       (하루 1행 유지 — 대시보드에서 여러 번 열어봐도 이력이 부풀지 않도록)."""
+    if not result.get('summary'):
+        return
+    today = datetime.now().strftime('%Y-%m-%d')
+    row = {
+        'date': today, 'grade': result['grade'],
+        'n_red': result['summary'].get('n_red', 0), 'n_org': result['summary'].get('n_org', 0),
+        'top1': round(result['summary'].get('top1', 0), 1),
+        'top2': round(result['summary'].get('top2', 0), 1),
+        'lev_pct': round(result['summary'].get('lev_pct', 0), 1),
+        'cash_pct': result['summary'].get('cash_pct'),
+        'n_pos': result['summary'].get('n_pos', 0),
+        'violation_rules': [v['rule'] for v in result.get('violations', [])],
+    }
+    path.parent.mkdir(exist_ok=True)
+    rows = []
+    if path.exists():
+        for line in path.read_text(encoding='utf-8').splitlines():
+            if not line.strip():
+                continue
+            try:
+                r = json.loads(line)
+                if r.get('date') != today:
+                    rows.append(r)
+            except Exception:
+                continue
+    rows.append(row)
+    rows.sort(key=lambda r: r['date'])
+    path.write_text('\n'.join(json.dumps(r, ensure_ascii=False) for r in rows) + '\n', encoding='utf-8')
+
+
+def load_history(path: Path = HISTORY_FILE) -> list:
+    if not path.exists():
+        return []
+    out = []
+    for line in path.read_text(encoding='utf-8').splitlines():
+        if not line.strip():
+            continue
+        try:
+            out.append(json.loads(line))
+        except Exception:
+            continue
+    return out
+
+
+def compliance_stats(history: list, window_days: int = 30) -> dict:
+    """최근 window_days간 준수율 — 신호 성적표와 같은 형식으로 '규율' 자체를 채점."""
+    if not history:
+        return {}
+    recent = history[-window_days:]
+    n = len(recent)
+    n_green = sum(1 for r in recent if '🟢' in r.get('grade', ''))
+    n_red_days = sum(1 for r in recent if r.get('n_red', 0) > 0)
+    return {
+        'n_days': n, 'green_pct': round(n_green / n * 100, 0) if n else 0,
+        'red_days': n_red_days,
+        'cur_streak_green': _cur_green_streak(history),
+    }
+
+
+def _cur_green_streak(history: list) -> int:
+    streak = 0
+    for r in reversed(history):
+        if '🟢' in r.get('grade', ''):
+            streak += 1
+        else:
+            break
+    return streak

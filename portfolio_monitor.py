@@ -161,6 +161,27 @@ def main():
     for alert in alerts:
         tg_send(alert)
 
+    # ── 🛡️ 가드레일 준수 이력 스냅샷 (매일 1회, 실제 매매와 무관한 관측) ──
+    try:
+        import guardrail
+        gpos = [{'sym': r['sym'], 'name': r.get('name', r['sym']), 'market': r.get('market', 'US'),
+                  'value': (r['cur_price'] * float(r.get('qty', 0))) if r.get('cur_price') else None,
+                  'pnl_pct': r.get('pnl_pct'), 'cur_price': r.get('cur_price'), 'qty': r.get('qty')}
+                 for r in results if r.get('cur_price')]
+        cash_min = cash_max = None
+        try:
+            import weekly_portfolio as wp
+            cash_mid = wp._macro_cash_pct() * 100
+            cash_min, cash_max = cash_mid - 7.5, cash_mid + 7.5  # 대시보드 기본밴드 폭 근사
+        except Exception:
+            pass
+        g_result = guardrail.evaluate(gpos, cash_min=cash_min, cash_max=cash_max)
+        guardrail.append_snapshot(g_result)
+        print(f"가드레일 스냅샷: {g_result['grade']} "
+              f"(위반 🔴{g_result['summary'].get('n_red',0)} 🟠{g_result['summary'].get('n_org',0)})")
+    except Exception as e:
+        print(f"가드레일 스냅샷 건너뜀: {e}")
+
     # ── 결과 저장 ─────────────────────────────────────────────────────
     out = {'date': DATE_STR, 'total': len(results), 'positions': results}
     RESULT_FILE.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
