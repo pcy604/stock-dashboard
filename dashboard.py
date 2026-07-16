@@ -904,10 +904,27 @@ with t_track:
         st.dataframe(_wdf9.style.map(_c_gap, subset=['포트수익', '알파']),
                      use_container_width=True, hide_index=True,
                      row_height=25, height=_dfh(len(_wdf9)))
-        with st.expander("종목별 상세 (스냅샷별 수익률)", expanded=False):
-            for r in _wpres:
-                _dt = ' · '.join(f"{n} {v:+.1f}%" for n, v in r.get('details', []))
-                st.caption(f"**{r['week']} [{'10선' if r['set']=='p10' else '20선'}]** {_dt}")
+        st.markdown("###### 🔍 스냅샷 상세 — 실제로 뭘 담았고 각각 얼마나 갔나")
+        _wk_opts = [f"{r['week']} [{'10선' if r['set']=='p10' else '20선'}]" for r in _wpres]
+        _wk_pick = st.selectbox("주차 선택", _wk_opts, index=len(_wk_opts) - 1, key="track_wk_detail")
+        _wsel = _wpres[_wk_opts.index(_wk_pick)]
+        _ddet = _wsel.get('details', [])
+        if _ddet:
+            _ddf = pd.DataFrame([{
+                '종목': d['name'], '코드': d['sym'], '시장': d.get('market', '-'),
+                '비중%': f"{d['weight_pct']:.1f}",
+                '진입가': f"{d['entry']:,.2f}" if d.get('entry') else '-',
+                '현재가': f"{d['cur']:,.2f}" if d.get('cur') else '조회실패',
+                '수익률': d.get('ret'),
+                '상태': ('🔴 손절가 이탈' if d.get('hit_stop') else
+                        '🟢 목표가 도달' if d.get('hit_target') else
+                        '⚪ 보유중' if d.get('ret') is not None else '-'),
+                '신호': ', '.join(d.get('signals', [])[:3]) or '-',
+            } for d in sorted(_ddet, key=lambda x: -(x['weight_pct'] or 0))])
+            st.dataframe(_ddf.style.map(_c_gap, subset=['수익률']).format({'수익률': lambda v: f"{v:+.1f}%" if v is not None else '-'}),
+                         use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_ddf)))
+        else:
+            st.caption("상세 없음")
         st.caption("벤치마크 = 스냅샷의 KR/US 비중대로 KOSPI·SPY를 섞은 같은 기간 수익률. "
                    "알파>0 = 시장을 이겼다는 뜻. 표본이 몇 주 쌓이기 전엔 소음이 큼 — 4주·13주 누적으로 판단.")
 
