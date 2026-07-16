@@ -61,6 +61,35 @@ CANSLIM_JSON     = Path('results/canslim_latest.json')
 TURNAROUND_JSON  = Path('results/turnaround_latest.json')
 PORTFOLIO_FILE   = Path('data/portfolio.json')
 PORTFOLIO_RESULT = Path('results/portfolio_latest.json')
+MDD_JSON         = Path('results/mdd.json')
+
+
+@st.cache_data(ttl=1800)
+def _mdd_map() -> dict:
+    """sym → 현재 고점대비 낙폭%(cur_dd) · 1y/역대 MDD. mdd.json(주 1회 갱신) 기반."""
+    d = load_json(MDD_JSON) or {}
+    return {s['sym']: s for s in d.get('stocks', [])}
+
+
+@st.cache_data(ttl=1800)
+def _attract_map(market: str = "전체") -> dict:
+    """sym → 매력도(위닝점수 0~100 · S/A/B/C 등급). winning_score(백테스트 샤프 가중) 기반 —
+    주봉 신호 유니버스에만 계산돼 있어 커버리지 밖 종목은 '-'."""
+    try:
+        import winning_score as _ws
+        return {r['sym']: {'score': r['score'], 'grade': r['grade']} for r in _ws.rank_all(market)}
+    except Exception:
+        return {}
+
+
+def _mdd_col(sym: str, mmap: dict):
+    r = mmap.get(sym)
+    return f"{r['cur_dd']:+.1f}%" if r and r.get('cur_dd') is not None else '-'
+
+
+def _attract_col(sym: str, amap: dict):
+    r = amap.get(sym)
+    return f"{r['grade']} {r['score']:.0f}" if r and r.get('score') is not None else '-'
 
 SIG_COLS_PAST = ['past_sig_52w','past_sig_vol','past_sig_ma5','past_sig_cup','past_sig_maconv','past_sig_rsimacd']
 SIG_COLS_NOW  = ['now_sig_52w', 'now_sig_vol', 'now_sig_ma5', 'now_sig_cup', 'now_sig_maconv', 'now_sig_rsimacd']
@@ -245,6 +274,8 @@ tab_screen, tab7, tab_pf, tab4, tab_guru, tab10 = st.tabs([
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 with tab_screen:
     _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
+    _MDDM = _mdd_map()            # sym → 고점대비 낙폭 (모든 서브탭 테이블 공통 열)
+    _ATTM = _attract_map(_GMKT)   # sym → 매력도(위닝점수·등급)
 
     # ── 매크로 요약 스트립 (구 '오늘의 종합' 카드 이관) ──
     _s_can_h = load_json(CANSLIM_JSON) or {}
@@ -519,6 +550,7 @@ with t_gain:
                 '영업익%': f"{cm['op']:+.0f}" if isinstance(cm.get('op'), (int, float)) else '-',
                 _retc: ret,
                 '향후2M계절성': _seasmap.get(s['sym']),
+                '고점대비%': _mdd_col(s['sym'], _MDDM),
             })
         if _gsort == "위닝점수":
             _grows.sort(key=lambda r: -(r['위닝점수'] if r['위닝점수'] is not None else -999))
@@ -582,7 +614,9 @@ with t_lead:
                     '신고가': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '?',
                     '영익변곡': _ogs,
                     '매출가속': ('✅' if m.get('rev_accel') else ('❌' if m.get('rev_accel') is False else '-')),
-                    '섹터': str(m.get('sector', '-'))[:14]}
+                    '섹터': str(m.get('sector', '-'))[:14],
+                    '고점대비%': _mdd_col(m['sym'], _MDDM),
+                    '매력도': _attract_col(m['sym'], _ATTM)}
 
         _f_all = [m for m in _lv2['all'] if _lm == "전체" or m['market'] == _lm]
         _themes = [t for t in _lv2.get('themes', [])
@@ -638,6 +672,7 @@ with t_value:
                 "(US 개별 종목 밸류는 🔍 종목 분석에서 공식 멀티플로 확인)")
     else:
         _vj = load_json(Path('results/value_kr.json'))
+        _ATTM = _attract_map("KR")   # 이 탭은 KR 전용 — 전역 _GMKT가 US여도 KR 매력도로 조회
         if not _vj or not _vj.get('stocks'):
             st.warning("가치 데이터 없음 → `python value_export.py` 실행 후 새로고침.")
         else:
@@ -668,7 +703,9 @@ with t_value:
                                'ROE%': _roe,
                                '매출성장%': _fmt_growth(s.get('rev_growth')),
                                '영업익성장%': _fmt_growth(_og9),
-                               '12개월%': s.get('ret_12m'), '기준': s.get('period')})
+                               '12개월%': s.get('ret_12m'), '기준': s.get('period'),
+                               '고점대비%': _mdd_col(s['sym'], _MDDM),
+                               '매력도': _attract_col(s['sym'], _ATTM)})
             _vrows.sort(key=lambda r: r['PER'])
             st.subheader(f"💎 저평가·우량 — {len(_vrows)}개 (PER≤{_vper} · PBR≤{_vpbr} · ROE≥{_vroe}% · 영업익≥{_vgrw}%)")
             if _vrows:
@@ -712,7 +749,9 @@ with t_prof:
                     continue
                 _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
                               '시총': fmt_cap(s.get('marcap'), s['market']),
-                              f'{_mo}월 평균%': md['ret'], '승률%': md['wr'], '표본': md['n']})
+                              f'{_mo}월 평균%': md['ret'], '승률%': md['wr'], '표본': md['n'],
+                              '고점대비%': _mdd_col(s['sym'], _MDDM),
+                              '매력도': _attract_col(s['sym'], _ATTM)})
             _rows.sort(key=lambda r: -r[f'{_mo}월 평균%'])
             if not _rows:
                 st.info("조건에 맞는 종목이 없습니다. 승률 기준을 낮춰보세요.")
@@ -880,6 +919,7 @@ with tab3:
     _cs_mkt = st.radio("시장", ["🇰🇷 한국", "🇺🇸 미국"], horizontal=True, key="canslim_mkt")
     _cs_kr = _cs_mkt.endswith("한국")
     _CS_JSON = CANSLIM_JSON if _cs_kr else Path('results/canslim_us_latest.json')
+    _ATTM = _attract_map("KR" if _cs_kr else "US")   # 이 탭은 자체 KR/US 토글 — 전역 _GMKT와 별개
     st.header(f"🏆 CANSLIM 스크리너 ({'한국' if _cs_kr else '미국'})")
     update_badge(_CS_JSON)
     canslim = load_json(_CS_JSON)
@@ -957,11 +997,9 @@ with tab3:
 
             score = sum([bool(m_ok), n_ok, l_ok, s_ok, c_ok, a_ok, i_ok])
 
-            if _cs_kr:
-                cap = s['marcap'] // 100_000_000
-                _cap_str = f"{cap/10000:.1f}조" if cap >= 10000 else f"{cap:,}억"
-            else:
-                _cap_str = fmt_cap(s.get('marcap'), 'US')
+            # 시총은 숫자로 저장 (표시 포맷은 column_config가 담당) — 문자열로 저장하면
+            # 표 헤더 클릭 정렬이 사전순("$9B">"$87B")으로 깨짐 (#4 실측 확인)
+            _cap_num = (s.get('marcap') or 0) / (1e12 if _cs_kr else 1e9)   # KR=조원, US=$B
             def _gtxt(v):
                 return v if isinstance(v, str) else (f"{v:+.0f}%" if v is not None else '??')
             if a_y1 is not None and a_y2 is not None:
@@ -974,7 +1012,7 @@ with tab3:
             rows3.append({
                 '종목명':  s['name'],
                 '코드':    s['sym'],
-                '시총':    _cap_str,
+                '시총':    _cap_num,
                 '점수/7':  score,
                 'RS':      _tag3(rs,     th_L,  '{:.0f}p'),
                 'N 거리%': _tag3(n_dist, th_N,  '{:+.1f}%'),
@@ -982,6 +1020,8 @@ with tab3:
                 'C 분기%': _tag3(c_g,    th_C,  '{:+.0f}%'),
                 'A 연간%': a_tag,
                 'I 순매수': _tag3(i_inst, th_I,  '{:+.0f}억'),
+                '고점대비%': _mdd_col(s['sym'], _MDDM),
+                '매력도': _attract_col(s['sym'], _ATTM),
                 '_score':  score,
             })
 
@@ -1009,7 +1049,8 @@ with tab3:
                 return 'color:#8b949e'
 
             # 컬럼을 CANSLIM 글자 순서(C→A→N→S→L→I)로 (#3)
-            disp3 = ['종목명','코드','시총','점수/7','C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수']
+            disp3 = ['종목명','코드','시총','점수/7','C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수',
+                     '고점대비%','매력도']
             df3 = df3.rename(columns={'RS': 'RS (L)'})
             sig3c = ['C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수']
 
@@ -1020,6 +1061,8 @@ with tab3:
                     .map(color_cell3,  subset=sig3c),
                 use_container_width=True,
                 row_height=25, height=_dfh(len(df3), cap=760),
+                column_config={'시총': st.column_config.NumberColumn(
+                    '시총', format=('%.1f조' if _cs_kr else '$%.1fB'))},
             )
             with st.expander("📖 CANSLIM 각 항목 기준·설명", expanded=False):
                 st.dataframe(pd.DataFrame([
@@ -1661,13 +1704,16 @@ def consensus_scenarios(sym, is_kr):
 
 @st.cache_data(ttl=6 * 3600)
 def _fwd_est_cached(sym, is_kr):
-    """올해(0y)/내년(+1y) 컨센서스 — 매출·EPS·순이익(EPS×주식수). 빈 결과는 캐시 안 함."""
+    """올해(0y)/내년(+1y) + 이번분기(0q)/다음분기(+1q) 컨센서스 — 매출·EPS·순이익(EPS×주식수).
+    yfinance의 revenue_estimate/earnings_estimate는 연간·분기 행이 같은 표에 같이 들어있음
+    (인덱스 '0y'/'+1y'/'0q'/'+1q') — 분기 행은 기존엔 안 읽고 버려지고 있었음. 빈 결과는 캐시 안 함."""
     t = yf.Ticker(f"{sym}.KS" if is_kr else sym)
     out = {}
+    _PERIODS = (('0y', '0y'), ('1y', '+1y'), ('0q', '0q'), ('1q', '+1q'))
     try:
         re_ = t.revenue_estimate
         if re_ is not None and not re_.empty:
-            for lab, idx in (('0y', '0y'), ('1y', '+1y')):
+            for lab, idx in _PERIODS:
                 if idx in re_.index and pd.notna(re_.loc[idx, 'avg']):
                     out[f'revenue_{lab}'] = float(re_.loc[idx, 'avg'])
     except Exception:
@@ -1675,7 +1721,7 @@ def _fwd_est_cached(sym, is_kr):
     try:
         ee = t.earnings_estimate
         if ee is not None and not ee.empty:
-            for lab, idx in (('0y', '0y'), ('1y', '+1y')):
+            for lab, idx in _PERIODS:
                 if idx in ee.index and pd.notna(ee.loc[idx, 'avg']):
                     out[f'eps_{lab}'] = float(ee.loc[idx, 'avg'])
     except Exception:
@@ -1683,7 +1729,7 @@ def _fwd_est_cached(sym, is_kr):
     try:
         sh = t.fast_info['shares']            # FastInfo는 .get이 없을 수 있어 인덱싱
         if sh:
-            for lab in ('0y', '1y'):
+            for lab, _ in _PERIODS:
                 if out.get(f'eps_{lab}'):
                     out[f'net_income_{lab}'] = out[f'eps_{lab}'] * float(sh)
     except Exception:
@@ -1696,7 +1742,11 @@ def _fwd_est_cached(sym, is_kr):
 @st.cache_data(ttl=6 * 3600)
 def _kr_naver_consensus_cached(sym):
     """KR 컨센서스 폴백 — 네이버 '기업실적분석' (E) 컬럼(증권사 추정 평균).
-    yfinance에 없는 영업이익 추정까지 제공. 반환 단위: 원(EPS는 원 그대로)."""
+    yfinance에 없는 영업이익 추정까지 제공. 반환 단위: 원(EPS는 원 그대로).
+
+    이 표엔 연간 (E) 다음에 분기 (E)도 같이 들어있는데(예: ...2025.12, 2026.03, 2026.06(E))
+    기존엔 연간 구간만 읽고 분기 구간은 그냥 버려지고 있었음 — 실측(005930)으로 확인.
+    분기 (E)는 대개 가장 가까운 미래분기 1개만 나옴 → 0q(이번), 그 다음 것이 있으면 1q(다음)."""
     import re
     from bs4 import BeautifulSoup
     from datetime import datetime as _d
@@ -1710,10 +1760,13 @@ def _kr_naver_consensus_cached(sym):
     dh = [h for h in heads if re.match(r'\d{4}\.\d{2}', h)]
     n_annual = 4 if len(dh) >= 10 else max(len(dh) - 6, 0)
     ynow = _d.now().year
-    emap = {}                             # 연간 (E) 컬럼 인덱스 → 0y(올해)/1y(내년)
+    emap = {}                             # 컬럼 인덱스 → 0y(올해)/1y(내년)/0q(이분기)/1q(다음분기)
     for i, h in enumerate(dh[:n_annual]):
         if '(E)' in h:
             emap[i] = '0y' if int(h[:4]) <= ynow else '1y'
+    _q_e_idx = [i for i, h in enumerate(dh[n_annual:], start=n_annual) if '(E)' in h]
+    for j, i in enumerate(_q_e_idx[:2]):
+        emap[i] = '0q' if j == 0 else '1q'
     if not emap:
         raise RuntimeError('no E cols')
 
@@ -1994,15 +2047,21 @@ with tab7:
                             return f"{_v:,.2f}" if isinstance(_v, (int, float)) else '-'
                         return _amt(_v)
 
-                    def _stmt_table(title, items, est=None):
-                        _ecols = ['내년E', '올해E'] if est else []   # 미래→과거 방향 통일
+                    _EST_LABELS = {
+                        'annual':  (('내년E', '1y'), ('올해E', '0y')),
+                        'quarter': (('다음분기E', '1q'), ('이번분기E', '0q')),
+                    }
+
+                    def _stmt_table(title, items, est=None, freq='annual'):
+                        _est_pairs = _EST_LABELS[freq]
+                        _ecols = [lab for lab, _ in _est_pairs] if est else []   # 미래→과거 방향 통일
                         _rows = []
                         for _it in items:
                             _lab, _key, _typ = _it[0], _it[1], _it[2]
                             _dk = _it[3] if len(_it) > 3 else None   # 직접 추정키(네이버 PER/PBR E 등)
                             _row = {'항목': _lab}
-                            if est:                       # 컨센서스 (내년/올해) — mult면 Fwd 멀티플
-                                for _el, _sfx in (('내년E', '1y'), ('올해E', '0y')):
+                            if est:                       # 컨센서스(연간=내년/올해, 분기=다음/이번) — mult면 Fwd 멀티플
+                                for _el, _sfx in _est_pairs:
                                     if _dk and est.get(f'{_dk}_{_sfx}') is not None:
                                         _dv = est[f'{_dk}_{_sfx}']
                                         _row[_el] = f"{_dv:.1f}x" if _typ == 'mult' else _fmt_v(_dv, _typ)
@@ -2045,15 +2104,17 @@ with tab7:
                         st.dataframe(_sty, use_container_width=True, hide_index=True,
                                      row_height=25, height=_dfh(len(_df)))
 
-                    _est = forward_estimates(sym8_clean, is_kr_sym) if _freq == "연간" else None
-                    _est = _est or None
+                    # 연간·분기 컨센서스가 같은 소스(yfinance/네이버)의 같은 응답에 함께 들어있어
+                    # freq 무관하게 항상 가져오고, 어느 열을 보여줄지만 freq로 고름 (#1: 분기에서도 컨센서스 표시)
+                    _est = forward_estimates(sym8_clean, is_kr_sym) or None
+                    _est_freq = 'annual' if _freq == "연간" else 'quarter'
                     # 대차 → 손익 → 현금. 멀티플 행: 현재 시총÷각 기간 실적(밴드 감각), E열=Fwd (#4)
                     _stmt_table("① 대차대조표 (E=컨센서스)", [
                                                ('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
                                                ('자본', 'equity', 'amt'),
                                                ('부채비율', 'debt_ratio', 'pct'),
                                                ('PBR (현시총÷자본)', 'equity', 'mult', 'pbr_dir')],
-                                est=_est)
+                                est=_est, freq=_est_freq)
                     _stmt_table("② 손익계산서 (E=컨센서스)", [
                                                ('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
                                                ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
@@ -2062,7 +2123,7 @@ with tab7:
                                                ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct'),
                                                ('PER (현시총÷순익)', 'net_income', 'mult', 'per_dir'),
                                                ('PSR (현시총÷매출)', 'revenue', 'mult')],
-                                est=_est)
+                                est=_est, freq=_est_freq)
                     _stmt_table("③ 현금흐름표", [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
                                                ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
                     _qn = "3개월 환산" if _freq == "분기" else "회계연도"
