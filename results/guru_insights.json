@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "gRe2k6MALkk",
+      "title": "반도체 일희일비 마라, 제일 큰 위험은 여깁니다 / 정주용 의장 (풀버전)",
+      "channel": "와이스트릿",
+      "published": "2026-07-17T00:00:03+00:00",
+      "url": "https://www.youtube.com/watch?v=gRe2k6MALkk",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-17T10:11:04.539282+09:00"
+    },
+    {
       "video_id": "HYdoXsjlgpg",
       "title": "5000조 반도체 투자의 동상이몽 #호남 #반도체 #SK하이닉스 #증설 #삼성전자 #이재용 #최태원 #이재명 #박정호",
       "channel": "와이스트릿",
@@ -13,11 +32,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-17T08:39:20.032306+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-17T10:11:42.992204+09:00"
     },
     {
       "video_id": "q2kSA1fpuc8",
@@ -35,8 +54,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-17T08:38:47.204497+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-17T10:10:10.939019+09:00"
     },
     {
       "video_id": "yQeB2YzuYCk",
@@ -15179,82 +15198,7 @@
       "source": "video",
       "attempts": 4,
       "analyzed_at": "2026-07-08T05:38:24.736516+09:00"
-    },
-    {
-      "video_id": "_f8Fy_8wxyM",
-      "title": "레버리지 ETF 상폐? 투기판 미쳐버린 국장 극약처방 이 방법밖에 없다 / [야식잡썰 EP.269] / 이대호 기자",
-      "channel": "와이스트릿",
-      "published": "2026-07-07T02:45:36+00:00",
-      "url": "https://www.youtube.com/watch?v=_f8Fy_8wxyM",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "한국 시장의 과도한 투기성과 변동성은 레버리지 상품의 무분별한 상장, 개인 투자자 비중 확대, 후진적인 시장 구조가 복합적으로 작용한 결과이며, 근본적인 해결책 없이는 지속될 수 없기에 극약처방과 같은 정책 개선이 필요하다.",
-        "summary": [
-          "단일종목 레버리지 ETF 상장 후 사이드카/서킷브레이커 발동 빈도, 괴리율 확대 등 시장의 극심한 변동성과 투기 심리가 드러났습니다.",
-          "한국 주식 시장은 삼성전자/SK하이닉스 등 특정 소수 종목에 시가총액이 집중되어 있고, 신용융자/미수금 규모가 크며, 개인 투자자 거래 비중이 압도적으로 높습니다.",
-          "한국인의 투기성은 압축 성장 경험, 경쟁 문화, 부동산 편중 자산 구조, 불안감 높은 국민성, 빠른 IT 정보 접근성 등 복합적인 요인에 기인합니다.",
-          "레버리지 상품은 '성장 사다리'가 아닌 '지렛대'로서 장기 투자에 부적합하며, 음의 복리 효과로 인해 장기 보유 시 자산이 녹아내릴 위험이 큽니다.",
-          "시장의 과도한 투기성을 완화하기 위해 기본 예탁금 상향, 차등적 진입 허용, 가격 제한폭 폐지 등의 '극약처방'이 필요하며, 이는 시장의 후진적인 면모를 개선하고 투자자를 보호하기 위함입니다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "코스피200 시총 비중, 레버리지 ETF 기초자산",
-            "view": "neutral",
-            "t": 405
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "코스피200 시총 비중, 레버리지 ETF 기초자산",
-            "view": "neutral",
-            "t": 405
-          },
-          {
-            "name": "VKOSPI",
-            "ticker": "",
-            "context": "한국 시장의 변동성 지수, 역대 최고치 기록",
-            "view": "negative",
-            "t": 214
-          }
-        ],
-        "key_points": [
-          {
-            "point": "단일종목 레버리지 ETF는 상장 이후 단기간에 사이드카 발동, 괴리율 급증 등 비정상적인 시장 과열 현상을 야기하며 투기적 성격을 여실히 드러냈습니다.",
-            "t": 110
-          },
-          {
-            "point": "한국 시장은 극소수 종목에 시가총액이 편중되고 개인 투자자의 거래 비중이 높은 상황에서, 레버리지 상품이 투기적 거래를 가속화하여 시장 변동성을 극대화하고 있습니다.",
-            "t": 400
-          },
-          {
-            "point": "한국인의 '빨리빨리' 문화, 불안감 높은 국민성, 불완전한 노후 준비 등 사회문화적, 심리적 요인들이 투자 시장의 투기적 성향을 부추기는 근본 원인으로 작용합니다.",
-            "t": 846
-          },
-          {
-            "point": "레버리지 ETF는 장기 투자에 부적합하며 음의 복리 효과로 인해 큰 손실 위험이 있으므로, '성장 사다리'가 아닌 '지렛대'임을 명확히 인지하고 차등적 진입 규제 등 극약처방이 필요합니다.",
-            "t": 1424
-          },
-          {
-            "point": "정책 당국은 단기적 시장 지표나 산업적 관점을 넘어, '누가 거래하느냐' 즉 한국인 특유의 투기적 성향까지 고려하여 금융 상품 정책을 수립해야 합니다.",
-            "t": 2301
-          },
-          {
-            "point": "시장 건전화를 위해서는 가격 제한폭 폐지, 비정상적인 변동성 상품에 대한 규제 강화 등 후진적인 시장 구조를 개선하여, 투자자들이 '데어 봐야 뜨거운 줄 아는' 경험을 통해 스스로 학습하도록 해야 한다는 극단적인 제안이 제기됩니다.",
-            "t": 1729
-          }
-        ],
-        "actionable": [
-          "개인 투자자는 레버리지 ETF의 투기적 성격과 장기 투자 부적합성을 인지하고, 단기 시세차익 추구보다는 장기적인 관점에서 신중하게 투자 계획을 수립해야 합니다.",
-          "시장의 투기 심리에 휩쓸리지 않고, 기업의 펀더멘털과 가치를 기반으로 한 분석을 통해 '사실'에 근거한 '결정'을 내리는 연습이 필요합니다.",
-          "정부 및 금융 당국은 단기적 시장 안정화보다는 장기적인 시장 건전화를 위해 레버리지 상품에 대한 규제 강화(예탁금 상향, 차등 진입) 및 투기 방지 제도 개선을 면밀히 검토해야 합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-07T19:25:20.483627+09:00"
     }
   ],
-  "updated": "2026-07-17T08:39:21.032534+09:00"
+  "updated": "2026-07-17T10:11:43.992509+09:00"
 }
