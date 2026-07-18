@@ -62,12 +62,9 @@ def _validation_section(trades):
     return lines
 
 
-def _portfolio_section():
-    try:
-        import weekly_portfolio as wp
-        res = wp.analyze()
-    except Exception as e:
-        return [f"<b>📊 주간 포트폴리오</b>", f"분석 실패: {e}"]
+def _portfolio_section(res):
+    if res is None:
+        return ["<b>📊 주간 포트폴리오</b>", "분석 실패"]
     if not res:
         return ["<b>📊 주간 포트폴리오</b>", "히스토리 없음"]
     lines = ["<b>📊 주간 포트폴리오 (진입→현재, vs KOSPI·SPY)</b>"]
@@ -75,6 +72,50 @@ def _portfolio_section():
         tag = '10선' if r['set'] == 'p10' else '20선'
         a = f" · 알파 {r['alpha']:+.2f}%p" if r.get('alpha') is not None else ""
         lines.append(f"{r['week']} [{tag}] {r['port_return']:+.2f}%{a}")
+    return lines
+
+
+def _holdings_section(res):
+    """구성종목 + 종목별 수익률 + 조치필요(손절이탈·목표도달) + 편입/편출 — 브리핑의 본론."""
+    if not res:
+        return []
+    p10s = [r for r in res if r['set'] == 'p10' and r.get('details')]
+    if not p10s:
+        return []
+    cur = p10s[-1]
+    lines = [f"<b>💼 현재 추천 10선 구성 ({cur['week']} 진입 기준)</b>"]
+    dets = sorted(cur['details'], key=lambda d: -(d.get('weight_pct') or 0))
+    stops, targets = [], []
+    for d in dets:
+        ret = d.get('ret')
+        rs = f"{ret:+.1f}%" if ret is not None else '조회실패'
+        mark = ''
+        if d.get('hit_stop'):
+            mark = ' 🔴손절선'
+            stops.append(d['name'])
+        elif d.get('hit_target'):
+            mark = ' 🟢목표도달'
+            targets.append(d['name'])
+        lines.append(f"· {d['name']} {d.get('weight_pct', 0):.0f}% → {rs}{mark}")
+
+    lines.append("")
+    lines.append("<b>⚖️ 리밸런싱 체크</b>")
+    if stops:
+        lines.append(f"🔴 손절선 이탈 {len(stops)}건: {', '.join(stops)} — 룰대로 정리 대상")
+    if targets:
+        lines.append(f"🟢 목표가 도달 {len(targets)}건: {', '.join(targets)} — 분할익절 검토")
+    if not stops and not targets:
+        lines.append("조치 필요 없음 — 손절·목표 밴드 안에서 보유 중")
+    if len(p10s) >= 2:
+        prev = p10s[-2]
+        cur_syms = {d['sym']: d['name'] for d in cur['details']}
+        prev_syms = {d['sym']: d['name'] for d in prev['details']}
+        added = [n for s, n in cur_syms.items() if s not in prev_syms]
+        removed = [n for s, n in prev_syms.items() if s not in cur_syms]
+        if added:
+            lines.append(f"➕ 이번 주 편입: {', '.join(added[:6])}")
+        if removed:
+            lines.append(f"➖ 편출: {', '.join(removed[:6])}")
     return lines
 
 
@@ -108,9 +149,17 @@ def _health_section():
 
 def build_message():
     parts = [f"<b>📒 주간 성적표</b>  {datetime.now().strftime('%Y-%m-%d')}"]
+    try:
+        import weekly_portfolio as wp
+        res = wp.analyze()                  # 가격조회 1회 공유 (구성종목·합계 둘 다 사용)
+    except Exception:
+        res = None
     sig_lines, trades = _sig_section()
-    for sec in (sig_lines, _validation_section(trades), _portfolio_section(),
+    for sec in (_holdings_section(res or []), _portfolio_section(res),
+                sig_lines, _validation_section(trades),
                 _guardrail_section(), _health_section()):
+        if not sec:
+            continue
         parts.append("")
         parts.extend(sec)
     parts.append("")
