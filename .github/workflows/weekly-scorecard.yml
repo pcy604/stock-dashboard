@@ -1,0 +1,32 @@
+# 주간 성적표 텔레그램 브리핑 — 매주 일요일 08시 KST
+# "성적표를 만들어놓고 안 보는" 상태 방지: 시스템이 매주 자기 성적을 보고.
+# 내용: 신호별 실전vs백테 · 포트 알파 · 개선검증(신뢰계수 반영 후) · 가드레일 · 파이프라인
+name: weekly-scorecard
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 23 * * 6'    # UTC 토 23시 = KST 일요일 08시
+
+permissions:
+  contents: read
+
+jobs:
+  scorecard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - run: pip install -r requirements.txt
+
+      - name: 주간 성적표 생성 + 텔레그램 발송
+        run: python weekly_scorecard.py
