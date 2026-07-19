@@ -2682,6 +2682,61 @@ with tab_pf:
     st.header("💼 포트폴리오 관리")
     update_badge(PORTFOLIO_RESULT)
 
+    # ── 🤖 AI 추천 포트폴리오 (시스템 제안) — 아래 '내 실보유'와 대비 구도 ──
+    _wpj = load_json(Path('results/weekly_portfolio.json'))
+    if _wpj and _wpj.get('p10'):
+        st.subheader("🤖 AI 추천 포트폴리오 — 시스템 제안")
+        _ai_set = st.radio("세트", ["10선 (집중)", "20선 (분산)"], horizontal=True, key="ai_pf_set")
+        _aip = _wpj['p10'] if _ai_set.startswith("10") else _wpj['p20']
+        _am1, _am2, _am3, _am4 = st.columns(4)
+        _am1.metric("기준 주차", _aip.get('week', '-'), help=f"갱신 {_wpj.get('updated', '-')}")
+        _am2.metric("권고 현금", f"{_aip.get('cash_pct', 0):.0f}%", help="매크로 신호(FRED) 기반 자동")
+        _am3.metric("주식 투입", f"{_aip.get('deployed_pct', 0)}%")
+        _am4.metric("종목 수", f"{len(_aip.get('positions', []))}개")
+
+        with st.spinner("현재가 조회 중 (제안 종목)..."):
+            _airows = []
+            for _p9 in _aip.get('positions', []):
+                _accy = '₩' if _p9.get('market') == 'KR' else '$'
+                _acur = _fetch_pf_price(_p9['sym'], _p9.get('market', 'US'))
+                _aret = (_acur / _p9['entry'] - 1) * 100 if _acur and _p9.get('entry') else None
+                if _acur and _p9.get('stop') and _acur <= _p9['stop']:
+                    _ast = '🔴 손절 실행'
+                elif _acur and _p9.get('target') and _acur >= _p9['target']:
+                    _ast = '🟢 익절 실행'
+                else:
+                    _ast = '보유'
+                _airows.append({
+                    '종목': _p9['name'], '코드': _p9['sym'], '시장': _p9.get('market', '-'),
+                    '비중%': f"{_p9.get('weight_pct', 0):.1f}",
+                    '진입가': f"{_accy}{_p9['entry']:,.2f}" if _p9.get('entry') else '-',
+                    '현재가': f"{_accy}{_acur:,.2f}" if _acur else '조회실패',
+                    '진입대비': _aret,
+                    '손절가(-7%)': f"{_accy}{_p9['stop']:,.2f}" if _p9.get('stop') else '-',
+                    '목표가(+14%)': f"{_accy}{_p9['target']:,.2f}" if _p9.get('target') else '-',
+                    '지시': _ast,
+                    '신호': ', '.join(_p9.get('signals', [])[:2]) or '-',
+                })
+        _aidf = pd.DataFrame(_airows)
+        def _c_aist(v):
+            s = str(v)
+            if '손절' in s: return 'background-color:#5a1a1a;color:white;font-weight:bold'
+            if '익절' in s: return 'color:#56d364;font-weight:bold'
+            return 'color:#8b949e'
+        def _c_airet(v):
+            try: return 'color:#56d364' if float(v) >= 0 else 'color:#f78166'
+            except Exception: return ''
+        st.dataframe(_aidf.style.map(_c_aist, subset=['지시']).map(_c_airet, subset=['진입대비'])
+                     .format({'진입대비': lambda v: f"{v:+.1f}%" if v is not None else '-'}),
+                     use_container_width=True, hide_index=True,
+                     row_height=25, height=_dfh(len(_aidf)))
+        st.caption("**이 포트는 원칙의 산출물** — ①선정: 신호 × 실전 신뢰계수(못 하는 신호 자동 감액) "
+                   "②비중: 손익비 리스크 사이징 + 종목 캡 ③손절 -7% · 목표 +14% (손익비 2:1 고정) "
+                   "④현금: 매크로 신호 자동 ⑤보유 후 매도: 방어손절·분할익절·시간매도 3룰. "
+                   "매주 자동 재구성(월 06시) · 성적은 📒 성적표 탭에서 매주 채점됨. "
+                   "⚠️ 페이퍼 트랙레코드 검증 중(8/11 첫 판독) — 실투자 근거 아님.")
+        st.divider()
+
     with st.expander("➕ 종목 추가", expanded=False):
         fc1, fc2, fc3, fc4, fc5, fc6 = st.columns([2, 1, 1, 1, 1, 1])
         with fc1: p_sym  = st.text_input("티커", key="p_sym", placeholder="TSLA / 005930")
