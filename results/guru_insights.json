@@ -1,6 +1,343 @@
 {
   "items": [
     {
+      "video_id": "EFo5oBfoI9c",
+      "title": "삼전닉스 이전에 '이 주식'이 있었다! 대한민국 1호 국민주는",
+      "channel": "삼프로TV",
+      "published": "2026-07-21T08:00:09+00:00",
+      "url": "https://www.youtube.com/watch?v=EFo5oBfoI9c",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:21:16.593385+09:00"
+    },
+    {
+      "video_id": "R067Gf1VmwM",
+      "title": "[7월 21일 마감시황] 이번 고비만 넘기면 8월 랠리 시작! 오늘 반등에도 내 종목은 왜 그대로일까? 수급이 살아나야 '진짜'ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-07-21T08:26:31+00:00",
+      "url": "https://www.youtube.com/watch?v=R067Gf1VmwM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:20:44.387308+09:00"
+    },
+    {
+      "video_id": "tfy0Qi7L7Bc",
+      "title": "\"실적 코웃음 치는 코스피\" 반등의 열쇠는 여기 있다 | 빈센트 [더블밸류업]",
+      "channel": "삼프로TV",
+      "published": "2026-07-21T08:31:49+00:00",
+      "url": "https://www.youtube.com/watch?v=tfy0Qi7L7Bc",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:20:12.253865+09:00"
+    },
+    {
+      "video_id": "HQkjs71O_6k",
+      "title": "개인이 버티는 시장은 끝…'진짜 반등'은 기관 수급에 달렸다ㅣ홍선애, 박병창 MP파트너스 대표 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-07-21T09:07:22+00:00",
+      "url": "https://www.youtube.com/watch?v=HQkjs71O_6k",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:19:40.119632+09:00"
+    },
+    {
+      "video_id": "PmeCeihxEQA",
+      "title": "7월 말 실적 발표 전 반드시 봐야 할 반도체 주가 반등 시나리오ㅣ김장열 유니스토리자산운용 리서치센터장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-07-21T11:30:25+00:00",
+      "url": "https://www.youtube.com/watch?v=PmeCeihxEQA",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "미국 빅테크 실적 발표와 거시 경제 지표에 따라 반도체 주가의 단기 변동성은 이어질 수 있지만, AI 인프라 확대로 인한 HBM 및 메모리 수요 증가는 장기적으로 긍정적인 요인입니다.",
+        "summary": [
+          "Kimi K3와 같은 오픈 웨이트 AI 모델 확산은 각 고객사의 자체 GPU 서버 운영을 촉진하여 HBM 및 일반 서버용 DRAM/SSD 수요를 증대시킵니다.",
+          "MOE(Mixture of Experts) 기술로 개별 추론에 필요한 메모리 단위는 줄어들 수 있으나, AI 모델의 파라미터 수 급증으로 전체 메모리 용량 필요성은 더욱 커집니다.",
+          "미국 빅테크 기업들의 CapEx 및 RPO(Remaining Performance Obligation) 가이던스와 AI 관련 실적 확인이 반도체 시장의 조정이 일시적인지 판단하는 주요 분기점이 될 것입니다.",
+          "지정학적 위험, 미-중동 전쟁, 미국 재정 적자 확대, 금리 상승 등 거시경제 불안정 요인이 상존하며, 이는 시장의 변동성을 키우는 요인입니다.",
+          "한국 반도체 기업들은 AI 인프라(HBM, 메모리, 장비) 경쟁력을 바탕으로 미국 시장의 하락 시 상대적으로 선방할 가능성이 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "HBM, ADR 프리미엄, 29일 실적 발표, 2026년 PER 5.6배",
+            "view": "긍정",
+            "t": 2135
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "HBM, 30일 실적 발표, 2026년 PER 5.2배",
+            "view": "긍정",
+            "t": 2149
+          },
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "HBM, 2026년 PER 6.9배",
+            "view": "긍정",
+            "t": 2135
+          },
+          {
+            "name": "알파벳",
+            "ticker": "GOOGL",
+            "context": "23, 24일 실적 발표, 빅테크 투자 및 RPO",
+            "view": "중립",
+            "t": 1342
+          },
+          {
+            "name": "인텔",
+            "ticker": "INTC",
+            "context": "23, 24일 실적 발표, 빅테크 투자 및 RPO",
+            "view": "중립",
+            "t": 1342
+          },
+          {
+            "name": "메타",
+            "ticker": "META",
+            "context": "29일 실적 발표, 빅테크 투자 및 RPO",
+            "view": "중립",
+            "t": 1523
+          },
+          {
+            "name": "마이크로소프트",
+            "ticker": "MSFT",
+            "context": "29일 실적 발표, 빅테크 투자 및 RPO",
+            "view": "중립",
+            "t": 1525
+          },
+          {
+            "name": "테라다인",
+            "ticker": "TER",
+            "context": "일부 반도체 기업 주가 상승 언급",
+            "view": "긍정",
+            "t": 2051
+          },
+          {
+            "name": "아스테라 랩스",
+            "ticker": "ALAB",
+            "context": "일부 반도체 기업 주가 상승 언급",
+            "view": "긍정",
+            "t": 2051
+          },
+          {
+            "name": "오라클",
+            "ticker": "ORCL",
+            "context": "CDS 프리미엄 상승으로 인한 신용 위험 언급",
+            "view": "부정",
+            "t": 3151
+          }
+        ],
+        "key_points": [
+          {
+            "point": "오픈 웨이트 AI 모델(Kimi K3)의 확산은 개별 기업의 GPU 서버 구축 및 HBM, 서버 DRAM, SSD 수요를 증가시켜 메모리 시장의 총 수요를 확대할 것입니다.",
+            "t": 110
+          },
+          {
+            "point": "AI 모델의 파라미터 수(Kimi K3는 이전 모델 대비 4배)가 크게 증가함에 따라, 이를 저장하고 처리하기 위한 HBM 및 K/V 캐시용 서버 DRAM, SSD의 수요가 필수적으로 늘어날 것입니다.",
+            "t": 507
+          },
+          {
+            "point": "미국 빅테크 기업들의 7월 말 실적 발표와 함께 공개될 CapEx(자본 지출) 및 RPO(미래 매출) 가이던스는 AI 투자 확대의 진정성을 확인하고 반도체 시장 조정이 일시적인지 판단하는 주요 분기점이 될 것입니다.",
+            "t": 1308
+          },
+          {
+            "point": "현재 시장은 'AI 거품 붕괴'보다는 'AI 투자 수익성 검증' 단계를 요구하고 있으며, AI 관련 매출 증가, 클라우드 성장 지속, CapEx 유지 또는 확대, HBM/GPU 수요 전망 유지가 확인될 경우 반도체 조정은 일시적일 가능성이 큽니다.",
+            "t": 2120
+          },
+          {
+            "point": "미국 AI 경쟁력 약화 우려, 미-중동 전쟁, 그리고 미국 재정 적자 확대 및 장기 금리 상승 압력은 시장의 주요 불확실성 요인으로 작용하며, 달러 약세와 주식 시장 조정 가능성을 높이고 있습니다.",
+            "t": 3220
+          }
+        ],
+        "actionable": [
+          "7월 23일/24일 (알파벳, 인텔) 및 29일/30일 (SK하이닉스, 삼성전자, FOMC)의 빅테크 및 반도체 기업 실적 발표와 가이던스를 면밀히 확인할 것.",
+          "반도체 시장이 'AI 거품 붕괴'보다는 'AI 투자 수익성 검증' 단계에 진입했음을 인지하고, 실적 지표에 집중하여 투자 전략을 수립할 것."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:19:07.796018+09:00"
+    },
+    {
+      "video_id": "FVGp1cuuw38",
+      "title": "조정장인지 약세장인지 재점검 필요",
+      "channel": "유안타증권",
+      "published": "2026-07-21T08:35:21+00:00",
+      "url": "https://www.youtube.com/watch?v=FVGp1cuuw38",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:14:39.651727+09:00"
+    },
+    {
+      "video_id": "9uZKG7Jwh6c",
+      "title": "구원투수 기다리는 코스피, 등판 못하는 국민연금.. 왜? | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.21.화]",
+      "channel": "체슬리TV",
+      "published": "2026-07-21T08:48:32+00:00",
+      "url": "https://www.youtube.com/watch?v=9uZKG7Jwh6c",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:14:07.163081+09:00"
+    },
+    {
+      "video_id": "92CxcycTR3A",
+      "title": "[하이라이트] 시장은 끝난게 아니다.. 과열 이후 착해진 가격 | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.21.화]",
+      "channel": "체슬리TV",
+      "published": "2026-07-21T09:59:57+00:00",
+      "url": "https://www.youtube.com/watch?v=92CxcycTR3A",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "시장은 끝난 것이 아니며, 가격 조정이 완료된 우량 기업을 저가에 매수하고, 변동성에 대비한 수비 전략을 세워 장기적으로 투자해야 한다.",
+        "summary": [
+          "최근 시장은 전반적으로 과열되었으나, 특히 반도체 섹터의 과열이 심화되었다. 그러나 반도체 주식들이 35~40% 하락하며 1차 가격 조정이 이미 발생했다.",
+          "SK 최태원 회장의 발언처럼 메모리 반도체 공급 부족은 지속될 것이며, 메모리 업체들은 시장에서 '갑'의 위치에 있어 펀더멘탈은 견고하다.",
+          "높은 원/달러 환율은 수출 기업들에게 호재로 작용하며, IMF나 2008년 금융 위기 시기와 유사한 기회가 나타나고 있다.",
+          "시장이 전반적으로 저평가되어 우량 기업들을 '착한 가격'에 매수할 기회가 도래했으며, 시장은 끝난 것이 아니라 단지 가격 조정 국면에 있었다.",
+          "주식 투자의 본질은 위대한 기업에 투자하는 것이며, 대중이 인지하지 못하는 기업 가치 변화에 주목하고, 자산 변동성에 대한 충분한 수비 전략이 동반되어야 한다.",
+          "정부의 증시 안정 기금이나 국민연금 같은 기관 투자자들이 시장 하락기에 제 역할을 하지 못해 외국 자본에 국내 우량 기업을 헐값에 넘기는 상황을 비판한다."
+        ],
+        "tickers": [
+          {
+            "name": "반도체 섹터",
+            "ticker": "",
+            "context": "최근 6개월 동안 과열되었으나, 35-40% 가격 조정이 일어났으며, 쇼티지(공급 부족)는 계속될 것으로 전망됨. 우산 주식(방어주)처럼 담을 시점.",
+            "view": "긍정",
+            "t": 43
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "반도체 섹터의 대표주로 언급. 국민연금 보유 종목 중 하나이며, 시장 안정 기금 집행 시 고려 대상. 가격 조정 후 좋은 기회.",
+            "view": "긍정",
+            "t": 1616
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "반도체 섹터의 대표주로 언급. 국민연금 보유 종목 중 하나이며, 시장 안정 기금 집행 시 고려 대상. 가격 조정 후 좋은 기회.",
+            "view": "긍정",
+            "t": 1616
+          }
+        ],
+        "key_points": [
+          {
+            "point": "시장 과열 이후 가격 조정: 최근 시장은 과열 국면에 있었으나, 특히 반도체 섹터의 급락으로 1차 가격 조정이 상당 부분 이루어져 우량 기업에 대한 '착한 가격' 매수 기회가 열렸다.",
+            "t": 211
+          },
+          {
+            "point": "수출 기업 및 메모리 산업 긍정적 전망: 고환율 환경은 수출 기업에 유리하며, SK 최태원 회장의 발언을 인용하여 메모리 반도체 공급 부족은 지속될 것으로 보아 메모리 제조업체의 시장 지배적 위치를 강조했다.",
+            "t": 196
+          },
+          {
+            "point": "투자 본질의 이해와 수비 전략의 중요성: 주식 투자는 위대한 기업의 가치를 대중이 인지하지 못할 때 투자하고, 동시에 자산 변동성에 대한 충분한 리스크 관리(수비)가 필수적임을 강조했다.",
+            "t": 731
+          },
+          {
+            "point": "기관 투자자의 역할 부재 비판: 증시 안정 기금이나 국민연금 같은 국내 기관들이 시장 하락기에 매수 기회를 놓치고 외국인 투자자들에게 국내 우량 기업을 헐값에 내주는 상황을 비판하며, 기관의 전문성 발휘를 촉구했다.",
+            "t": 1401
+          }
+        ],
+        "actionable": [
+          "재무적으로 견고한 우량 기업 중 최근 가격 조정을 받은 종목을 선별하여 분할 매수를 고려한다. (예: 반도체 관련주)",
+          "환율 상승으로 인한 실적 개선이 기대되는 수출 기업들을 눈여겨본다.",
+          "포트폴리오의 핵심 자산(Core Asset)은 장기적인 관점에서 모아가고, 경기 민감도가 높은 주변 자산(Satellite Asset)은 시장 상황에 따라 트레이딩하는 '코어-위성' 전략을 활용한다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:13:47.433713+09:00"
+    },
+    {
+      "video_id": "3akKt2wZsdg",
+      "title": "좋은 기업의 주가 이제 좋아졌습니다 #박세익",
+      "channel": "체슬리TV",
+      "published": "2026-07-21T11:00:18+00:00",
+      "url": "https://www.youtube.com/watch?v=3akKt2wZsdg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "좋은 기업의 주가가 외부 요인으로 하락해 투자하기 좋은 가격이 되었을 때, 본질 가치에 기반하여 매수하는 것이 중요하며, 좋은 기업이라도 항상 좋은 가격인 것은 아님을 기억해야 합니다.",
+        "summary": [
+          "기업의 본질적인 가치 대비 주가가 싼지 비싼지, 혹은 거품이 끼었는지 분석하는 것이 투자 판단의 기준이 되어야 합니다.",
+          "전쟁과 같은 외부 악재로 인해 주가가 하락한 시점은 우량 기업에 투자하기 좋은 가격이 될 수 있습니다.",
+          "투자하기에 '좋은 가격'일 때는 팔지 않고, '나쁜 가격'일 때는 사지 않는 원칙을 지켜야 합니다.",
+          "주가는 항상 '좋은 가격'과 '나쁜 가격'이라는 두 가지 측면을 가집니다.",
+          "좋은 기업이라고 해서 항상 그 주가가 투자하기에 '좋은 가격'인 것은 아니라는 점을 명심해야 합니다."
+        ],
+        "tickers": [],
+        "key_points": [
+          {
+            "point": "시장의 외부 충격으로 인한 주가 하락은 본질 가치가 우수한 기업에게는 매력적인 투자 기회('좋은 가격')를 제공할 수 있습니다.",
+            "t": 6
+          },
+          {
+            "point": "투자 결정 시에는 기업 자체의 우수성뿐만 아니라, 현재 주가가 기업의 가치 대비 적정하거나 저평가되어 있는지 판단하는 것이 중요합니다.",
+            "t": 27
+          }
+        ],
+        "actionable": [
+          "주가 움직임의 원인을 분석하여, 기업의 가치와 무관한 외부 요인으로 인한 저평가 기회를 포착하세요.",
+          "좋은 기업과 좋은 가격은 별개임을 인지하고, 아무리 좋은 기업이라도 고평가된 시점에는 매수를 보류하세요."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-21T21:11:51.656141+09:00"
+    },
+    {
       "video_id": "GJAuYhAwaJk",
       "title": "주식은 예측이 아니라 대응의 영역이다 #박소연 #돈 #공부 #독하게돈공부 #대응 #주식 #현금흐름 #투자",
       "channel": "와이스트릿",
@@ -46,11 +383,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-21T16:36:10.101637+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-21T21:21:48.920949+09:00"
     },
     {
       "video_id": "Hba2eXKP0_o",
@@ -830,11 +1167,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-21T16:36:45.063833+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-21T21:22:21.201094+09:00"
     },
     {
       "video_id": "BT1X4h7UtWc",
@@ -14579,378 +14916,7 @@
       "source": "video",
       "attempts": 3,
       "analyzed_at": "2026-07-11T05:08:23.433601+09:00"
-    },
-    {
-      "video_id": "JATyXH8g-HA",
-      "title": "\"월 300이 먼저다\" 가장 독하게 해야 할 돈.공.부 / 박소연 이사 (풀버전)",
-      "channel": "와이스트릿",
-      "published": "2026-07-10T02:45:16+00:00",
-      "url": "https://www.youtube.com/watch?v=JATyXH8g-HA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-10T19:10:14.895652+09:00"
-    },
-    {
-      "video_id": "-8Gjvzog-Ho",
-      "title": "8월, 클래리티 법안 될까, 안될까? | 서동주, 김동환, 김규진 타이거리서치 대표 [크립토 PLUS]",
-      "channel": "삼프로TV",
-      "published": "2026-07-10T05:05:25+00:00",
-      "url": "https://www.youtube.com/watch?v=-8Gjvzog-Ho",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "미국 중간 선거를 앞두고 '클래리티 법안'의 8월 통과 가능성은 낮으며, 암호화폐 산업의 정치적 기부금 사용 방식이 중요한 변수가 될 것입니다.",
-        "summary": [
-          "타이거리서치 김규진 대표는 '클래리티 법안'의 8월 통과 가능성을 20%로 낮게 평가했습니다.",
-          "법안 통과 지연의 주요 원인은 법안 자체의 이슈보다 중간 선거를 앞둔 미국 정치권의 복잡한 정치적 역학 관계 때문입니다.",
-          "법안 통과에 필요한 7~9표가 부족한 상황이며, 공화당 내에서도 반대표가 나올 것으로 예상됩니다.",
-          "중간 선거에 가장 많은 정치 자금을 기부한 집단이 암호화폐 산업이기 때문에, 이들이 정치적 영향력을 어떻게 행사할지가 관건입니다.",
-          "암호화폐 산업이 중간 선거 이전에 법안 통과를 위해 민주당 의원들과 협상하여 추가 기부금을 제시할지, 아니면 추후를 지켜볼지 주목됩니다.",
-          "현 시점에서 법안 통과는 여러 복합적인 정치적 이슈로 인해 어려울 것이라는 전망입니다."
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "'클래리티 법안'의 8월 내 통과는 80% 확률로 불가능할 것으로 전망되며, 이는 법안의 내용보다는 미국 중간 선거를 앞둔 정치적 이슈 때문입니다.",
-            "t": 6
-          },
-          {
-            "point": "공화당 내에서도 반대표가 예상되어 법안 통과에 필요한 추가 표 확보가 어렵습니다. 이로 인해 양당 모두 법안의 빠른 통과에 대한 정치적 유인이 상실된 상태입니다.",
-            "t": 14
-          },
-          {
-            "point": "암호화폐 산업은 이번 중간 선거에 가장 많은 정치 기부금을 제공한 집단이므로, 이들의 정치적 '카드' 사용 방식(예: 선거 전 통과를 위한 추가 기부금 제안)이 법안의 향방에 결정적인 영향을 미칠 것입니다.",
-            "t": 29
-          }
-        ],
-        "actionable": [
-          "미국 중간 선거 결과와 암호화폐 관련 법안 진행 상황을 지속적으로 모니터링하여 규제 환경 변화에 대비해야 합니다.",
-          "암호화폐 산업의 정치적 로비 활동 및 관련 소식에 주의를 기울여 정책 방향성을 예측하고 투자 전략에 반영할 필요가 있습니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-10T19:09:52.703364+09:00"
-    },
-    {
-      "video_id": "CYmbAH8965k",
-      "title": "반등은 나왔지만 아직 안심은 이르다? 주린이 지금 따라가도 될까요...😭ㅣ명민준, 박가영, 이지환 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-07-10T05:20:24+00:00",
-      "url": "https://www.youtube.com/watch?v=CYmbAH8965k",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "최근 시장 반등세 속에서 초보 투자자들이 지금 투자를 시작해도 될지 고민하는 상황에 대한 전문가들의 진단과 조언을 다룹니다.",
-        "summary": [
-          "시장에 반등의 조짐이 나타났으나, 현재 상황이 완전히 안심할 만한 수준인지에 대한 의문이 제기됩니다. (t=0)",
-          "주식 초보 투자자(주린이)들이 이러한 시장 흐름에 발맞춰 투자를 시작해야 할지 여부에 대해 깊이 고민하고 있습니다. (t=0)",
-          "명민준, 박가영, 이지환 전문가들이 '주린이 구조대'로서 초보 투자자들의 투자 결정에 도움을 줄 통찰력을 제공할 예정입니다. (t=0)"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "현재 시장은 반등세를 보이고 있으나, 이 반등세의 지속 가능성 및 투자 안전성에 대한 신중한 접근이 필요하다는 관점이 제시됩니다. (t=0)",
-            "t": 0
-          },
-          {
-            "point": "초보 투자자들이 시장의 단기적인 움직임에 휩쓸려 성급하게 투자 결정을 내리기보다는, 전문가의 심층 분석을 통해 리스크를 관리하는 것이 중요합니다. (t=0)",
-            "t": 0
-          },
-          {
-            "point": "이 영상은 주린이들이 '지금' 투자에 참여하는 것이 적절한 시기인지, 그리고 어떤 방식으로 접근해야 하는지에 대한 구체적인 방향성을 제시할 것으로 기대됩니다. (t=0)",
-            "t": 0
-          }
-        ],
-        "actionable": []
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-10T19:09:37.376852+09:00"
-    },
-    {
-      "video_id": "fHjDrYJSwBY",
-      "title": "'애플의 중국 메모리 협박?' 어림도 없는 이유 ㅣ빈센트 & 염승환 [더블 업]",
-      "channel": "삼프로TV",
-      "published": "2026-07-10T06:54:24+00:00",
-      "url": "https://www.youtube.com/watch?v=fHjDrYJSwBY",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "7월 빅테크 실적은 대체로 긍정적이며, AI 관련 컴퓨팅 용량 수요 폭증으로 메모리 가격이 급등하자, 빅테크 기업들은 공급 안정화를 위해 장기 계약을 체결하고 있습니다.",
-        "summary": [
-          "7월 빅테크 기업들의 실적은 대부분 양호했으며, 이는 컴퓨팅 용량에 대한 높은 수요를 반영합니다.",
-          "메타의 저커버그 CEO는 AI 경쟁을 '치킨 게임'에 비유하며, 현재 컴퓨팅 용량 부족으로 투자를 멈출 수 없다고 언급했습니다.",
-          "메모리 반도체 시장의 최악의 시나리오는 승자 독식 구조의 형성 또는 메모리 공급의 급격한 증가입니다.",
-          "메모리 가격이 너무 높아 애플과 같은 주요 기업들은 불만을 제기하고 우회 경로를 찾으려 하지만, 사실상 현재로서는 다른 방법이 없습니다.",
-          "대만의 Nanya(난야) 등 메모리 공급사들은 분기 가격을 대폭 인상하여 고객사들에게 높은 가격을 강요하고 있습니다.",
-          "메타는 삼성전자, SanDisk와 같은 메모리 제조사들과 장기 공급 계약을 체결하며, 메모리 가격 상승을 제한하려는 움직임을 보였습니다."
-        ],
-        "tickers": [
-          {
-            "name": "Meta",
-            "ticker": "META",
-            "context": "7월 빅테크 실적 중 하나로 언급되며, 컴퓨팅 용량 수요와 장기 메모리 공급 계약 체결로 긍정적 관점.",
-            "view": "긍정",
-            "t": 2
-          },
-          {
-            "name": "Apple",
-            "ticker": "AAPL",
-            "context": "높은 메모리 가격에 불만을 제기하며 우회 방안을 모색 중인 기업으로 언급, 가격 상승의 피해자 입장.",
-            "view": "중립",
-            "t": 41
-          },
-          {
-            "name": "Nanya",
-            "ticker": "",
-            "context": "메모리 가격을 대폭 인상하여 고객사에게 높은 가격을 요구하고 있는 대만 메모리 공급사.",
-            "view": "긍정",
-            "t": 103
-          },
-          {
-            "name": "Samsung Electronics",
-            "ticker": "005930",
-            "context": "메타와 장기 메모리 공급 계약을 체결한 기업으로 언급되며, 공급사 입장에서 긍정적.",
-            "view": "긍정",
-            "t": 128
-          },
-          {
-            "name": "SanDisk",
-            "ticker": "",
-            "context": "메타와 장기 메모리 공급 계약을 체결한 기업으로 언급되며, 공급사 입장에서 긍정적 (현재 Western Digital의 일부).",
-            "view": "긍정",
-            "t": 128
-          }
-        ],
-        "key_points": [
-          {
-            "point": "빅테크 기업들의 AI 관련 컴퓨팅 용량 수요가 매우 강하며, 이로 인해 메모리 반도체 가격이 급등하고 있습니다.",
-            "t": 5
-          },
-          {
-            "point": "메모리 반도체 시장은 공급 부족 심화와 가격 상승 추세가 뚜렷하며, 일부 공급사들은 가격 결정력을 강화하고 있습니다.",
-            "t": 105
-          },
-          {
-            "point": "빅테크 기업들은 불안정한 메모리 가격과 공급에 대응하기 위해 장기 공급 계약을 통해 가격 안정화 및 물량 확보를 시도하고 있습니다.",
-            "t": 125
-          },
-          {
-            "point": "메모리 시장의 위험 요소로는 특정 기업의 독점적 승리나 예상치 못한 공급 급증이 있습니다.",
-            "t": 13
-          }
-        ],
-        "actionable": [
-          "메모리 반도체 공급 기업들의 실적 발표 및 가이던스를 면밀히 주시하여, 상승하는 메모리 가격이 이익에 어떻게 반영될지 파악해야 합니다.",
-          "AI 산업 성장에 따른 컴퓨팅 및 메모리 수요 증가 추세를 지속적으로 모니터링하여 장기 투자 기회를 탐색할 필요가 있습니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-10T19:09:23.888207+09:00"
-    },
-    {
-      "video_id": "ZQmQFs6wBsk",
-      "title": "[7월 10일 마감시황] 반등은 약해도 기회는 시작됐다…과매도 종목을 봐야 하는 이유ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
-      "channel": "삼프로TV",
-      "published": "2026-07-10T08:12:35+00:00",
-      "url": "https://www.youtube.com/watch?v=ZQmQFs6wBsk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-11T05:09:03.512372+09:00"
-    },
-    {
-      "video_id": "xPugU8YqN2Q",
-      "title": "지옥 같았던 이번주 폭락...\"변동성은 일단 꼭지입니다\"ㅣ홍선애, 이혁진 NH투자증권 자산관리컨설팅센터 주식팀장 [여의도 인사이트]",
-      "channel": "삼프로TV",
-      "published": "2026-07-10T08:49:59+00:00",
-      "url": "https://www.youtube.com/watch?v=xPugU8YqN2Q",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "NH투자증권 이혁진 팀장은 최근 주식 시장의 변동성이 정점을 지나고 있으며, 하반기에는 반도체 업종의 수급 불균형 해소와 금리 인상 사이클 변화에 따른 외국인 투자 자금 유입으로 점진적인 회복세를 전망했다.",
-        "summary": [
-          "최근 시장의 변동성은 삼성전자 실적 발표, 레버리지 ETF의 수급 교란, SK하이닉스 ADR 상장 등으로 심화되었으나, 이 변동성은 이번 주를 기점으로 정점을 지나고 있다.",
-          "반도체 기업들의 EPS 전망치는 삼성전자 충당금 반영 외에는 크게 낮아지지 않았으며, HBM 공급은 내년 상반기까지 견조할 것으로 예상되나, 범용 메모리 시장의 회복 시기가 중요하다.",
-          "레버리지 ETF의 시장 교란 효과를 줄이기 위해 증거금 상향 및 교육 강화 등의 정책적 대응이 필요하며, 장기적으로는 삼성전자와 SK하이닉스 같은 대형주의 신고가 달성이 악순환 고리를 끊는 자연스러운 해결책이 될 수 있다.",
-          "하반기에는 금리 인상 관련 불확실성 해소 및 한국과 미국 간 금리 차이 축소로 원화 강세 전환이 기대되며, 이는 외국인 자금 유입의 촉매제가 될 것이다.",
-          "7월 말 Alphabet, Meta, Apple 등 AI 관련 기업들의 실적 발표와 9월 미중정상회담, 11월 중간선거 등 주요 이벤트들이 시장의 방향성을 결정할 중요한 변곡점이 될 것이다.",
-          "과거 중간선거 이후 증시가 강세를 보였던 패턴을 고려할 때, 현재 외국인 순매도 상위 종목(반도체, 자동차 등)에 대한 저가 매수 기회가 열릴 수 있다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "2분기 실적 발표 이후 주가 하락은 시장 심리 위축과 레버리지 ETF 수급 교란 영향이 컸으나, 충당금을 제외한 영업이익 자체는 역대급 수준이다. 기술적 하단 지표는 이미 나왔다.",
-            "view": "긍정",
-            "t": 50
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "SK하이닉스 ADR 상장으로 인한 수급 교란은 또 다른 악재 요인이었으며, ADR은 미국 증시 역사상 큰 규모를 자랑한다. 본주 대비 ADR이 평균 15% 저렴한 구조를 보이고 있다.",
-            "view": "중립",
-            "t": 158
-          },
-          {
-            "name": "Alphabet",
-            "ticker": "GOOGL",
-            "context": "7월 말 Alphabet 실적 발표는 AI 수요 둔화 우려를 해소하고 메모리 반도체 시장의 방향성을 제시할 중요한 이벤트이다. 특히 클라우드 영업이익률 상승 여부가 관건이다.",
-            "view": "중립",
-            "t": 2628
-          },
-          {
-            "name": "Meta Platforms",
-            "ticker": "META",
-            "context": "7월 말 Meta 실적 발표도 AI 관련 주들의 시장 전망에 큰 영향을 미칠 것이다. Perplexity CEO는 마이크론이 6-12개월 내 Meta 시가총액을 넘어설 것으로 예상했다.",
-            "view": "중립",
-            "t": 2628
-          },
-          {
-            "name": "Apple",
-            "ticker": "AAPL",
-            "context": "7월 말 Apple 실적 발표는 AI 인플레이션에 저항하는 기업의 사례로 주목된다. Apple의 실적 발표에서 CXMT, YMTC 등 중국 메모리 기업 관련 질문이 노이즈가 될 수 있다.",
-            "view": "중립",
-            "t": 2642
-          },
-          {
-            "name": "Micron Technology",
-            "ticker": "MU",
-            "context": "Perplexity CEO는 6-12개월 내 마이크론의 시가총액이 메타를 넘어설 것으로 예상하며, 이는 AI 수요에 따른 메모리 산업의 장기적인 성장 잠재력을 보여준다.",
-            "view": "긍정",
-            "t": 2320
-          },
-          {
-            "name": "Perplexity",
-            "ticker": "",
-            "context": "Perplexity의 CEO는 마이크론의 시가총액이 메타를 넘어설 것이라고 발언하며, AI 수요가 메모리 산업에 미치는 긍정적인 영향을 강조했다.",
-            "view": "긍정",
-            "t": 2313
-          }
-        ],
-        "key_points": [
-          {
-            "point": "변동성은 정점을 지났으며, 향후 시장은 안정화될 것으로 전망 (V-코스피 기준 86까지 올랐으나 곧 70 밑으로 내려올 것)",
-            "t": 3945
-          },
-          {
-            "point": "7~9월은 반도체, 8월은 통화정책, 9월은 미중정상회담 등 중요한 이벤트들이 하반기 시장의 주요 변곡점이 될 것이다.",
-            "t": 2610
-          },
-          {
-            "point": "레버리지 ETF로 인한 수급 교란 문제는 시장의 심리를 크게 흔들었으며, 외국인 수급의 부재로 낙폭이 커지는 경향을 보였다.",
-            "t": 117
-          },
-          {
-            "point": "SK하이닉스 ADR 상장은 단기적으로 한국 시장의 수급 불균형을 심화시키고 가격 괴리율을 발생시키는 요인이 된다.",
-            "t": 158
-          },
-          {
-            "point": "AI 수요에 대한 시장의 과소평가가 있었으며, 이는 장기적인 메모리 산업의 성장 동력이 될 수 있다.",
-            "t": 2205
-          },
-          {
-            "point": "한국의 금리 인상과 미국의 금리 동결/인하가 겹치면 원화 강세로 이어져 외국인 자금 유입의 기회가 될 수 있다.",
-            "t": 2835
-          },
-          {
-            "point": "미국 중간선거 이후 증시가 강세를 보였던 과거 40년의 패턴은 하반기 시장에 긍정적인 신호로 작용할 수 있다.",
-            "t": 3524
-          }
-        ],
-        "actionable": [
-          "레버리지 ETF 투자 시 높은 증거금 비율과 철저한 교육 이수 필요성을 인지해야 한다.",
-          "하반기 금리 인상 사이클 변화 및 원화 강세 전환 시 외국인 수급이 집중될 수 있는 반도체, 자동차 업종에 주목할 필요가 있다.",
-          "7월 말 Alphabet, Meta, Apple 등 주요 AI 관련 기업들의 실적 발표를 통해 실제 AI 수요와 메모리 업황 변화를 면밀히 분석해야 한다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-10T19:08:37.811785+09:00"
-    },
-    {
-      "video_id": "IqbSQCOFYN4",
-      "title": "변곡점이 끝나면 랠리가 나옵니다 #박세익",
-      "channel": "체슬리TV",
-      "published": "2026-07-10T03:00:27+00:00",
-      "url": "https://www.youtube.com/watch?v=IqbSQCOFYN4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "주식 시장의 변곡점에서 나타나는 높은 변동성을 이해하고, 금리 정책 및 물가 변화에 따른 안도 랠리 가능성에 대비해야 합니다.",
-        "summary": [
-          "주식 시장은 본질적으로 변화를 싫어하며, 금리 인상/인하와 같은 정책 변화가 예상될 때 선반영하려는 경향이 있습니다.",
-          "중앙은행의 금리 정책 불확실성(인상 기대와 인하 기대의 혼재)은 시장의 큰 변동성을 유발합니다.",
-          "변곡점에서는 마치 썰물과 밀물이 부딪히듯 시장의 변동성이 크게 확대되며, 이는 바닥권에서도 긴 밑꼬리나 장대 양봉 등으로 나타납니다.",
-          "작년(2023년) 4월 주봉 차트에서도 관찰되었듯이, 변동성이 크게 나타나는 시점은 곧 변곡점일 가능성이 높습니다.",
-          "향후 물가가 안정되면서 금리 인상 압박이 완화되면, 시장은 안도하며 다시 랠리를 펼칠 것으로 전망됩니다."
-        ],
-        "tickers": [],
-        "key_points": [
-          "시장의 변동성이 극대화되는 시점은 곧 변곡점이며, 이는 상승 전환의 신호일 수 있습니다.",
-          "중앙은행의 금리 정책이 인플레이션 하락과 함께 완화될 것이라는 기대감이 형성되면, 시장은 안도 랠리를 보일 것입니다."
-        ],
-        "actionable": [
-          "변곡점에서 나타나는 높은 변동성을 매수 기회로 활용하기 위해 시장 움직임을 면밀히 관찰해야 합니다.",
-          "향후 물가 및 중앙은행의 금리 정책 발표를 주시하여 시장의 전환점을 파악해야 합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-10T19:04:43.740337+09:00"
-    },
-    {
-      "video_id": "ks_65dwon40",
-      "title": "영끌에 빚투…금리 고개드는데 가계대출이 안잡힌다",
-      "channel": "체슬리TV",
-      "published": "2026-07-10T07:34:22+00:00",
-      "url": "https://www.youtube.com/watch?v=ks_65dwon40",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-11T03:11:04.645866+09:00"
-    },
-    {
-      "video_id": "HdUYf4RuLmM",
-      "title": "메타, 캐나다에 1GW 데이터센터 건설 | 확신 사라진 증시, 빚투도 줄었다…예금은 12조 증가 | 수입차 신차 점유율 25% 첫 돌파 | 권순우 삼프로TV 기자 [뉴스3]",
-      "channel": "삼프로TV",
-      "published": "2026-07-09T23:10:03+00:00",
-      "url": "https://www.youtube.com/watch?v=HdUYf4RuLmM",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-10T10:24:20.719256+09:00"
     }
   ],
-  "updated": "2026-07-21T16:36:46.064035+09:00"
+  "updated": "2026-07-21T21:22:22.201343+09:00"
 }
