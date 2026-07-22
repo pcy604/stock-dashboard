@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "yqDcGi3jZGg",
+      "title": "단일종목 레버리지 상품 보완 추진...2차 수술대 오른다ㅣ명민준, 박가영, 이다솔 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-22T13:30:22+00:00",
+      "url": "https://www.youtube.com/watch?v=yqDcGi3jZGg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-23T00:24:23.257966+09:00"
+    },
+    {
       "video_id": "Ytv5MGZWygA",
       "title": "삼전닉스 폭락? 두려워 말고 '역발상'으로 접근해야 할 때ㅣ차영주 와이즈경제연구소 소장 [집중 오늘의 주식]",
       "channel": "삼프로TV",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-22T22:18:38.982111+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-23T00:25:28.336525+09:00"
     },
     {
       "video_id": "41qPGNAFn44",
@@ -32,12 +51,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"시장은 장중 상승분을 반납하며 마감했지만, 특정 섹터에서는 외국인 매수세와 새로운 성장 모멘텀이 포착되었고, 거시적 불확실성 속에서도 저점 다지기가 진행 중입니다.\",\n  \"summary\": [\n    \"장 초반 상승세가 오후에 반납되며 '줬다 뺏는' 시장 상황이 연출되었으며, 이는 유가 상승, 채권 금리 급등, 미 증시 선물 하락 등 거시 경제 요인들이 복합적으로 작용했습니다.\",\n    \"외국인 투자자들은 국내 선물 시장에서 매도 우위를 보였고, 현물 주식은 매수했지만 ETF를 매도하는 등 전반적으로 관망세를 유지하며 불안정한 심리를 드러냈습니다.\",\n    \"코스피 전체는 하락했으나 현대차, SK텔레콤, 두산 등 일부 종목과 로봇, 화장품 섹터에서는 외국인/기관 매수세가 유입되며 시장의 새로운 모멘텀을 찾는 움직임이 나타났습니다.\",\n    \"반도체 대형주(SK하이닉스)는 파란불로 마감했지만, 외국인들의 매수세"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-22T22:18:06.685035+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-07-23T00:24:55.718187+09:00"
     },
     {
       "video_id": "HcAqPLyHvsY",
@@ -47,16 +65,42 @@
       "url": "https://www.youtube.com/watch?v=HcAqPLyHvsY",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "one_liner": "주식 투자에서 끝까지 모든 수익을 얻으려 하기보다 적절한 시점에 진입하고 과열된 시장에서 조용히 빠져나오는 전략을 취해야 한다.",
+        "summary": [
+          "어떤 섹터가 오르기 시작할 때 너무 서두르지 말고 세 번째나 네 번째 정도로 진입하는 것이 좋다.",
+          "새로운 기회를 찾을 때는 먼저 성공한 사람들의 이야기를 참고하여, 아직 많은 사람들이 모를 때 진입해야 한다.",
+          "괜찮다고 판단되면 머물지만, 대중이 몰려들어 '맛집'이라며 과열되기 시작하면 출구 전략을 고민해야 한다.",
+          "시장이 과열되고 마지막 소문이 퍼지면서 상투를 칠 때는 조용히 빠져나와야 한다.",
+          "모든 수익을 끝까지 다 얻으려 하면 결국 마지막 '설거지'를 하게 될 수 있으므로, 적당한 시점에 이익을 확정하는 것이 중요하다."
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "key_points": [
+          {
+            "point": "초기 확증 후 진입: 시장이나 섹터의 상승 추세가 명확해진 후, 너무 서두르지 않고 적절한 시점에 진입하는 것이 유리하다. (선점보다는 확인 후 진입)",
+            "t": 0
+          },
+          {
+            "point": "새로운 기회 탐색: 이미 과열된 시장보다는 아직 대중에게 널리 알려지지 않은 새로운 기회를 먼저 발굴하고 진입하는 것이 좋다.",
+            "t": 15
+          },
+          {
+            "point": "과열 시점의 전략적 이탈: 시장이 '맛집'처럼 소문나서 많은 사람이 몰려들고 과열되는 시점은 최고점일 가능성이 높으므로, 이때는 욕심을 버리고 조용히 빠져나와야 한다.",
+            "t": 35
+          },
+          {
+            "point": "최대 수익 추구의 위험성: 끝까지 모든 수익을 다 먹으려 하면 오히려 시장 하락 시점에 손실을 보거나 마지막 '설거지'를 떠안게 될 위험이 있다.",
+            "t": 49
+          }
+        ],
+        "actionable": [
+          "시장의 초기 움직임을 확인한 후 투자 진입 시점을 고려하고, 너무 이른 진입이나 너무 늦은 진입을 피한다.",
+          "투자한 종목이나 섹터가 대중의 과도한 관심과 찬사를 받을 때를 이익 실현의 신호로 삼고, 출구 전략을 준비한다.",
+          "욕심을 자제하고 이익을 확정하는 시점을 미리 계획하여, 시장의 마지막 과열 구간에서 발생할 수 있는 손실을 방지한다."
+        ]
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-22T22:09:19.986153+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-07-23T00:22:32.591748+09:00"
     },
     {
       "video_id": "wtUsxv1kswM",
@@ -74,8 +118,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-22T22:20:48.594670+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-23T00:27:06.445883+09:00"
     },
     {
       "video_id": "pepM8s3c6xs",
@@ -112,8 +156,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-22T22:19:43.702423+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-23T00:26:33.395802+09:00"
     },
     {
       "video_id": "BEM-x2-2kVU",
@@ -131,8 +175,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-22T22:19:11.431785+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-23T00:26:00.719856+09:00"
     },
     {
       "video_id": "zmTHWQtdzJY",
@@ -150,8 +194,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-22T22:10:25.286528+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-23T00:23:50.047941+09:00"
     },
     {
       "video_id": "hYIhTPYiq3g",
@@ -393,8 +437,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-22T22:21:20.691948+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-23T00:27:39.024166+09:00"
     },
     {
       "video_id": "FigtCBH-cGI",
@@ -1156,11 +1200,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-22T22:09:52.255611+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-23T00:23:16.894880+09:00"
     },
     {
       "video_id": "hDU_RHhUD3E",
@@ -14308,82 +14352,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-13T17:39:28.252560+09:00"
-    },
-    {
-      "video_id": "OHAcWR9UoFA",
-      "title": "최근 삼성전자 주가 조정의 배경... | 체슬리투자자문 오우석 과장 [모닝브리프 하이라이트]",
-      "channel": "체슬리TV",
-      "published": "2026-07-13T06:24:47+00:00",
-      "url": "https://www.youtube.com/watch?v=OHAcWR9UoFA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "메타의 대규모 AI 투자 계획 발표로 반도체 업황 개선 기대감이 높아지는 가운데, 삼성전자와 SK하이닉스의 긍정적인 실적 전망과 HBM 가격 상승이 반도체 리레이팅을 견인할 것으로 분석된다.",
-        "summary": [
-          "메타(Meta)는 2026년 7GW AI 데이터센터 구축에 이어 2027년 7GW 추가 계획을 발표, 2026년까지 총 14GW 확보를 목표로 하는 등 AI 투자 확대를 공식화했다. 이는 2026년 메타 AI 투자액 약 220조 원으로 예상되며, 미국 빅테크 전체 AI 투자액의 20%를 차지할 전망이다.",
-          "일반 고객이 체감하는 2027년 메모리 공급 부족은 공급 절벽 수준으로 심화될 것으로 전망되며, 빅테크 장기 공급 계약이 본격화되면서 메모리 신규 생산 물량은 LTA(장기 공급 계약)를 체결한 빅테크 중심으로 우선 배정될 예정이다.",
-          "삼성전자의 영업이익은 3분기 110조 원, 4분기 124조 원으로 예상되며 2분기 대비 실적 개선 폭이 확대될 것으로 보이며, 특히 2027년 예상 영업이익 574조 원 중 DS(반도체) 사업부가 566조 원을 차지할 것으로 전망된다.",
-          "SK하이닉스 ADR 강세는 SK하이닉스 본주와 삼성전자 주가 상승으로 이어지는 연쇄 효과가 기대되며, 이에 따른 반도체 리레이팅의 선순환이 예상된다.",
-          "모건스탠리 보고서의 적중도를 분석한 결과, AI 등장 이전인 2016~2019년에는 예측이 대부분 맞았지만, AI 시대 이후에는 적중률이 낮아지는 경향을 보였다. 이는 AI가 시장 예측의 패러다임을 변화시키고 있음을 시사한다.",
-          "일각에서는 SK하이닉스의 2분기 실적이 컨센서스를 하회할 가능성도 제기되지만, HBM 가격 인상과 고마진 효과가 3분기부터 본격 반영될 경우 실적 추정치가 상향 조정될 가능성이 있다."
-        ],
-        "tickers": [
-          {
-            "name": "메타",
-            "ticker": "META",
-            "context": "메타는 2026년 7GW AI 데이터센터 구축에 이어 2027년 7GW 추가 계획을 발표하며, 2026년까지 총 14GW 확보를 목표로 AI 투자를 확대할 것으로 전망된다. 이는 미국 빅테크 전체 AI 투자의 20%를 차지할 것으로 예상된다.",
-            "view": "긍정",
-            "t": 49
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930.KS",
-            "context": "삼성전자의 영업이익은 3분기 110조 원, 4분기 124조 원으로 예상되며, 2027년에는 DS 사업부가 전체 영업이익의 대부분을 차지하며 실적 개선 폭이 확대될 것으로 전망된다.",
-            "view": "긍정",
-            "t": 211
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660.KS",
-            "context": "SK하이닉스 ADR의 강세는 본주와 삼성전자 주가 상승으로 이어지는 연쇄 효과가 기대되며, HBM 부문의 가격 인상이 내년부터 본격적으로 실적에 반영되어 영업이익률 개선에 기여할 것으로 예상된다.",
-            "view": "긍정",
-            "t": 220
-          },
-          {
-            "name": "마이크론",
-            "ticker": "MU",
-            "context": "최근 SK하이닉스 ADR이 13% 상승한 반면 마이크론은 1.2% 상승에 그치며, SK하이닉스가 HBM 가격 인상에 대한 기대감이 더 크게 반영되고 있음을 시사한다.",
-            "view": "중립",
-            "t": 744
-          }
-        ],
-        "key_points": [
-          {
-            "point": "2027년 메모리 공급 절벽 심화 예상: 빅테크 중심의 신규 생산량 배정으로 일반 고객의 메모리 공급 부족이 심화될 수 있다.",
-            "t": 43
-          },
-          {
-            "point": "메타의 AI 투자 지속성 확인: 메타의 2027년 7GW 추가 투자 계획은 시장의 AI 투자 지속성 우려를 해소하는 강력한 신호로 작용한다.",
-            "t": 119
-          },
-          {
-            "point": "반도체 업종 리레이팅 기대: 삼성전자와 SK하이닉스의 실적 개선 및 HBM 가격 인상 등이 반도체 전반의 리레이팅을 이끌 선순환 구조를 형성할 것이다.",
-            "t": 220
-          },
-          {
-            "point": "AI 시대 이후 모건스탠리 보고서 적중률 하락: 과거의 분석 방식으로는 AI 시장의 급변하는 수요를 예측하기 어렵다는 시사점을 준다.",
-            "t": 935
-          }
-        ],
-        "actionable": [
-          "메타의 향후 AI 투자 계획 및 장기 공급 계약 현황을 지속적으로 모니터링하여 반도체 수요 변화를 파악한다.",
-          "삼성전자와 SK하이닉스의 3분기 실적 발표를 주시하고, HBM 가격 인상 등 고마진 제품의 매출 기여도를 확인하여 긍정적 실적 흐름 지속 여부를 판단한다.",
-          "AI 반도체 시장의 변화를 고려하여 기존의 투자 프레임을 재검토하고, HBM 등 고부가가치 메모리 중심의 투자 전략을 강화한다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-13T17:38:35.592396+09:00"
     }
   ],
-  "updated": "2026-07-22T22:21:54.019205+09:00"
+  "updated": "2026-07-23T00:27:40.024455+09:00"
 }
