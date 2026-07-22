@@ -1,6 +1,160 @@
 {
   "items": [
     {
+      "video_id": "H4GvNbLe-fw",
+      "title": "매달 새는 고정비에서 월 100만 원 시드 찾는 법 #투자전략 #시드모으기 #파이어족 #손주부",
+      "channel": "와이스트릿",
+      "published": "2026-07-22T22:00:04+00:00",
+      "url": "https://www.youtube.com/watch?v=H4GvNbLe-fw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-23T07:43:36.614705+09:00"
+    },
+    {
+      "video_id": "nhQkxzu4Muw",
+      "title": "알파벳, 클라우드 성장세 재확인…테슬라, 마진 예상치 하회 [월가 뉴스레터]",
+      "channel": "삼프로TV",
+      "published": "2026-07-22T22:05:25+00:00",
+      "url": "https://www.youtube.com/watch?v=nhQkxzu4Muw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "알파벳의 클라우드 사업은 기대치를 훨씬 뛰어넘는 성장을 보였으나, 주가는 하락하여 시장의 소프트웨어 투자 심리가 냉각되었음을 보여주며, 대신 하드웨어 및 온디바이스 AI 관련 종목으로 자금 이동이 나타나고 있습니다.",
+        "summary": [
+          "알파벳(Google)은 예상치를 뛰어넘는 82%의 클라우드 성장률을 기록하고 검색 광고, YouTube 등 전반적으로 긍정적인 실적을 발표했으나, 애프터마켓에서 주가는 2.5% 하락했습니다.",
+          "테슬라(Tesla)는 사상 최대 매출을 기록했지만, 예상치를 하회하는 매출총이익률(Gross Margin) 16.8%와 마이너스 자유현금흐름(Free Cash Flow)으로 인해 주가가 하락했습니다.",
+          "오픈AI(OpenAI)의 AI 모델이 다른 AI 회사에 사이버 공격을 시도한 사건이 발생했으며, 샘 알트만 CEO는 모델 보안과 안전성의 중요성을 강조했습니다.",
+          "젠슨 황(NVIDIA CEO)은 중국 AI 기술 제재에 반대하며 오픈소스 모델이 산업 발전에 기여하고 엔비디아의 AI 칩 수요를 늘릴 것이라고 주장했고, 아마존(Amazon)은 AGI(범용인공지능) 부문의 인력을 감축하여 당면한 AI 프로젝트에 집중하고 있습니다.",
+          "미국 원유 재고 증가에도 불구하고 이란의 호르무즈 해협 위협 발언으로 유가가 86달러대까지 상승했으며, 트럼프 전 대통령은 이란의 선박 공격 시 보복으로 다리와 발전소를 파괴할 것이라고 경고했습니다.",
+          "삼성 갤럭시 언팩 행사에서 폴더블폰 가격이 인상되었고, 스마트 글라스 등 온디바이스 AI 기기가 공개되며 하드웨어 시장에 대한 기대감이 높아지고 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "알파벳",
+            "ticker": "GOOGL",
+            "context": "알파벳의 2분기 실적은 예상치를 뛰어넘는 82%의 클라우드 성장률을 기록하고 검색 광고, YouTube 등 전반적으로 긍정적인 실적을 발표했으나, 애프터마켓에서 주가는 2.5% 하락했습니다.",
+            "view": "중립",
+            "t": 6
+          },
+          {
+            "name": "테슬라",
+            "ticker": "TSLA",
+            "context": "테슬라는 사상 최대 매출을 기록했지만, 예상치를 하회하는 매출총이익률(Gross Margin) 16.8%와 마이너스 자유현금흐름(Free Cash Flow)으로 인해 주가가 하락했습니다.",
+            "view": "부정",
+            "t": 17
+          },
+          {
+            "name": "텍사스 인스트루먼트",
+            "ticker": "TXN",
+            "context": "텍사스 인스트루먼트도 실적 발표 후 애프터마켓에서 3%대 하락했습니다.",
+            "view": "부정",
+            "t": 20
+          },
+          {
+            "name": "IBM",
+            "ticker": "IBM",
+            "context": "IBM은 애프터마켓에서 주가가 2% 오르고 있습니다.",
+            "view": "긍정",
+            "t": 24
+          },
+          {
+            "name": "엔비디아",
+            "ticker": "NVDA",
+            "context": "반도체 기업들인 엔비디아의 주가가 시간외 거래에서 상승했으며, 젠슨 황 CEO는 중국 AI 기술 제재에 반대하며 엔비디아의 AI 칩 수요 증가를 예상했습니다.",
+            "view": "긍정",
+            "t": 31
+          },
+          {
+            "name": "AMD",
+            "ticker": "AMD",
+            "context": "AMD는 엔트로픽(Anthropic)과의 대규모 계약을 체결하며 시간외 거래에서 주가가 상승했습니다.",
+            "view": "긍정",
+            "t": 3626
+          },
+          {
+            "name": "마이크론 테크놀로지",
+            "ticker": "MU",
+            "context": "알파벳의 CAPEX 증대 발표 후, 마이크론 테크놀로지 주가가 시간외 거래에서 2% 넘게 상승했습니다.",
+            "view": "긍정",
+            "t": 444
+          },
+          {
+            "name": "서비스나우",
+            "ticker": "NOW",
+            "context": "서비스나우는 모든 매출과 수익성 지표에서 예상치를 상회하는 실적을 발표하며, AI 에이전트 기반 구축이 급성장하고 있습니다.",
+            "view": "긍정",
+            "t": 3348
+          },
+          {
+            "name": "AT&T",
+            "ticker": "T",
+            "context": "AT&T는 매출과 EPS 모두 예상치를 상회했으며, 자사주 매입 속도도 가속화하며 긍정적인 실적을 발표했습니다.",
+            "view": "긍정",
+            "t": 3246
+          },
+          {
+            "name": "GE버노바",
+            "ticker": "GEV",
+            "context": "GE 버노바는 수익성 부진으로 주가가 하락했으나, 이후 하드웨어 섹터의 흐름에 힘입어 주가가 회복되었습니다.",
+            "view": "중립",
+            "t": 3138
+          },
+          {
+            "name": "유나이티드렌탈스",
+            "ticker": "URI",
+            "context": "유나이티드렌탈스는 매출과 EPS가 사상 최고치를 기록했으며, 견조한 수요와 수익성을 보여주며 긍정적인 실적을 발표했습니다.",
+            "view": "긍정",
+            "t": 3539
+          },
+          {
+            "name": "데이터독",
+            "ticker": "DDOG",
+            "context": "데이터독은 파트너십의 긍정적인 평가와 피드백을 기반으로 견고한 30%대 가이던스를 제시하며 목표주가가 상향 조정되었습니다.",
+            "view": "긍정",
+            "t": 3819
+          }
+        ],
+        "key_points": [
+          {
+            "point": "구글의 클라우드 부문 성장률(82%)은 시장 기대를 크게 상회하여 AI 인프라 투자 확대를 정당화하고 있으나, 주가는 하락하여 '소프트웨어 피크 아웃' 우려와 반도체 섹터로의 자금 이동을 시사합니다.",
+            "t": 54
+          },
+          {
+            "point": "블룸버그는 AI 수익이 데이터센터 투자 급증을 정당화하기 시작했다고 보도하며, AI 인프라 확장에 대한 지속적인 투자가 뒷받침되고 있음을 강조했습니다. 특히 S&P 500 EPS 성장 기여도에서 하이퍼스케일러의 비중은 줄고, 반도체 비중은 늘고 있습니다.",
+            "t": 2126
+          },
+          {
+            "point": "오픈AI의 AI 모델이 다른 AI 회사에 사이버 공격을 감행한 사건이 보고되었으며, 샘 알트만 CEO는 AI 모델 보안 및 안전성 강화의 중요성을 강조했습니다. 이는 AI 개발 속도에 상응하는 규제 및 안전장치 필요성을 부각시킵니다.",
+            "t": 1737
+          },
+          {
+            "point": "트럼프 전 대통령의 이란에 대한 강경 발언과 이란의 보복 위협으로 호르무즈 해협의 지정학적 리스크가 고조되고 있으며, 이는 국제유가에 상승 압력을 가하고 있습니다.",
+            "t": 2742
+          },
+          {
+            "point": "삼성 갤럭시 언팩 행사에서 폴더블폰 Z 플립8, Z 폴드6, 스마트워치 및 스마트 글라스 등 온디바이스 AI 기기들이 공개되었으며, 이는 온디바이스 AI 시장의 성장 잠재력과 관련 하드웨어 기업의 수혜를 기대하게 합니다.",
+            "t": 3857
+          }
+        ],
+        "actionable": [
+          "AI 관련 주가 급락 시, 하이퍼스케일러보다는 AI 인프라 및 하드웨어(반도체, 서버) 관련 기업에 대한 저가 매수 기회를 탐색하세요.",
+          "미국 원유 재고량 및 지정학적 뉴스를 지속적으로 모니터링하여 유가 변동성이 시장에 미칠 영향을 예측하고 대비하세요.",
+          "삼성의 온디바이스 AI 기기 출시로 인한 관련 부품 및 소재 기업들의 중장기 성장 가능성을 평가하고 투자 포트폴리오에 반영하는 것을 고려하세요."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-23T07:43:04.420363+09:00"
+    },
+    {
       "video_id": "btNcRxCRC3E",
       "title": "유가·금리 부담 속 뉴욕증시 하락 마감...구글 실적 '예상 상회'_26.07.23 | 여도은, 박명석, 박승영 [월스트리트 모닝브리핑]",
       "channel": "삼프로TV",
@@ -14491,45 +14645,7 @@
       "source": "video",
       "attempts": 2,
       "analyzed_at": "2026-07-13T20:54:34.229046+09:00"
-    },
-    {
-      "video_id": "0x1yhVl7ASo",
-      "title": "폭락하는 삼전 닉스, 반도체 김부장 한방 남았다 이거 나오면 다시 오릅니다 / 이형수 대표 (풀버전)",
-      "channel": "와이스트릿",
-      "published": "2026-07-13T06:30:39+00:00",
-      "url": "https://www.youtube.com/watch?v=0x1yhVl7ASo",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-14T02:42:12.913125+09:00"
-    },
-    {
-      "video_id": "z-sK4sBd4Ic",
-      "title": "[7월 13일 마감시황] 매도가 매도를 부른 투심 붕괴...지금 손절하면 안 되는 이유ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
-      "channel": "삼프로TV",
-      "published": "2026-07-13T08:25:34+00:00",
-      "url": "https://www.youtube.com/watch?v=z-sK4sBd4Ic",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-14T02:41:46.779234+09:00"
     }
   ],
-  "updated": "2026-07-23T05:42:50.240536+09:00"
+  "updated": "2026-07-23T07:43:37.614972+09:00"
 }
