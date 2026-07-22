@@ -2678,6 +2678,34 @@ def _fetch_pf_price(sym: str, market: str):
     except Exception:
         return None
 
+
+@st.cache_data(ttl=600)
+def _px_series(sym: str, market: str, days: int = 75):
+    """(현재가, 최근 45영업일 종가 리스트) — 현재가와 추세 스파크라인을 호출 1회로."""
+    try:
+        import FinanceDataReader as fdr
+        code = sym.replace('.KS', '').replace('.KQ', '')
+        fdr_sym = code if market == 'KR' else sym
+        start = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
+        c = fdr.DataReader(fdr_sym, start)['Close'].dropna()
+        if c.empty:
+            return None, []
+        return float(c.iloc[-1]), [round(float(x), 4) for x in c.tail(45)]
+    except Exception:
+        return None, []
+
+
+@st.cache_data(ttl=1800)
+def _marcap_join() -> dict:
+    """sym → 시총. 기존 산출물(screener·mdd·returns)에서 조인 — 추가 API 호출 없음."""
+    m = {}
+    for _p in (SCREENER_JSON, MDD_JSON, Path('results/returns.json')):
+        d = load_json(_p) or {}
+        for s in d.get('stocks', []):
+            if s.get('marcap') and s['sym'] not in m:
+                m[s['sym']] = s['marcap']
+    return m
+
 with tab_pf:
     st.header("💼 포트폴리오 관리")
     update_badge(PORTFOLIO_RESULT)
@@ -2690,15 +2718,33 @@ with tab_pf:
         _aip = _wpj['p10'] if _ai_set.startswith("10") else _wpj['p20']
         _am1, _am2, _am3, _am4 = st.columns(4)
         _am1.metric("기준 주차", _aip.get('week', '-'), help=f"갱신 {_wpj.get('updated', '-')}")
-        _am2.metric("권고 현금", f"{_aip.get('cash_pct', 0):.0f}%", help="매크로 신호(FRED) 기반 자동")
+        _am2.metric("💰 포트 내 현금", f"{_aip.get('cash_pct', 0):.0f}%", help="매크로 신호(FRED) 기반 자동 — 표 마지막 행에도 표시")
         _am3.metric("주식 투입", f"{_aip.get('deployed_pct', 0)}%")
         _am4.metric("종목 수", f"{len(_aip.get('positions', []))}개")
 
-        with st.spinner("현재가 조회 중 (제안 종목)..."):
+        _af1, _af2 = st.columns([1.2, 1])
+        _ai_mkt = _af1.radio("시장 필터", ["전체", "KR", "US"], horizontal=True, key="ai_pf_mkt")
+        _ai_cap = _af2.selectbox("시총 필터", ["전체", "1조·$1B 이상", "10조·$10B 이상"], key="ai_pf_cap")
+        _capmap = _marcap_join()
+
+        def _cap_pass(sym, mkt):
+            if _ai_cap == "전체":
+                return True
+            mc = _capmap.get(sym)
+            if not mc:
+                return True                      # 시총 미상은 필터로 죽이지 않음
+            th = (1e12, 1e9) if _ai_cap.startswith("1조") else (1e13, 1e10)
+            return mc >= (th[0] if mkt == 'KR' else th[1])
+
+        _pos_f = [p for p in _aip.get('positions', [])
+                  if (_ai_mkt == "전체" or p.get('market') == _ai_mkt)
+                  and _cap_pass(p['sym'], p.get('market', 'US'))]
+
+        with st.spinner("현재가·추세 조회 중 (제안 종목)..."):
             _airows = []
-            for _p9 in _aip.get('positions', []):
+            for _p9 in _pos_f:
                 _accy = '₩' if _p9.get('market') == 'KR' else '$'
-                _acur = _fetch_pf_price(_p9['sym'], _p9.get('market', 'US'))
+                _acur, _aspark = _px_series(_p9['sym'], _p9.get('market', 'US'))
                 _aret = (_acur / _p9['entry'] - 1) * 100 if _acur and _p9.get('entry') else None
                 if _acur and _p9.get('stop') and _acur <= _p9['stop']:
                     _ast = '🔴 손절 실행'
@@ -2707,29 +2753,32 @@ with tab_pf:
                 else:
                     _ast = '보유'
                 _airows.append({
-                    '종목': _p9['name'], '코드': _p9['sym'], '시장': _p9.get('market', '-'),
-                    '비중%': f"{_p9.get('weight_pct', 0):.1f}",
+                    '종목': _p9['name'], '시장': _p9.get('market', '-'),
+                    '시총': fmt_cap(_capmap.get(_p9['sym']), _p9.get('market', 'US')) if _capmap.get(_p9['sym']) else '-',
+                    '비중%': round(_p9.get('weight_pct', 0), 1),
                     '진입가': f"{_accy}{_p9['entry']:,.2f}" if _p9.get('entry') else '-',
                     '현재가': f"{_accy}{_acur:,.2f}" if _acur else '조회실패',
-                    '진입대비': _aret,
-                    '손절가(-7%)': f"{_accy}{_p9['stop']:,.2f}" if _p9.get('stop') else '-',
-                    '목표가(+14%)': f"{_accy}{_p9['target']:,.2f}" if _p9.get('target') else '-',
+                    '진입대비%': round(_aret, 2) if _aret is not None else None,
+                    '추세(45일)': _aspark or None,
+                    '손절가': f"{_accy}{_p9['stop']:,.2f}" if _p9.get('stop') else '-',
+                    '목표가': f"{_accy}{_p9['target']:,.2f}" if _p9.get('target') else '-',
                     '지시': _ast,
                     '신호': ', '.join(_p9.get('signals', [])[:2]) or '-',
                 })
+        _airows.append({'종목': '💰 현금', '시장': '-', '시총': '-',
+                        '비중%': round(_aip.get('cash_pct', 0), 1),
+                        '진입가': '-', '현재가': '-', '진입대비%': None, '추세(45일)': None,
+                        '손절가': '-', '목표가': '-', '지시': '대기', '신호': '매크로 신호 기반'})
         _aidf = pd.DataFrame(_airows)
-        def _c_aist(v):
-            s = str(v)
-            if '손절' in s: return 'background-color:#5a1a1a;color:white;font-weight:bold'
-            if '익절' in s: return 'color:#56d364;font-weight:bold'
-            return 'color:#8b949e'
-        def _c_airet(v):
-            try: return 'color:#56d364' if float(v) >= 0 else 'color:#f78166'
-            except Exception: return ''
-        st.dataframe(_aidf.style.map(_c_aist, subset=['지시']).map(_c_airet, subset=['진입대비'])
-                     .format({'진입대비': lambda v: f"{v:+.1f}%" if v is not None else '-'}),
-                     use_container_width=True, hide_index=True,
-                     row_height=25, height=_dfh(len(_aidf)))
+        st.dataframe(
+            _aidf, use_container_width=True, hide_index=True, height=_dfh(len(_aidf), cap=760),
+            column_config={
+                '비중%': st.column_config.NumberColumn('비중%', format='%.1f%%'),
+                '진입대비%': st.column_config.NumberColumn('진입대비%', format='%+.2f%%'),
+                '추세(45일)': st.column_config.LineChartColumn('추세(45일)', width='medium'),
+            })
+        if _ai_mkt != "전체" or _ai_cap != "전체":
+            st.caption(f"필터 적용 중: {len(_pos_f)}/{len(_aip.get('positions', []))}종목 표시 — 비중%는 원 포트폴리오 기준(재정규화 안 함)")
         st.caption("**이 포트는 원칙의 산출물** — ①선정: 신호 × 실전 신뢰계수(못 하는 신호 자동 감액) "
                    "②비중: 손익비 리스크 사이징 + 종목 캡 ③손절 -7% · 목표 +14% (손익비 2:1 고정) "
                    "④현금: 매크로 신호 자동 ⑤보유 후 매도: 방어손절·분할익절·시간매도 3룰. "
