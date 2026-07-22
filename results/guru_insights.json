@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-23T00:24:23.257966+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-23T02:06:40.474039+09:00"
     },
     {
       "video_id": "Ytv5MGZWygA",
@@ -35,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-23T00:25:28.336525+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-23T02:10:14.295883+09:00"
     },
     {
       "video_id": "41qPGNAFn44",
@@ -46,16 +46,110 @@
       "url": "https://www.youtube.com/watch?v=41qPGNAFn44",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "코스피는 장 막판 하락했지만, 특정 섹터 종목들은 긍정적 신호를 보였으며, 시장의 완전한 회복을 위해서는 외국인 수급과 긍정적인 거시 지표가 중요합니다.",
+        "summary": [
+          "코스피는 장 초반 상승분을 반납하며 마감했으나, 외국인들은 삼성전자, 현대차 등 대형주 현물을 매수하며 지수 하락 방어에 기여했습니다.",
+          "일부 기관(금투)은 선물 및 ETF 물량을 매도하며 지수 하락 압력을 높였습니다.",
+          "국채금리 상승과 유가(WTI $88) 상승 등 매크로 불확실성이 지속되고 있으며, 특히 미국 매크로 지표가 시장에 큰 영향을 미칠 것으로 예상됩니다.",
+          "로봇, 화장품, 일부 반도체 소부장 주 등 특정 섹터 종목들은 큰 폭으로 상승하며 시장 참여자들의 관심을 끌었으나, 추세 전환보다는 '바닥 다지기' 국면으로 평가됩니다.",
+          "외국인의 꾸준한 수급 유입은 긍정적이나, 대형주들의 강한 상승 모멘텀 부재로 당분간 변동성 장세가 예상되며, 소액/분할 매수 전략이 유효할 수 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "장 초반 9%까지 올랐으나 이후 하락하여 상승분을 반납하고, ADR도 하락세를 보였습니다.",
+            "view": "부정",
+            "t": 25
+          },
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "시간외 거래에서 10% 가까이 상승하며 반도체 섹터의 기대감을 높였습니다.",
+            "view": "긍정",
+            "t": 49
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "외국인들이 3일 연속 매수했으며, 엔비디아 CEO와의 회동 소식으로 긍정적인 전망이 나왔습니다.",
+            "view": "긍정",
+            "t": 957
+          },
+          {
+            "name": "현대차",
+            "ticker": "005380",
+            "context": "외국인 및 기관 동반 순매수가 있었고, 플라잉카 등 미래 모빌리티에 대한 기대감이 언급되었습니다.",
+            "view": "긍정",
+            "t": 1050
+          },
+          {
+            "name": "LG전자",
+            "ticker": "066570",
+            "context": "외국인 순매수가 나타나며 긍정적인 움직임을 보였습니다.",
+            "view": "긍정",
+            "t": 1441
+          },
+          {
+            "name": "두산에너빌리티",
+            "ticker": "034020",
+            "context": "4% 상승하며 일부 종목의 상승세를 이끌었습니다.",
+            "view": "긍정",
+            "t": 1438
+          },
+          {
+            "name": "SK텔레콤",
+            "ticker": "017670",
+            "context": "11% 상승하며 AI 데이터센터 관련 호재에 반응했습니다.",
+            "view": "긍정",
+            "t": 1446
+          },
+          {
+            "name": "네이버",
+            "ticker": "035420",
+            "context": "캐나다 투자 유치 및 클라우드 사업 확장 기대감으로 긍정적인 전망이 나왔습니다.",
+            "view": "긍정",
+            "t": 1734
+          },
+          {
+            "name": "엔비디아",
+            "ticker": "NVDA",
+            "context": "CEO가 삼성전자, SK 그룹 총수와 회동하며 국내 반도체 산업에 대한 기대감을 높였습니다.",
+            "view": "긍정",
+            "t": 1844
+          }
+        ],
+        "key_points": [
+          {
+            "point": "시장 변동성 확대: 시장 상승분 반납 및 외국인 선물 매도로 인한 불안정성 지속.",
+            "t": 0
+          },
+          {
+            "point": "특정 섹터의 강세: 로봇, 화장품, 일부 반도체 소부장 주식들이 개별 이슈로 상승.",
+            "t": 1205
+          },
+          {
+            "point": "외국인 수급의 중요성: 시장 회복을 위해 외국인의 지속적인 매수세가 필수적.",
+            "t": 2103
+          },
+          {
+            "point": "매크로 변수의 영향력: 유가, 국채금리 등 글로벌 매크로 지표가 시장 심리에 큰 영향을 미침.",
+            "t": 4700
+          },
+          {
+            "point": "바닥 다지기 국면: 아직 강력한 추세 전환에는 미치지 못했으며, 신중한 접근 필요.",
+            "t": 506
+          }
+        ],
+        "actionable": [
+          "시장 전반의 추세 전환 신호가 나타날 때까지는 소극적인 분할 매수 전략을 유지하세요.",
+          "알파벳, 테슬라 등 주요 빅테크 기업들의 실적 발표와 가이던스를 주시하여 시장 방향성을 판단하세요.",
+          "단기 테마에 휩쓸리기보다, 실적과 펀더멘털이 견고하고 장기 성장성이 기대되는 대형주 또는 특정 섹터 내 우량주에 집중하세요."
+        ]
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-23T00:24:55.718187+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-23T02:09:42.014817+09:00"
     },
     {
       "video_id": "HcAqPLyHvsY",
@@ -118,8 +212,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T00:27:06.445883+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-23T02:11:51.120919+09:00"
     },
     {
       "video_id": "pepM8s3c6xs",
@@ -156,8 +250,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T00:26:33.395802+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-23T02:11:18.651440+09:00"
     },
     {
       "video_id": "BEM-x2-2kVU",
@@ -175,8 +269,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T00:26:00.719856+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-23T02:10:46.438578+09:00"
     },
     {
       "video_id": "zmTHWQtdzJY",
@@ -186,16 +280,78 @@
       "url": "https://www.youtube.com/watch?v=zmTHWQtdzJY",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "트럼프와 같은 지정학적 리스크가 시장 변동성을 키웠지만, AI 산업에 대한 학습과 외국인 매수세로 가격 매력도가 높아진 지금이 상승 전환의 기회이며, 이는 펀더멘털 문제가 아닌 시장 심리와 수급 변화에 대한 '지혜'로운 대응으로 해석될 수 있다.",
+        "summary": [
+          "지난 1주일간 시장은 트럼프 발언 및 이란과의 긴장 고조, 캐나다 관세 부과 등 지정학적 이슈와 유가, 금리 상승 압력으로 큰 변동성을 겪었다.",
+          "특히 SK하이닉스 ADR 급락과 같은 '이해할 수 없는' 현상에 한국 시장의 투자자들은 심리적 충격을 받았으나, 이는 펀더멘털 문제가 아닌 수급 이슈에 따른 포지션 조정으로 분석된다.",
+          "시장 약세 국면에서 가격 매력도가 높아졌다고 판단, 포트폴리오의 위험자산 비중을 81%에서 45%로 낮춰 대응한 후, 현재는 87%까지 다시 늘리며 상승장을 기대하고 있다.",
+          "AI 산업의 발전 속도에 대한 믿음과 과거 하락장에서의 학습을 통해 투자자들의 이해도가 증가했으며, 외국인 매수세 유입도 긍정적 신호로 해석된다.",
+          "향후 시장은 지난 고점을 넘을 확률이 더 높다고 전망하며, 투자에 있어 '정보'나 '지식'을 넘어 '지혜'의 중요성을 강조한다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "",
+            "context": "ADR 상장 후 27% 급등 후 급락하여 시장에 멘붕을 가져왔으나, 현재는 가격 매력도 강세 구간으로 판단.",
+            "view": "긍정",
+            "t": 222
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "외국인 매수세와 함께 시장 상승을 견인하는 주요 종목으로 언급됨.",
+            "view": "긍정",
+            "t": 754
+          },
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "어젯밤 주가가 많이 올라왔다고 언급되며 긍정적인 기술주 흐름을 지지.",
+            "view": "긍정",
+            "t": 756
+          },
+          {
+            "name": "인텔",
+            "ticker": "INTC",
+            "context": "어젯밤 주가가 많이 올라왔다고 언급되며 긍정적인 기술주 흐름을 지지.",
+            "view": "긍정",
+            "t": 756
+          },
+          {
+            "name": "알파벳",
+            "ticker": "GOOGL",
+            "context": "이번 주 실적 발표가 예정되어 있어 시장 반응에 대한 기대가 있음.",
+            "view": "중립",
+            "t": 1328
+          }
+        ],
+        "key_points": [
+          {
+            "point": "최근 시장의 큰 변동성은 트럼프의 예측 불가능한 행보와 같은 외부 요인, 그리고 메모리 반도체 섹터의 급등락에 따른 수급 변화 때문이지, 펀더멘털의 문제가 아니었다.",
+            "t": 14
+          },
+          {
+            "point": "과거 시장 하락 시 보수적으로 대응했던 오토폴리오의 전략처럼, 최근 '이해할 수 없는' 시장 움직임(SK하이닉스 ADR 급락 후 조정)에 비중을 낮춰 대응했고, 이제는 가격 매력도가 강해져 다시 비중을 최대로 늘렸다.",
+            "t": 230
+          },
+          {
+            "point": "AI 산업에 대한 투자자들의 이해도가 깊어지고 집단적인 확신이 생기면서 시장의 '바닥'이 단단해졌으며, 현재 시장은 그 가속도가 해소되어 전 고점을 넘을 가능성이 높다고 본다.",
+            "t": 910
+          },
+          {
+            "point": "투자에서 '정보'와 '지식'은 누구나 얻을 수 있지만, 이를 활용하여 시장을 제대로 다루는 '지혜'가 핵심이며, 이것이 경제적 자유를 얻는 데 90%의 중요성을 갖는다.",
+            "t": 1528
+          }
+        ],
+        "actionable": [
+          "시장 뉴스에 일희일비하기보다는 근본적인 가치와 가격 매력도를 분석하는 '지혜'로운 관점을 유지하라.",
+          "예측 불가능한 급등락에도 불구하고, AI 및 반도체와 같은 핵심 성장 산업에 대한 장기적 관점과 비중 확대 기회를 모색하라.",
+          "시장 전반에 대한 학습과 자신만의 투자 방식을 구축하여 변동성에 흔들리지 않는 '기저 체력'을 만들어야 한다."
+        ]
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T00:23:50.047941+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-07-23T02:02:17.524205+09:00"
     },
     {
       "video_id": "hYIhTPYiq3g",
@@ -14354,5 +14510,5 @@
       "analyzed_at": "2026-07-13T17:39:28.252560+09:00"
     }
   ],
-  "updated": "2026-07-23T00:27:40.024455+09:00"
+  "updated": "2026-07-23T02:11:52.121163+09:00"
 }
