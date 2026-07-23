@@ -1,6 +1,123 @@
 {
   "items": [
     {
+      "video_id": "IBo0vHUJYSg",
+      "title": "8월 증시, 해야 할 것 vs 하지 말아야 할 것? 덜 먹는 건 손해가 아닙니다ㅣ명민준, 김기은, 유영화 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-23T13:00:34+00:00",
+      "url": "https://www.youtube.com/watch?v=IBo0vHUJYSg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "Server disconnected without sending a response."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-24T00:43:53.867985+09:00"
+    },
+    {
+      "video_id": "5VGIFBqBK8U",
+      "title": "\"K-반도체 피크아웃은 없다\"…돈 버는 기업을 사라ㅣ명민준, 김기은, 차영주 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-23T14:00:22+00:00",
+      "url": "https://www.youtube.com/watch?v=5VGIFBqBK8U",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "주식시장은 개선되는 분위기 속에서 삼성전자와 SK하이닉스 같은 펀더멘털이 강한 기업을 중심으로 한 장기적 투자 기회를 제공하지만, 시장 변동성과 종목별 펀더멘털에 대한 냉정한 분석이 필요합니다.",
+        "summary": [
+          "주식시장의 전반적인 분위기는 개선되고 있으며, 당분간 상승 흐름이 지속될 것으로 전망됩니다.",
+          "과거 고점 대비 하락한 종목들은 매물대가 형성되어 있지만, 거래량 증가나 기간 조정을 통해 이를 소화할 수 있을 것으로 보입니다.",
+          "삼성전자(005930)와 SK하이닉스(000660)는 견고한 실적과 낮은 PER(주가수익비율)을 바탕으로 기존 고점을 돌파할 잠재력이 충분하다고 평가됩니다.",
+          "Alphabet(GOOGL)은 클라우드 서비스 성장과 인프라 투자 확대로 매출이 증가했으나, 대규모 투자로 인한 잉여현금흐름(FCF) 감소는 장기적 관점에서 신중하게 접근해야 할 요소입니다.",
+          "현대차(005380)는 매출이 늘었음에도 불구하고 영업이익이 감소하는 등 재무제표에 우려스러운 부분이 있어, 아직은 보수적인 관점으로 접근하는 것이 좋습니다.",
+          "시장 참여자들의 감정적 반응(울증과 조울증)에 휘둘리지 않고, 기업의 본질적 가치와 장기적인 관점에서 분할 매수하는 전략이 유효합니다."
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "K-반도체 대장주로, 실적이 긍정적이며 낮은 PER을 기록하고 있어 기존 고점을 넘어설 잠재력이 있다고 평가됩니다. 외국인의 매수세도 유입되고 있습니다.",
+            "view": "긍정",
+            "t": 270
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "K-반도체 대장주로, 실적이 긍정적이며 낮은 PER을 기록하고 있어 기존 고점을 넘어설 잠재력이 있다고 평가됩니다. 펀드 규제로 인해 투자 비중 제한을 받는 경향이 있습니다.",
+            "view": "긍정",
+            "t": 270
+          },
+          {
+            "name": "Alphabet",
+            "ticker": "GOOGL",
+            "context": "2분기 매출과 EPS가 시장 전망치를 상회했으나, 대규모 투자를 위한 자본 지출로 잉여현금흐름(FCF)이 마이너스를 기록했습니다. 이는 장기 성장을 위한 투자로 해석됩니다.",
+            "view": "긍정",
+            "t": 1530
+          },
+          {
+            "name": "Tesla",
+            "ticker": "TSLA",
+            "context": "2분기 매출은 늘었으나, 가격 인하 및 영업비용 증가로 이익이 부진했습니다. 자율주행 및 로보택시 등에 대한 투자는 지속되지만, 장기적 수익성에 대한 냉정한 관점이 필요합니다.",
+            "view": "부정",
+            "t": 2320
+          },
+          {
+            "name": "현대차",
+            "ticker": "005380",
+            "context": "2분기 영업이익이 작년보다 20.8% 감소했으며, 글로벌 판매량 감소, 원자재 가격 상승, 마케팅 비용 증가 등으로 실적 하방 압력이 발생했습니다. 비용 통제에 대한 우려가 있습니다.",
+            "view": "부정",
+            "t": 2500
+          }
+        ],
+        "key_points": [
+          {
+            "point": "시장은 적절한 속도로 움직여야 하며, 급격한 상승은 부작용을 낳을 수 있습니다. 과거 시장 폭락 후 반등 시에도 이러한 패턴이 나타났습니다.",
+            "t": 57
+          },
+          {
+            "point": "이전 고점 돌파를 위해서는 매물대(차익 실현 매물)를 소화할 수 있는 거래량 증가 또는 충분한 기간 조정이 필수적입니다.",
+            "t": 226
+          },
+          {
+            "point": "개인투자자들의 고객 예탁금이 30% 가까이 감소하여 시장의 유동성이 줄어들었으며, 이는 상승 동력을 약화시키는 요인입니다.",
+            "t": 345
+          },
+          {
+            "point": "삼성전자와 SK하이닉스 같은 기업은 현재 이익을 창출하고 있으며, 낮은 PER을 고려할 때 주가 하락은 오히려 매력적인 매수 기회가 될 수 있습니다.",
+            "t": 540
+          },
+          {
+            "point": "펀드 운용 규제(동일 종목 10% 이상 보유 불가)로 인해 SK하이닉스 투자 비중이 제한되자, 일부 자금은 지분 보유 기업(SK스퀘어 등)으로 이동했습니다.",
+            "t": 1310
+          },
+          {
+            "point": "Alphabet(GOOGL)과 Tesla(TSLA)는 미래 기술(클라우드, 자율주행, AI 인프라)에 막대한 투자를 하고 있으며, 단기적 FCF 악화에도 불구하고 장기적 성장 가능성은 긍정적으로 평가됩니다.",
+            "t": 2020
+          },
+          {
+            "point": "현대차(005380)는 매출 증가에도 영업이익이 감소하여 비용 통제에 대한 우려가 크며, 이는 펀더멘털 관점에서 부정적인 신호입니다.",
+            "t": 2500
+          },
+          {
+            "point": "장마철에는 기능성과 디자인을 겸비한 레인부츠가 필수템으로, 50% 할인된 가격에 구매할 수 있는 좋은 기회입니다.",
+            "t": 3925
+          }
+        ],
+        "actionable": [
+          "시장 변동성에 흔들리지 않고 펀더멘털이 강한 삼성전자와 SK하이닉스 같은 기업에 대해 적극적인 분할 매수를 고려하십시오.",
+          "Alphabet(GOOGL)과 Tesla(TSLA)는 장기적 관점에서 투자 가치를 판단하되, 단기 실적이나 현금 흐름의 변동성을 면밀히 주시하십시오.",
+          "현대차(005380)와 같이 이익 감소 추세에 있는 기업에 대해서는 투자에 신중하거나 펀더멘털 개선 여부를 확인할 때까지 관망하는 것이 좋습니다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-24T00:39:28.972894+09:00"
+    },
+    {
       "video_id": "Bu-Mgevg3A8",
       "title": "드디어 코스피 '해빙기' 진입! 외국인 싹 쓸어담는 지금, 절대 팔면 안 되는 이유ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
       "channel": "삼프로TV",
@@ -13,12 +130,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"한국 증시는 외국인 매수세와 낙폭 과대 섹터의 반등으로 '해빙기'에 진입하고 있으며, 하반기에는 상반기와는 다른 시장 흐름이 예상됩니다.\",\n  \"summary\": [\n    \"최근 며칠간 한국 시장은 코스피, 코스닥 모두 반등세를 보였으며, 특히 외국인 투자자들이 코스피를 4거래일 연속 매수하고 개인 투자자들은 매도하는 등 수급 개선이 나타났습니다.\",\n    \"반도체 섹터는 긍정적인 실적에도 불구하고 현재 반등 강도가 강하지 않지만, 외국인 매수세가 유입되고 있어 추가적인 우상향 가능성이 높다고 판단됩니다.\",\n    \"2차전지 섹터는 ESS(에너지 저장 시스템)의 공급 부족 현상 및 EV 라인의 ESS 전환 가능성으로 인해 중장기적인 관점에서 긍정적인 전망을 유지하고 있습니다.\",\n    \"하워드 막스의 '최고의 기회는 최악의 시기에 찾아온다'는 격언처럼, 시장이 전반적으로 얼어붙었던 투심이 개선되고 있으며, "
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-23T22:17:02.394141+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-07-24T00:44:26.226399+09:00"
     },
     {
       "video_id": "MlS0tGXhgc4",
@@ -128,8 +244,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-23T22:18:07.744463+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-24T00:45:31.080962+09:00"
     },
     {
       "video_id": "-fTVIVQSDnI",
@@ -147,8 +263,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-23T22:17:34.895445+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-24T00:44:58.753792+09:00"
     },
     {
       "video_id": "mUBcgB1jVRM",
@@ -254,8 +370,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T22:20:19.427856+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-24T00:46:36.030320+09:00"
     },
     {
       "video_id": "_fiV9NJf2vY",
@@ -273,8 +389,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T22:19:46.566077+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-24T00:46:03.682525+09:00"
     },
     {
       "video_id": "cslzvo0iJsA",
@@ -848,11 +964,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T22:13:25.916764+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-24T00:35:17.706355+09:00"
     },
     {
       "video_id": "ni5wFvlQ1YY",
@@ -14013,44 +14129,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-14T18:42:41.704138+09:00"
-    },
-    {
-      "video_id": "F35MS5dXfLo",
-      "title": "반등을 기대하기 전에 반드시 확인할 것? 흔들린 계좌 긴급점검!ㅣ명민준, 박가영, 황유현 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-07-14T05:33:14+00:00",
-      "url": "https://www.youtube.com/watch?v=F35MS5dXfLo",
-      "analysis": {
-        "relevant": false,
-        "one_liner": "영상 내용을 분석할 수 없습니다. 요청된 내용은 영상의 음성을 직접 분석해야 하는데, 이는 텍스트 기반 모델의 역량을 벗어납니다. 따라서 제공된 정보로는 요약 및 분석이 불가능합니다.",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": []
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-14T18:37:39.689499+09:00"
-    },
-    {
-      "video_id": "fptE9Xkk6ZU",
-      "title": "[7월 14일 마감시황] 역사적 과매도, 개인 5조 투매의 끝...마지막 하락 국면?ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
-      "channel": "삼프로TV",
-      "published": "2026-07-14T08:20:58+00:00",
-      "url": "https://www.youtube.com/watch?v=fptE9Xkk6ZU",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-15T00:13:21.976420+09:00"
     }
   ],
-  "updated": "2026-07-23T22:20:52.970198+09:00"
+  "updated": "2026-07-24T00:46:37.030582+09:00"
 }
