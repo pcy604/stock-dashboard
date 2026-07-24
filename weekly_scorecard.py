@@ -69,7 +69,7 @@ def _portfolio_section(res):
         return ["<b>📊 주간 포트폴리오</b>", "히스토리 없음"]
     lines = ["<b>📊 주간 포트폴리오 (진입→현재, vs KOSPI·SPY)</b>"]
     for r in res[-6:]:                      # 최근 3주 × (10선/20선)
-        tag = '10선' if r['set'] == 'p10' else '20선'
+        tag = {'p10': '10선', 'p20': '20선', 'ckr': '역발상KR'}.get(r['set'], r['set'])
         a = f" · 알파 {r['alpha']:+.2f}%p" if r.get('alpha') is not None else ""
         lines.append(f"{r['week']} [{tag}] {r['port_return']:+.2f}%{a}")
     return lines

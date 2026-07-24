@@ -82,9 +82,71 @@ def generate(n, market='전체', capital=10_000_000, cash_pct=None):
     }
 
 
-def save_snapshot(p10, p20):
-    CURRENT.write_text(json.dumps({'updated': datetime.now().strftime('%Y-%m-%d %H:%M'),
-        'p10': p10, 'p20': p20}, ensure_ascii=False, indent=2), encoding='utf-8')
+def generate_contrarian_kr(n=10, cash_pct=None,
+                           dd_min=-60.0, dd_max=-15.0, per_max=15.0, roe_min=8.0):
+    """🔄 역발상 KR — 조정장 엔진 (2026-07 국장 급락 때 모멘텀 엔진이 눈을 감던
+    구조적 결함의 보완). 렌즈: '싸고(저PER) 돈 잘 버는(ROE·성장) 우량주가
+    고점대비 -15~-60% 조정받았을 때' — 공포에 우량주를 줍는 접근.
+    소스: value_kr.json(DART 공식재무 × 당일 시총) × mdd.json(낙폭).
+    ⚠️ 이 엔진도 페이퍼 검증 대상 — 성적표에서 모멘텀 엔진과 똑같이 채점됨."""
+    cash = _macro_cash_pct() if cash_pct is None else cash_pct
+    try:
+        val = json.loads(Path('results/value_kr.json').read_text(encoding='utf-8'))
+        mdd = {s['sym']: s for s in
+               json.loads(Path('results/mdd.json').read_text(encoding='utf-8'))['stocks']
+               if s.get('market') == 'KR'}
+    except Exception:
+        return None
+    cands = []
+    for s in val.get('stocks', []):
+        m = mdd.get(s['sym'])
+        if not m or m.get('cur_dd') is None or not m.get('price'):
+            continue
+        dd = m['cur_dd']
+        if not (dd_min <= dd <= dd_max):
+            continue
+        per, roe = s.get('per'), s.get('roe')
+        if not per or per <= 0 or per > per_max or roe is None or roe < roe_min:
+            continue
+        og = s.get('op_growth')
+        if not (og == '흑자전환' or (isinstance(og, (int, float)) and og > 0)):
+            continue
+        score = roe / per * (1.2 if og == '흑자전환' else 1.0)
+        cands.append({'sym': s['sym'], 'name': s['name'], 'score': round(score, 2),
+                      'price': m['price'], 'per': per, 'roe': roe, 'dd': dd, 'og': og,
+                      'marcap': s.get('marcap')})
+    cands.sort(key=lambda x: -x['score'])
+    top = cands[:n]
+    if not top:
+        return None
+    deployed = round((1 - cash) * 100, 1)
+    w = round(deployed / len(top), 1)
+    positions = []
+    for c in top:
+        _ogs = c['og'] if isinstance(c['og'], str) else f"영업익 {c['og']:+.0f}%"
+        positions.append({
+            'sym': c['sym'], 'name': c['name'], 'market': 'KR',
+            'weight_pct': w, 'entry': c['price'],
+            'total_score': c['score'], 'win_score': None, 'fund_score': None,
+            'signals': [f"PER {c['per']}", f"ROE {c['roe']:.0f}%",
+                        f"낙폭 {c['dd']:.0f}%", _ogs],
+            'stop': round(c['price'] * 0.90, 4),      # 역발상은 변동 커서 -10%
+            'target': round(c['price'] * 1.20, 4),    # 손익비 2:1
+        })
+    return {
+        'date': datetime.now().strftime('%Y-%m-%d'),
+        'week': datetime.now().strftime('%G-W%V'),
+        'n': len(positions), 'market': 'KR', 'engine': 'contrarian',
+        'cash_pct': round(cash * 100, 0), 'deployed_pct': deployed,
+        'positions': positions,
+    }
+
+
+def save_snapshot(p10, p20, ckr=None):
+    cur = {'updated': datetime.now().strftime('%Y-%m-%d %H:%M'), 'p10': p10, 'p20': p20}
+    if ckr:
+        cur['ckr'] = ckr
+    CURRENT.write_text(json.dumps(cur, ensure_ascii=False, indent=2), encoding='utf-8')
     hist = []
     if HISTORY.exists():
         try:
@@ -92,8 +154,17 @@ def save_snapshot(p10, p20):
         except Exception:
             hist = []
     wk = p10['week']
+    entry = {'week': wk, 'date': p10['date'], 'p10': p10, 'p20': p20}
+    if ckr:
+        entry['ckr'] = ckr
+    else:                                      # 같은 주 기존 ckr 보존 (p10/p20만 갱신될 때)
+        old = next((h for h in hist if h.get('week') == wk), None)
+        if old and old.get('ckr'):
+            entry['ckr'] = old['ckr']
+            cur['ckr'] = old['ckr']
+            CURRENT.write_text(json.dumps(cur, ensure_ascii=False, indent=2), encoding='utf-8')
     hist = [h for h in hist if h.get('week') != wk]
-    hist.append({'week': wk, 'date': p10['date'], 'p10': p10, 'p20': p20})
+    hist.append(entry)
     HISTORY.write_text(json.dumps(hist, ensure_ascii=False, indent=2), encoding='utf-8')
 
 
@@ -137,7 +208,7 @@ def analyze():
     hist = json.loads(HISTORY.read_text(encoding='utf-8'))
     out = []
     for h in hist:
-        for key in ('p10', 'p20'):
+        for key in ('p10', 'p20', 'ckr'):
             port = h.get(key) or {}
             poss = port.get('positions', [])
             if not poss:
