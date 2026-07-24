@@ -1,0 +1,40 @@
+{
+  "segments": [
+    {
+      "name": "DX부문",
+      "products": "TV, 모니터, 냉장고, 세탁기, 에어컨, 스마트폰, 네트워크시스템, PC",
+      "revenue": 187967300000000,
+      "revenue_pct": 56.3,
+      "op_income": 12852700000000
+    },
+    {
+      "name": "DS부문",
+      "products": "DRAM, NAND Flash, 모바일AP",
+      "revenue": 130128200000000,
+      "revenue_pct": 39.0,
+      "op_income": 24858100000000
+    },
+    {
+      "name": "SDC",
+      "products": "스마트폰용 OLED 패널",
+      "revenue": 29841700000000,
+      "revenue_pct": 8.9,
+      "op_income": 4116300000000
+    },
+    {
+      "name": "Harman",
+      "products": "디지털 콕핏, 카오디오, 포터블 스피커",
+      "revenue": 15783300000000,
+      "revenue_pct": 4.7,
+      "op_income": 1531100000000
+    }
+  ],
+  "total_revenue": 333605900000000,
+  "period": "2025.12",
+  "currency": "KRW",
+  "has_segment_gross_profit": false,
+  "note": "",
+  "sym": "005930",
+  "source": "[출처: 사업보고서 (2025.12) (20260310)]",
+  "_generated": "2026-07-24T21:53:38"
+}

@@ -1,0 +1,19 @@
+{
+  "segments": [
+    {
+      "name": "반도체 부문",
+      "products": "DRAM, NAND Flash 등",
+      "revenue": 97146675000000,
+      "revenue_pct": 100.0,
+      "op_income": 47206319000000
+    }
+  ],
+  "total_revenue": 97146675000000,
+  "period": "2025.12",
+  "currency": "KRW",
+  "has_segment_gross_profit": false,
+  "note": "",
+  "sym": "000660",
+  "source": "[출처: 사업보고서 (2025.12) (20260317)]",
+  "_generated": "2026-07-24T22:01:11"
+}
