@@ -116,7 +116,7 @@ def _income_sankey(row, unit_div, unit, seg=None):
         if v and v > 0:
             srcs.append(s); tgts.append(t); vals.append(v / unit_div); lcolors.append(c)
 
-    GRN, RED, GRY = '#2f9e44', '#e0413188', '#8a8a8a'
+    GRN, RED, GRY = '#2f9e44', '#e04131', '#8a8a8a'
     GRNL, REDL = 'rgba(47,158,68,0.28)', 'rgba(224,65,49,0.22)'
 
     n_rev = _node(f"매출 {rv/unit_div:,.1f}{unit}", GRY)
