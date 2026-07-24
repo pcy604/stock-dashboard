@@ -2226,17 +2226,28 @@ with tab7:
                         st.warning(f"부문 데이터 추출 실패 — 사업보고서에 부문표가 없거나 파싱 실패. {(_seg or {}).get('_error','')}")
                     else:
                         _segs = [s for s in _seg['segments'] if s.get('revenue') or s.get('revenue_pct')]
-                        _tot_op = sum((s.get('op_income') or 0) for s in _segs) or None
+                        # 공시된 부문 이익지표 자동 판별 (회사별로 GP/OP/둘다/없음이 다름 — management approach)
+                        _measure = _seg.get('segment_profit_measure')
+                        if _measure not in ('gross', 'operating', 'both'):   # 구버전 캐시 폴백
+                            _measure = 'operating' if any(s.get('op_income') for s in _segs) else \
+                                       ('gross' if any(s.get('gross_profit') for s in _segs) else 'none')
+                        # 표시할 이익 필드·라벨을 회사에 맞게 선택 (both면 OP 우선, GP 병기)
+                        _pf_key = 'op_income' if _measure in ('operating', 'both') else 'gross_profit'
+                        _pf_lab = 'OPM' if _pf_key == 'op_income' else 'GPM'
+                        _mlabel = _seg.get('segment_measure_label') or (f"부문 {_pf_lab}" if _measure != 'none' else "부문 마진 미공시")
+                        _tot_pf = sum((s.get(_pf_key) or 0) for s in _segs) or None
                         _srows = []
                         for s in _segs:
-                            _op_pct = (s['op_income'] / _tot_op * 100) if (s.get('op_income') and _tot_op) else None
+                            _pf = s.get(_pf_key)
+                            _pf_pct = (_pf / _tot_pf * 100) if (_pf and _tot_pf) else None
+                            _seg_margin = (_pf / s['revenue'] * 100) if (_pf and s.get('revenue')) else None
                             _srows.append({
                                 '사업부문': s['name'],
-                                '주요제품': str(s.get('products', ''))[:28],
+                                '주요제품': str(s.get('products', ''))[:26],
                                 '매출': fmt_cap(s.get('revenue'), 'KR') if s.get('revenue') else '-',
                                 '매출비중%': s.get('revenue_pct'),
-                                '영업이익': fmt_cap(s.get('op_income'), 'KR') if s.get('op_income') else '-',
-                                '이익비중%': round(_op_pct, 1) if _op_pct is not None else None,
+                                f'{_pf_lab}(부문마진)': round(_seg_margin, 1) if _seg_margin is not None else None,
+                                '이익비중%': round(_pf_pct, 1) if _pf_pct is not None else None,
                             })
                         _segdf = pd.DataFrame(_srows)
                         # 매출 비중 vs 이익 비중 나란히 막대 (핵심 통찰: 둘의 괴리)
@@ -2245,10 +2256,10 @@ with tab7:
                             y=[r['사업부문'] for r in _srows], x=[r.get('매출비중%') or 0 for r in _srows],
                             name='매출 비중', orientation='h', marker_color='#388bfd',
                             text=[f"{r.get('매출비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
-                        if _tot_op:
+                        if _tot_pf:
                             _fig_seg.add_trace(go.Bar(
                                 y=[r['사업부문'] for r in _srows], x=[r.get('이익비중%') or 0 for r in _srows],
-                                name='영업이익 비중', orientation='h', marker_color='#f0883e',
+                                name=f'{_pf_lab} 이익 비중', orientation='h', marker_color='#f0883e',
                                 text=[f"{r.get('이익비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
                         _fig_seg.update_layout(
                             barmode='group', height=max(180, 60 * len(_srows)),
@@ -2260,14 +2271,20 @@ with tab7:
                         st.dataframe(
                             _segdf, use_container_width=True, hide_index=True, height=_dfh(len(_segdf)),
                             column_config={'매출비중%': st.column_config.NumberColumn(format='%.1f%%'),
+                                           f'{_pf_lab}(부문마진)': st.column_config.NumberColumn(format='%.1f%%'),
                                            '이익비중%': st.column_config.NumberColumn(format='%.1f%%')})
-                        _gp = "부문별 매출총이익 공시됨" if _seg.get('has_segment_gross_profit') else \
-                              "⚠️ 부문별 매출총이익/매출원가는 공시되지 않음(대부분 기업) → 영업이익 비중으로 대체"
+                        _mnote = {
+                            'operating': "이 회사는 부문 **영업이익(OPM)**을 공시 (부문 매출원가 미분리 → GPM 불가)",
+                            'gross':     "이 회사는 부문 **매출총이익(GPM)**을 공시 (부문 판관비 미분리 → OPM 불가)",
+                            'both':      "이 회사는 부문 GPM·OPM 둘 다 공시 (OPM 표시)",
+                            'none':      "⚠️ 이 회사는 부문별 이익을 공시하지 않음 — 매출 비중만 표시",
+                        }.get(_measure, '')
                         st.caption(f"📄 {_seg.get('source', 'DART')} · {_seg.get('period', '')} · Gemini 추출 "
-                                   f"(원문 대조 권장). {_gp}. "
+                                   f"(원문 대조 권장). {_mnote}. "
                                    "핵심: **매출 비중 ≠ 이익 비중** — 파란막대보다 주황막대가 큰 부문이 진짜 캐시카우. "
                                    f"{('· ' + _seg['note']) if _seg.get('note') else ''}")
-                        st.caption("ℹ️ 부문 매출 합이 100% 초과할 수 있음 — 부문간 내부거래(연결조정 전) 포함 표기라 정상.")
+                        st.caption("ℹ️ 부문별 공시 이익지표는 회사마다 다름(경영진이 쓰는 지표 공시) — 테슬라類=GPM, 삼성類=OPM. "
+                                   "부문 매출 합이 100% 초과 가능(부문간 내부거래 포함).")
 
             st.divider()
             st.markdown("## 🏅 CANSLIM 스코어카드 — 종합 판단")

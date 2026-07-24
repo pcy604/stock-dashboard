@@ -33,12 +33,16 @@ _PROMPT = """당신은 재무 애널리스트다. 아래는 한국 기업의 DAR
   - products: 주요 제품/서비스 (짧게)
   - revenue: 해당 부문 매출액 (원 단위 숫자, 없으면 null)
   - revenue_pct: 전체 대비 매출 비중 % (원문에 있으면, 없으면 null)
-  - op_income: 부문 영업이익 (원 단위, 공시됐으면, 없으면 null)
+  - gross_profit: 부문 매출총이익 (원문에 부문별로 공시됐으면 숫자, 아니면 null)
+  - op_income: 부문 영업이익 (원문에 부문별로 공시됐으면 숫자, 아니면 null)
 - total_revenue: 전체 매출액 (원, 없으면 null)
 - period: 기준 회계기간 (예: "2025" 또는 "2025.12")
 - currency: "KRW"
-- has_segment_gross_profit: 사업부문별 매출총이익/매출원가가 원문에 분리 공시돼 있으면 true, 아니면 false
-- note: 한 줄 특이사항 (예: "부문 영업이익 미공시", 없으면 "")
+- segment_profit_measure: 이 회사가 '부문별로' 실제 공시한 이익 지표를 판별해서 하나 선택:
+    "gross"(부문 매출총이익만) / "operating"(부문 영업이익만) / "both"(둘 다) / "none"(부문 이익 미공시)
+    ※ 회계기준(K-IFRS 부문정보)은 경영진이 쓰는 지표를 공시 → 회사마다 다름. 원문에 실제 있는 것만.
+- segment_measure_label: 위 지표의 한글 표시명 ("부문 OPM" 또는 "부문 GPM" 또는 "부문 마진 미공시")
+- note: 한 줄 특이사항 (없으면 "")
 
 JSON만 출력. 마크다운 코드블록 없이."""
 
@@ -122,7 +126,8 @@ if __name__ == '__main__':
         print('실패:', d)
     else:
         print(f"[{d.get('period')}] {sym} · 전체매출 {d.get('total_revenue')}")
+        print(f"공시된 부문 이익지표: {d.get('segment_profit_measure')} ({d.get('segment_measure_label')})")
         for s in d['segments']:
             print(f"  {s['name']}: 매출 {s.get('revenue')} ({s.get('revenue_pct')}%) "
-                  f"영업익 {s.get('op_income')} · {s.get('products', '')[:30]}")
-        print('부문별 매출총이익 공시:', d.get('has_segment_gross_profit'), '·', d.get('note'))
+                  f"GP {s.get('gross_profit')} 영업익 {s.get('op_income')} · {str(s.get('products') or '')[:24]}")
+        print('note:', d.get('note'))
