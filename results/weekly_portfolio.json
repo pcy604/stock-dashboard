@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-24 20:04",
+  "updated": "2026-07-24 20:38",
   "p10": {
     "date": "2026-07-23",
     "week": "2026-W30",
@@ -546,34 +546,64 @@
     "n": 10,
     "market": "KR",
     "engine": "contrarian",
-    "cash_pct": 30.0,
-    "deployed_pct": 70.0,
+    "cash_pct": 32.0,
+    "deployed_pct": 67.5,
     "positions": [
       {
-        "sym": "023590",
-        "name": "다우기술",
+        "sym": "171090",
+        "name": "선익시스템",
         "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 35650.0,
-        "total_score": 10.29,
+        "weight_pct": 6.8,
+        "entry": 55500.0,
+        "total_score": 16.5,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 1.5",
+          "PER 6.1",
+          "ROE 67%",
+          "낙폭 -58%",
+          "영업익 +1310%"
+        ],
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 7,
+          "d_roe": 127.6,
+          "d_opm": 14.6
+        },
+        "stop": 49950.0,
+        "target": 66600.0
+      },
+      {
+        "sym": "071320",
+        "name": "지역난방공사",
+        "market": "KR",
+        "weight_pct": 6.8,
+        "entry": 64800.0,
+        "total_score": 9.61,
+        "win_score": null,
+        "fund_score": null,
+        "signals": [
+          "PER 2.3",
           "ROE 15%",
           "낙폭 -42%",
-          "영업익 +33%"
+          "영업익 +62%"
         ],
-        "stop": 32085.0,
-        "target": 42780.0
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 7,
+          "d_roe": 5.4,
+          "d_opm": 4.0
+        },
+        "stop": 58320.0,
+        "target": 77760.0
       },
       {
         "sym": "015760",
         "name": "한국전력",
         "market": "KR",
-        "weight_pct": 7.0,
+        "weight_pct": 6.8,
         "entry": 34050.0,
-        "total_score": 6.76,
+        "total_score": 9.17,
         "win_score": null,
         "fund_score": null,
         "signals": [
@@ -582,152 +612,182 @@
           "낙폭 -50%",
           "영업익 +61%"
         ],
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 5,
+          "d_roe": 8.8,
+          "d_opm": 4.8
+        },
         "stop": 30645.0,
         "target": 40860.0
-      },
-      {
-        "sym": "001450",
-        "name": "현대해상",
-        "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 38300.0,
-        "total_score": 6.18,
-        "win_score": null,
-        "fund_score": null,
-        "signals": [
-          "PER 3.2",
-          "ROE 20%",
-          "낙폭 -22%",
-          "영업익 +1%"
-        ],
-        "stop": 34470.0,
-        "target": 45960.0
       },
       {
         "sym": "041510",
         "name": "에스엠",
         "market": "KR",
-        "weight_pct": 7.0,
+        "weight_pct": 6.8,
         "entry": 69100.0,
-        "total_score": 5.75,
+        "total_score": 8.59,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 4.6",
+          "PER 4.4",
           "ROE 26%",
           "낙폭 -56%",
           "영업익 +110%"
         ],
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 6,
+          "d_roe": 26.3,
+          "d_opm": 6.8
+        },
         "stop": 62190.0,
         "target": 82920.0
       },
       {
-        "sym": "383220",
-        "name": "F&F",
+        "sym": "001450",
+        "name": "현대해상",
         "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 79000.0,
-        "total_score": 2.92,
+        "weight_pct": 6.8,
+        "entry": 38300.0,
+        "total_score": 6.65,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 7.3",
-          "ROE 21%",
-          "낙폭 -60%",
-          "영업익 +4%"
-        ],
-        "stop": 71100.0,
-        "target": 94800.0
-      },
-      {
-        "sym": "071050",
-        "name": "한국금융지주",
-        "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 229000.0,
-        "total_score": 2.74,
-        "win_score": null,
-        "fund_score": null,
-        "signals": [
-          "PER 6.1",
-          "ROE 17%",
+          "PER 3.4",
+          "ROE 20%",
           "낙폭 -22%",
-          "영업익 +96%"
+          "영업익 +1%"
         ],
-        "stop": 206100.0,
-        "target": 274800.0
+        "traj": {
+          "verdict_label": "➖ 정체",
+          "traj_score": 2,
+          "d_roe": 1.9,
+          "d_opm": null
+        },
+        "stop": 34470.0,
+        "target": 45960.0
       },
       {
-        "sym": "009970",
-        "name": "영원무역홀딩스",
+        "sym": "064820",
+        "name": "케이프",
         "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 191200.0,
-        "total_score": 2.73,
+        "weight_pct": 6.8,
+        "entry": 8330.0,
+        "total_score": 6.45,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 4.2",
-          "ROE 11%",
-          "낙폭 -24%",
-          "영업익 +42%"
+          "PER 4.6",
+          "ROE 21%",
+          "낙폭 -51%",
+          "영업익 +28%"
         ],
-        "stop": 172080.0,
-        "target": 229440.0
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 6,
+          "d_roe": 13.7,
+          "d_opm": 1.1
+        },
+        "stop": 7497.0,
+        "target": 9996.0
       },
       {
-        "sym": "006040",
-        "name": "동원산업",
+        "sym": "003380",
+        "name": "하림지주",
         "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 33350.0,
-        "total_score": 2.68,
+        "weight_pct": 6.8,
+        "entry": 9760.0,
+        "total_score": 5.56,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 3.9",
-          "ROE 10%",
-          "낙폭 -54%",
-          "영업익 +3%"
+          "PER 2.1",
+          "ROE 8%",
+          "낙폭 -50%",
+          "영업익 +16%"
         ],
-        "stop": 30015.0,
-        "target": 40020.0
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 6,
+          "d_roe": 5.3,
+          "d_opm": 0.5
+        },
+        "stop": 8784.0,
+        "target": 11712.0
       },
       {
-        "sym": "257720",
-        "name": "실리콘투",
+        "sym": "052400",
+        "name": "코나아이",
         "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 36050.0,
-        "total_score": 2.6,
+        "weight_pct": 6.8,
+        "entry": 41150.0,
+        "total_score": 5.29,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 14.2",
-          "ROE 37%",
-          "낙폭 -42%",
-          "영업익 +49%"
+          "PER 7.8",
+          "ROE 29%",
+          "낙폭 -58%",
+          "영업익 +166%"
         ],
-        "stop": 32445.0,
-        "target": 43260.0
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 6,
+          "d_roe": 13.7,
+          "d_opm": 14.7
+        },
+        "stop": 37035.0,
+        "target": 49380.0
       },
       {
-        "sym": "267250",
-        "name": "HD현대",
+        "sym": "272110",
+        "name": "케이엔제이",
         "market": "KR",
-        "weight_pct": 7.0,
-        "entry": 204500.0,
-        "total_score": 2.42,
+        "weight_pct": 6.8,
+        "entry": 28700.0,
+        "total_score": 4.58,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 5.0",
-          "ROE 12%",
-          "낙폭 -34%",
-          "영업익 +104%"
+          "PER 8.2",
+          "ROE 26%",
+          "낙폭 -33%",
+          "영업익 +57%"
         ],
-        "stop": 184050.0,
-        "target": 245400.0
+        "traj": {
+          "verdict_label": "📈 개선 가속",
+          "traj_score": 6,
+          "d_roe": 11.2,
+          "d_opm": 3.6
+        },
+        "stop": 25830.0,
+        "target": 34440.0
+      },
+      {
+        "sym": "037460",
+        "name": "삼지전자",
+        "market": "KR",
+        "weight_pct": 6.8,
+        "entry": 35050.0,
+        "total_score": 4.44,
+        "win_score": null,
+        "fund_score": null,
+        "signals": [
+          "PER 4.6",
+          "ROE 16%",
+          "낙폭 -38%",
+          "영업익 +40%"
+        ],
+        "traj": {
+          "verdict_label": "➖ 정체",
+          "traj_score": 4,
+          "d_roe": 1.2,
+          "d_opm": 0.4
+        },
+        "stop": 31545.0,
+        "target": 42060.0
       }
     ]
   }

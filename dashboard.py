@@ -676,12 +676,14 @@ with t_value:
         if not _vj or not _vj.get('stocks'):
             st.warning("가치 데이터 없음 → `python value_export.py` 실행 후 새로고침.")
         else:
-            _vc1, _vc2, _vc3, _vc4 = st.columns(4)
+            _vc1, _vc2, _vc3, _vc4, _vc5 = st.columns(5)
             _vper = _vc1.slider("PER ≤", 1, 30, 10, key="val_per")
             _vpbr = _vc2.slider("PBR ≤", 0.2, 5.0, 1.5, 0.1, key="val_pbr")
             _vroe = _vc3.slider("ROE ≥ %", 0, 30, 8, key="val_roe")
             _vgrw = _vc4.slider("영업익 성장 ≥ %", -50, 100, 0, key="val_grw",
                                 help="'흑자전환'은 항상 통과")
+            _vvec = _vc5.selectbox("궤적(벡터)", ["전체", "개선만(함정 제외)", "개선 가속만"], key="val_vec",
+                                   help="위치가 싸도 펀더멘털이 악화 중이면 밸류 함정 — 벡터로 거른다")
             def _fmt_growth(v):
                 # 숫자·'흑자전환' 문자열 혼재 컬럼 → 균일 문자열 (Arrow 직렬화 오류 방지)
                 if isinstance(v, str): return v
@@ -697,26 +699,47 @@ with t_value:
                 _og_ok = (_og9 == '흑자전환') or (isinstance(_og9, (int, float)) and _og9 >= _vgrw)
                 if not _og_ok:
                     continue
+                _tr = s.get('traj') or {}
+                _verd = _tr.get('verdict')
+                if _vvec == "개선만(함정 제외)" and _verd == 'deteriorating':
+                    continue
+                if _vvec == "개선 가속만" and _verd != 'improving':
+                    continue
                 _vrows.append({'종목': s['name'], '코드': s['sym'],
                                '시총': fmt_cap(s.get('marcap'), 'KR'),
                                'PER': _per, 'PBR': _pbr, 'PSR': s.get('psr'),
-                               'ROE%': _roe,
-                               '매출성장%': _fmt_growth(s.get('rev_growth')),
-                               '영업익성장%': _fmt_growth(_og9),
-                               '12개월%': s.get('ret_12m'), '기준': s.get('period'),
+                               'ROE%(위치)': _roe,
+                               'ΔROE(속도)': _tr.get('d_roe'),
+                               'ΔOPM(마진속도)': _tr.get('d_opm'),
+                               '매출성장': _fmt_growth(s.get('rev_growth')),
+                               '성장가속': _tr.get('growth_accel'),
+                               '궤적': f"{_tr.get('traj_score')}/7" if _tr.get('traj_score') is not None else '-',
+                               '판정': _tr.get('verdict_label', '-'),
                                '고점대비%': _mdd_col(s['sym'], _MDDM),
-                               '매력도': _attract_col(s['sym'], _ATTM)})
+                               '기준': s.get('period')})
             _vrows.sort(key=lambda r: r['PER'])
+            _ntrap = sum(1 for s in _vj['stocks'] if (s.get('traj') or {}).get('verdict') == 'deteriorating')
             st.subheader(f"💎 저평가·우량 — {len(_vrows)}개 (PER≤{_vper} · PBR≤{_vpbr} · ROE≥{_vroe}% · 영업익≥{_vgrw}%)")
             if _vrows:
                 _vdf9 = pd.DataFrame(_vrows[:50])
-                st.dataframe(_vdf9.style.format({'PER': '{:.1f}', 'PBR': '{:.2f}', 'PSR': '{:.2f}',
-                                                 'ROE%': '{:.1f}', '12개월%': '{:+.0f}'}, na_rep='-'),
-                             use_container_width=True, hide_index=True,
-                             row_height=25, height=_dfh(min(len(_vdf9), 20)))
-                st.caption(f"커버리지 {_vj.get('coverage')}종목(시총 상위, DART 공식 재무 × 실시간 시총 — 자체 DB). "
-                           "PER=시총/순익·PBR=시총/자본·PSR=시총/매출. "
-                           "⚠️ 저PER 함정 주의 — 경기순환주는 이익 고점에서 PER이 가장 쌈. 성장·현금흐름 같이 봐야.")
+                def _c_verd(v):
+                    s = str(v)
+                    if '개선' in s: return 'color:#16a34a;font-weight:bold'
+                    if '악화' in s: return 'color:#dc2626;font-weight:bold'
+                    return 'color:#888'
+                def _c_delta(v):
+                    try: return 'color:#16a34a' if float(v) >= 0 else 'color:#dc2626'
+                    except Exception: return ''
+                st.dataframe(
+                    _vdf9.style.map(_c_verd, subset=['판정'])
+                        .map(_c_delta, subset=['ΔROE(속도)', 'ΔOPM(마진속도)', '성장가속'])
+                        .format({'PER': '{:.1f}', 'PBR': '{:.2f}', 'PSR': '{:.2f}', 'ROE%(위치)': '{:.1f}',
+                                 'ΔROE(속도)': '{:+.1f}', 'ΔOPM(마진속도)': '{:+.1f}', '성장가속': '{:+.1f}'}, na_rep='-'),
+                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(min(len(_vdf9), 20)))
+                st.caption(f"커버리지 {_vj.get('coverage')}종목(DART 공식재무 × 실시간 시총). "
+                           f"**위치(스칼라) + 속도(Δ, 전년대비) + 가속(Δ²)** = 벡터 — Piotroski F-Score 방식. "
+                           f"판정: 📈개선 가속 / ➖정체 / 📉악화(함정). ⚠️ 현재 전체 밸류 유니버스 중 **{_ntrap}종목이 '싸지만 악화 중'**(함정) — "
+                           "위치만 보면 안 보이던 것. 컨센 리비전(애널 추정 방향)은 스냅샷 축적 후 추가 예정.")
             else:
                 st.info("조건 통과 종목 없음 — 기준을 완화해보세요.")
 
