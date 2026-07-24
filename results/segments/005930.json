@@ -2,39 +2,52 @@
   "segments": [
     {
       "name": "DX부문",
-      "products": "TV, 모니터, 냉장고, 세탁기, 에어컨, 스마트폰, 네트워크시스템, PC",
+      "products": "TV, 모니터, 냉장고, 세탁기, 에어컨,스마트폰, 네트워크시스템, PC 등",
       "revenue": 187967300000000,
       "revenue_pct": 56.3,
+      "gross_profit": null,
       "op_income": 12852700000000
     },
     {
       "name": "DS부문",
-      "products": "DRAM, NAND Flash, 모바일AP",
+      "products": "DRAM, NAND Flash, 모바일AP 등",
       "revenue": 130128200000000,
       "revenue_pct": 39.0,
+      "gross_profit": null,
       "op_income": 24858100000000
     },
     {
       "name": "SDC",
-      "products": "스마트폰용 OLED 패널",
+      "products": "스마트폰용 OLED패널 등",
       "revenue": 29841700000000,
       "revenue_pct": 8.9,
+      "gross_profit": null,
       "op_income": 4116300000000
     },
     {
       "name": "Harman",
-      "products": "디지털 콕핏, 카오디오, 포터블 스피커",
+      "products": "디지털 콕핏, 카오디오, 포터블 스피커 등",
       "revenue": 15783300000000,
       "revenue_pct": 4.7,
+      "gross_profit": null,
       "op_income": 1531100000000
+    },
+    {
+      "name": "기타 (내부거래 제거 등)",
+      "products": null,
+      "revenue": -30114600000000,
+      "revenue_pct": -8.9,
+      "gross_profit": null,
+      "op_income": null
     }
   ],
   "total_revenue": 333605900000000,
   "period": "2025.12",
   "currency": "KRW",
-  "has_segment_gross_profit": false,
-  "note": "",
+  "segment_profit_measure": "operating",
+  "segment_measure_label": "부문 영업이익",
+  "note": "각 사업부문별 매출액에는 부문간 내부거래가 포함되어 있으며, '기타' 부문에서 제거되었습니다.",
   "sym": "005930",
   "source": "[출처: 사업보고서 (2025.12) (20260310)]",
-  "_generated": "2026-07-24T21:53:38"
+  "_generated": "2026-07-25T03:10:13"
 }
