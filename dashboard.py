@@ -94,6 +94,65 @@ def _traj_map() -> dict:
     return {s['sym']: s['traj'] for s in d.get('stocks', []) if s.get('traj')}
 
 
+def _income_sankey(row, unit_div, unit, seg=None):
+    """손익계산서 1개 기간 → App Economy 스타일 Sankey.
+    매출 → 매출총이익(초록)/매출원가(빨강) → 영업이익/판관비 → 순이익/세금·기타.
+    seg(부문 dict) 있으면 왼쪽에 사업부문 → 매출 흐름 추가(KR)."""
+    rv = row.get('revenue')
+    gross = row.get('gross')
+    op = row.get('op_income')
+    ni = row.get('net_income')
+    if not rv or gross is None or op is None:
+        return None
+    cogs = rv - gross
+    sga = row.get('sga')
+    sga = sga if (sga is not None) else max(gross - op, 0)
+    other = max(op - ni, 0) if ni is not None else None
+
+    labels, colors, srcs, tgts, vals, lcolors = [], [], [], [], [], []
+    def _node(lbl, color):
+        labels.append(lbl); colors.append(color); return len(labels) - 1
+    def _link(s, t, v, c):
+        if v and v > 0:
+            srcs.append(s); tgts.append(t); vals.append(v / unit_div); lcolors.append(c)
+
+    GRN, RED, GRY = '#2f9e44', '#e0413188', '#8a8a8a'
+    GRNL, REDL = 'rgba(47,158,68,0.28)', 'rgba(224,65,49,0.22)'
+
+    n_rev = _node(f"매출 {rv/unit_div:,.1f}{unit}", GRY)
+    # 왼쪽 사업부문 → 매출 (KR seg)
+    if seg and seg.get('segments'):
+        _ss = [s for s in seg['segments'] if s.get('revenue')]
+        _tot = sum(s['revenue'] for s in _ss) or 1
+        for s in _ss[:6]:
+            ni_seg = _node(f"{s['name']} {s['revenue']/unit_div:,.0f}{unit}", GRY)
+            _link(ni_seg, n_rev, s['revenue'] * (rv / _tot), 'rgba(138,138,138,0.22)')
+    n_gross = _node(f"매출총이익 {gross/unit_div:,.1f}{unit}", GRN)
+    n_cogs  = _node(f"매출원가 {cogs/unit_div:,.1f}{unit}", RED)
+    n_op    = _node(f"영업이익 {op/unit_div:,.1f}{unit}", GRN)
+    n_sga   = _node(f"판관비 {sga/unit_div:,.1f}{unit}", RED)
+    n_net   = _node(f"순이익 {ni/unit_div:,.1f}{unit}" if ni is not None else "순이익", GRN)
+    n_oth   = _node(f"세금·기타 {other/unit_div:,.1f}{unit}", RED) if other else None
+
+    _link(n_rev, n_gross, gross, GRNL)
+    _link(n_rev, n_cogs, cogs, REDL)
+    _link(n_gross, n_op, op, GRNL)
+    _link(n_gross, n_sga, sga, REDL)
+    if ni is not None:
+        _link(n_op, n_net, ni, GRNL)
+    if n_oth is not None:
+        _link(n_op, n_oth, other, REDL)
+
+    fig = go.Figure(go.Sankey(
+        arrangement='snap',
+        node=dict(label=labels, color=colors, pad=18, thickness=16,
+                  line=dict(width=0)),
+        link=dict(source=srcs, target=tgts, value=vals, color=lcolors)))
+    fig.update_layout(height=380, paper_bgcolor='rgba(0,0,0,0)',
+                      font=dict(color='#c9d1d9', size=12), margin=dict(l=0, r=0, t=6, b=6))
+    return fig
+
+
 def _traj_col(sym: str, tmap: dict):
     """'📈 개선 5/7' 축약 — 다른 탭 표에 한 열로 얹는 용도."""
     t = tmap.get(sym)
@@ -2285,6 +2344,50 @@ with tab7:
                                    f"{('· ' + _seg['note']) if _seg.get('note') else ''}")
                         st.caption("ℹ️ 부문별 공시 이익지표는 회사마다 다름(경영진이 쓰는 지표 공시) — 테슬라類=GPM, 삼성類=OPM. "
                                    "부문 매출 합이 100% 초과 가능(부문간 내부거래 포함).")
+
+            # ── 💵 손익 흐름(Sankey) + 마진 궤적 (App Economy Insights 스타일) ──
+            st.divider()
+            st.subheader("💵 손익 흐름 — 매출이 순이익까지 어떻게 흐르나")
+            _flowq = unified_statements(sym8_clean, is_kr_sym, 'quarter')      # 분기 시계열
+            if not _flowq or len(_flowq) < 1:
+                _flowq = unified_statements(sym8_clean, is_kr_sym, 'annual')
+            if not _flowq:
+                st.caption("손익 흐름 데이터 없음.")
+            else:
+                _uq, _uu = (1e12, '조') if is_kr_sym else (1e9, 'B')
+                _seg_for_flow = None
+                if is_kr_sym:
+                    try:
+                        import segment_analysis as _sa2
+                        _seg_for_flow = _sa2.load_cached(sym8_clean)
+                    except Exception:
+                        pass
+                _sank = _income_sankey(_flowq[0], _uq, _uu, _seg_for_flow)
+                if _sank:
+                    st.plotly_chart(_sank, use_container_width=True)
+                    st.caption(f"{_flowq[0].get('period','')} 기준 · 초록=이익 흐름 · 빨강=비용 · "
+                               f"{'왼쪽 사업부문은 연간 mix를 기간 매출에 적용(예시)' if _seg_for_flow else '매출→순이익 흐름'}. "
+                               "이건 '위치'(이번 기간 구조) — 아래 마진 궤적이 '벡터'.")
+                # 마진 궤적 스트립
+                _mq = [r for r in _flowq if r.get('revenue')][:8][::-1]     # 오래된→최신
+                if len(_mq) >= 3:
+                    _mfig = go.Figure()
+                    _mx = [r.get('period', '') for r in _mq]
+                    for _mk, _mlab, _mc in [('gross', 'GPM', '#79c0ff'), ('op_income', 'OPM', '#f0883e'),
+                                            ('net_income', 'NPM', '#56d364')]:
+                        _my = [round(r[_mk] / r['revenue'] * 100, 1) if r.get(_mk) and r.get('revenue') else None
+                               for r in _mq]
+                        _mfig.add_trace(go.Scatter(x=_mx, y=_my, mode='lines+markers', name=_mlab,
+                                                   line=dict(color=_mc, width=2.5)))
+                    _mfig.update_layout(height=230, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                        font=dict(color='#8b949e', size=11), margin=dict(l=0, r=8, t=28, b=0),
+                                        title=dict(text='마진 궤적 (GPM·OPM·NPM) — Sankey가 못 보여주는 추이', font=dict(size=13)),
+                                        legend=dict(orientation='h', y=1.18, x=0), yaxis_ticksuffix='%')
+                    _mfig.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+                    _mfig.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
+                    st.plotly_chart(_mfig, use_container_width=True)
+                    st.caption("절대 매출은 회사 크면 무조건 커짐 — **마진**이 '성장이 이익으로 이어지는가'를 드러냄. "
+                               "마진이 우상향이면 규모의 경제/가격결정력 확보, 우하향이면 경쟁심화/원가압박 신호.")
 
             st.divider()
             st.markdown("## 🏅 CANSLIM 스코어카드 — 종합 판단")
