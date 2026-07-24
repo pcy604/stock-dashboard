@@ -65,6 +65,11 @@ jobs:
           python value_export.py
         continue-on-error: true
 
+      - name: 컨센서스 시계열 스냅샷 (월요일만 — 리비전 모멘텀 재료)
+        run: |
+          if [ "$(date -u +%u)" = "1" ]; then python consensus_snapshot.py; else echo "월요일 아님 — 스킵"; fi
+        continue-on-error: true
+
       - name: 포트폴리오 모니터 + 매도 알림(텔레그램)
         run: python portfolio_monitor.py
         continue-on-error: true
