@@ -894,7 +894,7 @@ with t_track:
     if not _wpres:
         st.info("주간 포트폴리오 히스토리 없음 — weekly_run이 매주 스냅샷을 쌓으면 여기 채워짐.")
     else:
-        _wrows = [{'주차': r['week'], '세트': '10선' if r['set'] == 'p10' else '20선',
+        _wrows = [{'주차': r['week'], '세트': {'p10': '10선', 'p20': '20선', 'ckr': '역발상KR'}.get(r['set'], r['set']),
                    '종목수': r['n'], '현금%': f"{r['cash_pct']:.0f}",
                    '포트수익': f"{r['port_return']:+.2f}%",
                    '벤치(KOSPI·SPY)': f"{r['bench_return']:+.2f}%" if r.get('bench_return') is not None else '-',
@@ -905,7 +905,8 @@ with t_track:
                      use_container_width=True, hide_index=True,
                      row_height=25, height=_dfh(len(_wdf9)))
         st.markdown("###### 🔍 스냅샷 상세 — 실제로 뭘 담았고 각각 얼마나 갔나")
-        _wk_opts = [f"{r['week']} [{'10선' if r['set']=='p10' else '20선'}]" for r in _wpres]
+        _SET_LAB = {'p10': '10선', 'p20': '20선', 'ckr': '역발상KR'}
+        _wk_opts = [f"{r['week']} [{_SET_LAB.get(r['set'], r['set'])}]" for r in _wpres]
         _wk_pick = st.selectbox("주차 선택", _wk_opts, index=len(_wk_opts) - 1, key="track_wk_detail")
         _wsel = _wpres[_wk_opts.index(_wk_pick)]
         _ddet = _wsel.get('details', [])
@@ -2714,8 +2715,15 @@ with tab_pf:
     _wpj = load_json(Path('results/weekly_portfolio.json'))
     if _wpj and _wpj.get('p10'):
         st.subheader("🤖 AI 추천 포트폴리오 — 시스템 제안")
-        _ai_set = st.radio("세트", ["10선 (집중)", "20선 (분산)"], horizontal=True, key="ai_pf_set")
-        _aip = _wpj['p10'] if _ai_set.startswith("10") else _wpj['p20']
+        _ai_opts = ["10선 (집중)", "20선 (분산)"] + (["🔄 역발상 KR (조정장)"] if _wpj.get('ckr') else [])
+        _ai_set = st.radio("세트", _ai_opts, horizontal=True, key="ai_pf_set")
+        if _ai_set.startswith("🔄"):
+            _aip = _wpj['ckr']
+            st.info("🔄 **역발상 엔진** — 모멘텀(신고가 추종)이 조정장에서 눈을 감는 결함의 보완. "
+                    "'싸고(PER≤15) 돈 잘 벌고(ROE≥8%·영업익 성장) 고점대비 -15~-60% 조정받은' KR 우량주. "
+                    "손절 -10% · 목표 +20%. ⚠️ 검증 0일차 — 이 엔진도 성적표에서 똑같이 채점됨.")
+        else:
+            _aip = _wpj['p10'] if _ai_set.startswith("10") else _wpj['p20']
         _am1, _am2, _am3, _am4 = st.columns(4)
         _am1.metric("기준 주차", _aip.get('week', '-'), help=f"갱신 {_wpj.get('updated', '-')}")
         _am2.metric("💰 포트 내 현금", f"{_aip.get('cash_pct', 0):.0f}%", help="매크로 신호(FRED) 기반 자동 — 표 마지막 행에도 표시")

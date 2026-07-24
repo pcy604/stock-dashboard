@@ -250,8 +250,15 @@ def main():
         _cash = weekly_portfolio._macro_cash_pct()
         _p10 = weekly_portfolio.generate(10, cash_pct=_cash)
         _p20 = weekly_portfolio.generate(20, cash_pct=_cash)
-        weekly_portfolio.save_snapshot(_p10, _p20)
-        print(f'주간 포트폴리오 생성: 10선/20선 · 현금 {_cash*100:.0f}%')
+        _ckr = None
+        try:                                   # 역발상 KR (조정장 엔진) — 실패해도 본 포트 유지
+            _ckr = weekly_portfolio.generate_contrarian_kr(10, cash_pct=_cash)
+        except Exception as _ce:
+            print(f'⚠️ 역발상 KR 생성 실패: {_ce}')
+        weekly_portfolio.save_snapshot(_p10, _p20, _ckr)
+        print(f'주간 포트폴리오 생성: 10선/20선'
+              f'{" + 역발상KR " + str(len(_ckr["positions"])) + "종목" if _ckr else ""}'
+              f' · 현금 {_cash*100:.0f}%')
     except Exception as e:
         print(f'⚠️ 주간 포트폴리오 생성 건너뜀: {e}')
 
