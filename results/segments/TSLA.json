@@ -1,0 +1,29 @@
+{
+  "segments": [
+    {
+      "name": "Automotive",
+      "products": "Electric vehicles (sales, leasing), regulatory credits, used vehicles, maintenance, Supercharging, insurance, parts, merchandise",
+      "revenue": 82056000000,
+      "revenue_pct": 86.53,
+      "gross_profit": 13292000000,
+      "op_income": null
+    },
+    {
+      "name": "Energy Generation and Storage",
+      "products": "Energy generation and storage products (sales, leasing, financing), services, incentives",
+      "revenue": 12771000000,
+      "revenue_pct": 13.47,
+      "gross_profit": 3802000000,
+      "op_income": null
+    }
+  ],
+  "total_revenue": 94827000000,
+  "period": "FY2025",
+  "currency": "USD",
+  "segment_profit_measure": "gross",
+  "segment_measure_label": "부문 GPM",
+  "note": "",
+  "sym": "TSLA",
+  "source": "[출처: 10-K (2026-01-29)]",
+  "_generated": "2026-07-25T03:24:32"
+}

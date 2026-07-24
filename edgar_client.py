@@ -247,6 +247,49 @@ def filings(ticker, form=None, limit=15):
     return out
 
 
+def business_text(ticker, max_chars=90000):
+    """최신 10-K(없으면 10-Q) 본문에서 세그먼트·손익 관련 구간 추출 (Gemini 입력용).
+    문서가 크므로 'segment'·'cost of revenue'·'gross profit' 마커 주변 창을 모아 반환."""
+    import re
+    fl = filings(ticker, form='10-K', limit=1) or filings(ticker, form='10-Q', limit=1)
+    if not fl:
+        return None
+    url = fl[0]['url']
+    try:
+        r = _get(url)
+        html = r.text
+    except Exception:
+        return None
+    txt = re.sub(r'<[^>]+>', ' ', html)
+    txt = re.sub(r'&[a-zA-Z#0-9]+;', ' ', txt)
+    txt = re.sub(r'\s+', ' ', txt)
+    low = txt.lower()
+    # 세그먼트/손익 마커 주변 구간 수집
+    markers = ['reportable segment', 'segment information', 'cost of revenue',
+               'cost of revenues', 'cost of sales', 'gross profit', 'revenue by']
+    spans = []
+    for m in markers:
+        i = 0
+        while True:
+            i = low.find(m, i)
+            if i < 0:
+                break
+            spans.append((max(0, i - 1500), i + 3500))
+            i += len(m)
+    if not spans:
+        chunk = txt[:max_chars]
+    else:
+        spans.sort()
+        merged = [spans[0]]
+        for s, e in spans[1:]:
+            if s <= merged[-1][1]:
+                merged[-1] = (merged[-1][0], max(merged[-1][1], e))
+            else:
+                merged.append((s, e))
+        chunk = ' … '.join(txt[s:e] for s, e in merged)[:max_chars]
+    return f"[출처: {fl[0]['form']} ({fl[0]['date']})]\n" + chunk
+
+
 if __name__ == '__main__':
     import sys
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')

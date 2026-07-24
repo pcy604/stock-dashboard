@@ -65,8 +65,53 @@ def load_cached(sym, max_age_days=30):
         return None
 
 
+_PROMPT_US = """You are a financial analyst. Below is text extracted from a US company's SEC 10-K/10-Q filing
+(segment note + income statement region). Extract the company's revenue structure by business
+segment/product as JSON only. Use ONLY numbers that actually appear in the text; null if absent.
+Never fabricate. Units: US dollars (raw number, e.g. 20500000000 for $20.5B).
+
+Fields:
+- segments: array. each: name, products (short), revenue (USD, or null),
+  revenue_pct (% of total, or null), gross_profit (USD if disclosed per segment, else null),
+  op_income (USD if disclosed per segment, else null)
+- total_revenue (USD or null)
+- period (e.g. "Q2 FY26" or "FY2025")
+- currency: "USD"
+- segment_profit_measure: which per-segment profit the filing actually discloses:
+    "gross"(segment gross profit only) / "operating"(segment operating profit only) /
+    "both" / "none". Management-approach: varies by company (Tesla→gross, many conglomerates→operating).
+    Only what's actually in the text.
+- segment_measure_label: Korean label — "부문 GPM" or "부문 OPM" or "부문 마진 미공시"
+- note: one-line caveat in Korean (or "")
+
+JSON only, no markdown fence."""
+
+
+def _finalize(data, sym, source_txt, source_default):
+    segs = [s for s in (data.get('segments') or []) if s.get('name')]
+    if not segs:
+        return None
+    tot = data.get('total_revenue') or sum((s.get('revenue') or 0) for s in segs) or None
+    for s in segs:
+        if s.get('revenue_pct') is None and s.get('revenue') and tot:
+            s['revenue_pct'] = round(s['revenue'] / tot * 100, 1)
+    data['segments'] = segs
+    data['total_revenue'] = tot
+    data['sym'] = sym
+    data['source'] = source_txt[:source_txt.find(']') + 1] if source_txt.startswith('[') else source_default
+    data['_generated'] = datetime.now().isoformat(timespec='seconds')
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    _cache_path(sym).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+    return data
+
+
+def analyze(sym, is_kr, force=False):
+    """시장 무관 디스패처 — KR=DART, US=EDGAR 10-K."""
+    return analyze_kr(sym, force) if is_kr else analyze_us(sym, force)
+
+
 def analyze_kr(sym, force=False):
-    """KR 종목 사업부문 분석. 캐시 우선. 반환 dict 또는 None."""
+    """KR 종목 사업부문 분석. 캐시 우선."""
     if not force:
         c = load_cached(sym)
         if c:
@@ -80,28 +125,37 @@ def analyze_kr(sym, force=False):
         txt = dart_client.business_text(cc, max_chars=120000)
         if not txt:
             return None
-        # 세그먼트 표는 '사업의 내용' 앞부분에 몰려 있음 → 앞 60k만 (토큰 절약)
-        head = txt[:60000]
+        head = txt[:60000]                  # 세그먼트 표는 '사업의 내용' 앞부분에 몰림
         client = G._gemini_client()
         resp = G._generate(client, [_PROMPT, "\n\n[사업보고서 원문]\n" + head])
         raw = resp.text if hasattr(resp, 'text') else str(resp)
         data = _parse_json(raw)
-        if not data or not data.get('segments'):
+        if not data:
             return None
-        # 비중 보정: revenue만 있고 pct 없으면 계산
-        segs = [s for s in data['segments'] if s.get('name')]
-        tot = data.get('total_revenue') or sum((s.get('revenue') or 0) for s in segs) or None
-        for s in segs:
-            if s.get('revenue_pct') is None and s.get('revenue') and tot:
-                s['revenue_pct'] = round(s['revenue'] / tot * 100, 1)
-        data['segments'] = segs
-        data['total_revenue'] = tot
-        data['sym'] = sym
-        data['source'] = txt[:txt.find(']') + 1] if txt.startswith('[') else 'DART 사업보고서'
-        data['_generated'] = datetime.now().isoformat(timespec='seconds')
-        CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        _cache_path(sym).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-        return data
+        return _finalize(data, sym, txt, 'DART 사업보고서')
+    except Exception as e:
+        return {'_error': str(e)[:200]}
+
+
+def analyze_us(sym, force=False):
+    """US 종목 사업부문 분석 — EDGAR 10-K 세그먼트/손익 구간 → Gemini."""
+    if not force:
+        c = load_cached(sym)
+        if c:
+            return c
+    try:
+        import edgar_client
+        import guru_youtube as G
+        txt = edgar_client.business_text(sym, max_chars=90000)
+        if not txt:
+            return None
+        client = G._gemini_client()
+        resp = G._generate(client, [_PROMPT_US, "\n\n[10-K filing text]\n" + txt])
+        raw = resp.text if hasattr(resp, 'text') else str(resp)
+        data = _parse_json(raw)
+        if not data:
+            return None
+        return _finalize(data, sym, txt, 'SEC 10-K')
     except Exception as e:
         return {'_error': str(e)[:200]}
 
@@ -121,7 +175,8 @@ def _parse_json(text: str) -> dict | None:
 
 if __name__ == '__main__':
     sym = sys.argv[1] if len(sys.argv) > 1 else '005930'
-    d = analyze_kr(sym, force='--force' in sys.argv)
+    _is_kr = sym.isdigit() and len(sym) == 6
+    d = analyze(sym, _is_kr, force='--force' in sys.argv)
     if not d or d.get('_error'):
         print('실패:', d)
     else:
