@@ -2261,24 +2261,23 @@ with tab7:
                 else:
                     st.caption("통합 재무표 데이터 없음 (해당 기준).")
 
-            # ── 🏭 사업부문별 매출 구조 (App Economy Insights 스타일, DART×Gemini) ──
+            # ── 🏭 사업부문별 매출 구조 (App Economy Insights 스타일, DART/EDGAR×Gemini) ──
             st.divider()
             st.subheader("🏭 사업부문별 매출 구조 — 이 회사는 어디서 돈을 버나")
-            if not is_kr_sym:
-                st.info("사업부문 분석은 현재 KR(DART 사업보고서) 전용 — US(10-K 세그먼트)는 다음 단계.")
-            else:
+            if True:
                 _seg_cached = None
                 try:
                     import segment_analysis as _sa
                     _seg_cached = _sa.load_cached(sym8_clean)
                 except Exception:
                     pass
-                _seg_go = st.button("🔍 사업부문 분석 (Gemini · ~10초)", key=f"seg_{sym8_clean}") if not _seg_cached else True
+                _seg_src = 'DART 사업보고서' if is_kr_sym else 'SEC 10-K'
+                _seg_go = st.button(f"🔍 사업부문 분석 ({_seg_src} · Gemini · ~15초)", key=f"seg_{sym8_clean}") if not _seg_cached else True
                 if _seg_go:
-                    with st.spinner("사업보고서에서 부문별 매출 추출 중..."):
+                    with st.spinner(f"{_seg_src}에서 부문별 매출 추출 중..."):
                         try:
                             import segment_analysis as _sa
-                            _seg = _seg_cached or _sa.analyze_kr(sym8_clean)
+                            _seg = _seg_cached or _sa.analyze(sym8_clean, is_kr_sym)
                         except Exception as _se:
                             _seg = {'_error': str(_se)[:150]}
                     if not _seg or _seg.get('_error') or not _seg.get('segments'):
@@ -2303,7 +2302,7 @@ with tab7:
                             _srows.append({
                                 '사업부문': s['name'],
                                 '주요제품': str(s.get('products', ''))[:26],
-                                '매출': fmt_cap(s.get('revenue'), 'KR') if s.get('revenue') else '-',
+                                '매출': fmt_cap(s.get('revenue'), 'KR' if is_kr_sym else 'US') if s.get('revenue') else '-',
                                 '매출비중%': s.get('revenue_pct'),
                                 f'{_pf_lab}(부문마진)': round(_seg_margin, 1) if _seg_margin is not None else None,
                                 '이익비중%': round(_pf_pct, 1) if _pf_pct is not None else None,
