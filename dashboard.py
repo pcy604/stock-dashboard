@@ -87,6 +87,22 @@ def _mdd_col(sym: str, mmap: dict):
     return f"{r['cur_dd']:+.1f}%" if r and r.get('cur_dd') is not None else '-'
 
 
+@st.cache_data(ttl=1800)
+def _traj_map() -> dict:
+    """sym → 펀더멘털 궤적(판정·ΔROE·궤적점수). value_kr.json 기반 — KR만."""
+    d = load_json(Path('results/value_kr.json')) or {}
+    return {s['sym']: s['traj'] for s in d.get('stocks', []) if s.get('traj')}
+
+
+def _traj_col(sym: str, tmap: dict):
+    """'📈 개선 5/7' 축약 — 다른 탭 표에 한 열로 얹는 용도."""
+    t = tmap.get(sym)
+    if not t:
+        return '-'
+    lab = {'improving': '📈', 'deteriorating': '📉', 'stable': '➖'}.get(t.get('verdict'), '')
+    return f"{lab} {t.get('traj_score')}/7"
+
+
 def _attract_col(sym: str, amap: dict):
     r = amap.get(sym)
     return f"{r['grade']} {r['score']:.0f}" if r and r.get('score') is not None else '-'
@@ -616,6 +632,7 @@ with t_lead:
                     '매출가속': ('✅' if m.get('rev_accel') else ('❌' if m.get('rev_accel') is False else '-')),
                     '섹터': str(m.get('sector', '-'))[:14],
                     '고점대비%': _mdd_col(m['sym'], _MDDM),
+                    '궤적': _traj_col(m['sym'], _traj_map()) if m['market'] == 'KR' else '-',
                     '매력도': _attract_col(m['sym'], _ATTM)}
 
         _f_all = [m for m in _lv2['all'] if _lm == "전체" or m['market'] == _lm]
@@ -673,6 +690,11 @@ with t_value:
     else:
         _vj = load_json(Path('results/value_kr.json'))
         _ATTM = _attract_map("KR")   # 이 탭은 KR 전용 — 전역 _GMKT가 US여도 KR 매력도로 조회
+        try:
+            import consensus_snapshot as _cs
+            _REVM = _cs.revision_map()          # sym → 애널 추정 리비전 방향(시계열 축적분)
+        except Exception:
+            _REVM = {}
         if not _vj or not _vj.get('stocks'):
             st.warning("가치 데이터 없음 → `python value_export.py` 실행 후 새로고침.")
         else:
@@ -715,6 +737,8 @@ with t_value:
                                '성장가속': _tr.get('growth_accel'),
                                '궤적': f"{_tr.get('traj_score')}/7" if _tr.get('traj_score') is not None else '-',
                                '판정': _tr.get('verdict_label', '-'),
+                               '컨센리비전': ({'up': '📈 상향', 'down': '📉 하향', 'flat': '➖ 유지'}
+                                          .get((_REVM.get(s['sym']) or {}).get('dir'), '-')),
                                '고점대비%': _mdd_col(s['sym'], _MDDM),
                                '기준': s.get('period')})
             _vrows.sort(key=lambda r: r['PER'])
@@ -724,14 +748,14 @@ with t_value:
                 _vdf9 = pd.DataFrame(_vrows[:50])
                 def _c_verd(v):
                     s = str(v)
-                    if '개선' in s: return 'color:#16a34a;font-weight:bold'
-                    if '악화' in s: return 'color:#dc2626;font-weight:bold'
+                    if '개선' in s or '상향' in s: return 'color:#16a34a;font-weight:bold'
+                    if '악화' in s or '하향' in s: return 'color:#dc2626;font-weight:bold'
                     return 'color:#888'
                 def _c_delta(v):
                     try: return 'color:#16a34a' if float(v) >= 0 else 'color:#dc2626'
                     except Exception: return ''
                 st.dataframe(
-                    _vdf9.style.map(_c_verd, subset=['판정'])
+                    _vdf9.style.map(_c_verd, subset=['판정', '컨센리비전'])
                         .map(_c_delta, subset=['ΔROE(속도)', 'ΔOPM(마진속도)', '성장가속'])
                         .format({'PER': '{:.1f}', 'PBR': '{:.2f}', 'PSR': '{:.2f}', 'ROE%(위치)': '{:.1f}',
                                  'ΔROE(속도)': '{:+.1f}', 'ΔOPM(마진속도)': '{:+.1f}', '성장가속': '{:+.1f}'}, na_rep='-'),
@@ -739,7 +763,8 @@ with t_value:
                 st.caption(f"커버리지 {_vj.get('coverage')}종목(DART 공식재무 × 실시간 시총). "
                            f"**위치(스칼라) + 속도(Δ, 전년대비) + 가속(Δ²)** = 벡터 — Piotroski F-Score 방식. "
                            f"판정: 📈개선 가속 / ➖정체 / 📉악화(함정). ⚠️ 현재 전체 밸류 유니버스 중 **{_ntrap}종목이 '싸지만 악화 중'**(함정) — "
-                           "위치만 보면 안 보이던 것. 컨센 리비전(애널 추정 방향)은 스냅샷 축적 후 추가 예정.")
+                           f"위치만 보면 안 보이던 것. **컨센리비전**=애널 추정(올해EPS) 4주 변화 "
+                           f"({'축적 {}주차 — 방향 판독까지 몇 주 더'.format(len(_REVM)) if _REVM else '스냅샷 축적 시작 — 다음 주부터 방향'}).")
             else:
                 st.info("조건 통과 종목 없음 — 기준을 완화해보세요.")
 
@@ -961,6 +986,7 @@ with tab3:
     _cs_kr = _cs_mkt.endswith("한국")
     _CS_JSON = CANSLIM_JSON if _cs_kr else Path('results/canslim_us_latest.json')
     _ATTM = _attract_map("KR" if _cs_kr else "US")   # 이 탭은 자체 KR/US 토글 — 전역 _GMKT와 별개
+    _TRAJM = _traj_map()                             # 궤적(KR만) — US는 '-'
     st.header(f"🏆 CANSLIM 스크리너 ({'한국' if _cs_kr else '미국'})")
     update_badge(_CS_JSON)
     canslim = load_json(_CS_JSON)
@@ -1062,6 +1088,7 @@ with tab3:
                 'A 연간%': a_tag,
                 'I 순매수': _tag3(i_inst, th_I,  '{:+.0f}억'),
                 '고점대비%': _mdd_col(s['sym'], _MDDM),
+                '궤적': _traj_col(s['sym'], _TRAJM) if _cs_kr else '-',
                 '매력도': _attract_col(s['sym'], _ATTM),
                 '_score':  score,
             })
@@ -1091,7 +1118,7 @@ with tab3:
 
             # 컬럼을 CANSLIM 글자 순서(C→A→N→S→L→I)로 (#3)
             disp3 = ['종목명','코드','시총','점수/7','C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수',
-                     '고점대비%','매력도']
+                     '고점대비%','궤적','매력도']
             df3 = df3.rename(columns={'RS': 'RS (L)'})
             sig3c = ['C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수']
 
