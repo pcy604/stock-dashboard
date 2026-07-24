@@ -111,10 +111,16 @@ def generate_contrarian_kr(n=10, cash_pct=None,
         og = s.get('op_growth')
         if not (og == '흑자전환' or (isinstance(og, (int, float)) and og > 0)):
             continue
-        score = roe / per * (1.2 if og == '흑자전환' else 1.0)
+        # 벡터 함정 필터: 위치가 싸도 펀더멘털이 '악화 중'이면 밸류 함정 → 제외
+        tr = s.get('traj')
+        if tr and tr.get('verdict') == 'deteriorating':
+            continue
+        # 궤적점수를 스코어에 반영 (개선 가속일수록 가점)
+        tboost = 1 + (tr['traj_score'] / 7 * 0.5) if tr else 1.0
+        score = roe / per * (1.2 if og == '흑자전환' else 1.0) * tboost
         cands.append({'sym': s['sym'], 'name': s['name'], 'score': round(score, 2),
                       'price': m['price'], 'per': per, 'roe': roe, 'dd': dd, 'og': og,
-                      'marcap': s.get('marcap')})
+                      'marcap': s.get('marcap'), 'traj': tr})
     cands.sort(key=lambda x: -x['score'])
     top = cands[:n]
     if not top:
@@ -124,12 +130,15 @@ def generate_contrarian_kr(n=10, cash_pct=None,
     positions = []
     for c in top:
         _ogs = c['og'] if isinstance(c['og'], str) else f"영업익 {c['og']:+.0f}%"
+        _tr = c.get('traj') or {}
         positions.append({
             'sym': c['sym'], 'name': c['name'], 'market': 'KR',
             'weight_pct': w, 'entry': c['price'],
             'total_score': c['score'], 'win_score': None, 'fund_score': None,
             'signals': [f"PER {c['per']}", f"ROE {c['roe']:.0f}%",
                         f"낙폭 {c['dd']:.0f}%", _ogs],
+            'traj': {'verdict_label': _tr.get('verdict_label'), 'traj_score': _tr.get('traj_score'),
+                     'd_roe': _tr.get('d_roe'), 'd_opm': _tr.get('d_opm')} if _tr else None,
             'stop': round(c['price'] * 0.90, 4),      # 역발상은 변동 커서 -10%
             'target': round(c['price'] * 1.20, 4),    # 손익비 2:1
         })

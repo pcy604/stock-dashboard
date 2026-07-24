@@ -20,6 +20,7 @@ from pathlib import Path
 from datetime import datetime
 
 import db
+import trajectory
 
 RETURNS = Path('results/returns.json')
 OUT = Path('results/value_kr.json')
@@ -62,6 +63,9 @@ def run():
                 return '흑자전환' if c > 0 else None
             return round((c / p - 1) * 100, 1)
 
+        # 펀더멘털 벡터(궤적): 스칼라 위치가 아니라 방향·속도 (밸류 함정 판별)
+        traj = trajectory.compute(f)
+
         rows.append({
             'sym': sym, 'name': name, 'marcap': live_row['marcap'],
             'period': cur['period'],
@@ -72,6 +76,7 @@ def run():
             'rev_growth': yoy(rv, prev.get('revenue')),
             'op_growth': yoy(cur.get('op_income'), prev.get('op_income')),
             'ret_12m': meta.get('ret_12m') if meta else None,
+            'traj': traj,   # {d_roe,d_opm,growth_accel,traj_score,verdict,...} or None
         })
     OUT.write_text(json.dumps({
         'generated': datetime.now().isoformat(timespec='seconds'),
