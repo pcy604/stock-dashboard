@@ -238,11 +238,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"하나증권 빈센트 애널리스트는 단기적으로 시장의 수급과 심리가 악화되어 두려움이 크지만, 장기적으로는 메모리 반도체 산업이 '사이클'을 넘어 '비사이클'로 전환되며 우상향할 것이라는 긍정적 시각을 유지하고 외국인과 기관이 매수 주체가 될 것으로 전망한다.\",\n  \"summary\": [\n    \"애널리스트는 현재 시장을 바닥권으로 판단하며 단기적인 반등 폭과 속도에 주목하지만, 전고점 돌파 여부에 대한 두려움도 크다.\",\n    \"밀리면 사야 한다는 기본 전략은 유지하지만, 단기적으로는 수급과 시장 심리의 꼬임이 강하게 체감되며 투자자들의 시장 방향성에 대한 두려움이 지배적이다.\",\n    \"메모리 반도체 산업의 '사이클' 존속 여부에 대한 논란이 있으나, 장기적으로는 기술 혁신과 산업 성장이 지속될 것이라는 믿음을 가지고 있다.\",\n    \"SK하이닉스와 삼성전자는 장기 공급 계약(LTA) 전략에서 상이한 접근 방식을"
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-25T16:05:30.119361+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-25T18:24:48.681489+09:00"
     },
     {
       "video_id": "zTaUe_KWwiw",
@@ -14225,5 +14226,5 @@
       "analyzed_at": "2026-07-15T20:26:26.905460+09:00"
     }
   ],
-  "updated": "2026-07-25T16:09:35.640567+09:00"
+  "updated": "2026-07-25T18:24:49.833811+09:00"
 }
