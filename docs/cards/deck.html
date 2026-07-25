@@ -1,0 +1,319 @@
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --panel-2:#f4f6f9; --line:#dde3ec;
+    --ink:#18202e; --ink-2:#3d4a5c; --mut:#6b7789;
+    --accent:#4f5fe6; --accent-soft:#eaecfd;
+    --gain:#1f9d57; --gain-bg:#e4f4ea; --loss:#d6414a; --loss-bg:#fbe8e9;
+    --warn:#c07d16; --warn-bg:#f8efdc;
+    --font-ui:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+    --font-mono:'SF Mono','JetBrains Mono','D2Coding',ui-monospace,'Cascadia Code',monospace;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0c1119; --panel:#141b28; --panel-2:#1a2331; --line:#26313f;
+    --ink:#e7edf5; --ink-2:#b3becd; --mut:#7d8a9c;
+    --accent:#7c8bff; --accent-soft:#1c2440;
+    --gain:#37c07e; --gain-bg:#12301f; --loss:#f0555b; --loss-bg:#361518;
+    --warn:#e0a13a; --warn-bg:#33260f;
+  }}
+  :root[data-theme="light"]{
+    --bg:#eef1f5; --panel:#ffffff; --panel-2:#f4f6f9; --line:#dde3ec;
+    --ink:#18202e; --ink-2:#3d4a5c; --mut:#6b7789;
+    --accent:#4f5fe6; --accent-soft:#eaecfd;
+    --gain:#1f9d57; --gain-bg:#e4f4ea; --loss:#d6414a; --loss-bg:#fbe8e9;
+    --warn:#c07d16; --warn-bg:#f8efdc;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1119; --panel:#141b28; --panel-2:#1a2331; --line:#26313f;
+    --ink:#e7edf5; --ink-2:#b3becd; --mut:#7d8a9c;
+    --accent:#7c8bff; --accent-soft:#1c2440;
+    --gain:#37c07e; --gain-bg:#12301f; --loss:#f0555b; --loss-bg:#361518;
+    --warn:#e0a13a; --warn-bg:#33260f;
+  }
+  *{box-sizing:border-box}
+  .deck{font-family:var(--font-ui);background:var(--bg);color:var(--ink);
+    padding:22px clamp(14px,3vw,34px) 60px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .deck h1,.deck h2,.deck h3,.deck p{margin:0}
+  .num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+  .topbar{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px 16px;
+    padding-bottom:16px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .topbar__id{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .topbar__name{font-size:23px;font-weight:800;letter-spacing:-.01em}
+  .topbar__sub{font-size:13px;color:var(--mut)}
+  .topbar__meta{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut)}
+
+  .verdict{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--warn);
+    border-radius:12px;padding:14px 18px;margin-bottom:22px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .verdict b{color:var(--ink);font-weight:700}
+  .verdict p{font-size:14.5px;color:var(--ink-2);max-width:80ch}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;align-items:start}
+  .wide{grid-column:span 2}
+  @media (max-width:720px){.wide{grid-column:span 1}.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px 17px 15px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--mut)}
+  .card.s-go::before{background:var(--gain)} .card.s-warn::before{background:var(--warn)} .card.s-block::before{background:var(--loss)}
+  .card__head{display:flex;align-items:center;gap:10px;margin-bottom:3px}
+  .card__n{font-family:var(--font-mono);font-size:12px;color:var(--mut);font-weight:600}
+  .card__title{font-size:16px;font-weight:700;letter-spacing:-.01em}
+  .badge{margin-left:auto;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .b-go{background:var(--gain-bg);color:var(--gain)} .b-warn{background:var(--warn-bg);color:var(--warn)} .b-block{background:var(--loss-bg);color:var(--loss)}
+  .card__upd{font-size:11px;color:var(--mut);font-family:var(--font-mono);margin-bottom:11px}
+  .card__body{font-size:13.5px;color:var(--ink-2)}
+
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13.5px}
+  .kv dt{color:var(--mut);white-space:nowrap} .kv dd{margin:0;color:var(--ink)}
+
+  .next{margin-top:13px;padding-top:11px;border-top:1px dashed var(--line);
+    font-size:13px;color:var(--ink);display:flex;gap:7px;align-items:flex-start}
+  .next b{color:var(--accent);font-weight:700;flex-shrink:0}
+
+  .ladder{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+  .ladder li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+  .step{font-family:var(--font-mono);font-size:11px;font-weight:700;padding:2px 6px;border-radius:5px;flex-shrink:0;margin-top:1px}
+  .st-done{background:var(--gain-bg);color:var(--gain)} .st-now{background:var(--accent-soft);color:var(--accent)}
+  .st-wait{background:var(--panel-2);color:var(--mut)} .st-block{background:var(--loss-bg);color:var(--loss)}
+  .ladder .cond{color:var(--mut);font-size:12.5px}
+
+  .flow{display:flex;flex-direction:column;gap:9px}
+  .flow__src{display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px}
+  .chip{border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--ink-2);background:var(--panel-2)}
+  .loop{border:1px solid var(--line);border-radius:10px;padding:9px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .loop.dashed{border-style:dashed;border-color:var(--loss)}
+  .loop__tag{font-weight:700;font-size:13px;flex-shrink:0}
+  .loop__steps{font-size:12px;color:var(--ink-2);font-family:var(--font-mono)}
+  .loop__owner{margin-left:auto;font-size:11px;color:var(--mut)}
+  .arrow{text-align:center;color:var(--mut);font-size:13px;line-height:1}
+  .merge{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:9px 12px;font-size:13px}
+  .merge b{color:var(--accent)}
+
+  .quad{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;
+    aspect-ratio:1.5/1;min-height:210px;position:relative}
+  .qcell{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:12px;display:flex;flex-direction:column;gap:4px;background:var(--panel-2)}
+  .qcell.us{border-color:var(--accent);background:var(--accent-soft)}
+  .qcell .qh{font-size:10.5px;letter-spacing:.05em;color:var(--mut);text-transform:uppercase;font-weight:700}
+  .qcomp{font-size:12px;color:var(--ink)}
+  .qaxis{font-size:10.5px;color:var(--mut);text-align:center;letter-spacing:.03em}
+  .qaxis.y{writing-mode:vertical-rl;text-orientation:mixed}
+  .quadwrap{display:grid;grid-template-columns:16px 1fr;grid-template-rows:1fr 16px;gap:5px;align-items:center}
+
+  .swot{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .sq{border-radius:9px;padding:9px 11px;font-size:12.5px}
+  .sq h4{margin:0 0 5px;font-size:12px;font-weight:700;letter-spacing:.02em}
+  .sq.s{background:var(--gain-bg)} .sq.s h4{color:var(--gain)}
+  .sq.w{background:var(--loss-bg)} .sq.w h4{color:var(--loss)}
+  .sq.o{background:var(--accent-soft)} .sq.o h4{color:var(--accent)}
+  .sq.t{background:var(--warn-bg)} .sq.t h4{color:var(--warn)}
+  .sq ul{margin:0;padding-left:15px;color:var(--ink-2)} .sq li{margin-bottom:2px}
+  .sq .act{margin-top:5px;font-size:11.5px;color:var(--ink);border-top:1px dashed color-mix(in srgb,var(--ink) 20%,transparent);padding-top:4px}
+  .sq .act b{font-weight:700}
+
+  .metrics{display:flex;flex-direction:column;gap:0}
+  .metric{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:baseline;
+    padding:8px 0;border-bottom:1px solid var(--line)}
+  .metric:last-child{border-bottom:0}
+  .metric__lab{font-size:12.5px;color:var(--ink-2)}
+  .metric__lab small{display:block;color:var(--mut);font-size:11px}
+  .metric__val{font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+  .up{color:var(--gain)} .down{color:var(--loss)} .flat{color:var(--mut)}
+
+  .fires{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
+  .fire{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px;
+    padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .fire:last-child{border-bottom:0;padding-bottom:0}
+  .fire__what{font-weight:600;color:var(--ink)}
+  .fire__age{font-family:var(--font-mono);font-size:11px;padding:2px 7px;border-radius:20px;background:var(--panel-2);color:var(--mut);white-space:nowrap;height:fit-content}
+  .fire__age.hot{background:var(--loss-bg);color:var(--loss)}
+  .fire__next{grid-column:1/2;font-size:12px;color:var(--ink-2)}
+  .fire__who{font-size:11px;color:var(--mut)}
+
+  .log{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+  .log li{font-size:13px}
+  .log .d{font-family:var(--font-mono);font-size:11px;color:var(--accent);font-weight:700}
+  .log .why{color:var(--mut);font-size:12px}
+  .log .pred{color:var(--ink-2);font-size:12px;margin-top:2px}
+  .log .pred b{color:var(--warn)}
+
+  .miss{margin-top:22px;background:var(--panel);border:1px dashed var(--loss);border-radius:12px;padding:14px 18px}
+  .miss h3{font-size:14px;font-weight:700;color:var(--loss);margin:0 0 8px}
+  .miss ol{margin:0;padding-left:20px;font-size:13px;color:var(--ink-2)} .miss li{margin-bottom:3px}
+  .foot{margin-top:26px;font-size:11px;color:var(--mut);text-align:center;font-family:var(--font-mono)}
+</style>
+
+<div class="deck">
+  <header class="topbar">
+    <span class="topbar__id">Stock Screener</span>
+    <span class="topbar__name">한·미 시그널 + 규율 엔진</span>
+    <span class="topbar__sub">자기교정 투자 시스템 · pcy604/stock-dashboard</span>
+    <span class="topbar__meta"><span class="badge b-warn">🟡 검증 대기</span><span class="num">2026-07-25</span></span>
+  </header>
+
+  <div class="verdict">
+    <span style="font-size:20px;line-height:1.2">🧭</span>
+    <p><b>한 줄 진단 —</b> 기능은 상용 수준으로 성숙했고 자기교정 루프도 돈다. 그러나 <b>① 종목선정 알파는 아직 미검증</b>(8/11 첫 판독)이고, <b>② 핵심인 가드레일 루프가 꺼져 있다</b>(실보유 미입력). 지금 필요한 건 새 기능이 아니라 <b>검증 결과와 실계좌 연동</b>이다.</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1 원페이저 -->
+    <section class="card s-go">
+      <div class="card__head"><span class="card__n">01</span><h2 class="card__title">원페이저</h2><span class="badge b-go">🟢 진행</span></div>
+      <p class="card__upd">최종갱신 2026-07-25</p>
+      <div class="card__body">
+        <dl class="kv">
+          <dt>문제</dt><dd>개인은 종목선정이 아니라 <b>집중·레버리지·감정</b>으로 잃는다 (본인 6월 ₩1억 손실이 증거)</dd>
+          <dt>대상</dt><dd>규율이 필요한 자기주도 투자자 <span class="num">(현재 1명)</span></dd>
+          <dt>해법</dt><dd>추천을 스스로 채점·교정하고(성적표), 사용자의 규율을 감시하는(가드레일) 시스템</dd>
+          <dt>지금</dt><dd>기능 성숙 · 검증 초기</dd>
+        </dl>
+      </div>
+      <p class="next"><b>다음 →</b><span>8/11 신뢰계수 반영 후 첫 개선 판독으로 "선정 엣지 유무"를 데이터로 결론.</span></p>
+    </section>
+
+    <!-- 2 마스터플랜 -->
+    <section class="card s-warn">
+      <div class="card__head"><span class="card__n">02</span><h2 class="card__title">마스터플랜</h2><span class="badge b-warn">🟡 M2 진행</span></div>
+      <p class="card__upd">최종갱신 2026-07-25 · 완료조건 = 검증가능</p>
+      <div class="card__body">
+        <ul class="ladder">
+          <li><span class="step st-done">M0</span><span>파이프라인 무인화 <span class="cond">— 매일 06시 자동 + 정지 감시 ✓</span></span></li>
+          <li><span class="step st-done">M1</span><span>성적표 루프 <span class="cond">— 신호 채점·신뢰계수 자동반영 ✓</span></span></li>
+          <li><span class="step st-now">M2</span><span>검증 게이트 <span class="cond">— 신호당 표본 30건 + 개선픽 알파 판독 (8/11)</span></span></li>
+          <li><span class="step st-block">M3</span><span>실계좌 규율 <span class="cond">— KIS 연동, 실보유 매일 자동채점 (미착수)</span></span></li>
+          <li><span class="step st-wait">M4</span><span>방향 확정 <span class="cond">— 8월 데이터로 선정 vs 규율집중 (A/B/C)</span></span></li>
+          <li><span class="step st-wait">M5</span><span>공개 트랙레코드 <span class="cond">— 검증 통과 시 공개 URL (조건부)</span></span></li>
+        </ul>
+      </div>
+      <p class="next"><b>다음 →</b><span>M2 완료조건(표본 30건)까지 매주 가상매매 축적 — 시간이 만드는 자산.</span></p>
+    </section>
+
+    <!-- 7 트랙션 보드 -->
+    <section class="card s-warn wide">
+      <div class="card__head"><span class="card__n">07</span><h2 class="card__title">트랙션 보드 — 시스템 성과 (허영지표 대신 행동지표)</h2><span class="badge b-warn">🟡 알파 미검증</span></div>
+      <p class="card__upd">측정 시작 2026-06-14 · 최종갱신 2026-07-25</p>
+      <div class="card__body metrics">
+        <div class="metric"><div class="metric__lab">신호 4주 실전EV — 컵핸들 <small>유일하게 백테 상회 (n=8)</small></div><div class="metric__val up">+3.5%</div></div>
+        <div class="metric"><div class="metric__lab">신호 4주 실전EV — 이평수렴 / 52주신고가 <small>신뢰계수 ×0.20 / ×0.29로 자동 강등</small></div><div class="metric__val down">-0.8% / -2.1%</div></div>
+        <div class="metric"><div class="metric__lab">주간 포트 알파 (vs KOSPI·SPY) <small>W27 → W29, 표본 적어 소음 수준</small></div><div class="metric__val"><span class="down">-3.2%p</span> → <span class="up">+3.5%p</span></div></div>
+        <div class="metric"><div class="metric__lab">가상매매 누적 / 신뢰계수 반영 후 픽 <small>개선검증 첫 4주 판독 2026-08-11</small></div><div class="metric__val">200+ / <span class="flat">D-17</span></div></div>
+        <div class="metric"><div class="metric__lab">컨센 리비전 스냅샷 <small>510종목 1주차 · 방향은 2주차부터</small></div><div class="metric__val flat">1주차</div></div>
+        <div class="metric"><div class="metric__lab">실사용자 / 실계좌 연동 / 수익 <small>개인 도구 — 외부 사용자·매출 미해당</small></div><div class="metric__val flat">1명 / ❌ / ❓</div></div>
+      </div>
+      <p class="next"><b>다음 →</b><span>이 카드가 3·5·6번을 검증한다. 8/11 판독에서 개선픽 알파가 (+)면 M4를 "선정 유지"로, (−)면 "규율 집중"으로 확정.</span></p>
+    </section>
+
+    <!-- 8 열린 전선 -->
+    <section class="card s-block">
+      <div class="card__head"><span class="card__n">08</span><h2 class="card__title">열린 전선</h2><span class="badge b-block">🔴 6건</span></div>
+      <p class="card__upd">최종갱신 2026-07-25 · 무엇 / 다음 / 누가</p>
+      <div class="card__body">
+        <ul class="fires">
+          <li><span class="fire__what">포트폴리오 미입력 → 가드레일 루프 꺼짐</span><span class="fire__age hot">핵심</span><span class="fire__next">→ 💼탭에 실보유 종목 입력하면 매일 규율 채점 시작</span><span class="fire__who">누가: 사용자 (5분)</span></li>
+          <li><span class="fire__what">KIS 실계좌 자동연동</span><span class="fire__age">대기</span><span class="fire__next">→ 수동입력 없이 실보유 자동 채점 (kis_client 존재)</span><span class="fire__who">누가: Claude + 사용자 계정</span></li>
+          <li><span class="fire__what">8/11 검증 첫 판독</span><span class="fire__age">D-17</span><span class="fire__next">→ 매주 가상매매 축적, 시간이 해결</span><span class="fire__who">누가: 시간</span></li>
+          <li><span class="fire__what">CANSLIM I(기관수급) 컬럼 공백</span><span class="fire__age hot">지속</span><span class="fire__next">→ KRX 계정을 Secrets(KRX_ID/PW)에 등록 시 복구</span><span class="fire__who">누가: 사용자</span></li>
+          <li><span class="fire__what">영업현금흐름 축 (Piotroski 완성)</span><span class="fire__age">대기</span><span class="fire__next">→ DB 스키마에 op_cf·부채 추가</span><span class="fire__who">누가: Claude</span></li>
+          <li><span class="fire__what">Gemini 세그먼트 추출 정확도 미검증</span><span class="fire__age">신규</span><span class="fire__next">→ 몇 종목 원문 대조로 신뢰도 확인</span><span class="fire__who">누가: 사용자 눈</span></li>
+        </ul>
+      </div>
+      <p class="next"><b>다음 →</b><span>1번(포트폴리오 입력)이 유일하게 사용자만 할 수 있고, 나머지 루프를 켠다. 이것부터.</span></p>
+    </section>
+
+    <!-- 4 워크플로우 -->
+    <section class="card s-warn wide">
+      <div class="card__head"><span class="card__n">04</span><h2 class="card__title">워크플로우 — 실제로 도는 것</h2><span class="badge b-warn">🟡 1개 루프 꺼짐</span></div>
+      <p class="card__upd">최종갱신 2026-07-25 · 점선 🔴 = 안 도는 구간</p>
+      <div class="card__body flow">
+        <div class="flow__src">
+          <span class="chip">DART·EDGAR 공식재무</span><span class="chip">FDR 가격</span><span class="chip">FRED 매크로</span><span class="chip">네이버 컨센</span><span class="chip">Gemini 추출</span>
+        </div>
+        <div class="arrow">▼ 매일 06시 무인 (GitHub Actions)</div>
+        <div class="loop"><span class="loop__tag">① 시스템 자기교정</span><span class="loop__steps">신호 발굴 → 가상매매 → 1·4·13주 채점 → 신뢰계수 보정 ↻</span><span class="loop__owner">자동</span></div>
+        <div class="loop dashed"><span class="loop__tag">② 행동 교정 (가드레일)</span><span class="loop__steps">보유 → 원칙 대조 → "몇 주 줄여라" → 준수율 ↻</span><span class="loop__owner">🔴 미입력</span></div>
+        <div class="loop"><span class="loop__tag">③ 인프라 감시</span><span class="loop__steps">파이프라인 → 신선도·실패율 검사 → 이상시 경보 ↻</span><span class="loop__owner">자동</span></div>
+        <div class="arrow">▼</div>
+        <div class="merge"><b>주간 성적표 브리핑</b> — 일요일 08시 텔레그램. 세 루프 결과 합류.</div>
+      </div>
+      <p class="next"><b>다음 →</b><span>②번 점선을 실선으로: 포트폴리오 입력(즉시) 또는 KIS 연동(자동). 이 루프가 이 시스템의 존재 이유.</span></p>
+    </section>
+
+    <!-- 5 경쟁 지형 -->
+    <section class="card s-go wide">
+      <div class="card__head"><span class="card__n">05</span><h2 class="card__title">경쟁 지형 — 우리 자리</h2><span class="badge b-go">🟢 공백 확보</span></div>
+      <p class="card__upd">최종갱신 2026-07-25 · 조사 완료</p>
+      <div class="card__body">
+        <div class="quadwrap">
+          <div class="qaxis y">실패 공개 ↑ · 성과 은폐 ↓</div>
+          <div class="quad">
+            <div class="qcell"><span class="qh">규율 · 실패공개</span><span class="qcomp">로보어드바이저 <span class="fire__who">(핀트·파운트) — 돈 위임, 규율 대행</span></span></div>
+            <div class="qcell us"><span class="qh">◆ 우리 자리 (공백)</span><span class="qcomp"><b>규율 엔진 + 실패까지 공개</b> — 계좌는 내가, 원칙은 기계가 감시</span></div>
+            <div class="qcell"><span class="qh">추천 · 성과은폐</span><span class="qcomp">Danelfin · Tickeron · Composer <span class="fire__who">— 큐레이션된 성과만 마케팅</span></span></div>
+            <div class="qcell"><span class="qh">자동매매</span><span class="qcomp">퀀터스 · 젠포트 <span class="fire__who">— 전략 백테·자동실행</span></span></div>
+          </div>
+          <div></div>
+          <div class="qaxis">종목추천 ← → 규율·리스크관리</div>
+        </div>
+      </div>
+      <p class="next"><b>다음 →</b><span>"실패까지 공개하는 규율 시스템"은 경쟁사에 0개. 단, 이 축의 생사는 8/11 검증에 달림 — 못 이기면 축 자체를 접는다.</span></p>
+    </section>
+
+    <!-- 6 SWOT -->
+    <section class="card s-go wide">
+      <div class="card__head"><span class="card__n">06</span><h2 class="card__title">SWOT — 각 칸 대응 액션</h2><span class="badge b-go">🟢 능동</span></div>
+      <p class="card__upd">최종갱신 2026-07-25</p>
+      <div class="card__body swot">
+        <div class="sq s"><h4>강점 S</h4><ul><li>정직성 — 실패를 기록·강등</li><li>3-루프 자기교정</li><li>전부 무료 스택</li></ul><p class="act"><b>액션:</b> 공개 트랙레코드로 정직성을 무기화</p></div>
+        <div class="sq w"><h4>약점 W</h4><ul><li>검증된 알파 없음</li><li>단일파일 2,900줄·테스트 0</li><li>사용자 1명</li></ul><p class="act"><b>액션:</b> 8/11 판독으로 알파 유무 결론</p></div>
+        <div class="sq o"><h4>기회 O</h4><ul><li>규율 엔진 시장 공백</li><li>SEC PDT 폐지 → 자기규율 수요↑</li><li>데이터·엔진 이미 보유</li></ul><p class="act"><b>액션:</b> KIS 연동으로 규율 자동화 선점</p></div>
+        <div class="sq t"><h4>위협 T</h4><ul><li>무료 데이터 의존 (pykrx 로그인화)</li><li>Gemini 추출 정확도</li><li>선정 엣지 부재 가능성</li></ul><p class="act"><b>액션:</b> 조용한실패 감시 유지 + 벡터로 함정 차단</p></div>
+      </div>
+      <p class="next"><b>다음 →</b><span>W(알파)와 O(규율)가 정면충돌 — 8월 데이터가 어느 쪽에 베팅할지 결정한다.</span></p>
+    </section>
+
+    <!-- 10 결정 로그 -->
+    <section class="card s-go">
+      <div class="card__head"><span class="card__n">10</span><h2 class="card__title">결정 로그</h2><span class="badge b-go">🟢 예측 추적</span></div>
+      <p class="card__upd">최종갱신 2026-07-25</p>
+      <div class="card__body">
+        <ul class="log">
+          <li><span class="d">06-20</span> 종목선정 매달리기 중단 → 생존(매도·리스크)에 집중<div class="why">근거: 레짐 백테 — 선정 변별력 비일관</div></li>
+          <li><span class="d">07-24</span> 역발상 KR 엔진 추가<div class="why">근거: 모멘텀이 조정장에 눈감음 (국장 폭락 시 KR 1종목)</div></li>
+          <li><span class="d">07-24</span> 펀더멘털 벡터 (위치+속도+가속)<div class="pred"><b>예측:</b> 벡터 필터가 함정 424종목 걸러 성과↑ → 8월 검증</div></li>
+          <li><span class="d">미결</span> A/B/C 방향 <span class="why">— 8월 데이터로 결정 예약</span></li>
+        </ul>
+      </div>
+      <p class="next"><b>다음 →</b><span>07-24 벡터 예측을 8/11 성적표에서 채점 — 맞았는지 데이터로 확인.</span></p>
+    </section>
+
+    <!-- 3 수익화 -->
+    <section class="card s-block">
+      <div class="card__head"><span class="card__n">03</span><h2 class="card__title">수익화 구조</h2><span class="badge b-block">🔴 미착수</span></div>
+      <p class="card__upd">최종갱신 2026-07-25 · 정직한 ❓</p>
+      <div class="card__body">
+        <dl class="kv">
+          <dt>누가 낸다</dt><dd>❓ 미정 — 현재 개인용, 외부 사용자 0</dd>
+          <dt>얼마 낸다</dt><dd>❓ 미측정</dd>
+          <dt>왜 낸다</dt><dd>가설 — "실패까지 공개하는 규율 엔진"은 무료 대안(Danelfin류)에 없음</dd>
+          <dt>몇 명이면</dt><dd>❓ 미측정</dd>
+          <dt>선결조건</dt><dd>M2 검증 통과 — 그 전 수익화는 근거 없음</dd>
+        </dl>
+      </div>
+      <p class="next"><b>다음 →</b><span>지금 수익화 설계는 시기상조. 8월 검증 후 공개 트랙레코드로 수요검증부터.</span></p>
+    </section>
+
+  </div>
+
+  <div class="miss">
+    <h3>❓ 먼저 이것부터 측정·실행하라 (카드의 ❓를 채우는 순서)</h3>
+    <ol>
+      <li><b>포트폴리오 입력</b> — 가드레일 루프(②)를 켜는 유일한 열쇠. 오늘, 5분. (사용자)</li>
+      <li><b>8/11 개선검증 판독</b> — 알파·선정엣지·방향(A/B/C)이 전부 여기서 결정. (시간)</li>
+      <li><b>Gemini 세그먼트 정확도</b> — 몇 종목 원문 대조로 신뢰도 확인. (사용자)</li>
+      <li><b>수익화·사용자 지표</b> — M2 통과 전엔 측정 대상 아님. 그때까지 ❓가 정답.</li>
+    </ol>
+  </div>
+
+  <p class="foot">Stock Screener 프로젝트 카드 · 커밋 3a24cf1 기준 · 숫자 없는 칸은 지어내지 않고 ❓로 둠</p>
+</div>
