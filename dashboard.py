@@ -2370,6 +2370,7 @@ with tab7:
                 # 마진 궤적 스트립
                 _mq = [r for r in _flowq if r.get('revenue')][:8][::-1]     # 오래된→최신
                 if len(_mq) >= 3:
+                    st.markdown("###### 📈 마진 궤적 (GPM·OPM·NPM) — Sankey가 못 보여주는 추이")
                     _mfig = go.Figure()
                     _mx = [r.get('period', '') for r in _mq]
                     for _mk, _mlab, _mc in [('gross', 'GPM', '#79c0ff'), ('op_income', 'OPM', '#f0883e'),
@@ -2378,10 +2379,10 @@ with tab7:
                                for r in _mq]
                         _mfig.add_trace(go.Scatter(x=_mx, y=_my, mode='lines+markers', name=_mlab,
                                                    line=dict(color=_mc, width=2.5)))
-                    _mfig.update_layout(height=230, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                        font=dict(color='#8b949e', size=11), margin=dict(l=0, r=8, t=28, b=0),
-                                        title=dict(text='마진 궤적 (GPM·OPM·NPM) — Sankey가 못 보여주는 추이', font=dict(size=13)),
-                                        legend=dict(orientation='h', y=1.18, x=0), yaxis_ticksuffix='%')
+                    _mfig.update_layout(height=240, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                        font=dict(color='#8b949e', size=11), margin=dict(l=0, r=8, t=34, b=0),
+                                        legend=dict(orientation='h', y=1.15, x=0, yanchor='bottom'),
+                                        yaxis_ticksuffix='%')
                     _mfig.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
                     _mfig.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
                     st.plotly_chart(_mfig, use_container_width=True)
