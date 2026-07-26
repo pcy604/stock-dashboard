@@ -1286,11 +1286,11 @@ def _plotly_line(dfs, labels, colors, title, yformat='{:.2f}', height=260):
             hovertemplate=f'{label}: %{{y:{yformat}}}<extra></extra>',
         ))
     fig.update_layout(
-        title=dict(text=title, font=dict(size=13)),
-        height=height, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        title=dict(text=title, font=dict(size=13), x=0, xanchor='left'),
+        height=height + 34, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='#8b949e', size=10),
-        margin=dict(l=0, r=0, t=35, b=0),
-        legend=dict(orientation='h', y=1.18, x=0),
+        margin=dict(l=0, r=0, t=34, b=34),
+        legend=dict(orientation='h', y=-0.22, x=0, yanchor='top'),   # 범례를 하단으로 → 제목과 겹침 방지
         hovermode='x unified',
     )
     fig.update_xaxes(gridcolor='rgba(128,128,128,0.2)', showgrid=True)
@@ -1501,11 +1501,11 @@ with tab4:
                 ))
         fig_idx.add_hline(y=0, line_color='rgba(110,118,129,0.4)', line_dash='dash')
         fig_idx.update_layout(
-            title='주요 지수 상대 성과 (1년 전 = 0%)',
-            height=280, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            title=dict(text='주요 지수 상대 성과 (1년 전 = 0%)', x=0, xanchor='left'),
+            height=314, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='#8b949e', size=10),
-            margin=dict(l=0,r=0,t=35,b=0),
-            legend=dict(orientation='h', y=1.18, x=0),
+            margin=dict(l=0,r=0,t=34,b=34),
+            legend=dict(orientation='h', y=-0.22, x=0, yanchor='top'),   # 범례 하단 (제목 겹침 방지)
             hovermode='x unified', yaxis_ticksuffix='%',
         )
         fig_idx.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
