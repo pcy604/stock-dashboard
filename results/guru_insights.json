@@ -16,8 +16,8 @@
         "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-28T01:11:20.486267+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-28T03:16:27.361525+09:00"
     },
     {
       "video_id": "M848WM1CQQg",
@@ -280,8 +280,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-28T01:11:52.965663+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-28T03:16:59.851261+09:00"
     },
     {
       "video_id": "cpAxJjAREr8",
@@ -435,11 +435,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-28T01:12:25.438565+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-28T03:17:17.936732+09:00"
     },
     {
       "video_id": "HA2ryzPLNYE",
@@ -558,8 +558,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-28T01:02:21.905463+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-28T03:11:20.556812+09:00"
     },
     {
       "video_id": "_tzWMZvnGX8",
@@ -13510,5 +13510,5 @@
       "analyzed_at": "2026-07-18T10:08:48.786758+09:00"
     }
   ],
-  "updated": "2026-07-28T01:12:26.869033+09:00"
+  "updated": "2026-07-28T03:17:19.146225+09:00"
 }
