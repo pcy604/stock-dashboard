@@ -13,11 +13,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"박지훈 부장이 과거 발언에 대한 해명과 함께, 중국 반도체(CXMT) 시장 진입이 한국 기업에 미칠 영향과 시장의 순환매장 가능성을 분석하며 투자 전략을 제시합니다.\",\n  \"summary\": [\n    \"NH투자증권 박지훈 부장이 과거 주식 매도 포지션 관련 발언에 대해 시청자들에게 오해를 해명하고 투명성을 강조했습니다.\",\n    \"중국 메모리 반도체 기업 CXMT의 IPO와 높은 기업 가치(SK 하이닉스 시총의 절반, 1분기 영업이익의 1/10)가 한국 반도체 기업에 대한 잠재적 위협으로 분석되었습니다.\",\n    \"기술력 격차(HBM, DDR5 미보유)에도 불구하고 시장에서 CXMT에 높은 밸류에이션을 주는 것은 중국의 반도체 자립 의지와 투자 확대를 반영합니다.\",\n    \"미국 빅테크 기업들의 막대한 CAPEX 투자와 낮은 Free Cash Flow는 재무적 압박 요인이지만, 장기적으로는 AI 클라우드 매"
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-28T03:16:27.361525+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-28T05:12:53.825875+09:00"
     },
     {
       "video_id": "M848WM1CQQg",
@@ -277,11 +278,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"하반기 주식 시장은 상반기와 다른 양상을 보일 것이며, 높은 변동성 속에서도 거시 지표를 확률적으로 분석하여 낙폭 과대 종목과 유동성을 활용한 기회를 찾아야 합니다.\",\n  \"summary\": [\n    \"오늘 한국 시장은 삼성전자와 SK하이닉스의 큰 반등은 없었지만, 지난 주말 미 증시 상황을 고려하면 나쁘지 않게 마감했습니다.\",\n    \"거시 경제 지표는 유가, 환율, 미국채 금리가 반도체 주가와 역의 상관관계를 보이며, 이들의 하락은 반도체에 긍정적으로 작용할 수 있습니다.\",\n    \"확신보다는 확률에 기반한 투자가 중요하며, 주식 시장의 과도한 변동성이 점차 줄어들고 시장이 정상화될 조짐을 보이고 있습니다.\",\n    \"하반기에는 상반기와 달리, 그동안 소외되었던 낙폭 과대 대형주나 특정 업종(바이오, 로봇 등)에서 반등 기회가 있을 것으로 예상됩니다.\",\n    \"현재 포트폴리오는 반도체 30%, 제약바"
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-28T03:16:59.851261+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-07-28T05:15:29.104915+09:00"
     },
     {
       "video_id": "cpAxJjAREr8",
@@ -13510,5 +13512,5 @@
       "analyzed_at": "2026-07-18T10:08:48.786758+09:00"
     }
   ],
-  "updated": "2026-07-28T03:17:19.146225+09:00"
+  "updated": "2026-07-28T05:15:30.301461+09:00"
 }
