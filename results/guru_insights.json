@@ -1,6 +1,119 @@
 {
   "items": [
     {
+      "video_id": "tA7Vuq4l_p0",
+      "title": "저점 다시 시험받는 시장...창신메모리 폭등, 삼성전자·하이닉스 괜찮나? | 박병창 MP파트너스 대표 [마켓 인사이드]",
+      "channel": "삼프로TV",
+      "published": "2026-07-28T00:28:21+00:00",
+      "url": "https://www.youtube.com/watch?v=tA7Vuq4l_p0",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-28T21:29:49.545449+09:00"
+    },
+    {
+      "video_id": "DaaqJSNcWqU",
+      "title": "중국 반도체·AI 투자 둔화까지 반영…삼전닉스 과도하게 빠졌다ㅣ김장열 유니스토리자산운용 리서치센터장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-07-28T11:30:17+00:00",
+      "url": "https://www.youtube.com/watch?v=DaaqJSNcWqU",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "반도체 시장은 가격 하락 예측에도 불구하고 빅테크의 장기 계약 및 고성능 메모리 수요 증가로 인해 펀더멘털이 견조하며, 최근 주가 하락은 과도한 공포를 반영한 것으로 보인다.",
+        "summary": [
+          "반도체 가격(DRAM, NAND)은 2027년까지 점진적인 하락이 예상되었으나, 최근 주가 급락은 시장의 과도한 비관론을 반영하고 있다.",
+          "SK 하이닉스(000660)와 삼성전자(005930) 주가 하락은 이미 알려진 메모리 가격 조정과 중국 반도체 업체의 DUV 장비 개발 소식, 빅테크의 '합리적 가격' 요구가 겹쳐 발생했다.",
+          "일론 머스크와 최태원 SK 회장의 발언은 메모리 가격의 영원한 상승은 어렵고, AI 시대에 필요한 경쟁력 있는 제품 확보가 중요하며, '터무니없는 가격'이 아닌 '합리적인 조건'의 공급을 강조했다.",
+          "ASML(ASML)의 DUV 장비 기술 우위와 중국 업체들의 제한된 생산 능력(2027년 목표 20대)을 고려할 때, 중국의 자체 DUV 양산이 단기간 내 시장 판도를 급격히 바꿀 가능성은 낮다.",
+          "빅테크 기업의 투자 확대 Commitments와 메모리 업체들의 제품 믹스 변화(HBM, AI 메모리, 고부가 제품)가 이익 규모를 견조하게 유지할 핵심 요소이다.",
+          "2027년 SK 하이닉스(000660)의 예상 EPS(주당순이익)와 과거 사이클 주식의 PER(주가수익비율)을 고려하면, 현재 주가는 이미 상당한 하락 우려를 반영하고 있으며, 과매도 구간일 가능성이 있다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "주가 120일 이동평균선 하회, 대세 하락 가능성 언급되었으나 과도한 하락으로 판단",
+            "view": "중립|긍정",
+            "t": 39
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "주가 120일 이동평균선 하회, 디램 및 낸드 가격 하락 시나리오 언급",
+            "view": "중립|긍정",
+            "t": 43
+          },
+          {
+            "name": "Micron Technology",
+            "ticker": "MU",
+            "context": "메모리 가격 하락 예측에 대한 언급, 테슬라에 메모리 공급 관련 발언 인용",
+            "view": "중립",
+            "t": 150
+          },
+          {
+            "name": "NVIDIA",
+            "ticker": "NVDA",
+            "context": "AI 투자와 관련하여 바닥을 지지하는 모습 언급, 공매도 우려에도 불구하고 펀더멘털 견조",
+            "view": "긍정",
+            "t": 3120
+          },
+          {
+            "name": "ASML Holding",
+            "ticker": "ASML",
+            "context": "중국의 DUV 장비 양산 소식으로 주가 급락했으나, 기술적 우위로 인해 장기적 경쟁 우위는 유지될 것",
+            "view": "중립|긍정",
+            "t": 3217
+          }
+        ],
+        "key_points": [
+          {
+            "point": "반도체 가격(ASP)은 2026년 3분기/4분기에 상승세가 둔화되고 2027년 1분기부터 하락할 것이라는 시나리오가 존재함. (DRAM -28%, NAND -30% (vs. 26.2Q) 예상)",
+            "t": 137
+          },
+          {
+            "point": "최태원 SK 회장은 메모리 가격이 지금처럼 계속 올라갈 수 없으며, 결국 사이클 산업이기 때문에 언젠가 조정이 올 것이라고 언급.",
+            "t": 601
+          },
+          {
+            "point": "일론 머스크는 마이크론으로부터 메모리를 '터무니없이 비싼(insane) 가격'이 아닌 '합리적인(reasonable) 조건'으로 공급받았다고 언급. 이는 빅테크가 메모리 가격 통제에 적극적으로 나설 수 있음을 시사.",
+            "t": 629
+          },
+          {
+            "point": "중국 업체들의 Immersion DUV 장비 양산 시작 소식으로 ASML 주가가 급락했으나, ASML의 생산 규모, 처리량, 정밀도, 신뢰성 등 기술력은 여전히 압도적이며, 단기간 내 중국 업체가 ASML 수준에 도달하기는 어려움.",
+            "t": 3217
+          },
+          {
+            "point": "빅테크 기업의 AI 인프라 확대를 위한 '잠재적 레버리지(그림자 부채)'가 상당하며, 이는 표면적인 부채보다 앞으로 반드시 지출해야 할 계약 의무가 더 많다는 의미.",
+            "t": 3620
+          },
+          {
+            "point": "메모리 산업은 사이클 산업의 본질을 가지고 있으나, 과거와 같은 대규모 폭락보다는 HBM 및 AI 메모리, 고부가 제품 확대 등을 통한 '제품 믹스' 변화로 이익 규모를 꾸준히 증대시키려는 노력이 중요.",
+            "t": 495
+          },
+          {
+            "point": "SK 하이닉스(000660)와 삼성전자(005930)의 주가는 이미 2027년 이익 하락 우려를 상당 부분 반영하고 있으며, 현재 주가가 PER 5~6배 수준으로 과거 사이클 저점 수준에 근접했다는 분석.",
+            "t": 1953
+          }
+        ],
+        "actionable": [
+          "반도체 기업의 주가 하락을 펀더멘털 악화가 아닌, 이미 시장에 반영된 가격 조정과 과도한 심리적 위축으로 판단하고 저점 매수 기회를 모색.",
+          "다음 주 발표될 다른 빅테크 기업들의 실적 발표와 투자 코멘트에서 AI 인프라 투자 지속 의지 및 메모리 장기 구매 계약 조건 등에 어떤 변화가 있는지 주시할 필요.",
+          "메모리 산업의 제품 믹스 변화(HBM, 고부가 메모리) 및 수요처 다변화가 이익 방어에 미치는 영향을 지속적으로 분석하여 투자 전략에 반영."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-28T21:27:40.814298+09:00"
+    },
+    {
       "video_id": "Z7WrW2aZp4k",
       "title": "\"살려주세요\" 제발 원금만이라도 돌려주세요 제발 / [야식잡썰 EP.272] / 이대호 기자",
       "channel": "와이스트릿",
@@ -16,8 +129,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-28T19:31:27.406082+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-28T21:30:21.827371+09:00"
     },
     {
       "video_id": "9b_qd6W6Y9U",
@@ -35,8 +148,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-28T19:30:55.105612+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-28T21:29:17.525443+09:00"
     },
     {
       "video_id": "5wqrpL-NWU0",
@@ -54,8 +167,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-28T19:30:22.955542+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-28T21:28:45.358595+09:00"
     },
     {
       "video_id": "Wrto3usUozY",
@@ -73,8 +186,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-28T19:29:50.735612+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-28T21:28:13.131804+09:00"
     },
     {
       "video_id": "wrTNLsmtXOc",
@@ -750,8 +863,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-28T19:31:59.476023+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-28T21:30:54.321799+09:00"
     },
     {
       "video_id": "1EXYsVlV1Rc",
@@ -1286,11 +1399,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-28T19:20:54.437007+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-28T21:24:50.055360+09:00"
     },
     {
       "video_id": "7pbetoCKocI",
@@ -13163,100 +13276,7 @@
       "source": "fail",
       "attempts": 2,
       "analyzed_at": "2026-07-21T02:07:16.080324+09:00"
-    },
-    {
-      "video_id": "UglY380Of1U",
-      "title": "노화를 10% 되돌리는 1%의 기술! / 김범수 교수 (풀버전)",
-      "channel": "와이스트릿",
-      "published": "2026-07-20T02:45:30+00:00",
-      "url": "https://www.youtube.com/watch?v=UglY380Of1U",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "NMN을 리포솜 기술로 피부에 직접 전달하여 피부 노화 징후를 개선하고 밝기, 주름, 리프팅에 긍정적 효과를 보인 화장품 기술을 소개합니다.",
-        "summary": [
-          "NMN (Nicotinamide Mononucleotide)은 노화 방지 분야에서 주목받는 성분으로, 인체 내 NAD+의 전구체이며 NAD+는 에너지 생성 및 장수 유전자(시르투인) 활성화에 필수적입니다.",
-          "나이가 들수록 NAD+ 수치가 감소하여 세포 기능 저하 및 노화가 진행되며, NMN 투여 시 생체 NAD+ 수치 증가 및 운동 능력 향상 등 긍정적 효과가 동물 실험 및 일부 인체 임상에서 확인되었습니다.",
-          "NMN은 친수성 물질로 피부 장벽 통과가 어렵고 불안정하여 쉽게 분해되므로, 바이오케미랩은 인지질로 만든 리포솜(Liposome) 기술을 활용하여 NMN의 안정성과 피부 침투율을 획기적으로 개선했습니다.",
-          "바이오케미랩의 NMN 리포솜 크림은 공신력 있는 시험기관의 인체 적용 시험 결과, 4주 사용 후 피부 밝기가 평균 10.6%, 주름이 8.8%, 안면 리프팅이 32% 개선되었음을 확인했습니다.",
-          "해당 제품은 NMN 리포솜 10% (순수 NMN 함량 1%)를 포함하고, 미백 기능성 나이아신아마이드와 주름 개선 기능성 아데노신을 추가하여 미백 및 주름 개선 이중 기능성을 갖추고 있습니다.",
-          "화장품의 제형과 발림성도 중요하게 고려하여, 부드럽고 촉촉한 사용감을 제공하며 민감성 피부에도 자극이 적도록 개발되었습니다."
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "NMN은 60~70세 쥐의 세포를 20세 상태로 되돌리는 효과가 관찰되어 '현대판 불로초'로 불리며 항노화 분야에서 뜨거운 관심을 받고 있습니다.",
-            "t": 0
-          },
-          {
-            "point": "NMN은 인체 내에서 NAD+로 전환되며, NAD+는 세포의 에너지 생산 및 DNA 복구와 관련된 장수 유전자(시르투인) 활성화에 필수적인 핵심 조효소입니다.",
-            "t": 533
-          },
-          {
-            "point": "나이가 들수록 NAD+ 수치는 20세 이후 20년마다 50%씩 급격히 감소하여 에너지 생성 감소, 세포 회복력 감소, 노화 진행을 유발합니다.",
-            "t": 744
-          },
-          {
-            "point": "일반 NMN은 친수성으로 피부 장벽을 통과하기 어렵고, 수용액 상태에서는 불안정하여 쉽게 분해됩니다. 이 문제를 해결하기 위해 바이오케미랩은 NMN을 인지질 캡슐 형태의 리포솜으로 제조하는 기술을 개발했습니다.",
-            "t": 1616
-          },
-          {
-            "point": "바이오케미랩의 리포솜 NMN은 180일 후에도 89.4%의 안정성을 유지하고, 피부 침투율이 96.8%에 달해 일반 NMN 제품 대비 월등한 효능을 보였습니다.",
-            "t": 1834
-          },
-          {
-            "point": "실제 인체 적용 시험 결과, 바이오케미랩의 NMN 리포솜 크림은 4주 사용 후 피부 밝기 10.6% 개선, 주름 8.8% 개선, 안면 리프팅 32% 개선 효과를 보였습니다.",
-            "t": 2432
-          },
-          {
-            "point": "바르는 NMN 화장품은 먹는 NMN이 위와 간에서 분해되어 생체 이용률이 낮은 단점을 보완하여 피부에 직접 작용하게 함으로써 국소적인 노화 개선에 더 효과적일 수 있습니다.",
-            "t": 1924
-          }
-        ],
-        "actionable": [
-          "바르는 NMN 화장품을 사용해보고 싶은 투자자는 제품의 리포솜 기술 적용 여부, NMN 함량, 그리고 안정성 관련 데이터를 꼼꼼히 확인할 필요가 있습니다.",
-          "피부 타입에 따라 보습 및 리프팅 효과가 다르게 나타날 수 있으므로, 초기에는 소량으로 시작하여 개인별 피부 반응을 주의 깊게 관찰하는 것이 좋습니다.",
-          "NMN 제품의 가격이 고가이므로, 장기적인 사용을 고려할 때 비용 효율성 또한 중요한 판단 기준이 될 수 있습니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-07-20T17:40:10.036696+09:00"
-    },
-    {
-      "video_id": "alXqIzLV1RA",
-      "title": "\"강남 아파트 한 채는 그냥 비싼 방석이다\" #박소연 #신영증권 #강남 #아파트 #부동산 #주식 #현금흐름 #투자",
-      "channel": "와이스트릿",
-      "published": "2026-07-20T04:00:25+00:00",
-      "url": "https://www.youtube.com/watch?v=alXqIzLV1RA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "박소연 이사는 강남 아파트가 현금 흐름과 유동성이 없다면 단지 비싼 방석일 뿐이라며, 자산의 실질적 가치를 재고해야 한다고 주장합니다.",
-        "summary": [
-          "과거 부자의 기준은 빨리 부자 되기, 10억 모으기, 또는 강남 입성 등이었다. [6]",
-          "최근 흐름에 따르면 강남 아파트를 보유하는 것이 실질적인 현금 흐름을 만들어 줄 수 있는지 의문이 제기된다. [16]",
-          "40대, 50대가 되면 자신이 세웠던 부자 목표가 맞았는지 재점검하는 '현타'가 올 수 있다. [33]",
-          "자산의 필수 속성은 유동화 가능성인데, 유동화할 수 없다면 진정한 자산으로 보기 어렵다. [39]"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "강남 아파트를 단순히 비싼 방석으로 비유하며, 자산의 가치를 가격 상승률보다는 실질적인 현금 흐름 창출 능력과 유동성으로 평가해야 한다고 강조한다. [0]",
-            "t": 0
-          },
-          {
-            "point": "재점검을 통해 40~50대에 많은 사람이 기존 부의 목표와 자산의 유용성에 대해 회의감을 느끼며 자산의 필수 속성인 유동성을 중요한 기준으로 삼아야 한다고 제언한다. [33]",
-            "t": 33
-          }
-        ],
-        "actionable": [
-          "현재 보유하고 있는 자산들이 실질적인 현금 흐름을 만들어내는지, 그리고 유동화가 가능한지 재평가하라.",
-          "단순히 명목상의 자산 가치 증가가 아닌, 장기적인 관점에서 실제적인 재정적 유용성과 유동성을 고려하여 투자 목표를 재설정하라."
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-07-20T17:37:03.767114+09:00"
     }
   ],
-  "updated": "2026-07-28T19:32:00.476280+09:00"
+  "updated": "2026-07-28T21:30:55.322038+09:00"
 }
