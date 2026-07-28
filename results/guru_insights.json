@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "z-lBSaZGKRA",
+      "title": "반도체 의심에 무너진 코스피…대책도 전략도 안 통하는 7월 증시ㅣ명민준, 박가영, 염승환 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-28T12:30:38+00:00",
+      "url": "https://www.youtube.com/watch?v=z-lBSaZGKRA",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-29T00:05:17.297867+09:00"
+    },
+    {
+      "video_id": "yAf1p4oqN8g",
+      "title": "창신메모리 삼전닉스를 잡는다? 폭락장에서 생긴 뜻밖의 저가 매수 기회ㅣ명민준, 박가영, 이지환 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-28T13:30:08+00:00",
+      "url": "https://www.youtube.com/watch?v=yAf1p4oqN8g",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-29T00:04:44.988397+09:00"
+    },
+    {
       "video_id": "tA7Vuq4l_p0",
       "title": "저점 다시 시험받는 시장...창신메모리 폭등, 삼성전자·하이닉스 괜찮나? | 박병창 MP파트너스 대표 [마켓 인사이드]",
       "channel": "삼프로TV",
@@ -121,16 +159,81 @@
       "url": "https://www.youtube.com/watch?v=Z7WrW2aZp4k",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "극심한 시장 침체와 주요 지수 하락에도 불구하고, 장기적인 확신 종목에 집중하고 패닉셀을 피할 것을 권고하며 시장 방향과 회복에 대한 전문가들의 다양한 관점을 제시한다.",
+        "summary": [
+          "시장이 '바닥'에 도달했다는 투자자들의 절박한 심리를 반영하듯, 진행자는 시장 손실로 인해 제정신이 아니라고 표현한다.",
+          "코스피가 10% 이상 폭락한 가상의 상황을 제시하며, 투자자들의 손실에 대한 현실적인 고통과 정부 보상 요구까지 거론된다.",
+          "업계 전문가들과 AI에게 조언을 구하지만, 명확한 해결책을 얻기 어렵다는 점이 강조되며 투자자들의 좌절감을 대변한다.",
+          "선진창 전문가는 단기 매매를 피하고 확신 있는 종목을 1년 이상 보유하며 계좌를 덮어둘 것을 권고한다.",
+          "윤지호 대표는 시장이 '박스권' 하단(코스피 5500~6500)을 형성 중이며, 하이퍼스케일러 및 반도체 산업 관련 우려가 시장에 선반영되고 있으나, 완전한 붕괴 상황은 아니라고 진단한다.",
+          "시장에는 기관의 손절 물량과 개인의 매수세가 엇갈리고 있으며, 향후 반도체 산업에서의 긍정적 변화가 촉매제가 될 수 있다는 기대감이 존재한다."
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "평균 매수가가 삼성전자 30층에 물려있다는 비유로 큰 손실을 나타냄",
+            "view": "부정",
+            "t": 336
+          },
+          {
+            "name": "코스피",
+            "ticker": "000000",
+            "context": "가상으로 10.84% 하락하여 6,023.66 포인트를 기록, 6000선이 깨질 뻔했으며, 박스권 5500~6500 하단을 형성 중이라고 분석됨",
+            "view": "부정",
+            "t": 117
+          },
+          {
+            "name": "코스닥",
+            "ticker": "000000",
+            "context": "가상으로 7.72% 하락하여 705.85 포인트를 기록함",
+            "view": "부정",
+            "t": 117
+          }
+        ],
+        "key_points": [
+          {
+            "point": "이전 '살려주세요' 특집이 시장 바닥과 일치했던 경험이 있어, 현재 시장의 극심한 공포 분위기가 바닥에 근접했을 가능성을 시사한다.",
+            "t": 44
+          },
+          {
+            "point": "단기 레버리지 ETF 투자자들의 손실에 대해 국가 재정으로 보상을 요구하는 목소리까지 나올 정도로 투자자들의 심리적 압박이 매우 크다.",
+            "t": 138
+          },
+          {
+            "point": "시장이 단기적으로 예측 불가능한 혼란 상태이므로, 단기 매매를 자제하고 확신 있는 종목을 장기(1년) 관점에서 보유하는 전략이 필요하다.",
+            "t": 601
+          },
+          {
+            "point": "현재 시장은 빅테크 자금 조달, AI 모델의 수익성, 반도체 CapEx(자본 지출) 등 다양한 거시적 우려가 선반영되어 하락하고 있으며, 코스피 5500~6500선의 박스권 하단에서 의미 있는 지지선을 찾을 것으로 예상된다.",
+            "t": 733
+          },
+          {
+            "point": "외국인과 기관 투자자들이 급하게 손실을 확정하는 매도 물량을 내놓고 있으며, 이는 반도체 중심 포트폴리오를 조정하는 움직임과 관련이 깊다.",
+            "t": 1639
+          },
+          {
+            "point": "시장은 최악의 붕괴 상황은 아니지만 불안정한 상태이므로, 투자자들은 침착하게 시장을 관망하며 급작스러운 결정을 피해야 한다.",
+            "t": 1737
+          },
+          {
+            "point": "FOMC 회의, 하이퍼스케일러 실적 발표, 주간 옵션 만기 등 이번 주 주요 거시 이벤트들이 시장 변동성을 더욱 키울 수 있다.",
+            "t": 2518
+          },
+          {
+            "point": "한국은 메모리 반도체 인프라 중심이며, 미국 AI 인프라 및 전력 상황이 좋지 않아 주가가 불확실하게 하락하는 상황에서, 시장 가격을 신뢰하고 대응해야 한다.",
+            "t": 2221
+          }
+        ],
+        "actionable": [
+          "단기적 시장 움직임에 일희일비하지 말고, 본업에 집중하며 계좌를 자주 확인하지 않는다.",
+          "확신 있는 종목은 현재 가격에서 1년 이상 장기 보유하는 관점으로 접근한다.",
+          "시장 반등 시 포트폴리오 비중을 줄이는 것을 고려하여 현금 비중을 확보한다."
+        ]
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-28T21:30:21.827371+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-29T00:07:57.387120+09:00"
     },
     {
       "video_id": "9b_qd6W6Y9U",
@@ -186,8 +289,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-28T21:28:13.131804+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-29T00:05:49.749137+09:00"
     },
     {
       "video_id": "wrTNLsmtXOc",
@@ -863,8 +966,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-28T21:30:54.321799+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-29T00:08:30.013938+09:00"
     },
     {
       "video_id": "1EXYsVlV1Rc",
@@ -1402,8 +1505,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-28T21:24:50.055360+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-29T00:04:11.915402+09:00"
     },
     {
       "video_id": "7pbetoCKocI",
@@ -13190,93 +13293,7 @@
       "source": "video",
       "attempts": 2,
       "analyzed_at": "2026-07-21T04:25:34.843973+09:00"
-    },
-    {
-      "video_id": "95oVHYWS8Z0",
-      "title": "이재규의 결정적 한 수(手)ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
-      "channel": "삼프로TV",
-      "published": "2026-07-20T05:17:19+00:00",
-      "url": "https://www.youtube.com/watch?v=95oVHYWS8Z0",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "이재규 SK증권 PB 차장은 하반기 시장을 저점 통과 후 회복기로 전망하며, AI 관련 반도체 및 방산 섹터에 주목할 것을 제안합니다.",
-        "summary": [
-          "하반기 시장은 고금리 환경 속에서도 저점을 통과하고 점진적 회복기에 진입할 것으로 예상됩니다. (t=10)",
-          "글로벌 인공지능(AI) 경쟁 심화로 고대역폭 메모리(HBM) 등 AI 반도체 관련 기업들의 수혜가 지속될 전망입니다. (t=125)",
-          "지정학적 리스크 심화로 인한 방위산업의 구조적 성장에 주목하며, 특히 기술력 있는 국내 방산 기업들의 해외 수주 확대를 긍정적으로 평가합니다. (t=260)",
-          "중국 경제의 회복 기대감이 점차 커지면서 중국 관련 소비재 및 경기 민감 업종의 반등 가능성도 고려해야 합니다. (t=400)",
-          "투자 전략으로는 낙폭 과대 우량 기술주에 대한 분할 매수와 경기 회복 시 수혜를 볼 수 있는 업종에 대한 선별적 접근을 권고합니다. (t=550)"
-        ],
-        "tickers": [
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "AI 반도체 수요 증가에 따른 HBM 기술력 보유 기업으로, 시장 기대치 상회하는 실적 및 주가 흐름을 보일 것으로 전망됩니다.",
-            "view": "긍정",
-            "t": 190
-          },
-          {
-            "name": "한화에어로스페이스",
-            "ticker": "012450",
-            "context": "글로벌 방산 수요 증가 및 기술력을 바탕으로 한 해외 수주 확대로 성장성이 부각되는 기업입니다.",
-            "view": "긍정",
-            "t": 320
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "메모리 반도체 업황 회복과 파운드리 경쟁력으로 AI 시대의 핵심 수혜주 중 하나이며, 주가 반등 여력이 충분하다고 판단됩니다.",
-            "view": "긍정",
-            "t": 225
-          }
-        ],
-        "key_points": [
-          {
-            "point": "하반기 시장은 고금리 지속에도 불구하고 글로벌 경기 저점 통과 기대감과 중국 리오프닝 효과로 점진적인 회복 흐름을 보일 것입니다. (t=10)",
-            "t": 10
-          },
-          {
-            "point": "인공지능(AI) 산업의 확산은 HBM 등 고성능 반도체 수요를 견인하며, 관련 기술력을 보유한 기업들의 실적 개선을 이끌 핵심 동력입니다. (t=125)",
-            "t": 125
-          },
-          {
-            "point": "지정학적 불안정은 전 세계적으로 국방비 지출을 늘리며, K-방산의 경쟁력을 바탕으로 한 국내 방위산업 기업들의 성장을 가속화할 구조적 요인입니다. (t=260)",
-            "t": 260
-          },
-          {
-            "point": "밸류에이션 매력이 높은 낙폭 과대 기술주와 경기 회복 시 수혜가 예상되는 경기 민감주를 중심으로 포트폴리오를 재편하는 것이 유효합니다. (t=550)",
-            "t": 550
-          }
-        ],
-        "actionable": [
-          "AI 반도체(HBM) 관련 핵심 기술 보유 기업 및 방산 분야의 해외 수주 기대 기업들을 포트폴리오에 적극적으로 고려하세요.",
-          "장기적 관점에서 낙폭이 컸던 우량 기술주에 대한 분할 매수를 통해 평균 단가를 낮추는 전략을 활용하세요.",
-          "중국 경제 회복 신호와 연계된 소비재 및 경기 민감 섹터의 반등 가능성을 주시하며 투자 기회를 탐색하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-20T17:28:44.087871+09:00"
-    },
-    {
-      "video_id": "DEupqvIJOM4",
-      "title": "“반도체값 더 오를까 걱정, 주요국이 가만 안둘 것”  | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.20.월]",
-      "channel": "체슬리TV",
-      "published": "2026-07-20T06:05:33+00:00",
-      "url": "https://www.youtube.com/watch?v=DEupqvIJOM4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-21T02:07:16.080324+09:00"
     }
   ],
-  "updated": "2026-07-28T21:30:55.322038+09:00"
+  "updated": "2026-07-29T00:08:31.014216+09:00"
 }
