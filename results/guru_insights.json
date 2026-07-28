@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-29T00:05:17.297867+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-29T02:14:28.228374+09:00"
     },
     {
       "video_id": "yAf1p4oqN8g",
@@ -27,16 +27,74 @@
       "url": "https://www.youtube.com/watch?v=yAf1p4oqN8g",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "시장 변동성 확대는 비합리적인 수급 왜곡에 기인하며, 장기 투자를 위한 개인 투자자들은 인버스 ETF를 활용한 포지션 유지 헤지 전략을 고려해야 합니다.",
+        "summary": [
+          "최근 삼성전자(005930), SK하이닉스(000660) 등 주요 반도체 기업의 주가 급락과 극심한 시장 변동성은 모건스탠리 고점론, 중국 메모리 업체 확장 등의 비합리적 수급 요인 때문입니다.",
+          "특히 창신메모리(ChangXin Memory Technologies) IPO 시점과 맞물려 외국계 자금의 특정 종목 매도 후 중국 시장으로의 유입 가능성이 제기됩니다.",
+          "개인 투자자는 시장의 단기 변동성에 일희일비하기보다, 핵심 보유 종목을 지키기 위한 '보험'의 개념으로 인버스 ETF를 활용한 헤지 전략을 고려해야 합니다.",
+          "헤지의 목적은 추가 수익 창출이 아닌, 보유 포지션 유지와 시장 하락 시 손실 축소이며, 정확한 저점 예측이 불가능하므로 무리한 타이밍 매매는 지양해야 합니다.",
+          "장기적으로 펀더멘털이 튼튼한 삼성전자, SK하이닉스 같은 기업들은 현 밸류에이션이 매력적이며, 시장의 수급 왜곡이 해소되면 반등할 가능성이 높습니다."
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "반도체 섹터의 대표 기업으로, 비합리적인 시장 변동성과 외국계 매도세로 인한 급락을 겪고 있습니다. 현재 P/E 9배 수준으로 밸류에이션 매력이 높다고 언급됩니다.",
+            "view": "긍정",
+            "t": 1106
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "삼성전자와 함께 시장의 비합리적인 매도세로 인해 큰 폭의 주가 하락을 겪고 있습니다. 펀더멘털은 문제 없다고 판단됩니다.",
+            "view": "긍정",
+            "t": 208
+          },
+          {
+            "name": "마이크론 테크놀로지",
+            "ticker": "MU",
+            "context": "미국의 주요 메모리 반도체 기업으로, 한국 기업들 대비 주가 하락 폭이 적어 시장의 비합리성을 보여주는 사례로 언급됩니다.",
+            "view": "중립",
+            "t": 214
+          },
+          {
+            "name": "창신메모리",
+            "ticker": "",
+            "context": "중국 메모리 업체로, 최근 IPO 이후 주가가 급등하며 한국 반도체 기업의 위협 요인으로 언급되나, 실제 기술력 및 경쟁력은 아직 한국 기업에 미치지 못한다고 분석됩니다.",
+            "view": "부정",
+            "t": 197
+          }
+        ],
+        "key_points": [
+          {
+            "point": "현재 반도체 시장의 높은 변동성은 비합리적인 수급 요인(외국계 리포트, 중국 IPO 자금 흐름 등)에 의해 발생하고 있으며, 펀더멘털 분석만으로는 설명하기 어려운 부분이 있습니다.",
+            "t": 53
+          },
+          {
+            "point": "개인 투자자는 시장 하락기에 주식 포지션을 유지하고 손실을 제한하기 위해 인버스 ETF를 활용한 헤지 전략을 사용하는 것이 효과적입니다.",
+            "t": 3539
+          },
+          {
+            "point": "헤지는 수익 창출의 도구가 아닌 보험의 개념으로 접근해야 하며, 정확한 저점 예측에 집착하기보다, 시장 리스크 관리를 목표로 삼아야 합니다.",
+            "t": 3720
+          },
+          {
+            "point": "개별 종목의 펀더멘털에 문제가 없다면 시장 리스크는 헤지로, 개별 종목의 펀더멘털에 문제가 있다면 비중 축소로 대응하는 것이 바람직합니다.",
+            "t": 4441
+          },
+          {
+            "point": "주식 시장의 장기적인 성장 가능성을 믿고, 단기 변동성에도 불구하고 우량 주도주 포지션을 유지하기 위해서는 비용을 지불하는 헤지 전략이 필수적입니다.",
+            "t": 2011
+          }
+        ],
+        "actionable": [
+          "보유 중인 주도주 포지션(예: 삼성전자, SK하이닉스)의 10~30% 규모로 인버스 ETF를 매수하여 시장 하락에 대비하는 포지션 헤지를 고려하세요.",
+          "인버스 ETF는 장기 보유가 아닌 단기적인 시장 리스크 헷지를 위한 도구로 활용하고, 특정 종목의 펀더멘털에 문제가 발생했을 경우에는 해당 종목의 비중을 축소하는 것이 우선입니다."
+        ]
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-29T00:04:44.988397+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-07-29T02:09:57.879158+09:00"
     },
     {
       "video_id": "tA7Vuq4l_p0",
@@ -286,11 +344,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-29T00:05:49.749137+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-29T02:15:02.928153+09:00"
     },
     {
       "video_id": "wrTNLsmtXOc",
@@ -13295,5 +13353,5 @@
       "analyzed_at": "2026-07-21T04:25:34.843973+09:00"
     }
   ],
-  "updated": "2026-07-29T00:08:31.014216+09:00"
+  "updated": "2026-07-29T02:15:04.084214+09:00"
 }
