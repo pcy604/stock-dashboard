@@ -10593,7 +10593,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 133.87,
+          "ret": 1.86
+        }
+      }
     },
     {
       "id": "CTVA_2026-07-22",
@@ -10617,7 +10623,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 90.51,
+          "ret": 1.99
+        }
+      }
     },
     {
       "id": "HIG_2026-07-22",
@@ -10641,7 +10653,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 145.68,
+          "ret": 3.19
+        }
+      }
     },
     {
       "id": "ADC_2026-07-22",
@@ -10665,7 +10683,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 80.39,
+          "ret": -0.04
+        }
+      }
     },
     {
       "id": "GTY_2026-07-22",
@@ -10689,7 +10713,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 34.83,
+          "ret": -2.99
+        }
+      }
     },
     {
       "id": "079940_2026-07-22",
@@ -10712,7 +10742,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 47100.0,
+          "ret": -1.24
+        }
+      }
     },
     {
       "id": "RTX_2026-07-22",
@@ -10735,7 +10771,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 215.25,
+          "ret": 10.2
+        }
+      }
     },
     {
       "id": "WM_2026-07-22",
@@ -10758,7 +10800,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 236.6,
+          "ret": -0.16
+        }
+      }
     },
     {
       "id": "SO_2026-07-22",
@@ -10781,7 +10829,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 96.05,
+          "ret": 0.01
+        }
+      }
     },
     {
       "id": "ET_2026-07-22",
@@ -10804,7 +10858,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 20.2,
+          "ret": -1.08
+        }
+      }
     },
     {
       "id": "COR_2026-07-22",
@@ -10827,7 +10887,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 318.61,
+          "ret": 5.75
+        }
+      }
     },
     {
       "id": "O_2026-07-22",
@@ -10850,7 +10916,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 65.54,
+          "ret": 0.53
+        }
+      }
     },
     {
       "id": "PCG_2026-07-22",
@@ -10873,7 +10945,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 17.71,
+          "ret": -2.46
+        }
+      }
     },
     {
       "id": "EA_2026-07-22",
@@ -10896,7 +10974,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 208.91,
+          "ret": -0.27
+        }
+      }
     },
     {
       "id": "FE_2026-07-22",
@@ -10919,7 +11003,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 49.13,
+          "ret": -0.66
+        }
+      }
     },
     {
       "id": "VTR_2026-07-22",
@@ -10942,7 +11032,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 97.72,
+          "ret": 0.31
+        }
+      }
     },
     {
       "id": "CNA_2026-07-22",
@@ -10965,7 +11061,13 @@
         "이평선수렴"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 55.16,
+          "ret": 6.13
+        }
+      }
     },
     {
       "id": "WTRG_2026-07-22",
@@ -10988,7 +11090,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 40.7,
+          "ret": 3.05
+        }
+      }
     },
     {
       "id": "DCI_2026-07-22",
@@ -11011,7 +11119,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 92.5,
+          "ret": 1.44
+        }
+      }
     },
     {
       "id": "HESM_2026-07-22",
@@ -11034,7 +11148,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 40.45,
+          "ret": -1.03
+        }
+      }
     },
     {
       "id": "MSA_2026-07-22",
@@ -11057,7 +11177,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 175.81,
+          "ret": 2.07
+        }
+      }
     },
     {
       "id": "NNN_2026-07-22",
@@ -11080,7 +11206,13 @@
         "컵위드핸들"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 48.85,
+          "ret": -0.5
+        }
+      }
     },
     {
       "id": "PBF_2026-07-22",
@@ -11103,7 +11235,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 63.35,
+          "ret": -1.77
+        }
+      }
     },
     {
       "id": "AM_2026-07-22",
@@ -11126,7 +11264,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 21.52,
+          "ret": -6.07
+        }
+      }
     },
     {
       "id": "SSB_2026-07-22",
@@ -11149,7 +11293,13 @@
         "이평선수렴"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 105.71,
+          "ret": 3.19
+        }
+      }
     },
     {
       "id": "SWX_2026-07-22",
@@ -11172,7 +11322,13 @@
         "이평선수렴"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 91.8,
+          "ret": -1.39
+        }
+      }
     },
     {
       "id": "JXN_2026-07-22",
@@ -11195,7 +11351,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 120.46,
+          "ret": -2.91
+        }
+      }
     },
     {
       "id": "EPRT_2026-07-22",
@@ -11218,7 +11380,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 32.0,
+          "ret": -2.27
+        }
+      }
     },
     {
       "id": "POR_2026-07-22",
@@ -11241,7 +11409,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 50.3,
+          "ret": -5.2
+        }
+      }
     },
     {
       "id": "RUSHA_2026-07-22",
@@ -11264,7 +11438,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 81.62,
+          "ret": 6.65
+        }
+      }
     },
     {
       "id": "OTTR_2026-07-22",
@@ -11287,7 +11467,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 90.77,
+          "ret": -2.4
+        }
+      }
     },
     {
       "id": "CTRE_2026-07-22",
@@ -11310,7 +11496,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 42.34,
+          "ret": -0.34
+        }
+      }
     },
     {
       "id": "SBRA_2026-07-22",
@@ -11333,7 +11525,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 22.05,
+          "ret": 0.07
+        }
+      }
     },
     {
       "id": "UNF_2026-07-22",
@@ -11356,7 +11554,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 301.19,
+          "ret": 3.43
+        }
+      }
     },
     {
       "id": "PARR_2026-07-22",
@@ -11379,7 +11583,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 83.07,
+          "ret": 4.35
+        }
+      }
     },
     {
       "id": "DFIN_2026-07-22",
@@ -11402,7 +11612,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 51.39,
+          "ret": 6.7
+        }
+      }
     },
     {
       "id": "KYN_2026-07-22",
@@ -11425,7 +11641,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 14.33,
+          "ret": -4.2
+        }
+      }
     },
     {
       "id": "LTC_2026-07-22",
@@ -11448,7 +11670,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 41.68,
+          "ret": -1.58
+        }
+      }
     },
     {
       "id": "BLTE_2026-07-22",
@@ -11471,7 +11699,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 152.44,
+          "ret": -3.24
+        }
+      }
     },
     {
       "id": "MDXG_2026-07-22",
@@ -11494,7 +11728,13 @@
         "RSI/MACD"
       ],
       "status": "open",
-      "realized": {}
+      "realized": {
+        "1w": {
+          "date": "2026-07-29",
+          "px": 4.23,
+          "ret": 1.19
+        }
+      }
     },
     {
       "id": "PCAR_2026-07-23",
@@ -14273,6 +14513,934 @@
         "5일선라이딩",
         "이평선수렴",
         "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PCAR_2026-07-29",
+      "sym": "PCAR",
+      "name": "Paccar",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 133.87,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ET_2026-07-29",
+      "sym": "ET",
+      "name": "Energy Transfer Partners",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 20.2,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CLH_2026-07-29",
+      "sym": "CLH",
+      "name": "Clean Harbors",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 326.34,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HESM_2026-07-29",
+      "sym": "HESM",
+      "name": "Hess Midstream",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 40.45,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SUN_2026-07-29",
+      "sym": "SUN",
+      "name": "Sunoco",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 76.47,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CTRE_2026-07-29",
+      "sym": "CTRE",
+      "name": "CareTrust REIT",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 42.34,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SBRA_2026-07-29",
+      "sym": "SBRA",
+      "name": "Sabra Health Care REIT",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 22.05,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PARR_2026-07-29",
+      "sym": "PARR",
+      "name": "Par Pacific Holdings",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 83.07,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "001940_2026-07-29",
+      "sym": "001940",
+      "name": "KISCO홀딩스",
+      "market": "KR",
+      "log_date": "2026-07-29",
+      "entry_px": 25850.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AMGN_2026-07-29",
+      "sym": "AMGN",
+      "name": "Amgen",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 387.64,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RTX_2026-07-29",
+      "sym": "RTX",
+      "name": "Raytheon Technologies",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 215.25,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SCHW_2026-07-29",
+      "sym": "SCHW",
+      "name": "Charles Schwab",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 104.47,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BMY_2026-07-29",
+      "sym": "BMY",
+      "name": "Bristol-Myers Squibb",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 63.1,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SO_2026-07-29",
+      "sym": "SO",
+      "name": "Southern Company",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 96.05,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "GM_2026-07-29",
+      "sym": "GM",
+      "name": "General Motors",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 89.4,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "COR_2026-07-29",
+      "sym": "COR",
+      "name": "Cencora",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 318.61,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "O_2026-07-29",
+      "sym": "O",
+      "name": "Realty Income",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 65.54,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MPLX_2026-07-29",
+      "sym": "MPLX",
+      "name": "MPLX",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 57.79,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CTVA_2026-07-29",
+      "sym": "CTVA",
+      "name": "Corteva",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 90.51,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PCG_2026-07-29",
+      "sym": "PCG",
+      "name": "Pacific Gas and Electric",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 17.71,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "EA_2026-07-29",
+      "sym": "EA",
+      "name": "Electronic Arts",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 208.91,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HIG_2026-07-29",
+      "sym": "HIG",
+      "name": "The Hartford",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 145.68,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AWK_2026-07-29",
+      "sym": "AWK",
+      "name": "American Water Works",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 138.09,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "FE_2026-07-29",
+      "sym": "FE",
+      "name": "FirstEnergy",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 49.13,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "L_2026-07-29",
+      "sym": "L",
+      "name": "Loews Corporation",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 118.94,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "VTRS_2026-07-29",
+      "sym": "VTRS",
+      "name": "Viatris",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 17.82,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PAA_2026-07-29",
+      "sym": "PAA",
+      "name": "Plains All American Pipeline",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 24.89,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "JKHY_2026-07-29",
+      "sym": "JKHY",
+      "name": "Jack Henry &amp; Associates",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 161.15,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BURL_2026-07-29",
+      "sym": "BURL",
+      "name": "Burlington Stores",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 371.13,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CNA_2026-07-29",
+      "sym": "CNA",
+      "name": "CNA Financial",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 55.16,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SCI_2026-07-29",
+      "sym": "SCI",
+      "name": "Service Corporation International",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 85.68,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "THC_2026-07-29",
+      "sym": "THC",
+      "name": "Tenet Healthcare",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 257.62,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WTRG_2026-07-29",
+      "sym": "WTRG",
+      "name": "Essential Utilities",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 40.7,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "OHI_2026-07-29",
+      "sym": "OHI",
+      "name": "Omega Healthcare",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 51.37,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MSA_2026-07-29",
+      "sym": "MSA",
+      "name": "MSA Safety",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 175.81,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "NNN_2026-07-29",
+      "sym": "NNN",
+      "name": "NNN REIT",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 48.85,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "컵위드핸들"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ENSG_2026-07-29",
+      "sym": "ENSG",
+      "name": "The Ensign Group",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 181.89,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AN_2026-07-29",
+      "sym": "AN",
+      "name": "AutoNation",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 229.98,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ADC_2026-07-29",
+      "sym": "ADC",
+      "name": "Agree Realty",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 80.39,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MTG_2026-07-29",
+      "sym": "MTG",
+      "name": "MGIC Investment",
+      "market": "US",
+      "log_date": "2026-07-29",
+      "entry_px": 30.58,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
       ],
       "status": "open",
       "realized": {}
