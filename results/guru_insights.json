@@ -1,6 +1,280 @@
 {
   "items": [
     {
+      "video_id": "vDdZX5kqntI",
+      "title": "미국이 절대 AI 투자를 멈출 수 없는 진짜 이유 #ai #미국 #중국 #인플레이션 #투자 #성상현",
+      "channel": "와이스트릿",
+      "published": "2026-07-30T22:00:03+00:00",
+      "url": "https://www.youtube.com/watch?v=vDdZX5kqntI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-31T07:47:46.965834+09:00"
+    },
+    {
+      "video_id": "qgfwrXPjMrw",
+      "title": "마이크로소프트, 호실적에 18% 급등…반도체 등 AI HW 섹터 동반 랠리 [월가 뉴스레터]",
+      "channel": "삼프로TV",
+      "published": "2026-07-30T21:57:25+00:00",
+      "url": "https://www.youtube.com/watch?v=qgfwrXPjMrw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "마이크로소프트의 호실적과 AI 투자 가속화가 미국 증시를 견인하며 반도체 섹터의 랠리를 이끌었지만, 애플과 메타의 실적은 아쉬움을 남겼고, 고금리 및 지정학적 리스크 등 거시적 불확실성은 여전하다.",
+        "summary": [
+          "마이크로소프트는 애저(Azure) 클라우드와 코파일럿(Copilot) 매출의 강력한 성장세를 발표하며 18% 급등했고, 엔비디아, 마이크론, AMD 등 주요 반도체 기업들도 동반 랠리했습니다.",
+          "메타는 AI 사업에 대한 낙관적 전망을 제시했으나 구체적인 숫자와 미래 전략의 불확실성으로 인해 8% 하락했으며, 애플은 양호한 실적에도 불구하고 4% 하락하여 기술주 내에서도 차별화된 움직임을 보였습니다.",
+          "10년 만기 국채금리는 4.675%로 여전히 높은 수준을 유지하고 30년물은 19년 만에 최고치를 기록하는 등 금리 부담이 지속되고 있으며, 유가도 여전히 불안정한 상황입니다.",
+          "AI 투자자 레오폴드 애션브레너의 극단적인 레버리지 포트폴리오가 청산되었고, 시타델이 이를 매입한 사건은 시장의 투기적 요인과 거대 헷지펀드의 영향력을 보여줍니다.",
+          "애틀랜타 연은의 3분기 GDP 성장률 전망치가 5%로 높아지고 경기침체 가능성이 급락했음에도 불구하고, 연준의 불확실한 통화 정책과 이란-미국 간 지정학적 긴장이 달러와 유가에 계속 영향을 미치고 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "18% 급등",
+            "view": "긍정",
+            "t": 2247
+          },
+          {
+            "name": "마이크로소프트",
+            "ticker": "MSFT",
+            "context": "15% 급등, 애저 클라우드 및 코파일럿 매출 호조",
+            "view": "긍정",
+            "t": 2249
+          },
+          {
+            "name": "인텔",
+            "ticker": "INTC",
+            "context": "11% 급등",
+            "view": "긍정",
+            "t": 2254
+          },
+          {
+            "name": "AMD",
+            "ticker": "AMD",
+            "context": "13% 급등",
+            "view": "긍정",
+            "t": 2257
+          },
+          {
+            "name": "마벨",
+            "ticker": "MRVL",
+            "context": "12% 급등",
+            "view": "긍정",
+            "t": 2259
+          },
+          {
+            "name": "램리서치",
+            "ticker": "LRCX",
+            "context": "18% 급등",
+            "view": "긍정",
+            "t": 2302
+          },
+          {
+            "name": "테라다인",
+            "ticker": "TER",
+            "context": "14% 급등",
+            "view": "긍정",
+            "t": 2306
+          },
+          {
+            "name": "샌디스크",
+            "ticker": "SNDK",
+            "context": "25% 급등",
+            "view": "긍정",
+            "t": 2309
+          },
+          {
+            "name": "웨스턴디지털",
+            "ticker": "WDC",
+            "context": "15% 급등",
+            "view": "긍정",
+            "t": 2312
+          },
+          {
+            "name": "오라클",
+            "ticker": "ORCL",
+            "context": "8% 급등, AI 투자 우려 해소",
+            "view": "긍정",
+            "t": 2314
+          },
+          {
+            "name": "아마존",
+            "ticker": "AMZN",
+            "context": "시간 외 7% 급등, AWS 및 칩 사업부 성장",
+            "view": "긍정",
+            "t": 2347
+          },
+          {
+            "name": "테슬라",
+            "ticker": "TSLA",
+            "context": "시간 외 3.5% 상승",
+            "view": "긍정",
+            "t": 2350
+          },
+          {
+            "name": "메타",
+            "ticker": "META",
+            "context": "시간 외 8% 급락, AI 사업 전망 모호 및 CapEx 전망 미제시",
+            "view": "부정",
+            "t": 2355
+          },
+          {
+            "name": "코인베이스",
+            "ticker": "COIN",
+            "context": "시간 외 5.5% 하락",
+            "view": "부정",
+            "t": 2400
+          },
+          {
+            "name": "애플",
+            "ticker": "AAPL",
+            "context": "시간 외 4.3% 하락, 중국산 메모리칩 거래 자제 경고",
+            "view": "부정",
+            "t": 2400
+          },
+          {
+            "name": "엑스모빌",
+            "ticker": "XOM",
+            "context": "에너지 종목 실적 발표 예정",
+            "view": "중립",
+            "t": 2422
+          },
+          {
+            "name": "쉐브론",
+            "ticker": "CVX",
+            "context": "에너지 종목 실적 발표 예정",
+            "view": "중립",
+            "t": 2422
+          }
+        ],
+        "key_points": [
+          {
+            "point": "마이크로소프트는 클라우드 서비스 애저(Azure)에 대한 고객 수요 초과, 코파일럿(Copilot) 매출의 전분기 대비 60% 이상 성장, 데이터 센터 확장 계획 발표 등 AI 사업에 대한 구체적이고 긍정적인 전망을 제시하며 시장의 신뢰를 얻었습니다.",
+            "t": 854
+          },
+          {
+            "point": "메타는 AI 사업 전반의 성장에 대해 낙관적으로 보고 있지만, 구체적인 수치나 중장기 CapEx 전망을 제시하지 않아 시장의 불확실성을 해소하지 못했습니다. 또한 컴퓨팅 자원 판매 등 단기 수익화 전략은 자체 활용에 대한 의구심을 남겼습니다.",
+            "t": 1400
+          },
+          {
+            "point": "아마존은 AWS 클라우드 서비스의 호실적과 AI 및 칩 사업부의 높은 성장 잠재력을 보여주며 긍정적인 평가를 받았고, 자체 칩 개발 및 비용 효율화 노력이 긍정적으로 작용했습니다.",
+            "t": 1741
+          },
+          {
+            "point": "레오폴드 애션브레너의 대규모 청산은 고레버리지를 활용한 소프트웨어 숏 포지션과 반도체 롱 포지션이 반대 방향으로 움직이며 발생한 것으로 분석되며, 시타델이 이 포트폴리오를 매입한 사실은 시장에 큰 영향을 미쳤습니다.",
+            "t": 2441
+          },
+          {
+            "point": "30년 만기 미국 국채 금리가 19년 만에 최고치를 기록하는 등 고금리 상황이 지속되고 있으며, 연준의 불확실한 통화 정책과 금리 동결에 대한 시장의 해석 차이가 시장 변동성을 키우고 있습니다.",
+            "t": 2921
+          },
+          {
+            "point": "이란의 미군 시설 공격 지속, 호르무즈 해협 병목 현상 등 지정학적 리스크가 유가에 지속적인 영향을 미치며 시장의 불안감을 높이고 있습니다.",
+            "t": 3610
+          },
+          {
+            "point": "오픈AI는 7월 월간 반복 매출이 2분기 전체 매출을 상회하고 GPT 토큰 가격을 대폭 인하하는 등 AI 기술 확산과 수익화에 박차를 가하고 있습니다.",
+            "t": 3853
+          }
+        ],
+        "actionable": [
+          "마이크로소프트, 아마존 등 AI 인프라 및 클라우드 분야의 선도 기업들의 장기적인 성장성을 주목하고 관련 ETF 투자를 고려할 수 있습니다.",
+          "메타와 애플의 단기 실적 변동성보다는 AI 전략의 구체성과 실행력을 면밀히 평가하고, 투자 비중을 조절하는 신중한 접근이 필요합니다.",
+          "미국 국채 금리 및 유가의 추이를 지속적으로 모니터링하며, 인플레이션과 연준의 통화 정책 변화 가능성에 대비한 포트폴리오 리밸런싱 전략을 검토해야 합니다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-31T07:47:14.463935+09:00"
+    },
+    {
+      "video_id": "EmVS3N1USlg",
+      "title": "매일 아침 펀드매니저들의 운용회의 라이브 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.07.31.금]",
+      "channel": "체슬리TV",
+      "published": "2026-07-30T22:09:42+00:00",
+      "url": "https://www.youtube.com/watch?v=EmVS3N1USlg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "글로벌 AI 및 반도체 섹터의 견조한 실적 기대감이 시장을 주도하나, 인플레이션과 금리 변동성에 대한 경계심을 유지하며 포트폴리오 균형을 강조합니다.",
+        "summary": [
+          "미국 증시는 AI 관련 기술주들의 실적 호조와 성장 기대감에 힘입어 상승세를 지속하고 있으며, 이는 국내 증시에도 긍정적인 영향을 미칠 전망입니다.",
+          "연준의 금리 인하 시점은 다소 지연될 수 있으나, 점진적인 인플레이션 완화 추세는 유지될 것으로 보이며, 향후 발표될 경제 지표에 따라 시장 변동성이 커질 수 있습니다.",
+          "반도체 섹터, 특히 HBM(고대역폭 메모리) 및 AI 칩 관련 기업들은 강력한 수요를 바탕으로 긍정적인 실적 전망을 유지하고 있습니다.",
+          "국내 증시는 외국인 투자자들의 매수세에 힘입어 반도체와 AI 관련 대형 기술주 중심으로 상승 흐름을 보일 것으로 예상되나, 환율 변동성에 유의해야 합니다.",
+          "투자 전략은 AI 핵심 기술주에 대한 장기적 관점의 비중을 유지하되, 경기 방어적 성격의 가치주 또는 고배당주를 통한 포트폴리오 분산 전략이 유효합니다."
+        ],
+        "tickers": [
+          {
+            "name": "NVIDIA",
+            "ticker": "NVDA",
+            "context": "AI 반도체 시장의 압도적 리더십으로 견조한 실적을 발표하며 시장을 견인하고 있습니다.",
+            "view": "긍정",
+            "t": 200
+          },
+          {
+            "name": "Microsoft",
+            "ticker": "MSFT",
+            "context": "클라우드 컴퓨팅(Azure) 및 AI 서비스 투자를 통해 견고한 성장세를 유지하며 시장 신뢰를 얻고 있습니다.",
+            "view": "긍정",
+            "t": 245
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "HBM 경쟁력 강화와 파운드리 기술 발전을 통해 AI 시대의 핵심 수혜주로 부각되고 있습니다.",
+            "view": "긍정",
+            "t": 290
+          },
+          {
+            "name": "Tesla",
+            "ticker": "TSLA",
+            "context": "전기차 시장 경쟁 심화와 가격 인하 압력으로 단기 실적 불확실성이 존재하여 신중한 접근이 필요합니다.",
+            "view": "중립",
+            "t": 340
+          }
+        ],
+        "key_points": [
+          {
+            "point": "글로벌 인플레이션 압력은 점진적으로 완화되고 있으나, 예상보다 높은 수준의 고용 지표가 연준의 금리 인하 시점을 지연시킬 가능성이 있습니다.",
+            "t": 60
+          },
+          {
+            "point": "AI 기술 혁신은 거스를 수 없는 메가트렌드이며, 관련 핵심 기술을 보유한 기업들의 장기적인 성장 잠재력에 주목해야 합니다.",
+            "t": 160
+          },
+          {
+            "point": "미국과 한국의 금리차가 유지되는 상황에서 환율 변동성은 국내 증시 외국인 수급에 중요한 영향을 미치므로 지속적인 모니터링이 필요합니다.",
+            "t": 400
+          },
+          {
+            "point": "기업들의 분기 실적 발표는 단순한 숫자 확인을 넘어, 향후 사업 전망과 가이던스를 통해 투자 방향성을 제시하는 핵심 요소입니다.",
+            "t": 490
+          },
+          {
+            "point": "과도한 특정 섹터 쏠림 현상보다는 AI 핵심 기술주를 주축으로 하되, 방어적 가치주와 고배당주를 포함한 균형 잡힌 포트폴리오 전략이 중요합니다.",
+            "t": 550
+          }
+        ],
+        "actionable": [
+          "다음 주 예정된 주요 기업들의 실적 발표와 컨퍼런스 콜 내용을 면밀히 분석하여, AI 및 반도체 섹터 내 옥석 가리기에 집중하십시오.",
+          "미국 연준 고위 관계자들의 발언과 소비자물가지수(CPI), 생산자물가지수(PPI) 등 핵심 경제 지표 발표를 주시하며 금리 변동성 리스크에 대비하십시오.",
+          "장기적인 관점에서 AI 산업 생태계 전반의 핵심 기술 공급망을 이해하고, 저평가된 우량주 또는 성장 잠재력이 큰 신기술 기업 발굴 노력을 병행하십시오."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-31T07:44:37.080194+09:00"
+    },
+    {
       "video_id": "s_L-v-px-QU",
       "title": "MS·반도체주 폭등 속 뉴욕증시 상승 마감...애플·아마존 실적발표_26.07.31 | 여도은, 박명석, 이선엽 [월스트리트 모닝브리핑]",
       "channel": "삼프로TV",
@@ -12525,64 +12799,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-22T17:21:01.989313+09:00"
-    },
-    {
-      "video_id": "snFg6_msFTU",
-      "title": "100조 이상 부자들이 똑같이 믿는 무서운 상황 / 정주용 세미나 (맛보기)",
-      "channel": "와이스트릿",
-      "published": "2026-07-22T06:00:07+00:00",
-      "url": "https://www.youtube.com/watch?v=snFg6_msFTU",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-23T00:27:39.024166+09:00"
-    },
-    {
-      "video_id": "FigtCBH-cGI",
-      "title": "\"모멘텀 쓰나미 몰려온다\" 이제 시선 돌리세요 | 김홍식 하나증권 리서치센터 상무 [더블 업]",
-      "channel": "삼프로TV",
-      "published": "2026-07-22T02:02:36+00:00",
-      "url": "https://www.youtube.com/watch?v=FigtCBH-cGI",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-22T19:56:26.601069+09:00"
-    },
-    {
-      "video_id": "QpYcKaV1Bqw",
-      "title": "바닥을 본 것인가? 신중할 수 밖에 없는 시장...'돈과 실적' 누가 이길까? | 이혁진, 전병하, 여도은, 허재무 [아침N투자]",
-      "channel": "삼프로TV",
-      "published": "2026-07-22T02:30:33+00:00",
-      "url": "https://www.youtube.com/watch?v=QpYcKaV1Bqw",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-22T19:55:54.394942+09:00"
     }
   ],
-  "updated": "2026-07-31T05:46:10.648386+09:00"
+  "updated": "2026-07-31T07:47:47.966120+09:00"
 }
