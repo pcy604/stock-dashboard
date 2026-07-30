@@ -16,8 +16,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T23:59:45.990787+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-31T02:13:16.758080+09:00"
     },
     {
       "video_id": "k0Rd3k3dV28",
@@ -27,16 +27,51 @@
       "url": "https://www.youtube.com/watch?v=k0Rd3k3dV28",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "one_liner": "에너지 빈국 한국의 고준위 방사성폐기물 처리 문제가 4년 뒤 원전 가동 중단으로 이어질 수 있으며, 이에 대한 영구 처분장 확보와 72조 원 규모의 재원 마련이 시급한 국가적 과제입니다.",
+        "summary": [
+          "2030~2032년 내 국내 원전 내 사용후핵연료 저장 공간이 포화 상태에 도달할 예정이며, 이는 원전 가동 중단으로 이어질 수 있는 심각한 문제로 지적됩니다. [00:00]",
+          "사용후핵연료 처리에 드는 비용은 현재 추계로만 72조 원에 달하며, 이는 경제적으로 엄청난 부담입니다. [00:38]",
+          "현재 한국은 물론 미국, 스웨덴, 프랑스 등 전 세계 어느 나라도 고준위 방사성폐기물 영구 처분장을 실제 운영해 본 경험이 없어 이 문제 해결에 난항을 겪고 있습니다. [02:37]",
+          "우리나라는 에너지 자립률이 19%에 불과하고, 그중 원자력이 70%를 차지하는 에너지 빈국으로, 원자력 발전 중단은 경제에 막대한 영향을 미칠 수 있습니다. [05:41]",
+          "국회에서 고준위 방사성폐기물 특별법이 통과되었으나, 이는 영구 처분장 부지 확보 절차의 시작점일 뿐, 실제 건설 및 운영까지는 사회적 합의와 많은 시간이 필요합니다. [24:46]",
+          "폐기물 처리 과정은 물론 지역 주민과의 소통과 보상, 그리고 투명하고 민주적인 절차를 통해 사회적 합의를 이루는 것이 핵심 과제입니다. [53:01]"
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "key_points": [
+          {
+            "point": "고준위 방사성폐기물 저장 포화 임박: 국내 원전 사용후핵연료 저장시설이 2030년부터 순차적으로 포화될 예정이며, 이는 원전 가동 중단 및 전력 수급 불안으로 직결될 수 있는 초비상 상황입니다.",
+            "t": 0
+          },
+          {
+            "point": "막대한 재정 부담: 고준위 폐기물 처분 및 관리 비용은 현재 추계만 72조 원에 달하며, 이는 국가 재정에 상당한 부담으로 작용할 것입니다.",
+            "t": 38
+          },
+          {
+            "point": "영구 처분장 부재 및 선례 부족: 전 세계적으로 고준위 방사성폐기물 영구 처분장을 실제 운영 중인 국가가 없으며, 이는 한국에게도 미지의 길이자 중대한 기술적, 사회적 과제로 남아있습니다.",
+            "t": 2044
+          },
+          {
+            "point": "에너지 빈국의 딜레마: 한국은 에너지 자립률이 낮고 원자력 비중이 높아 원전 가동 중단 시 제조업 기반 경제에 큰 타격이 예상되므로, 안정적인 에너지원으로서 원전의 중요성이 강조됩니다.",
+            "t": 541
+          },
+          {
+            "point": "사회적 합의와 투명한 절차의 중요성: 과거 부안 사태와 같은 실패 사례를 교훈 삼아, 지역 주민과의 진솔한 대화, 투명한 정보 공개, 민주적인 의사결정 과정을 통해 사회적 신뢰를 구축하는 것이 최우선 과제입니다.",
+            "t": 2446
+          },
+          {
+            "point": "특별법 제정 및 향후 과제: 고준위 방사성폐기물 특별법 제정은 첫걸음이며, 향후 부지 선정 공모, 총리실 산하 위원회 구성, 기술 개발, 그리고 지역 주민에 대한 합리적인 보상 및 지역 발전 계획 수립 등 복잡하고 긴 여정이 남아있습니다.",
+            "t": 5489
+          }
+        ],
+        "actionable": [
+          "국내외 고준위 방사성폐기물 처리 기술 개발 동향 및 관련 기업(예: 처분 용기, 심층 처분 기술 개발사)을 모니터링하여 장기적인 투자 기회를 탐색하세요.",
+          "정부의 고준위 방사성폐기물 처분장 부지 선정 공모 및 관련 예산 편성, 그리고 특별법 이행 상황을 주시하여 정책 리스크와 기회를 파악하세요.",
+          "에너지 전환 정책 및 원전 비중 변화가 국내 전력 시장과 주요 산업(예: 반도체, 철강)에 미칠 잠재적 영향을 분석하고 포트폴리오를 조정하세요."
+        ]
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T23:59:13.701537+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-07-31T02:12:44.394280+09:00"
     },
     {
       "video_id": "Gw8swHIqB04",
@@ -153,8 +188,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-31T00:00:18.328327+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-31T02:13:49.023209+09:00"
     },
     {
       "video_id": "BuAOEEiOSUc",
@@ -289,8 +324,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T00:01:55.166225+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-31T02:15:58.552095+09:00"
     },
     {
       "video_id": "gY1bUZw0IRM",
@@ -308,8 +343,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T00:01:22.890898+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-31T02:15:26.048709+09:00"
     },
     {
       "video_id": "KnaSBWiUAmw",
@@ -346,8 +381,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T00:00:50.572219+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-31T02:14:21.190805+09:00"
     },
     {
       "video_id": "mJJt591kmbA",
@@ -403,8 +438,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-30T21:23:35.110341+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-31T02:14:53.436111+09:00"
     },
     {
       "video_id": "OSW8JTwvbRg",
@@ -422,8 +457,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-30T23:56:30.125100+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-31T02:08:26.951340+09:00"
     },
     {
       "video_id": "VhXVpx3Yqdc",
@@ -699,8 +734,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-30T23:54:05.842737+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-31T02:07:54.490143+09:00"
     },
     {
       "video_id": "HRfzjuF72xI",
@@ -12478,5 +12513,5 @@
       "analyzed_at": "2026-07-22T17:17:22.449620+09:00"
     }
   ],
-  "updated": "2026-07-31T00:02:28.597332+09:00"
+  "updated": "2026-07-31T02:15:59.552290+09:00"
 }
