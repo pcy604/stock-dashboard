@@ -1,6 +1,104 @@
 {
   "items": [
     {
+      "video_id": "fg_tEUEg2n8",
+      "title": "폭락 뒤 남은 변수…지금은 매도보다 회복을 준비할 때ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-07-30T11:30:11+00:00",
+      "url": "https://www.youtube.com/watch?v=fg_tEUEg2n8",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-07-30T21:22:30.404536+09:00"
+    },
+    {
+      "video_id": "BuAOEEiOSUc",
+      "title": "[하이라이트] 전쟁보다 더 무서운 하락...여기서는 배팅이 맞다 | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.30.목]",
+      "channel": "체슬리TV",
+      "published": "2026-07-30T10:00:13+00:00",
+      "url": "https://www.youtube.com/watch?v=BuAOEEiOSUc",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "시장 하락은 일시적이며 결국 우량주는 회복하지만, 레버리지를 사용한 단일 종목 투자는 매우 위험하므로 공부를 통해 확신을 가지고 장기 투자해야 한다.",
+        "summary": [
+          "현재 시장 하락은 생존을 위협하는 수준이지만, 본질적으로 우량주라면 결국 V자 반등을 보일 것이다.",
+          "이익 증가 없는 주가 상승은 신기루와 같으므로, 시장이 과열될 때 현금을 확보하고 조정 시 우량주를 매수하는 전략이 필요하다.",
+          "단기적으로 금리 인상 가능성과 외국인 매도세가 시장을 불안하게 만들고 있으나, 결국 스마트머니는 저점에 다시 들어올 것이다.",
+          "개별 종목 레버리지 투자는 카지노와 같은 도박이므로 매우 위험하며, 주식 투자는 인내심을 갖고 기업 공부를 통해 확신을 가져야 한다.",
+          "역사적으로 시장은 항상 우상향했으므로, 단기적인 시장 상황에 일희일비하기보다 장기적인 관점에서 우량주 투자를 유지하는 것이 중요하다."
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "외인 청산 및 하이닉스와 함께 주가 하락",
+            "view": "중립",
+            "t": 350
+          },
+          {
+            "name": "하이닉스",
+            "ticker": "000660",
+            "context": "삼성전자와 함께 외인 청산으로 주가 하락",
+            "view": "중립",
+            "t": 514
+          },
+          {
+            "name": "대우그룹",
+            "ticker": "",
+            "context": "우량주였으나 결국 망했던 사례로, 종목 레버리지 위험성을 강조하는 데 사용",
+            "view": "부정",
+            "t": 952
+          }
+        ],
+        "key_points": [
+          {
+            "point": "현재 시장 하락은 생존을 위협할 정도로 심각하지만, 본질적으로 시장은 V자 반등할 것이다.",
+            "t": 1
+          },
+          {
+            "point": "이익 증가 없는 주가 상승은 거품이므로, 시장 과열 시 현금 확보가 중요하며, 조정 시 우량주를 저가 매수하여 주식 수를 늘리는 기회로 삼아야 한다.",
+            "t": 27
+          },
+          {
+            "point": "레버리지를 사용하지 않는 투자자는 현재 시장의 불확실성에 대응하기 위해 잠시 시장을 떠나 휴식을 취하며 심리적 안정과 재충전의 시간을 가져라.",
+            "t": 300
+          },
+          {
+            "point": "코로나 팬데믹과 같은 특이한 상황이 아닌 현재의 명확하지 않은 외국인 매도세는 투자자들의 배신감을 키우고 있지만, 결국 스마트머니는 저점에 다시 진입할 것이다.",
+            "t": 390
+          },
+          {
+            "point": "단일 종목에 대한 레버리지 투자는 투기가 될 수 있으며, 장기적으로는 지수가 우상향하더라도 개별 우량주가 사라질 수도 있음을 경계해야 한다.",
+            "t": 837
+          },
+          {
+            "point": "주식의 역사는 항상 우상향했으므로, 잡주가 아니라면 장기적으로는 다 올라오게 되어 있다. 다만 그 대가는 '시간'이다.",
+            "t": 610
+          },
+          {
+            "point": "투자자들은 과거의 후회를 반복하지 말고, 현재 상황을 기록하고 기업 공부를 통해 확신을 가지고 '무엇을 살지'에 집중해야 한다.",
+            "t": 1110
+          }
+        ],
+        "actionable": [
+          "시장 과열 시 현금 확보를 통해 조정장에서 우량주를 저가 매수할 기회를 노려라.",
+          "레버리지를 사용하지 않는 개인 투자자는 잠시 시장을 떠나 휴식을 취하며 심리적 안정과 재충전의 시간을 가져라.",
+          "단일 종목에 대한 레버리지 투자를 피하고, 우량 기업에 대한 심층적인 공부를 통해 투자 확신을 키워라."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-07-30T21:15:59.899341+09:00"
+    },
+    {
       "video_id": "uyY2Uah4PiE",
       "title": "죽고싶지 않아! 실리콘밸리가 움직인다 100년, 아니 200년 갑니다 [뭣이라!? EP.17] / 송이라 기자",
       "channel": "와이스트릿",
@@ -16,8 +114,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:10:06.252926+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:26:49.478108+09:00"
     },
     {
       "video_id": "Xg7hRPisONQ",
@@ -35,8 +133,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:09:34.074035+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:26:17.236966+09:00"
     },
     {
       "video_id": "hcJINgy1bw0",
@@ -54,8 +152,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:09:01.224485+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:25:44.401042+09:00"
     },
     {
       "video_id": "gY1bUZw0IRM",
@@ -73,8 +171,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:08:29.088190+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:25:12.018532+09:00"
     },
     {
       "video_id": "KnaSBWiUAmw",
@@ -97,9 +195,9 @@
     },
     {
       "video_id": "18d4SRbPszs",
-      "title": "시장은 아직 안정을 허락하지 않았다…반등보다 먼저 볼 것은?ㅣ명민준, 박가영, 이지환 [주린이 구조대]",
+      "title": "[26.07.30 오후 방송 전체보기] 삼성전자 확정 실적에도 반도체는 혼란의 시간...내일 시장의 운명은?",
       "channel": "삼프로TV",
-      "published": "2026-07-30T05:25:33+00:00",
+      "published": "2026-07-30T11:03:24+00:00",
       "url": "https://www.youtube.com/watch?v=18d4SRbPszs",
       "analysis": {
         "relevant": true,
@@ -111,8 +209,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:07:24.281170+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:23:02.742562+09:00"
     },
     {
       "video_id": "mJJt591kmbA",
@@ -130,8 +228,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:06:51.904299+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:24:39.614447+09:00"
     },
     {
       "video_id": "j12HdHSQ08g",
@@ -149,8 +247,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:06:19.751450+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:24:07.356390+09:00"
     },
     {
       "video_id": "2FOTy7qBClw",
@@ -168,8 +266,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:05:47.563193+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:23:35.110341+09:00"
     },
     {
       "video_id": "OSW8JTwvbRg",
@@ -187,8 +285,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:05:15.057331+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:21:58.036354+09:00"
     },
     {
       "video_id": "VhXVpx3Yqdc",
@@ -206,8 +304,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:04:42.521473+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:21:25.181251+09:00"
     },
     {
       "video_id": "_3NKzirRo_Q",
@@ -217,16 +315,143 @@
       "url": "https://www.youtube.com/watch?v=_3NKzirRo_Q",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "시장은 금리 인상 공포와 강제 매도로 급락 중이지만, 외국인들은 파생상품에서 반등에 베팅하고 있으며, 과거 과열된 섹터의 차익 실현 및 구조적 성장주 발굴의 중요성이 강조됩니다.",
+        "summary": [
+          "현재 시장은 개인 투자자들의 강제 청산 매물 출회로 인해 주가가 하락하는 양상을 보이며, 외국인들은 선물 매도 포지션을 유지하면서도 파생상품에서는 반등 베팅을 하고 있습니다.",
+          "2021년 고점 대비 크게 늘어난 신용 잔고는 여전히 높은 수준으로, 추가적인 시장 하락 시 강제 반대매매로 인한 하방 압력이 존재할 수 있습니다.",
+          "반도체, 2차 전지, 방산, 조선 등 과거 주도주들은 최근 급락세를 보였는데, 이는 과도한 자금 쏠림, 금리 인상, 지정학적 불확실성 등 복합적인 요인 때문입니다.",
+          "이러한 시장 하락은 개별 종목의 펀더멘탈 훼손 여부를 판단하는 중요한 시기이며, 꿈의 주식과 같은 성장 스토리가 실적 증가로 이어지지 않을 경우 추가 하락 위험이 있습니다.",
+          "시장 참여자들은 단기적인 등락에 연연하기보다, 견고한 이익 증가와 구조적 성장을 보이는 기업에 투자하고 시장 조정 시에는 리밸런싱 기회를 활용해야 합니다.",
+          "글로벌 경제의 탈동조화 추세는 경제 효율성을 저해하고 자본 배분을 비효율적으로 만들어 시장의 변동성을 키우므로, 투자자는 더욱 신중하고 현명한 접근이 필요합니다."
+        ],
+        "tickers": [
+          {
+            "name": "달바글로벌",
+            "ticker": "",
+            "context": "52주 신고가를 기록했으며, 시가총액 3조 3천억 규모의 신규 종목으로 특이한 움직임을 보입니다.",
+            "view": "중립",
+            "t": 189
+          },
+          {
+            "name": "골프존홀딩스",
+            "ticker": "",
+            "context": "52주 신고가를 기록했습니다.",
+            "view": "중립",
+            "t": 195
+          },
+          {
+            "name": "SK스퀘어",
+            "ticker": "",
+            "context": "외국인들이 매수한 종목 중 하나로, 최근 60% 가까이 하락했습니다.",
+            "view": "중립",
+            "t": 341
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "외국인들이 매수한 우선주입니다.",
+            "view": "중립",
+            "t": 344
+          },
+          {
+            "name": "현대차",
+            "ticker": "005380",
+            "context": "많은 개인 투자자들이 보유하고 있으며, 외국인들은 주가 하락으로 배당 매력이 높아지자 매수하고 있습니다. 전기차, 하이브리드, 로봇 사업을 잘 하고 있습니다.",
+            "view": "긍정",
+            "t": 356
+          },
+          {
+            "name": "기아",
+            "ticker": "000270",
+            "context": "현대차와 함께 전기차, 하이브리드, 로봇 사업을 잘 하고 있으며, 외국인들이 배당 매력으로 매수하고 있습니다.",
+            "view": "긍정",
+            "t": 356
+          },
+          {
+            "name": "보스턴 다이내믹스",
+            "ticker": "",
+            "context": "현대차의 자회사로, CES에서 열광적인 반응을 얻었으나 그 거품이 사라졌습니다.",
+            "view": "부정",
+            "t": 404
+          },
+          {
+            "name": "폭스바겐",
+            "ticker": "",
+            "context": "중국 전기차 시장의 영향으로 어려움을 겪고 있습니다.",
+            "view": "부정",
+            "t": 530
+          },
+          {
+            "name": "제주반도체",
+            "ticker": "080530",
+            "context": "주가가 크게 빠진 종목 중 하나입니다.",
+            "view": "부정",
+            "t": 607
+          },
+          {
+            "name": "LG전자",
+            "ticker": "066570",
+            "context": "주가가 크게 빠진 종목 중 하나입니다.",
+            "view": "부정",
+            "t": 608
+          },
+          {
+            "name": "원익IPS",
+            "ticker": "240810",
+            "context": "주가가 크게 빠진 종목 중 하나입니다.",
+            "view": "부정",
+            "t": 608
+          },
+          {
+            "name": "한미반도체",
+            "ticker": "042700",
+            "context": "주가가 거의 65% 빠진 종목 중 하나입니다.",
+            "view": "부정",
+            "t": 609
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "BNK 이민희 연구원의 2Q23 실적 발표 분석에 따르면, 매출액 및 영업이익이 컨센서스를 소폭 하회했습니다. 단기 과매도 국면이나 공급과잉 우려로 인해 목표 주가가 하향 조정되었습니다. (목표주가 14.8만원 -> 18.5만원에서 14.8만원으로 하향) 과거 15만원대에서 300만원까지 올랐던 것에 비해 현재는 피크아웃 우려가 큽니다.",
+            "view": "중립",
+            "t": 1020
+          }
+        ],
+        "key_points": [
+          {
+            "point": "현재 시장은 강제 청산 매물 출회 및 금리 인상 공포, 지정학적 불확실성 등으로 인해 많은 종목들이 하락하고 있습니다.",
+            "t": 35
+          },
+          {
+            "point": "과거 시장이 급락했을 때 주도주들은 먼저 바닥을 찍고 반등하는 경향이 있었으며, 현재도 일부 종목들이 52주 신고가를 기록하려는 움직임을 보이고 있습니다.",
+            "t": 324
+          },
+          {
+            "point": "외국인 투자자들은 파생 시장에서 단기적인 반등 베팅을 하고 있으며, 주가 하락으로 시가 배당률이 높아진 기업들에 주목하고 있습니다.",
+            "t": 191
+          },
+          {
+            "point": "주가 상승이 이익 증가를 동반하지 않는다면 거품일 가능성이 크지만, 현재 코스피 시장의 상승은 이익 증가가 뒷받침되고 있어 거품으로 보기는 어렵습니다.",
+            "t": 909
+          },
+          {
+            "point": "반도체 시장은 항상 '잔치'와 같지만, 과도한 기대감으로 뒤늦게 진입한 투자자들은 손실을 볼 위험이 크므로, 시장의 흐름과 펀더멘탈을 면밀히 분석하는 것이 중요합니다.",
+            "t": 1840
+          },
+          {
+            "point": "어려운 시장 상황 속에서도 본질적인 성장 동력을 잃지 않은 '구조적 성장주'에 투자하고, 시장의 단기적인 등락에 일희일비하지 않는 것이 중요합니다.",
+            "t": 2514
+          }
+        ],
+        "actionable": [
+          "시장의 단기적인 급등락에 휩쓸리지 않고, 기업의 펀더멘탈과 장기적인 성장 가능성을 바탕으로 투자 결정을 내릴 것.",
+          "주가가 과도하게 빠졌을 때, 이익 증가가 확실한 구조적 성장주를 매수하여 리밸런싱 기회로 활용하고, 단순히 주가가 오르는 종목을 쫓는 투자는 지양할 것.",
+          "시장을 움직이는 금리, 지정학적 이슈, 환율 등 거시 경제 지표들을 꾸준히 모니터링하여 시장의 큰 흐름을 이해하고 투자 전략에 반영할 것."
+        ]
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:04:09.900815+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:20:52.859567+09:00"
     },
     {
       "video_id": "lYzv9O8kMHE",
@@ -336,8 +561,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:02:51.031766+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-07-30T21:16:32.089218+09:00"
     },
     {
       "video_id": "HRfzjuF72xI",
@@ -12348,228 +12573,7 @@
       "source": "video",
       "attempts": 3,
       "analyzed_at": "2026-07-22T22:13:40.655078+09:00"
-    },
-    {
-      "video_id": "236ow2i-3fc",
-      "title": "[하이라이트] 내일 예정된 구글의 실적발표 프리뷰 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.07.22.수]",
-      "channel": "체슬리TV",
-      "published": "2026-07-22T01:42:35+00:00",
-      "url": "https://www.youtube.com/watch?v=236ow2i-3fc",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "Deutsche Bank는 Google Cloud의 매출 성장과 CapEx 투자 확대를 시장 예상치보다 훨씬 높게 전망하며, 이는 미국 정부의 AI 육성 정책과 맞물려 반도체 및 클라우드 기업들에 대한 긍정적 신호로 해석됩니다.",
-        "summary": [
-          "Deutsche Bank는 Google Cloud의 2분기 매출 성장률 전망을 기존 65%에서 70%로 상향 조정했으며, 하반기에는 75%까지 가속화될 것으로 예상했습니다.",
-          "AI 인프라 구축에 필요한 CapEx는 2027년 $325B (기존 $250B), 2028년에는 $365B~$370B로 대폭 상향 전망되었습니다.",
-          "Deutsche Bank는 2027년 Google Cloud 매출이 시장 예상치($142B)를 크게 웃도는 $190B~$195B에 이를 것으로 전망했습니다.",
-          "미국 재무장관 옐런은 미국이 조만간 전 세계 AI 연산 능력의 80%를 통제할 것이며, 중국에 패배하는 것은 '결코 용납할 수 없는(unconscionable)' 일이라고 강조했습니다. 이는 AI 반도체 및 클라우드 기업들의 대규모 CapEx를 국가 차원에서 뒷받침하는 신호로 해석됩니다."
-        ],
-        "tickers": [
-          {
-            "name": "Google",
-            "ticker": "GOOGL",
-            "context": "Google의 실적 발표와 CapEx, 클라우드 매출 성장 전망에 대한 도이치뱅크의 프리뷰가 주요 내용입니다.",
-            "view": "긍정",
-            "t": 2
-          },
-          {
-            "name": "NVIDIA Corp",
-            "ticker": "NVDA",
-            "context": "미국 정부 최고위층의 발언이 엔비디아를 비롯한 AI 반도체 기업과 클라우드 기업들의 대규모 CapEx를 국가 차원에서 뒷받침하는 신호로 해석되었습니다.",
-            "view": "긍정",
-            "t": 1158
-          },
-          {
-            "name": "Taiwan Semiconductor Manufactu",
-            "ticker": "TSM",
-            "context": "필라델피아 반도체 지수 내 여러 종목들이 큰 폭으로 상승했습니다.",
-            "view": "긍정",
-            "t": 2024
-          },
-          {
-            "name": "Micron Technology Inc",
-            "ticker": "MU",
-            "context": "필라델피아 반도체 지수 내 마이크론테크놀로지가 급등을 기록했습니다.",
-            "view": "긍정",
-            "t": 2026
-          },
-          {
-            "name": "Coherent Corp",
-            "ticker": "COHR",
-            "context": "필라델피아 반도체 지수 내 Coherent Corp가 급등을 기록했습니다.",
-            "view": "긍정",
-            "t": 2041
-          },
-          {
-            "name": "Teradyne Inc",
-            "ticker": "TER",
-            "context": "필라델피아 반도체 지수 내 Teradyne Inc가 급등을 기록했습니다.",
-            "view": "긍정",
-            "t": 2042
-          },
-          {
-            "name": "Sandisk",
-            "ticker": "SNDK",
-            "context": "필라델피아 반도체 지수 내 Sandisk가 급등을 기록했습니다.",
-            "view": "긍정",
-            "t": 2053
-          },
-          {
-            "name": "Western Digital",
-            "ticker": "WDC",
-            "context": "필라델피아 반도체 지수 내 Western Digital이 급등을 기록했습니다.",
-            "view": "긍정",
-            "t": 2054
-          },
-          {
-            "name": "Seagate",
-            "ticker": "STX",
-            "context": "필라델피아 반도체 지수 내 Seagate가 급등을 기록했습니다.",
-            "view": "긍정",
-            "t": 2055
-          },
-          {
-            "name": "Roundhill Memory ETF",
-            "ticker": "DRAM",
-            "context": "필라델피아 반도체 지수 내 DRAM 관련 ETF가 급등을 기록했습니다.",
-            "view": "긍정",
-            "t": 2058
-          }
-        ],
-        "key_points": [
-          {
-            "point": "Deutsche Bank의 Google Cloud 매출 및 CapEx 전망은 시장 컨센서스보다 매우 공격적이며, 이는 Google의 AI 및 클라우드 사업에 대한 강력한 자신감을 반영합니다.",
-            "t": 30
-          },
-          {
-            "point": "미 재무장관 옐런의 발언은 미국의 AI 기술 패권 유지를 위한 국가적 투자를 시사하며, 이는 AI 반도체 및 클라우드 인프라 관련 기업들에게 강력한 모멘텀으로 작용할 것입니다.",
-            "t": 1154
-          },
-          {
-            "point": "Google의 주가는 단기적으로는 상대적 소외를 겪을 수 있으나, 장기적으로 CapEx 투자 확대와 그에 따른 클라우드 매출 성과가 나타나는 시점에서 새로운 모멘텀을 얻을 수 있습니다.",
-            "t": 1510
-          }
-        ],
-        "actionable": [
-          "Google의 다음 실적 발표에서 Google Cloud 매출 성장률과 AI 인프라 CapEx 투자 규모, 그리고 이들이 실제 성과로 이어지는지 주목하세요.",
-          "Google과 같은 빅테크 기업들의 대규모 CapEx 투자에 따른 수혜가 예상되는 AI 반도체 및 인프라 관련 종목들을 면밀히 분석하고 기회를 탐색하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-22T17:05:01.801757+09:00"
-    },
-    {
-      "video_id": "qUmwHK245R4",
-      "title": "[하이라이트] 지금은 뭘 살건가가 중요하다 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.07.22.수]",
-      "channel": "체슬리TV",
-      "published": "2026-07-22T01:43:46+00:00",
-      "url": "https://www.youtube.com/watch?v=qUmwHK245R4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "낙폭 과대 조선 엔진 기업 (한화엔진, HD현대마린엔진)들의 강력한 매수 기회, 펀더멘털 성장과 낮은 밸류에이션 매력이 부각됩니다.",
-        "summary": [
-          "조선업종과 특히 엔진 관련 주식들이 5월부터 시장 수급에 휘말려 주가가 급락했으나, 펀더멘털은 오히려 사상 최대 수주와 증설로 2028년까지 가파른 성장이 예상됩니다. [00:26]",
-          "한화엔진과 HD현대마린엔진은 2026년 상반기에 이미 2025년 연간 수주를 달성했으며, 생산능력 확충을 통해 하반기부터 강력한 성장이 예상됩니다. [00:44]",
-          "HD현대마린엔진은 보그엔진 시장 진입, HD한국조선해양 계열사 물량 및 아시아 생산 거점 확대 수혜로 중장기 성장이 기대됩니다. [02:04]",
-          "주가는 고점 대비 40% 이상 하락했으며, 2028년 PER 기준 7~10배 수준으로 저평가되어 큰 상승 여력을 보유하고 있습니다. [01:40]",
-          "중국 조선 엔진 시장의 증설 어려움으로 한국 엔진 기업들이 반사 수혜를 누리고 있습니다. [01:57]",
-          "현재 시장의 공포와 관심 없는 분야에서 좋은 펀더멘털과 저평가된 기업을 찾는 것이 중요합니다. [09:48]"
-        ],
-        "tickers": [
-          {
-            "name": "한화엔진",
-            "ticker": "082740",
-            "context": "주가 낙폭이 너무 커 강력 추천, 2026년 상반기에 이미 2025년 수주 달성, 2028년 PER 10배 내외로 저평가",
-            "view": "긍정",
-            "t": 20
-          },
-          {
-            "name": "HD현대마린엔진",
-            "ticker": "077970",
-            "context": "주가 낙폭이 너무 커 강력 추천, 보그엔진 시장 진입, HD한국조선해양 계열사 물량 및 아시아 생산 거점 확대 수혜, 2028년 PER 7배 내외로 저평가",
-            "view": "긍정",
-            "t": 20
-          },
-          {
-            "name": "STX엔진",
-            "ticker": "096300",
-            "context": "고점 대비 65% 하락했으나 성장 전망, 펀더멘털은 긍정적",
-            "view": "긍정",
-            "t": 345
-          },
-          {
-            "name": "HD현대중공업",
-            "ticker": "329180",
-            "context": "조선업종 전반적인 성장 모멘텀",
-            "view": "중립",
-            "t": 26
-          },
-          {
-            "name": "삼성중공업",
-            "ticker": "010140",
-            "context": "조선업종 전반적인 성장 모멘텀",
-            "view": "중립",
-            "t": 26
-          },
-          {
-            "name": "대우조선해양",
-            "ticker": "042660",
-            "context": "조선업종 전반적인 성장 모멘텀",
-            "view": "중립",
-            "t": 26
-          },
-          {
-            "name": "Wartsila",
-            "ticker": "",
-            "context": "글로벌 엔진 제조사, 고점 대비 23% 하락으로 한국 기업 대비 덜 빠짐",
-            "view": "중립",
-            "t": 348
-          },
-          {
-            "name": "Kongsberg",
-            "ticker": "",
-            "context": "글로벌 엔진 제조사, 고점 대비 33% 하락으로 한국 기업 대비 덜 빠짐",
-            "view": "중립",
-            "t": 353
-          }
-        ],
-        "key_points": [
-          {
-            "point": "조선업 및 특히 엔진 관련 기업들은 5월 이후 시장 수급 문제로 주가가 급락했으나, 펀더멘털은 오히려 사상 최대 수주 및 증설로 2028년까지 가파른 성장이 예상됩니다. [00:26]",
-            "t": 26
-          },
-          {
-            "point": "엔진 산업의 펀더멘털은 2028년까지 급성장만 바라보는 중장기 투자에 유리하며, 고점 대비 40% 이상 하락한 현재는 매력적인 매수 기회로 판단됩니다. [01:35]",
-            "t": 135
-          },
-          {
-            "point": "국내 엔진 제조사들은 해외 경쟁사 대비 주가 낙폭이 훨씬 커 밸류에이션 매력이 극대화되었습니다. [03:47]",
-            "t": 347
-          },
-          {
-            "point": "중국은 조선 엔진 산업에서 기술력 부족과 장기 투자의 어려움으로 증설이 어렵기 때문에, 한국 기업들이 반사 수혜를 지속적으로 누릴 것으로 전망됩니다. [10:31]",
-            "t": 1031
-          },
-          {
-            "point": "장기적으로 안정적인 성장을 기대한다면 반도체보다 엔진 관련 기업들이 더 높은 수익률을 기록할 가능성이 있습니다. [06:45]",
-            "t": 645
-          },
-          {
-            "point": "투자 의사결정 시 현재 가치(PER, PBR)뿐만 아니라 미래 현금흐름(CapEx, 순이익 등)을 고려한 통합적인 밸류에이션 분석 능력을 갖추는 것이 중요합니다. [16:09]",
-            "t": 1609
-          }
-        ],
-        "actionable": [
-          "현재 과도하게 하락한 국내 조선 엔진 관련 기업들의 중장기 투자 기회를 적극적으로 검토합니다.",
-          "HD현대마린엔진, 한화엔진 등 주요 기업들의 수주 잔고, 생산 능력 확충 계획 및 밸류에이션(2028년 PER 기준)을 면밀히 분석합니다.",
-          "단기적인 시장 수급이나 노이즈보다는 기업의 본질적인 펀더멘털 성장과 저평가 여부에 집중하여 투자 전략을 수립합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-22T17:02:21.265624+09:00"
     }
   ],
-  "updated": "2026-07-30T19:10:07.253175+09:00"
+  "updated": "2026-07-30T21:26:50.478362+09:00"
 }
