@@ -8,16 +8,120 @@
       "url": "https://www.youtube.com/watch?v=4qNjua1pX5I",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "7월 한국 증시는 큰 폭의 하락과 높은 변동성을 보였으며, 대형주들의 급락과 신용융자 반대매매 압박 속에서 8월에는 바닥에 가까워졌지만, V자 반등보다는 불확실성이 해소되는 완만한 회복이 기대됩니다.",
+        "summary": [
+          "7월 한국 증시는 대형주 중심의 급락과 종목별 극심한 변동성으로 투자자들의 혼란과 공포를 가중시켰습니다. [02:53]",
+          "삼성전자, SK하이닉스 등 주요 대형주들이 고점 대비 45~60%의 큰 하락을 겪었으며, 양호한 실적에도 주가 부진을 면치 못하는 사례가 속출했습니다. [07:34]",
+          "코스닥 신용융자잔고가 절반 가까이 줄어들고 코스피도 대기 반대매매 압박이 상존하는 등 시장 전반에 신용 레버리지 리스크가 여전합니다. [23:51]",
+          "은행주, KT&G 등 일부 경기 방어주는 상대적으로 견조한 흐름을 보였으나, 개인 투자자들의 관심은 낮았습니다. [14:05]",
+          "시장이 바닥에 근접했을 가능성이 있지만, 과거와 같은 빠른 V자 반등보다는 미국 빅테크 실적 발표 등 주요 이벤트 후 불확실성이 해소되는 과정을 지켜봐야 할 것입니다. [34:25]"
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "고점 대비 45% 하락했으며, 대규모 현금 흐름에도 불구하고 주가가 밀려 투자자들의 이해가 어렵고 공포를 유발함.",
+            "view": "부정",
+            "t": 401
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "고점 대비 55~60% 하락했으며, 대규모 이익에도 불구하고 주가가 밀려 투자자들의 이해가 어렵고 공포를 유발함. SK스퀘어 주가도 하이닉스 지분과 연동.",
+            "view": "부정",
+            "t": 734
+          },
+          {
+            "name": "레인보우 로보틱스",
+            "ticker": "277810",
+            "context": "지난주 삼성 이슈로 로봇주가 급등락했으나, 시장 전체가 흔들리면서 이틀 만에 상승분을 반납하고 대장주가 급락하는 등 의미 있는 흐름을 만들지 못함.",
+            "view": "부정",
+            "t": 1050
+          },
+          {
+            "name": "KB금융",
+            "ticker": "105560",
+            "context": "시장 하락 속에서도 크게 빠지지 않고 버티고 있으며, 신고가에 근접하는 등 비교적 안정적인 모습을 보임.",
+            "view": "긍정",
+            "t": 1438
+          },
+          {
+            "name": "KT&G",
+            "ticker": "033780",
+            "context": "시장 하락 속에서도 신고가에 근접하는 등 비교적 안정적인 모습을 보임. 개인 투자자들의 매수세는 낮음.",
+            "view": "긍정",
+            "t": 1420
+          },
+          {
+            "name": "LG생활건강",
+            "ticker": "051900",
+            "context": "실적이 서프라이즈할 정도로 좋았음에도 불구하고 주가는 오히려 급락하여 시장의 비합리성을 보여주는 사례로 언급됨.",
+            "view": "부정",
+            "t": 1525
+          },
+          {
+            "name": "아모레퍼시픽",
+            "ticker": "090430",
+            "context": "실적이 좋았음에도 주가는 급락하여 시장의 비합리성을 보여주는 사례로 언급됨.",
+            "view": "부정",
+            "t": 1529
+          },
+          {
+            "name": "SK스퀘어",
+            "ticker": "402340",
+            "context": "하이닉스 지분 때문에 주가가 움직이는 경향이 있으며, 고점 대비 66% 하락하여 신규 접근에는 보수적인 관점 제시.",
+            "view": "부정",
+            "t": 1811
+          },
+          {
+            "name": "삼성전기",
+            "ticker": "009150",
+            "context": "고점 대비 45% 하락했으며, 실적 나쁘지 않았음에도 처참하게 하락하여 신규 접근은 보수적으로 검토할 필요가 있음.",
+            "view": "부정",
+            "t": 1855
+          },
+          {
+            "name": "AMD",
+            "ticker": "AMD",
+            "context": "다음 주 실적 발표 예정으로, 반도체 업황에 대한 우려 속에서도 시장에 긍정적인 영향을 줄 가능성이 있는 변수로 언급됨.",
+            "view": "중립",
+            "t": 4719
+          },
+          {
+            "name": "Nvidia",
+            "ticker": "NVDA",
+            "context": "다음 주 실적 발표 예정으로, 반도체 업황에 대한 우려 속에서도 시장에 긍정적인 영향을 줄 가능성이 있는 변수로 언급됨.",
+            "view": "중립",
+            "t": 4721
+          }
+        ],
+        "key_points": [
+          {
+            "point": "7월은 시장의 혼란스러운 분위기와 변동성을 극명하게 보여준 한 달이었다.",
+            "t": 46
+          },
+          {
+            "point": "삼성전자, SK하이닉스 등 대표 기업들의 고점 대비 큰 폭 하락은 시장에 대한 공포와 불확실성을 증폭시키고 있다.",
+            "t": 734
+          },
+          {
+            "point": "시장은 바닥에 가까워지고 있으나, 과거처럼 빠른 V자 반등을 기대하기보다는 당분간은 횡보하며 숨 고르기를 하거나 완만한 회복을 보일 가능성이 높다.",
+            "t": 3425
+          },
+          {
+            "point": "개인투자자들의 신용융자 규모가 여전히 높아 시장의 충격에 취약하며, 반대매매로 인한 강제 청산이 시장 하락의 주요 원인이 되고 있다.",
+            "t": 2135
+          }
+        ],
+        "actionable": [
+          "다음 주 예정된 AMD, 엔비디아 등 주요 반도체 및 빅테크 기업들의 실적 발표를 주시하여 시장의 향방을 가늠해야 합니다. [47:19]",
+          "과거 고점 대비 큰 폭으로 하락한 대형 우량주에 대한 섣부른 추가 매수보다는 시장 전반의 수급 안정화와 확실한 반등 신호를 기다리는 보수적인 접근이 필요합니다. [00:50]",
+          "시장 불안정성이 높은 상황에서 개인 투자자의 투기적인 단타 매매나 과도한 신용 투자는 위험을 더 키울 수 있으므로 자제해야 합니다. [04:57]"
+        ]
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-31T02:13:16.758080+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-07-31T04:03:35.626529+09:00"
     },
     {
       "video_id": "k0Rd3k3dV28",
@@ -188,8 +292,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T02:13:49.023209+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-31T04:04:08.230478+09:00"
     },
     {
       "video_id": "BuAOEEiOSUc",
@@ -397,11 +501,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-30T21:24:39.614447+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-31T04:07:28.176973+09:00"
     },
     {
       "video_id": "j12HdHSQ08g",
@@ -419,8 +523,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-30T21:24:07.356390+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-07-31T04:06:54.035646+09:00"
     },
     {
       "video_id": "2FOTy7qBClw",
@@ -438,8 +542,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T02:14:53.436111+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-07-31T04:06:21.618182+09:00"
     },
     {
       "video_id": "OSW8JTwvbRg",
@@ -12513,5 +12617,5 @@
       "analyzed_at": "2026-07-22T17:17:22.449620+09:00"
     }
   ],
-  "updated": "2026-07-31T02:15:59.552290+09:00"
+  "updated": "2026-07-31T04:07:29.353504+09:00"
 }
