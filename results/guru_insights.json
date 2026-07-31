@@ -141,8 +141,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-01T03:08:24.946759+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-01T05:07:21.592122+09:00"
     },
     {
       "video_id": "u8rk3a6yuXk",
@@ -13201,5 +13201,5 @@
       "analyzed_at": "2026-07-23T17:06:05.933389+09:00"
     }
   ],
-  "updated": "2026-08-01T03:11:26.869621+09:00"
+  "updated": "2026-08-01T05:07:22.763020+09:00"
 }
