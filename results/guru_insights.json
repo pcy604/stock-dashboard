@@ -1,6 +1,131 @@
 {
   "items": [
     {
+      "video_id": "_LDRRKcvSsM",
+      "title": "폭락에도 버텨야 하는 이유…결국 주가를 되돌리는 건 ‘실적’입니다ㅣ명민준, 박가영, 차영주 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-07-31T13:30:18+00:00",
+      "url": "https://www.youtube.com/watch?v=_LDRRKcvSsM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "주식 시장의 반등은 견고한 실적에 기반하며, 투자자들은 단기적인 가격 변동이나 시장 감정보다는 기업의 근본적인 실적에 집중해야 합니다.",
+        "summary": [
+          "최근 시장 반등은 주로 반도체 부문(삼성전기, SK하이닉스) 등 일부 기업의 견조한 실적에 기인합니다.",
+          "투자자들은 주가 하락 폭만으로 반등을 예측하기보다, 실적 호조가 동반된 경우에만 의미 있는 반등임을 인지해야 합니다.",
+          "현재 시장의 관심은 '미인대회' 비유처럼 견고한 실적을 가진 삼성전자, SK하이닉스('삼전닉스')와 같은 기업에 집중되어 있습니다.",
+          "차영주 소장은 차트 분석이나 단기 매매보다는 기업의 실적 보고서를 이해하고 이에 기반한 투자 신념을 갖는 것이 중요하다고 강조합니다.",
+          "변동성이 큰 시장에서도 펀더멘털이 강한 주식은 결국 가치를 회복한다는 믿음을 가지고 투자하는 것을 권유합니다.",
+          "투자자는 자신의 보유 종목의 실적을 직접 확인하고 이해하려는 노력을 해야 하며, 이는 장기적인 투자 성공의 기반이 됩니다."
+        ],
+        "tickers": [
+          {
+            "name": "삼성전기",
+            "ticker": "009150",
+            "context": "가장 먼저 상한가를 기록하며 시장 반등을 주도한 종목 중 하나로, 좋은 실적과 큰 하락폭이 겹쳐 반등을 이끌었습니다.",
+            "view": "긍정",
+            "t": 105
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "삼성전기 다음으로 상한가를 기록하며 시장 반등을 주도한 종목으로, 좋은 실적과 큰 하락폭이 겹쳐 반등을 이끌었습니다.",
+            "view": "긍정",
+            "t": 110
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "거의 상한가에 근접하며 시장 반등을 이끌었으며, 실적 호조가 주가 상승의 주요 원인으로 꼽혔습니다.",
+            "view": "긍정",
+            "t": 115
+          },
+          {
+            "name": "네이버",
+            "ticker": "035420",
+            "context": "실적과 관계없이 고점 대비 많이 하락한 종목으로 언급되었으며, 시장의 관심은 아직 '삼전닉스'에 집중되어 있다고 설명되었습니다.",
+            "view": "중립",
+            "t": 218
+          },
+          {
+            "name": "카카오",
+            "ticker": "035720",
+            "context": "실적과 관계없이 고점 대비 많이 하락한 종목으로 언급되었으며, 시장의 관심은 아직 '삼전닉스'에 집중되어 있다고 설명되었습니다.",
+            "view": "중립",
+            "t": 218
+          },
+          {
+            "name": "LG전자",
+            "ticker": "066570",
+            "context": "고점 대비 많이 하락한 종목으로 언급되었지만, 시장 반등의 주요 원인으로는 꼽히지 않았습니다.",
+            "view": "중립",
+            "t": 221
+          },
+          {
+            "name": "하이브",
+            "ticker": "352820",
+            "context": "실적이 잘 나왔음에도 주가가 하락한 사례로 언급되었으며, 시장의 관심이 '삼전닉스'에 쏠려 상대적으로 소외되었다고 분석되었습니다.",
+            "view": "부정",
+            "t": 409
+          },
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "뉴욕 증시에서 호실적을 발표하여 국내 반도체 주식 상승에 긍정적인 영향을 주었습니다.",
+            "view": "긍정",
+            "t": 551
+          },
+          {
+            "name": "메타",
+            "ticker": "META",
+            "context": "뉴욕 증시에서 실적 논란의 중심에 있는 종목으로 언급되었습니다.",
+            "view": "중립",
+            "t": 558
+          },
+          {
+            "name": "현대차",
+            "ticker": "005380",
+            "context": "10% 상승했지만, 40만원이라는 고점을 넘지 못해 여전히 시장의 주도주로 인식되지 못하는 상태라고 언급되었습니다.",
+            "view": "중립",
+            "t": 2017
+          }
+        ],
+        "key_points": [
+          {
+            "point": "주가 반등의 핵심은 실적이며, 차트상 저점 여부만이 아닌 실적 대비 주가 수준을 파악하는 것이 중요합니다.",
+            "t": 259
+          },
+          {
+            "point": "시장의 관심은 현재 '삼전닉스'와 같은 특정 실적 우량주에 집중되어 있으며, 이는 시장의 전반적인 방향을 이끄는 요인입니다.",
+            "t": 506
+          },
+          {
+            "point": "투자 격언 '이익은 스스로가 지킨다'처럼, 실적을 믿고 묵직하게 투자하는 것이 장기적인 관점에서 중요합니다.",
+            "t": 800
+          },
+          {
+            "point": "개인 투자자들은 단기적인 시장 변동에 일희일비하기 쉽지만, 실적이라는 믿을 수 있는 구석이 있다면 견뎌낼 수 있습니다.",
+            "t": 1129
+          },
+          {
+            "point": "주말 동안 자신이 보유한 종목의 실적을 찾아보고 이해하는 것이 투자에 대한 확신을 높이는 데 도움이 되는 숙제입니다.",
+            "t": 3497
+          },
+          {
+            "point": "애널리스트의 리포트나 목표 주가는 참고 자료일 뿐, 맹목적으로 따르기보다는 투자자 스스로 기업의 실적을 분석하는 능력을 길러야 합니다.",
+            "t": 4324
+          }
+        ],
+        "actionable": [
+          "보유 또는 관심 종목의 최신 실적 보고서를 검색하여 매출, 영업이익, 향후 전망 등을 확인하세요.",
+          "자신이 이해할 수 있을 때까지 실적 데이터를 분석하고, 필요하다면 AI 도구를 활용하여 기업의 펀더멘털을 파악하세요.",
+          "실적이 견고하다면 단기적인 주가 변동에 동요하지 않고 묵직하게 투자를 유지하는 전략을 고려하세요."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-01T00:51:10.392731+09:00"
+    },
+    {
       "video_id": "P9-KAJy2bN8",
       "title": "반도체 급락은 끝났다? 전고점까지 열어둬야 하는 이유ㅣ명민준, 박가영, 정태근 [주린이 구조대]",
       "channel": "삼프로TV",
@@ -16,8 +141,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-31T22:18:26.955623+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-01T00:51:43.004418+09:00"
     },
     {
       "video_id": "u8rk3a6yuXk",
@@ -216,11 +341,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-31T22:19:47.948939+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-01T00:52:48.645297+09:00"
     },
     {
       "video_id": "0c-e6MQPYqU",
@@ -238,8 +363,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-31T22:18:59.309174+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-01T00:52:15.804967+09:00"
     },
     {
       "video_id": "FR7A0eQt2VE",
@@ -451,8 +576,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T22:22:12.104941+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-01T00:53:21.401338+09:00"
     },
     {
       "video_id": "Z6ytMl5zq-o",
@@ -1183,8 +1308,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T22:17:54.209107+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-01T00:48:14.502400+09:00"
     },
     {
       "video_id": "Vvv4wgwNx9U",
@@ -12993,53 +13118,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-23T17:06:05.933389+09:00"
-    },
-    {
-      "video_id": "Xet8j3f_i4o",
-      "title": "코스피 7,000 탈환…관건은 유가와 빅테크 투자?!ㅣ홍선애, 장우진 금시공 대표 [여의도 인사이트]",
-      "channel": "삼프로TV",
-      "published": "2026-07-23T05:25:47+00:00",
-      "url": "https://www.youtube.com/watch?v=Xet8j3f_i4o",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "코스피 7,000p 도달 가능성을 진단하고, 핵심 변수인 유가와 빅테크 투자 동향에 대한 전문가들의 심층 분석을 제시합니다.",
-        "summary": [
-          "코스피 지수 7,000p 도달 여부 및 그에 대한 시장의 기대감 분석.",
-          "글로벌 유가 변동성이 국내 증시에 미치는 경제적 파급 효과 심층 논의.",
-          "빅테크 기업들의 현재 가치와 미래 성장 잠재력을 평가하고 투자 전략 모색."
-        ],
-        "tickers": [
-          {
-            "name": "빅테크 섹터",
-            "ticker": "",
-            "context": "코스피 상승을 견인할 주요 투자처로 언급된 빅테크 기업 전반에 대한 논의.",
-            "view": "중립",
-            "t": 0
-          }
-        ],
-        "key_points": [
-          {
-            "point": "코스피 지수 7,000p 돌파를 위한 필수 조건과 시나리오에 대한 전문가 진단.",
-            "t": 0
-          },
-          {
-            "point": "국제 유가 상승 또는 하락이 기업 실적 및 전반적인 시장 심리에 미칠 영향 분석.",
-            "t": 0
-          },
-          {
-            "point": "글로벌 빅테크 기업들의 실적 모멘텀과 기술 혁신이 시장에 미치는 파급력과 투자 기회.",
-            "t": 0
-          }
-        ],
-        "actionable": [
-          "국제 유가 동향 및 에너지 관련 지표를 주기적으로 확인하여 시장 변동성에 대비하세요.",
-          "글로벌 빅테크 기업들의 신기술 발표 및 분기별 실적 발표를 면밀히 분석하여 투자 포인트를 점검하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-23T17:05:50.548896+09:00"
     }
   ],
-  "updated": "2026-07-31T22:22:13.105258+09:00"
+  "updated": "2026-08-01T00:53:22.401640+09:00"
 }
