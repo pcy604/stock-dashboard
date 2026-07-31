@@ -138,11 +138,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-01T00:51:43.004418+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-01T03:08:24.946759+09:00"
     },
     {
       "video_id": "u8rk3a6yuXk",
@@ -341,11 +341,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-01T00:52:48.645297+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-01T03:11:25.700180+09:00"
     },
     {
       "video_id": "0c-e6MQPYqU",
@@ -355,16 +355,97 @@
       "url": "https://www.youtube.com/watch?v=0c-e6MQPYqU",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "7월 한국 증시의 급격한 하락 이후 SK하이닉스 상한가 등 일부 종목의 반등은 과도한 낙폭과 투심 개선에 기인하며, 추세적 반전을 위해서는 8월 QRA와 매크로 환경 안정이 필수적입니다.",
+        "summary": [
+          "7월은 한국 증시 역사상 최대 낙폭을 기록한 달 중 하나로, SK하이닉스 등 시가총액 상위 종목의 상한가는 이례적인 현상입니다.",
+          "오늘(7월 31일) 외국인은 7조 원 이상을 순매수하며, 과거 KOSPI 랠리를 이끌었던 외국인 순매수 규모를 상회했습니다.",
+          "SK하이닉스의 급등은 과도한 낙폭, 최태원 회장의 장내 매수, 그리고 실적 전망 하향 조정 철회 등 투심 개선 요인이 복합적으로 작용했습니다.",
+          "코스피 전체적으로 낙폭 과대 섹터(반도체, 전기장비, 통신장비)와 시가총액 1~10조 원 종목군에서 큰 폭의 하락이 발생했으며, 이들이 단기 반등을 주도했습니다.",
+          "삼성전자의 2027년 예상 PBR은 1배 수준으로 메모리 사이클 최악의 시기와 유사하며, 이는 주가가 저평가 영역에 진입했음을 시사합니다.",
+          "향후 추세적 반전을 위해서는 8월 초 미국 QRA(분기 국채 발행 계획) 발표에서 장기물 국채 발행 비중이 낮아지는 등 매크로 환경의 안정화가 중요합니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "7월 31일 이례적인 상한가를 기록하며 시장의 주목을 받았고, 이전까지 -50%의 급락을 겪었으며, 최태원 회장의 장내매수 및 실적 전망 상향 조정 등의 이슈가 있었습니다.",
+            "view": "긍정",
+            "t": 67
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "SK하이닉스와 함께 시장의 주도주로 언급되며, 2027년 예상 PBR이 1배 수준으로 역사적 저점 영역에 진입했다고 평가받았습니다.",
+            "view": "긍정",
+            "t": 530
+          },
+          {
+            "name": "삼성전기",
+            "ticker": "009150",
+            "context": "7월에 시가총액 10조 원 이상 종목 중 -57%의 가장 큰 낙폭을 기록한 종목으로 언급되었습니다.",
+            "view": "중립",
+            "t": 1000
+          },
+          {
+            "name": "LG이노텍",
+            "ticker": "011070",
+            "context": "7월에 시가총액 10조 원 이상 종목 중 -55%의 큰 낙폭을 기록한 종목으로 언급되었습니다.",
+            "view": "중립",
+            "t": 1010
+          },
+          {
+            "name": "SK스퀘어",
+            "ticker": "402340",
+            "context": "7월에 시가총액 10조 원 이상 종목 중 -53%의 큰 낙폭을 기록한 종목으로 언급되었습니다.",
+            "view": "중립",
+            "t": 1018
+          },
+          {
+            "name": "두산퓨어셀",
+            "ticker": "326290",
+            "context": "시가총액 1조원 이상 5조원 미만 종목 중 7월에 -66%의 가장 큰 낙폭을 기록했으며, 7월 31일 상한가를 기록했습니다.",
+            "view": "긍정",
+            "t": 1098
+          },
+          {
+            "name": "심텍",
+            "ticker": "222800",
+            "context": "시가총액 1조원 이상 5조원 미만 종목 중 7월에 -57%의 큰 낙폭을 기록했으며, 7월 31일 상한가를 기록했습니다.",
+            "view": "긍정",
+            "t": 1105
+          }
+        ],
+        "key_points": [
+          {
+            "point": "이례적인 대형주 폭등 및 외국인 순매수 규모는 시장의 단기 반등 기대감을 높이는 요인입니다.",
+            "t": 10
+          },
+          {
+            "point": "7월의 급격한 시장 하락은 펀더멘털 변화보다는 과도한 투매와 심리적 요인이 크게 작용했습니다.",
+            "t": 680
+          },
+          {
+            "point": "SK하이닉스의 실적 전망 하향 조정 철회와 같은 뉴스는 시장 심리 개선에 중요한 역할을 했습니다.",
+            "t": 1270
+          },
+          {
+            "point": "8월 초 발표될 미국 QRA(분기 국채 발행 계획)의 만기 구성이 장기 금리 안정과 시장 방향성에 중요한 변수가 될 것입니다.",
+            "t": 2330
+          },
+          {
+            "point": "과도한 레버리지 투자의 위험성이 7월 시장에서 여실히 드러났으며, 향후 포트폴리오 분산의 중요성이 강조됩니다.",
+            "t": 2130
+          }
+        ],
+        "actionable": [
+          "다음 주 발표될 미국 QRA(분기 국채 발행 계획)의 만기 구성(장기채 비중)을 면밀히 모니터링하여 장기 금리 추이와 시장에 미칠 영향을 예측하세요.",
+          "과도하게 하락하여 밸류에이션 매력이 생긴 섹터나 종목에 대해 분석하고, 하반기 시장 변동성 축소 시 분할 매수 기회를 탐색하세요.",
+          "포트폴리오 내 레버리지 비중을 점검하고, 예상치 못한 시장 충격에 대비하여 적절한 분산 투자를 유지하는 것이 중요합니다."
+        ]
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-01T00:52:15.804967+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-08-01T03:10:48.989519+09:00"
     },
     {
       "video_id": "FR7A0eQt2VE",
@@ -13120,5 +13201,5 @@
       "analyzed_at": "2026-07-23T17:06:05.933389+09:00"
     }
   ],
-  "updated": "2026-08-01T00:53:22.401640+09:00"
+  "updated": "2026-08-01T03:11:26.869621+09:00"
 }
