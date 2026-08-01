@@ -1,6 +1,119 @@
 {
   "items": [
     {
+      "video_id": "eS_NiaY-x8g",
+      "title": "스타십 완성되는 순간 진짜 무서운 일이 시작된다 / 정의훈 연구원 [성공예감 별책부록]",
+      "channel": "와이스트릿",
+      "published": "2026-08-01T00:00:09+00:00",
+      "url": "https://www.youtube.com/watch?v=eS_NiaY-x8g",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-01T13:08:59.540312+09:00"
+    },
+    {
+      "video_id": "-oBH7q6GFSk",
+      "title": "이 영상을 보고 나면 멸망할 때까지 싸우려는 이란이 이해될 겁니다 / 조한범 박사 (1부)",
+      "channel": "와이스트릿",
+      "published": "2026-08-01T03:00:02+00:00",
+      "url": "https://www.youtube.com/watch?v=-oBH7q6GFSk",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-01T13:08:27.265725+09:00"
+    },
+    {
+      "video_id": "2g9ib8BFdOo",
+      "title": "'SK하이닉스 상한가 돌파' 가 의미하는 것  | 빈센트 하나증권 애널리스트 [주말인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-08-01T02:00:37+00:00",
+      "url": "https://www.youtube.com/watch?v=2g9ib8BFdOo",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-01T13:07:37.903148+09:00"
+    },
+    {
+      "video_id": "_iPllh9756Q",
+      "title": "화투판에서 딸 자신 있나요? #박세익#폭락",
+      "channel": "체슬리TV",
+      "published": "2026-08-01T00:30:01+00:00",
+      "url": "https://www.youtube.com/watch?v=_iPllh9756Q",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "레버리지를 활용한 투기 시장에서는 극소수의 고수만이 수익을 내며, 대부분의 투자자는 손실을 본다는 경고성 메시지입니다.",
+        "summary": [
+          "레버리지를 이용한 투기 시장에서는 돈을 잃는 투자자가 압도적으로 많습니다. [00:01]",
+          "외환, 유가선물 등 모든 투기 시장에는 0.1% 미만의 극소수 고수('타짜')만이 존재합니다. [00:10]",
+          "통계적으로 3배 레버리지를 사용하는 시장에서는 99.9%의 투자자가 돈을 잃습니다. [00:29]",
+          "화자는 대부분의 투자자들이 입을 손실에 대한 우려를 표합니다. [00:22]",
+          "이러한 시장은 소수의 고수가 이익을 얻기 위해 계속 열려 있는 구조임을 암시합니다. [00:37]"
+        ],
+        "tickers": [],
+        "key_points": [
+          {
+            "point": "레버리지 투기 시장은 통계적으로 99.9%가 손실을 보는 극도로 위험한 곳입니다. [00:29]",
+            "t": 29
+          },
+          {
+            "point": "이 시장에서 꾸준히 수익을 올리는 '고수'는 0.1%에 불과하며, 대다수는 손실을 경험합니다. [00:29]",
+            "t": 29
+          }
+        ],
+        "actionable": [
+          "레버리지를 사용한 투기적 투자에 극도로 신중해야 합니다.",
+          "투기 시장에 참여하기 전에 압도적인 손실 가능성을 인지하고, 본인의 투자 성향과 위험 감수 능력을 철저히 평가해야 합니다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-01T13:07:05.115542+09:00"
+    },
+    {
+      "video_id": "ZxzUOP7zud0",
+      "title": "[하이라이트] SK 최태원 회장의 승부수 | 박세익 전무 & 체슬리 학습부장 [별주부전 / 26.07.25.토]",
+      "channel": "체슬리TV",
+      "published": "2026-08-01T03:16:04+00:00",
+      "url": "https://www.youtube.com/watch?v=ZxzUOP7zud0",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"SK그룹은 최태원 회장의 비전 아래 자체 AI 데이터센터(AIDC) 구축을 통해 비용 절감, B2B 인프라 임대, GPU 구독 서비스, 턴키 수출 등 구글의 풀스택 AI 전략을 모방하여 반도체 중심의 수익 구조를 다변화하고 글로벌 AI 인프라 시장에서 리더십을 확보하려 한다.\",\n  \"summary\": [\n    \"SK그룹은 최태원 회장의 비전 아래 2035년까지 15 GW 규모의 AI 데이터센터(AIDC)를 구축하여 글로벌 AI 인프라 허브를 목표로 한다.\",\n    \"이 전략은 구글의 풀스택 AI 모델을 벤치마킹하여 SK하이닉스의 HBM, SK엔무브의 액침 냉각, SK에코플랜트의 연료전지 등 계열사 역량을 결집해 전력 및 냉각 비용을 최소화한다.\",\n    \"수익 모델은 글로벌 하이퍼스케일러 대상 장기 인프라 임대, GPU 구독 서비스, 국내외 B2B/공공 시장 진출, 그리고 중동 및 동남아시아 지역에 AI 데이"
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-01T13:06:26.871867+09:00"
+    },
+    {
       "video_id": "upbgaeRCfn8",
       "title": "폭락 때 돈 버는 유일한 방법 #이형수 #주식 #시장 #투자 #폭락장 #급락장 #변동성",
       "channel": "와이스트릿",
@@ -13169,152 +13282,7 @@
       "source": "video",
       "attempts": 4,
       "analyzed_at": "2026-07-24T02:14:03.624170+09:00"
-    },
-    {
-      "video_id": "mUBcgB1jVRM",
-      "title": "이제 물린 주식 만회 할 기회입니다 #박세익 #주식",
-      "channel": "체슬리TV",
-      "published": "2026-07-23T08:25:42+00:00",
-      "url": "https://www.youtube.com/watch?v=mUBcgB1jVRM",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "자산 가격이 매력적인 수준으로 변화하여, 물린 주식을 만회할 절호의 기회가 찾아왔습니다.",
-        "summary": [
-          "진정한 프로는 실수를 하지 않는 것이 아니라, 실수를 효과적으로 만회(회복)하는 능력이 뛰어납니다. [0:27]",
-          "현재 자산 가격이 매우 매력적인 수준으로 변화하여, 물려있는 주식을 만회할 절호의 기회입니다. [0:35]",
-          "이러한 매력적인 가격 형성은 현 시점에서 가장 큰 호재이므로, 잘 대응하여 성공적인 회복을 이루어야 합니다. [0:40]"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "실수가 아닌 실수 회복 능력이 진정한 프로의 가장 큰 강점이며, 이는 투자에서도 마찬가지입니다. [0:27]",
-            "t": 27
-          },
-          {
-            "point": "현재 자산 가격이 매우 매력적인 수준으로 전환되어 있으며, 이는 과거의 손실을 만회할 수 있는 강력한 호재입니다. [0:35]",
-            "t": 35
-          }
-        ],
-        "actionable": [
-          "매력적인 자산 가격 형성 기회를 적극적으로 활용하여 물린 주식을 만회할 전략을 수립하십시오. [0:35]",
-          "투자 과정에서 실수가 발생할 경우를 대비하여, 효과적으로 회복(리커버리)할 수 있는 대응 방안을 미리 고려하십시오. [0:29]"
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-23T19:52:11.635594+09:00"
-    },
-    {
-      "video_id": "K13HWMnYdJg",
-      "title": "[하이라이트] 매수 매도가 부딪치면서 변동성이 있을겁니다 | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.23.목]",
-      "channel": "체슬리TV",
-      "published": "2026-07-23T10:00:00+00:00",
-      "url": "https://www.youtube.com/watch?v=K13HWMnYdJg",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "시장은 단기간 급락 후 반등을 모색 중이나 V자 회복은 어려우며, 매물 소화 과정에서 변동성이 예상됩니다. 투자자는 기준을 세우고 장기적인 안목으로 실적 기반의 기회를 찾아야 합니다.",
-        "summary": [
-          "수요일 이후 시장은 급락 후 반등을 시도하고 있지만, V자 반등보다는 매도-매수가 부딪히며 변동성이 지속될 것으로 보입니다.",
-          "투자 시 정보의 부족보다는 명확한 '기준'이 없는 것이 더 큰 문제이며, 한 명의 멘토를 정하거나 자신만의 투자 원칙을 확립하고 갈고닦는 것이 중요합니다.",
-          "과거 이란 전쟁 당시에도 급락 후 약세장에서는 낙폭의 35%, 일반 시장에서는 63%까지 회복하는 경향이 있었으며, 현재 시장은 최소 7,300포인트, 최대 8,000포인트까지 반등 가능성이 있습니다.",
-          "중동 불안으로 인한 유가 및 금리 상승이 현재 시장 회복을 제약하고 있지만, 이들이 안정되면 주식 시장에 긍정적으로 작용할 것입니다.",
-          "반도체 종목이 2-3개월 내 전고점을 돌파하지 못하면, 그동안 반도체에 가려져 있던 다른 저평가된 '우산 주식'으로 관심이 이동할 것으로 전망됩니다.",
-          "차를 사는 것과 같은 소비성 지출이 아닌, 수익률(ROI)을 고려한 효율적인 재투자를 통해 자산을 증식하는 투자의 본질을 강조합니다."
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "단기간 급락한 시장은 V자 반등이 아닌 점진적 회복을 보일 것이며, 바닥 다지기 과정에서 매물 소화로 인한 변동성이 예상됩니다.",
-            "t": 47
-          },
-          {
-            "point": "투자 성공의 핵심은 정보의 양이 아니라 명확한 투자 '기준'을 세우고 꾸준히 연마하는 것입니다. (이소룡의 '하나의 발차기 만 번 연습' 비유)",
-            "t": 125
-          },
-          {
-            "point": "시장 낙폭을 고려할 때, 약세장 기준 30% 반등 시 약 7,300포인트, 50% 반등 시 8,000포인트까지 회복 가능성이 있습니다.",
-            "t": 605
-          },
-          {
-            "point": "현재 중동의 지정학적 불안정과 유가, 금리 상승이 증시 반등에 제약 요인으로 작용하고 있습니다.",
-            "t": 725
-          },
-          {
-            "point": "향후 2-3개월 내 반도체 종목이 전고점을 돌파하지 못할 경우, 상대적으로 저평가된 다른 섹터(우산 주식)로 자금 이동이 예상됩니다.",
-            "t": 742
-          },
-          {
-            "point": "개인 투자자는 돈을 벌고 재투자하는 과정에서 수익률(ROI)을 우선시하여 투자 결정을 내려야 합니다.",
-            "t": 1024
-          }
-        ],
-        "actionable": [
-          "자신만의 명확한 투자 기준 또는 신뢰할 수 있는 멘토를 설정하고 꾸준히 따르는 것에 집중하십시오.",
-          "2-3개월 내 반도체 종목의 전고점 돌파 여부를 관찰하고, 회복이 더딜 경우 저평가된 다른 우량주로의 포트폴리오 조정을 고려하십시오.",
-          "장기적인 관점에서 자산 증식을 위해 소비성 지출(예: 자동차 구매)보다는 효율적인 재투자를 우선순위에 두십시오."
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-07-23T22:12:52.784302+09:00"
-    },
-    {
-      "video_id": "4hddLabpjF4",
-      "title": "폭등한 SK이터닉스 이유가 있었네 #sk이터닉스 #sk이터닉스주가전망 #sk이터닉스분석 #에너지투자 #에너지전환 #권효재",
-      "channel": "와이스트릿",
-      "published": "2026-07-23T07:40:25+00:00",
-      "url": "https://www.youtube.com/watch?v=4hddLabpjF4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-24T00:46:36.030320+09:00"
-    },
-    {
-      "video_id": "_fiV9NJf2vY",
-      "title": "내 연금, 자녀 계좌라면! 다른 거 필요 없습니다 이거 딱 2개만 모으세요 / TIME 액티브 ETF [오해와 진실] / 두지영 과장",
-      "channel": "와이스트릿",
-      "published": "2026-07-23T08:00:13+00:00",
-      "url": "https://www.youtube.com/watch?v=_fiV9NJf2vY",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-24T00:46:03.682525+09:00"
-    },
-    {
-      "video_id": "cslzvo0iJsA",
-      "title": "지금 미국 투자, 어디에 집중해야 할까? | 박현지, 여도은, 허재무 [아침N투자]",
-      "channel": "삼프로TV",
-      "published": "2026-07-23T02:34:48+00:00",
-      "url": "https://www.youtube.com/watch?v=cslzvo0iJsA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-23T22:18:40.731859+09:00"
     }
   ],
-  "updated": "2026-08-01T08:41:58.135723+09:00"
+  "updated": "2026-08-01T13:09:00.540505+09:00"
 }
