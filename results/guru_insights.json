@@ -13,11 +13,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": false,\n  \"one_liner\": \"구약성경은 고대 근동의 신화와 문화로부터 다양한 영향을 받았지만, 이스라엘만의 독특한 신앙으로 그 요소들을 변형하고 재해석하여 발전시켰으며, 이러한 역사적 맥락을 이해하는 것이 성경을 더 깊이 이해하는 데 도움이 됩니다.\",\n  \"summary\": [\n    \"시즌 1은 고대 근동 3,000년의 역사를 이스라엘의 관점에서 개괄적으로 다루었으며, 시즌 2는 구약성경과 고대 근동 신화, 신들의 관계에 초점을 맞춰 구약성경의 배경사를 탐구합니다 (t:115).\",\n    \"구약성경이 고대 근동 문학에 영향을 받았다는 사실에 대해 일부 신자들은 믿음의 혼란을 겪지만, 이는 오히려 이스라엘의 독특한 신앙적 관점을 더욱 명확히 보여주는 기회가 될 수 있습니다 (t:309).\",\n    \"쐐기문자나 이집트 성각문자 해독이 19세기에 이루어지면서 고대 근동 문헌과 구약성경의 유사성이 드러났지만, 이러한 고대 문헌 연구는 인문학 "
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-02T16:19:34.427899+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-08-02T18:41:57.598084+09:00"
     },
     {
       "video_id": "sCpMK69FZnU",
@@ -27,17 +28,112 @@
       "url": "https://www.youtube.com/watch?v=sCpMK69FZnU",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"2026년 8월 기준 한국 증시(코스피, 코스닥)가 글로벌 증시와 디커플링되며 약세장으로 진입했으나, AI 모델 신호와 거시지표는 바닥권 반등 가능성을 시사합니다.\",\n  \"summary\": [\n    \"2026년 8월, 체슬리AI 진단에 따르면 코스피와 코스닥은 약세장으로 전환된 반면, S&P 500과 나스닥은 여전히 강세장을 유지하며 글로벌 증시 디커플링 현상을 보였습니다.\",\n    \"2008년 금융위기나 1987년 블랙 먼데이와 달리, 현재 미국 시장(S&P 500, 나스닥, 다우)은 고점 대비 안정적인 조정을 보이거나 신고가를 기록하며 구조적인 약세장과는 차이가 있다는 분석입니다.\",\n    \"필라델피아 반도체 지수(-22.8% 하락) 및 마이크론 테크놀로지(-34% 하락) 등 반도체 섹터가 크게 조정받았으나, 과도한 증설 없이 HBM 수요 증가에 대응하고 있어 긍정적 측면이 있습니다.\",\n    \"미국 1"
+        "one_liner": "한국 시장은 2008년 금융위기와 다른 양상이지만, KOSPI와 KOSDAQ은 8월 들어 약세장으로 전환되었으며, 체슬리 AI 도구는 일부 매수 신호를 보이고 있습니다.",
+        "summary": [
+          "[0:28] 변동성이 큰 시장에서는 수익 관리와 함께 위험 관리가 중요하며, 이는 월드컵에서 수비가 중요한 것과 유사합니다.",
+          "[1:24] 2008년 금융위기 당시 코스피는 급락했지만, 현재는 미국 투자은행의 대규모 손실 발표가 없어 구조적인 약세장은 아닙니다.",
+          "[5:07] 코스피 주봉 차트에서 긴 꼬리가 달린 캔들이 바닥 신호일 수 있으며, 과거 2024년 8월에도 비슷한 형태를 보였습니다.",
+          "[10:19] 미국 주요 지수(S&P 500, NASDAQ, Dow Jones)는 현재 안정적이거나 신고가를 기록 중이며, 과거 2008년처럼 크게 하락하지 않았습니다.",
+          "[15:03] 필라델피아 반도체 지수가 고점 대비 약 22.8% 하락했지만, 30% 하락 시 분할 매수 기회로 볼 수 있습니다.",
+          "[23:03] 체슬리 AI의 8월 주식 시장 진단에 따르면 코스피와 코스닥은 '약세장'으로 전환되었고, 외국인 선물옵션 포지션은 우상향으로 전환, 바실리 신호는 매수를 나타내고 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "코스피",
+            "ticker": "005930",
+            "context": "2008년 급락 당시 KOSPI가 5262pt까지 하락했고, 현재 8월 약세장으로 전환",
+            "view": "중립",
+            "t": 111
+          },
+          {
+            "name": "코스닥",
+            "ticker": "035720",
+            "context": "2008년 급락 당시 245pt에서 550pt로 반등",
+            "view": "중립",
+            "t": 554
+          },
+          {
+            "name": "S&P 500",
+            "ticker": "SPX",
+            "context": "고점 대비 -1.74%로 안정적",
+            "view": "긍정",
+            "t": 1052
+          },
+          {
+            "name": "NASDAQ",
+            "ticker": "NDX",
+            "context": "고점 대비 -6.69%로 안정적",
+            "view": "긍정",
+            "t": 1105
+          },
+          {
+            "name": "Dow Jones",
+            "ticker": "DJI",
+            "context": "신고가 기록 중",
+            "view": "긍정",
+            "t": 1115
+          },
+          {
+            "name": "마이크론",
+            "ticker": "MU",
+            "context": "최근 플러스 18.36% 상승하며 바닥을 다지는 모습",
+            "view": "긍정",
+            "t": 2004
+          },
+          {
+            "name": "필라델피아 반도체 지수",
+            "ticker": "SOX",
+            "context": "고점 대비 약 22.8% 하락, 30% 하락 시 분할 매수 기회",
+            "view": "중립",
+            "t": 1503
+          },
+          {
+            "name": "KODEX 200",
+            "ticker": "069500",
+            "context": "바실리 1(공격형) 신호가 매수를 나타냄",
+            "view": "긍정",
+            "t": 2400
+          }
+        ],
+        "key_points": [
+          {
+            "point": "시장 변동성이 커서 수익과 위험 관리가 중요합니다.",
+            "t": 28
+          },
+          {
+            "point": "현재 시장은 2008년 금융위기 당시와는 다른 성격의 하락입니다.",
+            "t": 124
+          },
+          {
+            "point": "주봉상 긴 꼬리 캔들은 바닥 신호로 해석될 수 있습니다.",
+            "t": 305
+          },
+          {
+            "point": "미국 주요 지수들은 현재 안정적이거나 상승세를 유지하고 있습니다.",
+            "t": 1052
+          },
+          {
+            "point": "RSI와 MACD 오실레이터는 아직 강력한 매도 신호를 보내지 않고 있습니다.",
+            "t": 1709
+          },
+          {
+            "point": "달러 인덱스의 약세는 한국 증시에 긍정적인 신호입니다.",
+            "t": 2145
+          },
+          {
+            "point": "체슬리 AI 진단에 따르면 8월 코스피와 코스닥은 약세장으로 전환되었지만, 외국인 선물옵션 포지션과 바실리 매수 신호가 관측됩니다.",
+            "t": 2303
+          }
+        ],
+        "actionable": [
+          "시장의 변동성을 인지하고, 수익과 위험 관리를 철저히 하세요.",
+          "필라델피아 반도체 지수 등 주요 반도체 관련 지수가 30% 이상 하락할 경우 분할 매수를 고려해 볼 수 있습니다.",
+          "월요일 밤에 공개될 '월간 전망' 영상을 참고하여 시장 전략을 세우세요."
+        ]
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-02T16:17:16.581218+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-02T18:38:36.262398+09:00"
     },
     {
       "video_id": "nvAaHTr-1d0",
@@ -52,11 +148,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-02T16:22:26.427200+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-02T18:43:55.720700+09:00"
     },
     {
       "video_id": "Xk7fhMfMBtk",
@@ -163,8 +259,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-02T16:19:57.339275+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-02T18:42:51.995405+09:00"
     },
     {
       "video_id": "iGOG3QZtGy4",
@@ -389,11 +485,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-02T16:20:18.681081+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-02T18:43:23.745619+09:00"
     },
     {
       "video_id": "gdTofoxj-FE",
@@ -13192,5 +13288,5 @@
       "analyzed_at": "2026-07-24T13:53:51.875053+09:00"
     }
   ],
-  "updated": "2026-08-02T16:22:27.427479+09:00"
+  "updated": "2026-08-02T18:43:56.720896+09:00"
 }
