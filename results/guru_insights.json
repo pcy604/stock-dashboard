@@ -1,6 +1,32 @@
 {
   "items": [
     {
+      "video_id": "M4IU7F-SYoU",
+      "title": "반도체주 폭등 속 다우·S&P500 사상 최고…스페이스X, 2분기 매출 11조 원_26.08.05 | 여도은, 박명석, 김효진 [월스트리트 모닝브리핑]",
+      "channel": "삼프로TV",
+      "published": "2026-08-04T20:24:22+00:00",
+      "url": "https://www.youtube.com/watch?v=M4IU7F-SYoU",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "반도체주 폭등 및 다우·S&P500 사상 최고치 경신 속 SpaceX의 2분기 매출 11조원 달성 소식을 전하는 월스트리트 모닝브리핑입니다.",
+        "summary": [],
+        "tickers": [
+          {
+            "name": "SpaceX",
+            "ticker": "",
+            "context": "2분기 매출 11조원 달성",
+            "view": "긍정",
+            "t": 0
+          }
+        ],
+        "key_points": [],
+        "actionable": []
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-05T05:53:34.965723+09:00"
+    },
+    {
       "video_id": "FxJ9qPhjDmg",
       "title": "기존 주도주는 돌아오지 않는다? 삼전닉스 이후를 준비할 때ㅣ명민준, 박가영, 황유현 [주린이 구조대]",
       "channel": "삼프로TV",
@@ -13182,26 +13208,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-27T18:00:04.326520+09:00"
-    },
-    {
-      "video_id": "krt44ow_3YQ",
-      "title": "주식으로 돈 잃는 사람들이 흔히 하는 결정적 실수 | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.27.월]",
-      "channel": "체슬리TV",
-      "published": "2026-07-27T07:43:27+00:00",
-      "url": "https://www.youtube.com/watch?v=krt44ow_3YQ",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-28T03:11:20.556812+09:00"
     }
   ],
-  "updated": "2026-08-05T04:10:54.487460+09:00"
+  "updated": "2026-08-05T05:53:36.363576+09:00"
 }
