@@ -1,6 +1,138 @@
 {
   "items": [
     {
+      "video_id": "ftsAECXnuDE",
+      "title": "고금리 무릅쓰고 AI 투자 늘리는 빅테크…반도체 조정에도 수요는 꺾이지 않았다ㅣ김장열 유니스토리자산운용 리서치센터장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-08-04T11:30:02+00:00",
+      "url": "https://www.youtube.com/watch?v=ftsAECXnuDE",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "AI 투자는 여전히 초기 단계이며, 하이퍼스케일러의 지속적인 CAPEX 확대와 장기 계약으로 인한 메모리 공급 부족 심화는 반도체 가격 결정력을 강화하고 클라우드 사업자의 수익성을 높여 주가에 긍정적입니다.",
+        "summary": [
+          "AI 투자는 인프라 구축 단계의 중반부에 불과하며, 미국 IT 하드웨어 투자 비중이 닷컴 버블 최고치보다 낮고 제조 PMI가 과열되지 않아 추가 성장 여력이 충분합니다.",
+          "시장의 초점이 '곡괭이'(하드웨어/인프라)에서 '응용 서비스'(AI 소프트웨어, 에이전트, 로보틱스)로 이동하며, AI 인프라 구축 이후 활용 분야의 성장이 기대됩니다.",
+          "빅테크 기업들은 AI 투자 확대를 위해 대규모 회사채 발행 등 자금 확보에 적극적이며, 이는 단기적인 FCF 부족이 아닌 장기적인 AI 수익성 확신에 기반한 합리적 자본 조달입니다.",
+          "메모리 공급은 이미 장기 계약(LTA)으로 상당 부분 예약되어 있으며, 공급 부족이 지속되면서 메모리 업체의 가격 결정력이 강화될 것으로 전망됩니다.",
+          "최근 SK하이닉스 등 반도체 인프라 공급망 기업들의 주가 조정은 단기적인 CAPEX 둔화 우려와 멀티플 조정 때문이지만, 장기적인 AI 수요 강세와 인프라 확대 전망을 고려할 때 억울한 하락이며 리밸류에이션 가능성이 있습니다.",
+          "Micron의 견조한 실적 발표와 긍정적인 가이던스, 주식 분할 결정은 AI 수요에 힘입은 메모리 시장의 긍정적인 추세를 뒷받침합니다."
+        ],
+        "tickers": [
+          {
+            "name": "GS 건설",
+            "ticker": "006360",
+            "context": "부동산 대책, 데이터센터 건설, 원전 수주 기대감 등으로 건설 업종이 8.9% 상승하며 시장을 선도했습니다.",
+            "view": "긍정",
+            "t": 26
+          },
+          {
+            "name": "대우건설",
+            "ticker": "047040",
+            "context": "부동산 대책, 데이터센터 건설, 원전 수주 기대감 등으로 건설 업종이 8.9% 상승하며 시장을 선도했습니다. 실적도 예상보다 좋게 나왔습니다.",
+            "view": "긍정",
+            "t": 26
+          },
+          {
+            "name": "DL이앤씨",
+            "ticker": "375500",
+            "context": "건설 업종 중 많이 올랐습니다.",
+            "view": "긍정",
+            "t": 39
+          },
+          {
+            "name": "SK텔레콤",
+            "ticker": "017670",
+            "context": "국가대표 AI 선정 평가 결과 발표 기대감과 관련 이슈로 상승했습니다.",
+            "view": "긍정",
+            "t": 435
+          },
+          {
+            "name": "LG CNS",
+            "ticker": "064100",
+            "context": "SK텔레콤과 함께 국가대표 AI 관련 기대로 9% 상승했습니다.",
+            "view": "긍정",
+            "t": 510
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "HBM, 플래시 메모리 등 AI 인프라 관련 기업으로, 과도한 하락 후 재평가될 여지가 있습니다.",
+            "view": "긍정",
+            "t": 615
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "SK하이닉스와 유사하게 AI 인프라 관련 기업으로, 과도한 하락 후 재평가될 여지가 있습니다.",
+            "view": "긍정",
+            "t": 730
+          },
+          {
+            "name": "Microsoft",
+            "ticker": "MSFT",
+            "context": "Azure 성장 가속화 및 Copilot 서비스 매출 확대로 AI 투자 회수를 확인했습니다.",
+            "view": "긍정",
+            "t": 3490
+          },
+          {
+            "name": "Amazon",
+            "ticker": "AMZN",
+            "context": "AWS 성장률이 예상보다 강했고 AI 수요가 실제 매출로 연결되면서 AI 투자 회수를 확인했습니다.",
+            "view": "긍정",
+            "t": 3514
+          },
+          {
+            "name": "Oracle",
+            "ticker": "ORCL",
+            "context": "대규모 수주 잔고와 클라우드 수익화가 확인되며 AI 투자 회수를 확인했습니다.",
+            "view": "긍정",
+            "t": 3524
+          },
+          {
+            "name": "Micron",
+            "ticker": "MU",
+            "context": "견조한 실적 발표와 긍정적인 가이던스, 주식 분할 결정으로 주가가 상승했습니다.",
+            "view": "긍정",
+            "t": 2520
+          }
+        ],
+        "key_points": [
+          {
+            "point": "건설 업종(GS건설, 대우건설 등)이 부동산 대책, 데이터센터 건설, 원전 수주 기대감 등으로 오늘 시장에서 8.9% 상승하며 가장 큰 폭의 상승률을 기록했습니다.",
+            "t": 26
+          },
+          {
+            "point": "AI 투자는 인프라 구축 단계의 중반부에 불과하며, GDP 대비 IT 하드웨어 투자 비중이나 제조 PMI 지표를 볼 때 과열 상태가 아니어서 추가적인 성장 여력이 충분합니다.",
+            "t": 1025
+          },
+          {
+            "point": "AI 인프라(데이터센터, GPU 등) 구축 이후에는 AI 소프트웨어, 에이전트, 로보틱스, 자동화 등 AI를 활용하는 산업이 더욱 크게 성장할 가능성이 있습니다.",
+            "t": 1100
+          },
+          {
+            "point": "빅테크 기업들의 AI 투자 확대를 위한 대규모 회사채 발행은 단기적인 FCF 부족이 아닌, AI 투자 수익률이 차입 금리보다 높다는 판단에 따른 합리적인 자본 조달 행위로 해석됩니다.",
+            "t": 1730
+          },
+          {
+            "point": "메모리 공급은 이미 장기 계약(LTA)으로 상당 부분 예약되어 있으며, 공급 부족이 지속되면서 메모리 업체의 가격 결정력이 강화될 것으로 전망됩니다.",
+            "t": 2150
+          },
+          {
+            "point": "최근 SK하이닉스 등 반도체 인프라 공급망 기업들의 주가 조정은 단기적인 CAPEX 둔화 우려와 멀티플 조정 때문이지만, 장기적인 AI 수요 강세와 인프라 확대 전망을 고려할 때 억울한 하락이며 리밸류에이션 가능성이 있습니다.",
+            "t": 2320
+          }
+        ],
+        "actionable": [
+          "AI 인프라 관련 하드웨어/장비 기업들과 더불어 AI 소프트웨어, 서비스, 로보틱스 등 AI 활용 산업의 성장성에 주목하십시오.",
+          "빅테크 기업들의 CAPEX 확대와 장기 계약 동향을 면밀히 관찰하여, 메모리 공급 부족 지속 및 가격 결정력 강화 여부를 확인하십시오.",
+          "과도하게 하락한 국내 반도체 관련 기업들의 밸류에이션을 재검토하고, 실적 개선 및 AI 수요 지속에 따른 리밸류에이션 가능성을 고려하십시오."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-04T21:35:01.758416+09:00"
+    },
+    {
       "video_id": "rujimNYPpQs",
       "title": "이제 미국 ETF 못 산다! ISA에 울타리를 쳐버렸네요 / [ETF 저TF EP.25]",
       "channel": "와이스트릿",
@@ -16,8 +148,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T19:34:00.580848+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-04T21:37:33.894161+09:00"
     },
     {
       "video_id": "TSkBEVPnBb8",
@@ -35,8 +167,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T19:33:28.371111+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-04T21:37:01.711373+09:00"
     },
     {
       "video_id": "3EG8okO5yVk",
@@ -54,8 +186,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T19:32:56.016307+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-04T21:36:29.249044+09:00"
     },
     {
       "video_id": "prrBYlmS3J0",
@@ -70,11 +202,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"주식 투자의 최종 단계는 시장을 예측하려는 괴로움에서 벗어나 유동성의 힘과 장기 투자를 믿는 '기도'의 자세로 임하는 것이라는 유머러스한 제안입니다.\",\n  \"summary\": [\n    \"코스피와 코스닥 투자자들이 시장의 변동성과 예측 불확실성으로 인해 오랫동안 고통받고 있음을 표현합니다. (5)\",\n    \"주식 시장은 결국 투자자들의 기대와 실망이 만들어내는 심리적인 차트라는 점을 강조합니다. (10)\",\n    \"미국 시장과 국내 시장의 비동조화 등 계속해서 시장을 예측하려는 시도가 투자자들에게 큰 괴로움을 안겨주고 있다고 말합니다. (24)\",\n    \"단기적인 변동성의 파도를 벗어나 '오션뷰 테라스'에 앉아 장기 투자할 수 있는 좋은 종목에 투자하는 자세를 가져야 한다고 조언합니다. (34)\",\n    \"결국 주식은 '유동성'의 힘으로 움직이며, 이를 믿고 성공적인 장기 투자를 기원하는 '롱멘'으로 기도를"
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T19:30:30.464582+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-08-04T21:35:57.008700+09:00"
     },
     {
       "video_id": "QU_k-8LU2JM",
@@ -92,8 +225,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T19:29:58.300861+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-04T21:35:27.886136+09:00"
     },
     {
       "video_id": "EdI7nnuTwzU",
@@ -482,17 +615,68 @@
       "url": "https://www.youtube.com/watch?v=Nc68cob2HzQ",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"한국 주식 시장의 순환적 특성을 이해하고 자신의 투자 심리를 파악하여(지피지기) 장기 생존과 수익을 위한 전략적 의사결정을 강조한다.\",\n  \"summary\": [\n    \"한국 주식 시장은 뚜렷한 사계절과 같은 순환적 특성을 가지고 있어, '여름에 밀짚모자를 팔고 겨울에 사는' 전략처럼 시기에 맞는 투자 접근이 필요하다.\",\n    \"투자자들은 종종 탐욕과 공포에 휩쓸려 (FOMO, '밀짚모자' 심리) 비합리적인 의사결정을 반복하며, 이는 조지 소로스의 '재귀성 이론'이나 케인즈의 '야성적 충동'으로 설명될 수 있다.\",\n    \"시장의 현상뿐만 아니라 자기 자신의 투자 행동 패턴과 오류를 이해하는 것('지피지기')이 반복적인 실수를 줄이고 장기적으로 성공하는 데 필수적이다.\",\n    \"근본적으로 좋은 기업(예: SK하이닉스, 팔란티어)은 단기 변동성과 적자를 겪더라도 결국 우상향하는 경향이 있어, 시장의 '홍수"
+        "one_liner": "한국 증시의 계절성, 투자자 심리, 파생시장 동향 및 산업 사이클을 이해하여 장기 투자 전략을 수립하고 실수를 줄이는 것이 중요하다.",
+        "summary": [
+          "체슬리투자자문의 '한중미 포커스' 펀드는 현재 삼성증권에서 독점 판매 중이며, 향후 KB증권 퇴직연금 계좌에서도 가입 가능할 예정이다.",
+          "한국 주식 시장은 사계절과 같은 강한 계절적, 경기적 사이클을 가지므로 '겨울에 사고 여름에 파는' 전략적 접근이 필요하다.",
+          "투자자들은 FOMO나 야성적 충동 같은 행동경제학적 편향에 쉽게 영향을 받으므로, 투자 일기를 쓰고 자신의 실수를 인지하여 반복하지 않는 것이 중요하다.",
+          "외국인 투자자들은 파생상품 시장의 유동성을 활용해 주식 시장의 변동성을 조작할 수 있으므로, 국내 기관투자자들의 적극적인 대응과 개인투자자들의 학습이 요구된다.",
+          "SK하이닉스와 같은 장치산업 중심의 기업들은 이익 변동성이 커서 P/E 비율만으로는 적정 가치 판단이 어려우며, 산업 구조 변화로 '홍수'가 오지 않는다면 장기 보유 전략이 필요할 수 있다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "반도체 산업의 사이클성과 P/E 비율의 역설을 설명하는 예시",
+            "view": "중립",
+            "t": 3241
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "반도체 산업의 사이클성과 P/E 비율의 역설을 설명하는 예시",
+            "view": "중립",
+            "t": 3241
+          },
+          {
+            "name": "팔란티어",
+            "ticker": "PLTR",
+            "context": "높은 영업이익률을 가진 '좋은 땅' 기업의 예시",
+            "view": "긍정",
+            "t": 3322
+          }
+        ],
+        "key_points": [
+          {
+            "point": "한국 주식 시장의 강한 계절성 및 사이클성 이해의 중요성 강조. 사계절에 비유하여 시장의 상승과 하락에 대응하는 전략 필요성 제시.",
+            "t": 503
+          },
+          {
+            "point": "투자자의 행동경제학적 오류(FOMO, 야성적 충동)가 시장에 미치는 영향 설명 및 이를 극복하기 위한 자기 분석(투자 일기)의 중요성 역설.",
+            "t": 1029
+          },
+          {
+            "point": "파생시장에서 외국인 투자자들의 전략적 매도와 국내 개인투자자들의 높은 거래 비중이 시장 변동성을 증폭시키는 현상 분석.",
+            "t": 1849
+          },
+          {
+            "point": "장치산업 기업의 이익 변동성으로 인한 P/E 비율의 착시 현상 설명 및 '좋은 땅' 비유를 통해 근본적인 가치와 산업 구조 변화에 기반한 장기 투자 관점 제시.",
+            "t": 3241
+          },
+          {
+            "point": "시장 지표뿐만 아니라 '나 자신'에 대한 이해(지피지기)를 통해 반복되는 투자 실수를 줄이는 것이 성공적인 투자의 핵심임을 강조.",
+            "t": 2926
+          }
+        ],
+        "actionable": [
+          "체슬리투자자문의 '한중미 포커스' 펀드 가입에 관심 있다면 삼성증권(현재) 및 KB증권(향후)의 자문 서비스를 확인한다.",
+          "자신의 투자 판단 과정과 감정 상태를 기록하는 '투자 일기'를 작성하여 행동 편향을 인식하고 투자 의사결정 시 실수를 줄이도록 노력한다.",
+          "사이클 산업에 투자할 때는 단기적인 시세나 P/E 비율보다 기업의 본질 가치와 산업의 장기적인 변화(진입 장벽, 독점적 지위 등)를 면밀히 분석하여 전략을 수립한다."
+        ]
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T19:22:40.266809+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-04T21:31:37.171102+09:00"
     },
     {
       "video_id": "Uvn0Qs09m2A",
@@ -613,8 +797,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-04T19:35:05.155436+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-04T21:38:38.479831+09:00"
     },
     {
       "video_id": "0ltEqN7Oayo",
@@ -672,8 +856,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-04T19:34:32.837478+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-04T21:38:06.252833+09:00"
     },
     {
       "video_id": "BQR6H2nURss",
@@ -12844,26 +13028,7 @@
       "source": "fail",
       "attempts": 3,
       "analyzed_at": "2026-07-27T21:51:21.570039+09:00"
-    },
-    {
-      "video_id": "XmAtm6L7c6c",
-      "title": "반도체 제일 걱정인 부분은 '이 부분' 입니다 | 상지대학교 소현철 외래교수 [더블 업]",
-      "channel": "삼프로TV",
-      "published": "2026-07-27T02:27:26+00:00",
-      "url": "https://www.youtube.com/watch?v=XmAtm6L7c6c",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-27T21:50:16.464830+09:00"
     }
   ],
-  "updated": "2026-08-04T19:35:06.155695+09:00"
+  "updated": "2026-08-04T21:38:39.480113+09:00"
 }
