@@ -324,8 +324,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-05T00:16:01.948661+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-05T02:19:09.232344+09:00"
     },
     {
       "video_id": "TSkBEVPnBb8",
@@ -335,16 +335,52 @@
       "url": "https://www.youtube.com/watch?v=TSkBEVPnBb8",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "반도체와 같은 사이클 산업 투자 시, 초기 가격(P)에 집중하기보다 장기적인 물량(Q)과 설비투자 확대를 예측하여 투자해야 함을 강조하는 분석입니다.",
+        "summary": [
+          "반도체와 같은 사이클 산업에서는 초기 공급 부족으로 가격(P)이 급등할 수 있지만, 이러한 가격 상승은 필연적으로 물량(Q) 급증과 설비 투자 확대로 이어집니다.",
+          "오랫동안 사이클 산업에 투자해 온 경험 많은 투자자들은 이러한 P에서 Q로의 변화 과정을 잘 이해하고 투자합니다.",
+          "문제는 최근 유튜브 등에서 주식을 배우며 단순히 주가 기술적 분석이나 단기 실적만을 쫓는 투자자들이 이 P에서 Q로 이어지는 필연적인 변화 프로세스를 이해하지 못한다는 것입니다.",
+          "어느 시점부터는 가격(P)이 아니라 물량(Q) 변화를 중심으로 산업을 분석하고, 선제적으로 설비 투자 수혜 기업을 파악해야 합니다.",
+          "이미 전 세계의 숙련된 투자자들은 가격(P)이 전부가 아님을 인지하고 있으며, 이들이 언제 포지션에서 빠져나갈지 고민하는 것이 중요합니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "반도체 대표 기업 중 하나로, 사이클 산업 투자 논의의 예시로 언급됨",
+            "view": "중립",
+            "t": 0
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "반도체 대표 기업 중 하나로, 사이클 산업 투자 논의의 예시로 언급됨",
+            "view": "중립",
+            "t": 0
+          }
+        ],
+        "key_points": [
+          {
+            "point": "사이클 산업 투자에서 가격(P) 상승은 필연적으로 물량(Q) 증가와 설비투자 확대로 이어진다는 점을 이해하는 것이 핵심입니다.",
+            "t": 6
+          },
+          {
+            "point": "숙련된 투자자는 가격 지표에만 얽매이지 않고, P에서 Q로의 변화를 예측하여 설비 투자 수혜주를 선별하는 프로세스를 따릅니다.",
+            "t": 13
+          },
+          {
+            "point": "단기적인 주가 기술이나 실적만을 좇는 방식에서 벗어나, 장기적인 산업 사이클의 변화 과정과 그에 따른 투자 기회를 파악해야 합니다.",
+            "t": 23
+          }
+        ],
+        "actionable": [
+          "반도체 등 사이클 산업 투자 시, 가격 변동에만 집중하지 않고 장기적인 관점에서 물량 확대와 설비 투자 수혜 기업을 분석하세요.",
+          "단순히 주가 차트나 단기 실적 예측에 의존하기보다, 산업 전반의 공급-수요 사이클 변화와 투자 유발 효과를 깊이 있게 학습해야 합니다."
+        ]
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-05T00:15:29.830916+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-08-05T02:18:36.728903+09:00"
     },
     {
       "video_id": "3EG8okO5yVk",
@@ -372,17 +408,38 @@
       "published": "2026-08-04T08:11:30+00:00",
       "url": "https://www.youtube.com/watch?v=prrBYlmS3J0",
       "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "relevant": false,
+        "one_liner": "주식 시장의 예측 불가능성과 투자자들의 고뇌를 '기도'라는 유머러스한 방식으로 표현하며 심리와 유동성의 중요성을 강조한다.",
+        "summary": [
+          "코스피와 코스닥 투자자들이 시장 변동성으로 인해 겪는 괴로움을 유머러스한 '기도' 형식으로 표현한다.",
+          "주식은 결국 호재와 악재에 대한 기대와 실망이 만드는 '심리'의 산물이라고 강조한다.",
+          "미장과 국장의 비동조화 현상 등 예측 불가능한 시장 상황에 대한 투자자들의 답답함을 대변한다.",
+          "변동성에서 벗어나 장기 투자할 수 있는 좋은 종목에 투자하기를 바라며 '유동성'의 힘을 언급한다."
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "key_points": [
+          {
+            "point": "주식 투자의 최종 단계는 예측이나 분석이 아닌 '기도'라는 유머러스한 접근을 통해 시장의 불확실성을 표현한다.",
+            "t": 0
+          },
+          {
+            "point": "주식 시장은 결국 심리와 기대, 실망이 만들어내는 것이며, 예측하려는 시도는 괴로움의 연속이라고 강조한다.",
+            "t": 9
+          },
+          {
+            "point": "시장의 변동성에서 벗어나 '오션뷰 테라스'에 앉아 장기 투자할 수 있는 종목을 찾아야 한다는 메시지를 전달한다.",
+            "t": 34
+          },
+          {
+            "point": "주식 시장에서 '유동성'이 매우 중요한 요소임을 언급하며, 모든 것을 유동성의 이름으로 마무리하는 유머를 선보인다.",
+            "t": 43
+          }
+        ],
+        "actionable": []
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-05T00:14:57.366948+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-08-05T02:18:04.224080+09:00"
     },
     {
       "video_id": "QU_k-8LU2JM",
@@ -400,8 +457,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-05T00:14:25.063839+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-05T02:17:30.623366+09:00"
     },
     {
       "video_id": "EdI7nnuTwzU",
@@ -13146,5 +13203,5 @@
       "analyzed_at": "2026-07-28T03:11:20.556812+09:00"
     }
   ],
-  "updated": "2026-08-05T00:16:35.380876+09:00"
+  "updated": "2026-08-05T02:19:10.232548+09:00"
 }
