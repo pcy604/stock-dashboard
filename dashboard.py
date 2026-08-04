@@ -671,73 +671,79 @@ with t_gain:
 
 # ── 주도주 (섹터/전체 상대강도) ──
 with t_lead:
-    _lv2 = load_json(Path('results/leaders_v2.json'))
-    if _lv2 and _lv2.get('all'):
-        _lm = _GMKT
-        _cr = _lv2.get('criteria', {})
-        st.caption("**주도주 지문**: ①이익 변곡(흑자전환/영익 YoY≥+100%, 공식 DART·EDGAR) ②RS≥85(12개월 수익률 백분위) "
-                   "③52주 신고가 -15% 이내 ④시총 상위(KR150·US300). "
-                   "TSLA 20-21 · NVDA 23-24 · PLTR 24-25 · 삼전닉스/MU 25-26 공통 패턴에서 역산.")
-
-        def _lrow(m):
-            _og = m.get('op_growth')
-            _ogs = _og if isinstance(_og, str) else (f"{_og:+.0f}%" if _og is not None else '?')
-            return {'시장': m['market'], '종목': m['name'], '코드': m['sym'],
-                    '시총': fmt_cap(m.get('marcap'), m['market']),
-                    'RS': m['rs'],
-                    '12개월': f"{m['ret_12m']:+.0f}%" if m.get('ret_12m') is not None else '-',
-                    '신고가': f"{m['dist_52w']:+.0f}%" if m.get('dist_52w') is not None else '?',
-                    '영익변곡': _ogs,
-                    '매출가속': ('✅' if m.get('rev_accel') else ('❌' if m.get('rev_accel') is False else '-')),
-                    '섹터': str(m.get('sector', '-'))[:14],
-                    '고점대비%': _mdd_col(m['sym'], _MDDM),
-                    '궤적': _traj_col(m['sym'], _traj_map()) if m['market'] == 'KR' else '-',
-                    '매력도': _attract_col(m['sym'], _ATTM)}
-
-        _f_all = [m for m in _lv2['all'] if _lm == "전체" or m['market'] == _lm]
-        _themes = [t for t in _lv2.get('themes', [])
-                   if _lm == "전체" or any(m['market'] == _lm for m in t['members'])]
-
-        if _themes:
-            st.markdown("##### 🔥 주도 테마 (같은 섹터 2개+ 통과 = 무리로 온다)")
-            for _t in _themes[:4]:
-                _mem = [m for m in _t['members'] if _lm == "전체" or m['market'] == _lm]
-                st.markdown(f"**[{_t['sector']}]** {len(_mem)}종목")
-                _tdf9 = pd.DataFrame([_lrow(m) for m in _mem])
-                st.dataframe(_tdf9, use_container_width=True, hide_index=True,
-                             row_height=25, height=_dfh(len(_tdf9)))
-
-        _pass = [m for m in _f_all if m.get('inflection') is True]
-        _unk = [m for m in _f_all if m.get('inflection') is None]
-        st.markdown(f"##### 🏆 주도주 — 지문 4개 전부 통과 {len(_pass)}개")
-        if _pass:
-            _ldf = pd.DataFrame([_lrow(m) for m in _pass])
-            st.dataframe(_ldf, use_container_width=True, hide_index=True,
-                         row_height=25, height=_dfh(len(_ldf)))
-        else:
-            st.info("현재 지문 전부 통과 종목 없음 — 기준이 엄격한 게 정상 (주도주는 드묾).")
-        if _unk:
-            with st.expander(f"⚠️ RS·신고가 통과 + 이익 데이터 미확인 {len(_unk)}개 (수동 확인 필요)", expanded=False):
-                _udf = pd.DataFrame([_lrow(m) for m in _unk])
-                st.dataframe(_udf, use_container_width=True, hide_index=True,
-                             row_height=25, height=_dfh(len(_udf)))
-        st.caption(f"생성: {_lv2.get('generated', '?')} · 매일 자동 갱신(daily-refresh). "
-                   "⚠️ 신규상장·스핀오프(BE·SNDK류)는 data/leaders_watch.txt에 추가하면 유니버스에 포함.")
+    # 주도주 검증판 — 미국 1,279종·2018~2026 백테스트 + 워크포워드로 확정한 규칙⑤
+    # (구 "주도주 지문" 로직은 2026-08-05 제거 — 신고가 −15% 이내·영익 YoY≥+100% 가 검증에서 기각됨)
+    # ── 검증판 (규칙⑤) — 미국 1,279종·8.6년 백테스트 + 워크포워드로 확정한 규칙 ──
+    _lsig = load_json(Path('results/leaders_signal.json'))
+    if not _lsig:
+        st.warning("주도주 신호 데이터 없음 → 로컬에서 `python leaders_publish.py` 실행 후 커밋.")
     else:
-        # 폴백: 구버전 로직
-        st.caption("주도주 v2 데이터 없음 → `python leaders_run.py` 실행 후 새로고침. (임시로 구버전 표시)")
-        try:
-            import leaders as _ld
-            _lr = _ld.find_leaders(_GMKT)
-            if _lr:
+        _bt = _lsig['backtest']
+        st.caption(
+            f"미국 1,279종·2018~2026 백테스트와 워크포워드 6분할로 확정한 규칙. "
+            f"*시장 필터(KR/US)와 무관하게 미국 전용이다.*  \n"
+            f"**진입** `{_lsig['rule']}`  \n"
+            f"**운용** {_lsig['exit']}  \n"
+            f"기준 주차 **{_lsig['signal_week']}** · 유니버스 {_lsig['universe']:,}종 · "
+            f"생성 {_lsig['generated']}")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("백테스트 CAGR", f"{_bt['cagr']}%", f"SPY {_bt['spy_cagr']}%")
+        c2.metric("MDD", f"{_bt['mdd']}%", f"SPY {_bt['spy_mdd']}%", delta_color="inverse")
+        c3.metric("회복배율", f"{_bt['recover']}", f"SPY {_bt['spy_recover']}")
+        c4.metric("워크포워드", _bt['wf_cagr'], f"회복배율 {_bt['wf_recover']}", delta_color="off")
+
+        st.markdown(f"**이번 주 후보 {_lsig['n']}종**")
+        if _lsig['candidates']:
+            st.dataframe(pd.DataFrame([{
+                '종목': m['name'][:22], '코드': m['sym'], '종가': f"${m['close']:,.2f}",
+                'RS13': m['rs_13w'], 'PSR': m['psr'],
+                'PER': ('-' if m['per'] is None else m['per']),
+                '신고가': f"{m['dist_52w']:+.1f}%",
+                'OPM': ('-' if m['opm'] is None else f"{m['opm']:.1f}%"),
+                'OPM QoQ': ('-' if m['opm_qoq'] is None else f"{m['opm_qoq']:+.1f}"),
+                '시총($B)': m['marcap_b'],
+                '트리거': ', '.join(m['triggers'])} for m in _lsig['candidates']]),
+                use_container_width=True, hide_index=True, row_height=25,
+                height=_dfh(len(_lsig['candidates'])))
+        else:
+            st.info("이번 주 조건 충족 종목 없음")
+
+        with st.expander("필터 단계별 잔존 · 기각된 조건"):
+            st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
+                         use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))
+            st.markdown("**검증에서 기각된 조건** (넣으면 오히려 성과가 나빠짐)")
+            for r in _bt['rejected']:
+                st.markdown(f"- ~~{r}~~")
+
+        _pp = _lsig.get('paper')
+        if _pp:
+            st.markdown(f"**📓 포워드 페이퍼 트레이딩** — 시작 {_pp['created']} · "
+                        f"갱신 {_pp.get('updated','-')} · 보유 {_pp['n_open']} / 청산 {_pp['n_closed']}")
+            if _pp['open']:
                 st.dataframe(pd.DataFrame([{
-                    '시장': m['market'], '종목': m['name'], '코드': m['sym'],
-                    '시총': fmt_cap(m.get('marcap'), m['market']),
-                    'RS': m['_rs'], '신호': ', '.join(m['signals'][:3])}
-                    for m in _lr['top']]),
-                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(20))
-        except Exception as _le:
-            st.error(f"주도주 오류: {_le}")
+                    '종목': t['sym'], '기록일': t['log_date'],
+                    '진입': f"${t['entry']:,.2f}", '고점': f"${t['peak']:,.2f}",
+                    '고점대비': f"{(t['entry']/t['peak']-1)*100:+.1f}%",
+                    'RS13': t['rs'], 'PSR': t['psr'],
+                    '트리거': ', '.join(t['triggers'])} for t in _pp['open']]),
+                    use_container_width=True, hide_index=True, row_height=25,
+                    height=_dfh(len(_pp['open'])))
+            if _pp.get('live'):
+                _lv = _pp['live']
+                st.dataframe(pd.DataFrame([
+                    {'지표': '평균 수익', '실전': f"{_lv['avg']:+.1f}%", '백테스트': f"{_bt['avg_ret']:+.1f}%"},
+                    {'지표': '중앙 수익', '실전': f"{_lv['med']:+.1f}%", '백테스트': f"{_bt['med_ret']:+.1f}%"},
+                    {'지표': '승률', '실전': f"{_lv['winrate']:.0f}%", '백테스트': f"{_bt['winrate']:.0f}%"},
+                    {'지표': '평균 보유', '실전': f"{_lv['hold_wk']:.0f}주", '백테스트': f"{_bt['hold_wk']}주"}]),
+                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))
+            else:
+                st.caption(f"청산 거래가 없어 대조 불가. 백테스트 기대값 — "
+                           f"평균 {_bt['avg_ret']:+.1f}% · 중앙 {_bt['med_ret']:+.1f}% · "
+                           f"승률 {_bt['winrate']:.0f}% · 손익비 {_bt['payoff']}")
+        st.caption(
+            f"⚠️ {_bt['period']} 백테스트. 생존편향(상폐 미포함)·인샘플 규칙선택이 있어 낙관적이며, "
+            f"워크포워드는 CAGR {_bt['wf_cagr']}·회복배율 {_bt['wf_recover']}로 **절반은 SPY에 진다**. "
+            f"조건 충족 종목의 기계적 출력이며 매수 권유가 아님.")
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──

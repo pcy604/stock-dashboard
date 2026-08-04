@@ -1,0 +1,513 @@
+<title>주도주 탐지 연구 — 프로젝트 카드덱</title>
+
+<style>
+:root{
+  --paper:#eceef2; --card:#fcfcfb; --card2:#f3f5f8;
+  --ink:#12161d; --ink2:#3a4250; --mut:#68727f; --line:#d5dae2;
+  --up:#c0392b; --dn:#2c6fb0; --gold:#8a6a12; --goldbg:#f7f0da;
+  --ok:#2c6b3a; --okbg:#e3efe6; --no:#9c322a; --nobg:#f8e3e1;
+  --warn:#8a5a10; --warnbg:#faefd9;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --sans:"Pretendard","Malgun Gothic",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --sh:0 1px 2px rgba(18,22,29,.06),0 10px 26px -16px rgba(18,22,29,.25);
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#0b0f15; --card:#151b23; --card2:#1c232d;
+  --ink:#e4e9f0; --ink2:#b5bfcc; --mut:#828e9d; --line:#293240;
+  --up:#e06b62; --dn:#4a8fd0; --gold:#c9a13c; --goldbg:#2a2417;
+  --ok:#7fc294; --okbg:#1b2c22; --no:#e08a80; --nobg:#2e1d1c;
+  --warn:#d8a851; --warnbg:#2b2415;
+  --sh:0 1px 2px rgba(0,0,0,.4),0 12px 30px -18px rgba(0,0,0,.75);
+}}
+:root[data-theme="dark"]{
+  --paper:#0b0f15; --card:#151b23; --card2:#1c232d;
+  --ink:#e4e9f0; --ink2:#b5bfcc; --mut:#828e9d; --line:#293240;
+  --up:#e06b62; --dn:#4a8fd0; --gold:#c9a13c; --goldbg:#2a2417;
+  --ok:#7fc294; --okbg:#1b2c22; --no:#e08a80; --nobg:#2e1d1c;
+  --warn:#d8a851; --warnbg:#2b2415;
+  --sh:0 1px 2px rgba(0,0,0,.4),0 12px 30px -18px rgba(0,0,0,.75);
+}
+:root[data-theme="light"]{
+  --paper:#eceef2; --card:#fcfcfb; --card2:#f3f5f8;
+  --ink:#12161d; --ink2:#3a4250; --mut:#68727f; --line:#d5dae2;
+  --up:#c0392b; --dn:#2c6fb0; --gold:#8a6a12; --goldbg:#f7f0da;
+  --ok:#2c6b3a; --okbg:#e3efe6; --no:#9c322a; --nobg:#f8e3e1;
+  --warn:#8a5a10; --warnbg:#faefd9;
+  --sh:0 1px 2px rgba(18,22,29,.06),0 10px 26px -16px rgba(18,22,29,.25);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:840px;margin:0 auto;padding:0 16px 70px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+
+/* 헤더 */
+.top{padding:38px 0 18px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);font-weight:700}
+.top h1{font-size:clamp(26px,6vw,40px);font-weight:800;letter-spacing:-.028em;
+  line-height:1.1;margin:10px 0 10px}
+.top p{color:var(--ink2);margin:0;max-width:60ch}
+.topmeta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;
+  font-family:var(--mono);font-size:11.5px;color:var(--mut)}
+.topmeta b{color:var(--ink2)}
+
+/* 네비 */
+.nav{position:sticky;top:0;z-index:30;background:var(--paper);padding:10px 0;
+  border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;
+  scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{flex:0 0 auto;font-family:var(--mono);font-size:11.5px;font-weight:600;
+  padding:5px 11px;border:1px solid var(--line);border-radius:999px;
+  color:var(--ink2);text-decoration:none;background:var(--card);white-space:nowrap}
+.nav a:hover{border-color:var(--mut)}
+.nav a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* 카드 */
+.deck{display:flex;flex-direction:column;gap:16px;margin-top:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;
+  box-shadow:var(--sh);padding:18px 18px 16px;scroll-margin-top:56px}
+.chead{display:flex;justify-content:space-between;align-items:flex-start;
+  gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line);
+  margin-bottom:13px}
+.ctitle{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.cnum{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--card);
+  background:var(--ink);padding:2px 7px;border-radius:3px}
+.card h2{font-size:17.5px;font-weight:700;letter-spacing:-.02em}
+.cmeta{font-family:var(--mono);font-size:10.5px;color:var(--mut);white-space:nowrap}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;padding:3px 8px;
+  border-radius:3px;white-space:nowrap}
+.b-go{background:var(--okbg);color:var(--ok)}
+.b-hold{background:var(--warnbg);color:var(--warn)}
+.b-stop{background:var(--nobg);color:var(--no)}
+
+/* 공통 요소 */
+.kv{display:flex;flex-direction:column;gap:7px;margin:0}
+.kv>div{display:flex;gap:12px;align-items:baseline}
+.kv dt{flex:0 0 92px;color:var(--mut);font-size:13px}
+.kv dd{margin:0;flex:1;color:var(--ink)}
+.tblwrap{overflow-x:auto;margin:2px -4px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:400px}
+th,td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut);font-weight:700}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.up{color:var(--up);font-weight:600} .dn{color:var(--dn);font-weight:600}
+.mut{color:var(--mut)}
+.q{font-family:var(--mono);font-size:12px;color:var(--warn);
+  background:var(--warnbg);padding:1px 6px;border-radius:3px;white-space:nowrap}
+
+/* 지표 타일 */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px}
+.tile{background:var(--card2);border-radius:5px;padding:11px 12px}
+.tile .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut);font-weight:700}
+.tile .v{font-family:var(--mono);font-size:22px;font-weight:700;
+  letter-spacing:-.02em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.tile .s{font-size:11.5px;color:var(--mut)}
+
+/* 차트 */
+figure{margin:6px 0 2px}
+figcaption{font-size:12px;color:var(--mut);margin-bottom:8px}
+.bars{display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:12px}
+.brow{display:grid;grid-template-columns:44px 1fr 62px;align-items:center;gap:8px}
+.btrack{position:relative;height:19px;background:var(--card2);border-radius:3px}
+.bmid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+.bfill{position:absolute;top:2px;bottom:2px;border-radius:3px}
+.bfill.pos{background:var(--up)} .bfill.neg{background:var(--dn)}
+.bval{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-top:9px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;
+  margin-right:5px;vertical-align:-1px}
+
+/* SWOT */
+.swot{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media (max-width:560px){.swot{grid-template-columns:1fr}}
+.sq{background:var(--card2);border-radius:5px;padding:11px 12px}
+.sq h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;margin-bottom:7px}
+.sq ul{margin:0;padding-left:15px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.sq .act{display:block;color:var(--mut);font-size:12px;margin-top:1px}
+.sq.s h4{color:var(--ok)} .sq.w h4{color:var(--no)}
+.sq.o h4{color:var(--dn)} .sq.t h4{color:var(--warn)}
+
+/* 다이어그램 */
+pre.mermaid{background:var(--card2);border-radius:5px;padding:10px;overflow-x:auto;margin:0}
+
+/* 다음 행동 */
+.next{margin-top:13px;padding:10px 12px;background:var(--goldbg);
+  border-left:3px solid var(--gold);border-radius:0 4px 4px 0;font-size:13.5px}
+.next b{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold);display:block;margin-bottom:2px}
+.warnbox{margin-top:12px;padding:10px 12px;background:var(--nobg);
+  border-left:3px solid var(--up);border-radius:0 4px 4px 0;font-size:13px;color:var(--ink2)}
+ul.tight{margin:0;padding-left:17px;display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.8}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">Project Cards · 최종갱신 2026-08-04</p>
+  <h1>주도주 탐지 연구</h1>
+  <p>"어떤 종목을 살까"가 아니라 <b>"어떻게 손실을 최소화하고 수익을 극대화할까"</b>를 데이터로 답하는 연구.
+  미국 1,279종·8.6년으로 주도주를 기계적으로 정의하고, 진입·청산 규칙을 TSR·MDD로 검증한다.</p>
+  <div class="topmeta">
+    <span>단계 <b>연구·검증</b></span>
+    <span>실계좌 <b>미적용</b></span>
+    <span>코드 <b>stock_screener/leaders_*.py</b></span>
+    <span>데이터 <b>factor_weekly 532,609행</b></span>
+  </div>
+</header>
+
+<nav class="nav" aria-label="카드 이동">
+  <a href="#c1">1 원페이저</a><a href="#c2">2 마스터플랜</a><a href="#c3">3 수익 구조</a>
+  <a href="#c4">4 워크플로우</a><a href="#c5">5 경쟁 지형</a><a href="#c6">6 SWOT</a>
+  <a href="#c7">7 트랙션</a><a href="#c8">8 열린 전선</a><a href="#c9">9 목소리</a><a href="#c10">10 결정 로그</a>
+</nav>
+
+<div class="deck">
+
+<!-- 1 -->
+<section class="card" id="c1">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">01</span><h2>원페이저</h2></div>
+    <div><span class="badge b-go">🟢 규칙 확정</span> <span class="cmeta">2026-08-04</span></div>
+  </div>
+  <dl class="kv">
+    <div><dt>문제</dt><dd>종목 선정이 아니라 <b>감정·집중·레버리지</b>가 MDD를 키운다. 2026-06 실제로 1억(KRW) 손실.</dd></div>
+    <div><dt>대상</dt><dd>본인 1명. 외부 판매·배포 계획 없음.</dd></div>
+    <div><dt>해법</dt><dd>주도주를 <b>기계적으로 정의</b>(향후 52주 +150%↑) → 공통 특징 발굴 → 진입·청산 규칙 → 백테스트로 TSR·MDD 검증. 규칙이 정하고 사람은 실행만.</dd></div>
+    <div><dt>현재</dt><dd>진입·청산 규칙 확정(⑤). <b>워크포워드 CAGR 4/6 부분통과</b> — 실계좌는 미적용, 다음은 페이퍼 트레이딩.</dd></div>
+    <div><dt>규칙⑤</dt><dd><code>RS13&gt;1.5 AND (흑자전환 OR 이익폭증) AND PSR&lt;3</code> → 고점 −20% 트레일링 · 8종목 12.5% · 2주 분할매수 · <b>불타기 없음</b></dd></div><div><dt>결과</dt><dd class="up">CAGR 27.7% / MDD <b>−23.9%</b> / 회복배율 <b>1.16</b><br><span style="font-weight:400;color:var(--mut);font-size:12.5px">SPY 14.2% / −31.8% / 0.45 — <b>MDD가 SPY보다 낮다</b></span></dd></div>
+  </dl>
+  <div class="warnbox"><b>정직한 자가진단:</b> 규칙⑤로도 SPY를 이긴 해는 <b>9년 중 5년</b>. 초과수익은 2020(+68%p)·2024(+38%p)에 집중된다.
+  롤링 12개월 최악 <b>−37.3%p · 최장 45주</b> — 1년 가까이 계속 지는 구간이 실제로 있었다.</div>
+  <div class="next"><b>그래서 다음 행동</b>백테스트에서 더 짜낼 게 없다 — <b>페이퍼 트레이딩(M6)</b>으로. 실계좌는 계속 0원.</div>
+</section>
+
+<!-- 2 -->
+<section class="card" id="c2">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">02</span><h2>마스터플랜</h2></div>
+    <div><span class="badge b-hold">🟡 M4 부분통과</span> <span class="cmeta">완료조건 = 검증가능</span></div>
+  </div>
+  <div class="tblwrap"><table>
+    <thead><tr><th>단계</th><th>완료조건</th><th class="n">상태</th></tr></thead>
+    <tbody>
+      <tr><td><b>M1</b> 데이터 파이프라인</td><td>미국 $2B+ 1,200종 이상 · point-in-time(공시일 기준) 팩터 테이블</td><td class="n" style="color:var(--ok)">✅ 1,279종<br>532,609행</td></tr>
+      <tr><td><b>M2</b> 주도주 프로파일</td><td>기준 대비 리프트 5배 이상 조건 조합 발견</td><td class="n" style="color:var(--ok)">✅ 8.2배</td></tr>
+      <tr><td><b>M3</b> 운용 시뮬레이션</td><td>손절·피라미딩 포함, SPY 대비 회복배율 상회</td><td class="n" style="color:var(--ok)">✅ 0.87<br>vs 0.45</td></tr>
+      <tr style="background:var(--warnbg)"><td><b>M4</b> 워크포워드 검증</td><td><b>6개 분할 중 4개 이상</b>에서 SPY 상회</td><td class="n" style="color:var(--warn)">🟡 <b>부분통과</b><br><span style="font-size:10px">규칙⑤ CAGR <b>4/6</b> ✅<br>회복배율 3/6 ✗<br>(구 규칙은 3/6·2/6)</span></td></tr>
+      <tr><td><b>M5</b> <s>세금·환전 반영</s> → <b>buza-bot 콘텐츠화</b></td><td>검증 결과 4건을 콘텐츠 1회차로 발행</td><td class="n mut">⬜ 미착수<br><span style="font-size:10px">세금은 측정 제외 결정</span></td></tr>
+      <tr><td><b>M6</b> 페이퍼 트레이딩</td><td>실시간 신호 13주 추적 → 백테스트 기대값과 오차 ±10%p 이내</td><td class="n mut">⬜ 미착수</td></tr>
+      <tr><td><b>M7</b> 실계좌 투입</td><td>M4·M6 통과 <b>AND</b> 본인이 3개월간 손절 규율 무위반</td><td class="n mut">⬜ 잠김</td></tr>
+    </tbody>
+  </table></div>
+  <div class="next"><b>그래서 다음 행동</b>M4가 CAGR 기준으로 조건을 넘었다. 다음은 <b>M6 페이퍼 트레이딩</b> — M7은 여전히 잠금.</div>
+</section>
+
+<!-- 3 -->
+<section class="card" id="c3">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">03</span><h2>수익 구조</h2></div>
+    <div><span class="badge b-go">🟢 방향 확정</span> <span class="cmeta">2026-08-03 갱신</span></div>
+  </div>
+  <p style="color:var(--ink2);font-size:13.5px;margin:0 0 12px"><b>결론: 이 시스템 자체는 팔지 않는다.</b>
+  본인 투자 수익이 1차 리턴이고, 외부 수익화는 <b>buza-bot 콘텐츠로 흡수</b>한다.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th>갈래</th><th class="n">판정</th><th>이유</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--nobg)"><td><b>종목 추천 서비스</b></td><td class="n" style="color:var(--no)">❌ 안 함</td>
+        <td>한국 <b>유사투자자문업 신고 대상</b>(자본시장법)·미국 RIA 등록 · 트랙레코드 0 ·
+        승률 41%/초과수익 2년 집중 프로파일은 구독자가 3개월도 못 버팀</td></tr>
+      <tr><td>검증 프레임워크 도구</td><td class="n" style="color:var(--warn)">🟡 보류</td>
+        <td>차별점은 진짜 있음(8-K 공시일 기반 point-in-time — 대부분의 백테스트 서비스는 look-ahead).
+        다만 <b>정직한 백테스트를 원하는 사람은 이미 직접 만든다</b> → 시장이 작음</td></tr>
+      <tr style="background:var(--okbg)"><td><b>buza-bot 콘텐츠 흡수</b></td><td class="n" style="color:var(--ok)">✅ 채택</td>
+        <td>텔레그램 배포 인프라 이미 있음 · <b>새 제품이 아니라 기존 제품 강화</b> →
+        Q3 계약 안으로 들어옴 · "추천"이 아니라 "검증 결과"라 규제 부담 낮음</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13.5px;color:var(--ink2);margin:12px 0 6px"><b>콘텐츠 재료 — 이미 만들어져 있는 것</b></p>
+  <ul class="tight">
+    <li>거래량 급증은 신호가 아니다 — TSLA·NVDA 돌파 주 거래량이 <b>평균 미만</b>(0.8배)</li>
+    <li>52주 신고가 근처는 오히려 불리 — <b>리프트 0.4</b> (신고가에서 −32% 떨어진 게 주도주 중앙)</li>
+    <li>매출 성장률은 상방을 깎는다 — 조건 추가 시 52주 중앙 +35.7% → <b>+19.9%</b></li>
+    <li>분산할수록 MDD는 안 줄고 수익만 준다 — 20종목 CAGR 20.0% vs 8종목 <b>29.0%</b>, MDD는 2.3%p 차이뿐</li>
+  </ul>
+  <div class="warnbox"><b>세금·실투입금은 측정 안 하기로 결정(2026-08-03).</b>
+  따라서 "연 14.8%p 초과"는 <b>세전·비용 0.1%만 반영</b>한 수치다. 실투자 판단 근거로 쓰지 말 것.</div>
+  <div class="next"><b>그래서 다음 행동</b>위 4개를 buza-bot 콘텐츠 1회차로 뽑아본다 — 반응이 있으면 시리즈화.</div>
+</section>
+
+<!-- 4 -->
+<section class="card" id="c4">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">04</span><h2>워크플로우 — 실제로 도는 것</h2></div>
+    <div><span class="badge b-hold">🟡 운용 미연결</span> <span class="cmeta">점선 🔴 = 안 도는 구간</span></div>
+  </div>
+<pre class="mermaid">
+flowchart TD
+  A1["EDGAR companyfacts<br/>분기재무 + 공시일"] --> B
+  A2["EDGAR 8-K item 2.02<br/>실적 발표일 · 장전/장후"] --> B
+  A3["Yahoo 일봉<br/>→ W-MON 리샘플"] --> B
+  B["leaders_build.py<br/>factor_weekly 532,609행"] --> C1
+  B --> C2["leaders_events.py<br/>earnings_event 63,365건"]
+  C1["프로파일·스윕<br/>주도주 공통특징"] --> D
+  C2 --> C1
+  D["leaders_sim.py<br/>TSR / MDD 측정"] --> E
+  E["leaders_listup.py<br/>주간 리스트업 (규칙⑤)"] -.-> F
+  F["🔴 페이퍼 트레이딩<br/>미연결"] -.-> G
+  G["🔴 실계좌<br/>잠김 (M7)"]
+  H["🔴 DART 잠정실적 공시일<br/>미수집 → 한국 제외"] -.-> B
+  style F stroke-dasharray: 5 5
+  style G stroke-dasharray: 5 5
+  style H stroke-dasharray: 5 5
+</pre>
+  <div class="next"><b>그래서 다음 행동</b>수집→계산→분석은 자동으로 돈다. <b>리스트업 이후가 전부 끊겨 있다</b> — 페이퍼 트레이딩 배선이 다음 연결점.</div>
+</section>
+
+<!-- 5 -->
+<section class="card" id="c5">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">05</span><h2>경쟁 지형</h2></div>
+    <div><span class="badge b-stop">🔴 미조사</span> <span class="cmeta">사전지식 기반</span></div>
+  </div>
+  <div class="warnbox" style="margin-top:0;margin-bottom:12px"><b>⚠️ 이 카드는 조사 결과가 아니다.</b>
+  <code>/prior-art-check</code>를 돌린 적이 없다. 아래는 내 사전지식이며 <b>가격·기능은 확인되지 않았다</b>. 판단 근거로 쓰지 말 것.</div>
+  <div class="tblwrap"><table>
+    <thead><tr><th>서비스</th><th>강점</th><th>우리와의 차이</th></tr></thead>
+    <tbody>
+      <tr><td>IBD MarketSmith</td><td>RS·CANSLIM 원조, 차트 품질</td><td>규칙이 블랙박스 · 내 MDD 목표에 맞춘 청산 규칙 없음</td></tr>
+      <tr><td>Finviz Elite</td><td>스크리닝 속도·범용성</td><td>백테스트·point-in-time 없음</td></tr>
+      <tr><td>TradingView</td><td>차트·커뮤니티·전략 테스터</td><td>재무 point-in-time 부재 → look-ahead 위험</td></tr>
+      <tr><td>젠포트(국내)</td><td>한국 주식 백테스트</td><td>미국장 약함 · 공시일 기반 아님</td></tr>
+      <tr><td><b>이 프로젝트</b></td><td><b>공시일 기반 point-in-time · MDD를 KPI로 · 개인 규율에 맞춤</b></td><td>1인용 · 검증 미완 · UI 없음</td></tr>
+    </tbody>
+  </table></div>
+  <div class="next"><b>그래서 다음 행동</b>낮은 우선순위. 판매 계획이 없으니 이 카드는 M5까지 방치해도 된다.</div>
+</section>
+
+<!-- 6 -->
+<section class="card" id="c6">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">06</span><h2>SWOT</h2></div>
+    <div><span class="badge b-go">🟢 액션 부착</span> <span class="cmeta">2026-08-03</span></div>
+  </div>
+  <div class="swot">
+    <div class="sq s"><h4>STRENGTH</h4><ul>
+      <li>오버핏을 <b>숫자로 잰다</b> (인샘플 22.5%p → 아웃샘플 10.7%p)<span class="act">→ 워크포워드로 한 번 더</span></li>
+      <li><b>공시일(8-K) 기반</b> point-in-time — look-ahead 없음<span class="act">→ 한국 잠정실적도 같은 수준으로</span></li>
+      <li>MDD를 KPI로 둠 — 무매도 −66.9% → 트레일링 −33.3%<span class="act">→ 비중 30% 시나리오 측정</span></li>
+    </ul></div>
+    <div class="sq w"><h4>WEAKNESS</h4><ul>
+      <li>초과수익이 <b>2020·2024 두 해</b>에 집중<span class="act">→ 레짐 필터(SPY 40주선) 테스트</span></li>
+      <li><code>trail-20</code>이 <b>인샘플 선택</b> — 8개 중 최고를 고름<span class="act">→ M4 워크포워드가 판정</span></li>
+      <li>상위 5거래 의존 — 제외 시 평균 +21.8% → <b>+9.5%</b><span class="act">→ 종목수 8 → 15 스윕</span></li>
+    </ul></div>
+    <div class="sq o"><h4>OPPORTUNITY</h4><ul>
+      <li>한국 시장 미포함 — 유니버스 2배 가능<span class="act">→ DART 주요사항보고 수집</span></li>
+      <li>U자 관계 발견 — IC로 놓쳤던 팩터 재검토 여지<span class="act">→ 나머지 팩터도 구간별로 다시</span></li>
+      <li>기존 screener 인프라 재사용 가능<span class="act">→ paper_trade.py에 배선</span></li>
+    </ul></div>
+    <div class="sq t"><h4>THREAT</h4><ul>
+      <li>실전에서 <b>2년 연속 언더퍼폼</b>을 못 견딤<span class="act">→ 중단 기준을 사전 문서화</span></li>
+      <li>생존편향 — 상폐 종목 미수집<span class="act">→ 설계상 수용, 손절로 방어</span></li>
+      <li><b>Q3 계약 위반 위험</b> — 주력은 buza-bot인데 여기 몰두<span class="act">→ 09-30 점검 때 재판정</span></li>
+    </ul></div>
+  </div>
+  <div class="next"><b>그래서 다음 행동</b>W2(인샘플 선택)가 가장 위험. M4 전까지 이 시스템의 숫자는 전부 잠정이다.</div>
+</section>
+
+<!-- 7 -->
+<section class="card" id="c7">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">07</span><h2>트랙션 보드</h2></div>
+    <div><span class="badge b-hold">🟡 실사용 0</span> <span class="cmeta">2026-08-03 갱신</span></div>
+  </div>
+  <div class="tiles">
+    <div class="tile"><p class="k">백테스트 CAGR</p><p class="v up">27.7%</p><p class="s">SPY 14.2%</p></div>
+    <div class="tile"><p class="k">백테스트 MDD</p><p class="v dn">−23.9%</p><p class="s">SPY −31.8% ← 우리가 낮음</p></div>
+    <div class="tile"><p class="k">회복배율</p><p class="v">1.16</p><p class="s">SPY 0.45 · CAGR÷|MDD|</p></div>
+    <div class="tile"><p class="k">워크포워드</p><p class="v">4 / 6</p><p class="s">CAGR 기준 · 회복배율 3/6</p></div>
+    <div class="tile"><p class="k">실계좌 투입</p><p class="v mut">0원</p><p class="s">M7 잠김</p></div>
+    <div class="tile"><p class="k">페이퍼 신호</p><p class="v mut">0건</p><p class="s">미연결</p></div>
+  </div>
+
+  <figure>
+    <figcaption style="margin-top:16px">연도별 SPY 대비 초과수익 (%p) · <b>규칙⑤ 기준</b> — 빨강 = 이긴 해, 파랑 = 진 해 (5승 4패)</figcaption>
+    <div class="bars" role="img" aria-label="규칙⑤ 연도별 SPY 대비 초과수익. 2018 +3.0, 2019 -27.4, 2020 +68.1, 2021 -9.6, 2022 +24.0, 2023 -10.0, 2024 +38.0, 2025 -0.5, 2026 +25.6. 이긴 해 5/9">
+      <div class="brow"><span class="mut">2018</span><span class="btrack"><i class="bmid"></i><b class="bfill pos" style="left:50%;width:2.2%"></b></span><span class="bval up">+3.0</span></div>
+      <div class="brow"><span class="mut">2019</span><span class="btrack"><i class="bmid"></i><b class="bfill neg" style="right:50%;width:20.1%"></b></span><span class="bval dn">−27.4</span></div>
+      <div class="brow"><span class="mut">2020</span><span class="btrack"><i class="bmid"></i><b class="bfill pos" style="left:50%;width:50.0%"></b></span><span class="bval up">+68.1</span></div>
+      <div class="brow"><span class="mut">2021</span><span class="btrack"><i class="bmid"></i><b class="bfill neg" style="right:50%;width:7.0%"></b></span><span class="bval dn">−9.6</span></div>
+      <div class="brow"><span class="mut">2022</span><span class="btrack"><i class="bmid"></i><b class="bfill pos" style="left:50%;width:17.6%"></b></span><span class="bval up">+24.0</span></div>
+      <div class="brow"><span class="mut">2023</span><span class="btrack"><i class="bmid"></i><b class="bfill neg" style="right:50%;width:7.3%"></b></span><span class="bval dn">−10.0</span></div>
+      <div class="brow"><span class="mut">2024</span><span class="btrack"><i class="bmid"></i><b class="bfill pos" style="left:50%;width:27.9%"></b></span><span class="bval up">+38.0</span></div>
+      <div class="brow"><span class="mut">2025</span><span class="btrack"><i class="bmid"></i><b class="bfill neg" style="right:50%;width:0.4%"></b></span><span class="bval dn">−0.5</span></div>
+      <div class="brow"><span class="mut">2026</span><span class="btrack"><i class="bmid"></i><b class="bfill pos" style="left:50%;width:18.8%"></b></span><span class="bval up">+25.6</span></div>
+    </div>
+    <div class="legend"><span><i style="background:var(--up)"></i>SPY 초과</span><span><i style="background:var(--dn)"></i>SPY 미달</span></div>
+  </figure>
+
+  <div class="tblwrap" style="margin-top:14px"><table>
+    <thead><tr><th>거래 통계</th><th class="n">값</th><th>해석</th></tr></thead>
+    <tbody>
+      <tr><td>거래 수</td><td class="n">107건 / 8.6년</td><td>연 12회 · 평균 보유 21주</td></tr>
+      <tr><td>승률</td><td class="n">38%</td><td>지는 게 더 많다</td></tr>
+      <tr><td>거래 수익 <b>중앙값</b></td><td class="n dn">−6.9%</td><td>대부분의 거래는 손실</td></tr>
+      <tr><td>손익비</td><td class="n up">5.5</td><td>비대칭이 수익의 전부</td></tr>
+      <tr><td>상위 5거래</td><td class="n up">+557~231%</td><td>TSLA·MU·CROX·VRT·ANF</td></tr>
+      <tr><td>롤링 12개월 최악</td><td class="n dn">−37.3%p</td><td>최장 45주 연속 SPY 미달</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tblwrap" style="margin-top:14px"><table>
+    <thead><tr><th>진입조건 (2026-08-04 실측 · trail-20 · 8종목 12.5%)</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복배율</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--okbg)"><td><b>⑤ RS&gt;1.5 &amp; (흑자전환 OR 이익폭증) &amp; PSR&lt;3</b> ← 확정</td><td class="n">27.7%</td><td class="n up">−23.9%</td><td class="n"><b>1.16</b></td></tr>
+      <tr><td>RS&gt;1.5 &amp; 흑자전환 (PSR 없음)</td><td class="n">29.9%</td><td class="n">−27.6%</td><td class="n">1.08</td></tr>
+      <tr><td>RS&gt;1.5 &amp; (흑자전환 OR 이익폭증) — PSR 없음</td><td class="n up">30.6%</td><td class="n dn">−42.1%</td><td class="n">0.73</td></tr>
+      <tr><td>RS&gt;1.5 &amp; PSR&lt;3 (구 규칙)</td><td class="n">29.0%</td><td class="n">−33.3%</td><td class="n">0.87</td></tr>
+      <tr style="background:var(--nobg)"><td>⑤ + <b>불타기</b> (가격 or 이익 트리거)</td><td class="n">25.3~25.8%</td><td class="n dn">−35.6~38.2%</td><td class="n dn">0.7</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--ink2);margin:9px 0 0"><b>이익 폭증은 반드시 PSR&lt;3과 함께 걸어야 한다.</b>
+  단독으로 넣으면 조건 발생률이 34.5%로 헐거워져 MDD가 −42.1%까지 터진다.
+  <b>불타기는 트리거를 이익으로 바꿔도 여전히 불리</b> — 평단을 올려 트레일링에 더 빨리 걸리기 때문.</p>
+  <div class="tblwrap" style="margin-top:14px"><table>
+    <thead><tr><th>비중·종목수 (구 규칙 기준)</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복배율</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--okbg)"><td><b>5종목 · 종목당 20%</b> ← 최적</td><td class="n up">34.9%</td><td class="n">−35.7%</td><td class="n"><b>0.98</b></td></tr>
+      <tr><td>8종목 · 12.5% (현행)</td><td class="n">29.0%</td><td class="n">−33.3%</td><td class="n">0.87</td></tr>
+      <tr><td>12종목 · 8.3%</td><td class="n">20.4%</td><td class="n">−34.0%</td><td class="n">0.60</td></tr>
+      <tr style="background:var(--nobg)"><td><b>20종목 · 5%</b> ← 분산안, 가장 나쁨</td><td class="n dn">20.0%</td><td class="n">−31.0%</td><td class="n">0.65</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--ink2);margin:9px 0 0"><b>분산해도 MDD가 안 줄었다</b>(−33.3% → −31.0%, 2.3%p).
+  주도주는 같은 국면·같은 섹터에서 무더기로 나와 상관이 높다 → 종목을 늘리면 시장 리스크는 그대로고 초과수익만 희석된다.</p>
+  <div class="tblwrap" style="margin-top:14px"><table>
+    <thead><tr><th>진짜 벤치마크 — 레버리지 SPY와 비교 (2026-08-04)</th><th class="n">TSR</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복배율</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--okbg)"><td><b>전략 (길B + trail-20)</b></td><td class="n">695%</td><td class="n up">29.0%</td><td class="n">−33.3%</td><td class="n"><b>0.87</b></td></tr>
+      <tr><td>SPY ×1.0</td><td class="n">205%</td><td class="n">14.7%</td><td class="n">−31.8%</td><td class="n">0.46</td></tr>
+      <tr><td>SPY ×1.5 (주간복리)</td><td class="n">379%</td><td class="n">21.2%</td><td class="n">−44.8%</td><td class="n">0.47</td></tr>
+      <tr><td>SPY ×2.0 (주간복리)</td><td class="n">601%</td><td class="n">27.0%</td><td class="n dn">−56.1%</td><td class="n">0.48</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--ink2);margin:9px 0 0"><b>전략은 SPY×2와 비슷한 수익(695% vs 601%)을 MDD 절반(−33.3% vs −56.1%)으로 냈다.</b>
+  회복배율 0.87 vs 0.48 — 단순 레버리지로는 복제할 수 없는 효율이다. <b>이게 이 시스템의 유일한 진짜 엣지다.</b></p>
+  <div class="tblwrap" style="margin-top:14px"><table>
+    <thead><tr><th>M4 워크포워드 6분할</th><th class="n">전략 CAGR</th><th class="n">SPY CAGR</th><th class="n">승패</th></tr></thead>
+    <tbody>
+      <tr><td>2021</td><td class="n">20.0%</td><td class="n">26.9%</td><td class="n dn">패</td></tr>
+      <tr><td>2022 (하락장)</td><td class="n">9.4%</td><td class="n">−17.0%</td><td class="n up">승 +26%p</td></tr>
+      <tr><td>2023</td><td class="n">15.3%</td><td class="n">25.0%</td><td class="n dn">패</td></tr>
+      <tr><td>2024</td><td class="n">66.1%</td><td class="n">28.2%</td><td class="n up">승 +38%p</td></tr>
+      <tr><td>2025</td><td class="n">6.0%</td><td class="n">19.6%</td><td class="n dn">패</td></tr>
+      <tr><td>2025H2~2026</td><td class="n">118.0%</td><td class="n">19.2%</td><td class="n up">승 +99%p</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--ink2);margin:9px 0 0"><b>매년 이기는 시스템이 아니다.</b>
+  지는 해는 −7~−14%p로 조금 지고, 이기는 해는 +26~+99%p로 크게 이긴다.
+  거래 단위(승률 41%·손익비 5.0)와 <b>똑같은 비대칭이 연 단위에서도 반복</b>된다.</p>
+  <div class="warnbox"><b>이 카드의 모든 숫자는 백테스트다.</b> 실사용 지표(페이퍼 신호·실계좌)는 전부 0.
+  행동지표가 생기는 시점은 M6부터다.</div>
+  <div class="next"><b>그래서 다음 행동</b><b>중단 기준 확정(2026-08-03): 롤링 12개월 초과수익 −30%p.</b>
+  달력연도 2년 연속은 실측상 발생한 적 없어(24개월 롤링 최장 연속 14주) 장식용 규칙이 된다.</div>
+</section>
+
+<!-- 8 -->
+<section class="card" id="c8">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">08</span><h2>열린 전선</h2></div>
+    <div><span class="badge b-hold">🟡 5건 · 해결 5</span> <span class="cmeta">무엇 / 며칠째 / 다음 / 누가</span></div>
+  </div>
+  <div class="tblwrap"><table>
+    <thead><tr><th>항목</th><th class="n">며칠째</th><th>다음 행동</th><th class="n">누가</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>M4 회복배율 3/6</b> — 규칙⑤로 CAGR은 4/6 도달. 회복배율만 미달이고 이는 1년 창이 SPY MDD를 과소측정하는 지표 편향 가능성</td><td class="n">2</td><td>완료조건을 CAGR 기준으로 확정할지 판단</td><td class="n">나</td></tr>
+      <tr style="background:var(--okbg)"><td class="mut">✅ 해결: PSR&lt;3 편향 우려 → 기각. PSR은 U자지만 <b>고PSR 바스켓은 손절을 붙여도 CAGR −4.9%·MDD −74.8%</b>. PSR&lt;3이 최적</td><td class="n mut">—</td><td class="mut">2026-08-04</td><td class="n mut">완료</td></tr>
+      <tr><td>한국 잠정실적 공시일 미수집 → 한국 종목 전부 제외</td><td class="n">1</td><td>DART 주요사항보고 수집</td><td class="n">Claude</td></tr>
+      <tr><td>"매입 20% 상한 + 40% 초과 시 30%로 축소" <b>트림 로직 미구현</b> — 불타기는 기각됐지만 <b>상승 후 트림은 별개</b></td><td class="n">2</td><td>상승 후 리밸런싱 규칙 시뮬에 추가</td><td class="n">Claude</td></tr>
+      <tr><td>PSR·PER 부정확 — 주식수를 현재시총÷최근가로 역산</td><td class="n">1</td><td>EDGAR <code>dei</code> 태그로 시점별 주식수</td><td class="n">Claude</td></tr>
+      <tr><td>페이퍼 트레이딩 미연결 — 리스트업 이후가 끊김</td><td class="n">1</td><td><code>leaders_listup</code> → <code>paper_trade.py</code> 배선</td><td class="n">Claude</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>Q3 계약 정합성</b> — 주력=buza-bot 단일인데 이 연구에 몰두</td><td class="n">9</td><td>콘텐츠로 흡수(M5) → 계약 안으로 복귀</td><td class="n">나</td></tr>
+      <tr style="background:var(--okbg)"><td class="mut">✅ 해결: 중단 기준 미정 → 롤링 12개월 −30%p로 확정</td><td class="n mut">—</td><td class="mut">2026-08-03</td><td class="n mut">완료</td></tr>
+      <tr style="background:var(--okbg)"><td class="mut">✅ 해결: 비중 미검증 → 5종목 20%가 최적(회복배율 0.98)</td><td class="n mut">—</td><td class="mut">2026-08-03</td><td class="n mut">완료</td></tr>
+      <tr style="background:var(--okbg)"><td class="mut">✅ 제외: 세금·실투입금 → 측정하지 않기로 결정</td><td class="n mut">—</td><td class="mut">2026-08-03</td><td class="n mut">사용자</td></tr>
+    </tbody>
+  </table></div>
+  <div class="next"><b>그래서 다음 행동</b>규칙 설계는 끝났다. <b>남은 건 Q3 계약 정합성(네 결정)</b>과 페이퍼 트레이딩 배선뿐.</div>
+</section>
+
+<!-- 9 -->
+<section class="card" id="c9">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">09</span><h2>사용자의 목소리</h2></div>
+    <div><span class="badge b-go">🟢 6/6 적중</span> <span class="cmeta">2026-08-02~03 세션</span></div>
+  </div>
+  <p style="color:var(--ink2);font-size:13.5px;margin:0 0 11px">사용자 1명(본인)이므로 외부 VOC는 없다.
+  대신 이번 세션에서 <b>사용자가 내 결론을 반박한 기록</b>이 실제 VOC 역할을 했다.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th>사용자 지적</th><th>결과</th></tr></thead>
+    <tbody>
+      <tr><td>"30주선 들어본 적 없다. 5·10·20이면 충분하지 않나"</td><td class="up">✅ 맞음 — 20주선 분리도 3.75 &gt; 30주선 3.68</td></tr>
+      <tr><td>"498불 뚫을 때까지 신호가 없다는 건 아닌 것 같다"</td><td class="up">✅ 맞음 — 조기진입 326% vs 돌파진입 250%</td></tr>
+      <tr><td>"거래량이 해당 '주'에서만 안 잡힌 것 아닌가"</td><td class="up">✅ 맞음 — 창 넓히니 55% → 91% (단, 게이트로는 여전히 무용)</td></tr>
+      <tr><td>"왜 연 단위로 분할하나. 1년 뒤 안 팔아도 되는데"</td><td class="up">✅ 맞음 — 보유기간 52주 고정이 전략과 불일치</td></tr>
+      <tr><td>"정답지 보고 튜닝하는 게 의미 있나"</td><td class="up">✅ 맞음 — train/test 분리 도입</td></tr>
+      <tr><td>"너무 정교하게 하려는 건가"</td><td class="up">✅ 유효 — 단순화(실적 기준 분기)해도 결론 동일 확인</td></tr>
+    </tbody>
+  </table></div>
+  <div class="warnbox"><b>6건 중 6건이 내 오류를 잡았다.</b> 특히 "정답지 보고 튜닝" 지적은 이 연구의 방법론 자체를 바꿨다.
+  내가 혼자 굴렸으면 25종 표본에서 나온 신호를 그대로 믿었을 것이다.</div>
+  <div class="next"><b>그래서 다음 행동</b>내 결론을 받을 때 <b>"유니버스 전체에서 재현됐나"</b>를 먼저 물어라. 그게 6건 전부에 통했다.</div>
+</section>
+
+<!-- 10 -->
+<section class="card" id="c10">
+  <div class="chead">
+    <div class="ctitle"><span class="cnum">10</span><h2>결정 로그</h2></div>
+    <div><span class="badge b-hold">🟡 20건 · 미검증 1</span> <span class="cmeta">2026-08-04</span></div>
+  </div>
+  <div class="tblwrap"><table>
+    <thead><tr><th>결정</th><th>당시 근거</th><th class="n">검증</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--okbg)"><td><b>진입조건 확정(⑤)</b> — RS13&gt;1.5 &amp; (흑자전환 OR 이익폭증) &amp; PSR&lt;3</td><td>회복배율 0.87 → <b>1.16</b> · MDD −33.3% → <b>−23.9%</b>(SPY보다 낮음) · 워크포워드 CAGR 3/6 → <b>4/6</b></td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>이익 폭증 팩터 채택</b> — 영업익/순익 8분기 신고점 · 영업익 QoQ+50% · OPM QoQ+3%p 중 하나</td><td>흑자전환(발생률 10.9%)만으론 놓치는 기업 존재. 단 이익폭증은 34.5%로 흔해 <b>PSR&lt;3 없이 쓰면 MDD −42.1%</b></td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>불타기(피라미딩) 최종 기각</b> — 가격·이익 트리거 모두</td><td>노출 보정(unit 2배)해도 회복 0.9→0.6. 이익 트리거로 바꿔도 1.2→0.7. <b>불타기가 평단을 올려 트레일링 −20%에 더 빨리 걸린다</b> — 청산 규칙과 구조적 상충</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>2주 분할매수</b> 채택</td><td>1주 전액 대비 CAGR −0.2%p / MDD +1.1%p 개선. 4주 분할은 −3.2%p로 과도</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td>30주선 → <b>20주선</b></td><td>진짜/반납형 분리도 3.75 vs 3.68</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td>52주 신고가 돌파는 <b>1차 진입이 아님</b> (2차 피라미딩 트리거로 강등)</td><td>신고가 −15% 조기진입 326% vs 돌파 250%</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>OPM 변곡 게이트 기각</b></td><td>25종에선 승률 85%였으나 1,273종 IC &lt; 0.04, 부호도 뒤집힘</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>거래량 게이트 제외</b></td><td>기준 4종 × 임계 6개 전수 스윕 — 어떤 조합도 "조건 없음"보다 나쁨</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>실적 급등 후 매수(E-signal) 기각</b></td><td>39,192 이벤트에서 <code>react_w0</code> IC 전 밴드 음수</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><s>피라미딩 안 함</s> → <b>위 "불타기 최종 기각"으로 확정</b></td><td>노출 보정·이익 트리거까지 검증 완료</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>길B(RS13&gt;1.5) 채택</b>, 길A(폐허형) 기각</td><td>길A는 2020년에 관측 47% 집중·2021년 주도주율 0%. 길B는 연도별 3~19% 고름</td><td class="n" style="color:var(--ok)">✅ M4 확인</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b><code>trail-20</code> 채택</b></td><td>8개 중 최고 — 전 기간을 보고 고름. 단 워크포워드에서 <b>규칙 선택을 해도 고정 trail-20과 동일한 결과</b>가 나와, 선택 편향의 영향은 작은 것으로 보임</td><td class="n" style="color:var(--warn)">🟡 부분해소</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>M4 부분통과 — 실계좌(M7)는 계속 잠금</b></td><td>규칙⑤로 <b>CAGR 4/6 도달</b>(조건 충족). 회복배율은 3/6 — 1년 창이 SPY MDD를 과소측정하는 지표 편향 고려 필요</td><td class="n" style="color:var(--warn)">🟡 부분</td></tr>
+      <tr><td><b>PSR&lt;3 유지</b> (U자 확인 후에도)</td><td>PSR&lt;0.5(554%)·PSR&lt;1(394%)·PSR&gt;10(159%)·PSR&gt;20(−34%) 전부 열등. PSR&lt;3이 695%로 최적</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>진짜 벤치마크 = SPY×2 레버리지</b>로 교체</td><td>전략은 SPY×2와 유사 수익을 MDD 절반으로 달성(회복 0.87 vs 0.48). 단순 SPY 비교는 위험 수준이 달라 부적절</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>20종목 분산 기각</b>, 5~8종목 집중 채택</td><td>20종목 CAGR 20.0% vs 8종목 29.0% — MDD는 2.3%p만 개선. 주도주는 상관이 높아 분산이 안 먹힘</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>중단 기준 = 롤링 12개월 −30%p</b></td><td>달력연도 2년 연속은 실측상 0회(24개월 롤링 최장 연속 14주). 2년으로 잡으면 절대 발동 안 하는 장식 규칙</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>서비스화 = buza-bot 콘텐츠 흡수</b>, 종목추천 서비스 기각</td><td>유사투자자문업 규제 + 트랙레코드 0 + 승률 41% 프로파일</td><td class="n mut">— 결정</td></tr>
+      <tr><td>세금·실투입금 측정 제외</td><td>사용자 판단 (2026-08-03)</td><td class="n mut">— 수용</td></tr>
+      <tr><td>상폐 종목 미수집</td><td>사용자 판단 — 손절 규율로 방어</td><td class="n mut">— 수용</td></tr>
+    </tbody>
+  </table></div>
+  <div class="next"><b>그래서 다음 행동</b>규칙 설계는 여기서 종료. 남은 미검증은 <code>trail-20</code> 선택 편향 하나뿐이고, 그건 <b>실전 데이터(M6)</b>로만 풀린다.</div>
+</section>
+
+</div>
+
+<footer>
+  데이터 · 미국 $2B+ 1,279종 · 2018-01-01~2026-07-27 · SEC EDGAR(재무·8-K) + Yahoo Finance(가격)<br>
+  코드 · <code>leaders_{build,events,profile,sweep,sim,sim2,boost,wf,listup,winner,export}.py</code> · <code>leaders_schema.sql</code><br>
+  주도주 정의 · 향후 52주 +150% 이상 상승 (8,126건 / 1.82% / 490종) · 회복배율 = CAGR ÷ |MDD|<br>
+  전부 과거 데이터의 통계 분석이며 특정 종목의 매매 권유가 아님. 투자자문업 등록 주체 아님.
+</footer>
+
+</div>

@@ -28,3 +28,7 @@ results/*.csv
 .claude/
 results/*.log
 data/longcache/
+
+# 주도주 연구 캐시 (대용량, 재생성 가능)
+data/leaders_cache/
+RAW_보기.xlsx
