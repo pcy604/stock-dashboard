@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "utlJktsG3sE",
+      "title": "실적이 아니라 수급이 문제! 삼성전자 조정 때마다 사야 하는 이유ㅣ차영주 와이즈경제연구소 소장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-08-05T11:30:08+00:00",
+      "url": "https://www.youtube.com/watch?v=utlJktsG3sE",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-05T22:21:04.460872+09:00"
+    },
+    {
+      "video_id": "e4VkMTI82PQ",
+      "title": "\"또 속아?\" vs \"이번엔 진짜?\" 코스피 9,000 재도전의 조건ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-05T12:30:20+00:00",
+      "url": "https://www.youtube.com/watch?v=e4VkMTI82PQ",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-05T22:20:32.088982+09:00"
+    },
+    {
       "video_id": "0EqgkjQKvp4",
       "title": "반도체 소부장 거꾸로 가야 합니다 #소재 #부품 #전공정 #장비 #장비주 #반도체 #메모리 #테스 #호돌이 #우황제",
       "channel": "와이스트릿",
@@ -16,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T20:12:52.792323+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-05T22:23:13.486755+09:00"
     },
     {
       "video_id": "q31oB_kKuvM",
@@ -54,8 +92,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T20:11:48.086681+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-05T22:22:41.188960+09:00"
     },
     {
       "video_id": "aCl5bsIIBhs",
@@ -73,8 +111,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T20:11:15.855260+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-05T22:22:08.998392+09:00"
     },
     {
       "video_id": "P1Dlihaj2xs",
@@ -92,8 +130,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T20:10:43.439524+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-05T22:21:36.751134+09:00"
     },
     {
       "video_id": "P5njVdWtDrU",
@@ -147,12 +185,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"불확실성 시대의 시장은 예측하는 것이 아니라 다양한 자산군과 시장 현상을 종합적으로 분석하고 비중을 조절하며 대응하는 복잡계 투자 방식으로 접근해야 합니다.\",\n  \"summary\": [\n    \"2023년 8월 현재 시장은 여전히 변동성이 크고 방향성이 불확실하지만, 7월 중순 이후 가격 매력도가 나타나며 펀더멘털이 작동할 수 있는 여건이 마련되었습니다.\",\n    \"시장을 정확히 예측하는 것은 불가능하므로, 과거의 순환 이론(사이클 경제) 방식이 아닌 유용한 방법론을 개발하여 시장 변화에 대응하는 것이 중요합니다.\",\n    \"복잡계 투자 방식은 개별 기업의 펀더멘털뿐만 아니라 거시경제, 정치, 유동성, 시장 심리 등 다양한 변수를 종합적으로 고려하는 '스코어링 방식'을 활용합니다.\",\n    \"포트폴리오 관리는 특정 종목을 사고파는 행위 자체가 아니라, 전체 자산 구성과 비중을 세상의 움직임과 조화롭게 만드는 "
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T20:09:22.721930+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-05T22:19:59.359098+09:00"
     },
     {
       "video_id": "klB_pYV58yI",
@@ -170,8 +207,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T20:06:46.866147+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-05T22:19:26.753800+09:00"
     },
     {
       "video_id": "uMt9Ix3bQfI",
@@ -12943,116 +12980,7 @@
       "source": "fail",
       "attempts": 4,
       "analyzed_at": "2026-07-29T02:15:02.928153+09:00"
-    },
-    {
-      "video_id": "wrTNLsmtXOc",
-      "title": "\"반도체는 필수\" 과거 고점은 잊고 포트폴리오를 재정비 할 시점ㅣ홍선애, 박병창 MP파트너스 대표 [여의도 인사이트]",
-      "channel": "삼프로TV",
-      "published": "2026-07-28T09:05:15+00:00",
-      "url": "https://www.youtube.com/watch?v=wrTNLsmtXOc",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "현재 시장은 비정상적인 흐름과 심리적 압박으로 인해 예측 불가능하며, 투자자는 포트폴리오를 재정비하고 시간에 투자하며 시장의 근본적인 문제 해결을 기다려야 합니다.",
-        "summary": [
-          "현재 시장은 거시경제 지표나 기업 밸류에이션 등 정상적인 분석으로 설명하기 어려운 비정상적인 상황이며, 대부분의 투자자가 어려움을 겪고 있습니다.",
-          "SK하이닉스와 삼성전자 등 대형주 P/E가 급락하는 등 시장 심리가 극도로 위축되어, 과거 시장 하락 시 명확한 원인이 있었던 것과 달리 현재는 불확실성이 지배적입니다.",
-          "개별 종목 레버리지 ETF에 대한 정부의 규제 발표와 번복, 그리고 단기적 대응의 부재가 시장에 대한 불신과 피로감을 가중시키고 있습니다.",
-          "미국 금리 인상에 대한 불확실성, 유가 및 지정학적 리스크 등 거시경제적 요인들이 시장의 발목을 잡고 있으며, 이러한 요인들이 해소되어야 시장이 반등할 모멘텀을 찾을 수 있습니다.",
-          "국내 시장은 특정 소수 종목(반도체 대형주)으로의 쏠림 현상이 심화되어 왔고, 이로 인해 지수가 하락할 때 다른 종목들도 동반 하락하는 구조적 취약성을 가지고 있습니다.",
-          "현재 시장은 상반기의 'ETF 발 포모(FOMO)' 현상이 해소되는 과정에서 발생하는 비정상적인 '텐트럼'으로 해석될 수 있으며, 투자자는 현재 상황을 냉철하게 분석하고 장기적 관점에서 접근해야 합니다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "P/E가 3~4배 수준으로 떨어졌고, 레버리지 ETF 관련 매수세가 쏠리는 등 시장의 집중을 받고 있음",
-            "view": "부정",
-            "t": 81
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "P/E가 3~4배 수준으로 떨어졌고, 레버리지 ETF 관련 매수세가 쏠리는 등 시장의 집중을 받고 있음",
-            "view": "부정",
-            "t": 81
-          }
-        ],
-        "key_points": [
-          {
-            "point": "현재 시장은 비정상적인 움직임을 보이며, 기존의 가치분석 등 정상적인 해석으로는 시장을 설명하기 어렵습니다. 전문가들조차 '모르겠다'고 답하는 상황입니다.",
-            "t": 55
-          },
-          {
-            "point": "시장 하락의 근본적인 원인은 미국의 금리 인상 기조와 물가 상승 압박, 이란 지정학적 리스크 등 거시경제적 불확실성이 크기 때문입니다. 특히 미국 금리가 동결 또는 인하될 것이라는 신뢰가 쌓여야 합니다.",
-            "t": 1199
-          },
-          {
-            "point": "국내 시장은 대형 반도체 주식으로의 극심한 쏠림 현상과 레버리지 상품 규제 관련 정부의 오락가락 정책이 더해져 시장의 변동성이 확대되고 심리적 불안감이 커지고 있습니다.",
-            "t": 500
-          },
-          {
-            "point": "이러한 상황에서는 과거 고점에 물린 종목을 '손절매'하고 저평가된 우량주로 갈아타는 '가지치기'가 필요하며, 장기적인 관점에서 '시간에 투자'하는 전략이 중요합니다.",
-            "t": 2920
-          }
-        ],
-        "actionable": [
-          "현재 포트폴리오를 재점검하고, 급등락에 연연하지 않으며 안정적이고 장기적인 성장이 기대되는 종목 위주로 재정비하십시오. [t=4030]",
-          "불확실성이 높은 시기에는 시장과의 싸움을 피하고, 조급함으로 인해 몸과 마음을 해치지 않도록 인내심을 가지고 기다리는 것이 중요합니다. [t=4030]",
-          "특정 섹터나 종목으로의 과도한 쏠림 투자를 지양하고, 시장의 균형 잡힌 회복을 기다리는 전략이 필요합니다. [t=3615]"
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-28T19:29:18.442281+09:00"
-    },
-    {
-      "video_id": "FcYxNJkNg9Y",
-      "title": "'카센터' 된 국장...또 다시 미장, 부동산인가? | 김민수 레몬리서치 대표 [더블 업]",
-      "channel": "삼프로TV",
-      "published": "2026-07-28T09:45:54+00:00",
-      "url": "https://www.youtube.com/watch?v=FcYxNJkNg9Y",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "국내 주식시장의 극심한 변동성과 부동산 시장의 규제로 실망한 투자자들이 예금으로 자금을 옮기거나, 미국 시장의 3배 레버리지 상품에 투자하여 손실 만회를 시도하는 경향이 관찰되고 있습니다.",
-        "summary": [
-          "최근 국내 주식시장에서 사이드카 발동이 금융위기 이후 최고 수준으로 빈번하게 발생하며 높은 변동성을 보이고 있습니다.",
-          "투자자들은 매도-매수가 반복되는 비정상적인 시장 상황에 실망하여 국내 주식시장을 이탈하는 움직임을 보이고 있습니다.",
-          "이탈 자금은 예금으로 향하고 있으며, 부동산 시장은 기존 손실과 강한 규제로 인해 새로운 투자처가 되기 어려운 상황입니다.",
-          "일부 투자자들은 국내 시장에서의 손실을 만회하기 위해 미국 주식시장으로 이동, 특히 3배 레버리지 상품(SOXL 등)에 베팅하는 경향을 보이고 있습니다."
-        ],
-        "tickers": [
-          {
-            "name": "SOXL",
-            "ticker": "SOXL",
-            "context": "미국 시장에서 3배 레버리지 상품을 통해 손실 만회를 시도하는 투자자들의 움직임",
-            "view": "중립",
-            "t": 55
-          }
-        ],
-        "key_points": [
-          {
-            "point": "국내 주식시장의 잦은 사이드카 발동과 비정상적인 거래 양상은 투자자들에게 큰 실망감을 안겨주고 있습니다.",
-            "t": 0
-          },
-          {
-            "point": "국내 주식 및 부동산 시장의 불확실성으로 인해 자금이 예금으로 이동하는 경향이 뚜렷하며, 부동산은 규제와 손실로 인해 투자 매력이 떨어지고 있습니다.",
-            "t": 33
-          },
-          {
-            "point": "손실 만회를 목표로 미국 주식시장, 특히 고위험 3배 레버리지 상품에 대한 투자가 증가하는 추세가 데이터로 확인되고 있습니다.",
-            "t": 49
-          }
-        ],
-        "actionable": [
-          "변동성이 큰 시장 환경에서는 급격한 레버리지 투자가 추가적인 손실을 야기할 수 있으므로, 투자 시 개인의 위험 감수 수준을 재평가하고 신중하게 접근해야 합니다.",
-          "국내외 시장의 자산 흐름과 트렌드를 면밀히 관찰하여 포트폴리오의 균형을 유지하고, 분산 투자를 고려하는 것이 중요합니다.",
-          "단기적인 손실 만회를 위한 '복수 매매' 심리를 경계하고, 장기적인 관점에서 합리적인 투자 원칙을 고수해야 합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-28T19:25:14.227383+09:00"
     }
   ],
-  "updated": "2026-08-05T20:12:53.792616+09:00"
+  "updated": "2026-08-05T22:23:14.486984+09:00"
 }
