@@ -369,8 +369,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-06T01:08:13.797072+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-06T03:17:38.156684+09:00"
     },
     {
       "video_id": "q31oB_kKuvM",
@@ -423,11 +423,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-06T01:07:41.047382+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-06T03:17:05.420523+09:00"
     },
     {
       "video_id": "P1Dlihaj2xs",
@@ -442,11 +442,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-06T01:05:59.067369+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-06T03:16:32.973006+09:00"
     },
     {
       "video_id": "P5njVdWtDrU",
@@ -495,16 +495,106 @@
       "url": "https://www.youtube.com/watch?v=kOdxW6wZCs0",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "one_liner": "오종태는 불확실성이 큰 시장에서 정답을 찾기보다, 다양한 변수를 고려한 확률적 사고와 자산 배분 조정을 통해 포트폴리오의 안정적인 성장을 추구하는 복잡계 투자를 강조한다.",
+        "summary": [
+          "어렵고 불확실한 시장 상황에서는 과거의 사이클 경제 이론처럼 정답을 찾는 것이 아니라, 여러 변수를 종합적으로 고려하여 '유용한 방법'을 찾아 적용하는 '복잡계 투자' 방식이 필요하다.",
+          "투자의 핵심은 매매 타이밍이 아닌 비중 관리이며, 주식 외에도 예금, 채권, 연금 등 다양한 자산군을 활용하여 포트폴리오 전체의 위험-수익 균형을 조절해야 한다.",
+          "인버스 투자는 시장 하락에 대한 손실 보전, 자산 변동성 축소, 거시경제 이벤트 대응 등 세 가지 용도로 활용될 수 있다.",
+          "특히, 한국 시장처럼 특정 대형주(삼성전자, SK하이닉스 등)의 비중이 높은 상황에서는 개별 종목 매매가 아닌 전체 위험자산 축소를 위한 비중 조정이 중요하다.",
+          "모두가 같은 방향으로 쏠리는 시장 심리는 유동성과 맞물려 펀더멘털과 다른 결과를 낳을 수 있으므로, 이러한 시장 심리를 파악하고 대응하는 것이 필요하다.",
+          "2026년 현재 시장은 역사상 유례없는 변동성, 방향성, 쏠림 현상을 보이고 있으며, 이러한 상황에서는 어정쩡한 대응보다는 과감한 움직임(적극적 투자 또는 관망)이 적절하다."
+        ],
+        "tickers": [
+          {
+            "name": "코스피",
+            "ticker": "",
+            "context": "2026년 7월 중순, 코스피 2700 정도 이하부터 시장의 가격 매력도가 나타났다.",
+            "view": "긍정",
+            "t": 46
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "한국 시장에서 SK하이닉스와 함께 시장 전체의 60%를 차지하며, 관련주까지 포함하면 70%에 육박하는 비중을 차지한다.",
+            "view": "중립",
+            "t": 1490
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "한국 시장에서 삼성전자와 함께 시장 전체의 60%를 차지하며, 관련주까지 포함하면 70%에 육박하는 비중을 차지한다.",
+            "view": "중립",
+            "t": 1490
+          },
+          {
+            "name": "코덱스 ETF",
+            "ticker": "",
+            "context": "2026년 5월경 반도체 산업의 비중을 코덱스 ETF를 통해 중소형주 비중을 높이는 방식으로 바꾸어 모든 사람이 IT산업만 보고 있을 때의 투자 쏠림에 대응했다.",
+            "view": "중립",
+            "t": 1529
+          },
+          {
+            "name": "삼양식품",
+            "ticker": "003230",
+            "context": "2026년 7월 시장 대응 시, 포트폴리오 내 다른 성격의 종목으로 삼양식품의 비중을 높게 가져갔다.",
+            "view": "긍정",
+            "t": 1899
+          }
+        ],
+        "key_points": [
+          {
+            "point": "2026년 5월 말 시장은 가장 높은 구간이었으며, 이후 여름까지 조심스러운 대응이 필요하다고 판단했다.",
+            "t": 30
+          },
+          {
+            "point": "2026년 7월 중순부터 코스피 2700선 이하에서 시장의 가격 매력도(펀더멘털 단단함)가 나타나기 시작했다고 분석했다.",
+            "t": 43
+          },
+          {
+            "point": "불확실성 시대의 투자는 정답을 찾는 것이 아니라, 변화하는 상황에 대응할 수 있는 '유용한 방법'을 만들고 실행하는 것이다.",
+            "t": 315
+          },
+          {
+            "point": "매일 농부가 밭을 돌보듯이, 투자자는 매 순간 시장 환경과 개별 자산의 변화를 확인하고 포트폴리오를 수정해야 한다.",
+            "t": 842
+          },
+          {
+            "point": "주식 투자뿐만 아니라 예금, 개인연금, ETF, 금 등 다양한 자산으로 구성된 전체 자산 포트폴리오를 관리하는 관점으로 접근해야 한다.",
+            "t": 746
+          },
+          {
+            "point": "2026년 시장은 투자 경험이 오래된 사람들에게도 처음 겪는 변동성과 쏠림 현상을 보이며, 이는 역사상 유례없는 상황이다.",
+            "t": 1930
+          },
+          {
+            "point": "과거 사이클 경제 이론이 지배하던 시대를 지나, 데이터 경제와 기술 혁신(AI, 모바일 등)이 시장에 더 큰 영향을 미치는 새로운 경제 구조로 변화했다.",
+            "t": 1110
+          },
+          {
+            "point": "비중을 계속 변경하는 것은 개별 종목 매매가 아닌, 전체 포트폴리오의 위험 자산 축소와 매크로 이벤트 대응을 위한 자산 배분 전략의 일환이다.",
+            "t": 2317
+          },
+          {
+            "point": "인버스(Inverse) 전략은 하락에 베팅하는 것이 아니라, 손실 보전, 포트폴리오 변동성 축소, 매크로 이벤트 대응을 위한 헷지 수단으로 활용한다.",
+            "t": 2128
+          },
+          {
+            "point": "시장이 쏠리는 구간에서는 펀더멘털보다는 유동성과 시장 심리에 의한 가격 반영이 더 중요해지며, 이를 파악하는 것이 중요하다.",
+            "t": 1718
+          },
+          {
+            "point": "개인 투자자는 기관 투자자보다 시장에 대한 시야가 좁을 수 있으므로, 열린 생각과 마음으로 시장을 바라보고 폭넓은 관점에서 투자를 해야 한다.",
+            "t": 2515
+          }
+        ],
+        "actionable": [
+          "포트폴리오의 자산 비중을 주기적으로 점검하고 시장 상황(거시, 미시, 심리)에 따라 능동적으로 조정하여 리스크를 관리하라.",
+          "시장 쏠림이 과도하다고 판단될 경우, 인버스 ETF를 활용하여 포트폴리오의 변동성을 줄이거나 특정 매크로 이벤트에 대비하는 헷지 전략을 고려하라."
+        ]
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-06T00:55:24.042654+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-08-06T03:11:32.689776+09:00"
     },
     {
       "video_id": "klB_pYV58yI",
@@ -522,8 +612,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-06T00:50:22.107183+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-06T03:09:07.347067+09:00"
     },
     {
       "video_id": "uMt9Ix3bQfI",
@@ -13278,5 +13368,5 @@
       "analyzed_at": "2026-07-28T21:28:45.358595+09:00"
     }
   ],
-  "updated": "2026-08-06T01:08:14.797325+09:00"
+  "updated": "2026-08-06T03:17:39.156894+09:00"
 }
