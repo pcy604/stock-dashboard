@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "LJ6Bc8obUVc",
+      "title": "삼전닉스 반등만 기다리시나요? 그 사이 다른 상승 기회를 놓칩니다 | 이재규 SK증권 PB차장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-08-06T13:00:18+00:00",
+      "url": "https://www.youtube.com/watch?v=LJ6Bc8obUVc",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-06T22:18:38.140370+09:00"
+    },
+    {
       "video_id": "klrAwP5bH8o",
       "title": "\"바닥 확인하고 움직여라\" 그렇지 않다면...! | 하창완 하보노의 주식 이야기 대표 [더블 체크]",
       "channel": "삼프로TV",
@@ -35,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-06T20:14:07.776382+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-06T22:20:47.786564+09:00"
     },
     {
       "video_id": "0iWp1EI5sIw",
@@ -54,8 +73,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-06T20:13:35.496236+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-06T22:20:15.541447+09:00"
     },
     {
       "video_id": "3v1Avz9Ijmk",
@@ -73,8 +92,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-06T20:13:03.347133+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-06T22:19:42.732647+09:00"
     },
     {
       "video_id": "8H20N3eXxRg",
@@ -92,8 +111,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-06T20:12:31.178178+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-06T22:19:10.406400+09:00"
     },
     {
       "video_id": "v5zKEpXDhbc",
@@ -310,8 +329,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-06T20:15:44.346449+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-06T22:21:53.054406+09:00"
     },
     {
       "video_id": "rAIwAMIhvkA",
@@ -384,8 +403,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-06T20:15:12.297331+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-06T22:21:20.639430+09:00"
     },
     {
       "video_id": "rmylmQuzQdc",
@@ -1084,11 +1103,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-06T20:09:41.977361+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-06T22:17:18.371116+09:00"
     },
     {
       "video_id": "YdqLiexBJP0",
@@ -13120,64 +13139,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-29T20:14:29.928158+09:00"
-    },
-    {
-      "video_id": "iuKTS7atsow",
-      "title": "7월 폭락 후 주가는 어디까지 반등할까? #박세익 #폭락",
-      "channel": "체슬리TV",
-      "published": "2026-07-29T08:12:32+00:00",
-      "url": "https://www.youtube.com/watch?v=iuKTS7atsow",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "7월 폭락 이후 주식 시장은 호르무즈 해협 안정화, 유가 및 금리 하락 등의 거시 지표 개선에 힘입어 코스피 기준 7,300에서 8,000포인트까지 반등할 것으로 전망됩니다.",
-        "summary": [
-          "단기간 급락한 시장은 피보나치 수열을 기반으로 반등을 예측할 수 있으며, 약한 시장은 낙폭의 약 35%, 일반 시장은 약 63%를 회복하는 경향이 있습니다.",
-          "현재 시장은 아무리 약하더라도 코스피 기준 최소 7,300포인트까지 자율 반등할 것으로 예상됩니다.",
-          "호르무즈 해협의 상황이 정상화되면서 유가가 75달러 아래로 하락하는 것이 시장에 긍정적인 영향을 미칩니다.",
-          "미국 10년물 국채 금리가 4.3%에서 4.2% 수준으로 하락하는 추세도 주식 시장 반등에 기여할 것입니다.",
-          "유가 및 금리가 안정화될 경우 코스피는 7,500에서 8,000포인트 수준까지 상승할 수 있을 것으로 분석됩니다."
-        ],
-        "tickers": [
-          {
-            "name": "KOSPI",
-            "ticker": "",
-            "context": "7월 폭락 후 시장 반등 목표치 (7,300 ~ 8,000 포인트) 예상",
-            "view": "긍정",
-            "t": 15
-          }
-        ],
-        "key_points": [
-          {
-            "point": "7월 시장의 단기간 급락 후 반등 가능성을 피보나치 수열로 분석합니다.",
-            "t": 1
-          },
-          {
-            "point": "약한 시장은 통상 낙폭의 35%를 회복하며, 일반적인 시장은 63%까지 회복하는 경향이 있습니다.",
-            "t": 4
-          },
-          {
-            "point": "최소한의 반등 목표는 7,300포인트로 예상하며, 거시 환경 개선 시 7,500~8,000포인트까지 상승할 수 있습니다.",
-            "t": 15
-          },
-          {
-            "point": "호르무즈 해협 정상화로 인한 유가(75불 이하) 하락이 시장에 긍정적인 영향을 미칩니다.",
-            "t": 23
-          },
-          {
-            "point": "미국 10년물 국채 금리가 4.3%에서 4.2% 수준으로 하락하는 것이 주가 상승의 주요 동력입니다.",
-            "t": 30
-          }
-        ],
-        "actionable": [
-          "호르무즈 해협 관련 뉴스 및 국제 유가(WTI 기준 75달러 선) 변동 추이를 지속적으로 모니터링하세요.",
-          "미국 10년물 국채 금리의 추가 하락 여부를 주시하며 시장의 금리 반응을 평가하세요.",
-          "코스피의 예상 반등 구간(7,300~8,000포인트)을 참고하여 투자 전략을 수립하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-29T20:09:59.213837+09:00"
     }
   ],
-  "updated": "2026-08-06T20:15:45.346708+09:00"
+  "updated": "2026-08-06T22:21:54.054666+09:00"
 }
