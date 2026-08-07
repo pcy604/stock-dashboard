@@ -16,8 +16,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T20:36:02.853270+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T21:29:46.393637+09:00"
     },
     {
       "video_id": "7mzfgZlhPG0",
@@ -35,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T20:33:53.757260+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T21:27:04.632197+09:00"
     },
     {
       "video_id": "8XN-_N2gDck",
@@ -263,8 +263,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-07T20:36:35.141735+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-07T21:30:18.582716+09:00"
     },
     {
       "video_id": "OYdB-pi7cEs",
@@ -301,8 +301,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T18:44:01.477623+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T21:29:13.682751+09:00"
     },
     {
       "video_id": "2aivofKF-eE",
@@ -320,8 +320,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-07T20:34:58.423652+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-07T21:28:09.054831+09:00"
     },
     {
       "video_id": "2S-rs-e-Q1g",
@@ -339,8 +339,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-07T20:34:25.923940+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-07T21:27:36.796514+09:00"
     },
     {
       "video_id": "2maLCg9P-XY",
@@ -358,8 +358,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-07T20:28:49.366408+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-07T21:26:31.362294+09:00"
     },
     {
       "video_id": "mQI2dENOx9A",
@@ -561,8 +561,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-07T20:37:07.535054+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-07T21:30:50.815654+09:00"
     },
     {
       "video_id": "NahnlTzfD_4",
@@ -657,8 +657,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-07T20:35:30.675299+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-07T21:28:41.332694+09:00"
     },
     {
       "video_id": "E6VuOChaO_g",
@@ -13285,5 +13285,5 @@
       "analyzed_at": "2026-07-30T23:58:41.456865+09:00"
     }
   ],
-  "updated": "2026-08-07T20:37:08.535385+09:00"
+  "updated": "2026-08-07T21:30:51.815889+09:00"
 }
