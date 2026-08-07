@@ -1,6 +1,253 @@
 {
   "items": [
     {
+      "video_id": "T9PJyRAmiRM",
+      "title": "ISA논란, 지금 난리난 이유 #생산성금융ISA #ISA #슈퍼ISA #ISA혜택",
+      "channel": "와이스트릿",
+      "published": "2026-08-07T09:43:30+00:00",
+      "url": "https://www.youtube.com/watch?v=T9PJyRAmiRM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T20:36:02.853270+09:00"
+    },
+    {
+      "video_id": "7mzfgZlhPG0",
+      "title": "하이닉스 팔고 다른 종목 진입하기도 애매하다면 다음주 코스닥 실적주간을 주목 | 명민준, 박가영, 황유현 신한투자증권 팀장 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-07T10:18:10+00:00",
+      "url": "https://www.youtube.com/watch?v=7mzfgZlhPG0",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T20:33:53.757260+09:00"
+    },
+    {
+      "video_id": "8XN-_N2gDck",
+      "title": "반도체만으로는 부족하다? 하반기 시장에서 주목해야 할 변화 | 명민준, 박가영, 이재규 SK증권 PB 차장 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-07T11:14:35+00:00",
+      "url": "https://www.youtube.com/watch?v=8XN-_N2gDck",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "하반기 시장은 상반기 대형주 위주에서 종목별 장세로 전환될 것으로 예상되며, 투자자는 소외되었던 코스닥과 성장성이 높은 특정 섹터에 선별적 관심을 가지고 유연한 포트폴리오 전략을 구사해야 합니다.",
+        "summary": [],
+        "tickers": [
+          {
+            "name": "SK증권",
+            "ticker": "",
+            "context": "이재규 PB 차장의 소속",
+            "view": "중립",
+            "t": 9
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "상반기 시장을 주도한 대형주, 하반기에는 다른 흐름 예상",
+            "view": "중립",
+            "t": 50
+          },
+          {
+            "name": "알테오젠",
+            "ticker": "196170",
+            "context": "최근 저점 대비 50% 급등하며 1차 반등 완료",
+            "view": "긍정",
+            "t": 235
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "상반기 시장을 주도한 대형주, 하반기에는 다른 흐름 예상",
+            "view": "중립",
+            "t": 300
+          },
+          {
+            "name": "LS ELECTRIC",
+            "ticker": "000620",
+            "context": "최근 30~40% 상승하며 시장 강세 업종으로 언급",
+            "view": "긍정",
+            "t": 699
+          },
+          {
+            "name": "코스피",
+            "ticker": "KOSPI",
+            "context": "최근 덜 밀렸지만 코스닥 대비 상승 여력은 상대적으로 낮을 수 있음",
+            "view": "중립",
+            "t": 815
+          },
+          {
+            "name": "코스닥",
+            "ticker": "KOSDAQ",
+            "context": "저점 대비 30% 상승하며 1차 반등 완료, 연말 1000포인트 목표 제시",
+            "view": "긍정",
+            "t": 216
+          },
+          {
+            "name": "삼성바이오로직스",
+            "ticker": "207940",
+            "context": "120일 이동평균선 위에 위치한 바이오 기업으로 언급",
+            "view": "긍정",
+            "t": 2495
+          },
+          {
+            "name": "셀트리온",
+            "ticker": "068270",
+            "context": "120일 이동평균선 위에 위치한 바이오 기업으로 언급",
+            "view": "긍정",
+            "t": 2504
+          },
+          {
+            "name": "KB금융",
+            "ticker": "105560",
+            "context": "7월에 좋았던 금융주로 언급, 120일 이동평균선 위에 위치",
+            "view": "긍정",
+            "t": 2512
+          },
+          {
+            "name": "현대차",
+            "ticker": "005380",
+            "context": "자동차 부품주와 함께 언급되며 실적 대비 저평가되어 하반기 매력적일 수 있음",
+            "view": "긍정",
+            "t": 3314
+          },
+          {
+            "name": "한화에어로스페이스",
+            "ticker": "012450",
+            "context": "하단에 있는 종목으로 언급되며 상승 가능성 제시",
+            "view": "긍정",
+            "t": 4205
+          },
+          {
+            "name": "HD현대중공업",
+            "ticker": "329180",
+            "context": "하단에 있는 종목으로 언급되며 상승 가능성 제시",
+            "view": "긍정",
+            "t": 4206
+          },
+          {
+            "name": "리노공업",
+            "ticker": "058470",
+            "context": "반도체 소부장(소재, 부품, 장비) 업종에 대한 관심 필요",
+            "view": "긍정",
+            "t": 3340
+          },
+          {
+            "name": "주성엔지니어링",
+            "ticker": "036930",
+            "context": "태양광 관련주로 언급, 반도체 소부장에도 해당",
+            "view": "긍정",
+            "t": 3342
+          },
+          {
+            "name": "이오테크닉스",
+            "ticker": "039030",
+            "context": "반도체 소부장 업종에 대한 관심 필요",
+            "view": "긍정",
+            "t": 3347
+          },
+          {
+            "name": "테스",
+            "ticker": "095610",
+            "context": "반도체 소부장 업종에 대한 관심 필요",
+            "view": "긍정",
+            "t": 3348
+          },
+          {
+            "name": "삼성SDI",
+            "ticker": "006400",
+            "context": "7분기만에 흑자 전환하며 2차 전지 섹터의 긍정적 흐름 주도",
+            "view": "긍정",
+            "t": 2853
+          },
+          {
+            "name": "LG에너지솔루션",
+            "ticker": "373220",
+            "context": "3분기만에 흑자 전환하며 2차 전지 섹터의 긍정적 흐름 주도",
+            "view": "긍정",
+            "t": 2857
+          },
+          {
+            "name": "엘앤에프",
+            "ticker": "066970",
+            "context": "실적이 잘 나온 2차 전지 관련주로 언급",
+            "view": "긍정",
+            "t": 2901
+          },
+          {
+            "name": "D&D파마텍",
+            "ticker": "352930",
+            "context": "최근 급락했으나 소액 관심 가질 만한 바이오주로 언급",
+            "view": "중립",
+            "t": 3321
+          },
+          {
+            "name": "한올바이오파마",
+            "ticker": "009420",
+            "context": "코스피 바이오 기업으로 소액 관심 가질 만함",
+            "view": "긍정",
+            "t": 3343
+          },
+          {
+            "name": "SK스퀘어",
+            "ticker": "402340",
+            "context": "SK하이닉스 지분을 보유한 지주사로, 시가총액이 저평가되어 상승 여력 있음",
+            "view": "긍정",
+            "t": 4145
+          }
+        ],
+        "key_points": [
+          {
+            "point": "코스닥 및 제약/바이오 섹터의 1차 반등 완료: 이재규 차장은 코스닥 지수가 630포인트에서 800포인트까지 약 30% 상승하고, 알테오젠 같은 종목이 50% 급등하는 등 낙폭 과대주들의 단기 반등이 충분히 나왔다고 판단합니다.",
+            "t": 137
+          },
+          {
+            "point": "하반기 시장은 종목별 장세로 전환: 상반기 삼성전자와 SK하이닉스 중심의 대형주 장세에서 벗어나, 하반기에는 실적과 성장성을 겸비한 개별 종목들의 움직임이 중요해질 것이라고 강조합니다.",
+            "t": 307
+          },
+          {
+            "point": "수익률을 위한 '다르게' 혹은 '더 빠르게' 투자: 높은 수익률을 위해서는 남들과 다른 관점으로 시장에 접근하거나, 변화의 타이밍을 남들보다 빠르게 잡는 것이 중요하다고 조언합니다.",
+            "t": 541
+          },
+          {
+            "point": "포트폴리오 비중 조정의 필요성: 과거의 추세를 맹목적으로 따르기보다, 시장 분위기 변화에 맞춰 포트폴리오를 유연하게 조정하는 용기가 필요하며, 특히 물려있는 종목에 대한 손절 부담을 줄이기 위해 일부 매도를 고려할 수 있습니다.",
+            "t": 1600
+          },
+          {
+            "point": "코스닥 시장의 잠재력: 코스피 대비 낙폭이 적었던 코스닥은 연말까지 1000포인트 도달 가능성이 있으며, 특히 제약/바이오, 2차 전지, 로봇, 반도체 소부장 등 특정 섹터 내에서 기회를 찾아야 한다고 말합니다.",
+            "t": 2245
+          },
+          {
+            "point": "관심 종목군 제시: 제약/바이오 (삼성바이오로직스, 셀트리온, 알테오젠, 한올바이오파마, D&D파마텍), 2차 전지 (삼성SDI, LG에너지솔루션, 엘앤에프), 로봇, 반도체 소부장 (리노공업, 주성엔지니어링, 이오테크닉스, 테스), 자동차 (현대차 그룹) 등이 하반기 주목할 섹터로 언급됩니다.",
+            "t": 3251
+          }
+        ],
+        "actionable": [
+          "현재 포트폴리오에서 낙폭 과대 후 단기 급등한 코스닥 종목의 일부를 매도하여 현금을 확보하고, 하반기 시장 주도주로 예상되는 섹터로 전환을 고려하세요.",
+          "2차 전지, 로봇, 반도체 소부장, 제약/바이오 섹터 내에서 실적과 성장 가치를 겸비하고 있으나 아직 시장의 큰 관심을 받지 못했거나 조정을 받은 종목을 선별하여 연구하고 투자 기회를 모색하세요.",
+          "해외 증시에 자금을 배분할 계획이 있다면, 미국 증시보다 한국 시장이 더 강세를 보일 수 있다는 관점을 고려하여 자산 배분 비중을 재검토해 볼 수 있습니다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T20:33:21.444426+09:00"
+    },
+    {
       "video_id": "LtpSwiYWq5M",
       "title": "잃지 않는 주식 투자 여기서는 가능합니다 #김정현 #공모주 #투자 #하반기 #주식 #공모주투자",
       "channel": "와이스트릿",
@@ -16,8 +263,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T18:45:05.848642+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T20:36:35.141735+09:00"
     },
     {
       "video_id": "OYdB-pi7cEs",
@@ -73,8 +320,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T18:42:56.893946+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T20:34:58.423652+09:00"
     },
     {
       "video_id": "2S-rs-e-Q1g",
@@ -92,8 +339,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T18:42:24.806312+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T20:34:25.923940+09:00"
     },
     {
       "video_id": "2maLCg9P-XY",
@@ -111,8 +358,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T18:41:52.242505+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T20:28:49.366408+09:00"
     },
     {
       "video_id": "mQI2dENOx9A",
@@ -314,8 +561,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-07T18:45:37.876578+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-07T20:37:07.535054+09:00"
     },
     {
       "video_id": "NahnlTzfD_4",
@@ -410,8 +657,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-07T18:43:29.076774+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-07T20:35:30.675299+09:00"
     },
     {
       "video_id": "E6VuOChaO_g",
@@ -13036,124 +13283,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-30T23:58:41.456865+09:00"
-    },
-    {
-      "video_id": "fg_tEUEg2n8",
-      "title": "폭락 뒤 남은 변수…지금은 매도보다 회복을 준비할 때ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
-      "channel": "삼프로TV",
-      "published": "2026-07-30T11:30:11+00:00",
-      "url": "https://www.youtube.com/watch?v=fg_tEUEg2n8",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-31T04:04:08.230478+09:00"
-    },
-    {
-      "video_id": "BuAOEEiOSUc",
-      "title": "[하이라이트] 전쟁보다 더 무서운 하락...여기서는 배팅이 맞다 | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.30.목]",
-      "channel": "체슬리TV",
-      "published": "2026-07-30T10:00:13+00:00",
-      "url": "https://www.youtube.com/watch?v=BuAOEEiOSUc",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "시장 하락은 일시적이며 결국 우량주는 회복하지만, 레버리지를 사용한 단일 종목 투자는 매우 위험하므로 공부를 통해 확신을 가지고 장기 투자해야 한다.",
-        "summary": [
-          "현재 시장 하락은 생존을 위협하는 수준이지만, 본질적으로 우량주라면 결국 V자 반등을 보일 것이다.",
-          "이익 증가 없는 주가 상승은 신기루와 같으므로, 시장이 과열될 때 현금을 확보하고 조정 시 우량주를 매수하는 전략이 필요하다.",
-          "단기적으로 금리 인상 가능성과 외국인 매도세가 시장을 불안하게 만들고 있으나, 결국 스마트머니는 저점에 다시 들어올 것이다.",
-          "개별 종목 레버리지 투자는 카지노와 같은 도박이므로 매우 위험하며, 주식 투자는 인내심을 갖고 기업 공부를 통해 확신을 가져야 한다.",
-          "역사적으로 시장은 항상 우상향했으므로, 단기적인 시장 상황에 일희일비하기보다 장기적인 관점에서 우량주 투자를 유지하는 것이 중요하다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "외인 청산 및 하이닉스와 함께 주가 하락",
-            "view": "중립",
-            "t": 350
-          },
-          {
-            "name": "하이닉스",
-            "ticker": "000660",
-            "context": "삼성전자와 함께 외인 청산으로 주가 하락",
-            "view": "중립",
-            "t": 514
-          },
-          {
-            "name": "대우그룹",
-            "ticker": "",
-            "context": "우량주였으나 결국 망했던 사례로, 종목 레버리지 위험성을 강조하는 데 사용",
-            "view": "부정",
-            "t": 952
-          }
-        ],
-        "key_points": [
-          {
-            "point": "현재 시장 하락은 생존을 위협할 정도로 심각하지만, 본질적으로 시장은 V자 반등할 것이다.",
-            "t": 1
-          },
-          {
-            "point": "이익 증가 없는 주가 상승은 거품이므로, 시장 과열 시 현금 확보가 중요하며, 조정 시 우량주를 저가 매수하여 주식 수를 늘리는 기회로 삼아야 한다.",
-            "t": 27
-          },
-          {
-            "point": "레버리지를 사용하지 않는 투자자는 현재 시장의 불확실성에 대응하기 위해 잠시 시장을 떠나 휴식을 취하며 심리적 안정과 재충전의 시간을 가져라.",
-            "t": 300
-          },
-          {
-            "point": "코로나 팬데믹과 같은 특이한 상황이 아닌 현재의 명확하지 않은 외국인 매도세는 투자자들의 배신감을 키우고 있지만, 결국 스마트머니는 저점에 다시 진입할 것이다.",
-            "t": 390
-          },
-          {
-            "point": "단일 종목에 대한 레버리지 투자는 투기가 될 수 있으며, 장기적으로는 지수가 우상향하더라도 개별 우량주가 사라질 수도 있음을 경계해야 한다.",
-            "t": 837
-          },
-          {
-            "point": "주식의 역사는 항상 우상향했으므로, 잡주가 아니라면 장기적으로는 다 올라오게 되어 있다. 다만 그 대가는 '시간'이다.",
-            "t": 610
-          },
-          {
-            "point": "투자자들은 과거의 후회를 반복하지 말고, 현재 상황을 기록하고 기업 공부를 통해 확신을 가지고 '무엇을 살지'에 집중해야 한다.",
-            "t": 1110
-          }
-        ],
-        "actionable": [
-          "시장 과열 시 현금 확보를 통해 조정장에서 우량주를 저가 매수할 기회를 노려라.",
-          "레버리지를 사용하지 않는 개인 투자자는 잠시 시장을 떠나 휴식을 취하며 심리적 안정과 재충전의 시간을 가져라.",
-          "단일 종목에 대한 레버리지 투자를 피하고, 우량 기업에 대한 심층적인 공부를 통해 투자 확신을 키워라."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T21:15:59.899341+09:00"
-    },
-    {
-      "video_id": "uyY2Uah4PiE",
-      "title": "죽고싶지 않아! 실리콘밸리가 움직인다 100년, 아니 200년 갑니다 [뭣이라!? EP.17] / 송이라 기자",
-      "channel": "와이스트릿",
-      "published": "2026-07-30T02:45:12+00:00",
-      "url": "https://www.youtube.com/watch?v=uyY2Uah4PiE",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-30T21:26:49.478108+09:00"
     }
   ],
-  "updated": "2026-08-07T18:46:11.043024+09:00"
+  "updated": "2026-08-07T20:37:08.535385+09:00"
 }
