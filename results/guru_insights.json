@@ -8,16 +8,47 @@
       "url": "https://www.youtube.com/watch?v=T9PJyRAmiRM",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "one_liner": "새롭게 도입되는 '생산적 금융 ISA'는 투자 한도 확대와 전액 비과세 혜택을 제공하지만, 국내 주식 및 펀드로 투자가 제한되고 기존 ISA의 혜택이 축소되어 논란이 되고 있습니다.",
+        "summary": [
+          "새로운 '생산적 금융 ISA'가 도입되며 투자 한도가 기존 1억 원에서 2억 원으로 두 배 증가했습니다.",
+          "이 계좌에서는 이자 및 배당 소득 전액에 대해 비과세 혜택이 적용됩니다.",
+          "하지만 투자 대상은 국내 주식, 국내 주식형 펀드, 국민 성장 펀드로 엄격하게 제한됩니다.",
+          "기존 ISA의 혜택 중 올해 미사용 한도의 다음 해 이월 제도가 폐지되었습니다.",
+          "또한, 5년마다 계좌를 의무적으로 해지해야 하는 조건이 추가되어 장기 보유가 어려워졌습니다.",
+          "국내 주식의 매매 차익은 현재도 비과세이므로, 새로운 ISA는 주로 배당 소득에 대한 비과세 혜택에 초점이 맞춰질 것으로 예상됩니다."
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "key_points": [
+          {
+            "point": "'슈퍼 ISA'라는 이름과 달리 제한적인 투자 대상과 기존 혜택 축소로 인해 투자자들 사이에서 논란이 되고 있습니다.",
+            "t": 3
+          },
+          {
+            "point": "새로운 ISA는 국내 주식 및 국내 펀드로만 투자를 허용하여 국내 증시 활성화 목적이 강하지만, 투자 선택의 폭이 제한적입니다.",
+            "t": 13
+          },
+          {
+            "point": "기존 ISA의 핵심 장점이었던 미사용 한도 이월 제도 폐지 및 5년 주기 의무 해지 조건으로 계좌 운용의 유연성이 크게 저하되었습니다.",
+            "t": 25
+          },
+          {
+            "point": "국내 주식 매매 차익은 현재도 비과세이므로, 새로운 ISA의 주요 메리트는 배당 소득에 대한 비과세 혜택에 집중될 것으로 보이며, 이는 특정 투자 스타일(배당주 투자)을 유도할 수 있습니다.",
+            "t": 36
+          },
+          {
+            "point": "현재 세제 개편안에는 불확실한 부분이 많아, 투자자들은 추가적인 정부 발표와 명확한 세부 지침을 주시해야 합니다.",
+            "t": 44
+          }
+        ],
+        "actionable": [
+          "기존 ISA 보유자 및 신규 가입을 고려하는 투자자는 변경된 혜택과 제한 사항을 면밀히 검토하여 자신의 투자 전략을 재고하십시오.",
+          "새로운 ISA의 투자 대상 제한(국내 주식 및 펀드)과 5년 의무 해지 조건을 충분히 인지하고, 이것이 본인의 장기 투자 목표에 부합하는지 분석하십시오.",
+          "정확한 정보를 얻기 위해 관련 세제 개편안에 대한 추가 발표 및 세부 지침을 지속적으로 확인하고, 필요한 경우 금융 당국에 직접 문의하십시오."
+        ]
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-07T22:59:56.549540+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-08-08T00:32:51.949643+09:00"
     },
     {
       "video_id": "7mzfgZlhPG0",
@@ -35,8 +66,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-07T22:58:19.191496+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-08T00:32:02.816319+09:00"
     },
     {
       "video_id": "8XN-_N2gDck",
@@ -13285,5 +13316,5 @@
       "analyzed_at": "2026-07-30T23:58:41.456865+09:00"
     }
   ],
-  "updated": "2026-08-07T23:00:29.906756+09:00"
+  "updated": "2026-08-08T00:32:52.949888+09:00"
 }
