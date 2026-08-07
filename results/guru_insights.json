@@ -1,6 +1,120 @@
 {
   "items": [
     {
+      "video_id": "LtpSwiYWq5M",
+      "title": "잃지 않는 주식 투자 여기서는 가능합니다 #김정현 #공모주 #투자 #하반기 #주식 #공모주투자",
+      "channel": "와이스트릿",
+      "published": "2026-08-07T09:00:26+00:00",
+      "url": "https://www.youtube.com/watch?v=LtpSwiYWq5M",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T18:45:05.848642+09:00"
+    },
+    {
+      "video_id": "OYdB-pi7cEs",
+      "title": "\"이렇게 되면 또 5,000 볼 수도...\" 최악의 시나리오 | 하창완 하보노의 주식 이야기 대표 [더블 체크]",
+      "channel": "삼프로TV",
+      "published": "2026-08-07T01:21:19+00:00",
+      "url": "https://www.youtube.com/watch?v=OYdB-pi7cEs",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T18:44:33.487178+09:00"
+    },
+    {
+      "video_id": "MeCs8dJ28Z8",
+      "title": "모든 데이터센터에 들어가는 '이것' 1위 업체 | 조희진 하나증권 압구정금융센터 PB [더블 크루]",
+      "channel": "삼프로TV",
+      "published": "2026-08-07T01:48:53+00:00",
+      "url": "https://www.youtube.com/watch?v=MeCs8dJ28Z8",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T18:44:01.477623+09:00"
+    },
+    {
+      "video_id": "2aivofKF-eE",
+      "title": "반도체 다시 흔들, 코스피 박스권 돌파 신호는 | 홍선애, 박승영 한화투자증권 PLUS자산전략팀장 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-07T08:39:44+00:00",
+      "url": "https://www.youtube.com/watch?v=2aivofKF-eE",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T18:42:56.893946+09:00"
+    },
+    {
+      "video_id": "2S-rs-e-Q1g",
+      "title": "환율시장 긴장감 커진다…원화 향방 결정할 핵심 변수 | 홍선애, 변정규 다이와증권 코리아 FICC 본부장 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-07T09:21:35+00:00",
+      "url": "https://www.youtube.com/watch?v=2S-rs-e-Q1g",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T18:42:24.806312+09:00"
+    },
+    {
+      "video_id": "2maLCg9P-XY",
+      "title": "'롤러코스피' 생존법ㅣ 체슬리투자자문 박세익 전무 [워매신박 / 26.08.07.금]",
+      "channel": "체슬리TV",
+      "published": "2026-08-07T09:28:35+00:00",
+      "url": "https://www.youtube.com/watch?v=2maLCg9P-XY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-07T18:41:52.242505+09:00"
+    },
+    {
       "video_id": "mQI2dENOx9A",
       "title": "주식 급락장서 발 뻗고 잡니다. 돈 안 뺏기는 유일한 방법 / 홍춘욱 대표 (풀버전)",
       "channel": "와이스트릿",
@@ -200,8 +314,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T17:51:51.232188+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T18:45:37.876578+09:00"
     },
     {
       "video_id": "NahnlTzfD_4",
@@ -293,11 +407,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T17:42:11.303344+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-07T18:43:29.076774+09:00"
     },
     {
       "video_id": "E6VuOChaO_g",
@@ -893,8 +1007,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-07T17:56:12.456845+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-07T18:46:10.042772+09:00"
     },
     {
       "video_id": "6lasWzdJFKk",
@@ -13039,121 +13153,7 @@
       "source": "fail",
       "attempts": 2,
       "analyzed_at": "2026-07-30T21:26:49.478108+09:00"
-    },
-    {
-      "video_id": "Xg7hRPisONQ",
-      "title": "금값 움직이는 10년 사이클의 비밀 #조규원 #금 #변동성 #안전자산 #달러 #예금 #화폐 #사이클",
-      "channel": "와이스트릿",
-      "published": "2026-07-30T04:00:03+00:00",
-      "url": "https://www.youtube.com/watch?v=Xg7hRPisONQ",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T00:02:27.597098+09:00"
-    },
-    {
-      "video_id": "hcJINgy1bw0",
-      "title": "언제 폭등할까? 금값이 움직이는 진짜 순간 #조규원 #금 #변동성 #화폐 #은 #사이클",
-      "channel": "와이스트릿",
-      "published": "2026-07-30T07:00:05+00:00",
-      "url": "https://www.youtube.com/watch?v=hcJINgy1bw0",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-31T02:15:58.552095+09:00"
-    },
-    {
-      "video_id": "gY1bUZw0IRM",
-      "title": "금, 단순 안전자산이라고 착각하지 마세요 #조규원 #금 #변동성 #안전자산 #달러 #예금 #화폐 #사이클",
-      "channel": "와이스트릿",
-      "published": "2026-07-30T08:00:20+00:00",
-      "url": "https://www.youtube.com/watch?v=gY1bUZw0IRM",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-31T02:15:26.048709+09:00"
-    },
-    {
-      "video_id": "KnaSBWiUAmw",
-      "title": "\"환매만 되고 거래가 없다?\" 블랙록이 픽한 RWA 수혜주와 진짜 대장주 찾는 법 | 서동주, 김동환, 김준우 쟁글 대표 [크립토 PLUS]",
-      "channel": "삼프로TV",
-      "published": "2026-07-30T03:17:58+00:00",
-      "url": "https://www.youtube.com/watch?v=KnaSBWiUAmw",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-30T19:07:56.534520+09:00"
-    },
-    {
-      "video_id": "18d4SRbPszs",
-      "title": "[26.07.30 오후 방송 전체보기] 삼성전자 확정 실적에도 반도체는 혼란의 시간...내일 시장의 운명은?",
-      "channel": "삼프로TV",
-      "published": "2026-07-30T11:03:24+00:00",
-      "url": "https://www.youtube.com/watch?v=18d4SRbPszs",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-07-31T02:14:21.190805+09:00"
-    },
-    {
-      "video_id": "mJJt591kmbA",
-      "title": "6,500까지 반등하면, 분위기 반전 올까?ㅣ유창희 & 빈센트 & 정프로 [더블 체크]",
-      "channel": "삼프로TV",
-      "published": "2026-07-30T08:18:55+00:00",
-      "url": "https://www.youtube.com/watch?v=mJJt591kmbA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-07-31T04:07:28.176973+09:00"
     }
   ],
-  "updated": "2026-08-07T17:56:13.457133+09:00"
+  "updated": "2026-08-07T18:46:11.043024+09:00"
 }
