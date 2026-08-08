@@ -1,6 +1,45 @@
 {
   "items": [
     {
+      "video_id": "5sybmWEnYmI",
+      "title": "천국 다녀 온 반도체 장비 포기할 수 없는 이유 #반도체 #메모리 #장비 #장비주 #소부장 #증설 #호돌이 #우황제",
+      "channel": "와이스트릿",
+      "published": "2026-08-08T08:30:33+00:00",
+      "url": "https://www.youtube.com/watch?v=5sybmWEnYmI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "현재 반도체 산업은 과거 슈퍼사이클 대비 공정 복잡도 증가로 장비 투자 규모가 두 배 이상 커진 역대급 증설 사이클에 진입하고 있으며, 이는 장비주들에게 큰 기회가 될 것으로 전망된다.",
+        "summary": [
+          "이번 반도체 산업의 증설은 규모 면에서 과거 10년 전 메모리 슈퍼사이클 당시 웨이퍼 10만 장 규모의 공장 건설과 비교할 때 역대급 규모다.",
+          "과거 대비 기술과 공정이 달라져 동일한 웨이퍼 10만 장 생산에 필요한 장비 수가 두 배 이상 늘었다.",
+          "공정 수 자체가 두 배로 증가하면서 반도체 장비 기업들이 벌어들일 수 있는 수익 규모가 훨씬 커졌다.",
+          "장비주들이 이미 한번 크게 올랐다가 조정을 받았지만, 역대급 증설이라는 점과 향후 반도체 반등 시 다시 한번 도약할 수 있다는 막연한 기대감이 남아있다.",
+          "보수적인 관점에서 보더라도 장비주 포트폴리오를 가져볼 만한 이유가 있다는 견해를 제시했다."
+        ],
+        "tickers": [],
+        "key_points": [
+          {
+            "point": "이번 반도체 증설은 말도 안 되는 규모의 역대급 증설로 평가된다.",
+            "t": 3
+          },
+          {
+            "point": "10년 전 메모리 슈퍼사이클 때와 비교해 동일 웨이퍼 생산량에 필요한 장비 수가 두 배 이상 증가했다.",
+            "t": 10
+          },
+          {
+            "point": "기술 및 공정의 변화로 공정 수 자체가 두 배 늘어, 장비주들의 수익 잠재력이 크게 확대되었다.",
+            "t": 14
+          }
+        ],
+        "actionable": [
+          "반도체 장비 관련 종목 포트폴리오를 구성하거나 유지하는 것을 고려해볼 수 있다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-08T18:20:51.195504+09:00"
+    },
+    {
       "video_id": "cUY1Z1fZUaM",
       "title": "'별'난 사람들이 '주'식으로 '부'자되는 이야기를 '전'해드립니다! | 박세익 전무 & 체슬리 학습부장 & 소현철 박사 [별주부전 / 26.08.08.토]",
       "channel": "체슬리TV",
@@ -151,8 +190,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-08T17:20:53.412134+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-08T18:21:12.136188+09:00"
     },
     {
       "video_id": "TDJ7yxbS9Ug",
@@ -13097,26 +13136,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-07-31T17:21:54.953733+09:00"
-    },
-    {
-      "video_id": "r9J34-MEtds",
-      "title": "월가가 우려한 레버리지, 한국이 아니었나...'상황 인식' 못한 아셴브레너의 추락 | 체슬리투자자문 박세익 전무 [워매신박 / 26.07.31 금]",
-      "channel": "체슬리TV",
-      "published": "2026-07-31T08:01:35+00:00",
-      "url": "https://www.youtube.com/watch?v=r9J34-MEtds",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-01T00:48:14.502400+09:00"
     }
   ],
-  "updated": "2026-08-08T17:20:54.412369+09:00"
+  "updated": "2026-08-08T18:21:13.136435+09:00"
 }
