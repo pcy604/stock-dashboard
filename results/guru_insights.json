@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "xQYwDtoy0-o",
+      "title": "부동산 입지만큼 중요한데 사람들이 '이걸' 너무 몰라요 / 송희구 작가 (풀버전)",
+      "channel": "와이스트릿",
+      "published": "2026-08-08T03:00:10+00:00",
+      "url": "https://www.youtube.com/watch?v=xQYwDtoy0-o",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-08T12:58:51.915915+09:00"
+    },
+    {
+      "video_id": "TDJ7yxbS9Ug",
+      "title": "[8월 월간전망] 역대급 조정 후 단기적 상승, 8월 시장전망과 투자전략을 점검해봅니다 | 체슬리투자자문 박세익 전무",
+      "channel": "체슬리TV",
+      "published": "2026-08-08T03:00:20+00:00",
+      "url": "https://www.youtube.com/watch?v=TDJ7yxbS9Ug",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-08T12:57:18.475016+09:00"
+    },
+    {
       "video_id": "KRdGVQVCbD4",
       "title": "\"집값 잡으려다 전월세 폭등?\" 2026 세제개편안 후폭풍 | 김학렬 소장 [주말인터뷰]",
       "channel": "삼프로TV",
@@ -13,11 +51,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-08T11:34:50.762210+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-08T12:58:19.418775+09:00"
     },
     {
       "video_id": "MI_LyNWy8lM",
@@ -27,17 +65,45 @@
       "url": "https://www.youtube.com/watch?v=MI_LyNWy8lM",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "one_liner": "대부분의 투자자는 비현실적인 수익률을 쫓다가 시장 변동성으로 인한 스트레스를 받으므로, 현실적인 목표를 설정하고 감정적 매매를 피해야 합니다.",
+        "summary": [
+          "시장의 변동성으로 인한 계좌 평가손실을 보며 공포를 느끼고, 본전만 되면 매도하려는 투자 심리가 만연합니다.",
+          "현실적인 연평균 수익률 목표는 15% 수준이지만, 많은 투자자가 비현실적인 1500% 이상의 수익률을 추구합니다.",
+          "고점 매도와 저점 매수를 완벽하게 수행하여 연평균 수천 퍼센트의 수익을 내는 것은 세상에 존재하지 않는 환상입니다.",
+          "전설적인 투자자 스탠리 드러켄밀러(Stanley Druckenmiller)조차 30년간 연평균 30% 수익률을 달성했으며, 이 또한 완벽한 매매 타이밍의 결과는 아닙니다.",
+          "존재하지 않는 비현실적인 수익률을 쫓는 것은 투자자에게 불필요한 스트레스를 유발합니다."
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"많은 투자자가 비현실적인 수익률을 추구하며 스트레스를 받지만, 성공적인 투자는 현실적인 목표와 완벽한 시장 타이밍에 대한 집착을 버리는 데서 시작합니다.\",\n  \"summary\": [\n    \"시장의 변동성 때문에 계좌의 평가손을 보고 공포스러워하며, 본전이 되면 바로 빠져나오는 투자자들이 많습니다.\",\n    \"만약 고점에서 모두 팔고 저점에서 모두 매수하는 것이 가능하다면 연평균 1500% 심지어 3000%의 수익률도 가능하겠지만, 현실에서는 이런 사람은 존재하지 않습니다.\",\n    \"체슬리TV는 연평균 15%의 수익률을 목표로 하고 있습니다.\",\n    \"현존하는 투자 레전드 중 한 명인 스탠리 드러켄밀러(Stanley Druckenmiller)조차 30년간 연평균 30%의 수익률을 기록했으며, 이는 이상적인 시장 타이밍 수익률과는 거리가 있습니다.\",\n    \"존재하지 않는 비현실적인 수익률을 쫓다가 스트레"
+        "key_points": [
+          {
+            "point": "시장 변동성으로 인한 공포와 본전 심리는 투자자들이 장기 투자를 방해하는 주된 요인입니다.",
+            "t": 0
+          },
+          {
+            "point": "현실적인 연평균 수익률 목표를 15% 정도로 설정하는 것이 합리적입니다.",
+            "t": 9
+          },
+          {
+            "point": "고점 매도 및 저점 매수로 연평균 1500% 또는 3000%와 같은 극단적인 수익률은 비현실적이며, 이러한 환상을 쫓지 말아야 합니다.",
+            "t": 13
+          },
+          {
+            "point": "전설적인 투자자 스탠리 드러켄밀러는 30년간 연평균 30% 수익률을 달성했지만, 이는 꾸준한 노력이 아닌 완벽한 타이밍 매매의 결과는 아닙니다.",
+            "t": 25
+          },
+          {
+            "point": "비현실적인 수익률을 추구하는 것은 투자자에게 불필요한 스트레스를 가중시킵니다.",
+            "t": 39
+          }
+        ],
+        "actionable": [
+          "연평균 15%와 같이 현실적인 수익률 목표를 설정하고, 단기적인 시장 변동에 일희일비하지 마십시오.",
+          "완벽한 시장 타이밍으로 수천 퍼센트의 수익을 올릴 수 있다는 환상에서 벗어나, 지속 가능한 투자 전략에 집중하십시오."
+        ]
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-08T11:34:16.457134+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-08T12:57:46.806302+09:00"
     },
     {
       "video_id": "xpjWG6ImHQM",
@@ -52,12 +118,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"이 영상은 투자 스트레스, 중독, 상대적 박탈감 등 투자자의 심리적 문제의 원인을 진단하고, 건강한 투자와 행복한 삶을 위한 관계와 자기 성찰의 중요성을 강조합니다.\",\n  \"summary\": [\n    \"현대 사회의 불안감과 상대적 박탈감은 투자자들이 조바심을 갖고 레버리지나 신용대출을 무리하게 사용하는 투기적 행동으로 이어질 수 있습니다.\",\n    \"투자 스트레스는 일상에 대한 통제권을 잃고 충동적인 투자를 하는 '투자 중독'으로 발전할 수 있으며, 이는 심리적 고통의 주요 원인 중 하나입니다.\",\n    \"성공하는 투자자의 특징은 본업에 충실하고, 시대의 흐름을 명확히 파악하며, 인내심을 갖고 기업의 가치를 제대로 보는 것입니다.\",\n    \"인간관계는 삶의 행복과 성장에 매우 중요한 요소이며, 스트레스의 4가지 주요 요인(일, 돈, 건강, 인간관계) 중 압도적인 1위를 차지합니다.\",\n    \"주변 사람들과"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-08T11:38:52.254447+09:00"
+      "source": "fail",
+      "attempts": 3,
+      "analyzed_at": "2026-08-08T12:59:24.048785+09:00"
     },
     {
       "video_id": "BJoZ12TLG9c",
@@ -13016,45 +13081,7 @@
       "source": "fail",
       "attempts": 1,
       "analyzed_at": "2026-07-31T10:12:59.096962+09:00"
-    },
-    {
-      "video_id": "LJEZrgfrm3A",
-      "title": "\"단숨에 6400까지 폭등\" 올 것이 왔나? | 이지은 이지스탁 대표 [더블 체크]",
-      "channel": "삼프로TV",
-      "published": "2026-07-31T00:52:15+00:00",
-      "url": "https://www.youtube.com/watch?v=LJEZrgfrm3A",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-07-31T10:12:26.827978+09:00"
-    },
-    {
-      "video_id": "VuTd_JIfvY0",
-      "title": "\"360만원 열차 출발하나요?\" 진짜 가요? | 김록호 하나증권 리서치센터 팀장 [더블 크루]",
-      "channel": "삼프로TV",
-      "published": "2026-07-31T00:54:43+00:00",
-      "url": "https://www.youtube.com/watch?v=VuTd_JIfvY0",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-07-31T20:17:26.157410+09:00"
     }
   ],
-  "updated": "2026-08-08T11:38:53.254688+09:00"
+  "updated": "2026-08-08T12:59:25.049094+09:00"
 }
