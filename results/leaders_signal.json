@@ -1,10 +1,10 @@
 {
- "generated": "2026-08-05",
+ "generated": "2026-08-10",
  "signal_week": "2026-07-27",
- "rule": "RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  PSR < 3",
+ "rule": "RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
  "exit": "고점 대비 −20% 트레일링 · 8종목 × 12.5% · 2주 분할매수 · 불타기 없음",
  "universe": 1258,
- "n": 10,
+ "n": 16,
  "funnel": [
   [
    "유니버스 (시총$2B+ · 거래대금$5M+)",
@@ -15,11 +15,15 @@
    31
   ],
   [
-   "+ PSR < 3",
-   16
+   "+ OPM > 0",
+   21
   ],
   [
    "+ 흑자전환 OR 이익폭증",
+   16
+  ],
+  [
+   "(참고) 위에 PSR<3까지 걸면",
    10
   ]
  ],
@@ -57,6 +61,42 @@
    "opm_qoq": -0.9,
    "marcap_b": 84.1,
    "adv_m": 2575.0,
+   "triggers": [
+    "영업익 신고점",
+    "순익 신고점"
+   ]
+  },
+  {
+   "sym": "DDOG",
+   "name": "Datadog",
+   "close": 267.97,
+   "rs_13w": 1.83,
+   "rs_26w": null,
+   "psr": 11.52,
+   "per": 311.9,
+   "dist_52w": 0.0,
+   "opm": 0.7,
+   "opm_qoq": -0.3,
+   "marcap_b": 42.3,
+   "adv_m": 1007.0,
+   "triggers": [
+    "흑자전환",
+    "순익 신고점"
+   ]
+  },
+  {
+   "sym": "OKTA",
+   "name": "Okta",
+   "close": 141.93,
+   "rs_13w": 1.8,
+   "rs_26w": null,
+   "psr": 5.49,
+   "per": 66.6,
+   "dist_52w": -5.0,
+   "opm": 7.3,
+   "opm_qoq": 1.3,
+   "marcap_b": 16.4,
+   "adv_m": 372.0,
    "triggers": [
     "영업익 신고점",
     "순익 신고점"
@@ -115,6 +155,23 @@
    ]
   },
   {
+   "sym": "BRKR",
+   "name": "Bruker",
+   "close": 62.84,
+   "rs_13w": 1.64,
+   "rs_26w": null,
+   "psr": 3.49,
+   "per": null,
+   "dist_52w": 0.0,
+   "opm": 1.2,
+   "opm_qoq": -6.6,
+   "marcap_b": 12.1,
+   "adv_m": 109.0,
+   "triggers": [
+    "흑자전환"
+   ]
+  },
+  {
    "sym": "PBF",
    "name": "PBF Energy",
    "close": 72.28,
@@ -132,6 +189,26 @@
     "영업익 신고점",
     "순익 신고점",
     "영업익 QoQ+50%"
+   ]
+  },
+  {
+   "sym": "OSCR",
+   "name": "Oscar Health",
+   "close": 31.22,
+   "rs_13w": 1.62,
+   "rs_26w": null,
+   "psr": 112.94,
+   "per": null,
+   "dist_52w": -3.0,
+   "opm": 12313.5,
+   "opm_qoq": 16036.3,
+   "marcap_b": 3.4,
+   "adv_m": 145.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "순익 신고점",
+    "OPM QoQ+3%p"
    ]
   },
   {
@@ -171,6 +248,41 @@
     "순익 신고점",
     "영업익 QoQ+50%",
     "OPM QoQ+3%p"
+   ]
+  },
+  {
+   "sym": "QLYS",
+   "name": "Qualys",
+   "close": 144.75,
+   "rs_13w": 1.57,
+   "rs_26w": null,
+   "psr": 8.97,
+   "per": 30.5,
+   "dist_52w": -9.2,
+   "opm": 34.7,
+   "opm_qoq": 1.1,
+   "marcap_b": 6.1,
+   "adv_m": 85.0,
+   "triggers": [
+    "영업익 신고점"
+   ]
+  },
+  {
+   "sym": "NTAP",
+   "name": "NetApp",
+   "close": 178.5,
+   "rs_13w": 1.54,
+   "rs_26w": null,
+   "psr": 3.03,
+   "per": 16.5,
+   "dist_52w": 0.0,
+   "opm": 27.3,
+   "opm_qoq": 2.0,
+   "marcap_b": 21.0,
+   "adv_m": 395.0,
+   "triggers": [
+    "영업익 신고점",
+    "순익 신고점"
    ]
   },
   {
@@ -214,27 +326,33 @@
   }
  ],
  "backtest": {
-  "period": "2018-01 ~ 2026-07 · 미국 1,279종",
-  "cagr": 27.7,
-  "mdd": -23.9,
-  "recover": 1.16,
+  "period": "2018-06 ~ 2026-08 · 미국 1,271종",
+  "cagr": 32.8,
+  "mdd": -37.7,
+  "recover": 0.87,
   "spy_cagr": 14.2,
   "spy_mdd": -31.8,
   "spy_recover": 0.45,
-  "trades": 107,
-  "winrate": 38.0,
-  "payoff": 5.5,
-  "hold_wk": 21,
-  "med_ret": -6.9,
-  "avg_ret": 23.1,
+  "trades": 136,
+  "winrate": 43.4,
+  "hold_wk": 20.7,
+  "med_ret": -5.9,
   "wf_cagr": "4/6",
-  "wf_recover": "3/6",
+  "wf_recover": "2/6",
+  "prev_rule": {
+   "name": "⑤ PSR<3",
+   "cagr": 27.7,
+   "mdd": -23.9,
+   "recover": 1.16,
+   "why_changed": "주도주 이력 종목 520개 중 90개(17%)가 8년간 PSR<3에 한 번도 진입하지 않아 구조적 사각지대. NVDA는 신호 주차 PSR 최소 10.5로 포착 불가."
+  },
   "rejected": [
    "거래량 급증(어떤 임계도 무효)",
    "52주 신고가 근접(리프트 0.4)",
    "매출 성장률(상방을 깎음)",
-   "OPM 2분기 연속개선(유니버스 재현 실패)",
-   "피라미딩(가격·이익 트리거 모두 회복배율 악화)"
+   "OPM QoQ 개선(워크포워드 2~3/6)",
+   "피라미딩(가격·이익 트리거 모두 회복배율 악화)",
+   "PSR 컷 완화(<10 시 MDD −41.0%)·고PSR 슬리브 분리(수익만 희석)"
   ]
  },
  "paper": {

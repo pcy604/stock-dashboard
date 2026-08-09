@@ -15,7 +15,11 @@ CACHE = os.path.join(BASE, "data", "leaders_cache")
 pd.set_option("display.width", 250, "display.max_columns", 40)
 FEE = 0.001
 FCOLS = ["ma20", "rs_13w", "psr", "per", "dist_52w", "hi_52w", "marcap", "adv_20d",
-         "op_turn", "opm", "opm_qoq", "npm_qoq", "op_pos_streak", "rev_yoy"]
+         "op_turn", "opm", "opm_qoq", "npm_qoq", "op_pos_streak", "rev_yoy",
+         # 2026-08-08 추가 — 영업레버리지 검증용.
+         #   DOL       = 영업이익 증가율 ÷ 매출 증가율      (이미 일어난 레버리지)
+         #   gpm - opm = 판관비 비중                        (앞으로 터질 여지)
+         "gpm", "gpm_qoq", "rev_qoq"]
 
 
 def load():

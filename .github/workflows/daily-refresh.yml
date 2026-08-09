@@ -51,9 +51,10 @@ jobs:
         run: python canslim_run.py
         continue-on-error: true
 
-      - name: 주도주 v2 (지문 기반)
-        run: python leaders_run.py
-        continue-on-error: true
+      # 2026-08-08 제거: leaders_run.py는 results/leaders_v2.json을 만들지만 소비자가 없다.
+      # 08-05에 대시보드 🚀주도주 탭이 leaders_signal.json(규칙⑤)으로 교체됨.
+      # 이 스크립트의 핵심 조건(52주 신고가 -25% 이내 · 영업이익 YoY +100%)은
+      # 유니버스 검증에서 기각된 조건이라 결과를 되살리면 안 됨. 코드는 leaders_run.py에 보존.
 
       - name: US CANSLIM
         run: python canslim_us_run.py

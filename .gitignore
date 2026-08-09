@@ -32,3 +32,6 @@ data/longcache/
 # 주도주 연구 캐시 (대용량, 재생성 가능)
 data/leaders_cache/
 RAW_보기.xlsx
+
+# 2026-08-08: leaders_run.py 산출물 — 소비자 없음. 기각된 규칙(신고가 -25%·영익 YoY+100%) 결과라 되살리지 말 것
+results/leaders_v2.json

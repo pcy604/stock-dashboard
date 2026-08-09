@@ -16,13 +16,20 @@ LEDGER = os.path.join(BASE, "results", "leaders_paper.json")
 BOOST = {"b_ophigh": "영업익 신고점", "b_nihigh": "순익 신고점",
          "b_opjump": "영업익 QoQ+50%", "b_opmjump": "OPM QoQ+3%p"}
 BACKTEST = dict(
-    period="2018-01 ~ 2026-07 · 미국 1,279종", cagr=27.7, mdd=-23.9, recover=1.16,
+    period="2018-06 ~ 2026-08 · 미국 1,271종", cagr=32.8, mdd=-37.7, recover=0.87,
     spy_cagr=14.2, spy_mdd=-31.8, spy_recover=0.45,
-    trades=107, winrate=38.0, payoff=5.5, hold_wk=21, med_ret=-6.9, avg_ret=23.1,
-    wf_cagr="4/6", wf_recover="3/6",
+    trades=136, winrate=43.4, hold_wk=20.7, med_ret=-5.9,
+    wf_cagr="4/6", wf_recover="2/6",     # 구 규칙⑤는 4/6 · 3/6
+    # 2026-08-08 규칙 전환. PSR<3(구 규칙⑤)은 CAGR 27.7 / MDD −23.9 / 회복 1.16 이었다.
+    # MDD가 SPY(−31.8%)보다 나빠지는 것을 받아들이고 CAGR +5.1%p와 사각지대 해소를 택했다.
+    prev_rule=dict(name="⑤ PSR<3", cagr=27.7, mdd=-23.9, recover=1.16,
+                   why_changed="주도주 이력 종목 520개 중 90개(17%)가 8년간 PSR<3에 "
+                               "한 번도 진입하지 않아 구조적 사각지대. NVDA는 신호 주차 "
+                               "PSR 최소 10.5로 포착 불가."),
     rejected=["거래량 급증(어떤 임계도 무효)", "52주 신고가 근접(리프트 0.4)",
-              "매출 성장률(상방을 깎음)", "OPM 2분기 연속개선(유니버스 재현 실패)",
-              "피라미딩(가격·이익 트리거 모두 회복배율 악화)"])
+              "매출 성장률(상방을 깎음)", "OPM QoQ 개선(워크포워드 2~3/6)",
+              "피라미딩(가격·이익 트리거 모두 회복배율 악화)",
+              "PSR 컷 완화(<10 시 MDD −41.0%)·고PSR 슬리브 분리(수익만 희석)"])
 
 
 def main():
@@ -31,7 +38,8 @@ def main():
     wk = d.as_of.max()
     w = d[d.as_of == wk]
     base = w[(w.close >= 5) & (w.adv_20d >= 5e6) & (w.marcap >= 2e9)]
-    sel = base[(base.rs_13w > 1.5) & (base.psr < 3) &
+    # 규칙⑥ (2026-08-08~): PSR<3 → OPM>0. PSR은 표시용 참고지표로만 남는다.
+    sel = base[(base.rs_13w > 1.5) & (base.opm > 0) &
                ((base.op_turn == 1) | (base.b_any == 1))].sort_values("rs_13w", ascending=False)
 
     import sqlite3
@@ -54,8 +62,11 @@ def main():
 
     funnel = [("유니버스 (시총$2B+ · 거래대금$5M+)", int(len(base))),
               ("+ RS13 > 1.5", int((base.rs_13w > 1.5).sum())),
-              ("+ PSR < 3", int(((base.rs_13w > 1.5) & (base.psr < 3)).sum())),
-              ("+ 흑자전환 OR 이익폭증", int(len(sel)))]
+              ("+ OPM > 0", int(((base.rs_13w > 1.5) & (base.opm > 0)).sum())),
+              ("+ 흑자전환 OR 이익폭증", int(len(sel))),
+              ("(참고) 위에 PSR<3까지 걸면", int(((base.rs_13w > 1.5) & (base.opm > 0) &
+                                            (base.psr < 3) &
+                                            ((base.op_turn == 1) | (base.b_any == 1))).sum()))]
 
     paper = None
     if os.path.exists(LEDGER):
@@ -79,7 +90,7 @@ def main():
 
     out = dict(
         generated=str(date.today()), signal_week=str(wk.date()),
-        rule="RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  PSR < 3",
+        rule="RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
         exit="고점 대비 −20% 트레일링 · 8종목 × 12.5% · 2주 분할매수 · 불타기 없음",
         universe=int(len(base)), n=int(len(sel)),
         funnel=funnel, candidates=[row(r) for _, r in sel.iterrows()],
