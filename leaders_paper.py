@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-주도주 포워드 페이퍼 트레이딩 — 규칙⑤ 신호를 실시간으로 추적
-  진입: RS13>1.5 AND (흑자전환 OR 이익폭증) AND PSR<3   (leaders_listup 과 동일)
+주도주 포워드 페이퍼 트레이딩 — 두 규칙을 나란히 실시간 추적 (2026-08-08~)
+  규칙⑥ (주력): RS13>1.5 AND (흑자전환 OR 이익폭증) AND OPM>0
+  규칙⑤ (대조): RS13>1.5 AND (흑자전환 OR 이익폭증) AND PSR<3   ← 08-04 기록분 유지
   청산: 고점 대비 −20% 트레일링  ← 고정 기간이 아니므로 매 갱신마다 고점을 추적한다
-  목적: 백테스트(CAGR 27.7% / 승률 38% / 손익비 5.5)가 실전에서 재현되는지 대조
+  목적: 백테스트가 실전에서 재현되는지, 그리고 두 규칙 중 어느 쪽이 나은지 실측 대조
+
+  ※ PSR은 2026-08-08부터 의사결정에서 빠지고 표시용 참고지표로만 남는다.
 
 CLI
   python leaders_paper.py log      # 이번 주 신호를 가상진입 기록 (주 1회)
@@ -18,12 +21,25 @@ import pandas as pd
 BASE = os.path.dirname(os.path.abspath(__file__))
 LEDGER = os.path.join(BASE, "results", "leaders_paper.json")
 TRAIL = 0.20            # 고점 대비 −20% 트레일링
-MAXPOS = 8              # 동시 보유 상한
+MAXPOS = 8              # 규칙별 동시 보유 상한
 COST = 0.25 / 100       # 왕복 비용 근사
 
-# 백테스트 기대값 (2018~2026, 규칙⑤ · trail-20 · 8종목 12.5%)
-REF = dict(avg_ret=23.1, med_ret=-6.9, winrate=38.0, hold_wk=21.0,
-           payoff=5.5, cagr=27.7, mdd=-23.9)
+# 규칙별 진입 조건 — base(유동성·시총 통과분)를 받아 마스크를 돌려준다
+RULES = {
+    "R6": ("⑥ RS13>1.5 & (흑자전환 OR 이익폭증) & OPM>0",
+           lambda b: (b.rs_13w > 1.5) & (b.opm > 0) & ((b.op_turn == 1) | (b.b_any == 1))),
+    "R5": ("⑤ RS13>1.5 & (흑자전환 OR 이익폭증) & PSR<3",
+           lambda b: (b.rs_13w > 1.5) & (b.psr < 3) & ((b.op_turn == 1) | (b.b_any == 1))),
+}
+
+# 백테스트 기대값 (2018-06~2026-08 · trail-20 · 8종목 12.5%)
+REF_BY_RULE = {
+    "R6": dict(avg_ret=None, med_ret=-5.9, winrate=43.4, hold_wk=20.7,
+               cagr=32.8, mdd=-37.7, recov=0.87),
+    "R5": dict(avg_ret=23.1, med_ret=-6.9, winrate=38.3, hold_wk=21.3,
+               payoff=5.5, cagr=27.7, mdd=-23.9, recov=1.16),
+}
+REF = REF_BY_RULE["R5"]     # 기존 원장 호환
 
 
 def _fdr():
@@ -52,8 +68,9 @@ def price_series(sym, start):
 def load():
     if os.path.exists(LEDGER):
         return json.load(open(LEDGER, encoding="utf-8"))
-    return dict(created=str(date.today()), rule="⑤ RS13>1.5 & (흑자전환 OR 이익폭증) & PSR<3",
-                exit="고점 대비 -20% 트레일링", ref=REF, trades=[])
+    return dict(created=str(date.today()), rule=RULES["R6"][0],
+                rules={k: v[0] for k, v in RULES.items()},
+                exit="고점 대비 -20% 트레일링", ref=REF, ref_by_rule=REF_BY_RULE, trades=[])
 
 
 def save(d):
@@ -69,42 +86,56 @@ def cmd_log():
     wk = d.as_of.max()
     w = d[d.as_of == wk]
     base = w[(w.close >= 5) & (w.adv_20d >= 5e6) & (w.marcap >= 2e9)]
-    sel = base[(base.rs_13w > 1.5) & (base.psr < 3) &
-               ((base.op_turn == 1) | (base.b_any == 1))].sort_values("rs_13w", ascending=False)
 
     led = load()
-    open_syms = {t["sym"] for t in led["trades"] if t["status"] == "open"}
-    room = MAXPOS - len(open_syms)
-    print(f"기준 주차 {wk.date()} · 조건 충족 {len(sel)}종 · 현재 보유 {len(open_syms)}종 · 여유 {room}")
-    if room <= 0:
-        print("  보유 상한 도달 — 신규 진입 없음"); return
+    led.setdefault("rules", {k: v[0] for k, v in RULES.items()})
+    led.setdefault("ref_by_rule", REF_BY_RULE)
+    px_cache, total = {}, 0
 
-    added = 0
-    for _, r in sel.iterrows():
-        if added >= room:
-            break
-        if r.sym in open_syms:
-            continue
-        px, pdate = price_now(r.sym)
-        if px is None:
-            print(f"  SKIP {r.sym} 시세 조회 실패"); continue
-        trig = ([" 흑자전환"] if r.op_turn == 1 else []) + \
-               [k for k in ("b_ophigh", "b_nihigh", "b_opjump", "b_opmjump") if r[k] == 1]
-        led["trades"].append(dict(
-            id=f"{r.sym}_{date.today()}", sym=r.sym, market="US",
-            signal_week=str(wk.date()), log_date=str(date.today()),
-            entry_px=round(px, 4), entry_px_date=pdate,
-            peak_px=round(px, 4), peak_date=pdate,
-            rs_13w=round(float(r.rs_13w), 2), psr=round(float(r.psr), 2),
-            dist_52w=round(float(r.dist_52w), 1),
-            triggers=[t.strip() for t in trig],
-            status="open", exit_px=None, exit_date=None, ret_pct=None, hold_wk=None,
-            marks={}))
-        added += 1
-        print(f"  LOG  {r.sym:6s} ${px:>9,.2f}  RS {r.rs_13w:.2f}  PSR {r.psr:.2f}  {' '.join(trig)}")
+    # 규칙별로 독립된 보유 상한을 둔다 — 두 규칙의 성적을 섞지 않기 위해서.
+    # 08-04 이전 기록은 rule 필드가 없으므로 규칙⑤로 간주한다.
+    for rk, (rlabel, cond) in RULES.items():
+        sel = base[cond(base)].sort_values("rs_13w", ascending=False)
+        held = {t["sym"] for t in led["trades"]
+                if t["status"] == "open" and t.get("rule", "R5") == rk}
+        room = MAXPOS - len(held)
+        print(f"[{rk}] {rlabel}")
+        print(f"     기준 주차 {wk.date()} · 조건 충족 {len(sel)}종 · 보유 {len(held)}종 · 여유 {room}")
+        if room <= 0:
+            print("     보유 상한 도달 — 신규 진입 없음"); continue
+
+        added = 0
+        for _, r in sel.iterrows():
+            if added >= room:
+                break
+            if r.sym in held:
+                continue
+            if r.sym not in px_cache:                 # 두 규칙이 겹칠 때 시세 재조회 방지
+                px_cache[r.sym] = price_now(r.sym)
+            px, pdate = px_cache[r.sym]
+            if px is None:
+                print(f"     SKIP {r.sym} 시세 조회 실패"); continue
+            trig = ([" 흑자전환"] if r.op_turn == 1 else []) + \
+                   [k for k in ("b_ophigh", "b_nihigh", "b_opjump", "b_opmjump") if r[k] == 1]
+            led["trades"].append(dict(
+                id=f"{rk}_{r.sym}_{date.today()}", rule=rk, sym=r.sym, market="US",
+                signal_week=str(wk.date()), log_date=str(date.today()),
+                entry_px=round(px, 4), entry_px_date=pdate,
+                peak_px=round(px, 4), peak_date=pdate,
+                rs_13w=round(float(r.rs_13w), 2),
+                psr=round(float(r.psr), 2) if r.psr == r.psr else None,   # 참고지표
+                opm=round(float(r.opm), 2) if r.opm == r.opm else None,
+                dist_52w=round(float(r.dist_52w), 1),
+                triggers=[t.strip() for t in trig],
+                status="open", exit_px=None, exit_date=None, ret_pct=None, hold_wk=None,
+                marks={}))
+            added += 1
+            total += 1
+            print(f"     LOG  {r.sym:6s} ${px:>9,.2f}  RS {r.rs_13w:.2f}  "
+                  f"OPM {r.opm:6.2f}  PSR {r.psr:6.2f}  {' '.join(trig)}")
     led["updated"] = str(date.today())
     save(led)
-    print(f"\n기록 {added}건 → {LEDGER}")
+    print(f"\n기록 {total}건 → {LEDGER}")
 
 
 # ───────────────────────── update ─────────────────────────
@@ -153,38 +184,47 @@ def cmd_report():
     T = pd.DataFrame(led["trades"])
     if T.empty:
         print("기록 없음 — 먼저 `python leaders_paper.py log`"); return
-    cl = T[T.status == "closed"]
-    op = T[T.status == "open"]
+    if "rule" not in T.columns:
+        T["rule"] = "R5"                      # 08-04 이전 기록은 규칙⑤
+    T["rule"] = T["rule"].fillna("R5")
     print("=" * 96)
     print(f"주도주 페이퍼 트레이딩 — 시작 {led['created']} · 갱신 {led.get('updated','-')}")
-    print(f"규칙 {led['rule']}  |  청산 {led['exit']}")
+    print(f"청산 {led['exit']}   |   총 {len(T)}건")
     print("=" * 96)
-    print(f"  총 {len(T)}건 (청산 {len(cl)} · 보유 {len(op)})")
-    if len(op):
-        print("\n[보유 중]")
-        print(op[["sym", "log_date", "entry_px", "peak_px", "rs_13w", "psr", "triggers"]]
-              .to_string(index=False))
-    if len(cl) == 0:
-        print("\n청산된 거래가 없어 실전 대조 불가. 백테스트 기대값:")
-        print(f"  평균 {REF['avg_ret']:+.1f}% · 중앙 {REF['med_ret']:+.1f}% · "
-              f"승률 {REF['winrate']:.0f}% · 보유 {REF['hold_wk']:.0f}주 · 손익비 {REF['payoff']:.1f}")
-        return
-    live = dict(avg_ret=cl.ret_pct.mean(), med_ret=cl.ret_pct.median(),
-                winrate=(cl.ret_pct > 0).mean() * 100, hold_wk=cl.hold_wk.mean(),
-                payoff=(cl[cl.ret_pct > 0].ret_pct.mean() / abs(cl[cl.ret_pct <= 0].ret_pct.mean())
-                        if (cl.ret_pct <= 0).any() and (cl.ret_pct > 0).any() else np.nan))
-    print("\n[실전 vs 백테스트]")
-    print(f"{'지표':12s}{'실전':>10s}{'백테스트':>12s}{'괴리':>10s}")
-    for k, lab, unit in [("avg_ret", "평균 수익", "%"), ("med_ret", "중앙 수익", "%"),
-                         ("winrate", "승률", "%"), ("hold_wk", "평균 보유", "주"),
-                         ("payoff", "손익비", "")]:
-        lv, rf = live[k], REF[k]
-        gap = "—" if (lv != lv) else f"{lv - rf:+.1f}"
-        lvs = "—" if lv != lv else f"{lv:.1f}{unit}"
-        print(f"{lab:12s}{lvs:>10s}{rf:>11.1f}{unit}{gap:>10s}")
-    n = len(cl)
-    print(f"\n  ⚠️ 청산 {n}건 — {'표본이 너무 적어 판단 불가 (최소 20건 필요)' if n < 20 else '참고 가능'}")
-    print(f"  ⚠️ 백테스트는 생존편향·인샘플 선택이 있어 낙관적. 실전이 낮게 나오는 게 정상이다.")
+
+    refs = led.get("ref_by_rule", REF_BY_RULE)
+    for rk in [k for k in RULES if (T.rule == k).any()]:
+        sub = T[T.rule == rk]
+        cl, op = sub[sub.status == "closed"], sub[sub.status == "open"]
+        ref = refs.get(rk, {})
+        print(f"\n[{rk}] {RULES[rk][0]}")
+        print(f"     {len(sub)}건 (청산 {len(cl)} · 보유 {len(op)})")
+        if len(op):
+            cols = [c for c in ["sym", "log_date", "entry_px", "peak_px",
+                                "rs_13w", "opm", "psr", "triggers"] if c in op.columns]
+            print(op[cols].to_string(index=False))
+        if len(cl) == 0:
+            print(f"     청산 0건 — 대조 불가. 백테스트 기대: 중앙 {ref.get('med_ret'):+.1f}% · "
+                  f"승률 {ref.get('winrate'):.0f}% · 보유 {ref.get('hold_wk'):.0f}주")
+            continue
+        live = dict(med_ret=cl.ret_pct.median(), winrate=(cl.ret_pct > 0).mean() * 100,
+                    hold_wk=cl.hold_wk.mean())
+        print(f"     {'지표':10s}{'실전':>10s}{'백테스트':>12s}{'괴리':>10s}")
+        for k, lab, unit in [("med_ret", "중앙 수익", "%"), ("winrate", "승률", "%"),
+                             ("hold_wk", "평균 보유", "주")]:
+            lv, rf = live[k], ref.get(k)
+            if rf is None or lv != lv:
+                continue
+            print(f"     {lab:10s}{lv:>9.1f}{unit}{rf:>11.1f}{unit}{lv-rf:>+9.1f}")
+        print(f"     ⚠️ 청산 {len(cl)}건 — "
+              f"{'표본 부족, 판단 불가' if len(cl) < 20 else '참고 가능'}")
+
+    # 2026-08-08 측정: 13주 추적으로는 청산이 3~4건에 그치고, 롤링 13주 성과의
+    # p10~p90 폭이 200%p를 넘는다. 짧은 기간으로 성과를 판정하려 하지 말 것.
+    print("\n" + "-" * 96)
+    print("  ⚠️ 성과 판정에는 청산 20건 이상이 필요하다 — 주 1회 실행 기준 약 1.5년.")
+    print("  ⚠️ 13주로 확인할 수 있는 건 성과가 아니라 '규칙대로 굴렸는가'(M6a)뿐이다.")
+    print("  ⚠️ 백테스트는 생존편향·인샘플 선택이 있어 낙관적. 실전이 낮게 나오는 게 정상이다.")
 
 
 if __name__ == "__main__":

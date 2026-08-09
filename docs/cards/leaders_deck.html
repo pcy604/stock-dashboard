@@ -150,13 +150,14 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
 <div class="wrap">
 
 <header class="top">
-  <p class="eyebrow">Project Cards · 최종갱신 2026-08-04</p>
+  <p class="eyebrow">Project Cards · 최종갱신 2026-08-08</p>
   <h1>주도주 탐지 연구</h1>
   <p>"어떤 종목을 살까"가 아니라 <b>"어떻게 손실을 최소화하고 수익을 극대화할까"</b>를 데이터로 답하는 연구.
   미국 1,279종·8.6년으로 주도주를 기계적으로 정의하고, 진입·청산 규칙을 TSR·MDD로 검증한다.</p>
   <div class="topmeta">
     <span>단계 <b>연구·검증</b></span>
     <span>실계좌 <b>미적용</b></span>
+    <span>대시보드 <b>배포됨(08-05)</b></span>
     <span>코드 <b>stock_screener/leaders_*.py</b></span>
     <span>데이터 <b>factor_weekly 532,609행</b></span>
   </div>
@@ -174,18 +175,25 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
 <section class="card" id="c1">
   <div class="chead">
     <div class="ctitle"><span class="cnum">01</span><h2>원페이저</h2></div>
-    <div><span class="badge b-go">🟢 규칙 확정</span> <span class="cmeta">2026-08-04</span></div>
+    <div><span class="badge b-go">🟢 규칙⑥ 전환</span> <span class="cmeta">2026-08-08</span></div>
   </div>
   <dl class="kv">
     <div><dt>문제</dt><dd>종목 선정이 아니라 <b>감정·집중·레버리지</b>가 MDD를 키운다. 2026-06 실제로 1억(KRW) 손실.</dd></div>
     <div><dt>대상</dt><dd>본인 1명. 외부 판매·배포 계획 없음.</dd></div>
+    <div><dt>정체</dt><dd><b>"주도주 탐지기"가 아니다.</b> 실제 동작은 <b>강세 모멘텀 + 실적 흑자전환 포착기</b>. 상위 거래가 TSLA·MU·CROX·VRT·ANF인 것과 일관된다. 이름과 실체를 혼동하면 못 잡은 종목을 배신으로 오해하게 된다.</dd></div>
     <div><dt>해법</dt><dd>주도주를 <b>기계적으로 정의</b>(향후 52주 +150%↑) → 공통 특징 발굴 → 진입·청산 규칙 → 백테스트로 TSR·MDD 검증. 규칙이 정하고 사람은 실행만.</dd></div>
-    <div><dt>현재</dt><dd>진입·청산 규칙 확정(⑤). <b>워크포워드 CAGR 4/6 부분통과</b> — 실계좌는 미적용, 다음은 페이퍼 트레이딩.</dd></div>
-    <div><dt>규칙⑤</dt><dd><code>RS13&gt;1.5 AND (흑자전환 OR 이익폭증) AND PSR&lt;3</code> → 고점 −20% 트레일링 · 8종목 12.5% · 2주 분할매수 · <b>불타기 없음</b></dd></div><div><dt>결과</dt><dd class="up">CAGR 27.7% / MDD <b>−23.9%</b> / 회복배율 <b>1.16</b><br><span style="font-weight:400;color:var(--mut);font-size:12.5px">SPY 14.2% / −31.8% / 0.45 — <b>MDD가 SPY보다 낮다</b></span></dd></div>
+    <div><dt>현재</dt><dd>규칙⑥ 전환·배선 완료. <b>그런데 주간 사이클을 한 번도 돌리지 않아 데이터가 안 쌓이고 있다(5일째).</b></dd></div>
+    <div><dt>규칙⑥</dt><dd><code>RS13&gt;1.5 AND (흑자전환 OR 이익폭증) AND OPM&gt;0</code> → 고점 −20% 트레일링 · 8종목 12.5% · 2주 분할매수 · <b>불타기 없음</b><br><span style="font-size:12px;color:var(--mut)">PSR은 2026-08-08부로 <b>의사결정에서 제외</b> — 표시용 참고지표</span></dd></div><div><dt>결과</dt><dd class="up">CAGR 32.8% / MDD <b>−37.7%</b> / 회복배율 0.87<br><span style="font-weight:400;color:var(--mut);font-size:12.5px">SPY 14.2% / −31.8% / 0.45 · 구 규칙⑤ 27.7% / −23.9% / 1.16</span></dd></div>
   </dl>
-  <div class="warnbox"><b>정직한 자가진단:</b> 규칙⑤로도 SPY를 이긴 해는 <b>9년 중 5년</b>. 초과수익은 2020(+68%p)·2024(+38%p)에 집중된다.
+  <div class="warnbox"><b>🔴 이 전환은 낙폭을 팔아 수익을 산 결정이다.</b>
+  MDD가 −23.9% → <b>−37.7%</b>로 나빠졌고, 이는 <b>SPY(−31.8%)보다 나쁘다.</b>
+  "MDD를 SPY보다 낮게"라는 원래 KPI를 포기하고 CAGR +5.1%p와 사각지대 해소를 택했다.
+  <b>−37% 구간이 실제로 오면 그건 고장이 아니라 오늘의 선택이다.</b><br>
+  바꾼 이유: 주도주 이력 종목 <b>520개 중 90개(17%)가 8년간 PSR&lt;3에 한 번도 진입하지 않았다.</b>
+  NVDA는 신호 발생 주차의 PSR이 최소 10.5·중앙 15.8로 <b>구조적으로 포착 불가</b>였다.</div>
+  <div class="warnbox" style="border-left-color:var(--warn);background:var(--warnbg)"><b>정직한 자가진단:</b> 규칙⑥의 워크포워드는 <b>CAGR 4/6 · 회복배율 2/6</b>(구 규칙 3/6).
   롤링 12개월 최악 <b>−37.3%p · 최장 45주</b> — 1년 가까이 계속 지는 구간이 실제로 있었다.</div>
-  <div class="next"><b>그래서 다음 행동</b>백테스트에서 더 짜낼 게 없다 — <b>페이퍼 트레이딩(M6)</b>으로. 실계좌는 계속 0원.</div>
+  <div class="next"><b>그래서 다음 행동</b>만드는 건 끝났다. <b>`bash leaders_weekly.sh` 를 실제로 돌리는 것</b>만 남았다.</div>
 </section>
 
 <!-- 2 -->
@@ -202,8 +210,9 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
       <tr><td><b>M3</b> 운용 시뮬레이션</td><td>손절·피라미딩 포함, SPY 대비 회복배율 상회</td><td class="n" style="color:var(--ok)">✅ 0.87<br>vs 0.45</td></tr>
       <tr style="background:var(--warnbg)"><td><b>M4</b> 워크포워드 검증</td><td><b>6개 분할 중 4개 이상</b>에서 SPY 상회</td><td class="n" style="color:var(--warn)">🟡 <b>부분통과</b><br><span style="font-size:10px">규칙⑤ CAGR <b>4/6</b> ✅<br>회복배율 3/6 ✗<br>(구 규칙은 3/6·2/6)</span></td></tr>
       <tr><td><b>M5</b> <s>세금·환전 반영</s> → <b>buza-bot 콘텐츠화</b></td><td>검증 결과 4건을 콘텐츠 1회차로 발행</td><td class="n mut">⬜ 미착수<br><span style="font-size:10px">세금은 측정 제외 결정</span></td></tr>
-      <tr><td><b>M6</b> 페이퍼 트레이딩</td><td>실시간 신호 13주 추적 → 백테스트 기대값과 오차 ±10%p 이내</td><td class="n mut">⬜ 미착수</td></tr>
-      <tr><td><b>M7</b> 실계좌 투입</td><td>M4·M6 통과 <b>AND</b> 본인이 3개월간 손절 규율 무위반</td><td class="n mut">⬜ 잠김</td></tr>
+      <tr style="background:var(--warnbg)"><td><b>M6a</b> 배관·규율<br><span style="font-size:10px;color:var(--mut)">구 M6을 08-08에 분리</span></td><td><b>13주 연속</b> 주간 사이클 실행 <b>13/13</b> · 손절 규칙 위반 <b>0건</b> · 기록 누락 0건<br><span style="font-size:10px">← 13주로 잴 수 있는 건 성과가 아니라 <b>규칙대로 굴렸는가</b>뿐</span></td><td class="n" style="color:var(--warn)">🟡 <b>0/13주</b><br><span style="font-size:10px">규칙⑤⑥ 병렬기록<br>배선 완료(08-08)</span></td></tr>
+      <tr><td><b>M6b</b> 성과 검증</td><td><b>청산 20건 이상</b> 누적 후 백테스트 기대값과 대조<br><span style="font-size:10px">주 1회 실행 기준 약 <b>1.5년</b> · 중단 기준 발동 시 즉시 종료</span></td><td class="n mut">⬜ 대기<br><span style="font-size:10px">청산 0건</span></td></tr>
+      <tr><td><b>M7</b> 실계좌 투입<br><span style="font-size:10px;color:var(--mut)">조건 변경 08-08</span></td><td><b>M4 + M6a</b> 통과 시 <b>소액</b> 개시 (M6b 완료 대기 안 함)<br><span style="font-size:10px">← 성과 판정에 2년이 필요해 선행조건으로 걸면 2028년. 이 프로젝트의 진단은 "감정이 문제"였으므로 <b>해제 조건은 성과가 아니라 규율</b>이어야 논리가 맞다</span></td><td class="n mut">⬜ 잠김<br><span style="font-size:10px">M6a 0/13주</span></td></tr>
     </tbody>
   </table></div>
   <div class="next"><b>그래서 다음 행동</b>M4가 CAGR 기준으로 조건을 넘었다. 다음은 <b>M6 페이퍼 트레이딩</b> — M7은 여전히 잠금.</div>
@@ -213,7 +222,7 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
 <section class="card" id="c3">
   <div class="chead">
     <div class="ctitle"><span class="cnum">03</span><h2>수익 구조</h2></div>
-    <div><span class="badge b-go">🟢 방향 확정</span> <span class="cmeta">2026-08-03 갱신</span></div>
+    <div><span class="badge b-go">🟢 방향 확정</span> <span class="cmeta">2026-08-05 갱신</span></div>
   </div>
   <p style="color:var(--ink2);font-size:13.5px;margin:0 0 12px"><b>결론: 이 시스템 자체는 팔지 않는다.</b>
   본인 투자 수익이 1차 리턴이고, 외부 수익화는 <b>buza-bot 콘텐츠로 흡수</b>한다.</p>
@@ -247,7 +256,7 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
 <section class="card" id="c4">
   <div class="chead">
     <div class="ctitle"><span class="cnum">04</span><h2>워크플로우 — 실제로 도는 것</h2></div>
-    <div><span class="badge b-hold">🟡 운용 미연결</span> <span class="cmeta">점선 🔴 = 안 도는 구간</span></div>
+    <div><span class="badge b-stop">🔴 사이클 미실행</span> <span class="cmeta">점선 🔴 = 안 도는 구간</span></div>
   </div>
 <pre class="mermaid">
 flowchart TD
@@ -259,15 +268,19 @@ flowchart TD
   C1["프로파일·스윕<br/>주도주 공통특징"] --> D
   C2 --> C1
   D["leaders_sim.py<br/>TSR / MDD 측정"] --> E
-  E["leaders_listup.py<br/>주간 리스트업 (규칙⑤)"] -.-> F
-  F["🔴 페이퍼 트레이딩<br/>미연결"] -.-> G
+  E["leaders_listup.py<br/>주간 리스트업 (규칙⑤)"] --> F
+  F["leaders_paper.py<br/>페이퍼 트레이딩 · 8종 기록"] --> P2
+  P2["leaders_publish.py<br/>results/leaders_signal.json"] --> DASH
+  DASH["Streamlit 대시보드 🚀주도주 탭<br/>배포됨 2026-08-05"]
+  F -.-> G
   G["🔴 실계좌<br/>잠김 (M7)"]
+  W["🔴 leaders_weekly.sh<br/>실행 0회 · 5일째 — 여기가 멈춰 있다"] -.-> B
   H["🔴 DART 잠정실적 공시일<br/>미수집 → 한국 제외"] -.-> B
-  style F stroke-dasharray: 5 5
+  style W stroke-dasharray: 5 5
   style G stroke-dasharray: 5 5
   style H stroke-dasharray: 5 5
 </pre>
-  <div class="next"><b>그래서 다음 행동</b>수집→계산→분석은 자동으로 돈다. <b>리스트업 이후가 전부 끊겨 있다</b> — 페이퍼 트레이딩 배선이 다음 연결점.</div>
+  <div class="next"><b>그래서 다음 행동</b>배선은 대시보드까지 전부 이어졌다. <b>남은 단절은 하나 — 주간 사이클을 아무도 실행하지 않는다는 것.</b> (약 10분, 일요일 밤/월요일 아침)</div>
 </section>
 
 <!-- 5 -->
@@ -326,15 +339,15 @@ flowchart TD
 <section class="card" id="c7">
   <div class="chead">
     <div class="ctitle"><span class="cnum">07</span><h2>트랙션 보드</h2></div>
-    <div><span class="badge b-hold">🟡 실사용 0</span> <span class="cmeta">2026-08-03 갱신</span></div>
+    <div><span class="badge b-hold">🟡 실사용 0</span> <span class="cmeta">2026-08-05 갱신</span></div>
   </div>
   <div class="tiles">
-    <div class="tile"><p class="k">백테스트 CAGR</p><p class="v up">27.7%</p><p class="s">SPY 14.2%</p></div>
-    <div class="tile"><p class="k">백테스트 MDD</p><p class="v dn">−23.9%</p><p class="s">SPY −31.8% ← 우리가 낮음</p></div>
-    <div class="tile"><p class="k">회복배율</p><p class="v">1.16</p><p class="s">SPY 0.45 · CAGR÷|MDD|</p></div>
-    <div class="tile"><p class="k">워크포워드</p><p class="v">4 / 6</p><p class="s">CAGR 기준 · 회복배율 3/6</p></div>
+    <div class="tile"><p class="k">백테스트 CAGR</p><p class="v up">32.8%</p><p class="s">SPY 14.2% · 구규칙 27.7%</p></div>
+    <div class="tile"><p class="k">백테스트 MDD</p><p class="v dn">−37.7%</p><p class="s" style="color:var(--no)">SPY −31.8% ← 우리가 더 나쁨</p></div>
+    <div class="tile"><p class="k">회복배율</p><p class="v">0.87</p><p class="s">SPY 0.45 · 구규칙 1.16</p></div>
+    <div class="tile"><p class="k">워크포워드</p><p class="v">4 / 6</p><p class="s">CAGR 기준 · 회복배율 2/6</p></div>
     <div class="tile"><p class="k">실계좌 투입</p><p class="v mut">0원</p><p class="s">M7 잠김</p></div>
-    <div class="tile"><p class="k">페이퍼 신호</p><p class="v mut">0건</p><p class="s">미연결</p></div>
+    <div class="tile"><p class="k">페이퍼 보유</p><p class="v">8건</p><p class="s">청산 0 · 08-04 기록 · 갱신 0회</p></div><div class="tile"><p class="k">데이터 신선도</p><p class="v" style="color:var(--no)">12일</p><p class="s">최신 주차 07-27 · 08-03 누락</p></div>
   </div>
 
   <figure>
@@ -367,7 +380,8 @@ flowchart TD
   <div class="tblwrap" style="margin-top:14px"><table>
     <thead><tr><th>진입조건 (2026-08-04 실측 · trail-20 · 8종목 12.5%)</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복배율</th></tr></thead>
     <tbody>
-      <tr style="background:var(--okbg)"><td><b>⑤ RS&gt;1.5 &amp; (흑자전환 OR 이익폭증) &amp; PSR&lt;3</b> ← 확정</td><td class="n">27.7%</td><td class="n up">−23.9%</td><td class="n"><b>1.16</b></td></tr>
+      <tr style="background:var(--okbg)"><td><b>⑥ RS&gt;1.5 &amp; (흑자전환 OR 이익폭증) &amp; OPM&gt;0</b> ← 확정(08-08)</td><td class="n up">32.8%</td><td class="n dn">−37.7%</td><td class="n">0.87</td></tr>
+      <tr><td>⑤ 위에서 OPM&gt;0 대신 PSR&lt;3 (구 확정)</td><td class="n">27.7%</td><td class="n up">−23.9%</td><td class="n"><b>1.16</b></td></tr>
       <tr><td>RS&gt;1.5 &amp; 흑자전환 (PSR 없음)</td><td class="n">29.9%</td><td class="n">−27.6%</td><td class="n">1.08</td></tr>
       <tr><td>RS&gt;1.5 &amp; (흑자전환 OR 이익폭증) — PSR 없음</td><td class="n up">30.6%</td><td class="n dn">−42.1%</td><td class="n">0.73</td></tr>
       <tr><td>RS&gt;1.5 &amp; PSR&lt;3 (구 규칙)</td><td class="n">29.0%</td><td class="n">−33.3%</td><td class="n">0.87</td></tr>
@@ -413,8 +427,11 @@ flowchart TD
   <p style="font-size:13px;color:var(--ink2);margin:9px 0 0"><b>매년 이기는 시스템이 아니다.</b>
   지는 해는 −7~−14%p로 조금 지고, 이기는 해는 +26~+99%p로 크게 이긴다.
   거래 단위(승률 41%·손익비 5.0)와 <b>똑같은 비대칭이 연 단위에서도 반복</b>된다.</p>
-  <div class="warnbox"><b>이 카드의 모든 숫자는 백테스트다.</b> 실사용 지표(페이퍼 신호·실계좌)는 전부 0.
-  행동지표가 생기는 시점은 M6부터다.</div>
+  <div class="warnbox"><b>🔴 데이터가 안 쌓이고 있다 — 5일째.</b> 페이퍼 8종을 08-04에 기록한 뒤 <b>갱신 0회</b>, factor_weekly 최신 주차는 <b>2026-07-27로 12일 전</b>이고 08-03 주차는 통째로 누락됐다.</div>
+  <div class="warnbox" style="border-left-color:var(--warn);background:var(--warnbg)"><b>⚠️ 짧은 기간으로 성과를 판정하지 마라 (08-08 실측).</b>
+  13주 동안 청산되는 거래는 <b>3~4건</b>뿐이고(평균 보유 21주), 롤링 13주 성과의 p10~p90 폭은 <b>207%p</b>다.
+  구 M6 완료조건이 "±10%p 이내"였는데 <b>자연 산포가 그 20배</b> — 통과해도 우연이었다.
+  SPY 상회율이 안정되는 건 <b>2년(88%)·3년(99%)</b>부터다. 그래서 M6을 규율(M6a)과 성과(M6b)로 쪼갰다.</div>
   <div class="next"><b>그래서 다음 행동</b><b>중단 기준 확정(2026-08-03): 롤링 12개월 초과수익 −30%p.</b>
   달력연도 2년 연속은 실측상 발생한 적 없어(24개월 롤링 최장 연속 14주) 장식용 규칙이 된다.</div>
 </section>
@@ -423,24 +440,32 @@ flowchart TD
 <section class="card" id="c8">
   <div class="chead">
     <div class="ctitle"><span class="cnum">08</span><h2>열린 전선</h2></div>
-    <div><span class="badge b-hold">🟡 5건 · 해결 5</span> <span class="cmeta">무엇 / 며칠째 / 다음 / 누가</span></div>
+    <div><span class="badge b-stop">🔴 13건 · 해결 5</span> <span class="cmeta">무엇 / 며칠째 / 다음 / 누가</span></div>
   </div>
   <div class="tblwrap"><table>
     <thead><tr><th>항목</th><th class="n">며칠째</th><th>다음 행동</th><th class="n">누가</th></tr></thead>
     <tbody>
-      <tr style="background:var(--warnbg)"><td>🟡 <b>M4 회복배율 3/6</b> — 규칙⑤로 CAGR은 4/6 도달. 회복배율만 미달이고 이는 1년 창이 SPY MDD를 과소측정하는 지표 편향 가능성</td><td class="n">2</td><td>완료조건을 CAGR 기준으로 확정할지 판단</td><td class="n">나</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>주간 사이클 실행 0회</b> — <code>leaders_weekly.sh</code>를 만들어놓고 한 번도 안 돌림. factor_weekly 최신이 07-27(12일 전), 08-03 주차 누락, 페이퍼 8종 갱신 0회. <b>데이터가 안 쌓이면 M6는 영원히 안 끝난다</b></td><td class="n" style="font-weight:700">4</td><td><code>bash leaders_weekly.sh</code> (약 10분)</td><td class="n">나</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>규칙⑥의 MDD가 SPY보다 나쁨</b> — −37.7% vs −31.8%. 08-08 결정으로 <b>의도적으로 수용</b>했으나, 실전에서 −37% 구간이 오면 규칙을 어길 유인이 커진다. 중단 기준(롤링 12개월 −30%p) 외에 낙폭 대응 규칙이 없음</td><td class="n">0</td><td>−30%를 넘어갈 때의 사전 행동을 문서화</td><td class="n">나</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>영업레버리지 축 미검증</b> — DOL(영업이익증가율÷매출증가율)·GPM−OPM 스프레드. <code>FCOLS</code>에 <code>gpm·gpm_qoq·rev_qoq</code> 추가 완료(08-08). <b>단 gpm 결측이 56%</b>(23.3만/53.1만)라 표본이 반토막</td><td class="n">0</td><td>리프트 먼저 → 통과 시 백테스트</td><td class="n">Claude</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>EBITDA 흑자전환 미수집</b> — 영업이익보다 이른 시점 포착 가능. <b>단 "조정(adjusted)"은 비GAAP이라 회사마다 정의가 달라 재현 불가</b> → GAAP EBITDA(영업이익+D&amp;A)로 한정. EDGAR <code>DepreciationDepletionAndAmortization</code> 수집 필요</td><td class="n">0</td><td>발생률 25% 넘으면 그 자리에서 폐기</td><td class="n">Claude</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>성장조정 매출배수(PSR÷매출성장률) 미검증</b> — NVDA류 도달 경로. <b>단 매출성장률은 이미 "상방을 깎는다"고 실측</b>돼 분모로 쓰면 악화될 수 있고, 성장률 0 근처에서 발산</td><td class="n">0</td><td>하한 클리핑 설계 후 리프트 측정</td><td class="n">Claude</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>이 카드덱 소스가 미커밋</b> — <code>docs/cards/leaders_deck.html</code>이 08-07 갱신분부터 working tree에만 있음(마지막 커밋 <code>9d98d17</code>). 오늘 <code>auto: 로컬 데이터 갱신 2026-08-08</code>이 이미 돌았고, <b>daily-refresh가 로컬 변경을 덮어쓰면 갱신분이 날아간다</b></td><td class="n">2</td><td><code>git add docs/cards/leaders_deck.html &amp;&amp; git commit</code></td><td class="n">나</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>대시보드 실제 렌더링 미확인</b> — 배포는 됐으나(08-05 push) 브라우저 패널이 안 떠서 화면 검증을 못 함. 서버 로직·JSON·문법은 통과</td><td class="n">3</td><td>배포된 사이트에서 🚀주도주 탭 육안 확인</td><td class="n">나</td></tr>
+      <tr><td><code>leaders_run.py</code> 고아 — <code>results/leaders_v2.json</code>을 계속 생성하는데 대시보드가 더 이상 안 읽음. daily-refresh에서 돌면 낭비 (<code>daily-refresh.yml:55</code>에서 여전히 실행 중 확인)</td><td class="n">3</td><td>워크플로에서 제거할지 판단</td><td class="n">Claude</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>M4 회복배율 3/6</b> — 규칙⑤로 CAGR은 4/6 도달. 회복배율만 미달이고 이는 1년 창이 SPY MDD를 과소측정하는 지표 편향 가능성</td><td class="n">3</td><td>완료조건을 CAGR 기준으로 확정할지 판단</td><td class="n">나</td></tr>
       <tr style="background:var(--okbg)"><td class="mut">✅ 해결: PSR&lt;3 편향 우려 → 기각. PSR은 U자지만 <b>고PSR 바스켓은 손절을 붙여도 CAGR −4.9%·MDD −74.8%</b>. PSR&lt;3이 최적</td><td class="n mut">—</td><td class="mut">2026-08-04</td><td class="n mut">완료</td></tr>
       <tr><td>한국 잠정실적 공시일 미수집 → 한국 종목 전부 제외</td><td class="n">1</td><td>DART 주요사항보고 수집</td><td class="n">Claude</td></tr>
       <tr><td>"매입 20% 상한 + 40% 초과 시 30%로 축소" <b>트림 로직 미구현</b> — 불타기는 기각됐지만 <b>상승 후 트림은 별개</b></td><td class="n">2</td><td>상승 후 리밸런싱 규칙 시뮬에 추가</td><td class="n">Claude</td></tr>
       <tr><td>PSR·PER 부정확 — 주식수를 현재시총÷최근가로 역산</td><td class="n">1</td><td>EDGAR <code>dei</code> 태그로 시점별 주식수</td><td class="n">Claude</td></tr>
       <tr><td>페이퍼 트레이딩 미연결 — 리스트업 이후가 끊김</td><td class="n">1</td><td><code>leaders_listup</code> → <code>paper_trade.py</code> 배선</td><td class="n">Claude</td></tr>
-      <tr style="background:var(--nobg)"><td>🔴 <b>Q3 계약 정합성</b> — 주력=buza-bot 단일인데 이 연구에 몰두</td><td class="n">9</td><td>콘텐츠로 흡수(M5) → 계약 안으로 복귀</td><td class="n">나</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>Q3 계약 정합성</b> — 주력=buza-bot 단일인데 이 연구에 몰두. 코드 13개 + 대시보드 교체까지 진행됨</td><td class="n">14</td><td>콘텐츠로 흡수(M5) → 계약 안으로 복귀</td><td class="n">나</td></tr>
       <tr style="background:var(--okbg)"><td class="mut">✅ 해결: 중단 기준 미정 → 롤링 12개월 −30%p로 확정</td><td class="n mut">—</td><td class="mut">2026-08-03</td><td class="n mut">완료</td></tr>
       <tr style="background:var(--okbg)"><td class="mut">✅ 해결: 비중 미검증 → 5종목 20%가 최적(회복배율 0.98)</td><td class="n mut">—</td><td class="mut">2026-08-03</td><td class="n mut">완료</td></tr>
       <tr style="background:var(--okbg)"><td class="mut">✅ 제외: 세금·실투입금 → 측정하지 않기로 결정</td><td class="n mut">—</td><td class="mut">2026-08-03</td><td class="n mut">사용자</td></tr>
     </tbody>
   </table></div>
-  <div class="next"><b>그래서 다음 행동</b>규칙 설계는 끝났다. <b>남은 건 Q3 계약 정합성(네 결정)</b>과 페이퍼 트레이딩 배선뿐.</div>
+  <div class="next"><b>그래서 다음 행동</b>1번(사이클 실행)이 전부다. 나머지는 그게 돌기 시작하면 자연히 풀리거나 급하지 않다.</div>
 </section>
 
 <!-- 9 -->
@@ -471,11 +496,19 @@ flowchart TD
 <section class="card" id="c10">
   <div class="chead">
     <div class="ctitle"><span class="cnum">10</span><h2>결정 로그</h2></div>
-    <div><span class="badge b-hold">🟡 20건 · 미검증 1</span> <span class="cmeta">2026-08-04</span></div>
+    <div><span class="badge b-hold">🟡 28건 · 미검증 1</span> <span class="cmeta">2026-08-08</span></div>
   </div>
   <div class="tblwrap"><table>
     <thead><tr><th>결정</th><th>당시 근거</th><th class="n">검증</th></tr></thead>
     <tbody>
+      <tr style="background:var(--nobg)"><td>🔴 <b>PSR을 의사결정에서 제외 → 규칙⑥(OPM&gt;0) 전환</b> (2026-08-08, 사용자 결정)</td><td><b>PSR&lt;3이 자기가 잡은 주도주 98건보다 많은 99건을 버렸다.</b> 주도주 이력 종목 520개 중 <b>90개(17%)가 8년간 PSR&lt;3 미진입</b> — NVDA는 신호 주차 PSR 최소 10.5로 구조적 배제. 대안 검증에서 OPM&gt;0이 CAGR 32.8%·워크포워드 4/6으로 현행 이상. <b>대가로 MDD −23.9%→−37.7%(SPY보다 나쁨)를 수용</b></td><td class="n" style="color:var(--no)">🔴 전환</td></tr>
+      <tr style="background:var(--okbg)"><td><b>PSR 컷 완화·슬리브 분리 3안 전부 기각</b> (08-08)</td><td>PSR&lt;10은 CAGR을 못 올리고(27.7→27.1) MDD만 −41.0%로 악화. 고PSR 별도 슬리브(15~25%)는 MDD는 안 키우나 CAGR만 −1.7%p 희석(슬리브 단독 CAGR 10.6%·수익중앙 −8.1%). <b>손절을 −10%까지 조여도 PSR 없이는 MDD −34.4%</b> — 손절로 MDD를 막는다는 가설도 기각</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr style="background:var(--okbg)"><td><b>M6 완료조건 재설계 — 13주 폐기</b> (08-08)</td><td>13주 청산 3~4건, 롤링 13주 성과 p10~p90 폭 <b>207%p</b>인데 조건은 "±10%p 이내"였다. <b>자연 산포의 20배를 요구하는 조건은 통과해도 우연.</b> → M6a(규율 13주)·M6b(성과 청산 20건)로 분리, M7 해제는 규율 기준으로 변경</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b><code>trail-20</code> "최적" 표현 철회</b> (08-08)</td><td>규칙⑤ 기준 회복배율이 −10%:1.35, −15%:0.77, −20%:1.16, −25%:1.31, −30%:0.67로 <b>널뛴다.</b> −20%가 최적이라는 근거는 구 규칙 기준이었다. 워크포워드가 −20% 이상에서만 4/6이라 <b>유지하되 "최적"이라 부르지 않는다</b></td><td class="n" style="color:var(--warn)">🟡 표현 정정</td></tr>
+      <tr style="background:var(--okbg)"><td><b>대시보드 구 "주도주 지문" 제거</b> — 규칙⑤ 단독으로 교체 (2026-08-05 배포)</td><td>거기 쓰이던 <i>신고가 −15% 이내</i>(리프트 0.4)·<i>영익 YoY≥+100%</i>(기저 불안정)는 유니버스 검증에서 기각된 조건 — 두 규칙을 나란히 두면 어느 걸 믿을지 모호해짐</td><td class="n" style="color:var(--ok)">✅ 배포</td></tr>
+      <tr><td><b>주간 갱신을 증분 방식으로</b> (70분 → 10분)</td><td>새 주차가 없는 종목은 일봉·재무 로드 전에 스킵. 70분이면 안 돌리게 되고, 안 돌리면 데이터가 안 쌓인다</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>미완성 주봉 가드</b> — 금요일까지 데이터 없는 주는 버림</td><td>진행 중인 주가 섞이면 신호가 틀어짐 (수요일에 돌리면 월~수만 담긴 봉)</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr><td><b>스테일 자동커밋 1건 폐기</b> (<code>b86124b</code>)</td><td>중단된 rebase 정리 중 원격과 충돌. 내용이 전부 <code>results/*.json</code> 자동생성 데이터고 코드 0줄, 원격에 더 최신본 존재</td><td class="n mut">— 처리</td></tr>
       <tr style="background:var(--okbg)"><td><b>진입조건 확정(⑤)</b> — RS13&gt;1.5 &amp; (흑자전환 OR 이익폭증) &amp; PSR&lt;3</td><td>회복배율 0.87 → <b>1.16</b> · MDD −33.3% → <b>−23.9%</b>(SPY보다 낮음) · 워크포워드 CAGR 3/6 → <b>4/6</b></td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
       <tr><td><b>이익 폭증 팩터 채택</b> — 영업익/순익 8분기 신고점 · 영업익 QoQ+50% · OPM QoQ+3%p 중 하나</td><td>흑자전환(발생률 10.9%)만으론 놓치는 기업 존재. 단 이익폭증은 34.5%로 흔해 <b>PSR&lt;3 없이 쓰면 MDD −42.1%</b></td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
       <tr style="background:var(--nobg)"><td>🔴 <b>불타기(피라미딩) 최종 기각</b> — 가격·이익 트리거 모두</td><td>노출 보정(unit 2배)해도 회복 0.9→0.6. 이익 트리거로 바꿔도 1.2→0.7. <b>불타기가 평단을 올려 트레일링 −20%에 더 빨리 걸린다</b> — 청산 규칙과 구조적 상충</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
