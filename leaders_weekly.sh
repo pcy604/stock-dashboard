@@ -37,6 +37,9 @@ echo "--- 리포트"
 $PY leaders_paper.py report
 $PY leaders_listup.py
 
+echo "--- 텔레그램 주간 요약"
+$PY leaders_paper.py notify
+
 echo "=== DONE $(date '+%H:%M') ==="
 } 2>&1 | tee "$LOG"
 echo "로그: $LOG"

@@ -149,27 +149,56 @@ def cmd_update():
         s = price_series(t["sym"], t["entry_px_date"])
         if s is None or len(s) == 0:
             print(f"  SKIP {t['sym']} 시세 실패"); continue
-        peak = float(s.max()); last = float(s.iloc[-1])
+
+        # ── 청산 판정은 '주봉 종가' 기준 ─────────────────────────────────
+        # 2026-08-10 수정. 이전에는 일봉 종가로 판정했는데 백테스트
+        # (leaders_boost.run)는 주봉 종가로 청산한다. 일봉 고점은 주봉 고점보다
+        # 항상 크거나 같고 판정 횟수도 5배라, 페이퍼가 구조적으로 더 빨리·더 자주
+        # 털린다. 그 상태로는 M6b(백테스트 대조)가 전략을 재는 게 아니라
+        # 자의 차이를 재게 된다. leaders_build.py 와 동일한 주봉 규칙을 쓴다.
+        w = s.resample("W-MON", label="left", closed="left").last().dropna()
+        if len(w) and (pd.Timestamp(s.index[-1]) - pd.Timestamp(w.index[-1])).days < 4:
+            w = w.iloc[:-1]          # 미완성 주(금요일 봉 없음) 제거
+        if len(w) == 0:
+            print(f"  WAIT {t['sym']:6s} 완성된 주봉 없음 (진입 당주)"); continue
+
+        peak = float(w.max()); last = float(w.iloc[-1])
         t["peak_px"] = round(peak, 4)
-        t["peak_date"] = str(s.idxmax().date())
-        hold = (pd.Timestamp(s.index[-1]) - pd.Timestamp(t["entry_px_date"])).days / 7
+        t["peak_date"] = str(w.idxmax().date())
+        t["last_px"] = round(last, 4)          # 알림에서 청산선까지 거리를 보여주려면 필요
+        t["last_date"] = str(w.index[-1].date())
+        # 주봉 라벨은 그 주 '월요일'이고 진입은 그 주 '금요일 종가'라 그대로 빼면 음수가 된다.
+        # 진입 주의 월요일을 기준으로 잡아 완성된 주봉 수를 센다 (진입 당주 = 0주).
+        ed = pd.Timestamp(t["entry_px_date"]).normalize()
+        ew = ed - pd.Timedelta(days=ed.weekday())
+        hold = max(0.0, (pd.Timestamp(w.index[-1]) - ew).days / 7)
+
         # 고정 지평 마크 (백테스트 대조용)
         for lab, wks in (("4w", 4), ("13w", 13), ("26w", 26)):
             if hold >= wks and lab not in t["marks"]:
                 cut = pd.Timestamp(t["entry_px_date"]) + pd.Timedelta(weeks=wks)
-                sub = s[s.index <= cut]
+                sub = w[w.index <= cut]
                 if len(sub):
                     t["marks"][lab] = round((float(sub.iloc[-1]) / t["entry_px"] - 1) * 100, 2)
-        # 트레일링 청산 판정 (종가 기준)
-        hit = s[s <= peak * (1 - TRAIL)]
-        hit = hit[hit.index > pd.Timestamp(t["entry_px_date"])]
+
+        # 참고 기록: 일봉이 먼저 -20%를 뚫었는지. 청산 판정에는 쓰지 않는다.
+        # 실계좌(M7)로 갈 때 "일봉으로 봤으면 언제 털렸나"를 비교하기 위한 자료.
+        dpeak = s.cummax()
+        dhit = s[(s <= dpeak * (1 - TRAIL)) & (s.index > pd.Timestamp(t["entry_px_date"]))]
+        if len(dhit) and not t.get("daily_breach"):
+            t["daily_breach"] = dict(date=str(dhit.index[0].date()),
+                                     px=round(float(dhit.iloc[0]), 4))
+
+        hit = w[(w <= peak * (1 - TRAIL)) & (w.index > pd.Timestamp(t["entry_px_date"]))]
         if len(hit):
             xp = float(hit.iloc[0]); xd = str(hit.index[0].date())
             t.update(status="closed", exit_px=round(xp, 4), exit_date=xd,
                      ret_pct=round(((xp / t["entry_px"]) * (1 - COST) - 1) * 100, 2),
                      hold_wk=round((pd.Timestamp(xd) - pd.Timestamp(t["entry_px_date"])).days / 7, 1))
+            db = t.get("daily_breach")
             print(f"  EXIT {t['sym']:6s} {t['ret_pct']:+7.1f}%  {t['hold_wk']:.0f}주  "
-                  f"(고점 ${peak:,.2f} → −20%)")
+                  f"(주봉고점 ${peak:,.2f} → −20%)"
+                  + (f"  [일봉은 {db['date']}에 먼저 뚫음]" if db else ""))
         else:
             cur = ((last / t["entry_px"]) - 1) * 100
             dd = (last / peak - 1) * 100
@@ -227,6 +256,101 @@ def cmd_report():
     print("  ⚠️ 백테스트는 생존편향·인샘플 선택이 있어 낙관적. 실전이 낮게 나오는 게 정상이다.")
 
 
+# ───────────────────────── notify ─────────────────────────
+def _tg(text):
+    """config.py의 텔레그램 설정 재사용. 미설정이면 콘솔 출력."""
+    try:
+        import config
+        if not config.TELEGRAM_ENABLED:
+            raise RuntimeError("disabled")
+        import requests
+        r = requests.post(
+            f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN}/sendMessage",
+            json={"chat_id": config.TELEGRAM_CHAT_ID, "text": text,
+                  "parse_mode": "HTML", "disable_web_page_preview": True},
+            timeout=10)
+        if r.status_code != 200:
+            print(f"[텔레그램 실패 {r.status_code}] {r.text[:200]}")
+            return False
+        return True
+    except Exception as e:
+        print(f"[텔레그램 미발송: {e}]\n{text}")
+        return False
+
+
+def cmd_notify():
+    """토요일 주간 요약 — 금요일 종가 확정 기준."""
+    led = load()
+    T = pd.DataFrame(led["trades"])
+    if T.empty:
+        _tg("주도주 주간: 기록 없음"); return
+    if "rule" not in T.columns:
+        T["rule"] = "R5"
+    T["rule"] = T["rule"].fillna("R5")
+    today = str(date.today())
+
+    L = [f"<b>🚀 주도주 주간 요약</b>  {today}",
+         f"청산 규칙: 주봉 고점 −{int(TRAIL*100)}% 트레일링", ""]
+
+    # 이번 실행에서 새로 청산·진입된 것부터 (사람이 제일 먼저 볼 것)
+    new_x = T[(T.status == "closed") & (T.exit_date.astype(str) >= today)]
+    new_e = T[(T.status == "open") & (T.log_date == today)]
+    if len(new_x):
+        L.append("<b>❌ 청산</b>")
+        for _, t in new_x.iterrows():
+            L.append(f"  {t['sym']} {t['ret_pct']:+.1f}% · {t['hold_wk']:.0f}주 [{t['rule']}]")
+        L.append("")
+    if len(new_e):
+        L.append("<b>✅ 신규 진입 (금요일 종가)</b>")
+        for _, t in new_e.iterrows():
+            trg = " ".join(t["triggers"])[:38]
+            L.append(f"  {t['sym']} ${t['entry_px']:,.2f} RS{t['rs_13w']:.2f} [{t['rule']}] {trg}")
+        L.append("")
+    if not len(new_x) and not len(new_e):
+        L.append("<i>이번 주 청산·진입 없음</i>\n")
+
+    for rk in [k for k in RULES if (T.rule == k).any()]:
+        sub = T[T.rule == rk]
+        op, cl = sub[sub.status == "open"], sub[sub.status == "closed"]
+        L.append(f"<b>[{rk}]</b> 보유 {len(op)} · 청산 {len(cl)}")
+        rows = []
+        for _, t in op.iterrows():
+            pk, last = t["peak_px"], t.get("last_px") or t["peak_px"]
+            stop = pk * (1 - TRAIL)
+            room = (stop / last - 1) * 100          # 현재가에서 청산선까지 남은 %
+            pnl = (last / t["entry_px"] - 1) * 100
+            rows.append((room, t["sym"], last, stop, room, pnl))
+        # room이 0에 가까울수록 청산선에 붙은 것 → 급한 순으로 위에 놓는다
+        for room, sym, last, stop, _r, pnl in sorted(rows, reverse=True):
+            flag = " ⚠️" if room > -5 else ""
+            L.append(f"  {sym:<5} ${last:,.2f} ({pnl:+.1f}%) · 청산선 ${stop:,.2f} "
+                     f"[{room:+.1f}%]{flag}")
+        if len(cl):
+            L.append(f"  실적: 승률 {(cl.ret_pct>0).mean()*100:.0f}% · "
+                     f"중앙 {cl.ret_pct.median():+.1f}%")
+        L.append("")
+
+    # 차기 후보 (이번 주 신호에서 슬롯 밖으로 밀린 종목)
+    try:
+        sig = json.load(open(os.path.join(BASE, "results", "leaders_signal.json"),
+                             encoding="utf-8"))
+        held = set(T[T.status == "open"].sym)
+        wait = [c for c in sig.get("candidates", []) if c["sym"] not in held][:6]
+        if wait:
+            L.append(f"<b>📋 대기 후보</b> (신호주 {sig.get('signal_week','')})")
+            for c in wait:
+                L.append(f"  {c['sym']:<5} ${c['close']:,.2f} RS{c['rs_13w']:.2f} "
+                         f"OPM {c.get('opm')}")
+            L.append("")
+    except Exception:
+        pass
+
+    n_cl = int((T.status == "closed").sum())
+    L.append(f"<i>M6a 규율 카운트 · M6b 청산 {n_cl}/20건</i>")
+    _tg("\n".join(L))
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "report"
-    {"log": cmd_log, "update": cmd_update, "report": cmd_report}.get(cmd, cmd_report)()
+    {"log": cmd_log, "update": cmd_update, "report": cmd_report,
+     "notify": cmd_notify}.get(cmd, cmd_report)()

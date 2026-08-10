@@ -20,8 +20,8 @@
       "log_date": "2026-08-04",
       "entry_px": 91.61,
       "entry_px_date": "2026-07-31",
-      "peak_px": 107.85,
-      "peak_date": "2026-08-05",
+      "peak_px": 95.51,
+      "peak_date": "2026-08-03",
       "rs_13w": 2.98,
       "psr": 0.35,
       "dist_52w": -29.4,
@@ -36,7 +36,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 95.51,
+      "last_date": "2026-08-03"
     },
     {
       "id": "DELL_2026-08-04",
@@ -46,8 +48,8 @@
       "log_date": "2026-08-04",
       "entry_px": 405.37,
       "entry_px_date": "2026-07-31",
-      "peak_px": 467.27,
-      "peak_date": "2026-08-04",
+      "peak_px": 453.77,
+      "peak_date": "2026-08-03",
       "rs_13w": 1.86,
       "psr": 0.63,
       "dist_52w": -7.3,
@@ -60,7 +62,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 453.77,
+      "last_date": "2026-08-03"
     },
     {
       "id": "NSP_2026-08-04",
@@ -70,8 +74,8 @@
       "log_date": "2026-08-04",
       "entry_px": 50.61,
       "entry_px_date": "2026-07-31",
-      "peak_px": 54.03,
-      "peak_date": "2026-07-30",
+      "peak_px": 52.52,
+      "peak_date": "2026-08-03",
       "rs_13w": 1.74,
       "psr": 0.58,
       "dist_52w": -2.0,
@@ -84,7 +88,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 52.52,
+      "last_date": "2026-08-03"
     },
     {
       "id": "MAN_2026-08-04",
@@ -95,7 +101,7 @@
       "entry_px": 52.42,
       "entry_px_date": "2026-07-31",
       "peak_px": 56.6,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.69,
       "psr": 0.19,
       "dist_52w": 0.0,
@@ -107,7 +113,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 56.6,
+      "last_date": "2026-08-03"
     },
     {
       "id": "AVTR_2026-08-04",
@@ -117,8 +125,8 @@
       "log_date": "2026-08-04",
       "entry_px": 13.78,
       "entry_px_date": "2026-07-31",
-      "peak_px": 13.86,
-      "peak_date": "2026-07-30",
+      "peak_px": 13.78,
+      "peak_date": "2026-07-27",
       "rs_13w": 1.67,
       "psr": 2.59,
       "dist_52w": -10.5,
@@ -130,7 +138,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 13.59,
+      "last_date": "2026-08-03"
     },
     {
       "id": "PBF_2026-08-04",
@@ -140,8 +150,8 @@
       "log_date": "2026-08-04",
       "entry_px": 72.28,
       "entry_px_date": "2026-07-31",
-      "peak_px": 73.1,
-      "peak_date": "2026-07-30",
+      "peak_px": 72.28,
+      "peak_date": "2026-07-27",
       "rs_13w": 1.63,
       "psr": 0.24,
       "dist_52w": 0.0,
@@ -156,7 +166,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 61.71,
+      "last_date": "2026-08-03"
     },
     {
       "id": "HPE_2026-08-04",
@@ -167,7 +179,7 @@
       "entry_px": 47.9,
       "entry_px_date": "2026-07-31",
       "peak_px": 53.22,
-      "peak_date": "2026-08-05",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.62,
       "psr": 0.58,
       "dist_52w": -2.4,
@@ -181,7 +193,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 53.22,
+      "last_date": "2026-08-03"
     },
     {
       "id": "PGNY_2026-08-04",
@@ -191,8 +205,8 @@
       "log_date": "2026-08-04",
       "entry_px": 31.13,
       "entry_px_date": "2026-07-31",
-      "peak_px": 31.53,
-      "peak_date": "2026-08-03",
+      "peak_px": 31.13,
+      "peak_date": "2026-07-27",
       "rs_13w": 1.61,
       "psr": 2.55,
       "dist_52w": -2.5,
@@ -207,7 +221,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 28.1,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_CORT_2026-08-10",
@@ -219,7 +235,7 @@
       "entry_px": 110.77,
       "entry_px_date": "2026-08-07",
       "peak_px": 110.77,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 2.02,
       "psr": 2.94,
       "opm": 16.12,
@@ -233,7 +249,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 110.77,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_QLYS_2026-08-10",
@@ -245,7 +263,7 @@
       "entry_px": 183.48,
       "entry_px_date": "2026-08-07",
       "peak_px": 183.48,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.85,
       "psr": 8.97,
       "opm": 34.67,
@@ -258,7 +276,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 183.48,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_MAN_2026-08-10",
@@ -270,7 +290,7 @@
       "entry_px": 56.6,
       "entry_px_date": "2026-08-07",
       "peak_px": 56.6,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.85,
       "psr": 0.19,
       "opm": 0.63,
@@ -283,7 +303,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 56.6,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_OKTA_2026-08-10",
@@ -295,7 +317,7 @@
       "entry_px": 148.32,
       "entry_px_date": "2026-08-07",
       "peak_px": 148.32,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.68,
       "psr": 5.49,
       "opm": 7.32,
@@ -309,7 +331,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 148.32,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_AGL_2026-08-10",
@@ -321,7 +345,7 @@
       "entry_px": 95.51,
       "entry_px_date": "2026-08-07",
       "peak_px": 95.51,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.68,
       "psr": 0.35,
       "opm": 0.28,
@@ -337,7 +361,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 95.51,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_DELL_2026-08-10",
@@ -349,7 +375,7 @@
       "entry_px": 453.77,
       "entry_px_date": "2026-08-07",
       "peak_px": 453.77,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.66,
       "psr": 0.63,
       "opm": 8.34,
@@ -363,7 +389,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 453.77,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_HPE_2026-08-10",
@@ -375,7 +403,7 @@
       "entry_px": 53.22,
       "entry_px_date": "2026-08-07",
       "peak_px": 53.22,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.62,
       "psr": 0.58,
       "opm": 7.0,
@@ -390,7 +418,9 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 53.22,
+      "last_date": "2026-08-03"
     },
     {
       "id": "R6_TENB_2026-08-10",
@@ -402,7 +432,7 @@
       "entry_px": 36.38,
       "entry_px_date": "2026-08-07",
       "peak_px": 36.38,
-      "peak_date": "2026-08-07",
+      "peak_date": "2026-08-03",
       "rs_13w": 1.59,
       "psr": 5.63,
       "opm": 3.34,
@@ -415,10 +445,12 @@
       "exit_date": null,
       "ret_pct": null,
       "hold_wk": null,
-      "marks": {}
+      "marks": {},
+      "last_px": 36.38,
+      "last_date": "2026-08-03"
     }
   ],
-  "updated": "2026-08-10",
+  "updated": "2026-08-11",
   "rules": {
     "R6": "⑥ RS13>1.5 & (흑자전환 OR 이익폭증) & OPM>0",
     "R5": "⑤ RS13>1.5 & (흑자전환 OR 이익폭증) & PSR<3"
