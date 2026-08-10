@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "KdwqPsXIGgo",
+      "title": "하반기 코스피 vs 코스닥 승자는? 금리 부담 낮아질 때 당장 담아야 할 주식ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-08-10T11:30:22+00:00",
+      "url": "https://www.youtube.com/watch?v=KdwqPsXIGgo",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-10T21:31:56.624727+09:00"
+    },
+    {
       "video_id": "wEnMi8VoF3s",
       "title": "하반기 코스피 여전히 위쪽…AI 자금줄 쥔 '미 국채'가 마지막 변수ㅣ홍선애, 이은택 KB증권 자산배분전략 이사 [여의도 인사이트]",
       "channel": "삼프로TV",
@@ -105,17 +124,46 @@
       "url": "https://www.youtube.com/watch?v=S3lP5WhgFlc",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "one_liner": "개인 투자자들이 변화된 시장에서 살아남기 위해 자존감을 지키며 손절, 헷지 활용, 자신만의 투자 기준을 세우는 진지한 투자법을 강조하는 영상",
+        "summary": [
+          "매수보다 매도가 10배 이상 중요하며, 손실 포지션을 매도하는 것은 자존감과 심리적 이해를 요구하는 행위임을 강조합니다. [00:00, 00:08]",
+          "현 시장은 전례 없는 높은 변동성을 보이며, 이는 개인 투자자들에게 큰 도전이지만 동시에 귀한 학습 기회가 됩니다. [05:32, 08:59]",
+          "수업 참여자들이 손절매와 헤지(인버스를 통한 변동성 관리)를 활용하게 되면서 실제 투자 실력이 향상되는 모습을 보입니다. [06:40, 08:16, 09:28]",
+          "투자를 통해 자신만의 확고한 기준을 세우는 것이 중요하며, 이는 삶과 투자의 모든 영역에 걸친 지혜와 연결됩니다. [11:58, 12:55, 13:10]",
+          "개인 투자자가 어려운 시장에서 성장하고 실질적인 깨달음을 얻기 위해서는 단순 정보 습득을 넘어 진지한 자기 성찰과 실전 경험이 필수적입니다. [03:41, 14:46]"
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"달라진 시장 환경 속에서 개인 투자자가 손절매와 헤지 등 자신만의 기준을 세워 지속 가능한 투자를 하고, 삶과 투자를 연결하여 지혜롭게 성장하는 법에 대한 이야기입니다.\",\n  \"summary\": [\n    \"매수보다 매도가 10배 이상 중요하며, 손실 포지션 매도는 자기 존엄이 떨어지는 것을 확정하는 행위이기 때문에 자신과 인간 심리에 대한 이해가 필요합니다. [00:00]\",\n    \"본인의 투자 방식을 타인과 비교하고 개선하며, 특히 복잡계와 같은 시장에서 자신만의 생각과 기준을 만드는 것이 중요하다고 강조합니다. [00:50]\",\n    \"어려운 시장일수록 손절을 할 수 있는 능력과 헤지를 활용하여 변동성에 대응하는 것이 중요하며, 이는 투자 실력 향상에 필수적입니다. [06:41]\",\n    \"투자는 외면할 수 없는 삶의 일부이며, AI 시대에 더욱 중요도가 커지는 활동으로서, 재미와 의미를 모두 찾아 진지"
+        "key_points": [
+          {
+            "point": "달라진 시장과 높은 변동성: 현재 시장은 30년 투자 경력의 전문가도 처음 겪는 수준의 높은 변동성을 보이며, 이는 개인 투자자들에게는 더욱 큰 도전이자 귀한 학습 기회가 됩니다.",
+            "t": 532
+          },
+          {
+            "point": "매도와 손절의 중요성: 투자는 매수보다 매도가 훨씬 중요하며, 손실을 인정하고 손절하는 것은 자존감을 지키고 심리적 안정성을 유지하는 핵심적인 능력입니다.",
+            "t": 0
+          },
+          {
+            "point": "헷지 활용을 통한 변동성 관리: 과거 소수 전문가만 사용하던 헷지(인버스 활용)는 이제 늘어난 시장 변동성에 대응하여 포트폴리오를 적정하게 유지하는 필수적인 전략으로 부상했습니다.",
+            "t": 816
+          },
+          {
+            "point": "개인 투자자의 성장과 자율성 강조: 전문가의 의견을 맹목적으로 따르기보다, 제공된 정보와 경험을 바탕으로 자신만의 기준을 세우고 직접 실행하며 체화하는 과정이 중요합니다.",
+            "t": 244
+          },
+          {
+            "point": "투자의 본질적 가치: 투자는 단순히 돈을 버는 것을 넘어, 세상을 이해하고 자신을 성찰하는 삶의 과정이며, 진지한 태도로 임할 때 지혜와 성장을 가져다주는 활동입니다.",
+            "t": 15
+          }
+        ],
+        "actionable": [
+          "자신의 투자 실력을 향상시키기 위해, 오토폴리오와 개인 포트폴리오 두 계좌를 분리하여 운영하며 비교하는 방식을 고려해 볼 것. [00:43]",
+          "시장 변동성이 커진 시기에 손절 원칙을 확립하고 인버스 등 헤지 수단을 적극적으로 학습하여 포트폴리오의 안정성을 관리하는 방법을 익힐 것. [06:40, 08:16, 09:28]",
+          "오종태 대표의 라이브 강의 (8월 13일)에 참여하여 시장 판단 및 대응 전략을 학습하고, 교육 내용을 자신만의 투자 방식으로 체화하는 기회를 활용할 것 (단, 빨리 큰 돈을 벌려는 목적보다는 진지한 학습 태도로 참여). [17:21, 17:55]"
+        ]
       },
       "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-10T19:50:02.934840+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-10T21:31:23.878488+09:00"
     },
     {
       "video_id": "u7UYWtG7Mqg",
@@ -329,11 +377,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-10T19:53:41.270136+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-10T21:32:29.000237+09:00"
     },
     {
       "video_id": "DiD2eemzsuM",
@@ -447,8 +495,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-10T19:48:03.346995+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-10T21:29:57.632940+09:00"
     },
     {
       "video_id": "ulVEj3qWo0g",
@@ -924,11 +972,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-10T19:57:57.809218+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-10T21:33:01.309204+09:00"
     },
     {
       "video_id": "s935oWldYWE",
@@ -13079,47 +13127,7 @@
       "source": "fail",
       "attempts": 4,
       "analyzed_at": "2026-08-02T20:11:54.382923+09:00"
-    },
-    {
-      "video_id": "iGOG3QZtGy4",
-      "title": "내 주식이 더 빠지는 이유 #박세익",
-      "channel": "체슬리TV",
-      "published": "2026-08-02T01:18:31+00:00",
-      "url": "https://www.youtube.com/watch?v=iGOG3QZtGy4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "현재 시장에서 비반도체 주식들이 더 크게 하락하는 주요 원인은 신용 청산(반대매매)과 기관의 월간 손실 한도에 따른 무차별적인 스탑 로스 매도 때문이다.",
-        "summary": [
-          "개인 투자자들의 신용거래 청산(반대매매)이 늘어나면서 보유 주식이 일괄적으로 시장가에 매도되고 있습니다.",
-          "이로 인해 반도체 주식 외 다른 주식들까지도 함께 하락 압력을 받고 있습니다.",
-          "기관 투자자들도 월간 손실 한도를 초과할 경우 손실을 막기 위해 보유 주식 전체를 전량 매도하는 스탑 로스를 실행합니다.",
-          "기관의 이러한 매도는 특정 종목의 개별 가치나 이미 하락폭이 컸는지와 무관하게 모든 주식을 무차별적으로 매도하게 합니다.",
-          "결과적으로 이미 많이 하락한 주식들까지도 이러한 강제 매도 물량으로 인해 추가 하락하는 현상이 발생하고 있습니다."
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "신용 청산(반대매매)은 개인 투자자의 계좌 내 모든 종목을 시장가로 일괄 매도하게 하여 비반도체 주식의 하락폭을 키우는 요인이 됩니다.",
-            "t": 6
-          },
-          {
-            "point": "증권사 프랍 트레이딩 부서와 같은 기관은 월간 손실 한도에 도달하면 손실 확대를 막기 위해 보유하고 있는 모든 주식을 전량 매도하는 스탑 로스를 실행합니다.",
-            "t": 27
-          },
-          {
-            "point": "기관의 스탑 로스 매도는 특정 종목의 개별 상황이나 이미 충분히 하락했는지 여부와 관계없이 무차별적으로 이루어지며, 이는 시장 전반의 하락을 심화시킵니다.",
-            "t": 43
-          }
-        ],
-        "actionable": [
-          "시장 하락기에는 신용 잔고율이 높은 종목이나 업종에 대한 투자에 주의하고, 과도한 신용 거래를 피하는 것이 중요합니다.",
-          "기관의 손실 한도에 따른 대량 매도 가능성을 인지하고, 시장 불안정 시에는 포트폴리오의 리스크 관리를 강화할 필요가 있습니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-02T13:13:46.133174+09:00"
     }
   ],
-  "updated": "2026-08-10T20:03:51.486567+09:00"
+  "updated": "2026-08-10T21:33:02.494112+09:00"
 }
