@@ -10,8 +10,32 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from pathlib import Path
 from datetime import datetime, timedelta
+from contextlib import contextmanager
 
 st.set_page_config(page_title="Stock Dashboard", page_icon="📈", layout="wide")
+
+
+@contextmanager
+def guard(section: str):
+    """섹션 격리. Streamlit은 스크립트를 위→아래로 한 번에 실행하므로 한 탭에서
+    예외가 나면 그 아래 모든 탭이 통째로 렌더되지 않는다(2026-08-11 주도주 탭
+    KeyError로 5개 탭이 백지가 된 사고). 탭마다 이 가드를 씌워 고장을 국소화한다."""
+    try:
+        yield
+    except Exception as e:
+        st.error(f"⚠️ **{section}** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다.")
+        st.caption(f"`{type(e).__name__}: {e}`")
+
+
+def num(d: dict, key: str, fmt: str = '{}', dash: str = '-'):
+    """JSON에 없는 키를 '-'로 안전 표시. 데이터 스키마가 코드보다 늦게 따라올 때 대비."""
+    v = (d or {}).get(key)
+    if v is None:
+        return dash
+    try:
+        return fmt.format(v)
+    except (ValueError, TypeError):
+        return dash
 
 st.markdown("""
 <style>
@@ -54,6 +78,11 @@ div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem 
 }
 </style>
 """, unsafe_allow_html=True)
+
+# Streamlit Cloud 컨테이너의 파일시스템은 휘발성이다(슬립·재배포 시 초기화). 여기에
+# 파일로 저장하는 기능 — 보유종목·API키·구루 채널 — 은 "저장됐다"고 표시된 뒤 조용히
+# 사라진다. 조용히 실패하는 대신 사실대로 알리려고 환경을 구분한다.
+IS_CLOUD = str(Path(__file__).resolve()).replace('\\', '/').startswith('/mount/src')
 
 PERF_JSON        = Path('results/perf_latest.json')
 SCREENER_JSON    = Path('results/screener_latest.json')
@@ -341,22 +370,59 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
+# ── 📸 온보딩 포토카드 — 처음 온 사람이 탭을 누르기 전에 먼저 보는 30초 설명 ──
+#    세션 첫 렌더에서만 펼쳐두고, 이후 상호작용부터는 접힌다(매일 쓰는 사람 방해 금지).
+_first_visit = 'seen_onboard' not in st.session_state
+st.session_state['seen_onboard'] = True
+with st.expander("📸 처음이신가요? — 30초 사용법 카드 (탭 6개 · 시작 순서 · 주의사항)",
+                 expanded=_first_visit):
+    _card = Path('docs/onboarding_card.svg')
+    if _card.exists():
+        _svg = _card.read_text(encoding='utf-8')
+        # st.image(<img> 렌더)는 카드의 CSS가 앱 전역에 새지 않도록 격리해 준다.
+        try:
+            st.image(_svg, use_container_width=True)
+        except Exception:
+            st.html(_svg)
+        st.download_button("🖼️ 카드 이미지 저장 (SVG)", _svg,
+                           file_name="dashboard_사용법_카드.svg", mime="image/svg+xml",
+                           key="dl_onboard")
+        st.caption("더 자세한 설명(개념 사전·데이터 신뢰등급·FAQ)은 **🧭 프로젝트 종합 탭 → 📖 사용설명서**에 있습니다.")
+    else:
+        st.caption("온보딩 카드(docs/onboarding_card.svg)를 찾지 못했습니다.")
+
 tab_screen, tab7, tab_pf, tab4, tab_guru, tab10 = st.tabs([
     "🔎 종목 발굴", "🔍 종목 분석", "💼 포트폴리오", "🌍 매크로",
     "🎙️ 구루 인사이트", "🧭 프로젝트 종합"
 ])
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
-with tab_screen:
-    _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
-    _MDDM = _mdd_map()            # sym → 고점대비 낙폭 (모든 서브탭 테이블 공통 열)
-    _ATTM = _attract_map(_GMKT)   # sym → 매력도(위닝점수·등급)
+# 순서 주의: 서브탭 핸들(t_gain…)은 아래 6개 블록이 전부 의존하므로 **무조건 먼저** 만든다.
+# 매크로 스트립처럼 실패할 수 있는 계산을 먼저 두면, 그게 죽는 순간 핸들이 미정의가 되어
+# 서브탭 6개가 통째로 NameError로 날아간다. 스트립은 자리(container)만 잡아두고 뒤에서 채운다.
+_MDDM, _ATTM = {}, {}
 
-    # ── 매크로 요약 스트립 (구 '오늘의 종합' 카드 이관) ──
+with tab_screen:                           # 데이터를 건드리지 않는 순수 레이아웃 → 가드 불필요
+    _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
+    _macro_strip = st.container()          # 매크로 요약이 들어갈 자리
+    st.caption("상승 상위 · CANSLIM(KR/US) · 주도주 · 💎가치(뭘 살까) · ⚡타이밍(언제 살까) · 📒성적표(추천이 맞았나) — 시장 필터는 위 하나로 전 서브탭 공통")
+    t_gain, tab3, t_lead, t_value, t_prof, t_track = st.tabs([
+        "🔥 상승 상위", "🏆 CANSLIM",
+        "🚀 주도주", "💎 가치 발굴", "⚡ 타이밍 발굴", "📒 성적표"])
+
+# 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
+try:
+    _MDDM = _mdd_map()            # sym → 고점대비 낙폭
+except Exception:
+    _MDDM = {}
+try:
+    _ATTM = _attract_map(_GMKT)   # sym → 매력도(위닝점수·등급)
+except Exception:
+    _ATTM = {}
+
+# ── 매크로 요약 스트립 (구 '오늘의 종합' 카드 이관) ──
+with _macro_strip, guard('매크로 요약'):
     _s_can_h = load_json(CANSLIM_JSON) or {}
-    _s_scr_h = load_json(SCREENER_JSON) or {}
-    _scr_fh = [s for s in (_s_scr_h.get('stocks') or [])
-               if _GMKT == "전체" or s.get('market') == _GMKT]
     try:
         _fed_h = fetch_fred('FEDFUNDS', 1); _fed_r = _fed_h[-1][1] if _fed_h else None
         _m2_h = fetch_fred('M2SL', 14)
@@ -369,16 +435,11 @@ with tab_screen:
     _hm2.metric("매크로 신호", _msig)
     _hm4.metric("권고 현금", f"{_cmn}~{_cmx}%", help="매크로 위험도 기반 현금 비중 권고 · 상세는 🌍 매크로 탭")
 
-    st.caption("상승 상위 · CANSLIM(KR/US) · 주도주 · 💎가치(뭘 살까) · ⚡타이밍(언제 살까) · 📒성적표(추천이 맞았나) — 시장 필터는 위 하나로 전 서브탭 공통")
-    t_gain, tab3, t_lead, t_value, t_prof, t_track = st.tabs([
-        "🔥 상승 상위", "🏆 CANSLIM",
-        "🚀 주도주", "💎 가치 발굴", "⚡ 타이밍 발굴", "📒 성적표"])
-
 
 # ════════════════════════════════════════════════════════════════════
 # 탭: 구루 인사이트 — 투자 유튜브 채널 영상 일일 요약
 # ════════════════════════════════════════════════════════════════════
-with tab_guru:
+with tab_guru, guard('구루 인사이트'):
     st.header("🎙️ 구루 인사이트")
     st.caption("투자 유튜브 영상 일일 요약 — 핵심 · 언급 종목 · 강조 포인트, 클릭하면 해당 발언 시점으로 점프 (Gemini 분석)")
 
@@ -431,7 +492,9 @@ with tab_guru:
                     _chfile.write_text(json.dumps(_chans_cfg, ensure_ascii=False, indent=2),
                                        encoding='utf-8')
                     st.success(f"추가됨: {_newname.strip()} ({_cid})")
-                    st.info("⚠️ 클라우드 자동 분석에 반영하려면 `data/guru_channels.json` 을 git push 하세요.")
+                    st.info("⚠️ 클라우드 자동 분석에 반영하려면 `data/guru_channels.json` 을 git push 하세요."
+                            + ("  \n웹에서 추가한 채널은 서버 재시작 시 사라집니다 — 로컬에서 추가·커밋하세요."
+                               if IS_CLOUD else ""))
         st.caption("삭제·필터(include/exclude)는 data/guru_channels.json 직접 편집.")
 
     _GURU_JSON = Path('results/guru_insights.json')
@@ -540,7 +603,7 @@ def _returns_since(syms_markets, start_date):
 # ════════════════════════════════════════════════════════════════════
 
 # ── 🔥 상승 상위 (기간 상승률 + 신호 + CANSLIM + 실적증감 + 계절성) — 주봉 스크리너 통합 ──
-with t_gain:
+with t_gain, guard('상승 상위'):
     st.caption("기간별 상승 상위 + 주봉 신호 · CANSLIM · 매출/영업익 증감 · 당월 포함 향후 2개월 계절성. (주봉 스크리너 통합)")
     _retj = load_json(Path('results/returns.json'))
     _perf = load_json(PERF_JSON) or {}
@@ -670,7 +733,7 @@ with t_gain:
 
 
 # ── 주도주 (섹터/전체 상대강도) ──
-with t_lead:
+with t_lead, guard('주도주'):
     # 주도주 검증판 — 미국 1,279종·2018~2026 백테스트 + 워크포워드로 확정한 규칙⑤
     # (구 "주도주 지문" 로직은 2026-08-05 제거 — 신고가 −15% 이내·영익 YoY≥+100% 가 검증에서 기각됨)
     # ── 검증판 (규칙⑤) — 미국 1,279종·8.6년 백테스트 + 워크포워드로 확정한 규칙 ──
@@ -697,7 +760,8 @@ with t_lead:
             st.dataframe(pd.DataFrame([{
                 '종목': m['name'][:22], '코드': m['sym'], '종가': f"${m['close']:,.2f}",
                 'RS13': m['rs_13w'], 'PSR': m['psr'],
-                'PER': ('-' if m['per'] is None else m['per']),
+                # str/float 혼재 열은 Arrow 직렬화가 실패해 로그가 지저분해진다 → 문자열로 통일
+                'PER': ('-' if m['per'] is None else f"{m['per']:.1f}"),
                 '신고가': f"{m['dist_52w']:+.1f}%",
                 'OPM': ('-' if m['opm'] is None else f"{m['opm']:.1f}%"),
                 'OPM QoQ': ('-' if m['opm_qoq'] is None else f"{m['opm_qoq']:+.1f}"),
@@ -731,15 +795,17 @@ with t_lead:
             if _pp.get('live'):
                 _lv = _pp['live']
                 st.dataframe(pd.DataFrame([
-                    {'지표': '평균 수익', '실전': f"{_lv['avg']:+.1f}%", '백테스트': f"{_bt['avg_ret']:+.1f}%"},
-                    {'지표': '중앙 수익', '실전': f"{_lv['med']:+.1f}%", '백테스트': f"{_bt['med_ret']:+.1f}%"},
-                    {'지표': '승률', '실전': f"{_lv['winrate']:.0f}%", '백테스트': f"{_bt['winrate']:.0f}%"},
-                    {'지표': '평균 보유', '실전': f"{_lv['hold_wk']:.0f}주", '백테스트': f"{_bt['hold_wk']}주"}]),
+                    {'지표': '평균 수익', '실전': f"{_lv['avg']:+.1f}%", '백테스트': num(_bt, 'avg_ret', '{:+.1f}%')},
+                    {'지표': '중앙 수익', '실전': f"{_lv['med']:+.1f}%", '백테스트': num(_bt, 'med_ret', '{:+.1f}%')},
+                    {'지표': '승률', '실전': f"{_lv['winrate']:.0f}%", '백테스트': num(_bt, 'winrate', '{:.0f}%')},
+                    {'지표': '평균 보유', '실전': f"{_lv['hold_wk']:.0f}주", '백테스트': num(_bt, 'hold_wk', '{}주')}]),
                     use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))
             else:
                 st.caption(f"청산 거래가 없어 대조 불가. 백테스트 기대값 — "
-                           f"평균 {_bt['avg_ret']:+.1f}% · 중앙 {_bt['med_ret']:+.1f}% · "
-                           f"승률 {_bt['winrate']:.0f}% · 손익비 {_bt['payoff']}")
+                           f"중앙 {num(_bt, 'med_ret', '{:+.1f}%')} · "
+                           f"승률 {num(_bt, 'winrate', '{:.0f}%')} · "
+                           f"평균 보유 {num(_bt, 'hold_wk', '{}주')} · "
+                           f"거래 {num(_bt, 'trades', '{}건')}")
         st.caption(
             f"⚠️ {_bt['period']} 백테스트. 생존편향(상폐 미포함)·인샘플 규칙선택이 있어 낙관적이며, "
             f"워크포워드는 CAGR {_bt['wf_cagr']}·회복배율 {_bt['wf_recover']}로 **절반은 SPY에 진다**. "
@@ -747,7 +813,7 @@ with t_lead:
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
-with t_value:
+with t_value, guard('가치 발굴'):
     st.caption("💎 공식 지표(KRX)로 '싸고(저PER·저PBR) 돈 잘 버는(ROE·성장·배당)' 종목 발굴 — 가격이 아니라 가치 기준.")
     if _GMKT == "US":
         st.info("US 가치 스크린은 EDGAR 벌크 적재 후 제공 예정 — 지금은 KR만. "
@@ -835,7 +901,7 @@ with t_value:
 
 
 # ── ⚡ 타이밍 발굴 — 기술적 분석 기준 (언제 살까) ──
-with t_prof:
+with t_prof, guard('타이밍 발굴'):
     st.caption("⚡ 언제 오르나(계절성) · 얼마나 빠지나(MDD 낙폭) — 기술·통계 기준 타이밍. 하단에 포지션 사이징 계산기.")
     _pmode = st.radio("분석", ["📅 계절성 (월별 강세)", "🔄 MDD 낙폭 (바닥 탐색)"],
                       horizontal=True, key="prof_mode")
@@ -949,7 +1015,7 @@ def _wp_analyze_cached():
     import weekly_portfolio as _wp
     return _wp.analyze()
 
-with t_track:
+with t_track, guard('성적표'):
     st.caption("📒 시스템 추천을 이후 실제 가격으로 채점 — '신호가 나온다 ≠ 돈 번다'의 증거를 쌓는 곳. "
                "가상매매(신호별 정확도)와 주간 포트폴리오(종합 성과 vs 시장)로 나눠 본다.")
     import paper_trade as _pt
@@ -1046,7 +1112,7 @@ with t_track:
 # ════════════════════════════════════════════════════════════════════
 # 탭3: CANSLIM (슬라이더 실시간 조정)
 # ════════════════════════════════════════════════════════════════════
-with tab3:
+with tab3, guard('CANSLIM'):
     _cs_mkt = st.radio("시장", ["🇰🇷 한국", "🇺🇸 미국"], horizontal=True, key="canslim_mkt")
     _cs_kr = _cs_mkt.endswith("한국")
     _CS_JSON = CANSLIM_JSON if _cs_kr else Path('results/canslim_us_latest.json')
@@ -1303,7 +1369,7 @@ def _plotly_line(dfs, labels, colors, title, yformat='{:.2f}', height=260):
     fig.update_yaxes(gridcolor='rgba(128,128,128,0.2)', showgrid=True)
     return fig
 
-with tab4:
+with tab4, guard('매크로'):
     st.header("🌍 글로벌 매크로 대시보드")
     st.caption(f"🕐 {datetime.now().strftime('%Y-%m-%d %H:%M')} (FRED · FDR, 1시간 캐시)")
 
@@ -2054,7 +2120,7 @@ def ai_business_summary(name, text, src='공식 사업설명'):
         return f"(AI 요약 실패: {str(e)[:80]})"
 
 
-with tab7:
+with tab7, guard('종목 분석'):
     st.header("🔍 종목 분석")
     st.caption("US: TSLA · AAPL · NVDA  |  KR: 005930 또는 005930.KS")
 
@@ -2948,7 +3014,7 @@ def _marcap_join() -> dict:
                 m[s['sym']] = s['marcap']
     return m
 
-with tab_pf:
+with tab_pf, guard('포트폴리오'):
     st.header("💼 포트폴리오 관리")
     update_badge(PORTFOLIO_RESULT)
 
@@ -3036,6 +3102,11 @@ with tab_pf:
         st.divider()
 
     with st.expander("➕ 종목 추가", expanded=False):
+        if IS_CLOUD:
+            st.warning("⚠️ **웹(클라우드)에서 추가한 보유종목은 서버가 재시작되면 사라집니다.** "
+                       "클라우드 저장소가 임시 디스크라서 그렇습니다. 계속 남기려면 로컬 PC에서 "
+                       "추가한 뒤 `data/portfolio.json` 을 커밋·푸시하세요. "
+                       "(지금 추가해도 이번 세션 화면 확인용으로는 정상 동작합니다)")
         fc1, fc2, fc3, fc4, fc5, fc6 = st.columns([2, 1, 1, 1, 1, 1])
         with fc1: p_sym  = st.text_input("티커", key="p_sym", placeholder="TSLA / 005930")
         with fc2: p_name = st.text_input("이름(선택)", key="p_name", placeholder="Tesla")
@@ -3290,20 +3361,29 @@ with tab_pf:
             st.plotly_chart(fig_pf, use_container_width=True)
 
         st.divider()
-        if st.button("📲 지금 텔레그램으로 포트폴리오 전송", key="tg_now"):
+        # 텔레그램 토큰은 gitignore라 클라우드에는 없다 → 버튼을 눌러도 실패만 한다.
+        # 눌리는 죽은 버튼 대신 조건을 명시한다.
+        _tg_ready = Path('data/.telegram_token').exists() or bool(_get_secret('TELEGRAM_TOKEN'))
+        if st.button("📲 지금 텔레그램으로 포트폴리오 전송", key="tg_now", disabled=not _tg_ready):
             import subprocess, sys as _sys
-            result = subprocess.run([_sys.executable, 'portfolio_monitor.py'],
-                                    capture_output=True, text=True, cwd=str(Path(__file__).parent))
+            with st.spinner("전송 중..."):
+                result = subprocess.run([_sys.executable, 'portfolio_monitor.py'],
+                                        capture_output=True, text=True,
+                                        cwd=str(Path(__file__).parent))
             if result.returncode == 0:
                 st.success("✅ 텔레그램 전송 완료!")
             else:
-                st.error(f"오류: {result.stderr[:200]}")
+                st.error(f"오류: {(result.stderr or result.stdout)[:300]}")
+        if not _tg_ready:
+            st.caption("🔒 텔레그램 토큰이 없어 비활성화됨 — 로컬에서 `setup_telegram.py` 실행 후 사용하거나, "
+                       "클라우드는 Secrets에 `TELEGRAM_TOKEN`·`TELEGRAM_CHAT` 등록. "
+                       "(손절 경고 자동 발송은 매일 06:00 GitHub Actions가 따로 처리합니다)")
 
 
 # ════════════════════════════════════════════════════════════════════
 # 탭10: 프로젝트 종합 — 여정 · 목표 · 검증 로드맵
 # ════════════════════════════════════════════════════════════════════
-with tab10:
+with tab10, guard('프로젝트 종합'):
     # 📖 사용설명서 (GUIDE.md) — 홈페이지에서 바로 열람
     with st.expander("📖 사용설명서 — 처음이라면 여기부터 (프레임·탭 안내·개념 사전·데이터 출처)", expanded=False):
         try:
@@ -3436,6 +3516,9 @@ with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", exp
                 _KEY_FILE.parent.mkdir(exist_ok=True); _KEY_FILE.write_text(fh_input)
             except Exception:
                 pass
+        if IS_CLOUD:
+            st.caption("⚠️ 웹에서 넣은 키는 이번 세션에서만 유효합니다(서버 재시작 시 소멸). "
+                       "영구 적용은 Streamlit Cloud → Settings → Secrets 에 `FINNHUB_KEY` 등록.")
     with _set2:
         st.write("")
         if st.button("🔄 전체 새로고침", use_container_width=True):
