@@ -1,6 +1,127 @@
 {
   "items": [
     {
+      "video_id": "EIC4hb1f0jg",
+      "title": "'8월 전강후강' 아직 유효…삼전닉스 안정되면 코스닥 주도주는 '상승 3법'에서 나온다ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-10T12:30:15+00:00",
+      "url": "https://www.youtube.com/watch?v=EIC4hb1f0jg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-10T23:08:07.345482+09:00"
+    },
+    {
+      "video_id": "ebFn3gD8dlI",
+      "title": "주식보다 두 배 올랐다?…내 계좌 손실 줄이는 자산배분 전략ㅣ명민준, 박가영, 송재경 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-10T13:30:25+00:00",
+      "url": "https://www.youtube.com/watch?v=ebFn3gD8dlI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "주식, 채권, 환율 등 다양한 자산군과 지역별 시장 흐름을 이해하고 금 투자를 인플레이션 및 리스크 헤지 수단으로 활용하는 자산배분 전략을 모색해야 한다.",
+        "summary": [
+          "투자자들은 종목이나 국내 시장만 보지 않고 자산군 및 지역별 투자 시야를 넓혀야 합니다.",
+          "주식 시장을 이해하려면 주식, 금리, 환율의 상관관계를 파악해야 하며, 더 나아가 자산군별 움직임을 파악하는 것이 중요합니다.",
+          "금은 인플레이션 헤지 및 경기 침체에 대한 보험 역할을 하는 자산으로, 최근 미국 달러 약세와 실질 금리 하락 환경에서 강세를 보이고 있습니다.",
+          "전 세계 중앙은행들이 미국 국채 보유를 줄이고 금 및 기타 통화 자산을 늘리는 추세는 금 가격 상승의 장기적 요인으로 작용할 수 있습니다.",
+          "위험을 분산하고 싶다면 금광업체 ETF(GDX)나 국내 코스피 200 동일가중 ETF 같은 분산 투자를 고려할 수 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "고려아연",
+            "ticker": "010130",
+            "context": "은 가격 상승으로 주가 상승 예시",
+            "view": "긍정",
+            "t": 4471
+          },
+          {
+            "name": "GDX",
+            "ticker": "GDX",
+            "context": "금광업체 ETF는 금 가격 상승 시 높은 탄력성을 보이고 배당도 지급",
+            "view": "긍정",
+            "t": 1954
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "반도체 주식 투자 예시, 주주환원 잉여현금흐름 관련",
+            "view": "중립",
+            "t": 1045
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "반도체 주식 투자 예시, 주주환원 잉여현금흐름 관련",
+            "view": "중립",
+            "t": 1045
+          },
+          {
+            "name": "엔비디아",
+            "ticker": "NVDA",
+            "context": "주주환원 잘하는 기업 예시",
+            "view": "긍정",
+            "t": 1144
+          },
+          {
+            "name": "TSMC",
+            "ticker": "TSM",
+            "context": "주주환원 잘하는 기업 예시",
+            "view": "긍정",
+            "t": 1145
+          }
+        ],
+        "key_points": [
+          {
+            "point": "자산군별(주식, 채권, 귀금속, 원자재 등) 분산 투자 및 지역별 시장 분석의 중요성 강조.",
+            "t": 57
+          },
+          {
+            "point": "자산군 간의 비동조화(서로 다르게 움직이는 경향)를 활용한 포트폴리오 변동성 관리.",
+            "t": 270
+          },
+          {
+            "point": "금은 경제 불확실성 시기에 가치를 보존하는 '보험' 자산으로 기능.",
+            "t": 308
+          },
+          {
+            "point": "금 가격은 실질 금리 하락과 달러 약세(다른 통화 강세) 환경에서 상승 압력을 받음.",
+            "t": 1543
+          },
+          {
+            "point": "미국 연방 부채 증가와 금 가격 상승 간의 역사적 상관관계가 관찰되며, 이는 달러 및 국채 신뢰도 하락과 관련될 수 있음.",
+            "t": 2329
+          },
+          {
+            "point": "금광업체 ETF는 금 자체 투자보다 높은 탄력성과 배당 수익률을 제공할 수 있는 대안.",
+            "t": 3125
+          },
+          {
+            "point": "소액 투자자나 초심자는 특정 종목에 대한 부담을 줄이기 위해 지수 투자(동일 가중 방식 등)가 효과적일 수 있음.",
+            "t": 3905
+          }
+        ],
+        "actionable": [
+          "Investing.com과 같은 플랫폼을 활용하여 매일 주요 자산군(주식, 채권, 환율, 원자재, 암호화폐)의 움직임을 모니터링하는 습관을 들일 것.",
+          "포트폴리오의 일정 부분에 금을 '보험' 개념으로 포함시키는 것을 고려할 것.",
+          "KRX 금 시장(금 현물 계좌)을 통해 금에 투자하면 양도소득세 면제 혜택을 받을 수 있음(실물 인출 시 부가세 10% 부과).",
+          "금 가격에 대한 노출과 함께 배당 수익 및 더 높은 변동성을 추구한다면 금광업체 ETF(예: GDX) 투자를 고려할 것.",
+          "소액 투자자는 코스피 200 동일가중 ETF 등 여러 종목에 분산 투자하여 개별 종목의 위험을 줄이는 전략을 활용할 것."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-10T23:07:34.980484+09:00"
+    },
+    {
       "video_id": "KdwqPsXIGgo",
       "title": "하반기 코스피 vs 코스닥 승자는? 금리 부담 낮아질 때 당장 담아야 할 주식ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
       "channel": "삼프로TV",
@@ -16,8 +137,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-10T21:31:56.624727+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-10T23:08:39.708157+09:00"
     },
     {
       "video_id": "wEnMi8VoF3s",
@@ -380,8 +501,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-10T21:32:29.000237+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-10T23:09:11.938616+09:00"
     },
     {
       "video_id": "DiD2eemzsuM",
@@ -495,8 +616,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-10T21:29:57.632940+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-10T23:03:32.911905+09:00"
     },
     {
       "video_id": "ulVEj3qWo0g",
@@ -13019,115 +13140,7 @@
       "source": "fail",
       "attempts": 4,
       "analyzed_at": "2026-08-02T20:12:26.947179+09:00"
-    },
-    {
-      "video_id": "Xk7fhMfMBtk",
-      "title": "전쟁까지 갈 수밖에 없다. 저무는 미국 vs 피크아웃 중국/ 조한범 박사 (2부)",
-      "channel": "와이스트릿",
-      "published": "2026-08-02T03:00:20+00:00",
-      "url": "https://www.youtube.com/watch?v=Xk7fhMfMBtk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "미국과 중국의 패권 경쟁은 '투키디데스의 함정'에 빠져있으며, 에너지와 기술 통제를 통해 미국이 중국을 압박하고 있지만, 중국의 구조적 문제와 미국의 하향세로 인해 양국 모두 딜레마에 처해있습니다.",
-        "summary": [
-          "미국과 중국은 '투키디데스의 함정'에 빠진 숙명적 경쟁 관계에 있으며, 중국의 급부상은 기존 강대국인 미국에 위협이 되고 있습니다.",
-          "미국은 과거 일본의 성장을 억제했던 '플라자 합의'와 '반도체 협의'처럼 에너지와 첨단 기술(반도체) 통제를 통해 중국을 압박하고 있습니다.",
-          "트럼프 행정부의 중동 정책은 베네수엘라와 이란의 석유를 중국으로부터 차단하여 중국의 에너지 자립도를 약화시키고 물가 인상을 유도했습니다.",
-          "중국은 14억 인구의 에너지 수요와 '중진국 함정'이라는 구조적 한계에 직면해 있으며, 독재 체제는 장기적인 성장을 저해하는 독소로 작용할 것이라고 전망됩니다.",
-          "미국의 대중국 압박은 민주당과 공화당의 공통적인 목표이며, 블랙웰 H200 같은 최첨단 반도체 기술의 수출 통제와 같은 조치가 계속될 것입니다.",
-          "애플(AAPL)과 같은 미국 기업들도 중국향 저사양 D램 수급에 어려움을 겪고 있으며, 이는 미국 정부의 대중국 정책이 자국 기업에도 영향을 미치고 있음을 시사합니다."
-        ],
-        "tickers": [
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "미국의 일본 반도체 압박이 한국 반도체 산업에 기회를 제공했다고 언급됩니다.",
-            "view": "긍정",
-            "t": 112
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "미국의 일본 반도체 압박이 한국 반도체 산업에 기회를 제공했다고 언급됩니다.",
-            "view": "긍정",
-            "t": 112
-          },
-          {
-            "name": "엔비디아",
-            "ticker": "NVDA",
-            "context": "엔비디아의 블랙웰 H200 칩 판매를 제한하는 미국의 대중국 첨단 기술 통제 정책이 언급됩니다.",
-            "view": "중립",
-            "t": 356
-          },
-          {
-            "name": "애플",
-            "ticker": "AAPL",
-            "context": "미국의 대중국 반도체 통제로 인해 애플이 저사양 D램을 구하는 데도 어려움을 겪고 있다고 언급됩니다.",
-            "view": "부정",
-            "t": 1028
-          },
-          {
-            "name": "TSMC",
-            "ticker": "TSM",
-            "context": "하위 사양 칩 생산 관련하여 언급됩니다.",
-            "view": "중립",
-            "t": 1047
-          }
-        ],
-        "key_points": [
-          {
-            "point": "미국과 중국은 '투키디데스의 함정'에 빠진 운명적인 경쟁 관계에 있으며, 강대국 간의 부상과 기존 패권국의 견제는 필연적으로 전쟁으로 이어질 수 있습니다.",
-            "t": 33
-          },
-          {
-            "point": "미국은 일본을 압박했던 '플라자 합의'와 '반도체 협의'의 전례를 따라 중국의 에너지 공급을 차단하고 첨단 기술 접근을 제한하는 전략을 펼치고 있습니다.",
-            "t": 139
-          },
-          {
-            "point": "중국은 베네수엘라와 이란의 석유를 싸게 공급받아왔으나, 미국의 제재로 인해 이 경로가 막히면서 에너지 문제와 인플레이션 압박에 직면했습니다.",
-            "t": 246
-          },
-          {
-            "point": "중국은 14억 인구로 인한 방대한 자원 소비와 '중진국 함정', 독재 체제의 고질적인 부패 문제로 인해 고도 성장을 지속하기 어려운 구조적 한계를 가지고 있습니다.",
-            "t": 607
-          },
-          {
-            "point": "독재는 초기 개발 단계에서는 효율적일 수 있으나, 장기적으로는 성장을 저해하고 내부 부패와 불신을 야기하여 필연적으로 붕괴하게 되어 있습니다.",
-            "t": 719
-          },
-          {
-            "point": "미국의 대중국 견제는 특정 정권의 문제가 아닌, 민주당과 공화당 모두가 동의하는 숙명적인 국가적 과제이며, 이는 장기적인 미중 전략 경쟁으로 이어질 것입니다.",
-            "t": 1014
-          }
-        ],
-        "actionable": [
-          "미국과 중국의 에너지 및 첨단 기술 관련 정책 변화를 지속적으로 모니터링하여 관련 산업에 미칠 영향을 파악합니다.",
-          "중국의 '중진국 함정' 가능성과 독재 체제의 리스크가 중국 경제에 미칠 장기적인 영향을 고려하여 투자 전략을 수립합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-02T16:21:53.907526+09:00"
-    },
-    {
-      "video_id": "DoRKA9Udcag",
-      "title": "중국 반도체 쇼크의 진실, 한국은 정말 위기일까? | 전병서 중국경제금융연구소 소장 [주말인터뷰]",
-      "channel": "삼프로TV",
-      "published": "2026-08-02T02:00:08+00:00",
-      "url": "https://www.youtube.com/watch?v=DoRKA9Udcag",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-02T20:11:54.382923+09:00"
     }
   ],
-  "updated": "2026-08-10T21:33:02.494112+09:00"
+  "updated": "2026-08-10T23:09:13.059861+09:00"
 }
