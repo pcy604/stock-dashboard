@@ -90,6 +90,16 @@ def cmd_log():
     led = load()
     led.setdefault("rules", {k: v[0] for k, v in RULES.items()})
     led.setdefault("ref_by_rule", REF_BY_RULE)
+
+    # ── 사이클 실행 이력 ──────────────────────────────────────────────
+    # M6a 완료조건이 "13주 연속 실행"이라 실행 자체를 세야 한다.
+    # 신규 진입이 없는 주(슬롯 만석)에는 trades가 안 늘어나므로
+    # trades에서 역산하면 그 주를 통째로 놓친다. 그래서 따로 기록한다.
+    runs = led.setdefault("runs", [])
+    sw = str(wk.date())
+    if not any(r["signal_week"] == sw for r in runs):
+        runs.append(dict(signal_week=sw, ran_on=str(date.today())))
+        runs.sort(key=lambda r: r["signal_week"])
     px_cache, total = {}, 0
 
     # 규칙별로 독립된 보유 상한을 둔다 — 두 규칙의 성적을 섞지 않기 위해서.
@@ -289,8 +299,23 @@ def cmd_notify():
     T["rule"] = T["rule"].fillna("R5")
     today = str(date.today())
 
-    L = [f"<b>🚀 주도주 주간 요약</b>  {today}",
-         f"청산 규칙: 주봉 고점 −{int(TRAIL*100)}% 트레일링", ""]
+    # ── 주차 / M6a 연속성 ────────────────────────────────────────────
+    runs = led.get("runs", [])
+    nrun = len(runs)
+    sw = runs[-1]["signal_week"] if runs else "-"
+    # 신호주가 7일 간격으로 이어지는지 — 건너뛴 주가 있으면 M6a 카운트는 끊긴다
+    streak, gaps = (1 if runs else 0), 0
+    for a, b in zip(runs, runs[1:]):
+        d = (pd.Timestamp(b["signal_week"]) - pd.Timestamp(a["signal_week"])).days
+        if d == 7:
+            streak += 1
+        else:
+            streak, gaps = 1, gaps + 1
+    head = f"<b>🚀 주도주 {nrun}주차</b>  (신호주 {sw})"
+    m6a = f"M6a 규율 {streak}/13주" + (f" · 🔴 중간에 {gaps}주 걸름" if gaps else " ✅ 연속")
+
+    L = [head, f"{today} · 청산 규칙: 주봉 고점 −{int(TRAIL*100)}% 트레일링",
+         m6a, ""]
 
     # 이번 실행에서 새로 청산·진입된 것부터 (사람이 제일 먼저 볼 것)
     new_x = T[(T.status == "closed") & (T.exit_date.astype(str) >= today)]
@@ -346,7 +371,7 @@ def cmd_notify():
         pass
 
     n_cl = int((T.status == "closed").sum())
-    L.append(f"<i>M6a 규율 카운트 · M6b 청산 {n_cl}/20건</i>")
+    L.append(f"<i>M6b 성과표본 청산 {n_cl}/20건</i>")
     _tg("\n".join(L))
 
 
