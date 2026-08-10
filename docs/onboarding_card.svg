@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 742" width="100%" role="img"
+     aria-label="시그널 트레이딩 대시보드 30초 사용설명 카드">
+  <title>시그널 트레이딩 대시보드 — 30초 사용설명</title>
+  <defs>
+    <linearGradient id="hd" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="55%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <style>
+      .oc-f { font-family: Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+      .oc-h1 { font-size: 27px; font-weight: 800; fill: #fff; letter-spacing: -0.4px; }
+      .oc-h2 { font-size: 14.5px; fill: #dbeafe; }
+      .oc-sec { font-size: 13px; font-weight: 800; fill: #2563eb; letter-spacing: 1.4px; }
+      .oc-card-t { font-size: 17px; font-weight: 800; fill: #111827; }
+      .oc-card-d { font-size: 13.5px; fill: #374151; }
+      .oc-card-w { font-size: 12.5px; font-weight: 700; fill: #1d4ed8; }
+      .oc-lay-t { font-size: 15.5px; font-weight: 800; fill: #111827; }
+      .oc-lay-d { font-size: 12.5px; fill: #4b5563; }
+      .oc-step-n { font-size: 15px; font-weight: 800; fill: #fff; }
+      .oc-step-t { font-size: 14px; font-weight: 800; fill: #111827; }
+      .oc-step-d { font-size: 12px; fill: #4b5563; }
+      .oc-warn { font-size: 12.5px; fill: #7c2d12; }
+      .oc-foot { font-size: 12px; fill: #6b7280; }
+      .oc-badge { font-size: 11.5px; font-weight: 700; fill: #fff; }
+    </style>
+  </defs>
+
+  <rect width="1160" height="742" rx="18" fill="#ffffff"/>
+  <rect width="1160" height="742" rx="18" fill="none" stroke="#e5e7eb" stroke-width="2"/>
+
+  <!-- ── 헤더 ── -->
+  <path d="M0 18 A18 18 0 0 1 18 0 H1142 A18 18 0 0 1 1160 18 V104 H0 Z" fill="url(#hd)"/>
+  <text class="oc-f oc-h1" x="40" y="46">📈 시그널 트레이딩 대시보드 — 30초 사용설명</text>
+  <text class="oc-f oc-h2" x="40" y="76">공식 공시(DART·SEC EDGAR)와 시장 가격을 매일 자동으로 긁어와,
+    <tspan font-weight="700" fill="#ffffff">“뭘 살까 · 언제 살까 · 얼마나 살까”</tspan>를 숫자로 계산해 주는 개인 리서치 도구입니다.</text>
+
+  <!-- ── ① 원리: 3층 프레임 ── -->
+  <text class="oc-f oc-sec" x="40" y="140">① 이 도구가 생각하는 방식 — 3층 프레임</text>
+
+  <g>
+    <rect x="40" y="154" width="345" height="86" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+    <text class="oc-f oc-lay-t" x="60" y="184">🟡 가치 — “뭘 살까”</text>
+    <text class="oc-f oc-lay-d" x="60" y="209">재무 3표 · ROE · 성장 · 흑자전환</text>
+    <text class="oc-f oc-lay-d" x="60" y="228">회사가 실제로 돈을 버는가</text>
+  </g>
+  <text class="oc-f" x="399" y="203" font-size="20" fill="#9ca3af">×</text>
+  <g>
+    <rect x="422" y="154" width="316" height="86" rx="12" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text class="oc-f oc-lay-t" x="442" y="184">⚖️ 멀티플 — “비싼가”</text>
+    <text class="oc-f oc-lay-d" x="442" y="209">PER · PBR · PSR = 가격 ÷ 가치</text>
+    <text class="oc-f oc-lay-d" x="442" y="228">가치와 가격을 잇는 다리</text>
+  </g>
+  <text class="oc-f" x="752" y="203" font-size="20" fill="#9ca3af">×</text>
+  <g>
+    <rect x="775" y="154" width="345" height="86" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text class="oc-f oc-lay-t" x="795" y="184">🔵 가격 — “언제 살까”</text>
+    <text class="oc-f oc-lay-d" x="795" y="209">차트 · 주봉 신호 · 계절성 · RS</text>
+    <text class="oc-f oc-lay-d" x="795" y="228">지금이 들어갈 자리인가</text>
+  </g>
+
+  <!-- ── ② 탭 6개 ── -->
+  <text class="oc-f oc-sec" x="40" y="278">② 위쪽 탭 6개 — 각각 무엇을 하나</text>
+
+  <!-- row 1 -->
+  <g>
+    <rect x="40" y="292" width="345" height="112" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="40" y="292" width="5" height="112" rx="2.5" fill="#2563eb"/>
+    <text class="oc-f oc-card-t" x="62" y="320">🔎 종목 발굴</text>
+    <text class="oc-f oc-card-d" x="62" y="344">조건에 맞는 종목을 기계가 골라 목록으로.</text>
+    <text class="oc-f oc-card-d" x="62" y="364">상승상위·CANSLIM·주도주·가치·타이밍·성적표</text>
+    <text class="oc-f oc-card-w" x="62" y="389">👉 “살 만한 후보가 아예 없을 때” 여기서 시작</text>
+  </g>
+  <g>
+    <rect x="407" y="292" width="345" height="112" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="407" y="292" width="5" height="112" rx="2.5" fill="#2563eb"/>
+    <text class="oc-f oc-card-t" x="429" y="320">🔍 종목 분석</text>
+    <text class="oc-f oc-card-d" x="429" y="344">종목코드 입력 → 차트·공식 재무 3표·멀티플·</text>
+    <text class="oc-f oc-card-d" x="429" y="364">목표주가·AI 사업요약을 한 화면에서.</text>
+    <text class="oc-f oc-card-w" x="429" y="389">👉 US는 NVDA, KR은 005930 처럼 입력</text>
+  </g>
+  <g>
+    <rect x="775" y="292" width="345" height="112" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="775" y="292" width="5" height="112" rx="2.5" fill="#2563eb"/>
+    <text class="oc-f oc-card-t" x="797" y="320">💼 포트폴리오</text>
+    <text class="oc-f oc-card-d" x="797" y="344">보유 종목을 등록하면 수익률·비중·손절선을</text>
+    <text class="oc-f oc-card-d" x="797" y="364">매일 자동 추적하고 경고를 보냅니다.</text>
+    <text class="oc-f oc-card-w" x="797" y="389">👉 샀다면 반드시 여기에 손절가까지 등록</text>
+  </g>
+
+  <!-- row 2 -->
+  <g>
+    <rect x="40" y="416" width="345" height="112" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="40" y="416" width="5" height="112" rx="2.5" fill="#64748b"/>
+    <text class="oc-f oc-card-t" x="62" y="444">🌍 매크로</text>
+    <text class="oc-f oc-card-d" x="62" y="468">기준금리·M2·지수로 시장 위험도를 판정하고</text>
+    <text class="oc-f oc-card-d" x="62" y="488">권고 현금비중을 제시합니다.</text>
+    <text class="oc-f oc-card-w" x="62" y="513">👉 “지금 사도 되는 장인가”를 먼저 확인</text>
+  </g>
+  <g>
+    <rect x="407" y="416" width="345" height="112" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="407" y="416" width="5" height="112" rx="2.5" fill="#64748b"/>
+    <text class="oc-f oc-card-t" x="429" y="444">🎙️ 구루 인사이트</text>
+    <text class="oc-f oc-card-d" x="429" y="468">투자 유튜브 영상을 매일 AI가 요약. 언급 종목</text>
+    <text class="oc-f oc-card-d" x="429" y="488">시각을 누르면 그 발언 시점으로 점프합니다.</text>
+    <text class="oc-f oc-card-w" x="429" y="513">👉 시장이 지금 무엇을 이야기하는지 훑을 때</text>
+  </g>
+  <g>
+    <rect x="775" y="416" width="345" height="112" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <rect x="775" y="416" width="5" height="112" rx="2.5" fill="#64748b"/>
+    <text class="oc-f oc-card-t" x="797" y="444">🧭 프로젝트 종합</text>
+    <text class="oc-f oc-card-d" x="797" y="468">전체 사용설명서 · 검증 로드맵 · 페이퍼</text>
+    <text class="oc-f oc-card-d" x="797" y="488">트레이딩 성적표(신호가 실제로 맞았는지).</text>
+    <text class="oc-f oc-card-w" x="797" y="513">👉 “이 숫자를 믿어도 되나”가 궁금할 때</text>
+  </g>
+
+  <!-- ── ③ 처음이라면 이 순서 ── -->
+  <text class="oc-f oc-sec" x="40" y="566">③ 처음이라면 이 순서로 — 4단계</text>
+
+  <g>
+    <rect x="40" y="580" width="256" height="76" rx="12" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+    <circle cx="68" cy="608" r="14" fill="#4338ca"/><text class="oc-f oc-step-n" x="63" y="613">1</text>
+    <text class="oc-f oc-step-t" x="90" y="606">🌍 시장 온도 재기</text>
+    <text class="oc-f oc-step-d" x="90" y="627">매크로 탭에서 권고 현금비중 확인.</text>
+    <text class="oc-f oc-step-d" x="90" y="645">위험하면 오늘은 사지 않는 것도 답.</text>
+  </g>
+  <text class="oc-f" x="306" y="624" font-size="20" fill="#9ca3af">→</text>
+  <g>
+    <rect x="328" y="580" width="256" height="76" rx="12" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+    <circle cx="356" cy="608" r="14" fill="#4338ca"/><text class="oc-f oc-step-n" x="351" y="613">2</text>
+    <text class="oc-f oc-step-t" x="378" y="606">🔎 후보 3~5개 뽑기</text>
+    <text class="oc-f oc-step-d" x="378" y="627">종목 발굴 탭 · 시장(KR/US) 고르고</text>
+    <text class="oc-f oc-step-d" x="378" y="645">정렬을 ‘위닝점수’로 바꿔서 보기.</text>
+  </g>
+  <text class="oc-f" x="594" y="624" font-size="20" fill="#9ca3af">→</text>
+  <g>
+    <rect x="616" y="580" width="256" height="76" rx="12" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+    <circle cx="644" cy="608" r="14" fill="#4338ca"/><text class="oc-f oc-step-n" x="639" y="613">3</text>
+    <text class="oc-f oc-step-t" x="666" y="606">🔍 한 종목씩 검증</text>
+    <text class="oc-f oc-step-d" x="666" y="627">종목 분석 탭에 코드 입력 → 재무가</text>
+    <text class="oc-f oc-step-d" x="666" y="645">실제로 좋아지는지 눈으로 확인.</text>
+  </g>
+  <text class="oc-f" x="882" y="624" font-size="20" fill="#9ca3af">→</text>
+  <g>
+    <rect x="904" y="580" width="216" height="76" rx="12" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+    <circle cx="932" cy="608" r="14" fill="#4338ca"/><text class="oc-f oc-step-n" x="927" y="613">4</text>
+    <text class="oc-f oc-step-t" x="954" y="606">💼 손절선까지 등록</text>
+    <text class="oc-f oc-step-d" x="954" y="627">샀으면 포트폴리오 탭에</text>
+    <text class="oc-f oc-step-d" x="954" y="645">손절가와 함께 기록.</text>
+  </g>
+
+  <!-- ── 경고 + 출처 ── -->
+  <rect x="40" y="670" width="1080" height="42" rx="10" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+  <text class="oc-f oc-warn" x="60" y="688">⚠️ 이 대시보드는 <tspan font-weight="800">의사결정 보조 도구</tspan>입니다. 점수·신호는 확률이지 보장이 아니며, 매수 권유가 아닙니다. 최종 판단과 책임은 사용자 본인에게 있습니다.</text>
+  <text class="oc-f oc-warn" x="60" y="705">숫자에 ‘-’가 보이는 칸은 오류가 아니라 <tspan font-weight="800">해당 종목에 그 데이터가 없다는 뜻</tspan>입니다 (예: 애널 커버리지 없는 중소형주의 컨센서스).</text>
+
+  <text class="oc-f oc-foot" x="40" y="732">데이터 출처: DART · SEC EDGAR(공식 재무) · KRX/FinanceDataReader(가격) · FRED(매크로) · 네이버금융/yfinance(컨센서스, 참고)  ·  매일 06:00 KST 자동 갱신</text>
+</svg>
