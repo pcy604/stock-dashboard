@@ -42,6 +42,9 @@ CHECKS = [
     ('results/weekly_portfolio.json', _wp_date,       9,  '주간 추천 포트폴리오'),
     ('results/canslim_latest.json',   _generic_date,  4,  'CANSLIM(KR)'),
     ('results/value_kr.json',         _generic_date,  4,  '가치 스냅샷(DART)'),
+    # 주간 산출물(토 08:00 KST 자동 실행) — 주기 7일 + 여유 2일
+    ('results/leaders_signal.json',   _generic_date,  9,  '주도주 신호(주간)'),
+    ('results/leaders_paper.json',    _paper_date,    9,  '주도주 페이퍼 원장'),
 ]
 
 # 2종 감시: 위는 '멈춤'(날짜 안 늙음), 아래는 '조용한 저하'(매일 갱신되지만
