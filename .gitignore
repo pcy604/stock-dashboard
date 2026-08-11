@@ -35,3 +35,6 @@ RAW_보기.xlsx
 
 # 2026-08-08: leaders_run.py 산출물 — 소비자 없음. 기각된 규칙(신고가 -25%·영익 YoY+100%) 결과라 되살리지 말 것
 results/leaders_v2.json
+
+# stash 백업(2026-08-11 정리) — 로컬 보관용, 원격에 올리지 않는다
+.stash_backup/
