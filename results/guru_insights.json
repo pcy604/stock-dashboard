@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "xlSqV_hx5VU",
+      "title": "거래량이 실종된 코스피, 당분간 주도주는 기대하지 마세요ㅣ명민준, 김유민, 황유현 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-11T12:30:23+00:00",
+      "url": "https://www.youtube.com/watch?v=xlSqV_hx5VU",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-11T23:07:24.980542+09:00"
+    },
+    {
+      "video_id": "35WG25DeY4Q",
+      "title": "삼전닉스 도대체 왜 발목이 묶인거에요?ㅣ명민준, 김유민, 이지환 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-11T13:30:05+00:00",
+      "url": "https://www.youtube.com/watch?v=35WG25DeY4Q",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-11T23:06:52.447772+09:00"
+    },
+    {
       "video_id": "1LBCAzE1Eoo",
       "title": "사람보다 AI가 더 많은 트래픽 만든다…반도체 슈퍼사이클이 다시 오는 이유ㅣ김장열 유니스토리자산운용 리서치센터장 [집중 오늘의 주식]",
       "channel": "삼프로TV",
@@ -16,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-11T21:28:37.274488+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-11T23:07:57.688331+09:00"
     },
     {
       "video_id": "yqlZlHn7eiQ",
@@ -306,8 +344,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-11T21:29:41.653620+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-11T23:09:02.766898+09:00"
     },
     {
       "video_id": "mTWiJsE6WuU",
@@ -561,8 +599,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-11T21:29:09.446475+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-11T23:08:30.147351+09:00"
     },
     {
       "video_id": "kNCfFROlePo",
@@ -824,11 +862,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-11T21:28:04.478958+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-11T23:04:13.774872+09:00"
     },
     {
       "video_id": "T6lGLhlCULM",
@@ -12834,166 +12872,7 @@
       "source": "fail",
       "attempts": 2,
       "analyzed_at": "2026-08-04T08:56:13.610431+09:00"
-    },
-    {
-      "video_id": "qHq6Kor1ZKE",
-      "title": "매일 아침 펀드매니저들의 운용회의 라이브 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.08.04.화]",
-      "channel": "체슬리TV",
-      "published": "2026-08-03T22:08:48+00:00",
-      "url": "https://www.youtube.com/watch?v=qHq6Kor1ZKE",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "불확실한 거시경제 환경 속에서도 인공지능 및 반도체 섹터의 구조적 성장에 주목하며, 개별 기업의 실적 개선과 밸류업 기회에 집중해야 함을 강조한다.",
-        "summary": [
-          "글로벌 인공지능(AI) 및 반도체 산업은 구조적 성장기에 진입하여 장기적인 투자 매력이 높다.",
-          "미국 연방준비제도(Fed)의 금리 인상 사이클 종료 기대감은 시장에 긍정적이나, 인플레이션의 추가 하락 여부에 주목해야 한다.",
-          "국내 증시는 기업 밸류업 프로그램 및 수출 회복 기대감으로 하방 경직성을 보이며, 실적 개선 기업 위주로 접근이 필요하다.",
-          "이차전지 산업은 단기적인 조정이 있었으나, 장기적인 전기차 전환 트렌드는 유효하므로 저점 매수 기회를 탐색해야 한다.",
-          "지정학적 리스크와 고금리 장기화 가능성은 여전히 시장의 주요 변동성 요인으로, 분산 투자와 보수적 접근이 중요하다."
-        ],
-        "tickers": [
-          {
-            "name": "Samsung Electronics",
-            "ticker": "005930",
-            "context": "HBM 및 파운드리 부문의 기술 리더십과 메모리 업황 회복에 따른 실적 개선 기대.",
-            "view": "긍정",
-            "t": 700
-          },
-          {
-            "name": "NVIDIA",
-            "ticker": "NVDA",
-            "context": "데이터센터 AI 가속기 시장의 압도적 점유율과 지속적인 기술 혁신으로 강력한 성장 모멘텀 유지.",
-            "view": "긍정",
-            "t": 850
-          },
-          {
-            "name": "POSCO Holdings",
-            "ticker": "005490",
-            "context": "이차전지 소재 사업의 성장 잠재력과 전통 철강 사업의 안정성을 동시에 보유.",
-            "view": "중립",
-            "t": 1000
-          },
-          {
-            "name": "Kakao",
-            "ticker": "035720",
-            "context": "플랫폼 사업의 수익성 개선과 신규 성장 동력 발굴을 통한 턴어라운드 기대.",
-            "view": "중립",
-            "t": 1150
-          }
-        ],
-        "key_points": [
-          {
-            "point": "글로벌 경기 둔화 우려 속에서도 AI와 반도체 섹터는 차세대 기술 주도로 강력한 성장 사이클 진입.",
-            "t": 120
-          },
-          {
-            "point": "미국 금리 인상 사이클 종료와 인플레이션 둔화 추세가 확인될 경우, 위험자산 선호 심리 회복 기대.",
-            "t": 300
-          },
-          {
-            "point": "국내 증시의 밸류업 프로그램은 저평가된 기업들의 재평가를 유도하며 장기 투자 매력을 높이는 요인.",
-            "t": 450
-          },
-          {
-            "point": "단기적 노이즈에도 불구하고 전기차 및 이차전지 시장의 장기적인 성장 비전은 변함없으며, 조정 시 매수 기회.",
-            "t": 600
-          },
-          {
-            "point": "변동성 장세에서는 기업의 본질 가치와 실적 성장성에 기반한 bottom-up 분석이 중요.",
-            "t": 1300
-          }
-        ],
-        "actionable": [
-          "AI 및 반도체 관련 기술 리더 기업에 대한 비중 확대 고려.",
-          "기업 밸류업 프로그램의 수혜가 예상되는 저평가 우량주 발굴.",
-          "매크로 지표(물가, 금리) 변화를 지속적으로 모니터링하며 유연한 포트폴리오 조정."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T07:38:07.710146+09:00"
-    },
-    {
-      "video_id": "TiQvRYsugiY",
-      "title": "WTI유가 5% 급락 속 뉴욕증시 강세 마감...다우 '사상 최고치' 경신_26.08.04 | 여도은, 박명석, 한상희 [월스트리트 모닝브리핑]",
-      "channel": "삼프로TV",
-      "published": "2026-08-03T20:31:55+00:00",
-      "url": "https://www.youtube.com/watch?v=TiQvRYsugiY",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "WTI 유가 급락에도 불구하고 다우지수가 사상 최고치를 경신하며 뉴욕 증시가 전반적으로 강세를 보였고, 이는 인플레이션 완화 및 경기 연착륙 기대감을 높였습니다.",
-        "summary": [
-          "뉴욕 증시는 다우존스 산업평균지수가 사상 최고치를 경신하는 등 전반적으로 강세 마감했습니다.",
-          "WTI 유가가 5% 급락하여 인플레이션 압력 완화에 대한 기대감이 증폭되었고, 에너지 비용 하락은 소비와 기업 활동에 긍정적으로 작용할 것으로 분석됩니다.",
-          "기술주와 경기민감주가 강세를 보인 반면, 유가 하락으로 인해 에너지 섹터는 상대적으로 부진했습니다.",
-          "견조한 기업 실적과 긍정적인 경제 지표가 증시 상승의 주요 배경으로 작용했습니다.",
-          "연방준비제도(Fed)의 추가 금리 인상 사이클 종료에 대한 시장의 기대감이 반영되었습니다."
-        ],
-        "tickers": [
-          {
-            "name": "다우존스 산업평균지수",
-            "ticker": "DJIA",
-            "context": "WTI 유가 급락에도 사상 최고치를 경신하며 뉴욕 증시 강세를 주도했습니다.",
-            "view": "긍정",
-            "t": 35
-          },
-          {
-            "name": "S&P 500",
-            "ticker": "SPX",
-            "context": "다우지수와 함께 상승 마감하며 시장 전반의 강세를 나타냈습니다.",
-            "view": "긍정",
-            "t": 50
-          },
-          {
-            "name": "나스닥 종합지수",
-            "ticker": "NDX",
-            "context": "기술주 중심의 강세에 힘입어 상승 마감했습니다.",
-            "view": "긍정",
-            "t": 65
-          },
-          {
-            "name": "엑슨모빌",
-            "ticker": "XOM",
-            "context": "WTI 유가 하락으로 에너지 섹터 약세 속 하락세를 보였습니다.",
-            "view": "부정",
-            "t": 405
-          },
-          {
-            "name": "엔비디아",
-            "ticker": "NVDA",
-            "context": "인플레이션 완화 기대감 속 기술주 강세에 힘입어 상승했습니다.",
-            "view": "긍정",
-            "t": 440
-          }
-        ],
-        "key_points": [
-          {
-            "point": "WTI 유가가 5% 급락하며 글로벌 인플레이션 압력 완화 및 경기 연착륙 가능성에 대한 기대감이 크게 상승했습니다.",
-            "t": 130
-          },
-          {
-            "point": "연방준비제도(Fed)의 추가적인 금리 인상 가능성이 낮아질 것이라는 시장의 전망이 증시 상승에 긍정적인 영향을 미쳤습니다.",
-            "t": 510
-          },
-          {
-            "point": "다수의 기업들이 예상을 뛰어넘는 견조한 실적을 발표하고, 전반적인 경제 지표가 강세를 보이며 증시 상승의 주요 원동력이 되었습니다.",
-            "t": 285
-          },
-          {
-            "point": "유가 하락으로 인해 에너지 섹터는 상대적으로 부진한 모습을 보였으며, 이는 단기적인 섹터 로테이션에 영향을 줄 수 있습니다.",
-            "t": 375
-          }
-        ],
-        "actionable": [
-          "글로벌 유가 동향과 이에 따른 에너지 섹터의 반응을 지속적으로 모니터링하여 포트폴리오 비중을 조절하는 것을 고려하세요.",
-          "인플레이션 압력 완화에 따른 수혜가 예상되는 기술주, 경기민감주 및 성장주에 대한 투자 기회를 탐색하세요.",
-          "연방준비제도(Fed)의 통화정책 발표와 주요 경제 지표(특히 물가 지표)를 주의 깊게 살펴보고, 시장 전망 변화에 대비하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T05:46:31.687671+09:00"
     }
   ],
-  "updated": "2026-08-11T21:30:47.257259+09:00"
+  "updated": "2026-08-11T23:09:04.179584+09:00"
 }
