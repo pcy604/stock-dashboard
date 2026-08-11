@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "dZzICbpzsuI",
+      "title": "미국채 10년물 금리 '최고점'…하반기 금리 결정 향방은? | 신영증권 김효진 박사 [글로벌 인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-08-11T22:45:50+00:00",
+      "url": "https://www.youtube.com/watch?v=dZzICbpzsuI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-12T08:22:25.800132+09:00"
+    },
+    {
       "video_id": "a_2dgW8yDdk",
       "title": "반도체 피크아웃 아직은 아닙니다 #반도체 #메모리 #피크아웃 #가격 #물량 #호돌이 #우황제",
       "channel": "와이스트릿",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T07:28:38.107381+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-12T08:22:58.478771+09:00"
     },
     {
       "video_id": "xsoaub9Lyt0",
@@ -12999,46 +13018,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-04T16:24:05.252785+09:00"
-    },
-    {
-      "video_id": "sTXF023nVYk",
-      "title": "여기서는 그냥 다 지르세요 #박세익",
-      "channel": "체슬리TV",
-      "published": "2026-08-04T03:00:04+00:00",
-      "url": "https://www.youtube.com/watch?v=sTXF023nVYk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "시장 이익 3배 증가에도 불구하고 지수가 크게 하락하여, 현재는 과감한 풀베팅으로 현금 비중을 줄이고 투자에 나설 시점입니다.",
-        "summary": [
-          "시장은 현재 '제대로 된 대가'를 치르는 중이며, 이익 증가 없는 상승은 신기루 같지만 현재는 이익이 3배 늘었습니다 [00:00:00].",
-          "작년 300조원이었던 수익이 올해 900조원으로 확정되어 시장 이익이 세 배 증가했습니다 [00:00:09].",
-          "과거 2500 수준의 시장에서 이익이 3배 늘었다면, 적정한 주가 수준은 7500 정도로 판단됩니다 [00:00:19].",
-          "지수가 9300에서 40%나 빠진 현시점에서는 이것저것 생각할 것 없이 단순하게 풀베팅하는 것이 맞다고 강조합니다 [00:00:26].",
-          "이전 영상에서 현금을 만들어두라고 조언했던 것은 바로 이처럼 시장이 저평가될 때 다시 매수하기 위함이었습니다 [00:00:34]."
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "시장 적정 주가 수준 전망: 시장 전체 이익이 3배 증가한 점을 고려할 때, 과거 2500 수준에 상응하는 7500 정도가 적정한 주가 수준이라고 평가합니다 [00:00:19].",
-            "t": 19
-          },
-          {
-            "point": "현재 시장은 매수 기회: 지수가 고점인 9300에서 40% 하락한 현재는 불필요한 고민 없이 과감하게 투자할 시점이라고 강력히 주장합니다 [00:00:26].",
-            "t": 26
-          },
-          {
-            "point": "풀베팅 전략 권고: 현시점에서는 '풀베팅'이 올바른 투자 전략이며, 이는 과거 현금 확보 조언의 궁극적인 목적이기도 했다고 설명합니다 [00:00:29]."
-          }
-        ],
-        "actionable": [
-          "시장 이익 증가와 지수 하락을 고려하여, 현금을 적극적으로 활용하여 투자 비중을 늘리는 방안을 고려해볼 수 있습니다 [00:00:29].",
-          "복잡한 시장 분석보다는 단순한 논리에 기반한 과감한 투자 결정을 내리는 것을 고려해볼 수 있습니다 [00:00:29]."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-04T16:21:27.454219+09:00"
     }
   ],
-  "updated": "2026-08-12T07:28:39.107612+09:00"
+  "updated": "2026-08-12T08:22:59.479052+09:00"
 }
