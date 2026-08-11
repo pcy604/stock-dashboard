@@ -1281,6 +1281,7 @@ def macro_inputs():
     if ff:
         d['fed'] = ff[-1][1]
         d['fed_6m'] = round(ff[-1][1] - ff[-7][1], 2) if len(ff) >= 7 else None
+        d['fed_12m'] = round(ff[-1][1] - ff[-13][1], 2) if len(ff) >= 13 else None
         d['fed_pct'] = _pctile([v for _, v in ff], ff[-1][1])
         d['fed_hist'] = ff
     ip = fetch_fred('INDPRO', 130)                        # 산업생산 = 실적 사이클 대용
