@@ -1543,7 +1543,11 @@ with tab4, guard('매크로'):
                              f"금리가 어느 쪽으로 움직이느냐에 따라 {' 또는 '.join(_nb)} 로 갈립니다. "
                              f"지금은 달걀보다 위 두 렌즈를 우선해 보세요.")
             else:
-                _egg_line = f"현재: **{EGG[_ei][1]}** — {EGG[_ei][2]}"
+                # 달걀은 6개월이 횡보면 12개월로 판정한다. 위 '방향'(6개월)과 달라 보일 수
+                # 있으므로 어느 창을 썼는지 밝힌다.
+                _win = ("6개월은 횡보지만 12개월 기준으로는 방향이 잡혀 이렇게 봅니다. "
+                        if _RG['rate_dir'] == '횡보' else "")
+                _egg_line = f"현재: **{EGG[_ei][1]}** — {_win}{EGG[_ei][2]}"
             st.caption(f"{_egg_line}  \n"
                        f"금리 {_MI.get('fed','-')}% = 최근 10년 분포의 {_MI.get('fed_pct','-')}% 지점 · "
                        f"6개월 {_MI.get('fed_6m','-')}%p · 12개월 {_MI.get('fed_12m','-')}%p → 방향 **{_RG['rate_dir']}**")
@@ -1627,14 +1631,19 @@ with tab4, guard('매크로'):
     for _col, _side, _hdr in ((_tw1, '악화', '⬇️ 악화 쪽 방아쇠'), (_tw2, '개선', '⬆️ 개선 쪽 방아쇠')):
         with _col:
             st.markdown(f"**{_hdr}**")
+            # 색 의미는 '좋다/나쁘다'로 통일한다. 개선 방아쇠가 발동한 건 좋은 일이므로
+            # 빨강으로 칠하면 안 된다(발동=빨강으로 두면 호재가 경고처럼 읽힌다).
+            _bad = (_side == '악화')
             _rows = [t for t in _TR if t['side'] == _side]
             st.dataframe(pd.DataFrame([{
-                '상태': ('❓' if t['hit'] is None else ('🔴 발동' if t['hit'] else '🟢 미발동')),
+                '상태': ('❓ 자료없음' if t['hit'] is None else
+                        (('🔴 발동' if _bad else '🟢 발동') if t['hit'] else
+                         ('🟢 아직' if _bad else '⚪ 아직'))),
                 '지표': t['name'], '현재': t['cur'], '임계': t['thr']} for t in _rows]),
                 use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_rows)))
             for t in _rows:
                 if t['hit']:
-                    st.caption(f"🔴 **{t['name']}** — {t['why']}")
+                    st.caption(f"{'🔴' if _bad else '🟢'} **{t['name']}** — {t['why']}")
     with st.expander("각 방아쇠가 무슨 뜻인지 (전체)"):
         for t in _TR:
             st.markdown(f"- **[{t['side']}] {t['name']}** (현재 {t['cur']} / 임계 {t['thr']}) — {t['why']}")
