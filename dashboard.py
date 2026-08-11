@@ -1388,16 +1388,23 @@ def macro_regime(d, px):
     phase, top = order[0]
     conf = top - order[1][1]                       # 1위와 2위 점수차 = 확신도
 
-    # 코스톨라니 달걀
-    fp = d.get('fed_pct')
+    # 코스톨라니 달걀 — 금리의 사이클 위치 × 방향
+    # 6개월 변화가 0 근처(횡보)면 달걀 위치가 정해지지 않는다. 이때 12개월 변화로 한 번 더
+    # 물어보고, 그래도 정체면 '방향 미정'을 숨기지 말고 표시한다(예전엔 횡보를 '하락'으로
+    # 흘려보내 "금리 하락 중"이라고 잘못 단정했다).
+    fp, f12 = d.get('fed_pct'), d.get('fed_12m')
+    egg_dir = rate_dir
+    if egg_dir == '횡보' and f12 is not None and abs(f12) >= 0.5:
+        egg_dir = '하락' if f12 < 0 else '상승'
+    egg_flat = (egg_dir == '횡보')
     if fp is None:
         egg_i = None
     elif fp >= 70:
-        egg_i = 5 if rate_dir in ('상승', '횡보') else 0
+        egg_i = 0 if egg_dir == '하락' else 5          # 고점 통과=A1(채권) / 고점 접근·정체=B3(현금)
     elif fp >= 30:
-        egg_i = 1 if rate_dir == '하락' else (4 if rate_dir == '상승' else 1)
+        egg_i = 1 if egg_dir == '하락' else (4 if egg_dir == '상승' else (4 if fp >= 50 else 1))
     else:
-        egg_i = 2 if rate_dir == '하락' else 3
+        egg_i = 2 if egg_dir == '하락' else 3          # 저점 하락중=A3(매수) / 저점 통과=B1(보유)
 
     # 막스 시계추 — 0=극도의 공포, 100=극도의 탐욕
     parts = []
@@ -1410,7 +1417,7 @@ def macro_regime(d, px):
     pend = round(sum(parts) / len(parts)) if parts else None
 
     return dict(phase=phase, scores=sc, conf=conf, rate_dir=rate_dir, growth=growth,
-                px_dir=px_dir, egg_i=egg_i, pend=pend, second=order[1][0])
+                px_dir=px_dir, egg_i=egg_i, egg_flat=egg_flat, pend=pend, second=order[1][0])
 
 
 def macro_triggers(d, px):
@@ -1527,8 +1534,18 @@ with tab4, guard('매크로'):
                     f"background:{'#111827' if _on else '#f3f4f6'};color:{'#fff' if _on else '#6b7280'};"
                     f"font-weight:{'700' if _on else '400'}'>{code} · {title}</div>",
                     unsafe_allow_html=True)
-            st.caption(f"현재: **{EGG[_RG['egg_i']][1]}** — {EGG[_RG['egg_i']][2]}  \n"
-                       f"금리 {_MI.get('fed','-')}% = 최근 10년 분포의 {_MI.get('fed_pct','-')}% 지점, 방향 {_RG['rate_dir']}")
+            _ei = _RG['egg_i']
+            if _RG.get('egg_flat'):
+                # 금리가 정체면 방향이 없으므로 '하락 중/상승 중' 같은 단정을 하지 않는다.
+                _nb = [EGG[j][0] for j in (_ei - 1, _ei + 1) if 0 <= j < len(EGG)]
+                _egg_line = (f"현재: **{EGG[_ei][0]} 부근 — 금리 정체로 방향 미확정**  \n"
+                             f"금리가 어느 쪽으로 움직이느냐에 따라 {' 또는 '.join(_nb)} 로 갈립니다. "
+                             f"지금은 달걀보다 위 두 렌즈를 우선해 보세요.")
+            else:
+                _egg_line = f"현재: **{EGG[_ei][1]}** — {EGG[_ei][2]}"
+            st.caption(f"{_egg_line}  \n"
+                       f"금리 {_MI.get('fed','-')}% = 최근 10년 분포의 {_MI.get('fed_pct','-')}% 지점 · "
+                       f"6개월 {_MI.get('fed_6m','-')}%p · 12개월 {_MI.get('fed_12m','-')}%p → 방향 **{_RG['rate_dir']}**")
 
     with _L3:
         st.markdown("**⏳ 하워드 막스 시계추** — 남들이 얼마나 겁먹었나")
