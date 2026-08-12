@@ -260,26 +260,43 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
   </div>
 <pre class="mermaid">
 flowchart TD
-  A1["EDGAR companyfacts<br/>분기재무 + 공시일"] --> B
-  A2["EDGAR 8-K item 2.02<br/>실적 발표일 · 장전/장후"] --> B
-  A3["Yahoo 일봉<br/>→ W-MON 리샘플"] --> B
-  B["leaders_build.py<br/>factor_weekly 532,609행"] --> C1
-  B --> C2["leaders_events.py<br/>earnings_event 63,365건"]
-  C1["프로파일·스윕<br/>주도주 공통특징"] --> D
-  C2 --> C1
-  D["leaders_sim.py<br/>TSR / MDD 측정"] --> E
-  E["leaders_listup.py<br/>주간 리스트업 (규칙⑥)"] --> F
-  F["leaders_paper.py<br/>규칙⑤⑥ 병렬 · 16건 추적"] --> P2
-  P2["leaders_publish.py<br/>results/leaders_signal.json"] --> DASH
-  DASH["Streamlit 대시보드 🚀주도주 탭"]
-  F --> TG["📱 텔레그램 주간 요약<br/>주차·청산선 거리·대기후보"]
-  W["✅ 작업 스케줄러<br/>매주 토 08:00 자동<br/>(금 미장 마감 +3h)"] ==> B
-  HC["🩺 pipeline_health<br/>매일 06:00 · 9일 정지 시 경보"] -. 감시 .-> P2
-  F -.-> G
-  G["🔴 실계좌<br/>잠김 (M7 · M6a 1/13주)"]
-  H["🔴 DART 잠정실적 공시일<br/>미수집 → 한국 제외"] -.-> B
-  style G stroke-dasharray: 5 5
-  style H stroke-dasharray: 5 5
+  subgraph SRC["① 수집 (분기·일간)"]
+    A1["EDGAR 분기재무"]
+    A2["EDGAR 8-K 실적일"]
+    A3["Yahoo 일봉"]
+  end
+
+  subgraph CYC["② 주간 사이클 — 매주 토 08:00 자동 · 약 8분"]
+    B["factor_weekly 53만행"]
+    E["규칙⑥ 리스트업"]
+    F["페이퍼 R5·R6 16건"]
+    P["signal.json 생성"]
+  end
+
+  subgraph OUT["③ 출력"]
+    DASH["Streamlit 주도주 탭"]
+    TG["텔레그램 주간 요약"]
+  end
+
+  A1 --> B
+  A2 --> B
+  A3 --> B
+  B --> E
+  E --> F
+  F --> P
+  P --> DASH
+  F --> TG
+
+  HC["신선도 감시 · 매일 06시"] -. 9일 정지면 경보 .-> P
+  F -. 잠김 .-> G["실계좌 M7"]
+  H["DART 한국 미수집"] -. 제외 .-> B
+
+  classDef ok fill:#e3efe6,stroke:#2c6b3a,color:#12321c
+  classDef no fill:#f8e3e1,stroke:#9c322a,color:#3a1512,stroke-dasharray:5 5
+  classDef watch fill:#f7f0da,stroke:#8a6a12,color:#3a2f08
+  class B,E,F,P,DASH,TG ok
+  class G,H no
+  class HC watch
 </pre>
   <div class="next"><b>그래서 다음 행동</b>08-11 기준 <b>사람 개입이 필요한 구간이 없다.</b> 남은 단절은 실계좌(M7, 의도적 잠금)와 한국 종목(DART 미수집)뿐. <b>다음 검증은 08-15(토) 첫 자동 실행이 실제로 도는지.</b></div>
 </section>
