@@ -134,12 +134,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"이 영상은 주린이(주식 초보) 투자자들에게 가치 투자와 트레이딩 전략을 명확히 구분하고, 시장의 고점과 저점을 파악하는 기술적/심리적 기준, 그리고 주식 시장에서 흔히 발생하는 오류와 대응 방법을 구체적인 사례를 들어 설명합니다.\",\n  \"summary\": [\n    \"투자하기 전에 자신의 투자 성향이 가치 투자 지향인지 트레이딩 지향인지 명확히 정의하고, 이 두 가지 전략을 혼용하지 않도록 주의해야 합니다.\",\n    \"가치 투자는 기업의 본질적 가치를 믿고 주가가 하락했을 때 매수하는 것이 유리하며, 장기적인 관점에서 기업의 가치를 꾸준히 추적하는 것이 중요합니다.\",\n    \"트레이딩은 차트의 기술적 분석과 시장의 모멘텀을 활용하며, 강한 상승 추세에 편승하고 손절매 기준을 엄격하게 지키는 것이 필수적입니다.\",\n    \"시장의 고점은 투자자들 사이에 과도한 확신과 빚투(빚을 내서 투자)가 만연할 때 형성되는 "
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T23:09:07.413242+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T00:36:20.364349+09:00"
     },
     {
       "video_id": "_-YwmXSAcQU",
@@ -157,8 +156,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-12T23:15:08.621815+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-13T00:36:52.802404+09:00"
     },
     {
       "video_id": "e7uZxqRFIgc",
@@ -176,8 +175,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-12T23:16:46.461860+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-13T00:37:25.870181+09:00"
     },
     {
       "video_id": "pv6XY4H2ask",
@@ -12749,5 +12748,5 @@
       "analyzed_at": "2026-08-05T17:06:38.018956+09:00"
     }
   ],
-  "updated": "2026-08-12T23:17:37.430740+09:00"
+  "updated": "2026-08-13T00:37:26.870429+09:00"
 }
