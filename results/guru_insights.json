@@ -137,8 +137,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-13T01:35:14.908377+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-13T02:37:54.695608+09:00"
     },
     {
       "video_id": "_-YwmXSAcQU",
@@ -12748,5 +12748,5 @@
       "analyzed_at": "2026-08-05T17:06:38.018956+09:00"
     }
   ],
-  "updated": "2026-08-13T01:35:48.605645+09:00"
+  "updated": "2026-08-13T02:37:55.740883+09:00"
 }
