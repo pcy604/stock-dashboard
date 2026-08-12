@@ -1,0 +1,866 @@
+<title>주도주 탐지 연구 — 완료 보고서</title>
+
+<style>
+:root{
+  --paper:#e8ebef; --sheet:#fbfcfd; --sheet2:#f1f4f7;
+  --ink:#12161b; --ink2:#39434f; --mut:#6d7883; --line:#ccd4dd; --hair:#dde3ea;
+  --acc:#17415c; --acc2:#2c6a8f; --brass:#8a6a12; --brassbg:#f6f0dc;
+  --pos:#1f6b45; --posbg:#e2efe7; --neg:#a03028; --negbg:#f8e5e3;
+  --warn:#8a5a10; --warnbg:#faefd9;
+  --mono:Consolas,"Cascadia Mono","D2Coding",ui-monospace,monospace;
+  --sans:"Pretendard","Malgun Gothic",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --sh:0 1px 2px rgba(18,22,27,.05),0 14px 34px -22px rgba(18,22,27,.3);
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#0a0d11; --sheet:#141a21; --sheet2:#1b232c;
+  --ink:#e5eaf0; --ink2:#b3bfcb; --mut:#7f8b98; --line:#2a343f; --hair:#232c35;
+  --acc:#6fa8cc; --acc2:#8fc0de; --brass:#c9a53f; --brassbg:#2a2415;
+  --pos:#74c295; --posbg:#172a20; --neg:#e0897f; --negbg:#2c1c1a;
+  --warn:#d5a84e; --warnbg:#2a2415;
+  --sh:0 1px 2px rgba(0,0,0,.5),0 16px 40px -24px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --paper:#0a0d11; --sheet:#141a21; --sheet2:#1b232c;
+  --ink:#e5eaf0; --ink2:#b3bfcb; --mut:#7f8b98; --line:#2a343f; --hair:#232c35;
+  --acc:#6fa8cc; --acc2:#8fc0de; --brass:#c9a53f; --brassbg:#2a2415;
+  --pos:#74c295; --posbg:#172a20; --neg:#e0897f; --negbg:#2c1c1a;
+  --warn:#d5a84e; --warnbg:#2a2415;
+  --sh:0 1px 2px rgba(0,0,0,.5),0 16px 40px -24px rgba(0,0,0,.8);
+}
+:root[data-theme="light"]{
+  --paper:#e8ebef; --sheet:#fbfcfd; --sheet2:#f1f4f7;
+  --ink:#12161b; --ink2:#39434f; --mut:#6d7883; --line:#ccd4dd; --hair:#dde3ea;
+  --acc:#17415c; --acc2:#2c6a8f; --brass:#8a6a12; --brassbg:#f6f0dc;
+  --pos:#1f6b45; --posbg:#e2efe7; --neg:#a03028; --negbg:#f8e5e3;
+  --warn:#8a5a10; --warnbg:#faefd9;
+  --sh:0 1px 2px rgba(18,22,27,.05),0 14px 34px -22px rgba(18,22,27,.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.72;-webkit-font-smoothing:antialiased}
+.doc{max-width:900px;margin:0 auto;padding:26px 14px 80px;
+  display:flex;flex-direction:column;gap:20px}
+
+/* ── 낱장 ────────────────────────────────────────── */
+.sheet{background:var(--sheet);border:1px solid var(--line);box-shadow:var(--sh);
+  padding:0;scroll-margin-top:16px;overflow:hidden}
+.run{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  padding:9px 22px;border-bottom:1px solid var(--hair);background:var(--sheet2);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--mut);
+  text-transform:uppercase;flex-wrap:wrap}
+.run b{color:var(--acc);font-weight:700}
+.body{padding:22px 22px 20px}
+.foot{display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 22px 10px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:10.5px;color:var(--mut)}
+.foot .pg{font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums}
+
+/* ── 제목 ────────────────────────────────────────── */
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+.masthead{text-align:left;padding:34px 22px 26px}
+.masthead .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--brass);font-weight:700}
+.masthead h1{font-size:clamp(27px,5.4vw,42px);font-weight:800;letter-spacing:-.032em;
+  line-height:1.08;margin:12px 0 12px}
+.masthead .sub{color:var(--ink2);max-width:62ch;margin:0}
+.masthead .meta{display:flex;flex-wrap:wrap;gap:5px 20px;margin-top:18px;
+  padding-top:14px;border-top:2px solid var(--acc);
+  font-family:var(--mono);font-size:11.5px;color:var(--mut)}
+.masthead .meta b{color:var(--ink2)}
+
+.stitle{display:flex;align-items:baseline;gap:11px;margin-bottom:4px}
+.snum{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--sheet);
+  background:var(--acc);padding:3px 8px;letter-spacing:.05em;flex:0 0 auto}
+.sheet h2{font-size:19px;font-weight:750;letter-spacing:-.022em}
+.lede{color:var(--ink2);margin:9px 0 16px;max-width:66ch;font-size:14.5px}
+
+h3{font-size:14px;font-weight:700;margin:20px 0 8px;color:var(--acc);
+  letter-spacing:-.01em}
+h3:first-of-type{margin-top:4px}
+
+/* ── 본문 요소 ───────────────────────────────────── */
+p{margin:0 0 11px}
+ul.tight{margin:0 0 12px;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+ul.tight li::marker{color:var(--acc2)}
+code{font-family:var(--mono);font-size:12.5px;background:var(--sheet2);
+  padding:1px 5px;border:1px solid var(--hair);color:var(--ink2)}
+b.n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700}
+.pos{color:var(--pos);font-weight:600} .neg{color:var(--neg);font-weight:600}
+.mut{color:var(--mut)}
+
+/* ── 표 ──────────────────────────────────────────── */
+.tw{overflow-x:auto;margin:4px -4px 12px;padding:0 4px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:440px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--hair);
+  vertical-align:top}
+thead th{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut);font-weight:700;
+  border-bottom:1.5px solid var(--line);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{font-family:var(--mono);text-align:right;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hl{background:var(--posbg)}
+tr.kill{background:var(--negbg)}
+caption{caption-side:bottom;text-align:left;font-size:11.5px;color:var(--mut);
+  padding-top:7px;font-family:var(--mono)}
+
+/* ── 강조 박스 ───────────────────────────────────── */
+.callout{padding:11px 14px;margin:12px 0;font-size:13.5px;color:var(--ink2);
+  border-left:3px solid var(--acc);background:var(--sheet2)}
+.callout.warn{border-left-color:var(--warn);background:var(--warnbg)}
+.callout.kill{border-left-color:var(--neg);background:var(--negbg)}
+.callout.ok{border-left-color:var(--pos);background:var(--posbg)}
+.callout b{color:var(--ink)}
+
+/* ── 지표 타일 ───────────────────────────────────── */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);margin:6px 0 14px}
+.tile{background:var(--sheet);padding:10px 12px}
+.tile .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut);font-weight:700}
+.tile .v{font-family:var(--mono);font-size:21px;font-weight:700;
+  letter-spacing:-.02em;margin:3px 0 1px;font-variant-numeric:tabular-nums}
+.tile .s{font-size:11px;color:var(--mut);line-height:1.45}
+
+/* ── 목차 ────────────────────────────────────────── */
+.toc{display:flex;flex-direction:column;gap:0;margin-top:6px}
+.toc a{display:flex;align-items:baseline;gap:10px;text-decoration:none;
+  color:var(--ink);padding:7px 2px;border-bottom:1px solid var(--hair)}
+.toc a:hover{background:var(--sheet2)}
+.toc a:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.toc .tn{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);
+  flex:0 0 26px}
+.toc .tt{font-weight:600;font-size:14px}
+.toc .td{color:var(--mut);font-size:12.5px;flex:1;
+  border-bottom:1px dotted var(--line);margin:0 4px;transform:translateY(-3px)}
+.toc .tp{font-family:var(--mono);font-size:12px;color:var(--mut);
+  font-variant-numeric:tabular-nums}
+
+/* ── 기각 스탬프 ─────────────────────────────────── */
+.verdict{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;
+  letter-spacing:.06em;white-space:nowrap}
+.v-kill{background:var(--negbg);color:var(--neg);border:1px solid var(--neg)}
+.v-keep{background:var(--posbg);color:var(--pos);border:1px solid var(--pos)}
+.v-hold{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn)}
+
+@media (max-width:640px){
+  .body{padding:18px 15px 16px} .run,.foot{padding-left:15px;padding-right:15px}
+  .masthead{padding:26px 15px 20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="doc">
+
+<!-- ══ 표지 ══ -->
+<section class="sheet">
+  <div class="masthead">
+    <p class="kicker">Quantitative Research · Completion Report</p>
+    <h1>주도주 탐지 연구<br>완료 보고서</h1>
+    <p class="sub">미국 1,271종 · 2018년 6월 ~ 2026년 8월. 주도주를 기계적으로 정의하고,
+    진입·청산 규칙을 세워, 총수익이 아니라 <b>최대낙폭과 회복배율</b>로 검증한 기록.
+    채택한 것보다 <b>기각한 것</b>이 더 많은 보고서다.</p>
+    <div class="meta">
+      <span>작성 <b>2026-08-11</b></span>
+      <span>연구 기간 <b>2026-07-26 ~ 08-11</b></span>
+      <span>데이터 <b>factor_weekly 532,609행</b></span>
+      <span>코드 <b>stock_screener/leaders_*.py</b></span>
+      <span>상태 <b>운용 검증 단계 (M6a 1/13주)</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 1. 요약 ══ -->
+<section class="sheet" id="p1">
+  <div class="run"><span>주도주 탐지 연구 — 완료 보고서</span><span><b>요약</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">01</span><h2>요약</h2></div>
+    <p class="lede">한 장으로 읽는 결론. 이 연구가 무엇을 물었고, 무엇이 죽었고,
+    무엇이 남았고, 그것을 어떻게 증명할 것인가.</p>
+
+    <h3>물음</h3>
+    <p>“어떤 종목을 살까”가 아니라 <b>“어떻게 낙폭을 줄이면서 수익을 낼까”</b>.
+    종목 선정보다 <b>감정·집중·레버리지</b>가 최대낙폭(MDD)을 키운다는 진단에서 출발했다.
+    그래서 성공 지표를 수익률이 아니라 <b>MDD</b>와 <b>회복배율(CAGR÷|MDD|)</b>로 잡았다.</p>
+
+    <h3>방법</h3>
+    <p>주도주를 사람 판단 없이 정의했다 — <b>그 시점 이후 52주에 +150% 이상 상승</b>.
+    미국 1,271종 8.2년에서 관측 462,934건 중 주도주는 <b>9,787건(2.11%)</b>이었다.
+    재무는 결산일이 아니라 <b>공시일(EDGAR 8-K) 기준</b>으로 붙여 미래 정보 누출을 차단했다.</p>
+
+    <h3>결과 — 확정 규칙</h3>
+    <div class="callout"><b>RS13 &gt; 1.5</b> AND <b>(흑자전환 OR 이익폭증)</b> AND <b>OPM &gt; 0</b>
+    → 고점 대비 <b>−20% 트레일링</b> 청산 · 8종목 균등 12.5% · 2주 분할매수 · 불타기 없음</div>
+    <div class="tiles">
+      <div class="tile"><p class="k">CAGR</p><p class="v pos">32.8%</p><p class="s">SPY 14.2%</p></div>
+      <div class="tile"><p class="k">MDD</p><p class="v neg">−37.7%</p><p class="s">SPY −31.8%</p></div>
+      <div class="tile"><p class="k">회복배율</p><p class="v">0.87</p><p class="s">SPY 0.45 · SPY×2 0.48</p></div>
+      <div class="tile"><p class="k">워크포워드</p><p class="v">4 / 6</p><p class="s">CAGR 기준</p></div>
+      <div class="tile"><p class="k">승률</p><p class="v">43.4%</p><p class="s">지는 거래가 더 많다</p></div>
+    </div>
+
+    <h3>가장 중요한 결론</h3>
+    <ul class="tight">
+      <li><b>초기 가설은 전멸했다.</b> 역대 주도주 25종을 눈으로 분석해 뽑은 특징
+      (신고가 돌파·거래량 급증·이익률 변곡)이 유니버스 전체 검증에서
+      <b>하나도 재현되지 않았다.</b> 승자만 보고 만든 특징은 예측력이 아니라 사후 서술이었다.</li>
+      <li><b>청산 규칙이 종목 선정보다 성과를 좌우한다.</b> 같은 진입 조건에서
+      무매도는 MDD −66.9%, 트레일링 −20%는 −33.3%였다.</li>
+      <li><b>수익의 전부가 비대칭에서 나온다.</b> 승률 43%, 거래 수익 중앙값은 <b class="neg">−5.9%</b>.
+      상위 5거래를 빼면 평균 +21.8% → <b>+9.5%</b>로 무너진다.</li>
+      <li><b>매년 이기는 시스템이 아니다.</b> 지는 해는 −7~−14%p로 조금 지고,
+      이기는 해는 +26~+99%p로 크게 이긴다. 롤링 12개월 최악은 <b>−37.3%p · 최장 45주</b>.</li>
+    </ul>
+
+    <h3>현재 상태와 다음 관문</h3>
+    <p>백테스트는 끝났고 <b>실전 데이터는 이제 1주차</b>다. 규칙⑤(구)와 규칙⑥(현)을
+    나란히 페이퍼 트레이딩으로 굴리며 실측 대조 중이다. 실계좌는 잠겨 있다.</p>
+    <div class="callout warn"><b>이 보고서의 모든 숫자는 세전·비용 0.1%만 반영한 백테스트다.</b>
+    생존편향(상장폐지 종목 미수집)과 인샘플 선택 편향이 남아 있어 <b>실전은 이보다 낮게 나오는 것이 정상</b>이다.
+    실투자 판단의 단독 근거로 쓰지 말 것.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">1 / 14</span></div>
+</section>
+
+<!-- ══ 2. 목차 ══ -->
+<section class="sheet" id="p2">
+  <div class="run"><span>주도주 탐지 연구 — 완료 보고서</span><span><b>목차</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">02</span><h2>목차</h2></div>
+    <nav class="toc">
+      <a href="#p1"><span class="tn">01</span><span class="tt">요약</span><span class="td"></span><span class="tp">1</span></a>
+      <a href="#p2"><span class="tn">02</span><span class="tt">목차</span><span class="td"></span><span class="tp">2</span></a>
+      <a href="#p3"><span class="tn">03</span><span class="tt">연구 목표와 네 가지 원칙</span><span class="td"></span><span class="tp">3</span></a>
+      <a href="#p4"><span class="tn">04</span><span class="tt">데이터 기반 — 무엇을 어떻게 모았나</span><span class="td"></span><span class="tp">4</span></a>
+      <a href="#p5"><span class="tn">05</span><span class="tt">기각된 가설 ① ~ ⑤</span><span class="td"></span><span class="tp">5</span></a>
+      <a href="#p6"><span class="tn">06</span><span class="tt">기각된 가설 ⑥ ~ ⑩</span><span class="td"></span><span class="tp">6</span></a>
+      <a href="#p7"><span class="tn">07</span><span class="tt">방법론에서 배운 것 — IC 함정과 U자</span><span class="td"></span><span class="tp">7</span></a>
+      <a href="#p8"><span class="tn">08</span><span class="tt">확정 규칙과 정의</span><span class="td"></span><span class="tp">8</span></a>
+      <a href="#p9"><span class="tn">09</span><span class="tt">증빙 ① 전기간 성적과 벤치마크</span><span class="td"></span><span class="tp">9</span></a>
+      <a href="#p10"><span class="tn">10</span><span class="tt">증빙 ② 진입조건·비중 스윕</span><span class="td"></span><span class="tp">10</span></a>
+      <a href="#p11"><span class="tn">11</span><span class="tt">증빙 ③ PSR 논쟁 — 규칙⑤에서 ⑥으로</span><span class="td"></span><span class="tp">11</span></a>
+      <a href="#p12"><span class="tn">12</span><span class="tt">증빙 ④ 강건성 — 손절폭 교차검증</span><span class="td"></span><span class="tp">12</span></a>
+      <a href="#p13"><span class="tn">13</span><span class="tt">검증 설계 — 13주를 폐기한 이유</span><span class="td"></span><span class="tp">13</span></a>
+      <a href="#p14"><span class="tn">14</span><span class="tt">운영 구조 · 한계 · 반증 조건</span><span class="td"></span><span class="tp">14</span></a>
+    </nav>
+    <div class="callout"><b>읽는 순서 제안.</b> 결론만 필요하면 <b>1쪽</b>.
+    “왜 이 규칙인가”가 궁금하면 <b>3 → 5·6 → 8쪽</b>.
+    “숫자를 믿을 수 있나”를 따지려면 <b>9 ~ 12쪽</b>.
+    “언제 접을 것인가”는 <b>13 · 14쪽</b>.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">2 / 14</span></div>
+</section>
+
+<!-- ══ 3. 원칙 ══ -->
+<section class="sheet" id="p3">
+  <div class="run"><span>연구 목표와 원칙</span><span><b>왜 이렇게 정했나</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">03</span><h2>연구 목표와 네 가지 원칙</h2></div>
+    <p class="lede">이 연구의 규칙은 취향이 아니라 <b>과거에 속았던 방식</b>에서 역산해 만들었다.
+    각 원칙은 “이렇게 안 하면 이렇게 속는다”는 실패에 대응한다.</p>
+
+    <h3>원칙 1 — 주도주를 사람이 고르지 않는다</h3>
+    <p>“TSLA는 주도주였다”는 사후 판단이다. 대신 <b>그 시점 이후 52주 +150% 이상</b>이라는
+    기계적 정의를 썼다. 사람이 목록을 만드는 순간 승자편향이 들어오고, 그 위에 만든 특징은
+    전부 사후 서술이 된다.</p>
+
+    <h3>원칙 2 — 재무는 결산일이 아니라 공시일에 붙인다</h3>
+    <p>2분기 실적은 2분기가 끝난 날 알 수 있는 게 아니라 <b>8-K가 공시된 날</b> 알 수 있다.
+    결산일 기준으로 붙이면 백테스트가 미래를 미리 아는 상태가 된다(look-ahead).
+    EDGAR <code>8-K item 2.02</code>로 실적 발표일과 장전/장후까지 수집해
+    <b>63,365건</b>의 이벤트 테이블을 만들었다.</p>
+
+    <h3>원칙 3 — 표본에서 찾은 신호는 유니버스 전체에서 다시 잰다</h3>
+    <p>25종 표본에서 승률 85%였던 조건이 1,271종에서는 예측력이 0이거나 부호가 뒤집혔다.
+    그래서 모든 신호는 <b>유니버스 전체 리프트</b>로 재검증하고,
+    통과한 것만 백테스트로 넘긴다.</p>
+
+    <h3>원칙 4 — 전 기간 최적값은 믿지 않는다</h3>
+    <p>8개 청산 규칙 중 성적이 가장 좋은 것을 고르면 그건 답안지를 보고 고른 것이다.
+    그래서 <b>워크포워드 6분할</b>을 완료조건에 넣었고, 인샘플과 아웃샘플 초과수익을 따로 쟀다
+    (<b>22.5%p → 10.7%p</b>).</p>
+
+    <div class="callout ok"><b>성공 지표를 수익률로 두지 않았다.</b>
+    CAGR만 보면 조건을 느슨하게 할수록 좋아 보인다. 실제로 필터를 다 빼면 CAGR은 30.6%로 오르지만
+    MDD가 −42.1%로 SPY(−31.8%)보다 나빠진다. <b>회복배율(CAGR÷|MDD|)</b>을 함께 봐야
+    “버틸 수 있는 전략”이 걸러진다.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">3 / 14</span></div>
+</section>
+
+<!-- ══ 4. 데이터 ══ -->
+<section class="sheet" id="p4">
+  <div class="run"><span>데이터 기반</span><span><b>수집 구조</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">04</span><h2>데이터 기반 — 무엇을 어떻게 모았나</h2></div>
+    <p class="lede">결론의 신뢰도는 전부 이 층에서 결정된다. 무엇을 모았고 무엇을 못 모았는지 먼저 밝힌다.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>구성</th><th>출처</th><th class="n">규모</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>주간 팩터 패널 <code>factor_weekly</code></td><td>EDGAR + Yahoo</td>
+          <td class="n">532,609행</td><td>미국 1,271종 · 2018-06~2026-08 · 월요일 라벨 주봉</td></tr>
+        <tr><td>실적 이벤트 <code>earnings_event</code></td><td>EDGAR 8-K item 2.02</td>
+          <td class="n">63,365건</td><td>발표일 + 장전/장후 구분</td></tr>
+        <tr><td>분기 재무</td><td>EDGAR companyfacts</td><td class="n">—</td>
+          <td>매출·매출총이익·영업이익·순이익, <b>공시일 기준</b></td></tr>
+        <tr><td>가격</td><td>Yahoo 일봉</td><td class="n">—</td>
+          <td>W-MON 리샘플. 금요일 봉 없는 주는 폐기(미완성 주봉 가드)</td></tr>
+        <tr><td>라벨</td><td>파생</td><td class="n">462,934</td>
+          <td>52주 전방수익 계산 가능한 관측. 주도주 <b>9,787건(2.11%)</b></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>유니버스 게이트</h3>
+    <p>시총 <b>$2B 이상</b> · 20일 평균 거래대금 <b>$5M 이상</b> · 주가 <b>$5 이상</b>.
+    2026-08-03 주차 기준 통과 <b>1,258종</b>.</p>
+
+    <h3>못 모은 것 — 알려진 결함</h3>
+    <div class="tw"><table>
+      <thead><tr><th>항목</th><th>영향</th><th>현재 처리</th></tr></thead>
+      <tbody>
+        <tr><td><b>상장폐지 종목</b></td><td>생존편향. 성적이 실제보다 좋게 나온다</td>
+          <td>설계상 수용. 손절 규칙으로 부분 방어</td></tr>
+        <tr><td><b>한국 잠정실적 공시일</b></td><td>DART 미수집 → 한국 종목 전부 제외</td>
+          <td>미해결. 유니버스가 미국에 한정됨</td></tr>
+        <tr><td><b>시점별 주식 수</b></td><td>PSR·PER이 현재 시총÷최근가 역산이라 부정확</td>
+          <td>미해결. 밸류에이션 지표는 참고용</td></tr>
+        <tr><td><b>세금·환전·실투입금</b></td><td>실수령 수익률은 이보다 낮다</td>
+          <td>측정하지 않기로 결정(2026-08-03)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout warn">위 네 가지 때문에 <b>이 보고서의 수치는 상단 추정치</b>다.
+    특히 생존편향은 방향이 정해져 있다 — 실제 성적은 여기서 <b>내려가지 올라가지 않는다</b>.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">4 / 14</span></div>
+</section>
+
+<!-- ══ 5. 기각 1 ══ -->
+<section class="sheet" id="p5">
+  <div class="run"><span>기각된 가설</span><span><b>① ~ ⑤</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">05</span><h2>기각된 가설 ① ~ ⑤</h2></div>
+    <p class="lede">이 연구의 실제 산출물은 채택한 규칙 하나가 아니라 <b>죽인 가설 열 개</b>다.
+    각각 “왜 그럴듯했는가”와 “무엇이 그것을 죽였는가”를 함께 적는다.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th style="width:22%">가설</th><th>왜 그럴듯했나</th><th>무엇이 죽였나</th><th class="n">판정</th></tr></thead>
+      <tbody>
+        <tr class="kill"><td><b>① 거래량 급증이 돌파를 확증한다</b></td>
+          <td>차트에서 큰 상승은 대개 거래량을 동반한다</td>
+          <td>TSLA·NVDA의 돌파 주 거래량이 <b>20주 평균의 0.8배</b>로 평균 미만이었다.
+          기준 4종 × 임계 6개 <b>전수 스윕에서 어떤 조합도 “조건 없음”보다 나빴다</b></td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>② 52주 신고가 근처를 사야 한다</b></td>
+          <td>추세추종의 기본. 신고가는 저항이 없다</td>
+          <td>유니버스 리프트 <b>0.4~0.7</b>(1보다 낮음 = 오히려 불리).
+          주도주의 신고가 대비 위치 중앙값은 <b>−32%</b>였다</td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>③ 영업이익률 변곡이 신호다</b></td>
+          <td>표본 25종에서 승률 <b>85%</b></td>
+          <td>1,273종에서 IC <b>&lt; 0.04</b>, 게다가 <b>부호가 뒤집혔다</b>.
+          표본에서만 성립하는 착시</td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>④ 실적 서프라이즈 직후 매수</b></td>
+          <td>PEAD(실적 발표 후 표류)는 학계에서 잘 알려진 현상</td>
+          <td><b>39,192개 이벤트</b>에서 발표주 반응(<code>react_w0</code>)의 IC가
+          <b>전 밴드에서 음수</b></td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>⑤ 매출 고성장주가 크게 오른다</b></td>
+          <td>성장주 투자의 상식</td>
+          <td>조건 추가 시 52주 수익 중앙값이 <b>+35.7% → +19.9%</b>로 <b>내려갔다</b>.
+          매출 성장률은 상방을 <b>깎는다</b></td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout kill"><b>공통점.</b> ①②③은 전부 <b>역대 주도주 25종을 눈으로 분석해</b> 뽑은 특징이다.
+    승자만 모아놓고 공통점을 찾으면 반드시 뭔가 나오지만, 그것이 <b>패자에게도 똑같이 있으면</b>
+    예측력은 0이다. 유니버스 전체 리프트를 재는 절차가 없었다면 셋 다 규칙에 들어갔을 것이다.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">5 / 14</span></div>
+</section>
+
+<!-- ══ 6. 기각 2 ══ -->
+<section class="sheet" id="p6">
+  <div class="run"><span>기각된 가설</span><span><b>⑥ ~ ⑩</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">06</span><h2>기각된 가설 ⑥ ~ ⑩</h2></div>
+    <p class="lede">앞의 다섯 개가 “진입 신호”에 대한 착각이라면, 이쪽은 <b>운용 방식</b>에 대한 착각이다.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th style="width:22%">가설</th><th>왜 그럴듯했나</th><th>무엇이 죽였나</th><th class="n">판정</th></tr></thead>
+      <tbody>
+        <tr class="kill"><td><b>⑥ 오르는 종목에 불타기(피라미딩)</b></td>
+          <td>리버모어식 고전. 이긴 포지션을 키운다</td>
+          <td>TSR <b>694% → 535%</b>. 노출을 보정해도, 트리거를 가격에서 이익으로 바꿔도
+          회복배율 <b>1.2 → 0.7</b>. <b>평단이 올라가 트레일링 −20%에 더 빨리 걸린다</b> —
+          청산 규칙과 구조적으로 상충</td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>⑦ 20종목으로 분산하면 안전하다</b></td>
+          <td>분산은 위험을 줄인다는 기본 원리</td>
+          <td>20종목 CAGR <b>20.0%</b> vs 8종목 <b>29.0%</b>인데
+          <b>MDD는 2.3%p밖에 안 줄었다</b>. 주도주는 같은 국면·같은 섹터에서 무더기로 나와
+          상관이 높다 → 시장 리스크는 그대로고 초과수익만 희석</td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>⑧ 폭락 후 반등주(폐허형)를 노린다</b></td>
+          <td>주도주율 <b>14.1%</b>로 단독 수치는 가장 높았다</td>
+          <td>관측의 <b>47%가 2020년 한 해에 몰려 있고 2021년 주도주율은 0%</b>.
+          폭락장에서만 작동하는 레짐 의존 신호</td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>⑨ 이익률 개선 추이가 신호다</b></td>
+          <td>③의 변형. 절대 수준 대신 방향을 보자</td>
+          <td><code>OPM QoQ &gt; 0</code> 워크포워드 <b>3/6</b>,
+          <code>&gt; 3%p</code>는 <b>2/6</b>. 회복배율 0.60·0.65로 현행 미달</td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+        <tr class="kill"><td><b>⑩ 손절을 조이면 낙폭을 막을 수 있다</b></td>
+          <td>종목당 −20%면 포트폴리오도 −20%에서 멈춰야 하지 않나</td>
+          <td>필터 없이 손절을 <b>−10%까지 조여도 MDD −34.4%</b>,
+          그 대가로 CAGR이 30.6% → <b>17.7%</b>로 반토막.
+          손절은 <b>1회 손실</b>을 제한하지 <b>누적·동시</b> 손실을 막지 못한다</td>
+          <td class="n"><span class="verdict v-kill">기각</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout"><b>⑩이 특히 중요하다.</b> 8종목이 같은 주에 함께 손절선을 때리면
+    그 주 하나로 −20%가 난다. 게다가 필터를 풀면 후보가 넘쳐 <b>평균 노출이 70% → 90%</b>로 올라가
+    현금 완충이 사라진다. <b>낙폭 방어는 청산이 아니라 진입 조건과 노출에서 나온다.</b></div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">6 / 14</span></div>
+</section>
+
+<!-- ══ 7. 방법론 ══ -->
+<section class="sheet" id="p7">
+  <div class="run"><span>방법론</span><span><b>가장 비싼 실수</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">07</span><h2>방법론에서 배운 것 — IC 함정과 U자</h2></div>
+    <p class="lede">가설 하나를 잘못 죽인 게 아니라, <b>측정 도구가 틀려서 여러 개를 한꺼번에 잘못 죽였다.</b>
+    이 연구에서 가장 이전 가능한 교훈이다.</p>
+
+    <h3>무슨 일이 있었나</h3>
+    <p>RS·매출성장률·이익률 변화의 예측력을 <b>정보계수(IC, 선형 순위상관)</b>로 쟀더니
+    전부 0에 가깝게 나왔다. “이 팩터들은 무용하다”고 결론내고 여러 턴을 낭비했다.</p>
+
+    <h3>실제로는</h3>
+    <p>구간별 반응 곡선을 그려보니 <b>U자</b>였다. 극단(위·아래) 양쪽에서 주도주율이 높고
+    중간이 가장 낮다. <b>U자 관계는 선형 상관으로 재면 정확히 0이 나온다.</b></p>
+
+    <div class="tw"><table>
+      <caption>PSR 구간별 반응 — 리프트 1.0이 유니버스 평균. 양 끝이 높고 가운데가 낮은 전형적 U자.</caption>
+      <thead><tr><th>PSR 구간</th><th class="n">관측</th><th class="n">주도주율</th><th class="n">리프트</th><th class="n">52주 수익 중앙</th><th class="n">승률</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td>0 – 1</td><td class="n">118,329</td><td class="n">2.93%</td><td class="n"><b>1.61</b></td><td class="n pos">+14.71%</td><td class="n">67.61%</td></tr>
+        <tr><td>1 – 2</td><td class="n">91,276</td><td class="n">1.26%</td><td class="n">0.69</td><td class="n pos">+10.05%</td><td class="n">63.41%</td></tr>
+        <tr><td>2 – 3</td><td class="n">53,156</td><td class="n">1.07%</td><td class="n">0.59</td><td class="n pos">+8.74%</td><td class="n">62.23%</td></tr>
+        <tr><td>3 – 5</td><td class="n">56,257</td><td class="n">0.93%</td><td class="n">0.51</td><td class="n pos">+7.20%</td><td class="n">60.32%</td></tr>
+        <tr><td>5 – 10</td><td class="n">57,257</td><td class="n">1.40%</td><td class="n">0.77</td><td class="n pos">+7.07%</td><td class="n">58.73%</td></tr>
+        <tr><td>10 – 20</td><td class="n">30,426</td><td class="n">1.29%</td><td class="n">0.71</td><td class="n pos">+3.88%</td><td class="n">54.60%</td></tr>
+        <tr class="hl"><td>20 +</td><td class="n">26,025</td><td class="n"><b>3.20%</b></td><td class="n"><b>1.76</b></td><td class="n neg">−0.07%</td><td class="n">49.91%</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout kill"><b>교훈 1 — IC가 0이어도 팩터가 죽은 게 아니다.</b>
+    반드시 구간별 반응 곡선을 그려 U자인지 확인할 것.</div>
+    <div class="callout warn"><b>교훈 2 — 그런데 U자를 찾았다고 쓸 수 있는 것도 아니다.</b>
+    위 표에서 <b>PSR 20+ 구간이 주도주율 1위(리프트 1.76)</b>다.
+    그런데 그 구간의 수익 중앙값은 <b>−0.07%</b>, 승률 <b>49.9%</b> — 동전던지기다.
+    <b>“주도주가 많이 나온다”와 “돈을 번다”는 다른 질문</b>이고, 이 차이가 11쪽 논쟁의 핵심이 된다.</div>
+    <div class="callout ok"><b>교훈 3 — 시기 집중도를 항상 함께 본다.</b>
+    가설 ⑧(폐허형)은 주도주율 14.1%로 가장 높았지만 관측의 47%가 2020년 한 해에 몰려 있었다.
+    <b>단일 수치는 레짐 의존을 숨긴다.</b></div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">7 / 14</span></div>
+</section>
+
+<!-- ══ 8. 확정 규칙 ══ -->
+<section class="sheet" id="p8">
+  <div class="run"><span>확정 규칙</span><span><b>규칙 ⑥</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">08</span><h2>확정 규칙과 정의</h2></div>
+    <p class="lede">살아남은 조건만 남긴 최종 규칙. 각 항목이 왜 이 형태인지는 앞 장들의 기각 결과에서 나온다.</p>
+
+    <div class="callout ok" style="font-size:15px">
+      <b>진입</b> &nbsp; <code>RS13 &gt; 1.5</code> AND <code>(흑자전환 OR 이익폭증)</code> AND <code>OPM &gt; 0</code><br>
+      <b>청산</b> &nbsp; 고점 대비 <b>−20% 트레일링</b> (주봉 종가 기준)<br>
+      <b>비중</b> &nbsp; 8종목 균등 12.5% · <b>2주 분할매수</b> · 불타기 없음<br>
+      <b>진입가</b> &nbsp; 신호 발생 주의 <b>금요일 종가</b>
+    </div>
+
+    <h3>각 조건의 정의</h3>
+    <div class="tw"><table>
+      <thead><tr><th>조건</th><th>정의</th><th>근거</th></tr></thead>
+      <tbody>
+        <tr><td><b>RS13 &gt; 1.5</b></td><td>13주 상대강도가 시장의 1.5배 초과</td>
+          <td>강세형 경로. 연도별 주도주율 3~19%로 <b>고르게 분포</b>해 레짐 의존이 낮다</td></tr>
+        <tr><td><b>흑자전환</b></td><td>영업이익이 적자에서 흑자로 전환한 분기</td>
+          <td>발생률 10.9%. 단독 리프트가 가장 높은 펀더멘털 조건</td></tr>
+        <tr><td><b>이익폭증</b><br><span class="mut" style="font-size:12px">4개 중 하나라도</span></td>
+          <td><code>b_ophigh</code> 영업이익 8분기 신고점<br>
+              <code>b_nihigh</code> 순이익 8분기 신고점<br>
+              <code>b_opjump</code> 영업이익 QoQ ≥ +50%<br>
+              <code>b_opmjump</code> 영업이익률 QoQ ≥ +3%p</td>
+          <td>흑자전환만으로는 놓치는 기업이 있다. 신고점 판정은 <b>자기 자신을 제외한 과거 8분기</b>와 비교</td></tr>
+        <tr><td><b>OPM &gt; 0</b></td><td>당분기 영업이익률이 흑자</td>
+          <td>이익폭증 단독은 발생률 34.5%로 헐거워 MDD가 −42.1%까지 터진다. 이를 조이는 역할</td></tr>
+        <tr><td><b>−20% 트레일링</b></td><td>진입 후 최고 주봉 종가 대비 −20% 도달 시 청산</td>
+          <td>무매도 대비 MDD −66.9% → −33.3%. <b>단, 최적값이라는 근거는 약하다</b>(12쪽)</td></tr>
+        <tr><td><b>2주 분할매수</b></td><td>목표 비중을 2주에 나눠 진입</td>
+          <td>1주 전액 대비 CAGR −0.2%p / MDD +1.1%p 개선. 4주 분할은 −3.2%p로 과도</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>이번 주 필터 통과 현황 <span class="mut" style="font-weight:400;font-size:12px">— 2026-08-03 신호주</span></h3>
+    <div class="tw"><table>
+      <thead><tr><th>단계</th><th class="n">잔존</th><th class="n">비율</th></tr></thead>
+      <tbody>
+        <tr><td>유니버스 (시총 $2B+ · 거래대금 $5M+)</td><td class="n">1,258</td><td class="n">100%</td></tr>
+        <tr><td>+ RS13 &gt; 1.5</td><td class="n">36</td><td class="n">2.9%</td></tr>
+        <tr><td>+ OPM &gt; 0</td><td class="n">20</td><td class="n">1.6%</td></tr>
+        <tr class="hl"><td>+ (흑자전환 OR 이익폭증) <b>← 최종</b></td><td class="n"><b>17</b></td><td class="n">1.4%</td></tr>
+        <tr><td class="mut">(참고) 여기에 구 규칙의 PSR &lt; 3까지 걸면</td><td class="n mut">9</td><td class="n mut">0.7%</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">8 / 14</span></div>
+</section>
+
+<!-- ══ 9. 증빙 1 ══ -->
+<section class="sheet" id="p9">
+  <div class="run"><span>백테스트 증빙 ①</span><span><b>전기간 · 벤치마크</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">09</span><h2>증빙 ① 전기간 성적과 벤치마크</h2></div>
+    <p class="lede">2018-06 ~ 2026-08 · 미국 1,271종 · 수수료 왕복 0.1% 반영 · 세금 미반영.</p>
+
+    <h3>거래 통계</h3>
+    <div class="tw"><table>
+      <thead><tr><th>항목</th><th class="n">규칙⑥ (현행)</th><th class="n">규칙⑤ (구)</th><th>해석</th></tr></thead>
+      <tbody>
+        <tr><td>거래 수</td><td class="n">136건 / 8.2년</td><td class="n">107건</td><td>연 16.7회 / 13.1회</td></tr>
+        <tr><td>평균 보유</td><td class="n">20.7주</td><td class="n">21.3주</td><td>약 5개월</td></tr>
+        <tr><td>승률</td><td class="n">43.4%</td><td class="n">38.3%</td><td><b>지는 거래가 더 많다</b></td></tr>
+        <tr><td>거래 수익 중앙값</td><td class="n neg">−5.9%</td><td class="n neg">−6.9%</td><td>대부분의 거래는 손실</td></tr>
+        <tr><td>평균 노출</td><td class="n">86.3%</td><td class="n">70.3%</td><td>현금 완충의 차이</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>진짜 벤치마크 — 레버리지 SPY와 비교</h3>
+    <p>위험 수준이 다른 것끼리 비교하면 의미가 없다. 그래서 <b>SPY×1.5·×2</b>를 함께 놓았다.</p>
+    <div class="tw"><table>
+      <thead><tr><th>대상</th><th class="n">TSR</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복배율</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td><b>전략 (구 규칙⑤ 기준 측정)</b></td><td class="n">695%</td><td class="n pos">29.0%</td><td class="n">−33.3%</td><td class="n"><b>0.87</b></td></tr>
+        <tr><td>SPY ×1.0</td><td class="n">205%</td><td class="n">14.7%</td><td class="n">−31.8%</td><td class="n">0.46</td></tr>
+        <tr><td>SPY ×1.5 (주간복리)</td><td class="n">379%</td><td class="n">21.2%</td><td class="n">−44.8%</td><td class="n">0.47</td></tr>
+        <tr><td>SPY ×2.0 (주간복리)</td><td class="n">601%</td><td class="n">27.0%</td><td class="n neg">−56.1%</td><td class="n">0.48</td></tr>
+      </tbody>
+      <caption>전략이 SPY×2와 비슷한 수익을 MDD 절반으로 냈다. 회복배율 0.87 vs 0.48 — 단순 레버리지로 복제되지 않는 부분이 이 시스템의 실질 엣지다.</caption>
+    </table></div>
+
+    <h3>연도별 SPY 대비 초과수익 (%p)</h3>
+    <div class="tw"><table>
+      <thead><tr><th>규칙</th><th class="n">2018</th><th class="n">2019</th><th class="n">2020</th><th class="n">2021</th><th class="n">2022</th><th class="n">2023</th><th class="n">2024</th><th class="n">2025</th><th class="n">2026</th></tr></thead>
+      <tbody>
+        <tr><td>⑤ PSR&lt;3</td><td class="n neg">−1.9</td><td class="n neg">−27.5</td><td class="n pos">+109.0</td><td class="n neg">−2.4</td><td class="n pos">+29.3</td><td class="n neg">−13.2</td><td class="n pos">+28.4</td><td class="n pos">+12.5</td><td class="n pos">+44.3</td></tr>
+        <tr><td>⑥ OPM&gt;0</td><td class="n pos">+12.4</td><td class="n neg">−32.0</td><td class="n pos">+109.9</td><td class="n neg">−29.2</td><td class="n pos">+51.4</td><td class="n neg">−2.6</td><td class="n pos">+13.5</td><td class="n neg">−6.0</td><td class="n pos">+64.5</td></tr>
+      </tbody>
+      <caption>지는 해는 조금 지고 이기는 해는 크게 이긴다. 거래 단위의 비대칭(승률 43%·손익비 5.5)이 연 단위에서도 그대로 반복된다.</caption>
+    </table></div>
+
+    <div class="callout warn"><b>초과수익의 집중도.</b> 규칙⑤ 기준 9년 중 SPY를 이긴 해는 <b>5년</b>이고,
+    초과수익은 2020·2024·2026에 몰려 있다. <b>상위 5거래를 제외하면 평균 +21.8% → +9.5%</b>로 내려간다.
+    이 전략은 “꾸준히 조금씩”이 아니라 “대부분 지다가 가끔 크게”의 구조다.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">9 / 14</span></div>
+</section>
+
+<!-- ══ 10. 증빙 2 ══ -->
+<section class="sheet" id="p10">
+  <div class="run"><span>백테스트 증빙 ②</span><span><b>조건 스윕</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">10</span><h2>증빙 ② 진입조건·비중 스윕</h2></div>
+    <p class="lede">“이 조건이 최선인가”에 답하려면 대안을 같은 조건에서 전부 돌려봐야 한다.
+    아래는 다른 모든 설정을 고정하고 <b>세 번째 조건만 교체</b>한 결과다.</p>
+
+    <h3>세 번째 조건 교체 — 16종 비교 <span class="mut" style="font-weight:400;font-size:12px">(trail −20% · 8종목 12.5% 고정)</span></h3>
+    <div class="tw"><table>
+      <thead><tr><th>필터</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복</th><th class="n">거래</th><th class="n">승률</th><th class="n">노출</th><th class="n">WF</th></tr></thead>
+      <tbody>
+        <tr><td>(필터 없음)</td><td class="n">30.58</td><td class="n neg">−42.09</td><td class="n">0.73</td><td class="n">155</td><td class="n">44.5</td><td class="n">89.7</td><td class="n neg">2/6</td></tr>
+        <tr class="hl"><td><b>OPM &gt; 0 ← 채택</b></td><td class="n pos"><b>32.77</b></td><td class="n">−37.70</td><td class="n">0.87</td><td class="n">136</td><td class="n">43.4</td><td class="n">86.3</td><td class="n pos"><b>4/6</b></td></tr>
+        <tr><td>순익률 QoQ &gt; 0</td><td class="n">32.87</td><td class="n">−36.00</td><td class="n">0.91</td><td class="n">147</td><td class="n">47.6</td><td class="n">88.3</td><td class="n">3/6</td></tr>
+        <tr><td>PSR &lt; 3 <span class="mut">(구 규칙)</span></td><td class="n">27.66</td><td class="n pos">−23.88</td><td class="n"><b>1.16</b></td><td class="n">107</td><td class="n">38.3</td><td class="n">70.3</td><td class="n pos">4/6</td></tr>
+        <tr><td>OPM 0~10%</td><td class="n">28.61</td><td class="n">−31.49</td><td class="n">0.91</td><td class="n">99</td><td class="n">41.4</td><td class="n">67.7</td><td class="n neg">2/6</td></tr>
+        <tr><td>시총 &lt; $10B</td><td class="n">28.52</td><td class="n">−41.24</td><td class="n">0.69</td><td class="n">137</td><td class="n">44.5</td><td class="n">85.0</td><td class="n">4/6</td></tr>
+        <tr><td>PSR &lt; 5</td><td class="n">26.31</td><td class="n">−27.77</td><td class="n">0.95</td><td class="n">120</td><td class="n">40.0</td><td class="n">75.0</td><td class="n">4/6</td></tr>
+        <tr><td>OPM QoQ &gt; 0</td><td class="n">26.73</td><td class="n neg">−44.43</td><td class="n">0.60</td><td class="n">162</td><td class="n">42.6</td><td class="n">90.0</td><td class="n">3/6</td></tr>
+        <tr><td>흑자 2Q 연속+</td><td class="n">23.96</td><td class="n neg">−47.62</td><td class="n">0.50</td><td class="n">130</td><td class="n">36.2</td><td class="n">82.7</td><td class="n">4/6</td></tr>
+        <tr><td>OPM QoQ &gt; 3%p</td><td class="n">20.53</td><td class="n">−31.56</td><td class="n">0.65</td><td class="n">159</td><td class="n">40.3</td><td class="n">85.9</td><td class="n neg">2/6</td></tr>
+        <tr><td>매출YoY &lt; 30%</td><td class="n">20.66</td><td class="n neg">−46.03</td><td class="n">0.45</td><td class="n">114</td><td class="n">36.0</td><td class="n">79.9</td><td class="n">4/6</td></tr>
+        <tr><td>PER &lt; 30</td><td class="n">19.56</td><td class="n">−31.43</td><td class="n">0.62</td><td class="n">67</td><td class="n">43.3</td><td class="n">66.1</td><td class="n">4/6</td></tr>
+        <tr class="kill"><td>OPM ≤ 10%</td><td class="n neg">17.63</td><td class="n neg">−43.48</td><td class="n neg">0.41</td><td class="n">151</td><td class="n">37.1</td><td class="n">79.0</td><td class="n neg">1/6</td></tr>
+      </tbody>
+      <caption>WF = 워크포워드 6분할 중 SPY를 이긴 구간 수(CAGR 기준). 완료조건은 4/6 이상.</caption>
+    </table></div>
+
+    <h3>종목 수와 비중</h3>
+    <div class="tw"><table>
+      <thead><tr><th>구성</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복배율</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td><b>5종목 · 20%</b></td><td class="n pos">34.9%</td><td class="n">−35.7%</td><td class="n"><b>0.98</b></td></tr>
+        <tr><td>8종목 · 12.5% <span class="mut">(현행)</span></td><td class="n">29.0%</td><td class="n">−33.3%</td><td class="n">0.87</td></tr>
+        <tr><td>12종목 · 8.3%</td><td class="n">20.4%</td><td class="n">−34.0%</td><td class="n">0.60</td></tr>
+        <tr class="kill"><td>20종목 · 5% <span class="mut">(분산안)</span></td><td class="n neg">20.0%</td><td class="n">−31.0%</td><td class="n">0.65</td></tr>
+      </tbody>
+      <caption>분산해도 MDD가 거의 안 줄었다(−33.3% → −31.0%, 2.3%p). 주도주는 상관이 높아 분산이 작동하지 않는다.</caption>
+    </table></div>
+
+    <div class="callout"><b>왜 5종목(회복 0.98)을 안 쓰고 8종목을 쓰나.</b>
+    5종목이 수치는 낫지만 <b>개별 종목 사고에 대한 노출</b>이 커진다.
+    이 차이(0.98 vs 0.87)는 뒤에 나올 <b>측정 노이즈 범위 안</b>이라 유의미하다고 보기 어렵다.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">10 / 14</span></div>
+</section>
+
+<!-- ══ 11. PSR 논쟁 ══ -->
+<section class="sheet" id="p11">
+  <div class="run"><span>백테스트 증빙 ③</span><span><b>규칙 전환</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">11</span><h2>증빙 ③ PSR 논쟁 — 규칙⑤에서 ⑥으로</h2></div>
+    <p class="lede">이 연구에서 가장 오래 다툰 지점. <b>회복배율이 더 좋은 규칙을 버리고</b>
+    낙폭이 나쁜 규칙으로 갈아탄 이유를 기록한다.</p>
+
+    <h3>발견 — PSR &lt; 3이 무엇을 막고 있었나</h3>
+    <div class="tw"><table>
+      <thead><tr><th>구간</th><th class="n">관측</th><th class="n">주도주</th><th class="n">비율</th><th class="n">52주 중앙</th><th class="n">승률</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td>규칙⑤가 <b>통과</b>시킨 구간</td><td class="n">820</td><td class="n">98건</td><td class="n">11.95%</td><td class="n pos">+18.1%</td><td class="n">61.8%</td></tr>
+        <tr class="kill"><td>PSR이 <b>막은</b> 구간</td><td class="n">1,401</td><td class="n"><b>99건</b></td><td class="n">7.07%</td><td class="n">+0.1%</td><td class="n">50.0%</td></tr>
+      </tbody>
+      <caption>PSR&lt;3은 자기가 포착한 주도주(98건)보다 많은 주도주(99건)를 문 앞에서 돌려보냈다.</caption>
+    </table></div>
+
+    <h3>막힌 구간을 쪼개보면</h3>
+    <div class="tw"><table>
+      <thead><tr><th>막힌 PSR</th><th class="n">관측</th><th class="n">주도주율</th><th class="n">52주 중앙</th><th class="n">승률</th></tr></thead>
+      <tbody>
+        <tr><td>3 – 5</td><td class="n">240</td><td class="n">5.42%</td><td class="n pos">+19.9%</td><td class="n">59.2%</td></tr>
+        <tr class="hl"><td>5 – 10</td><td class="n">264</td><td class="n"><b>9.47%</b></td><td class="n pos"><b>+25.2%</b></td><td class="n"><b>65.2%</b></td></tr>
+        <tr class="kill"><td>10 – 20</td><td class="n">274</td><td class="n">9.85%</td><td class="n neg">−11.1%</td><td class="n">44.2%</td></tr>
+        <tr class="kill"><td>20 +</td><td class="n">623</td><td class="n">5.46%</td><td class="n neg">−10.7%</td><td class="n">42.7%</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>구조적 사각지대</h3>
+    <div class="tiles">
+      <div class="tile"><p class="k">주도주 이력 종목</p><p class="v">520</p><p class="s">전체</p></div>
+      <div class="tile"><p class="k">규칙⑤가 포착</p><p class="v">19</p><p class="s">주도주 시점에</p></div>
+      <div class="tile"><p class="k">PSR만 빼면</p><p class="v">34</p><p class="s">+15종</p></div>
+      <div class="tile"><p class="k">8년간 PSR&lt;3 미진입</p><p class="v neg">90</p><p class="s">= 전체의 17%</p></div>
+    </div>
+    <p><b>NVDA는 아슬아슬하게 놓친 게 아니다.</b> 8년 전체 PSR 최소값이 2.84이고,
+    RS·실적 조건을 충족한 16개 주차의 PSR은 <b>최소 10.5 / 중앙 15.8</b>이었다.
+    컷을 3에서 10으로 옮겨도 잡히지 않는다.</p>
+    <p class="mut" style="font-size:13px">PSR 때문에 통째로 놓친 종목(이후 최대 52주 수익):
+    NTLA +543% · ENPH +479% · CELH +399% · PLTR +378% · COIN +292% · ELF +257% ·
+    <b>NVDA +252%</b> · TWLO +238% · ETSY +230% · NET +217% · GNRC +153%</p>
+
+    <h3>그럼 컷을 옮기면 되나 — 아니다</h3>
+    <div class="tw"><table>
+      <thead><tr><th>PSR 컷</th><th class="n">CAGR</th><th class="n">MDD</th><th class="n">회복배율</th></tr></thead>
+      <tbody>
+        <tr><td>&lt; 2</td><td class="n">21.5%</td><td class="n">−30.3%</td><td class="n">0.71</td></tr>
+        <tr class="hl"><td>&lt; 3</td><td class="n">27.7%</td><td class="n pos">−23.9%</td><td class="n"><b>1.16</b></td></tr>
+        <tr><td>&lt; 5</td><td class="n">26.3%</td><td class="n">−27.8%</td><td class="n">0.95</td></tr>
+        <tr class="kill"><td>&lt; 10</td><td class="n">27.1%</td><td class="n neg">−41.0%</td><td class="n">0.66</td></tr>
+        <tr class="kill"><td>없음</td><td class="n">30.6%</td><td class="n neg">−42.1%</td><td class="n">0.73</td></tr>
+      </tbody>
+      <caption>PSR&lt;10은 CAGR을 거의 못 올리면서(27.7→27.1) MDD만 −23.9%→−41.0%로 터뜨린다. 고PSR만 담는 별도 슬리브(15~25%)도 검증했으나 단독 CAGR 10.6%·수익 중앙 −8.1%로 수익만 희석시켰다.</caption>
+    </table></div>
+
+    <div class="callout kill"><b>최종 결정과 그 대가.</b> 컷 조정·슬리브 분리는 모두 기각하고,
+    PSR을 <b>의사결정에서 제외</b>해 참고지표로 강등했다(2026-08-08).
+    얻은 것은 CAGR <b>+5.1%p</b>와 17% 사각지대 해소. 내준 것은
+    MDD <b>−23.9% → −37.7%</b> — <b>SPY(−31.8%)보다 나쁜 낙폭</b>이다.
+    “MDD를 SPY보다 낮게”라는 원래 목표를 포기한 결정이며, 실전에서 −37% 구간이 오면
+    그것은 고장이 아니라 이 선택의 결과다.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">11 / 14</span></div>
+</section>
+
+<!-- ══ 12. 강건성 ══ -->
+<section class="sheet" id="p12">
+  <div class="run"><span>백테스트 증빙 ④</span><span><b>강건성</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">12</span><h2>증빙 ④ 강건성 — 손절폭 교차검증</h2></div>
+    <p class="lede">한 파라미터에서만 좋은 성적은 실력이 아니라 운이다.
+    손절폭을 −10%부터 −30%까지 바꿔가며 성적이 <b>유지되는지</b>를 봤다.</p>
+
+    <h3>회복배율 (CAGR ÷ |MDD|)</h3>
+    <div class="tw"><table>
+      <thead><tr><th>필터</th><th class="n">−10%</th><th class="n">−15%</th><th class="n">−20%</th><th class="n">−25%</th><th class="n">−30%</th><th class="n">중앙</th><th class="n">최악</th></tr></thead>
+      <tbody>
+        <tr><td>PSR &lt; 3</td><td class="n">1.35</td><td class="n">0.77</td><td class="n">1.16</td><td class="n">1.31</td><td class="n">0.67</td><td class="n"><b>1.16</b></td><td class="n">0.67</td></tr>
+        <tr><td>PSR 없음</td><td class="n">0.51</td><td class="n">0.95</td><td class="n">0.73</td><td class="n">0.74</td><td class="n">0.60</td><td class="n">0.73</td><td class="n">0.51</td></tr>
+        <tr><td>OPM &gt; 0</td><td class="n">0.58</td><td class="n">0.77</td><td class="n">0.87</td><td class="n">0.78</td><td class="n">0.37</td><td class="n">0.77</td><td class="n">0.37</td></tr>
+        <tr class="hl"><td>PSR&lt;10 &amp; OPM 0~10</td><td class="n">0.80</td><td class="n">0.93</td><td class="n">1.12</td><td class="n">1.22</td><td class="n">0.90</td><td class="n">0.93</td><td class="n"><b>0.80</b></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>같은 조합의 MDD (%)</h3>
+    <div class="tw"><table>
+      <thead><tr><th>필터</th><th class="n">−10%</th><th class="n">−15%</th><th class="n">−20%</th><th class="n">−25%</th><th class="n">−30%</th><th class="n">진폭</th></tr></thead>
+      <tbody>
+        <tr><td>PSR &lt; 3</td><td class="n">−26.2</td><td class="n">−35.0</td><td class="n">−23.9</td><td class="n">−28.1</td><td class="n">−37.4</td><td class="n neg">13.5%p</td></tr>
+        <tr><td>PSR 없음</td><td class="n">−34.4</td><td class="n">−35.3</td><td class="n">−42.1</td><td class="n">−37.1</td><td class="n">−41.3</td><td class="n">7.7%p</td></tr>
+        <tr><td>OPM &gt; 0</td><td class="n">−38.1</td><td class="n">−35.6</td><td class="n">−37.7</td><td class="n">−44.4</td><td class="n">−49.8</td><td class="n">14.2%p</td></tr>
+        <tr class="hl"><td>PSR&lt;10 &amp; OPM 0~10</td><td class="n">−25.1</td><td class="n">−25.1</td><td class="n">−24.7</td><td class="n">−26.0</td><td class="n">−27.5</td><td class="n pos"><b>2.8%p</b></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout warn"><b>불편한 발견.</b> 규칙⑤의 자랑이던 MDD −23.9%는
+    <b>손절 −20%에서만 나오는 값</b>이다. −15%로 바꾸면 −35.0%로 튄다.
+    회복배율도 1.35 → 0.77 → 1.16 → 1.31 → 0.67로 널뛴다.
+    <b>“PSR&lt;3가 낙폭을 지킨다”는 서술은 과장이었고</b>, 정확히는
+    “PSR&lt;3 + trail −20% 조합에서 그 숫자가 나왔다”가 맞다.</div>
+
+    <h3>워크포워드 6분할 — 규칙⑥ 상세</h3>
+    <div class="tw"><table>
+      <thead><tr><th>구간</th><th class="n">전략 CAGR</th><th class="n">SPY CAGR</th><th class="n">승패</th><th class="n">전략 회복</th><th class="n">SPY 회복</th></tr></thead>
+      <tbody>
+        <tr class="kill"><td>2021</td><td class="n">5.8%</td><td class="n">26.9%</td><td class="n neg">패</td><td class="n">0.48</td><td class="n">6.99</td></tr>
+        <tr class="hl"><td>2022 <span class="mut">(하락장)</span></td><td class="n">18.0%</td><td class="n">−17.0%</td><td class="n pos">승 +35%p</td><td class="n">0.79</td><td class="n">−0.75</td></tr>
+        <tr class="hl"><td>2023</td><td class="n">32.9%</td><td class="n">25.0%</td><td class="n pos">승 +8%p</td><td class="n">2.16</td><td class="n">2.55</td></tr>
+        <tr class="hl"><td>2024</td><td class="n">63.2%</td><td class="n">28.2%</td><td class="n pos">승 +35%p</td><td class="n">2.94</td><td class="n">5.29</td></tr>
+        <tr class="kill"><td>2025</td><td class="n">8.1%</td><td class="n">19.6%</td><td class="n neg">패</td><td class="n">0.31</td><td class="n">1.16</td></tr>
+        <tr class="hl"><td>2025H2 ~ 26</td><td class="n">147.1%</td><td class="n">19.9%</td><td class="n pos">승 +127%p</td><td class="n">6.18</td><td class="n">2.38</td></tr>
+      </tbody>
+      <caption>CAGR 기준 4/6 통과. 회복배율 기준은 2/6으로 미달(구 규칙⑤는 3/6).</caption>
+    </table></div>
+
+    <div class="callout"><b>trail −20%를 유지하는 이유.</b> 전 기간 회복배율만 보면 −10%(1.35)나 −25%(1.31)가 낫다.
+    그러나 <b>워크포워드 4/6은 −20% 이상에서만 나온다.</b> 전 기간 최적값이 아니라
+    아웃샘플 일관성을 기준으로 남겨둔 것이며, <b>“최적”이라고 부르지 않는다.</b></div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">12 / 14</span></div>
+</section>
+
+<!-- ══ 13. 검증 설계 ══ -->
+<section class="sheet" id="p13">
+  <div class="run"><span>검증 설계</span><span><b>13주 폐기</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">13</span><h2>검증 설계 — 13주를 폐기한 이유</h2></div>
+    <p class="lede">원래 완료조건은 “실시간 신호 <b>13주</b> 추적 → 백테스트 기대값과 오차 <b>±10%p</b> 이내”였다.
+    이 조건 자체가 통계적으로 성립하지 않는다는 것을 확인하고 폐기했다.</p>
+
+    <h3>근거 1 — 13주에 청산되는 거래는 3~4건뿐</h3>
+    <div class="tw"><table>
+      <thead><tr><th>기간</th><th class="n">청산 예상</th><th>판정 가능성</th></tr></thead>
+      <tbody>
+        <tr><td>1개월</td><td class="n">1.0건</td><td>불가</td></tr>
+        <tr class="kill"><td><b>1분기(13주)</b></td><td class="n"><b>3.3건</b></td><td>승률 43%·손익비 5.5를 3건으로 검증할 수 없다</td></tr>
+        <tr><td>1년</td><td class="n">13.1건</td><td>참고 가능</td></tr>
+        <tr><td>2년</td><td class="n">26.3건</td><td>판정 가능</td></tr>
+      </tbody>
+      <caption>평균 보유가 21주라 13주 시점엔 대부분의 포지션이 청산조차 되지 않는다.</caption>
+    </table></div>
+
+    <h3>근거 2 — 자연 산포가 조건의 20배</h3>
+    <div class="tw"><table>
+      <thead><tr><th>구간</th><th class="n">중앙</th><th class="n">p10</th><th class="n">p90</th><th class="n">폭</th><th class="n">SPY 상회율</th></tr></thead>
+      <tbody>
+        <tr><td>1개월</td><td class="n">+16.0%</td><td class="n neg">−58.8%</td><td class="n">+380.3%</td><td class="n neg">439%p</td><td class="n">51.9%</td></tr>
+        <tr class="kill"><td><b>1분기</b></td><td class="n">+20.0%</td><td class="n neg">−35.5%</td><td class="n">+171.8%</td><td class="n neg"><b>207%p</b></td><td class="n">59.8%</td></tr>
+        <tr><td>6개월</td><td class="n">+16.2%</td><td class="n">−16.7%</td><td class="n">+149.3%</td><td class="n">166%p</td><td class="n">57.2%</td></tr>
+        <tr><td>1년</td><td class="n">+16.7%</td><td class="n">−6.6%</td><td class="n">+97.7%</td><td class="n">104%p</td><td class="n">62.8%</td></tr>
+        <tr class="hl"><td>2년</td><td class="n">+32.4%</td><td class="n pos">+2.7%</td><td class="n">+58.2%</td><td class="n">56%p</td><td class="n pos"><b>88.2%</b></td></tr>
+        <tr class="hl"><td>3년</td><td class="n">+27.9%</td><td class="n pos">+17.2%</td><td class="n">+39.7%</td><td class="n pos">23%p</td><td class="n pos"><b>98.5%</b></td></tr>
+      </tbody>
+      <caption>롤링 N주 수익률(연율)의 분포. 완료조건이 요구한 ±10%p에 비해 13주 산포는 207%p — 20배다.</caption>
+    </table></div>
+
+    <div class="callout kill"><b>결론.</b> 13주 결과가 기대값 ±10%p 안에 들어온다면 그것은
+    실력이 아니라 <b>우연</b>이다. 통과해도 아무것도 증명하지 못하는 조건이었다.</div>
+
+    <h3>재설계 — 규율과 성과를 분리</h3>
+    <div class="tw"><table>
+      <thead><tr><th>단계</th><th>완료 조건</th><th>재는 것</th><th class="n">현재</th></tr></thead>
+      <tbody>
+        <tr><td><b>M4</b> 워크포워드</td><td>6분할 중 4개 이상 SPY 상회</td><td>아웃샘플 재현성</td>
+          <td class="n"><span class="verdict v-hold">CAGR 4/6</span></td></tr>
+        <tr><td><b>M6a</b> 규율</td><td><b>13주 연속</b> 주간 사이클 실행 13/13 · 손절 규칙 위반 0건</td>
+          <td><b>규칙대로 굴리는가</b></td><td class="n"><span class="verdict v-hold">1/13주</span></td></tr>
+        <tr><td><b>M6b</b> 성과</td><td><b>청산 20건</b> 누적 후 백테스트 기대값과 대조</td>
+          <td>전략이 실전에서 재현되는가</td><td class="n"><span class="verdict v-hold">0/20건</span></td></tr>
+        <tr><td><b>M7</b> 실계좌</td><td>M4 + M6a 통과 시 <b>소액</b> 개시</td>
+          <td>—</td><td class="n"><span class="verdict v-kill">잠김</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout"><b>M7의 해제 조건을 성과가 아니라 규율로 둔 이유.</b>
+    성과 판정에는 최소 2년이 필요한데(위 표 SPY 상회율 88.2%), 그것을 선행조건으로 걸면 실계좌는 2028년이 된다.
+    이 프로젝트의 원래 진단은 “종목 선정이 아니라 <b>감정</b>이 낙폭을 키운다”였다.
+    그렇다면 잠금 해제 조건도 <b>규율의 증명</b>이어야 논리가 맞다.
+    <b>M6a는 누적이 아니라 연속으로 센다</b> — 한 주라도 거르면 카운트가 1로 리셋된다.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구</span><span class="pg">13 / 14</span></div>
+</section>
+
+<!-- ══ 14. 운영·한계 ══ -->
+<section class="sheet" id="p14">
+  <div class="run"><span>운영 구조 · 한계</span><span><b>반증 조건</b></span></div>
+  <div class="body">
+    <div class="stitle"><span class="snum">14</span><h2>운영 구조 · 한계 · 반증 조건</h2></div>
+
+    <h3>현재 운영 구조 <span class="mut" style="font-weight:400;font-size:12px">— 2026-08-11 기준</span></h3>
+    <div class="tw"><table>
+      <thead><tr><th>주기</th><th>동작</th><th>산출</th></tr></thead>
+      <tbody>
+        <tr><td><b>매주 토 08:00</b><br><span class="mut" style="font-size:12px">금 미장 마감 +3h</span></td>
+          <td>가격 갱신 → factor_weekly 증분 → 보유 갱신·청산 판정 → 신규 기록 → 발행</td>
+          <td>대시보드 자동 반영 + 텔레그램 주간 요약</td></tr>
+        <tr><td>매일 06:00</td><td>산출물 신선도 검사</td><td>9일 이상 정지 시 텔레그램 경보</td></tr>
+      </tbody>
+    </table></div>
+    <p><b>진입가를 금요일 종가로 맞춘 이유</b> — 백테스트가 신호 발생 주의 주봉 종가,
+    즉 <b>금요일 종가에 매수</b>하기 때문이다. 월요일에 사면 그 시점부터 백테스트와 다른 게임이 된다.
+    마감 직후가 아니라 3시간 뒤에 도는 것은, 금요일 일봉이 아직 없으면
+    미완성 주봉 가드가 <b>그 주를 통째로 버리기</b> 때문이다.</p>
+
+    <h3>측정 도구에 대한 정정 <span class="mut" style="font-weight:400;font-size:12px">— 2026-08-10</span></h3>
+    <div class="callout warn">페이퍼 트레이딩은 <b>일봉 종가</b>로, 백테스트는 <b>주봉 종가</b>로 청산 판정을 하고 있었다.
+    일봉 고점은 주봉 고점보다 항상 크거나 같고 판정 횟수도 5배라
+    <b>페이퍼가 구조적으로 더 빨리·더 자주 털린다.</b>
+    그 상태로는 M6b가 전략이 아니라 <b>자의 차이</b>를 재게 된다. 주봉으로 통일했다.
+    (실측 차이: AGL 고점 대비 일봉 −11.4% vs 주봉 +0.0%)</div>
+
+    <h3>남은 한계</h3>
+    <ul class="tight">
+      <li><b>생존편향</b> — 상장폐지 종목 미수집. 실제 성적은 여기서 내려간다</li>
+      <li><b>한국 시장 제외</b> — DART 잠정실적 공시일 미수집</li>
+      <li><b>밸류에이션 지표 부정확</b> — 주식 수를 현재 시총÷최근가로 역산</li>
+      <li><b>세금·환전 미반영</b> — 세전 기준. 실수령은 더 낮다</li>
+      <li><b>성장조정 밸류에이션 부재</b> — NVDA류(고PSR 고성장)를 판별할 축이 데이터에 없다.
+      PSR÷매출성장률 같은 지표가 필요하지만, 매출성장률이 이미 상방을 깎는다고 측정된 이상
+      분모로 쓰면 오히려 나빠질 수 있어 <b>미검증</b>이다</li>
+    </ul>
+
+    <h3>반증 조건 — 언제 접을 것인가</h3>
+    <div class="callout kill"><b>중단 기준: 롤링 12개월 SPY 대비 초과수익 −30%p</b> (2026-08-03 사전 확정)<br>
+    달력연도 2년 연속 언더퍼폼은 실측상 발생한 적이 없어(24개월 롤링 최장 연속 14주)
+    <b>절대 발동하지 않는 장식 규칙</b>이 되므로 채택하지 않았다.<br><br>
+    <b>M6b에서 실측이 기대값을 크게 벗어나면 파라미터를 고치지 않고 연구를 중단한다.</b>
+    실패했는데 파라미터를 조정하는 것이 과최적화의 정의이기 때문이다.</div>
+
+    <h3>정직한 자평</h3>
+    <p><b>연구는 성립했고, 운용은 이제 시작이다.</b> 방법론(공시일 기준·유니버스 재검증·워크포워드)이
+    자리를 잡아 가설을 실제로 죽일 수 있게 된 것이 가장 큰 소득이다.
+    반면 <b>실전 데이터는 1주차</b>이고, 이 보고서의 모든 숫자는 여전히 과거에 대한 이야기다.
+    13주 규율(M6a)을 채우는 것 외에 지금 할 수 있는 일은 없다.</p>
+
+    <div class="callout"><b>이 문서에 대하여.</b> 2026-07-26 ~ 08-11의 연구·구현 기록을 정리한 것이다.
+    수치는 <code>leaders_*.py</code>와 <code>market.db</code>에서 재현 가능하며,
+    기각된 가설도 코드에 근거와 함께 남겨두었다 — <b>같은 논쟁을 두 번 하지 않기 위해서</b>.</div>
+  </div>
+  <div class="foot"><span>주도주 탐지 연구 · 2026-08-11</span><span class="pg">14 / 14</span></div>
+</section>
+
+</div>
