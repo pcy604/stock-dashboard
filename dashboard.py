@@ -298,7 +298,8 @@ def data_stamp(path: str, prefix: str = '데이터 기준') -> str:
         if r['path'] == path:
             if r['date'] is None:
                 return f"⚠️ {prefix} 확인 불가 ({r['note']})"
-            age = f"{r['age']}일 전" if r['age'] else '오늘'
+            # 클라우드는 UTC, 데이터 날짜는 KST라 갓 갱신된 파일이 -1일로 나온다 → 0으로 눕힌다
+            age = f"{r['age']}일 전" if (r['age'] or 0) > 0 else '오늘'
             base = f"{prefix} **{r['date']}** ({age}) · 갱신 주기 {r['cycle']}"
             if r['state'] != 'ok':
                 return (f"🔴 **갱신 정지** — {base}. 허용 {r['max_age']}일을 넘겼습니다. "
@@ -3761,7 +3762,7 @@ with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", exp
 with guard('데이터 신선도'):
     _DS = _data_status()
     _n_stale = sum(1 for r in _DS if r['state'] != 'ok')
-    _oldest = max((r['age'] for r in _DS if r['age'] is not None), default=None)
+    _oldest = max((max(r['age'], 0) for r in _DS if r['age'] is not None), default=None)
     _hdr = (f"📅 데이터 신선도 — 전 항목 정상 (가장 오래된 것 {_oldest}일 전)" if not _n_stale
             else f"🔴 데이터 신선도 — **{_n_stale}개 항목이 갱신 정지** (클릭해서 확인)")
     with st.expander(_hdr, expanded=bool(_n_stale)):
@@ -3770,7 +3771,7 @@ with guard('데이터 신선도'):
                     'nodate': '⚠️ 날짜없음', 'error': '⚠️ 오류'}[r['state']],
             '데이터': r['label'],
             '마지막 갱신': r['date'] or '-',
-            '경과': f"{r['age']}일" if r['age'] is not None else '-',
+            '경과': (f"{max(r['age'], 0)}일" if r['age'] is not None else '-'),
             '갱신 주기': r['cycle'],
             '쓰이는 화면': r['used_by'],
             '만드는 것': f"{r['producer']} ({r['job']})",
