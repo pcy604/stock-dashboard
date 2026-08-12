@@ -38,3 +38,6 @@ results/leaders_v2.json
 
 # stash 백업(2026-08-11 정리) — 로컬 보관용, 원격에 올리지 않는다
 .stash_backup/
+
+# 사례 차트 PNG (leaders_cases.py가 재생성)
+results/cases/*.png
