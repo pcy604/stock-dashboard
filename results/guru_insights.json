@@ -1,6 +1,147 @@
 {
   "items": [
     {
+      "video_id": "Eqeg_m1_4aQ",
+      "title": "엔비디아 700조 AI 자금이 반도체로…삼전닉스 다시 출발?ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-12T12:30:07+00:00",
+      "url": "https://www.youtube.com/watch?v=Eqeg_m1_4aQ",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "긍정적인 CPI 지표와 AI 및 반도체 산업의 구조적 성장에 힘입어 국내 증시의 회복세와 추가 상승이 기대되며, 특정 성장 섹터에 대한 관심이 유효합니다.",
+        "summary": [
+          "SK하이닉스, 삼성전자 등 주요 반도체 및 기술주들이 최근 긍정적인 회복세를 보이며 코스피와 코스닥 시장 전반의 상승 분위기를 주도하고 있습니다.",
+          "시장 불안 심리가 공포 단계를 지나 회복기로 접어들고 있으며, 금리 동결 또는 인하 가능성이 높아지면서 성장주에 대한 투자 심리가 개선될 것으로 전망됩니다.",
+          "싱가포르 국부펀드 테마섹이 삼성전자, SK하이닉스 등 한국 주식에 첫 직접 투자를 단행하며 AI 및 반도체 산업의 장기 성장성에 대한 강한 믿음을 보여주었습니다.",
+          "로봇, 바이오, 화장품 등 특정 성장 섹터들은 시장의 주요 상승 동력이 될 수 있으며, 현금 비중이 높은 투자자들에게 매수 기회를 제공할 수 있습니다.",
+          "LG전자의 AI 및 로봇 사업 전환 노력과 미국 AI 반도체 금융 플랫폼 구조의 확립은 해당 산업의 지속적인 성장을 위한 강력한 기반을 마련하고 있습니다.",
+          "과도한 불안감에 휩쓸려 섣부른 매도보다는, 시장의 저점 확인 후에는 장기적인 관점에서 종목을 보유하거나 조정 시 분할 매수를 고려하는 것이 현명한 전략입니다."
+        ],
+        "tickers": [
+          {
+            "name": "SK Hynix",
+            "ticker": "000660",
+            "context": "150만 원 회복, 시가총액 100조 원 이상, 시장 주도주로 주목",
+            "view": "긍정",
+            "t": 60
+          },
+          {
+            "name": "Samsung Electronics",
+            "ticker": "005930",
+            "context": "5% 상승 후 넥장에서도 추가 상승하며 시장 상승에 기여",
+            "view": "긍정",
+            "t": 120
+          },
+          {
+            "name": "Hanwha Aerospace",
+            "ticker": "012450",
+            "context": "주가 상승 기록",
+            "view": "긍정",
+            "t": 139
+          },
+          {
+            "name": "LG Electronics",
+            "ticker": "066570",
+            "context": "13% 이상 상승, 로봇/AI 사업 전환 노력에 대한 시장의 기대감 반영",
+            "view": "긍정",
+            "t": 140
+          },
+          {
+            "name": "Hankook Kolmar",
+            "ticker": "161890",
+            "context": "월봉상 역사적 신고가를 돌파하며 완만한 상승 추세 지속, 추가 상승 여력 존재",
+            "view": "긍정",
+            "t": 600
+          },
+          {
+            "name": "Dalba",
+            "ticker": "",
+            "context": "한독콜마와 유사한 흐름을 보이며 윗꼬리가 길지만, 상승세가 끝났다고 보기는 어렵다.",
+            "view": "긍정",
+            "t": 1050
+          },
+          {
+            "name": "SPG",
+            "ticker": "058600",
+            "context": "장기 조정 후 상승세를 보이며 횡보하는 '상승 3법' 패턴을 형성하고 있어 추가 상승 기대",
+            "view": "긍정",
+            "t": 1635
+          },
+          {
+            "name": "로봇 (Robotics)",
+            "ticker": "",
+            "context": "현금 비중이 있다면 매수를 고려할 만한 아직 성장 여력이 있는 섹터",
+            "view": "긍정",
+            "t": 940
+          },
+          {
+            "name": "바이오 (Bio)",
+            "ticker": "",
+            "context": "현금 비중이 있다면 매수를 고려할 만한 아직 성장 여력이 있는 섹터로, 금리 인하 시 수혜 예상",
+            "view": "긍정",
+            "t": 940
+          },
+          {
+            "name": "화장품 (Cosmetics)",
+            "ticker": "",
+            "context": "현금 비중이 있다면 매수를 고려할 만한 아직 성장 여력이 있는 섹터",
+            "view": "긍정",
+            "t": 950
+          }
+        ],
+        "key_points": [
+          {
+            "point": "코스닥이 코스피에 선행하여 움직이는 경향이 있으며, 현재 코스닥의 반등은 코스피의 추가 상승 가능성을 시사한다.",
+            "t": 325
+          },
+          {
+            "point": "미국 CPI 지표의 긍정적 발표는 금리 인상에 대한 시장의 우려를 완화하고, 이는 기술주와 성장주 전반의 투자 심리 개선으로 이어질 것이다.",
+            "t": 1530
+          },
+          {
+            "point": "싱가포르 국부펀드 테마섹의 한국 주요 반도체 기업 투자와 LG그룹의 AI/로봇 사업 확장은 AI 및 반도체 산업의 장기적인 성장 동력을 강화하는 요인이다.",
+            "t": 2300
+          },
+          {
+            "point": "단기적인 시장 변동성에도 불구하고, 현재는 과거 서브프라임 사태 이후의 시장 심리와 유사하게 공포를 극복하고 회복기에 접어드는 단계로 해석된다.",
+            "t": 2100
+          },
+          {
+            "point": "글로벌 금융기관들이 AI 반도체 금융 플랫폼을 통해 데이터 센터와 AI 기업에 자금을 공급하고 있으며, 이는 엔비디아와 같은 하드웨어 기업의 성장을 촉진하는 선순환 구조를 만들고 있다.",
+            "t": 4340
+          }
+        ],
+        "actionable": [
+          "오늘 밤(녹화일 기준) 발표되는 미국 CPI 지표 및 이에 따른 미국 증시의 움직임을 주시하여 국내 시장에 미칠 영향을 분석할 것.",
+          "현금 비중을 유지하고 있는 투자자는 로봇, 바이오, 화장품 등 성장 잠재력이 높은 섹터의 종목들을 조정 시 분할 매수하는 전략을 고려할 것.",
+          "시장 회복기에 대한 긍정적인 시각을 유지하되, 과도한 낙관론에 치우치기보다 장기적인 성장 동력을 가진 기업에 대한 꾸준한 관심을 이어갈 것."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-12T23:14:35.929305+09:00"
+    },
+    {
+      "video_id": "phJkTgYnGgY",
+      "title": "아직은 추세 이탈 아닌 변동성…삼전닉스 매도 신호는 없었다ㅣ명민준, 박가영, 차영주 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-12T13:30:31+00:00",
+      "url": "https://www.youtube.com/watch?v=phJkTgYnGgY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"이 영상은 주린이(주식 초보) 투자자들에게 가치 투자와 트레이딩 전략을 명확히 구분하고, 시장의 고점과 저점을 파악하는 기술적/심리적 기준, 그리고 주식 시장에서 흔히 발생하는 오류와 대응 방법을 구체적인 사례를 들어 설명합니다.\",\n  \"summary\": [\n    \"투자하기 전에 자신의 투자 성향이 가치 투자 지향인지 트레이딩 지향인지 명확히 정의하고, 이 두 가지 전략을 혼용하지 않도록 주의해야 합니다.\",\n    \"가치 투자는 기업의 본질적 가치를 믿고 주가가 하락했을 때 매수하는 것이 유리하며, 장기적인 관점에서 기업의 가치를 꾸준히 추적하는 것이 중요합니다.\",\n    \"트레이딩은 차트의 기술적 분석과 시장의 모멘텀을 활용하며, 강한 상승 추세에 편승하고 손절매 기준을 엄격하게 지키는 것이 필수적입니다.\",\n    \"시장의 고점은 투자자들 사이에 과도한 확신과 빚투(빚을 내서 투자)가 만연할 때 형성되는 "
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-12T23:09:07.413242+09:00"
+    },
+    {
       "video_id": "_-YwmXSAcQU",
       "title": "\"조정은 끝\" 삼성전자가 50만원을 가려면 넘어야할 고개ㅣ차영주 와이즈경제연구소 소장 [집중 오늘의 주식]",
       "channel": "삼프로TV",
@@ -16,8 +157,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T21:31:02.919374+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-12T23:15:08.621815+09:00"
     },
     {
       "video_id": "e7uZxqRFIgc",
@@ -35,8 +176,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-12T21:33:44.361295+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-12T23:16:46.461860+09:00"
     },
     {
       "video_id": "pv6XY4H2ask",
@@ -111,8 +252,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-12T21:32:07.576988+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-12T23:16:13.734194+09:00"
     },
     {
       "video_id": "ZS59m-fngMg",
@@ -248,11 +389,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-12T21:34:16.645311+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-12T23:17:36.430490+09:00"
     },
     {
       "video_id": "CezNCD51nx4",
@@ -501,8 +642,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-12T21:31:35.325052+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-12T23:15:41.344555+09:00"
     },
     {
       "video_id": "PAO2QR9l7WM",
@@ -12606,122 +12747,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-05T17:06:38.018956+09:00"
-    },
-    {
-      "video_id": "Esdy2Wum9Ts",
-      "title": "한국 반도체 기업의 주가 향방은 '이것'에 달렸다. 무엇을 증명해야 할까? | 신영증권 김효진 박사 [글로벌 인터뷰]",
-      "channel": "삼프로TV",
-      "published": "2026-08-04T22:41:56+00:00",
-      "url": "https://www.youtube.com/watch?v=Esdy2Wum9Ts",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T10:06:17.204600+09:00"
-    },
-    {
-      "video_id": "6aquZ3XENxk",
-      "title": "테슬라 로보택시 '눈', 삼성·LG가 독점 공급…AI 올라탄 한국 부품사 역대급 호황 | 산업용 전기요금 하반기 4개 권역 나눠 차등 인하 | 권순우 삼프로TV 취재팀장 [뉴스3]",
-      "channel": "삼프로TV",
-      "published": "2026-08-04T23:31:43+00:00",
-      "url": "https://www.youtube.com/watch?v=6aquZ3XENxk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "한국 정부의 산업용 전기요금 차등 인하, 원전 확대, 그리고 테슬라 로보택시의 국내 부품 공급 소식 등 주요 정책 및 기업 이슈가 국내외 시장에 긍정적 영향을 미치고 있지만, 부동산 정책은 여전히 부족하다는 평가다.",
-        "summary": [
-          "글로벌 시장의 나스닥 최고치 경신과 국내 코스닥의 긍정적 분위기 속에서도 코스피는 수급 부담으로 어려움을 겪고 있으며, 중국 경제의 불확실성도 영향을 미치고 있다.",
-          "월가 주요 증권사들이 SK하이닉스에 대해 2028년까지 공급 부족 전망과 함께 높은 목표 주가를 제시하며 긍정적인 시장 기대를 형성 중이다.",
-          "테슬라의 완전 자율주행 로보택시 '사이버캡'의 카메라 모듈을 삼성전기와 LG이노텍이 독점 공급하며 한국 부품사의 기술력을 입증, 관련 산업의 성장 기대감을 높였다.",
-          "한국 정부는 하반기부터 산업용 전기요금을 4개 권역으로 나눠 차등 인하하고 AI 데이터센터 전용 요금제를 도입하여 산업 경쟁력 강화 및 AI 인프라 구축을 지원할 예정이다.",
-          "정부는 원전의 계속 운전 허가 및 신규 원전 건설 추진 등 에너지 정책 방향을 전환하고 있으며, 이는 관련 기업들의 수혜가 예상된다.",
-          "가계대출이 총량 관리 목표치를 2조 원 초과하는 등 부동산 시장 불안정이 심화되고 있으며, 현 정부의 부동산 세제 개편안은 근본적인 문제 해결에 미흡하다는 비판이 제기되고 있다."
-        ],
-        "tickers": [
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "UBS 목표 주가 204달러, 로젠블랫 목표 주가 320달러 제시. 2028년까지 공급 부족 전망 등 월가에서 긍정적 리포트 다수",
-            "view": "긍정",
-            "t": 299
-          },
-          {
-            "name": "삼성전기",
-            "ticker": "009150",
-            "context": "테슬라 로보택시 '사이버캡' 카메라 모듈 전량 공급, 완전 자율주행 시장 핵심 부품사로 부상",
-            "view": "긍정",
-            "t": 515
-          },
-          {
-            "name": "LG이노텍",
-            "ticker": "011070",
-            "context": "테슬라 로보택시 '사이버캡' 카메라 모듈 전량 공급, 완전 자율주행 시장 핵심 부품사로 부상",
-            "view": "긍정",
-            "t": 515
-          },
-          {
-            "name": "두산에너빌리티",
-            "ticker": "034020",
-            "context": "가스터빈 기술력이 미국 빅테크로부터 인정받아 추가 주문을 받으며 수주 확대 기대",
-            "view": "긍정",
-            "t": 1011
-          },
-          {
-            "name": "이수페타시스",
-            "ticker": "007660",
-            "context": "AI 반도체 관련 FCPGA 기판 기술력으로 엔비디아 등 빅테크에 납품하며 성장성 연결",
-            "view": "긍정",
-            "t": 1206
-          },
-          {
-            "name": "롯데에너지머티리얼즈",
-            "ticker": "377190",
-            "context": "빅테크에 부품 납품하며 엔비디아 성장성과 연결된 국내 부품사로 언급",
-            "view": "긍정",
-            "t": 1209
-          },
-          {
-            "name": "엔비디아",
-            "ticker": "NVDA",
-            "context": "AI 및 로보틱스 시장 성장에 따른 국내 부품사들의 수혜와 연관 지어 언급",
-            "view": "긍정",
-            "t": 1215
-          }
-        ],
-        "key_points": [
-          {
-            "point": "최근 시장은 나스닥 신고가에도 불구하고 코스피의 수급 불안정, 중국 경제 문제, 미국 헤지펀드 청산 등 다양한 요인으로 방향성을 찾지 못하고 있다.",
-            "t": 133
-          },
-          {
-            "point": "테슬라의 차세대 로보택시 '사이버캡'에 삼성전기와 LG이노텍의 카메라 모듈이 독점 공급되며, 완전 자율주행 시장에서 한국 부품사들의 기술력과 경쟁 우위가 강화되고 있다.",
-            "t": 515
-          },
-          {
-            "point": "한국 정부가 산업용 전기요금 차등 인하, AI 데이터센터 전용 요금제 도입, 원전 확대 등 에너지 및 산업 육성 정책을 추진하여 국내 기업들의 경쟁력 강화 및 미래 산업 인프라 구축을 지원한다.",
-            "t": 1426
-          },
-          {
-            "point": "8월 현재 가계대출 총량이 정부 목표치를 이미 초과했으며, 부족한 부동산 정책, 특히 세제 개편안이 서민 주거 안정 및 시장 정상화에 미흡하다는 비판이 커지고 있다.",
-            "t": 2220
-          }
-        ],
-        "actionable": [
-          "AI, 로보틱스, 자율주행 등 미래 산업의 밸류체인 내 한국 부품 및 소재 기업들의 실질적인 수주 및 성장 가능성을 면밀히 분석하고 투자 기회를 모색한다.",
-          "정부의 산업용 전기요금 인하 및 원전 확대 정책 수혜가 예상되는 철강, 석유화학, 원자력 관련 기업들의 실적 개선 여부를 지속적으로 모니터링한다.",
-          "부동산 시장의 불확실성과 가계대출 규제 강화 가능성을 고려하여 주택 구매 및 투자 시 신중한 접근이 필요하며, 정부의 추가적인 부동산 안정화 대책 발표를 주시한다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T10:05:44.637839+09:00"
     }
   ],
-  "updated": "2026-08-12T21:34:17.645546+09:00"
+  "updated": "2026-08-12T23:17:37.430740+09:00"
 }
