@@ -110,7 +110,8 @@ IS_CLOUD = str(Path(__file__).resolve()).replace('\\', '/').startswith('/mount/s
 PERF_JSON        = Path('results/perf_latest.json')
 SCREENER_JSON    = Path('results/screener_latest.json')
 CANSLIM_JSON     = Path('results/canslim_latest.json')
-TURNAROUND_JSON  = Path('results/turnaround_latest.json')
+# TURNAROUND_JSON 제거(2026-08-13): 정의만 있고 쓰는 화면이 없었다. 파일도 06-01에
+# 멈춰 있어, 남겨두면 '살아 있는 데이터'로 오인돼 감시 목록만 오염시킨다.
 PORTFOLIO_FILE   = Path('data/portfolio.json')
 PORTFOLIO_RESULT = Path('results/portfolio_latest.json')
 MDD_JSON         = Path('results/mdd.json')
@@ -276,6 +277,35 @@ def load_json(path):
         return data
     except Exception:
         return None
+
+@st.cache_data(ttl=600, show_spinner=False)
+def _data_status():
+    """산출물별 실제 데이터 날짜·주기·상태 (data_freshness 레지스트리 단일 원천)."""
+    try:
+        import data_freshness
+        return data_freshness.statuses()
+    except Exception:
+        return []
+
+
+def data_stamp(path: str, prefix: str = '데이터 기준') -> str:
+    """화면에 '이 숫자는 언제 것인가'를 붙인다. 정지 상태면 눈에 띄게 경고한다.
+
+    이걸 만든 이유: 🔥상승 상위가 18일 지난 수익률을 '1개월 상승 상위'로 보여주는데
+    화면 어디에도 기준일이 없었다. 숫자 옆에 날짜가 없으면 사용자는 최신이라고 읽는다.
+    """
+    for r in _data_status():
+        if r['path'] == path:
+            if r['date'] is None:
+                return f"⚠️ {prefix} 확인 불가 ({r['note']})"
+            age = f"{r['age']}일 전" if r['age'] else '오늘'
+            base = f"{prefix} **{r['date']}** ({age}) · 갱신 주기 {r['cycle']}"
+            if r['state'] != 'ok':
+                return (f"🔴 **갱신 정지** — {base}. 허용 {r['max_age']}일을 넘겼습니다. "
+                        f"이 화면 숫자는 그날 기준이니 최신 시세로 다시 확인하세요.")
+            return base
+    return ''
+
 
 def file_mtime(path):
     p = Path(path)
@@ -621,6 +651,7 @@ with t_gain, guard('상승 상위'):
 
         _slab = "위닝점수순" if _gsort == "위닝점수" else f"{_gper}상승순"
         st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 · {_slab} ({_cmo}·{_nmo}월 계절성 동반)")
+        st.caption(data_stamp('results/returns.json', '상승률 기준일'))
         _gdf = pd.DataFrame(_grows)
         def _cg2(v):
             try: return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#dc2626'
@@ -654,6 +685,7 @@ with t_gain, guard('상승 상위'):
 
 # ── 주도주 (섹터/전체 상대강도) ──
 with t_lead, guard('주도주'):
+    st.caption(data_stamp('results/leaders_signal.json'))
     # 주도주 검증판 — 미국 1,279종·2018~2026 백테스트 + 워크포워드로 확정한 규칙⑤
     # (구 "주도주 지문" 로직은 2026-08-05 제거 — 신고가 −15% 이내·영익 YoY≥+100% 가 검증에서 기각됨)
     # ── 검증판 (규칙⑤) — 미국 1,279종·8.6년 백테스트 + 워크포워드로 확정한 규칙 ──
@@ -734,6 +766,7 @@ with t_lead, guard('주도주'):
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
 with t_value, guard('가치 발굴'):
+    st.caption(data_stamp('results/value_kr.json'))
     st.caption("💎 공식 지표(KRX)로 '싸고(저PER·저PBR) 돈 잘 버는(ROE·성장·배당)' 종목 발굴 — 가격이 아니라 가치 기준.")
     if _GMKT == "US":
         st.info("US 가치 스크린은 EDGAR 벌크 적재 후 제공 예정 — 지금은 KR만. "
@@ -932,6 +965,7 @@ with t_track, guard('성적표'):
 # 탭3: CANSLIM (슬라이더 실시간 조정)
 # ════════════════════════════════════════════════════════════════════
 with tab3, guard('CANSLIM'):
+    st.caption(data_stamp('results/canslim_latest.json'))
     _cs_mkt = st.radio("시장", ["🇰🇷 한국", "🇺🇸 미국"], horizontal=True, key="canslim_mkt")
     _cs_kr = _cs_mkt.endswith("한국")
     _CS_JSON = CANSLIM_JSON if _cs_kr else Path('results/canslim_us_latest.json')
@@ -3720,8 +3754,29 @@ with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", exp
             st.rerun()
     st.caption("데이터 갱신은 매일 06:00 자동(GitHub Actions). 수동: weekly_run·perf_run·canslim_run·screen_precompute")
 
-# ── 페이지 최하단: 데이터 출처·업데이트 시각 ──
-_foot_upd = max([m for m in (file_mtime(p) for p in [SCREENER_JSON, CANSLIM_JSON, PERF_JSON,
-                 Path('results/returns.json'), Path('results/seasonality.json')]) if m], default="—")
-st.caption(f"📅 마지막 데이터 업데이트: {_foot_upd} (KST)  ·  자동 갱신 매일 06:00  ·  "
-           f"출처: FinanceDataReader(가격)·네이버금융(실적)·FRED(매크로)·KRX/S&P500(섹터)")
+# ── 페이지 최하단: 데이터 신선도 ─────────────────────────────────
+# 예전엔 file_mtime(파일 수정시각)을 '데이터 갱신일'로 표시했다. 클라우드에서 그건
+# 저장소를 내려받은 시각이라, 07-26에 멈춘 데이터가 '어제 갱신'으로 보였다.
+# 이제 파일 안의 실제 날짜를 읽는다 — 화면이 신선하다고 거짓말하지 않는다.
+with guard('데이터 신선도'):
+    _DS = _data_status()
+    _n_stale = sum(1 for r in _DS if r['state'] != 'ok')
+    _oldest = max((r['age'] for r in _DS if r['age'] is not None), default=None)
+    _hdr = (f"📅 데이터 신선도 — 전 항목 정상 (가장 오래된 것 {_oldest}일 전)" if not _n_stale
+            else f"🔴 데이터 신선도 — **{_n_stale}개 항목이 갱신 정지** (클릭해서 확인)")
+    with st.expander(_hdr, expanded=bool(_n_stale)):
+        st.dataframe(pd.DataFrame([{
+            '상태': {'ok': '🟢 정상', 'stale': '🔴 정지', 'missing': '⚫ 없음',
+                    'nodate': '⚠️ 날짜없음', 'error': '⚠️ 오류'}[r['state']],
+            '데이터': r['label'],
+            '마지막 갱신': r['date'] or '-',
+            '경과': f"{r['age']}일" if r['age'] is not None else '-',
+            '갱신 주기': r['cycle'],
+            '쓰이는 화면': r['used_by'],
+            '만드는 것': f"{r['producer']} ({r['job']})",
+        } for r in _DS]), use_container_width=True, hide_index=True,
+            row_height=25, height=_dfh(len(_DS)))
+        st.caption("‘마지막 갱신’은 **파일 안에 기록된 데이터 날짜**입니다(배포 시각이 아님). "
+                   "정지 항목은 매일 06:00 `pipeline_health.py`가 텔레그램으로도 알립니다.")
+st.caption("출처: DART·SEC EDGAR(공식 재무) · FinanceDataReader/KRX(가격) · "
+           "FRED(매크로) · 네이버금융·yfinance(컨센서스, 참고)")

@@ -1,0 +1,36 @@
+# 전 화면 스모크 — "탭이 백지가 되는" 사고를 배포 전에 잡는다.
+#
+# 2026-08-11: dashboard.py 한 줄의 KeyError로 6개 탭 중 5개가 백지가 된 채
+# 며칠 방치됐다. Streamlit은 스크립트를 위→아래로 실행하므로 예외 하나가
+# 그 아래 전부를 죽인다. 사람이 눈으로 볼 때까지 아무도 모른다.
+name: smoke
+
+on:
+  push:
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - '.github/workflows/smoke.yml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - run: pip install -r requirements.txt pytest
+
+      # FRED 키가 없으면 매크로가 빈 값으로 떨어지지만 렌더 자체는 되어야 한다
+      # (키 없는 환경에서도 화면이 죽지 않는지가 이 테스트의 관심사).
+      - name: 전 화면 렌더 + 데이터 감시 사각지대 검사
+        env:
+          FRED_KEY: ${{ secrets.FRED_KEY }}
+        run: pytest tests/ -q --tb=short

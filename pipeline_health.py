@@ -18,34 +18,10 @@ from datetime import datetime
 from pathlib import Path
 
 # (파일, 내부 날짜 추출 함수, 허용 나이 일수)
-def _screener_date(p):
-    return json.loads(p.read_text(encoding='utf-8')).get('date')
-
-def _paper_date(p):
-    trades = json.loads(p.read_text(encoding='utf-8')).get('trades', [])
-    return max((t.get('log_date') for t in trades), default=None)
-
-def _wp_date(p):
-    return (json.loads(p.read_text(encoding='utf-8')).get('p10') or {}).get('date')
-
-def _generic_date(p):
-    d = json.loads(p.read_text(encoding='utf-8'))
-    for k in ('date', 'updated', 'generated'):
-        v = d.get(k)
-        if v:
-            return str(v)[:10]
-    return None
-
-CHECKS = [
-    ('results/screener_latest.json',  _screener_date, 4,  '주봉 스크리너(weekly_run)'),
-    ('results/paper_trades.json',     _paper_date,    9,  '페이퍼 트레이딩 기록'),
-    ('results/weekly_portfolio.json', _wp_date,       9,  '주간 추천 포트폴리오'),
-    ('results/canslim_latest.json',   _generic_date,  4,  'CANSLIM(KR)'),
-    ('results/value_kr.json',         _generic_date,  4,  '가치 스냅샷(DART)'),
-    # 주간 산출물(토 08:00 KST 자동 실행) — 주기 7일 + 여유 2일
-    ('results/leaders_signal.json',   _generic_date,  9,  '주도주 신호(주간)'),
-    ('results/leaders_paper.json',    _paper_date,    9,  '주도주 페이퍼 원장'),
-]
+# 2026-08-13: 감시 목록을 data_freshness.SOURCES 로 일원화했다.
+# 여기에 목록을 따로 들고 있던 탓에 returns/seasonality/mdd 가 감시 밖에 있었고,
+# returns.json 이 18일 정지한 걸 아무도 몰랐다. 이제 레지스트리에 등록하면
+# 화면 표기와 정지 경보가 동시에 붙는다 — 목록이 갈라질 수 없다.
 
 # 2종 감시: 위는 '멈춤'(날짜 안 늙음), 아래는 '조용한 저하'(매일 갱신되지만
 # 내용이 나빠지는 것 — 예: 소스 차단으로 대부분 종목이 데이터수집 실패)
@@ -56,23 +32,8 @@ def _screener_fail_pct(p):
 
 
 def check():
-    today = datetime.now()
-    stale = []
-    for path, getter, max_days, label in CHECKS:
-        p = Path(path)
-        if not p.exists():
-            stale.append(f"{label}: 파일 없음 ({path})")
-            continue
-        try:
-            ds = getter(p)
-            if not ds:
-                stale.append(f"{label}: 날짜 필드 없음")
-                continue
-            age = (today - datetime.strptime(ds[:10], '%Y-%m-%d')).days
-            if age > max_days:
-                stale.append(f"{label}: {age}일 정지 (마지막 {ds[:10]}, 허용 {max_days}일)")
-        except Exception as e:
-            stale.append(f"{label}: 검사 실패 ({e})")
+    from data_freshness import stale_lines
+    stale = stale_lines()
 
     p = Path('results/screener_latest.json')
     if p.exists():

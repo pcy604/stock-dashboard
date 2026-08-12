@@ -41,7 +41,7 @@ jobs:
           restore-keys: |
             longcache-
 
-      - name: 계절성·MDD 증분 갱신
+      - name: 기간수익률·계절성·MDD 증분 갱신
         run: python screen_precompute.py
         continue-on-error: true
 
@@ -49,6 +49,26 @@ jobs:
         run: |
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
-          git add results/seasonality.json results/mdd.json 2>/dev/null || true
+          # returns.json 누락이 2026-06→07, 07→08 두 번 연속 18일 정지를 만들었다.
+          # screen_precompute 가 만드는 3개를 전부 커밋한다.
+          git add results/returns.json results/seasonality.json results/mdd.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "auto: 종목 프로파일 갱신 $(date -u +%Y-%m-%d)"
           git push
+
+      # continue-on-error 로 스텝이 죽어도 초록불이라 그대로 묻힌다.
+      # 커밋 뒤 신선도를 직접 확인해, 정지면 텔레그램 경보 + 잡을 실패로 표시한다.
+      - name: 신선도 검증 (정지면 실패 처리)
+        env:
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python pipeline_health.py
+          python - <<'PY'
+          import sys
+          from data_freshness import statuses
+          bad = [r for r in statuses()
+                 if r['job'] == 'weekly-profile' and r['state'] != 'ok']
+          for r in bad:
+              print(f"::error::{r['label']} — {r['note']} (마지막 {r['date']})")
+          sys.exit(1 if bad else 0)
+          PY
