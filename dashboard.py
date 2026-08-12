@@ -52,19 +52,35 @@ html, body, [class*="css"] { font-size: 14px !important; }
 section[data-testid="stSidebar"] * { font-size: 12px !important; }
 [data-testid="metric-container"] [data-testid="stMetricValue"] { font-size: 18px !important; font-weight: 700; }
 [data-testid="metric-container"] label { font-size: 11.5px !important; }
-h1 { font-size: 19px !important; margin-bottom: 6px !important; }
-h2 { font-size: 16px !important; margin-bottom: 5px !important; }
-h3 { font-size: 14px !important; margin-bottom: 4px !important; }
+h1 { font-size: 21px !important; margin-bottom: 8px !important; }
+h2 { font-size: 17px !important; margin-bottom: 6px !important; }
+h3 { font-size: 15px !important; margin-bottom: 5px !important; }
+/* 섹션 제목 위에 숨 쉴 자리 — 앞 블록에 붙어 있으면 어디서 끊기는지 안 보인다 */
+h2, h3 { margin-top: 1.6rem !important; }
 
-/* ── 전역 컴팩트: 요소 사이 세로 간격·여백 축소 ── */
-[data-testid="stVerticalBlock"] { gap: 0.5rem !important; }
-[data-testid="stVerticalBlockBorderWrapper"] { gap: 0.5rem !important; }
-hr { margin: 0.45rem 0 !important; }
+/* ── 읽는 폭 제한 ─────────────────────────────────────────────
+   layout="wide"는 표에는 좋지만 2000px 모니터에서 글줄이 1800px씩 흘러
+   눈이 쉴 곳이 없어진다(2026-08-13 "화면이 꽉 차서 숨쉬기 힘들다").
+   폭을 잡아 가운데로 모으면 표는 여전히 넉넉하고 문장은 읽히는 길이가 된다. */
+.block-container { max-width: 1400px !important; margin: 0 auto !important;
+  padding-top: 2.2rem !important; padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important; padding-bottom: 4rem !important; }
+
+/* ── 세로 리듬: 촘촘하되 답답하지 않게 ── */
+[data-testid="stVerticalBlock"] { gap: 0.85rem !important; }
+[data-testid="stVerticalBlockBorderWrapper"] { gap: 0.85rem !important; }
+/* 구분선은 '섹션이 바뀐다'는 신호 — 붙여두면 신호가 죽는다 */
+hr { margin: 1.7rem 0 !important; border-color: #e8e8e4 !important; }
 [data-testid="stMetric"] { padding: 0 !important; }
 div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem !important; }
 [data-testid="stCaptionContainer"] p { margin-bottom: 0.1rem !important; }
 [data-testid="stRadio"] > label { margin-bottom: 0 !important; }
 [data-testid="stExpander"] details { padding: 0 !important; }
+/* 테두리 카드 안쪽 여백 — 글이 선에 닿아 있으면 답답하다 */
+[data-testid="stVerticalBlockBorderWrapper"] > div > [data-testid="stVerticalBlock"] {
+  padding: 0.4rem 0.6rem !important; }
+/* 표는 위아래로 조금 띄운다 */
+[data-testid="stDataFrame"] { margin: 0.35rem 0 0.6rem !important; }
 
 /* ── 모바일 반응형 (≤640px) ───────────────────────────────────
    Streamlit은 좁은 화면에서 st.columns를 자동으로 쌓지 않아 카드/표가
@@ -1385,9 +1401,7 @@ def macro_triggers(d, px):
 
 with tab4, guard('매크로'):
     st.header("🌍 매크로 — 지금은 사이클의 어느 국면인가")
-    st.caption(f"🕐 {datetime.now().strftime('%Y-%m-%d %H:%M')} (FRED · FDR, 1시간 캐시) · "
-               "판정 임계값은 모두 아래에 공개돼 있습니다 — 맞히는 게 아니라 '어디쯤인지'와 "
-               "'무엇이 바뀌면 넘어가는지'를 보는 화면입니다.")
+    st.caption(f"🕐 {datetime.now().strftime('%Y-%m-%d %H:%M')} · FRED · FDR (1시간 캐시)")
 
     with st.spinner("사이클 지표 수집 중..."):
         _MI = macro_inputs()
@@ -1420,20 +1434,24 @@ with tab4, guard('매크로'):
         f"주가 <b>{_RG['px_dir']}</b>(200일선 {'위' if _PX.get('above_ma') else '아래'})</div>"
         f"</div>", unsafe_allow_html=True)
 
-    # st.success/st.error 는 '성공/실패' 알림으로 읽히므로 여기선 쓰지 않는다(오해 방지).
-    _w1, _w2 = st.columns(2)
-    for _col, _ttl, _txt, _bg, _bd, _fg in (
-            (_w1, '✅ 이 국면에서 통하는 것', _S['works'], '#f0fdf4', '#86efac', '#15803d'),
-            (_w2, '⛔ 이 국면에서 안 통하는 것', _S['fails'], '#fef2f2', '#fca5a5', '#b91c1c')):
+    # st.success/st.error 는 '성공/실패' 알림으로 읽히므로 쓰지 않는다.
+    # 색 면적도 줄인다 — 큰 색 블록이 나란히 서면 화면이 소리를 지른다(2026-08-13).
+    # 흰 바탕 + 왼쪽 4px 액센트만으로 대비를 준다.
+    _w1, _w2 = st.columns(2, gap='medium')
+    for _col, _ttl, _txt, _ac in (
+            (_w1, '이 국면에서 통하는 것', _S['works'], '#16a34a'),
+            (_w2, '이 국면에서 안 통하는 것', _S['fails'], '#dc2626')):
         _col.markdown(
-            f"<div style='background:{_bg};border:1px solid {_bd};border-radius:10px;padding:12px 16px'>"
-            f"<div style='font-size:13px;font-weight:800;color:{_fg}'>{_ttl}</div>"
-            f"<div style='font-size:13px;color:#374151;margin-top:5px'>{_txt}</div></div>",
+            f"<div style='background:#ffffff;border:1px solid #e8e8e4;border-left:4px solid {_ac};"
+            f"border-radius:10px;padding:15px 18px'>"
+            f"<div style='font-size:12px;font-weight:800;letter-spacing:.4px;color:{_ac}'>{_ttl}</div>"
+            f"<div style='font-size:13.5px;color:#374151;margin-top:8px;line-height:1.6'>{_txt}</div></div>",
             unsafe_allow_html=True)
 
     # ── ② 세 렌즈 ────────────────────────────────────────────────
+    st.divider()
     st.subheader("🔭 세 렌즈로 본 현재 위치")
-    st.caption("같은 사이클을 다른 축에서 본다. 세 개가 서로 어긋나면 그 자체가 '전환기'라는 신호다.")
+    st.caption("셋이 서로 어긋나면 그 자체가 '전환기' 신호다.")
     _L1, _L2, _L3 = st.columns(3, gap='medium')
 
     with _L1.container(border=True):
@@ -1452,7 +1470,9 @@ with tab4, guard('매크로'):
                 f"<span style='font-variant-numeric:tabular-nums;opacity:{'1' if _on else '.7'}'>"
                 f"{_RG['scores'][k]}점</span></div>",
                 unsafe_allow_html=True)
-        st.caption("점수 = (금리·실적·주가) 3축 부합도. 최고점이 현재 국면.")
+        with st.expander("판정 근거"):
+            st.caption("점수 = (금리 방향 · 실적 방향 · 주가 추세) 3축 부합도의 합. "
+                       "최고점이 현재 국면이고, 1위와 2위의 점수차가 확신도다.")
 
     with _L2.container(border=True):
         st.markdown("##### 🥚 코스톨라니 달걀")
@@ -1481,9 +1501,13 @@ with tab4, guard('매크로'):
                 _win = ("6개월은 횡보지만 12개월 기준으로는 방향이 잡혀 이렇게 봅니다. "
                         if _RG['rate_dir'] == '횡보' else "")
                 _egg_line = f"현재: **{EGG[_ei][1]}** — {_win}{EGG[_ei][2]}"
-            st.caption(f"{_egg_line}  \n"
-                       f"금리 {_MI.get('fed','-')}% = 최근 10년 분포의 {_MI.get('fed_pct','-')}% 지점 · "
-                       f"6개월 {_MI.get('fed_6m','-')}%p · 12개월 {_MI.get('fed_12m','-')}%p → 방향 **{_RG['rate_dir']}**")
+            _egg_head, _, _egg_rest = _egg_line.partition('  \n')
+            st.caption(_egg_head)
+            with st.expander("판정 근거"):
+                st.caption(f"금리 {_MI.get('fed','-')}% = 최근 10년 분포의 {_MI.get('fed_pct','-')}% 지점  \n"
+                           f"6개월 {_MI.get('fed_6m','-')}%p · 12개월 {_MI.get('fed_12m','-')}%p "
+                           f"→ 방향 **{_RG['rate_dir']}**"
+                           + (f"  \n{_egg_rest}" if _egg_rest else ""))
 
     with _L3.container(border=True):
         st.markdown("##### ⏳ 하워드 막스 시계추")
@@ -1507,13 +1531,16 @@ with tab4, guard('매크로'):
                 f"<div style='display:flex;justify-content:space-between;font-size:12px;color:#898781;"
                 f"margin-top:6px'><span>공포</span><span>중립</span><span>탐욕</span></div></div>",
                 unsafe_allow_html=True)
-            st.caption(f"HY 스프레드 {_MI.get('hy','-')}%(하위 {_MI.get('hy_pct','-')}%) · "
-                       f"VIX {_MI.get('vix','-')}(하위 {_MI.get('vix_pct','-')}%) · "
-                       f"S&P 52주 위치 {_PX.get('pos52','-')}%  \n"
-                       "막스: *\"남들이 겁 없이 사는 곳에서 조심하고, 아무도 안 사는 곳에서 사라.\"* "
-                       "→ 오른쪽일수록 기대수익이 낮다.")
+            st.caption("오른쪽일수록 남들이 낙관적 → 기대수익은 낮다.")
+            with st.expander("판정 근거"):
+                st.caption(f"HY 스프레드 {_MI.get('hy','-')}% (하위 {_MI.get('hy_pct','-')}%)  \n"
+                           f"VIX {_MI.get('vix','-')} (하위 {_MI.get('vix_pct','-')}%)  \n"
+                           f"S&P 52주 위치 {_PX.get('pos52','-')}%")
+                st.caption("막스: *\"남들이 겁 없이 사는 곳에서 조심하고, "
+                           "아무도 안 사는 곳에서 사라.\"*")
 
     # ── ③ 사이클 궤적 ────────────────────────────────────────────
+    st.divider()
     st.subheader("🌀 사이클 궤적 — 지난 2년 어디서 어디로 왔나")
     _ip_h, _ff_h = _MI.get('ip_hist'), _MI.get('fed_hist')
     if _ip_h and _ff_h and len(_ff_h) >= 30:
@@ -1597,16 +1624,19 @@ with tab4, guard('매크로'):
                 st.dataframe(pd.DataFrame([{'월': p[0][:7], '산업생산 YoY(%)': round(p[1], 2),
                                             '금리 6개월(%p)': p[2]} for p in reversed(_pts)]),
                              use_container_width=True, hide_index=True, row_height=25, height=260)
-            st.caption("사이클은 보통 **시계 반대 방향**으로 돈다: 회복 초입 → 실적장세 → 역금융 → 역실적 → 다시 회복. "
-                       "지금 어디 있느냐보다 **어느 쪽으로 움직이는 중이냐**가 중요하다. "
-                       "좌하단은 금융장세와 역실적장세가 겹치므로 주가 추세(200일선)로 가른다.")
+            st.caption("지금 어디 있느냐보다 **어느 쪽으로 움직이는 중이냐**가 중요하다.")
+            with st.expander("이 그림 읽는 법"):
+                st.caption("사이클은 보통 **시계 반대 방향**으로 돈다: "
+                           "회복 초입 → 실적장세 → 역금융 → 역실적 → 다시 회복.")
+                st.caption("좌하단은 금융장세와 역실적장세가 겹치므로 "
+                           "주가 추세(200일선)로 가른다.")
     else:
         st.caption("궤적 표시에 필요한 시계열(FEDFUNDS·INDPRO)을 불러오지 못했습니다.")
 
     # ── ④ 전이 감시판 ────────────────────────────────────────────
+    st.divider()
     st.subheader("🚨 전이 감시판 — 무엇이 바뀌면 국면이 넘어가나")
-    st.caption("각 줄은 '이 값이 임계를 넘으면 국면이 이쪽으로 움직인다'는 관측 조건이다. "
-               "예측이 아니라 **체크리스트**로 쓰라고 만든 표다.")
+    st.caption("예측이 아니라 **체크리스트**다 — 임계를 넘으면 국면이 그쪽으로 움직인다.")
     _TR = macro_triggers(_MI, _PX)
     _tw1, _tw2 = st.columns(2)
     for _col, _side, _hdr in ((_tw1, '악화', '⬇️ 악화 쪽 방아쇠'), (_tw2, '개선', '⬆️ 개선 쪽 방아쇠')):
