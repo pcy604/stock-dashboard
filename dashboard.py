@@ -3610,32 +3610,6 @@ with _pf_main, guard('포트폴리오'):
             fig_pf.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
             st.plotly_chart(fig_pf, use_container_width=True)
 
-        # 🧮 포지션 사이징 계산기 — 2026-08-12 ⚡타이밍 발굴에서 이관('얼마나'는 집행 단계)
-        st.divider()
-        st.markdown("##### 🧮 포지션 사이징 계산기 — 얼마나 살까·어디서 자를까")
-        _zc1, _zc2, _zc3, _zc4, _zc5 = st.columns(5)
-        _z_cap = _zc1.number_input("투자 자본(원)", min_value=0, value=10_000_000, step=1_000_000, key="sz_cap")
-        _z_risk = _zc2.slider("1회 리스크 %", 0.5, 5.0, 1.0, 0.5, key="sz_risk",
-                              help="이 매매에서 잃어도 되는 최대 금액 = 자본 × 리스크%")
-        _z_entry = _zc3.number_input("진입가", min_value=0.0, value=10000.0, step=100.0, key="sz_entry")
-        _z_stop = _zc4.slider("손절 %", 3, 15, 8, key="sz_stop", help="오닐 룰: -7~8%")
-        _z_rr = _zc5.slider("손익비 R:R", 1.0, 5.0, 2.0, 0.5, key="sz_rr")
-        if _z_entry > 0 and _z_cap > 0:
-            _z_stopp = _z_entry * (1 - _z_stop / 100)
-            _z_riskamt = _z_cap * _z_risk / 100
-            _z_qty = int(_z_riskamt / (_z_entry - _z_stopp)) if _z_entry > _z_stopp else 0
-            _z_invest = _z_qty * _z_entry
-            _z_target = _z_entry * (1 + _z_stop / 100 * _z_rr)
-            _zm1, _zm2, _zm3, _zm4 = st.columns(4)
-            _zm1.metric("매수 수량", f"{_z_qty:,}주", f"투입 {_z_invest:,.0f}원")
-            _zm2.metric("손절가", f"{_z_stopp:,.0f}", f"-{_z_stop}%")
-            _zm3.metric("목표가", f"{_z_target:,.0f}", f"+{_z_stop * _z_rr:.0f}%")
-            _zm4.metric("최대 손실", f"{_z_riskamt:,.0f}원", f"자본의 {_z_risk}%")
-            if _z_invest > _z_cap:
-                st.warning(f"⚠️ 필요 투입({_z_invest:,.0f}원)이 자본을 초과 — 손절폭이 좁아 수량이 과대. "
-                           "리스크%를 낮추거나 손절폭을 넓히세요.")
-        st.caption("'얼마나'는 감이 아니라 산수: 수량 = (자본×리스크%) ÷ (진입가−손절가). "
-                   "손익비 2:1 = 손절 -8%면 목표 +16%. 목표 도달 전 추세 꺾이면 룰대로 청산.")
 
         st.divider()
         # 텔레그램 토큰은 gitignore라 클라우드에는 없다 → 버튼을 눌러도 실패만 한다.
@@ -3655,6 +3629,34 @@ with _pf_main, guard('포트폴리오'):
             st.caption("🔒 텔레그램 토큰이 없어 비활성화됨 — 로컬에서 `setup_telegram.py` 실행 후 사용하거나, "
                        "클라우드는 Secrets에 `TELEGRAM_TOKEN`·`TELEGRAM_CHAT` 등록. "
                        "(손절 경고 자동 발송은 매일 06:00 GitHub Actions가 따로 처리합니다)")
+
+    # 🧮 포지션 사이징 계산기 — 2026-08-12 ⚡타이밍 발굴에서 이관('얼마나'는 집행 단계)
+    st.divider()
+    st.markdown("##### 🧮 포지션 사이징 계산기 — 얼마나 살까·어디서 자를까")
+    _zc1, _zc2, _zc3, _zc4, _zc5 = st.columns(5)
+    _z_cap = _zc1.number_input("투자 자본(원)", min_value=0, value=10_000_000, step=1_000_000, key="sz_cap")
+    _z_risk = _zc2.slider("1회 리스크 %", 0.5, 5.0, 1.0, 0.5, key="sz_risk",
+                          help="이 매매에서 잃어도 되는 최대 금액 = 자본 × 리스크%")
+    _z_entry = _zc3.number_input("진입가", min_value=0.0, value=10000.0, step=100.0, key="sz_entry")
+    _z_stop = _zc4.slider("손절 %", 3, 15, 8, key="sz_stop", help="오닐 룰: -7~8%")
+    _z_rr = _zc5.slider("손익비 R:R", 1.0, 5.0, 2.0, 0.5, key="sz_rr")
+    if _z_entry > 0 and _z_cap > 0:
+        _z_stopp = _z_entry * (1 - _z_stop / 100)
+        _z_riskamt = _z_cap * _z_risk / 100
+        _z_qty = int(_z_riskamt / (_z_entry - _z_stopp)) if _z_entry > _z_stopp else 0
+        _z_invest = _z_qty * _z_entry
+        _z_target = _z_entry * (1 + _z_stop / 100 * _z_rr)
+        _zm1, _zm2, _zm3, _zm4 = st.columns(4)
+        _zm1.metric("매수 수량", f"{_z_qty:,}주", f"투입 {_z_invest:,.0f}원")
+        _zm2.metric("손절가", f"{_z_stopp:,.0f}", f"-{_z_stop}%")
+        _zm3.metric("목표가", f"{_z_target:,.0f}", f"+{_z_stop * _z_rr:.0f}%")
+        _zm4.metric("최대 손실", f"{_z_riskamt:,.0f}원", f"자본의 {_z_risk}%")
+        if _z_invest > _z_cap:
+            st.warning(f"⚠️ 필요 투입({_z_invest:,.0f}원)이 자본을 초과 — 손절폭이 좁아 수량이 과대. "
+                       "리스크%를 낮추거나 손절폭을 넓히세요.")
+    st.caption("'얼마나'는 감이 아니라 산수: 수량 = (자본×리스크%) ÷ (진입가−손절가). "
+               "손익비 2:1 = 손절 -8%면 목표 +16%. 목표 도달 전 추세 꺾이면 룰대로 청산.")
+
 
 
 
