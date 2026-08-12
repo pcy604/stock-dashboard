@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "R80LPDWRkps",
+      "title": "코스닥부터 화장품·조선·배터리까지 하반기 투자전략은? | 박승영 한화투자증권 PLUS자산전략팀장 [글로벌 인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-08-12T22:56:04+00:00",
+      "url": "https://www.youtube.com/watch?v=R80LPDWRkps",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-13T08:21:57.245640+09:00"
+    },
+    {
       "video_id": "jJXKmoD9gi8",
       "title": "삼성전자보다 여기부터 보세요 #삼성전자 #반도체 #메모리 #SK하이닉스 #소부장 #소재 #부품 #장비 #호돌이 #우황제",
       "channel": "와이스트릿",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T07:24:29.849710+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T08:23:01.899788+09:00"
     },
     {
       "video_id": "q2i6fylE_Ek",
@@ -35,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T07:23:57.527826+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T08:22:29.551258+09:00"
     },
     {
       "video_id": "op0pUJrHKh8",
@@ -51,12 +70,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "죄송합니다. 저는 텍스트 기반 AI 모델이므로 영상의 음성을 직접 분석하여 내용을 파악하고 타임스탬프를 추정할 수 없습니다. 따라서 요청하신 JSON 형식의 요약을 생성해 드릴 수 없습니다. 영상을 시청하거나 스크립트를 제공해 주시면 분석을 시도할 수 있습니다."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T07:23:07.711362+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T08:21:24.567917+09:00"
     },
     {
       "video_id": "nO5npWPNTYI",
@@ -12450,59 +12468,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-05T17:13:01.476553+09:00"
-    },
-    {
-      "video_id": "a93HUnqW9fE",
-      "title": "두산에너빌리티 : 동트기 전이 가장 어둡다 - 김도엽 연구원",
-      "channel": "유안타증권",
-      "published": "2026-08-05T04:53:04+00:00",
-      "url": "https://www.youtube.com/watch?v=a93HUnqW9fE",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "두산에너빌리티는 2분기 호실적을 기록했으며, 하반기에는 원전 및 가스터빈 사업 관련 대규모 프로젝트가 가시화될 것으로 기대되어 주가 상승 여력이 충분하다.",
-        "summary": [
-          "2024년 2분기 연결 매출액은 4.7조 원, 영업이익은 3,143억 원으로 컨센서스를 20% 상회했다.",
-          "수익 개선은 대형 가스 프로젝트와 원자력 기자재 공정 초과 및 두산바켓의 관세 효과에 기인했다.",
-          "상반기 가스터빈 12기, 스팀터빈 6기, 장기서비스 5건, 두크 가스복합발전소 건설공사를 수주하며 연간 목표의 54%를 달성했고, 특히 가스 부문은 목표의 97%를 달성하여 가이던스 초과 달성 가능성이 높다.",
-          "하반기에는 체코 두코바니 원전 시공 계약, SMR 기자재 계약, 미국 에너지부의 AP1000 프로젝트 금융 지원 등으로 원전 및 SMR 발주 가시성이 높아지고, 연말 12차 전력수급기본계획 발표로 추가 전력 수요가 반영될 가능성이 있어 업사이드가 충분하다."
-        ],
-        "tickers": [
-          {
-            "name": "두산에너빌리티",
-            "ticker": "034020",
-            "context": "2분기 호실적 발표 및 하반기 전망 상향",
-            "view": "긍정",
-            "t": 12
-          }
-        ],
-        "key_points": [
-          {
-            "point": "두산에너빌리티는 2분기 연결 영업이익이 컨센서스를 20% 상회하며, 대형 가스 프로젝트와 원자력 기자재 공정 초과가 실적 개선을 견인했다.",
-            "t": 20
-          },
-          {
-            "point": "상반기 견조한 수주 실적을 바탕으로 연간 목표 달성률 54%를 기록했으며, 가스 수주 부문은 연간 목표의 97%에 달해 가이던스 초과 달성 가능성이 높다.",
-            "t": 58
-          },
-          {
-            "point": "하반기에는 체코 두코바니 원전 시공 계약, SMR 기자재 공급 계약(X-energy), 미국 에너지부의 AP1000 프로젝트 금융 지원(175억 달러) 등 대형 원전 및 SMR 관련 긍정적인 뉴스 플로우가 기대된다.",
-            "t": 259
-          },
-          {
-            "point": "8-9월 발표 예정인 데미투자 1호(텍사스 LNG, SMR, 복합화력)와 연말 12차 전력수급기본계획(30GW 이상 추가 전력 수요 예상)이 잠재적인 업사이드로 작용할 수 있다.",
-            "t": 420
-          }
-        ],
-        "actionable": [
-          "하반기 발표 예정인 체코 두코바니 원전, SMR 기자재 계약, 미국 AP1000 프로젝트 관련 공시 및 진행 상황을 면밀히 모니터링한다.",
-          "8~9월 발표될 데미투자 1호 선정 결과와 연말 12차 전력수급기본계획에 포함될 발전원 믹스 및 용량에 주목한다.",
-          "두산에너빌리티의 원전 및 가스터빈 사업 포트폴리오의 시너지 효과를 고려하여 장기적인 투자 관점에서 접근한다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T17:12:34.986822+09:00"
     }
   ],
-  "updated": "2026-08-13T07:24:30.849980+09:00"
+  "updated": "2026-08-13T08:23:02.900040+09:00"
 }
