@@ -51,8 +51,14 @@ def get(url, hdr, tries=5):
     return None
 
 
-def universe(n, lo=2e9, hi=None):
-    """시총 밴드로 유니버스 선정. 중형주 밴드 = lo 2e9 ~ hi 50e9"""
+def universe(n, lo=5e8, hi=None):
+    """수집 대상 선정. 2026-08-12: lo 2e9 -> 5e8.
+
+    ⚠️ 여기서 쓰는 marketcap은 us_marketcap.csv 스냅샷(현재 시점) 값이다.
+    따라서 이 함수는 '무엇을 수집할지'만 정하고, '무엇을 매매할지'는
+    factor_weekly의 주차별 marcap으로 걸어야 한다(point-in-time).
+    수집 하한을 낮게 잡을수록 그 시점엔 컸다가 지금 작아진 종목이 덜 빠진다.
+    """
     d = pd.read_csv(os.path.join(DATA, "us_marketcap.csv"))
     d = d[(d.country == "United States") & (d.marketcap >= lo)]
     if hi:
@@ -204,7 +210,7 @@ def fetch_8k(sym, cik):
         return False
 
 
-def cmd_fetch(n, lo=2e9, hi=None):
+def cmd_fetch(n, lo=5e8, hi=None):   # 2026-08-12: 2e9 -> 5e8 (수집 하한만. 매매 필터는 point-in-time)
     u = universe(n, lo, hi)
     cm = cikmap()
     print(f"유니버스 {len(u)}종 (시총 {lo/1e9:.0f}B~{(hi/1e9 if hi else 999):.0f}B)", flush=True)
@@ -249,6 +255,15 @@ def build(start="2018-01-01", incremental=False):
         else:
             print("증분 요청됐으나 기존 데이터 없음 → 전체 적재")
     else:
+        # 2026-08-12 추가. 전체 재적재는 기존 데이터를 지우고 6시간 넘게 돈다.
+        # 중간에 끊기면 되돌릴 방법이 없어 한 번 DB를 통째로 날린 적이 있다.
+        n_old = con.execute("SELECT COUNT(*) FROM factor_weekly WHERE factor_ver=?",
+                            (VER,)).fetchone()[0]
+        if n_old:
+            bak = DB + f".bak-{pd.Timestamp.now():%Y%m%d-%H%M}"
+            print(f"기존 {n_old:,}행 → 백업 {os.path.basename(bak)}", flush=True)
+            con.commit()
+            import shutil; shutil.copy2(DB, bak)
         con.execute("DELETE FROM factor_weekly WHERE factor_ver=?", (VER,))
     cols = None
     total = 0
