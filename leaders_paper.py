@@ -21,7 +21,12 @@ import pandas as pd
 BASE = os.path.dirname(os.path.abspath(__file__))
 LEDGER = os.path.join(BASE, "results", "leaders_paper.json")
 TRAIL = 0.20            # 고점 대비 −20% 트레일링
-MAXPOS = 8              # 규칙별 동시 보유 상한
+MAXPOS = 8              # 규칙별 기본 동시 보유 상한
+# 2026-08-12: 종목 수 8 vs 10은 백테스트로 우열이 안 갈렸다.
+#   8종목  CAGR 33.2 · MDD −37.7 · 회복 0.88 · WF 4/6
+#   10종목 CAGR 27.0 · MDD −30.1 · 회복 0.90 · WF 4/6
+# 그래서 실측으로 판정하기 위해 10종목판을 병렬로 굴린다.
+SLOTS = {"R5": 8, "R6": 8, "R6T": 10}
 COST = 0.25 / 100       # 왕복 비용 근사
 
 # 규칙별 진입 조건 — base(유동성·시총 통과분)를 받아 마스크를 돌려준다
@@ -30,6 +35,8 @@ RULES = {
            lambda b: (b.rs_13w > 1.5) & (b.opm > 0) & ((b.op_turn == 1) | (b.b_any == 1))),
     "R5": ("⑤ RS13>1.5 & (흑자전환 OR 이익폭증) & PSR<3",
            lambda b: (b.rs_13w > 1.5) & (b.psr < 3) & ((b.op_turn == 1) | (b.b_any == 1))),
+    "R6T": ("⑥ 동일 조건 · 10종목 (종목 수 검증용)",
+            lambda b: (b.rs_13w > 1.5) & (b.opm > 0) & ((b.op_turn == 1) | (b.b_any == 1))),
 }
 
 # 백테스트 기대값 (2018-06~2026-08 · trail-20 · 8종목 12.5%)
@@ -38,6 +45,8 @@ REF_BY_RULE = {
                cagr=32.8, mdd=-37.7, recov=0.87),
     "R5": dict(avg_ret=23.1, med_ret=-6.9, winrate=38.3, hold_wk=21.3,
                payoff=5.5, cagr=27.7, mdd=-23.9, recov=1.16),
+    "R6T": dict(med_ret=None, winrate=39.8, hold_wk=None,
+                cagr=27.0, mdd=-30.1, recov=0.90),
 }
 REF = REF_BY_RULE["R5"]     # 기존 원장 호환
 
@@ -108,7 +117,7 @@ def cmd_log():
         sel = base[cond(base)].sort_values("rs_13w", ascending=False)
         held = {t["sym"] for t in led["trades"]
                 if t["status"] == "open" and t.get("rule", "R5") == rk}
-        room = MAXPOS - len(held)
+        room = SLOTS.get(rk, MAXPOS) - len(held)
         print(f"[{rk}] {rlabel}")
         print(f"     기준 주차 {wk.date()} · 조건 충족 {len(sel)}종 · 보유 {len(held)}종 · 여유 {room}")
         if room <= 0:
