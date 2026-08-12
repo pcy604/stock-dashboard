@@ -39,9 +39,16 @@ def num(d: dict, key: str, fmt: str = '{}', dash: str = '-'):
 
 st.markdown("""
 <style>
-html, body, [class*="css"] { font-size: 13px !important; }
-.stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 12px !important; }
-.stTabs [data-baseweb="tab"] { font-size: 13px !important; font-weight: 600; padding: 6px 14px; }
+/* 본문 14px — 13px 컴팩트는 표는 좋았지만 설명 글이 안 읽혔다(2026-08-12).
+   표·탭은 촘촘하게 유지하고 '읽는 텍스트'만 키운다. */
+html, body, [class*="css"] { font-size: 14px !important; }
+.stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 12.5px !important; }
+.stTabs [data-baseweb="tab"] { font-size: 14px !important; font-weight: 600; padding: 7px 15px; }
+/* 캡션이 화면의 절반이다 — 회색을 한 단계 진하게(#52514e) + 행간을 벌려 읽히게 */
+[data-testid="stCaptionContainer"] p { font-size: 12.5px !important; line-height: 1.65 !important;
+  color: #52514e !important; }
+[data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li {
+  line-height: 1.65 !important; }
 section[data-testid="stSidebar"] * { font-size: 12px !important; }
 [data-testid="metric-container"] [data-testid="stMetricValue"] { font-size: 18px !important; font-weight: 700; }
 [data-testid="metric-container"] label { font-size: 11.5px !important; }
@@ -443,10 +450,13 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     _macro_strip = st.container()          # 매크로 요약이 들어갈 자리
     # 서브탭 순서 = 신뢰도 순서. 검증된 규칙(주도주·CANSLIM)을 앞에, 참고용 탐색을 뒤에.
     # 성적표는 2026-08-11 포트폴리오 탭으로 이관했다(실적 공시는 한 곳에서).
-    st.caption("🚀주도주·🏆CANSLIM = 백테스트로 검증된 규칙 · 🔥상승상위·💎가치·⚡타이밍 = 후보 탐색용 — "
-               "시장 필터는 위 하나로 전 서브탭 공통 · 📒성적표는 💼포트폴리오 탭으로 옮겼습니다")
-    t_lead, tab3, t_gain, t_value, t_prof = st.tabs([
-        "🚀 주도주", "🏆 CANSLIM", "🔥 상승 상위", "💎 가치 발굴", "⚡ 타이밍 발굴"])
+    # 2026-08-12 통폐합: ⚡타이밍 발굴 서브탭 제거.
+    #   · 계절성·고점대비 낙폭 → 🔥상승 상위의 필터로 흡수(같은 데이터를 두 화면에서 보던 중복)
+    #   · 🧮 사이징 계산기 → 💼포트폴리오로 이동(발굴이 아니라 집행 단계의 도구다)
+    st.caption("🚀주도주·🏆CANSLIM = 백테스트로 검증된 규칙 · 🔥상승상위·💎가치 = 후보 탐색용 — "
+               "시장 필터는 위 하나로 전 서브탭 공통 · 📒성적표와 🧮사이징 계산기는 💼포트폴리오 탭에 있습니다")
+    t_lead, tab3, t_gain, t_value = st.tabs([
+        "🚀 주도주", "🏆 CANSLIM", "🔥 상승 상위", "💎 가치 발굴 (KR)"])
 
 # 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
 try:
@@ -479,9 +489,9 @@ with _macro_strip, guard('매크로 요약'):
 # 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
 # ════════════════════════════════════════════════════════════════════
 
-# ── 🔥 상승 상위 (기간 상승률 + 신호 + CANSLIM + 실적증감 + 계절성) — 주봉 스크리너 통합 ──
+# ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
-    st.caption("기간별 상승 상위 + 주봉 신호 · CANSLIM · 매출/영업익 증감 · 당월 포함 향후 2개월 계절성. (주봉 스크리너 통합)")
+    st.caption("기간별 상승 상위 + 주봉 신호 · 매출/영업익 증감 · 향후 2개월 계절성. CANSLIM 점수는 🏆 서브탭에서 슬라이더로 직접 조정해 보세요.")
     _retj = load_json(Path('results/returns.json'))
     _perf = load_json(PERF_JSON) or {}
     if not _retj or not _retj.get('stocks'):
@@ -495,6 +505,13 @@ with t_gain, guard('상승 상위'):
         _gsort = _gc2.selectbox("정렬", ["상승률", "위닝점수"], key="gain_sort")
         _gsig = _gc3.checkbox("신호 있는 종목만", value=False, key="gain_sigonly")
         _gn = _gc4.slider("표시 종목수", 10, 60, 30, key="gain_n")
+        # ⚡타이밍 발굴에서 흡수한 두 필터 — 같은 데이터를 별도 화면으로 두던 중복 제거
+        with st.expander("⚡ 타이밍 필터 — 계절성 승률 · 고점대비 낙폭 (구 '타이밍 발굴')"):
+            _tf1, _tf2 = st.columns(2)
+            _gwr = _tf1.slider("당월 계절성 최소 승률 %  (0 = 끄기)", 0, 90, 0, 5, key="gain_seaswr",
+                               help="이번 달에 과거 몇 %의 확률로 올랐는지. 표본 3년 미만은 자동 제외.")
+            _gdd = _tf2.slider("고점대비 낙폭 범위 %", -90, 0, (-90, 0), key="gain_ddrange",
+                               help="바닥 탐색용. 예: -60~-25 로 좁히면 크게 조정받은 종목만 남는다.")
         _src, _retkey = _PERIODS[_gper]
 
         # 위닝 셋업 스코어 흡수 (점수/등급) — JSON 기반이라 가벼움
@@ -533,12 +550,15 @@ with t_gain, guard('상승 상위'):
         from datetime import datetime as _gdt
         _cmo = _gdt.now().month; _nmo = _cmo % 12 + 1
         _seasj = load_json(Path('results/seasonality.json')) or {}
-        _seasmap = {}
+        _seasmap, _seaswr = {}, {}
         for s in _seasj.get('stocks', []):
             m = s.get('months', {})
             vals = [m[str(x)]['ret'] for x in (_cmo, _nmo) if m.get(str(x))]
             if vals:
                 _seasmap[s['sym']] = round(sum(vals) / len(vals), 1)
+            _cur = m.get(str(_cmo))
+            if _cur and _cur.get('n', 0) >= 3:          # 표본 3년 미만은 우연이라 승률로 안 쓴다
+                _seaswr[s['sym']] = _cur['wr']
 
         _retc = f'{_gper}상승'
         _grows = []
@@ -551,6 +571,12 @@ with t_gain, guard('상승 상위'):
                 continue
             if _gsig and pm.get('nsig', 0) == 0:
                 continue
+            if _gwr > 0 and _seaswr.get(s['sym'], -1) < _gwr:
+                continue
+            _dd_v = (_MDDM.get(s['sym']) or {}).get('cur_dd')
+            if (_gdd[0], _gdd[1]) != (-90, 0):
+                if _dd_v is None or not (_gdd[0] <= _dd_v <= _gdd[1]):
+                    continue
             cm = _canmap.get(s['sym'], {})
             wm = _winmap.get(s['sym'], {})
             _ws_v = wm.get('score')
@@ -560,7 +586,8 @@ with t_gain, guard('상승 상위'):
                 '등급': wm.get('grade', '-'),
                 '위닝점수': _ws_v if _ws_v is not None else None,   # 정렬용 원값
                 '신호': ', '.join(pm.get('sigs', [])[:3]) or '-',
-                'CANSLIM': f"{cm['score']}/7" if cm.get('score') is not None else '-',
+                # CANSLIM 점수 열은 2026-08-12 제거 — 🏆CANSLIM 서브탭과 같은 판정을 두 곳에서
+                # 다르게 보여주던 중복. 실적 증감(매출·영업익)만 남긴다.
                 '매출%': f"{cm['rev']:+.0f}" if isinstance(cm.get('rev'), (int, float)) else '-',
                 '영업익%': f"{cm['op']:+.0f}" if isinstance(cm.get('op'), (int, float)) else '-',
                 _retc: ret,
@@ -714,6 +741,8 @@ with t_value, guard('가치 발굴'):
                                 help="'흑자전환'은 항상 통과")
             _vvec = _vc5.selectbox("궤적(벡터)", ["전체", "개선만(함정 제외)", "개선 가속만"], key="val_vec",
                                    help="위치가 싸도 펀더멘털이 악화 중이면 밸류 함정 — 벡터로 거른다")
+            st.radio("정렬", ["저PER순", "위닝점수순"], horizontal=True, key="val_sort",
+                     help="위닝점수 = 백테스트 샤프 가중 셋업 점수. '싼 순'만 보면 저PER 함정이 늘 위로 온다.")
             def _fmt_growth(v):
                 # 숫자·'흑자전환' 문자열 혼재 컬럼 → 균일 문자열 (Arrow 직렬화 오류 방지)
                 if isinstance(v, str): return v
@@ -749,7 +778,12 @@ with t_value, guard('가치 발굴'):
                                           .get((_REVM.get(s['sym']) or {}).get('dir'), '-')),
                                '고점대비%': _mdd_col(s['sym'], _MDDM),
                                '기준': s.get('period')})
-            _vrows.sort(key=lambda r: r['PER'])
+            # 정렬 축을 '싼 순'에만 묶어두면 저PER 함정이 늘 맨 위로 온다.
+            # 위닝점수(셋업의 질)는 이미 전 표에 계산돼 있으니 정렬 축으로도 쓴다.
+            if st.session_state.get('val_sort', '저PER순') == '위닝점수순':
+                _vrows.sort(key=lambda r: -(( _ATTM.get(r['코드']) or {}).get('score') or -1))
+            else:
+                _vrows.sort(key=lambda r: r['PER'])
             _ntrap = sum(1 for s in _vj['stocks'] if (s.get('traj') or {}).get('verdict') == 'deteriorating')
             st.subheader(f"💎 저평가·우량 — {len(_vrows)}개 (PER≤{_vper} · PBR≤{_vpbr} · ROE≥{_vroe}% · 영업익≥{_vgrw}%)")
             if _vrows:
@@ -776,114 +810,6 @@ with t_value, guard('가치 발굴'):
             else:
                 st.info("조건 통과 종목 없음 — 기준을 완화해보세요.")
 
-
-# ── ⚡ 타이밍 발굴 — 기술적 분석 기준 (언제 살까) ──
-with t_prof, guard('타이밍 발굴'):
-    st.caption("⚡ 언제 오르나(계절성) · 얼마나 빠지나(MDD 낙폭) — 기술·통계 기준 타이밍. 하단에 포지션 사이징 계산기.")
-    _pmode = st.radio("분석", ["📅 계절성 (월별 강세)", "🔄 MDD 낙폭 (바닥 탐색)"],
-                      horizontal=True, key="prof_mode")
-
-    if _pmode.startswith("📅"):
-        _seas = load_json(Path('results/seasonality.json'))
-        if not _seas or not _seas.get('stocks'):
-            st.warning("계절성 데이터 없음 → `python screen_precompute.py` 실행 후 새로고침")
-        else:
-            st.caption(f"표본 기간: {_seas.get('history', '5년')}  ·  더 깊게: "
-                       "`python screen_precompute.py --start 2008-01-01` (수십 년 표본)")
-            from datetime import datetime as _dtt
-            _smkt = _GMKT
-            _c1, _c3 = st.columns(2)
-            _mo = _c1.selectbox("월 선택", list(range(1, 13)),
-                                index=_dtt.now().month - 1, format_func=lambda x: f"{x}월", key="seas_mo")
-            _minwr = _c3.slider("최소 승률 %", 50, 90, 65, key="seas_wr")
-            _rows = []
-            for s in _seas['stocks']:
-                if _smkt != "전체" and s['market'] != _smkt:
-                    continue
-                md = s['months'].get(str(_mo)) or s['months'].get(_mo)
-                if not md or md['n'] < 3 or md['wr'] < _minwr:
-                    continue
-                _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
-                              '시총': fmt_cap(s.get('marcap'), s['market']),
-                              f'{_mo}월 평균%': md['ret'], '승률%': md['wr'], '표본': md['n'],
-                              '고점대비%': _mdd_col(s['sym'], _MDDM),
-                              '매력도': _attract_col(s['sym'], _ATTM)})
-            _rows.sort(key=lambda r: -r[f'{_mo}월 평균%'])
-            if not _rows:
-                st.info("조건에 맞는 종목이 없습니다. 승률 기준을 낮춰보세요.")
-            else:
-                st.subheader(f"📅 {_mo}월에 강한 종목 — {len(_rows)}개 (승률 {_minwr}%+)")
-                _sdf = pd.DataFrame(_rows[:40])
-                def _cs(v):
-                    try: return 'color:#16a34a;font-weight:bold' if float(v) >= 0 else 'color:#dc2626'
-                    except: return ''
-                st.dataframe(_sdf.style.map(_cs, subset=[f'{_mo}월 평균%'])
-                             .format({f'{_mo}월 평균%': '{:+.1f}%', '승률%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_sdf)))
-                st.caption("⚠️ 계절성은 과거 통계적 경향일 뿐 — 표본 적으면 우연. 보조 지표로만.")
-
-    else:
-        _mdd = load_json(Path('results/mdd.json'))
-        if not _mdd or not _mdd.get('stocks'):
-            st.warning("MDD 데이터 없음 → `python screen_precompute.py` 실행 후 새로고침")
-        else:
-            _mmkt = _GMKT
-            _ddrange = st.slider("현재 고점대비 낙폭 범위 %", -90, 0, (-60, -25), key="mdd_range")
-            _rows = []
-            for s in _mdd['stocks']:
-                if _mmkt != "전체" and s['market'] != _mmkt:
-                    continue
-                cd = s['cur_dd']
-                if cd is None or not (_ddrange[0] <= cd <= _ddrange[1]):
-                    continue
-                _rows.append({'시장': s['market'], '종목': s['name'], '코드': s['sym'],
-                              '시총': fmt_cap(s.get('marcap'), s['market']),
-                              '현재가': s['price'], '현재낙폭%': cd,
-                              '1년MDD%': s['mdd_1y'], '역대MDD%': s['mdd_all']})
-            _rows.sort(key=lambda r: r['현재낙폭%'])
-            if not _rows:
-                st.info("해당 낙폭 범위 종목이 없습니다.")
-            else:
-                st.subheader(f"🔄 고점대비 {_ddrange[0]}~{_ddrange[1]}% 빠진 종목 — {len(_rows)}개")
-                _mdf = pd.DataFrame(_rows[:50])
-                def _cd(v):
-                    try:
-                        f = float(v)
-                        if f <= -50: return 'color:#dc2626;font-weight:bold'
-                        if f <= -30: return 'color:#ea580c'
-                    except: pass
-                    return 'color:#888'
-                st.dataframe(_mdf.style.map(_cd, subset=['현재낙폭%', '1년MDD%', '역대MDD%'])
-                             .format({'현재낙폭%': '{:.0f}%', '1년MDD%': '{:.0f}%', '역대MDD%': '{:.0f}%'}),
-                             use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_mdf)))
-                st.caption("⚠️ 바닥은 칼날 — 많이 빠졌다고 사는 게 아니라 실적 개선·턴어라운드 확인 후 진입.")
-
-    # 🧮 포지션 사이징 계산기 — ③ '어떻게' 단계 (자동추천 탭 흡수)
-    st.divider()
-    st.markdown("##### 🧮 포지션 사이징 계산기 — 얼마나 살까·어디서 자를까")
-    _zc1, _zc2, _zc3, _zc4, _zc5 = st.columns(5)
-    _z_cap = _zc1.number_input("투자 자본(원)", min_value=0, value=10_000_000, step=1_000_000, key="sz_cap")
-    _z_risk = _zc2.slider("1회 리스크 %", 0.5, 5.0, 1.0, 0.5, key="sz_risk",
-                          help="이 매매에서 잃어도 되는 최대 금액 = 자본 × 리스크%")
-    _z_entry = _zc3.number_input("진입가", min_value=0.0, value=10000.0, step=100.0, key="sz_entry")
-    _z_stop = _zc4.slider("손절 %", 3, 15, 8, key="sz_stop", help="오닐 룰: -7~8%")
-    _z_rr = _zc5.slider("손익비 R:R", 1.0, 5.0, 2.0, 0.5, key="sz_rr")
-    if _z_entry > 0 and _z_cap > 0:
-        _z_stopp = _z_entry * (1 - _z_stop / 100)
-        _z_riskamt = _z_cap * _z_risk / 100
-        _z_qty = int(_z_riskamt / (_z_entry - _z_stopp)) if _z_entry > _z_stopp else 0
-        _z_invest = _z_qty * _z_entry
-        _z_target = _z_entry * (1 + _z_stop / 100 * _z_rr)
-        _zm1, _zm2, _zm3, _zm4 = st.columns(4)
-        _zm1.metric("매수 수량", f"{_z_qty:,}주", f"투입 {_z_invest:,.0f}원")
-        _zm2.metric("손절가", f"{_z_stopp:,.0f}", f"-{_z_stop}%")
-        _zm3.metric("목표가", f"{_z_target:,.0f}", f"+{_z_stop * _z_rr:.0f}%")
-        _zm4.metric("최대 손실", f"{_z_riskamt:,.0f}원", f"자본의 {_z_risk}%")
-        if _z_invest > _z_cap:
-            st.warning(f"⚠️ 필요 투입({_z_invest:,.0f}원)이 자본을 초과 — 손절폭이 좁아 수량이 과대. "
-                       "리스크%를 낮추거나 손절폭을 넓히세요.")
-    st.caption("'얼마나'는 감이 아니라 산수: 수량 = (자본×리스크%) ÷ (진입가−손절가). "
-               "손익비 2:1 = 손절 -8%면 목표 +16%. 목표 도달 전 추세 꺾이면 룰대로 청산.")
 
 
 # ── 📒 성적표 — 추천 사후분석 (포워드 트랙레코드) ──
@@ -1508,32 +1434,39 @@ with tab4, guard('매크로'):
     # ── ② 세 렌즈 ────────────────────────────────────────────────
     st.subheader("🔭 세 렌즈로 본 현재 위치")
     st.caption("같은 사이클을 다른 축에서 본다. 세 개가 서로 어긋나면 그 자체가 '전환기'라는 신호다.")
-    _L1, _L2, _L3 = st.columns(3)
+    _L1, _L2, _L3 = st.columns(3, gap='medium')
 
-    with _L1:
-        st.markdown("**🗓️ 우라가미 4계절** — 장세의 종류")
+    with _L1.container(border=True):
+        st.markdown("##### 🗓️ 우라가미 4계절")
+        st.caption("장세의 **종류** — 지금이 무슨 장인가")
         for k in ('FIN', 'EARN', 'RFIN', 'RERN'):
             _on = (k == _RG['phase'])
             _sv = SEASONS[k]
             st.markdown(
-                f"<div style='padding:6px 10px;margin:3px 0;border-radius:7px;font-size:12.5px;"
-                f"background:{'#111827' if _on else '#f3f4f6'};color:{'#fff' if _on else '#6b7280'};"
-                f"font-weight:{'700' if _on else '400'}'>"
-                f"{_sv['emoji']} {_sv['name']} <span style='float:right'>{_RG['scores'][k]}점</span></div>",
+                f"<div style='display:flex;justify-content:space-between;align-items:center;"
+                f"padding:{'9px 12px' if _on else '7px 12px'};margin:4px 0;border-radius:8px;"
+                f"font-size:{'15px' if _on else '13.5px'};"
+                f"background:{'#0b0b0b' if _on else '#f4f4f2'};color:{'#fff' if _on else '#52514e'};"
+                f"font-weight:{'700' if _on else '500'}'>"
+                f"<span>{_sv['emoji']} {_sv['name']}</span>"
+                f"<span style='font-variant-numeric:tabular-nums;opacity:{'1' if _on else '.7'}'>"
+                f"{_RG['scores'][k]}점</span></div>",
                 unsafe_allow_html=True)
         st.caption("점수 = (금리·실적·주가) 3축 부합도. 최고점이 현재 국면.")
 
-    with _L2:
-        st.markdown("**🥚 코스톨라니 달걀** — 무슨 자산을 들 때인가")
+    with _L2.container(border=True):
+        st.markdown("##### 🥚 코스톨라니 달걀")
+        st.caption("무슨 **자산**을 들 때인가 — 금리 사이클 위치")
         if _RG['egg_i'] is None:
             st.caption("금리 데이터 없음 — 판정 불가")
         else:
             for i, (code, title, why) in enumerate(EGG):
                 _on = (i == _RG['egg_i'])
                 st.markdown(
-                    f"<div style='padding:5px 10px;margin:2px 0;border-radius:7px;font-size:12px;"
-                    f"background:{'#111827' if _on else '#f3f4f6'};color:{'#fff' if _on else '#6b7280'};"
-                    f"font-weight:{'700' if _on else '400'}'>{code} · {title}</div>",
+                    f"<div style='padding:{'8px 12px' if _on else '5px 12px'};margin:3px 0;"
+                    f"border-radius:8px;font-size:{'14px' if _on else '12.5px'};"
+                    f"background:{'#0b0b0b' if _on else '#f4f4f2'};color:{'#fff' if _on else '#52514e'};"
+                    f"font-weight:{'700' if _on else '500'}'>{code} · {title}</div>",
                     unsafe_allow_html=True)
             _ei = _RG['egg_i']
             if _RG.get('egg_flat'):
@@ -1552,24 +1485,28 @@ with tab4, guard('매크로'):
                        f"금리 {_MI.get('fed','-')}% = 최근 10년 분포의 {_MI.get('fed_pct','-')}% 지점 · "
                        f"6개월 {_MI.get('fed_6m','-')}%p · 12개월 {_MI.get('fed_12m','-')}%p → 방향 **{_RG['rate_dir']}**")
 
-    with _L3:
-        st.markdown("**⏳ 하워드 막스 시계추** — 남들이 얼마나 겁먹었나")
+    with _L3.container(border=True):
+        st.markdown("##### ⏳ 하워드 막스 시계추")
+        st.caption("남들이 얼마나 **겁먹었나** — 역발상 눈금")
         _p = _RG['pend']
         if _p is None:
             st.caption("위험지표 조회 실패 — 판정 불가")
         else:
             _plab = ('극도의 공포' if _p < 15 else '공포' if _p < 35 else
                      '중립' if _p < 65 else '탐욕' if _p < 85 else '극도의 탐욕')
-            _pcol = '#2563eb' if _p < 35 else ('#6b7280' if _p < 65 else '#dc2626')
+            _pcol = '#2a78d6' if _p < 35 else ('#52514e' if _p < 65 else '#d03b3b')
             st.markdown(
-                f"<div style='margin:6px 0 2px'><div style='font-size:20px;font-weight:800;color:{_pcol}'>"
-                f"{_p} / 100 · {_plab}</div>"
-                f"<div style='position:relative;height:12px;border-radius:6px;margin-top:8px;"
-                f"background:linear-gradient(90deg,#2563eb,#e5e7eb 50%,#dc2626)'>"
-                f"<div style='position:absolute;left:calc({_p}% - 2px);top:-4px;width:4px;height:20px;"
-                f"background:#111827;border-radius:2px'></div></div>"
-                f"<div style='display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;margin-top:3px'>"
-                f"<span>공포</span><span>탐욕</span></div></div>", unsafe_allow_html=True)
+                f"<div style='margin:10px 0 2px'>"
+                f"<div style='font-size:38px;font-weight:800;line-height:1.05;color:{_pcol}'>{_p}"
+                f"<span style='font-size:15px;font-weight:600;color:#898781'> / 100</span></div>"
+                f"<div style='font-size:16px;font-weight:700;color:{_pcol};margin-top:2px'>{_plab}</div>"
+                f"<div style='position:relative;height:14px;border-radius:7px;margin-top:14px;"
+                f"background:linear-gradient(90deg,#2a78d6,#eeeeec 50%,#d03b3b)'>"
+                f"<div style='position:absolute;left:calc({_p}% - 3px);top:-5px;width:6px;height:24px;"
+                f"background:#0b0b0b;border:2px solid #fff;border-radius:3px'></div></div>"
+                f"<div style='display:flex;justify-content:space-between;font-size:12px;color:#898781;"
+                f"margin-top:6px'><span>공포</span><span>중립</span><span>탐욕</span></div></div>",
+                unsafe_allow_html=True)
             st.caption(f"HY 스프레드 {_MI.get('hy','-')}%(하위 {_MI.get('hy_pct','-')}%) · "
                        f"VIX {_MI.get('vix','-')}(하위 {_MI.get('vix_pct','-')}%) · "
                        f"S&P 52주 위치 {_PX.get('pos52','-')}%  \n"
@@ -1585,39 +1522,83 @@ with tab4, guard('매크로'):
         _d6 = {_ffk[i]: round(_ffd[_ffk[i]] - _ffd[_ffk[i - 6]], 2) for i in range(6, len(_ffk))}
         _pts = [(dt, y, _d6[dt]) for dt, y in _ip_h if dt in _d6][-24:]
         if len(_pts) >= 4:
-            _fig_cy = go.Figure()
-            _fig_cy.add_trace(go.Scatter(
-                x=[p[1] for p in _pts], y=[p[2] for p in _pts], mode='lines+markers',
-                line=dict(color='rgba(37,99,235,0.45)', width=2),
-                marker=dict(size=5, color='rgba(37,99,235,0.5)'),
-                text=[p[0][:7] for p in _pts], hovertemplate='%{text}<br>산업생산 YoY %{x:.1f}%<br>금리 6개월 %{y:+.2f}%p<extra></extra>',
-                name='지난 24개월'))
-            _fig_cy.add_trace(go.Scatter(
-                x=[_pts[-1][1]], y=[_pts[-1][2]], mode='markers+text',
-                marker=dict(size=16, color='#dc2626', line=dict(color='#fff', width=2)),
-                text=['현재'], textposition='top center', name='현재'))
-            _fig_cy.add_hline(y=0, line_color='rgba(110,118,129,0.5)', line_dash='dash')
-            _fig_cy.add_vline(x=0, line_color='rgba(110,118,129,0.5)', line_dash='dash')
+            # 마크 규격(dataviz): 선 2px 실선 · 마커 지름 ≥8px · 격자는 표면에서 한 단계
+            # 떨어진 실선 헤어라인(점선 금지) · 텍스트에는 시리즈 색을 입히지 않는다.
+            # 시간 방향은 '오래된 구간=옅은 파랑 / 최근 6개월=진한 파랑 3px'로 표현한다
+            # (무지개 램프 대신 같은 계열 두 단계 — 순차 인코딩).
+            _CY_OLD, _CY_NEW, _CY_NOW = '#9ec5f4', '#2a78d6', '#eb6834'
+            _INK, _MUTED, _GRID = '#0b0b0b', '#898781', '#e1e0d9'
             _xs = [p[1] for p in _pts]; _ys = [p[2] for p in _pts]
-            _xr = max(abs(min(_xs)), abs(max(_xs))) * 1.35 + 0.5
-            _yr = max(abs(min(_ys)), abs(max(_ys))) * 1.35 + 0.2
-            for _tx, _ty, _tt in [(_xr*.55, _yr*.75, '☀️ 실적장세<br>성장↑ 금리↑'),
-                                  (-_xr*.55, _yr*.75, '🍂 역금융장세<br>성장↓ 금리↑'),
-                                  (-_xr*.55, -_yr*.75, '🌱금융 / ❄️역실적<br>성장↓ 금리↓ (주가로 구분)'),
-                                  (_xr*.55, -_yr*.75, '🔁 회복 초입<br>성장↑ 금리↓')]:
+            _xr = max(abs(min(_xs)), abs(max(_xs))) * 1.18 + 0.35
+            _yr = max(abs(min(_ys)), abs(max(_ys))) * 1.25 + 0.15
+            _fig_cy = go.Figure()
+            # 현재 사분면만 아주 옅게 깔아 '지금 여기'를 배경으로 알린다
+            _qx = [0, _xr] if _xs[-1] >= 0 else [-_xr, 0]
+            _qy = [0, _yr] if _ys[-1] >= 0 else [-_yr, 0]
+            _fig_cy.add_shape(type='rect', x0=_qx[0], x1=_qx[1], y0=_qy[0], y1=_qy[1],
+                              fillcolor='rgba(42,120,214,0.045)', line_width=0, layer='below')
+            _cut = max(0, len(_pts) - 7)          # 최근 6개월 강조 (구간이므로 -7부터 이어붙임)
+            _fig_cy.add_trace(go.Scatter(
+                x=_xs[:_cut + 1], y=_ys[:_cut + 1], mode='lines',
+                line=dict(color=_CY_OLD, width=2, shape='spline', smoothing=0.6),
+                hoverinfo='skip', showlegend=False))
+            _fig_cy.add_trace(go.Scatter(
+                x=_xs, y=_ys, mode='markers',
+                marker=dict(size=9, color=_CY_OLD, line=dict(color='#ffffff', width=2)),
+                text=[p[0][:7] for p in _pts],
+                hovertemplate='%{text}<br>산업생산 YoY %{x:.2f}%<br>금리 6개월 %{y:+.2f}%p<extra></extra>',
+                showlegend=False))
+            _fig_cy.add_trace(go.Scatter(
+                x=_xs[_cut:], y=_ys[_cut:], mode='lines',
+                line=dict(color=_CY_NEW, width=3, shape='spline', smoothing=0.6),
+                hoverinfo='skip', name='최근 6개월'))
+            _fig_cy.add_trace(go.Scatter(
+                x=[_xs[0]], y=[_ys[0]], mode='markers+text',
+                marker=dict(size=11, color='#ffffff', line=dict(color=_CY_OLD, width=3)),
+                text=[f"  {_pts[0][0][:7]} 시작"], textposition='middle right',
+                textfont=dict(size=12, color=_MUTED), hoverinfo='skip', showlegend=False))
+            _fig_cy.add_trace(go.Scatter(
+                x=[_xs[-1]], y=[_ys[-1]], mode='markers+text',
+                marker=dict(size=17, color=_CY_NOW, line=dict(color='#ffffff', width=3)),
+                text=[f"현재 {_pts[-1][0][:7]}  "], textposition='middle left',
+                textfont=dict(size=14, color=_INK, family='sans-serif'),
+                hovertemplate=f'현재 {_pts[-1][0][:7]}<br>산업생산 YoY %{{x:.2f}}%<br>금리 6개월 %{{y:+.2f}}%p<extra></extra>',
+                showlegend=False))
+            _fig_cy.add_hline(y=0, line_color='#c3c2b7', line_width=1)
+            _fig_cy.add_vline(x=0, line_color='#c3c2b7', line_width=1)
+            for _tx, _ty, _ta, _tv, _tt in [
+                    (_xr, _yr, 'right', 'top', '☀️ 실적장세<br><span style="font-size:11px">성장↑ 금리↑</span>'),
+                    (-_xr, _yr, 'left', 'top', '🍂 역금융장세<br><span style="font-size:11px">성장↓ 금리↑</span>'),
+                    (-_xr, -_yr, 'left', 'bottom', '🌱 금융 / ❄️ 역실적<br><span style="font-size:11px">성장↓ 금리↓ · 주가로 구분</span>'),
+                    (_xr, -_yr, 'right', 'bottom', '🔁 회복 초입<br><span style="font-size:11px">성장↑ 금리↓</span>')]:
                 _fig_cy.add_annotation(x=_tx, y=_ty, text=_tt, showarrow=False,
-                                       font=dict(size=10, color='#9ca3af'))
-            _fig_cy.update_layout(height=360, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                  font=dict(color='#6b7280', size=10), showlegend=False,
-                                  margin=dict(l=0, r=0, t=10, b=30),
-                                  xaxis_title='실적 사이클 — 산업생산 YoY (%)',
-                                  yaxis_title='금리 방향 — Fed 6개월 변화 (%p)',
+                                       xanchor=_ta, yanchor=_tv, align=('right' if _ta == 'right' else 'left'),
+                                       font=dict(size=13, color=_MUTED))
+            _fig_cy.update_layout(height=420, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                  font=dict(color=_MUTED, size=12), showlegend=False,
+                                  margin=dict(l=10, r=10, t=16, b=46),
+                                  hoverlabel=dict(font_size=13),
+                                  xaxis_title=dict(text='실적 사이클 — 산업생산 YoY (%)', font=dict(size=13)),
+                                  yaxis_title=dict(text='금리 방향 — Fed 6개월 변화 (%p)', font=dict(size=13)),
                                   xaxis_range=[-_xr, _xr], yaxis_range=[-_yr, _yr])
-            _fig_cy.update_xaxes(gridcolor='rgba(128,128,128,0.15)')
-            _fig_cy.update_yaxes(gridcolor='rgba(128,128,128,0.15)')
+            _fig_cy.update_xaxes(gridcolor=_GRID, zeroline=False, ticksuffix='%', tickfont=dict(size=12))
+            _fig_cy.update_yaxes(gridcolor=_GRID, zeroline=False, tickfont=dict(size=12))
             st.plotly_chart(_fig_cy, use_container_width=True)
-            st.caption("사이클은 보통 시계 반대 방향으로 돈다(회복 초입 → 실적장세 → 역금융 → 역실적 → 회복). "
-                       "점이 어느 쪽으로 움직이고 있는지가 위치보다 중요하다. "
+            _c1, _c2 = st.columns([3, 2])
+            _c1.markdown(
+                "<span style='display:inline-block;width:22px;height:3px;background:#2a78d6;"
+                "vertical-align:middle;border-radius:2px'></span> <b>최근 6개월</b> &nbsp;&nbsp;"
+                "<span style='display:inline-block;width:22px;height:2px;background:#9ec5f4;"
+                "vertical-align:middle;border-radius:2px'></span> 그 이전 &nbsp;&nbsp;"
+                "<span style='display:inline-block;width:11px;height:11px;background:#eb6834;"
+                "border-radius:50%;vertical-align:middle'></span> <b>현재</b>",
+                unsafe_allow_html=True)
+            with _c2.popover("📋 값으로 보기"):
+                st.dataframe(pd.DataFrame([{'월': p[0][:7], '산업생산 YoY(%)': round(p[1], 2),
+                                            '금리 6개월(%p)': p[2]} for p in reversed(_pts)]),
+                             use_container_width=True, hide_index=True, row_height=25, height=260)
+            st.caption("사이클은 보통 **시계 반대 방향**으로 돈다: 회복 초입 → 실적장세 → 역금융 → 역실적 → 다시 회복. "
+                       "지금 어디 있느냐보다 **어느 쪽으로 움직이는 중이냐**가 중요하다. "
                        "좌하단은 금융장세와 역실적장세가 겹치므로 주가 추세(200일선)로 가른다.")
     else:
         st.caption("궤적 표시에 필요한 시계열(FEDFUNDS·INDPRO)을 불러오지 못했습니다.")
@@ -3628,6 +3609,33 @@ with _pf_main, guard('포트폴리오'):
             fig_pf.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
             fig_pf.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
             st.plotly_chart(fig_pf, use_container_width=True)
+
+        # 🧮 포지션 사이징 계산기 — 2026-08-12 ⚡타이밍 발굴에서 이관('얼마나'는 집행 단계)
+        st.divider()
+        st.markdown("##### 🧮 포지션 사이징 계산기 — 얼마나 살까·어디서 자를까")
+        _zc1, _zc2, _zc3, _zc4, _zc5 = st.columns(5)
+        _z_cap = _zc1.number_input("투자 자본(원)", min_value=0, value=10_000_000, step=1_000_000, key="sz_cap")
+        _z_risk = _zc2.slider("1회 리스크 %", 0.5, 5.0, 1.0, 0.5, key="sz_risk",
+                              help="이 매매에서 잃어도 되는 최대 금액 = 자본 × 리스크%")
+        _z_entry = _zc3.number_input("진입가", min_value=0.0, value=10000.0, step=100.0, key="sz_entry")
+        _z_stop = _zc4.slider("손절 %", 3, 15, 8, key="sz_stop", help="오닐 룰: -7~8%")
+        _z_rr = _zc5.slider("손익비 R:R", 1.0, 5.0, 2.0, 0.5, key="sz_rr")
+        if _z_entry > 0 and _z_cap > 0:
+            _z_stopp = _z_entry * (1 - _z_stop / 100)
+            _z_riskamt = _z_cap * _z_risk / 100
+            _z_qty = int(_z_riskamt / (_z_entry - _z_stopp)) if _z_entry > _z_stopp else 0
+            _z_invest = _z_qty * _z_entry
+            _z_target = _z_entry * (1 + _z_stop / 100 * _z_rr)
+            _zm1, _zm2, _zm3, _zm4 = st.columns(4)
+            _zm1.metric("매수 수량", f"{_z_qty:,}주", f"투입 {_z_invest:,.0f}원")
+            _zm2.metric("손절가", f"{_z_stopp:,.0f}", f"-{_z_stop}%")
+            _zm3.metric("목표가", f"{_z_target:,.0f}", f"+{_z_stop * _z_rr:.0f}%")
+            _zm4.metric("최대 손실", f"{_z_riskamt:,.0f}원", f"자본의 {_z_risk}%")
+            if _z_invest > _z_cap:
+                st.warning(f"⚠️ 필요 투입({_z_invest:,.0f}원)이 자본을 초과 — 손절폭이 좁아 수량이 과대. "
+                           "리스크%를 낮추거나 손절폭을 넓히세요.")
+        st.caption("'얼마나'는 감이 아니라 산수: 수량 = (자본×리스크%) ÷ (진입가−손절가). "
+                   "손익비 2:1 = 손절 -8%면 목표 +16%. 목표 도달 전 추세 꺾이면 룰대로 청산.")
 
         st.divider()
         # 텔레그램 토큰은 gitignore라 클라우드에는 없다 → 버튼을 눌러도 실패만 한다.
