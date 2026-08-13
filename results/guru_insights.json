@@ -1,6 +1,82 @@
 {
   "items": [
     {
+      "video_id": "GvNXpCkBY1M",
+      "title": "\"태양광 보호 같아 보이죠?\" 사실 또 반도체입니다 | 윤재성 하나증권 리서치센터 수석연구위원 [더블 업]",
+      "channel": "삼프로TV",
+      "published": "2026-08-13T01:49:20+00:00",
+      "url": "https://www.youtube.com/watch?v=GvNXpCkBY1M",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-13T18:52:05.715903+09:00"
+    },
+    {
+      "video_id": "I1GVAxM1N0c",
+      "title": "\"올랐는데 지금이라도...\" 고민되시죠? | 이학주 하나증권 원주지점 차장 [더블 크루]",
+      "channel": "삼프로TV",
+      "published": "2026-08-13T02:00:10+00:00",
+      "url": "https://www.youtube.com/watch?v=I1GVAxM1N0c",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-13T18:51:33.630955+09:00"
+    },
+    {
+      "video_id": "i0daARsLUF4",
+      "title": "[8월 13일 마감시황] 삼전닉스 다음은 어디?…상승 흐름 이어갈 다음 순환매를 찾아라ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-08-13T08:54:48+00:00",
+      "url": "https://www.youtube.com/watch?v=i0daARsLUF4",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-13T18:50:29.449340+09:00"
+    },
+    {
+      "video_id": "lT3WpArAMOs",
+      "title": "순환매 한 바퀴 돈 코스닥…지금은 신규 매수보다 반도체로 일부 이동ㅣ홍선애, 장우진 금시공 대표 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-13T09:30:22+00:00",
+      "url": "https://www.youtube.com/watch?v=lT3WpArAMOs",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-13T18:49:57.130829+09:00"
+    },
+    {
       "video_id": "L_DgBMHoncs",
       "title": "논란의 ISA 원상 복구? 내년부터 2개 굴리세요 이거 모르면 세금만 털립니다 / [ETF 저TF EP.26]",
       "channel": "와이스트릿",
@@ -228,11 +304,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T17:22:50.239224+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T18:52:38.212292+09:00"
     },
     {
       "video_id": "t_gfn1YqOhs",
@@ -247,11 +323,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T17:18:25.977822+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T18:51:01.550788+09:00"
     },
     {
       "video_id": "SPiCZMyeWFo",
@@ -575,12 +651,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"변화된 시장 분위기 속에서 외국인 투자 유입과 주식 비중 확대의 기회를 이해하고, 기존 관점과 다른 시각으로 시장을 바라봐야 할 때입니다.\",\n  \"summary\": [\n    \"코스피와 코스닥 지수가 상승세를 보이며, 미국 및 글로벌 시장도 긍정적인 흐름을 나타내고 있습니다.\",\n    \"엔비디아 CEO 젠슨 황과 주요 금융권 인사들의 회동은 시장에 큰 변화의 신호탄으로 작용하고 있으며, 그 의미를 정확히 파악하는 것이 중요합니다.\",\n    \"빅테크 및 AI 관련 기업들의 실적 호조가 주가 상승의 주된 요인이며, 이는 밸류에이션이 높아진 것이 아니라 기업 이익이 증가했기 때문으로 해석되어야 합니다.\",\n    \"지난 7월 말부터 한국 주식, 특히 삼성전자와 SK하이닉스 등 반도체 종목에 대한 '가격 매력도'를 강조하며 매도를 피하고 비중을 늘릴 것을 조언했습니다.\",\n    \"노르웨이 국부펀드, 테마섹, 캐피탈,"
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T17:10:07.022440+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T18:49:24.902996+09:00"
     },
     {
       "video_id": "hDTeC6GrmVI",
@@ -653,12 +728,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"AI 기술의 발전이 하드웨어와 인프라 부문에 대한 투자를 촉진하고 있으며, 특히 전력 효율과 관련 기술 혁신이 새로운 시장 기회를 창출하고 있습니다.\",\n  \"summary\": [\n    \"미국 시장은 AI 인프라와 반도체 섹터의 강세 속에 대부분의 빅테크 기업이 지수 대비 부진한 모습을 보이고 있습니다.\",\n    \"Nvidia의 주가 상승과 금융기관의 AI 투자 지원 움직임은 AI 하드웨어 및 인프라 부문의 투자 심리 개선을 이끌고 있습니다.\",\n    \"AI 산업 성장을 위한 핵심 병목 지점으로 전력(데이터센터 전력 효율), 광학 기술(광 상호연결), MCC(모듈형 통합 컴퓨팅), ESS(에너지 저장 시스템)가 부각되고 있습니다.\",\n    \"싱가포르 국부펀드 테마섹의 삼성전자 및 SK하이닉스 직접 투자는 한국 반도체 기업에 대한 장기적 긍정 신호로 해석됩니다.\",\n    \"화장품 OEM/ODM 기업인 코스맥스"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T17:07:01.836049+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T18:46:39.898896+09:00"
     },
     {
       "video_id": "g3jNpyT3Qfk",
@@ -676,8 +750,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T17:05:11.712753+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T18:46:07.392521+09:00"
     },
     {
       "video_id": "kjJuNdgYBx4",
@@ -11977,228 +12051,7 @@
       "source": "video",
       "attempts": 2,
       "analyzed_at": "2026-08-06T01:05:26.261223+09:00"
-    },
-    {
-      "video_id": "e4VkMTI82PQ",
-      "title": "\"또 속아?\" vs \"이번엔 진짜?\" 코스피 9,000 재도전의 조건ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-08-05T12:30:20+00:00",
-      "url": "https://www.youtube.com/watch?v=e4VkMTI82PQ",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "시장은 전반적으로 긍정적인 순환매를 보이며 상승하고 있으며, 특히 신재생에너지, 전력설비, 조선 등 에너지 관련 섹터와 제약바이오에 주목할 필요가 있다.",
-        "summary": [
-          "최근 시장은 삼성전자와 SK하이닉스 외에 다른 종목들도 함께 오르는 건전한 순환매를 보이고 있다. [55]",
-          "외국인 투자자들은 지난 2개월간 대규모 매도 후 최근 이틀간 순매수를 기록했으며, 개인 투자자들의 신용잔고가 크게 감소하여 시장의 투기적 요소가 줄었다. [55]",
-          "에너지 관련 섹터(신재생에너지, 원전, 풍력, 수소 등)와 전력설비(변압기 등)는 정책 기대감과 AI 데이터센터 투자 확대에 힘입어 강세를 보이고 있다. [2300]",
-          "조선업종과 조선기자재 역시 미 해군 함정 건조 계약 등으로 강한 상승세를 보이고 있다. [2320]",
-          "제약바이오는 최근 특정 기업 이슈로 급락했으나, 섹터 전체의 하락보다는 개별 종목의 투명성이 확보된다면 반등 가능성이 있다. [2450]",
-          "외국인 매도 포지션이 많은 코스닥 시장에서 특정 가격대(6,800~7,100포인트)를 강하게 돌파하면 숏 스퀴즈로 인한 급등 가능성이 존재한다. [800]"
-        ],
-        "tickers": [
-          {
-            "name": "로보티즈",
-            "ticker": "",
-            "context": "박가영 앵커가 선택했으나 시장 상승세에도 주가 하락",
-            "view": "부정",
-            "t": 68
-          },
-          {
-            "name": "현대차",
-            "ticker": "005380",
-            "context": "박가영 앵커가 선택했으나 시장 상승세에도 주가 하락",
-            "view": "부정",
-            "t": 68
-          },
-          {
-            "name": "하이브",
-            "ticker": "352820",
-            "context": "박가영 앵커가 선택했으나 시장 상승세에도 주가 하락, 유창희 대표는 '매력 부족'으로 판단",
-            "view": "부정",
-            "t": 68
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "시장 상승을 주도하는 대형주 중 하나, 긍정적인 시장 흐름에 기여",
-            "view": "긍정",
-            "t": 599
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "시장 상승을 주도하는 대형주 중 하나, 긍정적인 시장 흐름에 기여",
-            "view": "긍정",
-            "t": 599
-          },
-          {
-            "name": "한화솔루션",
-            "ticker": "009830",
-            "context": "태양광 관련주, 신재생에너지 섹터에서 강한 상승세",
-            "view": "긍정",
-            "t": 3445
-          },
-          {
-            "name": "OCI홀딩스",
-            "ticker": "010060",
-            "context": "태양광 관련주, 신재생에너지 섹터에서 강한 상승세",
-            "view": "긍정",
-            "t": 3445
-          },
-          {
-            "name": "현대에너지솔루션",
-            "ticker": "322000",
-            "context": "태양광 관련주, 신재생에너지 섹터에서 강한 상승세",
-            "view": "긍정",
-            "t": 3445
-          },
-          {
-            "name": "현대일렉트릭",
-            "ticker": "267260",
-            "context": "변압기/전력설비 관련주, AI 데이터센터 투자 확대 및 정책 기대감으로 강세",
-            "view": "긍정",
-            "t": 3620
-          },
-          {
-            "name": "LS일렉트릭",
-            "ticker": "010120",
-            "context": "변압기/전력설비 관련주, AI 데이터센터 투자 확대 및 정책 기대감으로 강세",
-            "view": "긍정",
-            "t": 3620
-          },
-          {
-            "name": "효성중공업",
-            "ticker": "298040",
-            "context": "변압기/전력설비 관련주, AI 데이터센터 투자 확대 및 정책 기대감으로 강세",
-            "view": "긍정",
-            "t": 3620
-          },
-          {
-            "name": "대한광통신",
-            "ticker": "010170",
-            "context": "광통신 관련주, 정책적 기대감으로 강세",
-            "view": "긍정",
-            "t": 3655
-          },
-          {
-            "name": "알테오젠",
-            "ticker": "196670",
-            "context": "제약바이오 관련주, 대규모 기술이전 계약 체결로 긍정적이나 이후 주가 횡보",
-            "view": "중립",
-            "t": 3747
-          },
-          {
-            "name": "현대백화점",
-            "ticker": "069960",
-            "context": "유통 관련주, 2분기 역대 최대 매출에도 연결 기준 영업이익 감소로 주가 하락",
-            "view": "부정",
-            "t": 3855
-          },
-          {
-            "name": "디앤디파마텍",
-            "ticker": "347850",
-            "context": "제약바이오 관련주, 화이자 비만약 임상 결과 실망으로 급락",
-            "view": "부정",
-            "t": 3810
-          }
-        ],
-        "key_points": [
-          {
-            "point": "시장이 삼성전자와 SK하이닉스 중심에서 다른 섹터로 순환매가 확산되는 긍정적인 움직임을 보이고 있다.",
-            "t": 55
-          },
-          {
-            "point": "외국인 투자자들은 코스닥 시장의 특정 저항선을 돌파하면 숏 커버링에 나서면서 지수 상승을 가속화할 가능성이 있다.",
-            "t": 800
-          },
-          {
-            "point": "유가 하락, 미국 채권금리 안정화, 일본 엔화 강세 등 거시경제 지표들이 시장 유동성 증가와 위험자산 선호 심리를 강화하고 있다.",
-            "t": 2100
-          },
-          {
-            "point": "에너지 전환 정책(신재생에너지, 원전, 수소 등)과 AI 데이터센터 투자 확대는 전력 설비, 조선, 광통신 등 관련 섹터에 긍정적인 영향을 미치고 있다.",
-            "t": 2300
-          },
-          {
-            "point": "개별 종목 투자의 난이도가 높아졌으므로, 너무 조급해하지 말고 펀더멘털이 견고한 기업에는 기회를 찾아야 한다.",
-            "t": 2550
-          },
-          {
-            "point": "제약바이오 섹터는 특정 악재로 인한 개별 종목의 등락이 크지만, 시장 전반의 투심을 꺾지는 않았으며, 미 국채금리 인하 기조가 지속되면 바이오 섹터에 긍정적인 영향을 줄 수 있다.",
-            "t": 2450
-          },
-          {
-            "point": "과거 시장의 급락 이후에는 V자 반등과 함께 일정 기간 횡보하는 패턴이 나타났으며, 현재 시장은 이러한 패턴에서 상승을 이어갈 기회가 될 수 있다.",
-            "t": 1120
-          }
-        ],
-        "actionable": [
-          "에너지 관련 섹터(신재생에너지, 전력설비)와 조선업종 내 펀더멘털이 견고한 종목들을 관찰하고 투자 기회를 모색한다. [2300]",
-          "개별 종목 투자의 난이도가 높아졌으므로, 너무 조급해하지 말고 확신이 낮은 종목은 정리하며 시장의 흐름과 패턴을 꾸준히 학습한다. [2550]",
-          "코스닥 지수가 월봉 5일선 이상을 유지하는지, 주요 저항선(6,800~7,100포인트)을 강하게 돌파하는지 주시하며 시장 방향성을 판단한다. [1715]"
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-06T01:02:47.687765+09:00"
-    },
-    {
-      "video_id": "0EqgkjQKvp4",
-      "title": "반도체 소부장 거꾸로 가야 합니다 #소재 #부품 #전공정 #장비 #장비주 #반도체 #메모리 #테스 #호돌이 #우황제",
-      "channel": "와이스트릿",
-      "published": "2026-08-05T10:00:05+00:00",
-      "url": "https://www.youtube.com/watch?v=0EqgkjQKvp4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-06T03:17:38.156684+09:00"
-    },
-    {
-      "video_id": "q31oB_kKuvM",
-      "title": "반등 시작? 외국인 매수에 숨겨진 진짜 신호 | 하창완 하보노의 주식 이야기 대표 [더블 체크]",
-      "channel": "삼프로TV",
-      "published": "2026-08-05T00:49:12+00:00",
-      "url": "https://www.youtube.com/watch?v=q31oB_kKuvM",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T20:12:20.384673+09:00"
-    },
-    {
-      "video_id": "WPkNiFFJ4X4",
-      "title": "반도체만 오르는 장 끝? 8월은 '확산장'이 시작됩니다 | 권택중 하나증권 더센터필드W 부지점장 [더블 크루]",
-      "channel": "삼프로TV",
-      "published": "2026-08-05T01:28:35+00:00",
-      "url": "https://www.youtube.com/watch?v=WPkNiFFJ4X4",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-05T22:22:41.188960+09:00"
     }
   ],
-  "updated": "2026-08-13T17:24:26.918398+09:00"
+  "updated": "2026-08-13T18:52:39.212551+09:00"
 }
