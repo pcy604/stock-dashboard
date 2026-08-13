@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T00:35:28.307722+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T01:35:17.131962+09:00"
     },
     {
       "video_id": "ouT-f05lIG4",
@@ -147,8 +147,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T00:36:45.231901+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-14T01:35:49.506381+09:00"
     },
     {
       "video_id": "P7mv5457GTk",
@@ -11925,5 +11925,5 @@
       "analyzed_at": "2026-08-06T08:41:37.932518+09:00"
     }
   ],
-  "updated": "2026-08-14T00:37:19.194984+09:00"
+  "updated": "2026-08-14T01:35:50.842875+09:00"
 }
