@@ -1,41 +1,41 @@
 {
   "horizon": "4w",
-  "updated": "2026-08-12 21:44",
+  "updated": "2026-08-13 21:43",
   "weights": {
     "sig_52w": {
-      "mult": 0.11,
-      "n": 80,
-      "live_ev": -0.21,
+      "mult": 0.09,
+      "n": 98,
+      "live_ev": -0.22,
       "ref_ev": 1.0
     },
     "sig_vol": {
-      "mult": 0.71,
-      "n": 4,
-      "live_ev": -0.34,
+      "mult": 1.1,
+      "n": 5,
+      "live_ev": 2.78,
       "ref_ev": 0.8
     },
     "sig_ma5": {
-      "mult": 1.27,
-      "n": 92,
-      "live_ev": 1.68,
+      "mult": 1.28,
+      "n": 119,
+      "live_ev": 1.61,
       "ref_ev": 0.4
     },
     "sig_cup": {
-      "mult": 1.22,
-      "n": 28,
-      "live_ev": 4.98,
+      "mult": 1.23,
+      "n": 34,
+      "live_ev": 4.02,
       "ref_ev": 0.5
     },
     "sig_maconv": {
-      "mult": 1.04,
-      "n": 172,
-      "live_ev": 1.66,
+      "mult": 0.99,
+      "n": 211,
+      "live_ev": 1.59,
       "ref_ev": 1.6
     },
     "sig_rsimacd": {
-      "mult": 0.97,
-      "n": 144,
-      "live_ev": 0.87,
+      "mult": 0.94,
+      "n": 175,
+      "live_ev": 0.84,
       "ref_ev": 0.9
     }
   }
