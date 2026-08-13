@@ -1,8 +1,8 @@
 {
- "generated": "2026-08-10",
+ "generated": "2026-08-14",
  "signal_week": "2026-08-03",
  "rule": "RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
- "exit": "고점 대비 −20% 트레일링 · 8종목 × 12.5% · 2주 분할매수 · 불타기 없음",
+ "exit": "고점 대비 −20% 트레일링(주봉) · 12종목 × 8.3% · 2주 분할매수 · 불타기 없음",
  "universe": 1258,
  "n": 17,
  "funnel": [
@@ -334,19 +334,25 @@
   }
  ],
  "backtest": {
-  "period": "2018-06 ~ 2026-08 · 미국 1,271종",
-  "cagr": 32.8,
-  "mdd": -37.7,
-  "recover": 0.87,
-  "spy_cagr": 14.2,
+  "period": "2018-01 ~ 2026-08 · 미국 1,811종 (point-in-time)",
+  "cagr": 28.2,
+  "mdd": -29.8,
+  "recover": 0.95,
+  "spy_cagr": 14.6,
   "spy_mdd": -31.8,
-  "spy_recover": 0.45,
-  "trades": 136,
-  "winrate": 43.4,
-  "hold_wk": 20.7,
-  "med_ret": -5.9,
+  "spy_recover": 0.46,
+  "trades": 205,
+  "winrate": 40.5,
+  "maxpos": 12,
   "wf_cagr": "4/6",
-  "wf_recover": "2/6",
+  "wf_recover": "미측정",
+  "prev_measure": {
+   "note": "편향 유니버스(1,279종) 기준 옛 표기",
+   "cagr": 32.8,
+   "mdd": -37.7,
+   "recover": 0.87,
+   "maxpos": 8
+  },
   "prev_rule": {
    "name": "⑤ PSR<3",
    "cagr": 27.7,
@@ -365,7 +371,7 @@
  },
  "paper": {
   "created": "2026-08-04",
-  "updated": "2026-08-10",
+  "updated": "2026-08-11",
   "n_total": 16,
   "n_open": 16,
   "n_closed": 0,
@@ -374,7 +380,7 @@
     "sym": "AGL",
     "log_date": "2026-08-04",
     "entry": 91.61,
-    "peak": 107.85,
+    "peak": 95.51,
     "rs": 2.98,
     "psr": 0.35,
     "triggers": [
@@ -388,7 +394,7 @@
     "sym": "DELL",
     "log_date": "2026-08-04",
     "entry": 405.37,
-    "peak": 467.27,
+    "peak": 453.77,
     "rs": 1.86,
     "psr": 0.63,
     "triggers": [
@@ -400,7 +406,7 @@
     "sym": "NSP",
     "log_date": "2026-08-04",
     "entry": 50.61,
-    "peak": 54.03,
+    "peak": 52.52,
     "rs": 1.74,
     "psr": 0.58,
     "triggers": [
@@ -423,7 +429,7 @@
     "sym": "AVTR",
     "log_date": "2026-08-04",
     "entry": 13.78,
-    "peak": 13.86,
+    "peak": 13.78,
     "rs": 1.67,
     "psr": 2.59,
     "triggers": [
@@ -434,7 +440,7 @@
     "sym": "PBF",
     "log_date": "2026-08-04",
     "entry": 72.28,
-    "peak": 73.1,
+    "peak": 72.28,
     "rs": 1.63,
     "psr": 0.24,
     "triggers": [
@@ -461,7 +467,7 @@
     "sym": "PGNY",
     "log_date": "2026-08-04",
     "entry": 31.13,
-    "peak": 31.53,
+    "peak": 31.13,
     "rs": 1.61,
     "psr": 2.55,
     "triggers": [
