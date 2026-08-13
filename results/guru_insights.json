@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "bGb1gRTHJ-4",
+      "title": "시중은행보다 더 버는 증권사...미래에셋, 분기 순익 1.9조원 | SMR·양자·우주…정부, 7대 미래성장동력 '씨앗' 뿌린다 | 권순우 삼프로TV 취재팀장 [뉴스3]",
+      "channel": "삼프로TV",
+      "published": "2026-08-12T23:32:52+00:00",
+      "url": "https://www.youtube.com/watch?v=bGb1gRTHJ-4",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-13T09:44:37.587345+09:00"
+    },
+    {
+      "video_id": "g0d0NnwI1_s",
+      "title": "반도체만 오르는 시장, 안도하긴 이르다…지금부터 ‘선택과 집중’ | 장우진 금시공 대표 [마켓 인사이드]",
+      "channel": "삼프로TV",
+      "published": "2026-08-13T00:17:00+00:00",
+      "url": "https://www.youtube.com/watch?v=g0d0NnwI1_s",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-13T09:44:05.357018+09:00"
+    },
+    {
       "video_id": "R80LPDWRkps",
       "title": "코스닥부터 화장품·조선·배터리까지 하반기 투자전략은? | 박승영 한화투자증권 PLUS자산전략팀장 [글로벌 인터뷰]",
       "channel": "삼프로TV",
@@ -16,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-13T08:21:57.245640+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-13T09:45:09.816528+09:00"
     },
     {
       "video_id": "jJXKmoD9gi8",
@@ -35,8 +73,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-13T08:23:01.899788+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-13T09:46:14.542003+09:00"
     },
     {
       "video_id": "q2i6fylE_Ek",
@@ -54,27 +92,31 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-13T08:22:29.551258+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-13T09:45:42.095560+09:00"
     },
     {
       "video_id": "op0pUJrHKh8",
       "title": "매일 아침 펀드매니저들의 운용회의 라이브 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.08.13.목]",
       "channel": "체슬리TV",
-      "published": "2026-08-12T22:01:32+00:00",
+      "published": "2026-08-13T00:28:48+00:00",
       "url": "https://www.youtube.com/watch?v=op0pUJrHKh8",
       "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "relevant": false,
+        "one_liner": "영상의 내용이 제공되지 않아 주식·투자 전문 애널리스트로서 분석을 수행할 수 없습니다.",
+        "summary": [
+          "제공된 입력에 영상 내용(자막 또는 스크립트)이 없어 분석을 진행할 수 없습니다.",
+          "요청하신 박세익 전무 및 체슬리투자자문의 모닝브리프 영상에 대한 구체적인 투자 정보 추출은 영상 내용이 필수적입니다.",
+          "투자자가 빠르게 흡수할 핵심을 정리하기 위해서는 영상 음성 분석 또는 텍스트 형태의 내용이 필요합니다.",
+          "현재로서는 JSON 스키마에 따라 빈 내용으로 반환합니다."
+        ],
         "tickers": [],
         "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "actionable": []
       },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-13T08:21:24.567917+09:00"
+      "source": "video",
+      "attempts": 3,
+      "analyzed_at": "2026-08-13T09:42:33.197655+09:00"
     },
     {
       "video_id": "nO5npWPNTYI",
@@ -12393,82 +12435,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-05T17:15:09.294679+09:00"
-    },
-    {
-      "video_id": "V9ZL9lw4Ux0",
-      "title": "반도체가 쏘아 올린 반등 신호, 지금은 추격 매수 타이밍인가ㅣ홍선애, 박병창 MP파트너스 대표 [여의도 인사이트]",
-      "channel": "삼프로TV",
-      "published": "2026-08-05T05:19:40+00:00",
-      "url": "https://www.youtube.com/watch?v=V9ZL9lw4Ux0",
-      "analysis": {
-        "relevant": false,
-        "one_liner": "요청하신 영상의 내용(텍스트 스크립트 또는 자막)이 제공되지 않아 분석을 수행할 수 없습니다.",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": []
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T17:13:12.456534+09:00"
-    },
-    {
-      "video_id": "lLJ6HmXJ3EE",
-      "title": "코스피 급락, 지금 어디쯤 왔을까요?",
-      "channel": "유안타증권",
-      "published": "2026-08-05T02:11:38+00:00",
-      "url": "https://www.youtube.com/watch?v=lLJ6HmXJ3EE",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "현재 코스피의 급락은 과거 금융위기 및 팬데믹과 유사한 수준으로, 실적 전망은 견고하며 밸류에이션은 극단적 저평가 상태이나, 고물가·고금리 등으로 V자 반등보다는 시간 싸움이 예상됩니다.",
-        "summary": [
-          "워런 버핏의 '남들이 두려워할 때 욕심을 부려라'는 격언이 현재 코스피 상황에 적용될 수 있습니다.",
-          "코스피는 과거 외환위기, 금융위기, 팬데믹 시기와 유사하게 30거래일 사이 약 30% 급락했습니다.",
-          "과거 급락 시점 이후 12개월간 코스피는 +61.1%(2008년 금융위기) 또는 +94.1%(팬데믹) 크게 반등했습니다.",
-          "올해 코스피 영업이익 전망치는 968조원이나, 현재 지수는 630조원 수준을 반영하여 50%대 실적 쇼크가 선반영된 상태입니다.",
-          "이익 성장 속도 대비 주가 수준(PEG)은 0.06으로 MSCI 선진국 및 신흥국 증시 중 가장 낮은 극단적 저평가 상태입니다.",
-          "현재는 고물가·고긴축·고금리 등으로 V자 반등보다는 시간 싸움이 예상되나, 중장기적 관점에서는 바닥 통과가 가능하다는 판단입니다."
-        ],
-        "tickers": [
-          {
-            "name": "코스피",
-            "ticker": "",
-            "context": "현재 시장의 가격 조정과 전망을 논함",
-            "view": "긍정",
-            "t": 0
-          }
-        ],
-        "key_points": [
-          {
-            "point": "현재 시장의 공포와 코스피의 급락 속도(-29.5% in 30거래일)는 과거 2008년 금융위기나 팬데믹 시점과 유사합니다.",
-            "t": 6
-          },
-          {
-            "point": "실적 전망이 견고함에도 불구하고 현재 지수는 -50%대 실적 쇼크를 미리 반영한 수준으로 저평가되어 있습니다.",
-            "t": 32
-          },
-          {
-            "point": "코스피의 PEG(Price-to-Earnings Growth) 지수는 0.06으로, 피터 린치가 '극단적 저평가'로 본 0.5 아래를 훨씬 밑돌며 MSCI 선진국 및 신흥국 증시 중 가장 낮은 수준입니다.",
-            "t": 49
-          },
-          {
-            "point": "현재의 고물가, 고긴축, 고금리 상황으로 인해 과거와 같은 V자형 반등보다는 '시간 싸움'이 이어질 가능성이 큽니다.",
-            "t": 100
-          },
-          {
-            "point": "가격 조정은 이미 '9부 능선'을 통과했으며, 최악의 파국만 아니라면 중장기적 관점에서는 바닥을 통과할 수 있다는 긍정적인 시각입니다.",
-            "t": 107
-          }
-        ],
-        "actionable": [
-          "남들이 두려워할 때 욕심을 부리라는 워런 버핏의 격언을 고려하여 현재의 저평가된 시장에서 투자 기회를 모색할 수 있습니다.",
-          "V자 반등보다는 시간 싸움이 예상되므로, 장기적인 관점에서 분할 매수 등 전략적인 접근을 통해 기회를 활용하는 것이 바람직합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-05T17:13:01.476553+09:00"
     }
   ],
-  "updated": "2026-08-13T08:23:02.900040+09:00"
+  "updated": "2026-08-13T09:46:15.542288+09:00"
 }
