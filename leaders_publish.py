@@ -16,10 +16,19 @@ LEDGER = os.path.join(BASE, "results", "leaders_paper.json")
 BOOST = {"b_ophigh": "영업익 신고점", "b_nihigh": "순익 신고점",
          "b_opjump": "영업익 QoQ+50%", "b_opmjump": "OPM QoQ+3%p"}
 BACKTEST = dict(
-    period="2018-06 ~ 2026-08 · 미국 1,271종", cagr=32.8, mdd=-37.7, recover=0.87,
-    spy_cagr=14.2, spy_mdd=-31.8, spy_recover=0.45,
-    trades=136, winrate=43.4, hold_wk=20.7, med_ret=-5.9,
-    wf_cagr="4/6", wf_recover="2/6",     # 구 규칙⑤는 4/6 · 3/6
+    # 2026-08-13 갱신. 유니버스 선정의 look-ahead를 제거하고(수집 하한 $2B→$0.5B,
+    # 1,279→1,811종) 다시 측정한 값이다. 이전 표기(CAGR 32.8/MDD -37.7)는
+    # "지금 시총이 큰 회사"만 수집한 편향된 유니버스 기준이라 부풀려져 있었다.
+    # 종목 수도 8 -> 12로 바꿨다. 8종목은 워크포워드 2/6으로 M4 미달.
+    period="2018-01 ~ 2026-08 · 미국 1,811종 (point-in-time)",
+    cagr=28.2, mdd=-29.8, recover=0.95,
+    spy_cagr=14.6, spy_mdd=-31.8, spy_recover=0.46,
+    # 확대 유니버스에서는 CAGR/MDD/회복/워크포워드만 다시 쟀다.
+    # 보유주수·수익중앙·회복배율 워크포워드는 미측정이라 키를 비워 대시보드에 '-'로 뜬다.
+    trades=205, winrate=40.5,
+    maxpos=12, wf_cagr="4/6", wf_recover="미측정",
+    prev_measure=dict(note="편향 유니버스(1,279종) 기준 옛 표기",
+                      cagr=32.8, mdd=-37.7, recover=0.87, maxpos=8),
     # 2026-08-08 규칙 전환. PSR<3(구 규칙⑤)은 CAGR 27.7 / MDD −23.9 / 회복 1.16 이었다.
     # MDD가 SPY(−31.8%)보다 나빠지는 것을 받아들이고 CAGR +5.1%p와 사각지대 해소를 택했다.
     prev_rule=dict(name="⑤ PSR<3", cagr=27.7, mdd=-23.9, recover=1.16,
@@ -91,7 +100,7 @@ def main():
     out = dict(
         generated=str(date.today()), signal_week=str(wk.date()),
         rule="RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
-        exit="고점 대비 −20% 트레일링 · 8종목 × 12.5% · 2주 분할매수 · 불타기 없음",
+        exit="고점 대비 −20% 트레일링(주봉) · 12종목 × 8.3% · 2주 분할매수 · 불타기 없음",
         universe=int(len(base)), n=int(len(sel)),
         funnel=funnel, candidates=[row(r) for _, r in sel.iterrows()],
         backtest=BACKTEST, paper=paper)
