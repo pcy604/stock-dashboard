@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T01:35:17.131962+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T02:43:27.195362+09:00"
     },
     {
       "video_id": "ouT-f05lIG4",
@@ -11925,5 +11925,5 @@
       "analyzed_at": "2026-08-06T08:41:37.932518+09:00"
     }
   ],
-  "updated": "2026-08-14T01:35:50.842875+09:00"
+  "updated": "2026-08-14T02:43:28.243117+09:00"
 }
