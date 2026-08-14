@@ -107,6 +107,50 @@ def load_adv(sym: str, close: pd.Series | None = None) -> pd.Series | None:
     return v.rolling(20).mean() if len(v) > 25 else None
 
 
+def earnings_map() -> dict:
+    """sym → 이익 변곡 시계열. {sym: DataFrame[available_from, op_turn, op_yoy]}
+
+    ⚠️ look-ahead 차단이 이 함수의 존재 이유다.
+    2023Q1 실적은 2023-03-31 에 존재한 정보가 아니라 **5월 중순 공시 후**에야 알 수 있다.
+    분기말 기준으로 필터를 걸면 미래를 훔쳐보게 되어 백테스트가 가짜가 된다.
+    그래서 각 분기에 `available_from` = 분기말 + LAG_DAYS 를 붙이고,
+    신호일에는 그 시점까지 **공시된** 분기만 참조한다.
+    """
+    LAG_DAYS = 50          # 분기말 → 공시까지 (1~3분기 45일, 사업보고서 90일 법정 한도의 보수적 중간값)
+    try:
+        import ingest_dart_quarterly as IQ
+        q = IQ.quarterly()
+    except Exception:
+        return {}
+    if q is None or len(q) == 0:
+        return {}
+    qend = {1: '-03-31', 2: '-06-30', 3: '-09-30', 4: '-12-31'}
+    q = q.copy()
+    q['qend'] = pd.to_datetime(q['year'].astype(str) + q['q'].map(qend))
+    # 4분기(사업보고서)는 법정 기한이 90일이라 더 늦게 나온다
+    q['available_from'] = q['qend'] + pd.to_timedelta(
+        [90 if x == 4 else LAG_DAYS for x in q['q']], unit='D')
+    out = {}
+    for sym, g in q.groupby('sym'):
+        g = g.sort_values('available_from')[['available_from', 'op_turn', 'op_yoy']]
+        out[sym] = g.reset_index(drop=True)
+    return out
+
+
+def earn_ok_at(g, when, min_op_yoy=100.0) -> bool:
+    """신호일 `when` 기준으로 '가장 최근에 공시된' 분기가 이익 변곡인가."""
+    if g is None or len(g) == 0:
+        return False
+    vis = g[g['available_from'] <= when]
+    if len(vis) == 0:
+        return False
+    last = vis.iloc[-1]
+    if last['op_turn'] == 1:
+        return True
+    y = last['op_yoy']
+    return bool(pd.notna(y) and y >= min_op_yoy)
+
+
 def names() -> dict:
     try:
         import sqlite3
@@ -118,16 +162,22 @@ def names() -> dict:
 
 # ── 규칙 ───────────────────────────────────────────────────────────
 def trades_for(c: pd.Series, trail=TRAIL, start=START, end=None,
-               min_price=MIN_PRICE, lookback=LOOKBACK, adv=None, min_adv=0) -> list[dict]:
+               min_price=MIN_PRICE, lookback=LOOKBACK, adv=None, min_adv=0,
+               earn=None) -> list[dict]:
     """52주 신고가 진입 → 고점대비 trail% 이탈 청산 → 재진입 허용.
 
-    adv: 20일 평균 거래대금 시계열(원). min_adv 이상일 때만 진입한다 —
-    '신호는 떴지만 실제로는 못 사는' 종목을 백테스트에서 빼기 위한 컷.
+    adv:  20일 평균 거래대금 시계열(원). min_adv 이상일 때만 진입한다 —
+          '신호는 떴지만 실제로는 못 사는' 종목을 백테스트에서 빼기 위한 컷.
+    earn: 이익 변곡 시계열(earnings_map 산출). 주면 '흑자전환 또는 영업익 YoY≥100%'
+          조건을 **공시 시차를 반영해** 추가한다. None이면 순수 가격 규칙.
     """
     hi = c.rolling(lookback).max().shift(1)          # shift(1): 당일 종가는 비교에서 제외
     sig = (c > hi) & (c >= min_price)
     if adv is not None and min_adv > 0:
         sig = sig & (adv.reindex(c.index).ffill() >= min_adv)
+    if earn is not None:
+        # 공시 시차를 반영해, 그날까지 '공시된' 분기만 보고 이익 변곡 여부를 판정
+        sig = sig & pd.Series([earn_ok_at(earn, d) for d in c.index], index=c.index)
     px = c[(c.index >= start) & ((c.index <= end) if end else True)]
     s = sig.reindex(px.index).fillna(False)
     out, pos, entry, peak, edate = [], False, 0.0, 0.0, None
