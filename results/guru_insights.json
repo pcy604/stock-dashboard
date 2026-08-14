@@ -16,8 +16,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T20:29:17.382062+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T21:33:47.515101+09:00"
     },
     {
       "video_id": "555XFS6LUmA",
@@ -35,12 +35,12 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T20:27:02.523087+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T21:31:38.360895+09:00"
     },
     {
       "video_id": "0mJrm-RVgFc",
-      "title": "인버스 사신 분들, 장기채 물리신 분들...ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.14.금]",
+      "title": "1년 뒤 웃으며 잔치하시죠ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.14.금]",
       "channel": "체슬리TV",
       "published": "2026-08-14T10:00:15+00:00",
       "url": "https://www.youtube.com/watch?v=0mJrm-RVgFc",
@@ -54,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T20:24:53.384007+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T21:29:02.205834+09:00"
     },
     {
       "video_id": "H3yK_1JuUIM",
@@ -70,11 +70,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T20:27:40.838349+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T21:32:10.620063+09:00"
     },
     {
       "video_id": "7KzLnsP6_lg",
@@ -158,8 +158,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T20:25:25.647499+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T21:30:01.086515+09:00"
     },
     {
       "video_id": "4z863twH-Oc",
@@ -177,8 +177,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T20:29:49.534709+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-14T21:34:19.766506+09:00"
     },
     {
       "video_id": "PaznSLcZNEg",
@@ -240,8 +240,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T20:28:13.035489+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-14T21:32:42.822599+09:00"
     },
     {
       "video_id": "cb7ShNJbBA0",
@@ -259,8 +259,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T20:26:30.407764+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-14T21:31:06.265367+09:00"
     },
     {
       "video_id": "Vg000RDoFqM",
@@ -278,8 +278,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T20:25:57.749488+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-14T21:30:33.434562+09:00"
     },
     {
       "video_id": "5uDYlcDIK5E",
@@ -462,8 +462,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T18:45:24.455555+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-14T21:33:14.935819+09:00"
     },
     {
       "video_id": "v4V0hpDi2Tc",
@@ -11410,5 +11410,5 @@
       "analyzed_at": "2026-08-06T22:20:47.786564+09:00"
     }
   ],
-  "updated": "2026-08-14T20:29:50.534975+09:00"
+  "updated": "2026-08-14T21:34:20.766742+09:00"
 }
