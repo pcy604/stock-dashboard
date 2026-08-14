@@ -16,8 +16,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-15T01:29:59.120238+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-15T02:36:16.018672+09:00"
     },
     {
       "video_id": "rlBL0hhoWXs",
@@ -35,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-15T01:29:26.763570+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-15T02:35:43.767026+09:00"
     },
     {
       "video_id": "6nFtfLuzyYg",
@@ -11473,5 +11473,5 @@
       "analyzed_at": "2026-08-06T22:18:38.140370+09:00"
     }
   ],
-  "updated": "2026-08-15T01:30:00.238081+09:00"
+  "updated": "2026-08-15T02:36:17.192353+09:00"
 }
