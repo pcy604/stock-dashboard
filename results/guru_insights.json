@@ -1,6 +1,63 @@
 {
   "items": [
     {
+      "video_id": "6nFtfLuzyYg",
+      "title": "국장에서는 열심히 살아야 되는 이유 #국장 #변동성 #주주환원 #배당 #사이클 #반도체 #레버리지 #야식잡썰 #이대호",
+      "channel": "와이스트릿",
+      "published": "2026-08-14T10:00:33+00:00",
+      "url": "https://www.youtube.com/watch?v=6nFtfLuzyYg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-14T20:29:17.382062+09:00"
+    },
+    {
+      "video_id": "555XFS6LUmA",
+      "title": "10월 5일에 주목해야 하는 이유…외국인 복귀는 이미 시작됐다ㅣ홍선애, 이혁진 NH투자증권 주식전략팀장 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-14T09:47:19+00:00",
+      "url": "https://www.youtube.com/watch?v=555XFS6LUmA",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-14T20:27:02.523087+09:00"
+    },
+    {
+      "video_id": "0mJrm-RVgFc",
+      "title": "인버스 사신 분들, 장기채 물리신 분들...ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.14.금]",
+      "channel": "체슬리TV",
+      "published": "2026-08-14T10:00:15+00:00",
+      "url": "https://www.youtube.com/watch?v=0mJrm-RVgFc",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-14T20:24:53.384007+09:00"
+    },
+    {
       "video_id": "H3yK_1JuUIM",
       "title": "[8월 14일 마감시황] 반도체 부활에 외국인까지 돌아왔다…코스피 상승 추세 이어질 조건ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
       "channel": "삼프로TV",
@@ -13,11 +70,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T18:43:15.784001+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T20:27:40.838349+09:00"
     },
     {
       "video_id": "7KzLnsP6_lg",
@@ -101,8 +158,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T18:40:32.015785+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T20:25:25.647499+09:00"
     },
     {
       "video_id": "4z863twH-Oc",
@@ -120,8 +177,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T18:45:56.715841+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T20:29:49.534709+09:00"
     },
     {
       "video_id": "PaznSLcZNEg",
@@ -183,14 +240,14 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T18:43:47.869631+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T20:28:13.035489+09:00"
     },
     {
       "video_id": "cb7ShNJbBA0",
-      "title": "외국인이 다시 산다…7천피 터치한 코스피, 상승장 재개될까ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
+      "title": "[26.08.14 오후 방송 전체보기] 코스피, 돌아온 외국인·살아난 반도체에 5거래일 연속 상승! 원화 한 달 새 9.4% '껑충'",
       "channel": "삼프로TV",
-      "published": "2026-08-14T05:23:38+00:00",
+      "published": "2026-08-14T11:04:27+00:00",
       "url": "https://www.youtube.com/watch?v=cb7ShNJbBA0",
       "analysis": {
         "relevant": true,
@@ -202,8 +259,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T18:44:20.075949+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T20:26:30.407764+09:00"
     },
     {
       "video_id": "Vg000RDoFqM",
@@ -221,8 +278,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T18:42:43.183644+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T20:25:57.749488+09:00"
     },
     {
       "video_id": "5uDYlcDIK5E",
@@ -424,8 +481,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T18:44:52.210663+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-14T20:28:45.175593+09:00"
     },
     {
       "video_id": "0nwhlumpbA4",
@@ -11351,64 +11408,7 @@
       "source": "fail",
       "attempts": 2,
       "analyzed_at": "2026-08-06T22:20:47.786564+09:00"
-    },
-    {
-      "video_id": "0iWp1EI5sIw",
-      "title": "\"반도체 초격차 시작됐다\" 이젠 5년 단위? | 김록호 하나증권 리서치센터 팀장 [더블 업]",
-      "channel": "삼프로TV",
-      "published": "2026-08-06T02:04:20+00:00",
-      "url": "https://www.youtube.com/watch?v=0iWp1EI5sIw",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-06T22:20:15.541447+09:00"
-    },
-    {
-      "video_id": "3v1Avz9Ijmk",
-      "title": "[8월 6일 마감시황] '투기판' 된 코스피, 이제 펀더멘털도 안 통한다 | 홍선애, 김장열, 이권희 [클로징벨 라이브]",
-      "channel": "삼프로TV",
-      "published": "2026-08-06T08:43:40+00:00",
-      "url": "https://www.youtube.com/watch?v=3v1Avz9Ijmk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-06T22:19:42.732647+09:00"
-    },
-    {
-      "video_id": "8H20N3eXxRg",
-      "title": "\"본전만 찾고 팔겠다?\" 많이 오른 코스닥조차 여전히 마이너스라면 | 홍선애, 장우진 금시공 대표 [여의도 인사이트]",
-      "channel": "삼프로TV",
-      "published": "2026-08-06T09:47:04+00:00",
-      "url": "https://www.youtube.com/watch?v=8H20N3eXxRg",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-06T22:19:10.406400+09:00"
     }
   ],
-  "updated": "2026-08-14T18:45:57.716098+09:00"
+  "updated": "2026-08-14T20:29:50.534975+09:00"
 }
