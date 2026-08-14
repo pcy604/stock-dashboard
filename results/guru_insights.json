@@ -1,6 +1,110 @@
 {
   "items": [
     {
+      "video_id": "H3yK_1JuUIM",
+      "title": "[8월 14일 마감시황] 반도체 부활에 외국인까지 돌아왔다…코스피 상승 추세 이어질 조건ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-08-14T08:23:10+00:00",
+      "url": "https://www.youtube.com/watch?v=H3yK_1JuUIM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-14T18:43:15.784001+09:00"
+    },
+    {
+      "video_id": "7KzLnsP6_lg",
+      "title": "주식은 우리 삶을 이렇게 만듭니다 #박세익 #주식",
+      "channel": "체슬리TV",
+      "published": "2026-08-14T08:00:06+00:00",
+      "url": "https://www.youtube.com/watch?v=7KzLnsP6_lg",
+      "analysis": {
+        "relevant": false,
+        "one_liner": "주식 투자는 세상을 변화시키는 혁신 기술과 천재들의 삶을 이해하고 공유하는 매력적인 학습 도구입니다.",
+        "summary": [
+          "주식 투자는 세상의 변화와 혁신 기술을 학습하는 독특한 기회를 제공합니다.",
+          "이는 개인의 삶을 윤택하고 풍요롭게 만드는 천재들의 노력과 통찰력을 공유하는 경험입니다.",
+          "주식을 통해 투자자들은 세계를 변화시키는 기술과 기업에 대한 깊은 이해를 얻게 됩니다.",
+          "투자를 하지 않으면 이러한 중요한 발전과 트렌드를 심도 있게 공부할 동기가 부족할 수 있습니다.",
+          "이러한 세계적인 혁신에 대한 참여와 이해가 주식 투자의 본질적인 매력으로 강조됩니다."
+        ],
+        "tickers": [
+          {
+            "name": "Tesla",
+            "ticker": "TSLA",
+            "context": "엘런 머스크가 만든 혁신 기술 기업",
+            "view": "긍정",
+            "t": 14
+          },
+          {
+            "name": "Palantir",
+            "ticker": "PLTR",
+            "context": "알렉스 카프가 이끄는 혁신 기술 기업",
+            "view": "긍정",
+            "t": 16
+          },
+          {
+            "name": "Apple",
+            "ticker": "AAPL",
+            "context": "스티브 잡스가 만든 혁신 기술 기업",
+            "view": "긍정",
+            "t": 17
+          },
+          {
+            "name": "NVIDIA",
+            "ticker": "NVDA",
+            "context": "젠슨 황이 이끄는 혁신 기술 기업",
+            "view": "긍정",
+            "t": 19
+          }
+        ],
+        "key_points": [
+          {
+            "point": "주식 투자는 세계의 변화와 혁신 기술을 이해하기 위한 강력한 학습 도구입니다.",
+            "t": 0
+          },
+          {
+            "point": "투자를 통해 세계 최고의 수재와 천재들이 만드는 혁신에 간접적으로 참여하고 그들의 삶을 공유할 수 있습니다.",
+            "t": 7
+          },
+          {
+            "point": "주식 투자는 그렇지 않았다면 관심을 가지지 않았을 기술과 시장에 대해 능동적으로 공부하게 만드는 동기를 부여합니다.",
+            "t": 28
+          }
+        ],
+        "actionable": []
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-14T18:42:10.867566+09:00"
+    },
+    {
+      "video_id": "GIbyIjNCY_o",
+      "title": "솔리다임 美 상장 추진…하이닉스에 호재냐 악재냐ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.14.금]",
+      "channel": "체슬리TV",
+      "published": "2026-08-14T08:06:16+00:00",
+      "url": "https://www.youtube.com/watch?v=GIbyIjNCY_o",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-14T18:40:32.015785+09:00"
+    },
+    {
       "video_id": "4z863twH-Oc",
       "title": "이건 때 되면 무조건 오른다고요 떨어지면 사시라고요 / 박병창 대표 (풀버전)",
       "channel": "와이스트릿",
@@ -13,11 +117,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T17:20:33.765212+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T18:45:56.715841+09:00"
     },
     {
       "video_id": "PaznSLcZNEg",
@@ -76,15 +180,15 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T17:07:06.586786+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T18:43:47.869631+09:00"
     },
     {
       "video_id": "cb7ShNJbBA0",
-      "title": "GPU 담보 '칩 증권화(CBS)'의 경고, 반도체 랠리 뒤 숨은 리스크는ㅣ홍선애, 신영증권 김효진 박사 [여의도 인사이트]",
+      "title": "외국인이 다시 산다…7천피 터치한 코스피, 상승장 재개될까ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
       "channel": "삼프로TV",
       "published": "2026-08-14T05:23:38+00:00",
       "url": "https://www.youtube.com/watch?v=cb7ShNJbBA0",
@@ -95,12 +199,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"GPU를 담보로 하는 '칩 증권화(CBS)'의 개념과 그 확산이 반도체 랠리에 미칠 수 있는 잠재적 리스크를 경고하는 내용입니다.\",\n  \"summary\": [\n    \"AI 시대 GPU 수요 폭증과 높은 단가로 인해 GPU를 담보로 하는 '칩 증권화(CBS)'라는 새로운 자금 조달 방식이 등장하고 있습니다. (t=60)\",\n    \"CBS는 대규모 GPU 구매 비용을 충당하기 위한 대안으로 부상했으나, 자산 가치 평가와 유동성 측면에서 과거의 증권화 상품과 유사한 위험을 내포합니다. (t=180)\",\n    \"주요 리스크로는 GPU 기술의 빠른 진부화, 금리 변동에 대한 취약성, 그리고 담보물의 실제 가치 대비 과대평가 가능성이 지적됩니다. (t=240)\",\n    \"전문가들은 2008년 서브프라임 모기지 사태 당시 CDO(부채담보부증권)와 유사하게, 신용 평가 모델의 한계 및 담보 자산의 급격한 가치 하락 위험을"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T17:05:11.889134+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T18:44:20.075949+09:00"
     },
     {
       "video_id": "Vg000RDoFqM",
@@ -115,11 +218,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T17:04:05.336932+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-14T18:42:43.183644+09:00"
     },
     {
       "video_id": "5uDYlcDIK5E",
@@ -299,11 +402,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T17:15:12.565043+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T18:45:24.455555+09:00"
     },
     {
       "video_id": "v4V0hpDi2Tc",
@@ -318,11 +421,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-14T17:09:36.348667+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-14T18:44:52.210663+09:00"
     },
     {
       "video_id": "0nwhlumpbA4",
@@ -11305,225 +11408,7 @@
       "source": "fail",
       "attempts": 2,
       "analyzed_at": "2026-08-06T22:19:10.406400+09:00"
-    },
-    {
-      "video_id": "v5zKEpXDhbc",
-      "title": "코스피와 삼전닉스, 무너지는 하락일까 기회가 되는 하락일까 | 오종태의 투자병법",
-      "channel": "오종태의투자병법",
-      "published": "2026-08-06T09:25:24+00:00",
-      "url": "https://www.youtube.com/watch?v=v5zKEpXDhbc",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "오종태 대표는 최근 코스피와 코스닥 시장의 큰 하락과 변동성에도 불구하고, 펀더멘털 대비 가격 매력도가 높아졌다고 분석하며 이 시기를 학습을 통해 투자 용기를 키울 기회로 삼을 것을 강조했습니다.",
-        "summary": [
-          "현재 한국 시장(코스피 -4.40%, 코스닥 -1.40%)은 미국 시장과 달리 실적 대비 주가가 과도하게 하락하여 가격 매력도가 높아진 상태입니다.",
-          "시장은 심리, 유동성, 펀더멘털 세 가지 요소로 작동하며, 현재 한국 시장은 심리와 유동성 면에서는 약세지만, 펀더멘털 대비 가격이 낮아진 상황입니다.",
-          "미국 시장은 실적 발표 내용이 좋아서 지수가 올라갔지만, 이익도 같이 올라 밸류에이션 부담이 없는 역사적 고점인 반면, 아시아 시장은 '개박살'이 났다고 표현하며 펀더멘털 대비 주가 하락이 컸음을 지적합니다.",
-          "알고리즘 매매는 인간적인 감정 없이 데이터(변동성)에만 반응하여 시장의 움직임을 증폭시키며, 투자자들은 '화상 환자'처럼 놀란 상태입니다.",
-          "이러한 변동성과 투자자들의 심리적 위축은 단기적인 현상이며, 장기적으로는 2008년 이후 글로벌 유동성이 풍부해 투자는 계속될 것이라고 전망합니다.",
-          "어려운 시장에서 용기를 키우는 방법은 무모함이 아닌 '절실함'과 '이해'를 통해 학습하고 복기하며 자신만의 투자 원칙을 세우는 것입니다."
-        ],
-        "tickers": [
-          {
-            "name": "코스피",
-            "ticker": "",
-            "context": "8/6 11:10 기준 -4.40%로 6300 초반. 하락했으나 가격 매력도가 생겨 불편하지 않음.",
-            "view": "긍정",
-            "t": 9
-          },
-          {
-            "name": "코스닥",
-            "ticker": "",
-            "context": "8/6 11:10 기준 -1.40%로 788. 하락했으나 가격 매력도가 생겨 불편하지 않음.",
-            "view": "긍정",
-            "t": 12
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "8/6 11:10 기준 -10.01%. 코스피 시장의 변동성에 영향을 주는 주요 종목.",
-            "view": "중립",
-            "t": 19
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "8/6 11:10 기준 -6.30%. 코스피 시장의 변동성에 영향을 주는 주요 종목.",
-            "view": "중립",
-            "t": 20
-          },
-          {
-            "name": "미국 시장",
-            "ticker": "",
-            "context": "역사상 고점이나 이익 대비 밸류에이션이 올라간 것이 아니어서 가격 부담은 적음.",
-            "view": "중립",
-            "t": 200
-          },
-          {
-            "name": "아시아 시장",
-            "ticker": "",
-            "context": "미국 시장과 달리 주가가 '개박살' 나면서 적정 펀더멘털보다 싸진 구간에 진입하여 가격 매력도가 높음.",
-            "view": "긍정",
-            "t": 228
-          }
-        ],
-        "key_points": [
-          {
-            "point": "주식 투자는 가격, 심리, 유동성, 펀더멘털 세 가지 요소의 균형을 이해하는 것이 중요하며, 특히 한국 시장은 펀더멘털 대비 가격 매력도가 커진 상태입니다.",
-            "t": 28
-          },
-          {
-            "point": "현재 시장의 큰 변동성은 미국 시장의 하락 흐름과 아시아 시장의 과도한 주가 조정에 기인하며, 알고리즘 매매가 이러한 변동성을 증폭시키는 요인으로 작용하고 있습니다.",
-            "t": 141
-          },
-          {
-            "point": "투자자들은 현재 '화상 환자'처럼 놀란 상태로 대응이 어렵지만, 글로벌 유동성은 여전히 풍부하며, 시장이 회복하면 돈은 다시 들어올 것입니다.",
-            "t": 414
-          },
-          {
-            "point": "투자 용기를 키우는 방법은 무모함이 아닌 '절실함'과 '이해'에 기반합니다. 지금의 어려운 시간을 지난 투자 경험과 이슈들을 복기하고 학습하여 이해를 확장하는 기회로 삼아야 합니다.",
-            "t": 702
-          }
-        ],
-        "actionable": [
-          "현재 시장을 단순히 부정적으로만 보지 말고, 펀더멘털 대비 가격 매력도가 형성된 종목을 찾아 학습하고 분석하는 시간을 갖습니다.",
-          "본인 채널의 과거 영상들을 포함하여 시장 움직임과 주요 이슈에 대한 설명을 복기하고 공부하여, 시장을 바라보는 자신만의 관점과 판단 기준을 정립합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-06T20:11:58.466818+09:00"
-    },
-    {
-      "video_id": "cyd8KuFk4JU",
-      "title": "불안하고 두려운 시장...홀로 견디기 어렵다면...",
-      "channel": "체슬리TV",
-      "published": "2026-08-06T08:14:47+00:00",
-      "url": "https://www.youtube.com/watch?v=cyd8KuFk4JU",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "시장의 변동성과 불안감 속에서 경험 많은 조언자의 역할과 장기적인 관점에서의 자산 배분 전략의 중요성을 강조하며, 단기적인 추세 추종보다는 위기 속 기회를 포착하는 지혜를 나눕니다.",
-        "summary": [
-          "시장의 변동성 속에서 마음의 평온을 유지하고 전문적인 지도가 필요함을 강조하며, 자신을 허드슨강의 기적을 만든 슐렌버거 기장과 같은 역할을 하는 '체슬리'로 비유합니다 [00:06].",
-          "주식 투자는 혼자 하는 것이지만, 전문가의 도움을 받아 예측 불가능한 시장의 '난기류'를 헤쳐나가는 것이 중요하다고 역설합니다 [00:43].",
-          "시장의 하락은 스트레스를 주지만, 장기적인 관점에서 보면 '기회'가 될 수 있으며, 기회는 종종 '위기'의 형태로 찾아온다고 설명합니다 [01:31].",
-          "돈을 쫓기보다는 좋은 주식을 좋은 가격에 사는 것이 중요하며, 이는 자산 배분의 기본 원칙이자 장기적인 성공을 위한 길이라고 조언합니다 [03:41].",
-          "마이클 버리의 공매도 전략에 대한 회의적인 시각을 드러내며, 시장의 전반적인 우상향 경향과 확률적으로 낮은 하락 베팅의 위험성을 지적합니다 [07:27].",
-          "1987년 블랙먼데이와 유사한 금리 인상 환경에 대한 우려를 언급하면서도, 우리 시장은 이미 선반영된 측면이 있다고 분석합니다 [08:58]."
-        ],
-        "tickers": [
-          {
-            "name": "엔비디아",
-            "ticker": "NVDA",
-            "context": "마이클 버리가 공매도를 했으나 수익을 내지 못한 종목",
-            "view": "긍정",
-            "t": 703
-          },
-          {
-            "name": "아이셰어즈 반도체 상장지수펀드",
-            "ticker": "SOXX",
-            "context": "마이클 버리가 공매도를 통해 수익을 낸 종목 중 하나",
-            "view": "부정",
-            "t": 703
-          },
-          {
-            "name": "마이크론",
-            "ticker": "MU",
-            "context": "마이클 버리가 공매도를 통해 수익을 낸 종목 중 하나",
-            "view": "부정",
-            "t": 703
-          },
-          {
-            "name": "캐터필러",
-            "ticker": "CAT",
-            "context": "마이클 버리가 공매도를 통해 수익을 낸 종목 중 하나",
-            "view": "부정",
-            "t": 703
-          },
-          {
-            "name": "팔란티어",
-            "ticker": "PLTR",
-            "context": "마이클 버리가 공매도를 통해 수익을 낸 종목 중 하나",
-            "view": "부정",
-            "t": 703
-          },
-          {
-            "name": "테슬라",
-            "ticker": "TSLA",
-            "context": "마이클 버리가 공매도를 통해 수익을 낸 종목 중 하나",
-            "view": "부정",
-            "t": 703
-          },
-          {
-            "name": "어플라이드머티리얼즈",
-            "ticker": "AMAT",
-            "context": "마이클 버리가 공매도를 통해 수익을 낸 종목 중 하나",
-            "view": "부정",
-            "t": 703
-          }
-        ],
-        "key_points": [
-          {
-            "point": "변동성이 심한 시장에서 불안과 두려움을 느끼는 것은 당연하며, 경험 있는 안내자의 역할이 중요함을 강조 [00:06].",
-            "t": 6
-          },
-          {
-            "point": "주식 투자는 개인이 결정하는 여정이지만, 시장의 급격한 변화에 대한 심리적 준비와 대응 전략이 필요함 [00:43].",
-            "t": 43
-          },
-          {
-            "point": "시장의 하락은 투자 경력 33년 중에도 심각한 스트레스 순위 10위 안에도 들지 않는다고 언급하며, 경험이 주는 평정심을 강조 [01:31].",
-            "t": 131
-          },
-          {
-            "point": "돈을 벌려고 하기보다 돈이 스스로 찾아오도록 하는 '기본 판단력'을 얻는 것이 중요하며, 좋은 가격에 좋은 주식을 사는 지혜를 역설 [03:41].",
-            "t": 341
-          },
-          {
-            "point": "기회는 항상 위기라는 탈을 쓰고 오므로, 시장 하락을 기회로 삼는 인식이 중요함을 피력 [05:05].",
-            "t": 505
-          },
-          {
-            "point": "워런 버핏처럼 좋은 주식을 장기적으로 보유하는 것이 중요하며, 단기적인 매수 매도보다는 자산 배분에 집중해야 함 [05:46].",
-            "t": 546
-          },
-          {
-            "point": "마이클 버리와 같은 비관론자는 명성을 얻지만, 낙관론자는 수익을 얻는다는 투자 격언을 인용하며, 확률적으로 낮은 하락 베팅에 대한 의문을 제기 [08:00].",
-            "t": 800
-          },
-          {
-            "point": "최근 금리 인상 기조가 1987년 블랙먼데이 직전 상황과 유사함을 언급하며, 연준의 금리 정책이 시장에 미치는 영향을 주시해야 함 [09:13]."
-          }
-        ],
-        "actionable": [
-          "단기적인 시장 변동에 일희일비하기보다는, 장기적인 투자 목표와 원칙을 세우고 이를 꾸준히 지켜나가야 합니다 [00:43].",
-          "시장이 불안정할 때를 좋은 자산을 저렴하게 매수할 수 있는 '기회'로 인식하고, 과도한 공포에 사로잡히지 않도록 노력해야 합니다 [05:05].",
-          "자산 배분에 대한 욕심을 내고 좋은 주식을 좋은 가격에 사는 데 집중하며, 펀더멘털이 강한 기업에 장기 투자하는 전략을 유지해야 합니다 [05:31]."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-06T20:07:12.074973+09:00"
-    },
-    {
-      "video_id": "_PCFtTh5aeM",
-      "title": "바닥은 확인했다! 진짜 반등은 이때 나옵니다 / 문남중 연구위원 (풀버전)",
-      "channel": "와이스트릿",
-      "published": "2026-08-06T02:45:09+00:00",
-      "url": "https://www.youtube.com/watch?v=_PCFtTh5aeM",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-06T22:21:53.054406+09:00"
     }
   ],
-  "updated": "2026-08-14T17:20:34.765579+09:00"
+  "updated": "2026-08-14T18:45:57.716098+09:00"
 }
