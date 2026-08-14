@@ -1959,15 +1959,44 @@ def _kelly_pct(score):
     if score >= 4:  return 9
     return 5
 
+def _pf_secrets():
+    """st.secrets 는 없을 수도 있다(로컬). 접근 자체가 예외를 던지므로 감싼다."""
+    try:
+        return st.secrets
+    except Exception:
+        return None
+
+
+def _pf_status() -> dict:
+    try:
+        import portfolio_store
+        return portfolio_store.status(_pf_secrets())
+    except Exception:
+        return {'backend': 'local', 'permanent': False,
+                'where': str(PORTFOLIO_FILE), 'label': '🔴 임시 저장'}
+
+
 def _load_pf() -> list:
+    """보유종목 — 영구 저장(GitHub)이 켜져 있으면 그쪽을 진실로 본다."""
+    try:
+        import portfolio_store
+        return portfolio_store.load(_pf_secrets())
+    except Exception:
+        pass
     if not PORTFOLIO_FILE.exists(): return []
     try: return json.loads(PORTFOLIO_FILE.read_text(encoding='utf-8')).get('positions', [])
     except: return []
 
-def _save_pf(positions: list):
-    PORTFOLIO_FILE.parent.mkdir(exist_ok=True)
-    data = {'updated': datetime.now().strftime('%Y-%m-%d %H:%M'), 'positions': positions}
-    PORTFOLIO_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+def _save_pf(positions: list, note: str = '') -> tuple[bool, str]:
+    """저장하고 (영구저장됐는가, 메시지)를 돌려준다. 화면이 사실대로 말할 수 있게."""
+    try:
+        import portfolio_store
+        return portfolio_store.save(positions, _pf_secrets(), note)
+    except Exception as e:
+        PORTFOLIO_FILE.parent.mkdir(exist_ok=True)
+        data = {'updated': datetime.now().strftime('%Y-%m-%d %H:%M'), 'positions': positions}
+        PORTFOLIO_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+        return False, f'로컬에만 저장됨 ({type(e).__name__})'
 
 
 
@@ -3417,11 +3446,18 @@ with _pf_main, guard('포트폴리오'):
         st.divider()
 
     with st.expander("➕ 종목 추가", expanded=False):
-        if IS_CLOUD:
-            st.warning("⚠️ **웹(클라우드)에서 추가한 보유종목은 서버가 재시작되면 사라집니다.** "
-                       "클라우드 저장소가 임시 디스크라서 그렇습니다. 계속 남기려면 로컬 PC에서 "
-                       "추가한 뒤 `data/portfolio.json` 을 커밋·푸시하세요. "
-                       "(지금 추가해도 이번 세션 화면 확인용으로는 정상 동작합니다)")
+        # 저장 위치를 숨기지 않는다 — 트랙레코드는 어디에 남는지가 곧 신뢰다.
+        _pfs = _pf_status()
+        if _pfs['permanent']:
+            st.caption(f"{_pfs['label']} — 저장 위치 `{_pfs['where']}`. "
+                       "추가·삭제할 때마다 저장소에 커밋되어 서버가 재시작돼도 남습니다.")
+        else:
+            st.warning(
+                f"{_pfs['label']} — 지금은 `{_pfs['where']}` 에만 저장됩니다. "
+                "**영구 저장을 켜려면** GitHub 개인 액세스 토큰(`contents:write`)을 발급해 "
+                "Streamlit Cloud → Settings → Secrets 에 `GITHUB_TOKEN` 으로 등록하세요. "
+                "토큰은 형이 직접 만들어 넣어야 합니다(제가 대신 만들 수 없습니다). "
+                "등록하면 이 문구가 🟢로 바뀌고 추가·삭제가 저장소에 커밋됩니다.")
         fc1, fc2, fc3, fc4, fc5, fc6 = st.columns([2, 1, 1, 1, 1, 1])
         with fc1: p_sym  = st.text_input("티커", key="p_sym", placeholder="TSLA / 005930")
         with fc2: p_name = st.text_input("이름(선택)", key="p_name", placeholder="Tesla")
@@ -3444,9 +3480,11 @@ with _pf_main, guard('포트폴리오'):
                     'qty': float(p_qty), 'buy_price': float(p_buy), 'buy_date': str(p_date),
                     'stop_loss_pct': float(p_stop), 'target_pct': float(p_target), 'note': p_note,
                 })
-                _save_pf(positions)
+                _ok, _msg = _save_pf(positions, f"{p_sym.upper()} 추가")
                 st.cache_data.clear()
-                st.success(f"✅ {p_sym.upper()} 추가 완료")
+                st.success(f"✅ {p_sym.upper()} 추가 완료 — {_msg}")
+                if not _ok:
+                    st.session_state['pf_warn'] = _msg
                 st.rerun()
             else:
                 st.error("티커·매수가·수량을 모두 입력하세요")
@@ -3652,9 +3690,9 @@ with _pf_main, guard('포트폴리오'):
             if st.button("🗑️ 삭제", key="do_del"):
                 del_sym = del_name.split(' ')[0]
                 new_pos = [p for p in positions if p['sym'] != del_sym]
-                _save_pf(new_pos)
+                _ok, _msg = _save_pf(new_pos, f"{del_sym} 삭제")
                 st.cache_data.clear()
-                st.success(f"{del_sym} 삭제 완료")
+                st.success(f"{del_sym} 삭제 완료 — {_msg}")
                 st.rerun()
 
         if valid_pf:
