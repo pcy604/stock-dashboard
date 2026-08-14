@@ -16,8 +16,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T23:03:54.163596+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-15T00:28:35.418375+09:00"
     },
     {
       "video_id": "rlBL0hhoWXs",
@@ -35,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-14T23:03:22.022596+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-15T00:28:03.016387+09:00"
     },
     {
       "video_id": "6nFtfLuzyYg",
@@ -54,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T23:05:31.490109+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-15T00:29:40.052845+09:00"
     },
     {
       "video_id": "555XFS6LUmA",
@@ -73,8 +73,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-14T23:04:26.558718+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-15T00:29:07.690582+09:00"
     },
     {
       "video_id": "0mJrm-RVgFc",
@@ -11473,5 +11473,5 @@
       "analyzed_at": "2026-08-06T22:18:38.140370+09:00"
     }
   ],
-  "updated": "2026-08-14T23:05:32.490357+09:00"
+  "updated": "2026-08-15T00:29:41.053097+09:00"
 }
