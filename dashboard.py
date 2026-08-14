@@ -686,6 +686,99 @@ with t_gain, guard('상승 상위'):
 
 # ── 주도주 (섹터/전체 상대강도) ──
 with t_lead, guard('주도주'):
+    # 2026-08-15: KR 규칙(KR-P1) 추가. US 규칙⑥과 근거 강도가 달라 탭을 나눈다.
+    _lead_mkt = st.radio("시장", ["🇺🇸 미국 (규칙⑥)", "🇰🇷 한국 (KR-P1)"],
+                         horizontal=True, key="lead_mkt",
+                         help="두 규칙은 검증 수준이 다릅니다 — 미국은 워크포워드까지, "
+                              "한국은 가격 백테스트만 거쳤습니다.")
+
+if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
+    with t_lead, guard('주도주 KR'):
+        st.caption(data_stamp('results/leaders_kr.json'))
+        _kr = load_json(Path('results/leaders_kr.json'))
+        if not _kr:
+            st.warning("KR 주도주 데이터 없음 → 로컬에서 `python leaders_kr.py publish` 실행 후 커밋.")
+        else:
+            _kbt = _kr['backtest'].get(str(int(_kr['params']['trail'])), {})
+            st.markdown(
+                f"<div style='background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #d97706;"
+                f"border-radius:10px;padding:13px 17px'>"
+                f"<b style='color:#92400e'>검증 등급 C — 연구용</b>"
+                f"<span style='color:#6b7280;font-size:12.5px'> · 미국 규칙⑥(등급 A−)과 같은 무게로 쓰면 안 됩니다</span>"
+                f"<div style='font-size:13px;color:#374151;margin-top:6px'>"
+                f"KR은 <b>분기 재무가 없어</b> 규칙⑥의 핵심 조건인 '이익 변곡'을 넣지 못했습니다"
+                f"(보유 재무: 연간 2023~2025, 835종). 그래서 <b>가격만으로</b> 만든 규칙입니다. "
+                f"워크포워드 검증도 아직 없습니다.</div></div>", unsafe_allow_html=True)
+            st.markdown(f"**진입** `{_kr['rule']}`  \n"
+                        f"유니버스 {_kr['universe']:,}종 · 기간 {_kr['period']} · 생성 {_kr['generated']}")
+
+            _k1, _k2, _k3, _k4 = st.columns(4)
+            _k1.metric("거래당 평균수익", f"{_kbt.get('avg','-')}%", help="왕복 비용 0.3% 차감 후")
+            _k2.metric("승률", f"{_kbt.get('winrate','-')}%", f"중앙값 {_kbt.get('med','-')}%",
+                       delta_color="off", help="중앙값이 음수 = 전형적 거래는 손실. 소수의 대박이 전부를 만든다")
+            _k3.metric("손익비", f"{_kbt.get('payoff','-')}")
+            _k4.metric("상위 1% 의존도", f"{_kbt.get('top1pct_share','-')}%",
+                       help="전체 수익 중 상위 1% 거래가 차지하는 비중. 높을수록 몇 건을 놓치면 무너진다")
+
+            st.markdown(f"**이번 후보 {_kr['n']}종** — 최근 8주 내 신고가 돌파 후 아직 트레일링에 안 걸린 종목")
+            if _kr['candidates']:
+                st.dataframe(pd.DataFrame([{
+                    '종목': c['name'][:18], '코드': c['sym'], '돌파일': c['entry_date'],
+                    '돌파가': f"{c['entry_px']:,.0f}", '현재가': f"{c['close']:,.0f}",
+                    '수익률': f"{c['ret']:+.1f}%", '고점대비': f"{c['ret']-c['peak_gain']:+.1f}%",
+                    '트레일링 손절가': f"{c['stop']:,.0f}", '경과': f"{c['days']}일",
+                } for c in _kr['candidates']]), use_container_width=True, hide_index=True,
+                    row_height=25, height=_dfh(len(_kr['candidates'])))
+            else:
+                st.info("이번 주 조건 충족 종목 없음")
+
+            with st.expander("📉 손절폭을 왜 -30%로 정했나 · 기각된 조건"):
+                st.caption("전 종목 1,476종·2018~2026 백테스트. 넓힐수록 단조 개선됐다.")
+                st.dataframe(pd.DataFrame([{
+                    '트레일링': k + '%', '거래': f"{v['n']:,}", '승률': f"{v['winrate']}%",
+                    '평균수익': f"{v['avg']}%", '중앙값': f"{v['med']}%",
+                    '손익비': v['payoff'], '보유(중앙)': f"{v['hold_d']}일",
+                    '상위1% 의존': f"{v['top1pct_share']}%",
+                } for k, v in sorted(_kr['backtest'].items(), key=lambda x: int(x[0]))]),
+                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(6))
+                st.markdown("**검증에서 기각된 조건** (넣으면 오히려 나빠짐)")
+                st.markdown("- ~~상대강도 RS13 ≥ 1.2~~ — 평균 11.9% → 10.5%")
+                st.markdown("- ~~상대강도 RS13 ≥ 1.5~~ — 평균 11.9% → 8.4%")
+                st.markdown("- ~~상대강도 RS13 ≥ 2.0~~ — 평균 11.9% → 3.7%, 손익비 3.09 → 2.54")
+                st.caption("US 규칙⑥의 **핵심 조건인 RS13>1.5가 KR에서는 단조로 성과를 깎았다.** "
+                           "52주 신고가 자체가 이미 강한 모멘텀 필터라, RS를 겹치면 '이미 너무 오른 것'만 "
+                           "남아 되돌림이 커지는 것으로 보인다. 같은 아이디어가 시장을 건너면 뒤집힐 수 있다는 증거.")
+
+            with st.expander("⚠️ 이 숫자를 믿으면 안 되는 이유 (반드시 읽을 것)"):
+                for c in _kr.get('caveats', []):
+                    st.markdown(f"- {c}")
+                st.caption("특히 **중앙값이 -11%**다. 셋 중 둘은 손실로 끝나고, 수익의 44%가 상위 1% 거래에서 나온다. "
+                           "몇 건의 대박을 놓치면 전체가 마이너스가 되는 구조라 **분산과 규율 없이는 재현되지 않는다.**")
+
+            with st.expander("📚 사례 연구 — 2023 에코프로로 검증한 것"):
+                st.markdown("""
+**진입은 쉬웠다.** 52주 신고가 규칙이 **2023-02-06, 28,685원**에 잡았다. 고점(7/25)까지 **8.8배**.
+
+**문제는 전부 청산 쪽이었다.** 그 상승 구간에 최대 **-32.2%** 눌림이 있었다.
+
+| 손절폭 | 거래 | 누적수익 | 1%리스크 비중 | 포트 기여 |
+|---|---|---|---|---|
+| -7% (구 룰) | 6 | +188% | 14% | +27% |
+| **-10%** | 3 | +393% | 10% | **+39%** |
+| -20% | 2 | +430% | 5% | +21% |
+| -30% | 2 | +315% | 3% | +10% |
+
+매수후보유는 2024년 말 +97%, 오늘 +218% (고점 대비 **-64%**) — **안 팔면 대부분 토해낸다.**
+
+> ⚠️ **주의**: 이 표만 보면 -10%가 답 같지만, **전 종목 1,476종으로 보면 -30%가 최고다**
+> (평균 11.9% vs 2.3%). 단일 종목으로 파라미터를 정하면 안 된다는 반례로 남겨둔다.
+
+**기저율**: 2023년 KR 1,350종 중 고점 10배 이상은 **5종(0.4%)**, 연말까지 유지한 건 **1종**.
+"내년에 하나 나온다"는 맞지만 "그게 뭔지 미리 안다"는 틀리다. → 한 종목을 맞히는 게 아니라
+**후보 여러 개를 규칙으로 태우는 것**이 유일한 방법.
+""")
+else:
+  with t_lead, guard('주도주 US'):
     st.caption(data_stamp('results/leaders_signal.json'))
     # 주도주 검증판 — 미국 1,279종·2018~2026 백테스트 + 워크포워드로 확정한 규칙⑤
     # (구 "주도주 지문" 로직은 2026-08-05 제거 — 신고가 −15% 이내·영익 YoY≥+100% 가 검증에서 기각됨)
