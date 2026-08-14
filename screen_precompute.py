@@ -81,17 +81,20 @@ def _series_for(sym, mkt, init_start):
             last = old.index.max()
             fstart = (last - timedelta(days=7)).strftime('%Y-%m-%d')   # 7일 겹쳐 받아 누락 방지
             new = fdr.DataReader(fsym, fstart)
-            if new is not None and not new.empty:
-                add = new[['Close']] if 'Close' in new.columns else new
-                comb = pd.concat([old[['Close']], add])
+            # 2026-08-15: 거래량도 함께 보존한다. 종가만 캐싱해 온 탓에 KR 규칙에
+            # 유동성 컷을 못 걸었고, 백테스트에 '실제로는 못 사는' 신호가 섞였다.
+            _cols = [c for c in ('Close', 'Volume') if c in getattr(new, 'columns', [])]
+            _keep = [c for c in ('Close', 'Volume') if c in old.columns]
+            if new is not None and not new.empty and _cols:
+                comb = pd.concat([old[_keep], new[_cols]])
                 comb = comb[~comb.index.duplicated(keep='last')].sort_index()
             else:
-                comb = old[['Close']]
+                comb = old[_keep]
         else:
             df = fdr.DataReader(fsym, init_start)
             if df is None or df.empty:
                 return None
-            comb = df[['Close']]
+            comb = df[[c for c in ('Close', 'Volume') if c in df.columns]]
         comb.to_parquet(cp)
         return comb['Close'].dropna()
     except Exception:

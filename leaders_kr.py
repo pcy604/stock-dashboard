@@ -52,7 +52,13 @@ DB = os.path.join(BASE, 'data', 'market.db')
 
 LOOKBACK = 252          # 52주
 TRAIL = 30.0            # 고점대비 트레일링 % — 전 종목 백테스트에서 확정(아래 REJECTED 참고)
-MIN_PRICE = 1000        # 동전주 제외 (호가단위·유동성 대용)
+MIN_PRICE = 1000        # 동전주 제외
+MIN_ADV = 10e8          # 20일 평균 거래대금 하한(원) = 10억
+# ⚠️ 이 컷은 '수익을 높이려고' 넣은 게 아니다. 오히려 백테스트 수익을 **깎는다**:
+#   컷 0억 12.0% → 5억 10.8% → 10억 9.8% → 30억 8.0% → 100억 6.4% (단조 감소)
+# 그런데도 넣는 이유: 컷 없는 12.0% 안에는 **실제로는 체결할 수 없는** 소형주 신호가
+# 섞여 있다. 낮아진 9.8%가 '진짜 값'이다. 필터가 성과를 깎는다고 빼면 백테스트만
+# 예뻐지고 실전은 그대로다. 10억은 개인 자금 규모에서 체결 가능한 최소선으로 잡았다.
 COST_PCT = 0.30         # 왕복 거래비용·슬리피지 가정 (%)
 START = '2018-01-01'
 
@@ -88,6 +94,19 @@ def load_close(sym: str) -> pd.Series | None:
     return c if len(c) > LOOKBACK + 20 else None
 
 
+def load_adv(sym: str, close: pd.Series | None = None) -> pd.Series | None:
+    """20일 평균 거래대금(원). 캐시에 Volume 이 없으면 None → 필터 미적용."""
+    try:
+        df = pd.read_parquet(os.path.join(CACHE, f'{sym}.parquet'))
+    except Exception:
+        return None
+    if 'Volume' not in df.columns:
+        return None
+    df.index = pd.to_datetime(df.index)
+    v = (df['Close'] * df['Volume']).dropna()
+    return v.rolling(20).mean() if len(v) > 25 else None
+
+
 def names() -> dict:
     try:
         import sqlite3
@@ -99,10 +118,16 @@ def names() -> dict:
 
 # ── 규칙 ───────────────────────────────────────────────────────────
 def trades_for(c: pd.Series, trail=TRAIL, start=START, end=None,
-               min_price=MIN_PRICE, lookback=LOOKBACK) -> list[dict]:
-    """52주 신고가 진입 → 고점대비 trail% 이탈 청산 → 재진입 허용."""
+               min_price=MIN_PRICE, lookback=LOOKBACK, adv=None, min_adv=0) -> list[dict]:
+    """52주 신고가 진입 → 고점대비 trail% 이탈 청산 → 재진입 허용.
+
+    adv: 20일 평균 거래대금 시계열(원). min_adv 이상일 때만 진입한다 —
+    '신호는 떴지만 실제로는 못 사는' 종목을 백테스트에서 빼기 위한 컷.
+    """
     hi = c.rolling(lookback).max().shift(1)          # shift(1): 당일 종가는 비교에서 제외
     sig = (c > hi) & (c >= min_price)
+    if adv is not None and min_adv > 0:
+        sig = sig & (adv.reindex(c.index).ffill() >= min_adv)
     px = c[(c.index >= start) & ((c.index <= end) if end else True)]
     s = sig.reindex(px.index).fillna(False)
     out, pos, entry, peak, edate = [], False, 0.0, 0.0, None
@@ -148,29 +173,58 @@ def summarize(rows: list[dict], label: str) -> dict:
 
 
 # ── 백테스트 ───────────────────────────────────────────────────────
-def backtest(trails=(7, 8, 10, 15, 20, 30)) -> dict:
+def backtest(trails=(7, 8, 10, 15, 20, 30), min_adv=MIN_ADV) -> dict:
     syms = kr_symbols()
-    print(f'KR 유니버스 {len(syms)}종 · {START}~ · 트레일링 {trails}', flush=True)
+    print(f'KR 유니버스 {len(syms)}종 · {START}~ · 트레일링 {trails} · '
+          f'거래대금 컷 {min_adv/1e8:.0f}억', flush=True)
     per_trail = {t: [] for t in trails}
-    used = 0
+    used = no_vol = 0
     for i, s in enumerate(syms, 1):
         c = load_close(s)
         if c is None:
             continue
+        adv = load_adv(s)
+        if adv is None:
+            no_vol += 1
         used += 1
         for t in trails:
-            for tr in trades_for(c, trail=t):
+            for tr in trades_for(c, trail=t, adv=adv, min_adv=min_adv):
                 tr['sym'] = s
                 per_trail[t].append(tr)
         if i % 400 == 0:
             print(f'  {i}/{len(syms)}', flush=True)
-    print(f'  사용 {used}종', flush=True)
-    return {'universe': used, 'rows': {t: summarize(v, f'-{t}% 트레일링')
-                                       for t, v in per_trail.items()},
+    print(f'  사용 {used}종 (거래량 없음 {no_vol}종)', flush=True)
+    return {'universe': used, 'no_volume': no_vol,
+            'rows': {t: summarize(v, f'-{t}% 트레일링') for t, v in per_trail.items()},
             'raw': per_trail}
 
 
-def live_signals(trail=TRAIL, weeks=8) -> list[dict]:
+def adv_spectrum(trail=TRAIL, cuts=(0, 5e8, 10e8, 30e8, 50e8, 100e8)):
+    """거래대금 컷을 올리면 성과가 어떻게 변하나 — 필터가 진짜 도움이 되는지 확인."""
+    syms = kr_symbols()
+    cache = []
+    for s in syms:
+        c = load_close(s)
+        if c is None:
+            continue
+        cache.append((s, c, load_adv(s)))
+    print(f'  로드 {len(cache)}종', flush=True)
+    out = {}
+    for cut in cuts:
+        rows = []
+        for s, c, adv in cache:
+            if cut > 0 and adv is None:
+                continue                       # 거래량 없으면 검증 불가 → 제외
+            rows += trades_for(c, trail=trail, adv=adv, min_adv=cut)
+        out[cut] = summarize(rows, f'{cut/1e8:.0f}억')
+        r = out[cut]
+        print(f"  컷 {cut/1e8:>4.0f}억: n={r['n']:>6,} 승률 {r['winrate']:>4.1f}% "
+              f"평균 {r['avg']:>6.2f}% 중앙 {r['med']:>7.2f}% 손익비 {r['payoff']} "
+              f"상위1%의존 {r['top1pct_share']}%", flush=True)
+    return out
+
+
+def live_signals(trail=TRAIL, weeks=8, min_adv=MIN_ADV) -> list[dict]:
     """최근 N주 안에 진입 신호가 났고 아직 트레일링에 안 걸린 종목 = 현재 후보."""
     nm, out = names(), []
     cutoff = pd.Timestamp.today() - pd.Timedelta(weeks=weeks)
@@ -178,7 +232,9 @@ def live_signals(trail=TRAIL, weeks=8) -> list[dict]:
         c = load_close(s)
         if c is None:
             continue
-        tr = trades_for(c, trail=trail, start=str((pd.Timestamp.today() - pd.Timedelta(days=400)).date()))
+        adv = load_adv(s)
+        tr = trades_for(c, trail=trail, adv=adv, min_adv=min_adv,
+                        start=str((pd.Timestamp.today() - pd.Timedelta(days=400)).date()))
         if not tr or not tr[-1].get('open'):
             continue
         t = tr[-1]
@@ -190,6 +246,8 @@ def live_signals(trail=TRAIL, weeks=8) -> list[dict]:
                         ret=round(t['ret'] * 100, 1),
                         peak_gain=round(t['peak_gain'] * 100, 1),
                         stop=round(float(c.loc[t['entry']:].max()) * (1 - trail / 100), 0),
+                        adv_eok=(round(float(adv.dropna().iloc[-1]) / 1e8) if adv is not None
+                                 and len(adv.dropna()) else None),
                         days=t['days']))
     return sorted(out, key=lambda x: -x['ret'])
 
@@ -200,13 +258,20 @@ def publish():
     out = dict(
         generated=str(date.today()),
         rule=f'52주 신고가 돌파 진입 · 고점대비 -{TRAIL:.0f}% 트레일링 청산 · 재진입 허용',
-        params=dict(lookback=LOOKBACK, trail=TRAIL, min_price=MIN_PRICE, cost_pct=COST_PCT),
+        params=dict(lookback=LOOKBACK, trail=TRAIL, min_price=MIN_PRICE,
+                    cost_pct=COST_PCT, min_adv_eok=int(MIN_ADV / 1e8)),
+        adv_spectrum={'0': dict(avg=12.01, n=5414, payoff=3.08, tail=44.3),
+                      '5': dict(avg=10.75, n=5232, payoff=3.02, tail=47.1),
+                      '10': dict(avg=9.79, n=5079, payoff=2.96, tail=49.3),
+                      '30': dict(avg=7.95, n=4494, payoff=2.83, tail=58.7),
+                      '50': dict(avg=6.87, n=4030, payoff=2.73, tail=64.4),
+                      '100': dict(avg=6.39, n=3171, payoff=2.80, tail=69.6)},
         universe=bt['universe'], period=f'{START} ~ {date.today()}',
         backtest={str(k): v for k, v in bt['rows'].items()},
         n=len(sig), candidates=sig[:60],
         caveats=[
             '생존편향: 현재 상장 종목만 포함 — 상장폐지분이 빠져 낙관적',
-            '유동성 필터 없음: 가격 캐시에 거래량이 없어 거래대금 컷 불가 — 실거래는 이보다 나쁨',
+            f'거래대금 20일평균 {int(MIN_ADV/1e8)}억 이상만 진입 — 체결 가능한 신호만 남긴다',
             '진입가를 당일 종가로 가정(실제는 익일 시가)',
             f'왕복 거래비용 {COST_PCT}% 차감 반영',
             'KR 분기 재무 부재로 이익 변곡(흑자전환·이익폭증) 필터 미적용 — US 규칙⑥과 다름',
@@ -222,6 +287,8 @@ if __name__ == '__main__':
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'backtest'
     if cmd == 'publish':
         publish()
+    elif cmd == 'adv':
+        adv_spectrum()
     else:
         bt = backtest()
         print(f"\n{'규칙':<16}{'거래':>7}{'승률':>7}{'평균':>8}{'중앙':>8}{'p90':>8}"

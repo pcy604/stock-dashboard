@@ -710,10 +710,14 @@ if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
                 f"(보유 재무: 연간 2023~2025, 835종). 그래서 <b>가격만으로</b> 만든 규칙입니다. "
                 f"워크포워드 검증도 아직 없습니다.</div></div>", unsafe_allow_html=True)
             st.markdown(f"**진입** `{_kr['rule']}`  \n"
+                        f"**유동성 컷** 20일 평균 거래대금 "
+                        f"{_kr['params'].get('min_adv_eok', '-')}억 이상 (체결 가능한 신호만)  \n"
                         f"유니버스 {_kr['universe']:,}종 · 기간 {_kr['period']} · 생성 {_kr['generated']}")
 
             _k1, _k2, _k3, _k4 = st.columns(4)
-            _k1.metric("거래당 평균수익", f"{_kbt.get('avg','-')}%", help="왕복 비용 0.3% 차감 후")
+            _k1.metric("거래당 평균수익", f"{_kbt.get('avg','-')}%",
+                       help="왕복 비용 0.3% 차감 + 거래대금 컷 적용 후. 컷을 빼면 12.0%로 오르지만 "
+                            "그건 체결 불가능한 소형주 신호를 포함한 값이라 쓰지 않는다.")
             _k2.metric("승률", f"{_kbt.get('winrate','-')}%", f"중앙값 {_kbt.get('med','-')}%",
                        delta_color="off", help="중앙값이 음수 = 전형적 거래는 손실. 소수의 대박이 전부를 만든다")
             _k3.metric("손익비", f"{_kbt.get('payoff','-')}")
@@ -726,6 +730,7 @@ if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
                     '종목': c['name'][:18], '코드': c['sym'], '돌파일': c['entry_date'],
                     '돌파가': f"{c['entry_px']:,.0f}", '현재가': f"{c['close']:,.0f}",
                     '수익률': f"{c['ret']:+.1f}%", '고점대비': f"{c['ret']-c['peak_gain']:+.1f}%",
+                    '거래대금': (f"{c['adv_eok']:,}억" if c.get('adv_eok') else '-'),
                     '트레일링 손절가': f"{c['stop']:,.0f}", '경과': f"{c['days']}일",
                 } for c in _kr['candidates']]), use_container_width=True, hide_index=True,
                     row_height=25, height=_dfh(len(_kr['candidates'])))
@@ -748,6 +753,24 @@ if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
                 st.caption("US 규칙⑥의 **핵심 조건인 RS13>1.5가 KR에서는 단조로 성과를 깎았다.** "
                            "52주 신고가 자체가 이미 강한 모멘텀 필터라, RS를 겹치면 '이미 너무 오른 것'만 "
                            "남아 되돌림이 커지는 것으로 보인다. 같은 아이디어가 시장을 건너면 뒤집힐 수 있다는 증거.")
+
+            with st.expander("💧 유동성 컷을 왜 넣었나 — 백테스트 수익을 깎는데도"):
+                _sp = _kr.get('adv_spectrum', {})
+                if _sp:
+                    st.dataframe(pd.DataFrame([{
+                        '거래대금 컷': f"{k}억", '거래': f"{v['n']:,}",
+                        '평균수익': f"{v['avg']}%", '손익비': v['payoff'],
+                        '상위1% 의존': f"{v['tail']}%",
+                    } for k, v in sorted(_sp.items(), key=lambda x: int(x[0]))]),
+                        use_container_width=True, hide_index=True, row_height=25, height=_dfh(6))
+                st.markdown("컷을 올릴수록 백테스트 수익은 **단조로 떨어진다** (12.0% → 6.4%). "
+                            "그런데도 넣는 이유:")
+                st.markdown("- 컷 없는 **12.0% 안에는 실제로는 체결할 수 없는 소형주 신호가 섞여 있다.** "
+                            "낮아진 9.8%가 '진짜 값'이다.")
+                st.markdown("- 필터가 성과를 깎는다고 빼면 **백테스트만 예뻐지고 실전은 그대로**다.")
+                st.markdown("- 10억은 개인 자금 규모에서 체결 가능한 최소선으로 잡았다.")
+                st.caption("⚠️ 다만 컷을 올릴수록 **상위 1% 의존도가 44% → 70%로 오른다.** "
+                           "유동성을 요구할수록 소수의 대박에 더 기대게 된다 — 분산이 더 중요해진다.")
 
             with st.expander("⚠️ 이 숫자를 믿으면 안 되는 이유 (반드시 읽을 것)"):
                 for c in _kr.get('caveats', []):
