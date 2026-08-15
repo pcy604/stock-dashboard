@@ -26,7 +26,9 @@ MAXPOS = 8              # 규칙별 기본 동시 보유 상한
 #   8종목  CAGR 33.2 · MDD −37.7 · 회복 0.88 · WF 4/6
 #   10종목 CAGR 27.0 · MDD −30.1 · 회복 0.90 · WF 4/6
 # 그래서 실측으로 판정하기 위해 10종목판을 병렬로 굴린다.
-SLOTS = {"R5": 8, "R6": 8, "R6T": 10}
+# 2026-08-15: 유니버스 look-ahead 제거 후 규칙⑥이 밀렸다(회복 0.48·WF 2/6).
+# 32조합 전수 스윕 상위 둘을 후보 A·B로 올려 병렬 관찰한다. 확정 전까지 기존 R5/R6도 유지.
+SLOTS = {"R5": 8, "R6": 8, "R6T": 10, "A": 12, "B": 8}
 COST = 0.25 / 100       # 왕복 비용 근사
 
 # 규칙별 진입 조건 — base(유동성·시총 통과분)를 받아 마스크를 돌려준다
@@ -37,6 +39,12 @@ RULES = {
            lambda b: (b.rs_13w > 1.5) & (b.psr < 3) & ((b.op_turn == 1) | (b.b_any == 1))),
     "R6T": ("⑥ 동일 조건 · 10종목 (종목 수 검증용)",
             lambda b: (b.rs_13w > 1.5) & (b.opm > 0) & ((b.op_turn == 1) | (b.b_any == 1))),
+    # 후보 A — 회복배율 1위. 이익이 터졌는데 아직 PER이 싼 구간
+    "A": ("A 이익폭증 & PER<20 & RS13>1.5 · 12종목",
+          lambda b: (b.b_any == 1) & (b.per > 0) & (b.per < 20) & (b.rs_13w > 1.5)),
+    # 후보 B — CAGR 1위, 낙폭도 1위. 방어는 자산배분 레이어가 맡는다는 전제
+    "B": ("B (흑자전환 OR 이익폭증) & RS13>1.7 · 8종목",
+          lambda b: ((b.op_turn == 1) | (b.b_any == 1)) & (b.rs_13w > 1.7)),
 }
 
 # 백테스트 기대값 (2018-06~2026-08 · trail-20 · 8종목 12.5%)
@@ -47,7 +55,14 @@ REF_BY_RULE = {
                payoff=5.5, cagr=27.7, mdd=-23.9, recov=1.16),
     "R6T": dict(med_ret=None, winrate=39.8, hold_wk=None,
                 cagr=27.0, mdd=-30.1, recov=0.90),
+    # 확대 유니버스(2,208종·$0.15B 하한) 기준 재측정값
+    "A": dict(winrate=47.3, cagr=29.9, mdd=-22.8, recov=1.31),
+    "B": dict(winrate=40.5, cagr=43.4, mdd=-51.3, recov=0.85),
 }
+
+# 규칙별 유니버스 게이트 (거래대금, 시총). 백테스트와 같은 조건이어야 대조가 성립한다.
+GATES = {"R5": (5e6, 2e9), "R6": (5e6, 2e9), "R6T": (5e6, 2e9),
+         "A": (1e6, 0), "B": (1e6, 0)}
 REF = REF_BY_RULE["R5"]     # 기존 원장 호환
 
 
@@ -94,7 +109,7 @@ def cmd_log():
     d["as_of"] = pd.to_datetime(d.as_of)
     wk = d.as_of.max()
     w = d[d.as_of == wk]
-    base = w[(w.close >= 5) & (w.adv_20d >= 5e6) & (w.marcap >= 2e9)]
+    w = w[w.close >= 5]   # 게이트는 규칙별로 다르므로 아래 루프에서 건다
 
     led = load()
     led.setdefault("rules", {k: v[0] for k, v in RULES.items()})
@@ -114,6 +129,8 @@ def cmd_log():
     # 규칙별로 독립된 보유 상한을 둔다 — 두 규칙의 성적을 섞지 않기 위해서.
     # 08-04 이전 기록은 rule 필드가 없으므로 규칙⑤로 간주한다.
     for rk, (rlabel, cond) in RULES.items():
+        liq, mc = GATES.get(rk, (5e6, 2e9))
+        base = w[(w.adv_20d >= liq) & (w.marcap >= mc)]
         sel = base[cond(base)].sort_values("rs_13w", ascending=False)
         held = {t["sym"] for t in led["trades"]
                 if t["status"] == "open" and t.get("rule", "R5") == rk}
@@ -252,8 +269,12 @@ def cmd_report():
                                 "rs_13w", "opm", "psr", "triggers"] if c in op.columns]
             print(op[cols].to_string(index=False))
         if len(cl) == 0:
-            print(f"     청산 0건 — 대조 불가. 백테스트 기대: 중앙 {ref.get('med_ret'):+.1f}% · "
-                  f"승률 {ref.get('winrate'):.0f}% · 보유 {ref.get('hold_wk'):.0f}주")
+            def _f(k, fmt):
+                v = ref.get(k)
+                return format(v, fmt) if isinstance(v, (int, float)) else "—"
+            print(f"     청산 0건 — 대조 불가. 백테스트 기대: 중앙 {_f('med_ret','+.1f')}% · "
+                  f"승률 {_f('winrate','.0f')}% · CAGR {_f('cagr','.1f')}% · "
+                  f"MDD {_f('mdd','.1f')}%")
             continue
         live = dict(med_ret=cl.ret_pct.median(), winrate=(cl.ret_pct > 0).mean() * 100,
                     hold_wk=cl.hold_wk.mean())

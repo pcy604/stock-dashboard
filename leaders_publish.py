@@ -97,8 +97,32 @@ def main():
                                  winrate=round((r.ret_pct > 0).mean() * 100, 0),
                                  hold_wk=round(r.hold_wk.mean(), 1))
 
+    # ── 후보 A·B (2026-08-15~) ────────────────────────────────────────
+    # 유니버스 look-ahead 제거 후 32조합 전수 스윕에서 규칙⑥을 앞선 둘.
+    # 확정 전까지 병렬 관찰하므로 대시보드에도 나란히 싣는다.
+    # 게이트가 규칙마다 다르다 — A·B는 거래대금 $1M, 시총 제한 없음(백테스트와 동일).
+    ab = w[(w.close >= 5) & (w.adv_20d >= 1e6)]
+    cand_a = ab[(ab.b_any == 1) & (ab.per > 0) & (ab.per < 20) &
+                (ab.rs_13w > 1.5)].sort_values("rs_13w", ascending=False).head(12)
+    cand_b = ab[((ab.op_turn == 1) | (ab.b_any == 1)) &
+                (ab.rs_13w > 1.7)].sort_values("rs_13w", ascending=False).head(8)
+    alt = dict(
+        A=dict(rule="이익폭증 AND PER<20 AND RS13>1.5", slots=12,
+               note="회복배율 1위. PER 조건이 적자 기업을 자동으로 걸러낸다.",
+               stat=dict(cagr=29.9, mdd=-22.8, recover=1.31, winrate=47.3,
+                         wf="4/6", exposure=75.1),
+               n=int(len(ab[(ab.b_any == 1) & (ab.per > 0) & (ab.per < 20) & (ab.rs_13w > 1.5)])),
+               candidates=[row(r) for _, r in cand_a.iterrows()]),
+        B=dict(rule="(흑자전환 OR 이익폭증) AND RS13>1.7", slots=8,
+               note="CAGR 1위이자 낙폭 1위. OPM 조건이 없어 적자 기업이 섞인다 — "
+                    "b_opmjump(OPM QoQ +3%p)가 적자 상태에서도 발동하기 때문.",
+               stat=dict(cagr=43.4, mdd=-51.3, recover=0.85, winrate=40.5,
+                         wf="5/6", exposure=94.8),
+               n=int(len(ab[((ab.op_turn == 1) | (ab.b_any == 1)) & (ab.rs_13w > 1.7)])),
+               candidates=[row(r) for _, r in cand_b.iterrows()]))
+
     out = dict(
-        generated=str(date.today()), signal_week=str(wk.date()),
+        generated=str(date.today()), signal_week=str(wk.date()), alt=alt,
         rule="RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
         exit="고점 대비 −20% 트레일링(주봉) · 12종목 × 8.3% · 2주 분할매수 · 불타기 없음",
         universe=int(len(base)), n=int(len(sel)),
