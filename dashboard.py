@@ -754,6 +754,32 @@ if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
                            "52주 신고가 자체가 이미 강한 모멘텀 필터라, RS를 겹치면 '이미 너무 오른 것'만 "
                            "남아 되돌림이 커지는 것으로 보인다. 같은 아이디어가 시장을 건너면 뒤집힐 수 있다는 증거.")
 
+            with st.expander("📊 이익 변곡 필터 — 수익은 그대로, 거래는 68% 감소"):
+                _ab = _kr.get('earn_ab', {})
+                if _ab:
+                    st.dataframe(pd.DataFrame([
+                        {'규칙': '가격만 (52주 신고가)', '거래': f"{_ab['price_only']['n']:,}",
+                         '승률': f"{_ab['price_only']['winrate']}%",
+                         '평균수익': f"{_ab['price_only']['avg']}%",
+                         '손익비': _ab['price_only']['payoff'],
+                         '상위1% 의존': f"{_ab['price_only']['tail']}%"},
+                        {'규칙': '+ 이익 변곡 (채택)', '거래': f"{_ab['with_earn']['n']:,}",
+                         '승률': f"{_ab['with_earn']['winrate']}%",
+                         '평균수익': f"{_ab['with_earn']['avg']}%",
+                         '손익비': _ab['with_earn']['payoff'],
+                         '상위1% 의존': f"{_ab['with_earn']['tail']}%"}]),
+                        use_container_width=True, hide_index=True, row_height=25, height=_dfh(2))
+                st.markdown("**평균수익은 개선되지 않았다** (9.79% → 9.60%). "
+                            "이 분산에서는 구분할 수 없는 차이다.")
+                st.markdown("그런데도 켜는 이유는 '수익'이 아니라 **선별성**이다:")
+                st.markdown("- 거래가 **5,079 → 1,599건으로 68% 감소**. 연 590건은 개인이 다룰 수 없고, "
+                            "연 186건은 다룰 수 있다. **실행 가능성이 곧 전략의 일부다.**")
+                st.markdown("- 손익비 2.96 → 3.05, 상위 1% 의존도 49.3% → 46.7%로 **꼬리 의존이 완화**된다.")
+                st.markdown("- **에코프로 2023-02-06 진입(+256%)은 필터를 통과한다** — 잡고 싶은 걸 죽이지 않는다.")
+                st.caption("판정은 **공시 시차**를 반영한다: 2023Q1 실적은 3/31이 아니라 5월 중순에야 "
+                           "알 수 있으므로, 분기말+50일(사업보고서 90일) 이후부터만 참조한다. "
+                           "이걸 안 하면 미래를 훔쳐보는 백테스트가 된다.")
+
             with st.expander("💧 유동성 컷을 왜 넣었나 — 백테스트 수익을 깎는데도"):
                 _sp = _kr.get('adv_spectrum', {})
                 if _sp:

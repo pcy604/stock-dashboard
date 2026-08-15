@@ -62,6 +62,19 @@ MIN_ADV = 10e8          # 20일 평균 거래대금 하한(원) = 10억
 COST_PCT = 0.30         # 왕복 거래비용·슬리피지 가정 (%)
 START = '2018-01-01'
 
+USE_EARN = True         # 이익 변곡(흑자전환 OR 영업익 YoY≥100%) 필터 사용
+# A/B 실측 (전 종목·거래대금 10억 컷 동일 조건, 2018~2026):
+#   가격만      n=5,079 · 승률 36.8% · 평균 9.79% · 손익비 2.96 · 상위1%의존 49.3%
+#   + 이익변곡  n=1,599 · 승률 36.0% · 평균 9.60% · 손익비 3.05 · 상위1%의존 46.7%
+#
+# 평균수익은 **개선되지 않았다**(-0.19%p, 이 분산에서는 구분 불가한 차이).
+# 그런데도 켜는 이유는 '수익'이 아니라 '선별성'이다:
+#   · 거래가 5,079 → 1,599 건으로 68% 줄어든다. 연 590건은 개인이 다룰 수 없고
+#     연 186건은 다룰 수 있다. 실행 가능성이 곧 전략의 일부다.
+#   · 손익비 2.96 → 3.05, 상위 1% 의존도 49.3% → 46.7% 로 꼬리 의존이 완화된다.
+#   · 에코프로 2023-02-06 진입(+256%)은 필터를 통과한다 — 잡고 싶은 걸 죽이지 않는다.
+# 거래대금 컷과 같은 논리다: 백테스트 수익을 위해서가 아니라 실전에서 쓸 수 있게 만드는 필터.
+
 # 검증에서 기각된 조건 — 넣으면 오히려 나빠진 것들. 화면에 그대로 노출한다.
 REJECTED = [
     ('상대강도 RS13 ≥ 1.2', '평균 11.9% → 10.5%'),
@@ -176,8 +189,16 @@ def trades_for(c: pd.Series, trail=TRAIL, start=START, end=None,
     if adv is not None and min_adv > 0:
         sig = sig & (adv.reindex(c.index).ffill() >= min_adv)
     if earn is not None:
-        # 공시 시차를 반영해, 그날까지 '공시된' 분기만 보고 이익 변곡 여부를 판정
-        sig = sig & pd.Series([earn_ok_at(earn, d) for d in c.index], index=c.index)
+        # 공시 시차를 반영해, 그날까지 '공시된' 분기만 보고 이익 변곡 여부를 판정.
+        # merge_asof(backward)로 '각 거래일에서 가장 최근에 공시된 분기'를 벡터로 붙인다
+        # (일별 파이썬 루프는 1,437종 × 2,000일이라 실용 속도가 안 나온다).
+        g = earn.sort_values('available_from')
+        flag = pd.DataFrame({
+            'available_from': g['available_from'].values,
+            'flag': ((g['op_turn'] == 1) | (g['op_yoy'] >= 100.0)).values})
+        m = pd.merge_asof(pd.DataFrame({'d': c.index}), flag,
+                          left_on='d', right_on='available_from', direction='backward')
+        sig = sig & pd.Series(m['flag'].fillna(False).to_numpy(dtype=bool), index=c.index)
     px = c[(c.index >= start) & ((c.index <= end) if end else True)]
     s = sig.reindex(px.index).fillna(False)
     out, pos, entry, peak, edate = [], False, 0.0, 0.0, None
@@ -249,6 +270,40 @@ def backtest(trails=(7, 8, 10, 15, 20, 30), min_adv=MIN_ADV) -> dict:
             'raw': per_trail}
 
 
+def earn_ab(trail=TRAIL, min_adv=MIN_ADV):
+    """이익 변곡 필터의 효과를 A/B로 잰다 — 넣기 전과 후를 같은 조건에서 비교.
+
+    US 규칙⑥의 핵심 조건이므로 '넣으면 당연히 좋아진다'고 가정하지 않는다.
+    RS13 도 US에서는 핵심이었지만 KR에서는 성과를 깎았다(REJECTED 참고).
+    """
+    em = earnings_map()
+    if not em:
+        print('이익 변곡 데이터 없음 — ingest_dart_quarterly.py 먼저 실행'); return {}
+    print(f'  이익 변곡 커버리지 {len(em)}종', flush=True)
+    syms = kr_symbols()
+    base, filt, covered = [], [], 0
+    for i, s in enumerate(syms, 1):
+        c = load_close(s)
+        if c is None:
+            continue
+        adv = load_adv(s)
+        base += trades_for(c, trail=trail, adv=adv, min_adv=min_adv)
+        g = em.get(s)
+        if g is not None:
+            covered += 1
+            filt += trades_for(c, trail=trail, adv=adv, min_adv=min_adv, earn=g)
+        if i % 400 == 0:
+            print(f'    {i}/{len(syms)}', flush=True)
+    a = summarize(base, '가격만 (KR-P1)')
+    b = summarize(filt, '+ 이익 변곡')
+    print(f'\n  재무 커버 {covered}종')
+    for r in (a, b):
+        print(f"  {r['label']:<16} n={r['n']:>6,} 승률 {r['winrate']:>4.1f}% "
+              f"평균 {r['avg']:>6.2f}% 중앙 {r['med']:>7.2f}% 손익비 {r['payoff']} "
+              f"보유 {r['hold_d']:>3}일 상위1%의존 {r['top1pct_share']}%", flush=True)
+    return {'base': a, 'earn': b, 'covered': covered}
+
+
 def adv_spectrum(trail=TRAIL, cuts=(0, 5e8, 10e8, 30e8, 50e8, 100e8)):
     """거래대금 컷을 올리면 성과가 어떻게 변하나 — 필터가 진짜 도움이 되는지 확인."""
     syms = kr_symbols()
@@ -274,9 +329,10 @@ def adv_spectrum(trail=TRAIL, cuts=(0, 5e8, 10e8, 30e8, 50e8, 100e8)):
     return out
 
 
-def live_signals(trail=TRAIL, weeks=8, min_adv=MIN_ADV) -> list[dict]:
+def live_signals(trail=TRAIL, weeks=8, min_adv=MIN_ADV, use_earn=USE_EARN) -> list[dict]:
     """최근 N주 안에 진입 신호가 났고 아직 트레일링에 안 걸린 종목 = 현재 후보."""
     nm, out = names(), []
+    em = earnings_map() if use_earn else {}
     cutoff = pd.Timestamp.today() - pd.Timedelta(weeks=weeks)
     for s in kr_symbols():
         c = load_close(s)
@@ -284,6 +340,7 @@ def live_signals(trail=TRAIL, weeks=8, min_adv=MIN_ADV) -> list[dict]:
             continue
         adv = load_adv(s)
         tr = trades_for(c, trail=trail, adv=adv, min_adv=min_adv,
+                        earn=(em.get(s) if use_earn else None),
                         start=str((pd.Timestamp.today() - pd.Timedelta(days=400)).date()))
         if not tr or not tr[-1].get('open'):
             continue
@@ -307,7 +364,14 @@ def publish():
     sig = live_signals()
     out = dict(
         generated=str(date.today()),
-        rule=f'52주 신고가 돌파 진입 · 고점대비 -{TRAIL:.0f}% 트레일링 청산 · 재진입 허용',
+        rule=('52주 신고가 돌파 + 이익 변곡(흑자전환 OR 영업익 YoY≥100%) 진입 · '
+              f'고점대비 -{TRAIL:.0f}% 트레일링 청산 · 재진입 허용' if USE_EARN else
+              f'52주 신고가 돌파 진입 · 고점대비 -{TRAIL:.0f}% 트레일링 청산 · 재진입 허용'),
+        earn_ab={'price_only': dict(n=5079, winrate=36.8, avg=9.79, med=-11.88,
+                                    payoff=2.96, tail=49.3),
+                 'with_earn': dict(n=1599, winrate=36.0, avg=9.60, med=-12.32,
+                                   payoff=3.05, tail=46.7)},
+        use_earn=USE_EARN,
         params=dict(lookback=LOOKBACK, trail=TRAIL, min_price=MIN_PRICE,
                     cost_pct=COST_PCT, min_adv_eok=int(MIN_ADV / 1e8)),
         adv_spectrum={'0': dict(avg=12.01, n=5414, payoff=3.08, tail=44.3),
@@ -322,6 +386,10 @@ def publish():
         caveats=[
             '생존편향: 현재 상장 종목만 포함 — 상장폐지분이 빠져 낙관적',
             f'거래대금 20일평균 {int(MIN_ADV/1e8)}억 이상만 진입 — 체결 가능한 신호만 남긴다',
+            '이익 변곡 필터는 수익을 높이지 않는다(9.79% → 9.60%). 거래를 68% 줄여 '
+            '실행 가능하게 만드는 것이 목적이다',
+            '분기 재무는 공시 시차(1~3분기 50일·사업보고서 90일)를 반영해 참조한다 — '
+            'look-ahead 없음',
             '진입가를 당일 종가로 가정(실제는 익일 시가)',
             f'왕복 거래비용 {COST_PCT}% 차감 반영',
             'KR 분기 재무 부재로 이익 변곡(흑자전환·이익폭증) 필터 미적용 — US 규칙⑥과 다름',
@@ -339,6 +407,8 @@ if __name__ == '__main__':
         publish()
     elif cmd == 'adv':
         adv_spectrum()
+    elif cmd == 'earn':
+        earn_ab()
     else:
         bt = backtest()
         print(f"\n{'규칙':<16}{'거래':>7}{'승률':>7}{'평균':>8}{'중앙':>8}{'p90':>8}"
