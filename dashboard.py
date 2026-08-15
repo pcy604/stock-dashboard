@@ -1032,6 +1032,64 @@ else:
                         use_container_width=True, hide_index=True, row_height=25,
                         height=_dfh(min(len(_rows), 14)))
 
+            # ── 주차별 조회 ────────────────────────────────────────────
+            # 종목별 조회만으로는 "이 조건이면 오른다"를 확인할 수 없다.
+            # 같은 주에 함께 걸렸던 종목이 어떻게 됐는지 다 봐야 조건의 실효를 판정할 수 있다.
+            st.divider()
+            st.subheader("📅 주차별 조회 — 그 주에 함께 걸렸던 종목 전부")
+            st.caption("종목 하나만 보면 성공 사례만 눈에 들어온다. "
+                       "같은 주 신호를 통째로 놓고 이후 성적을 봐야 조건이 실제로 작동하는지 알 수 있다.")
+
+            @st.cache_data(show_spinner=False)
+            def _by_week(_gen):
+                idx = {}
+                for _s, _v in _sd['symbols'].items():
+                    for _x in _v.get('rows', []):
+                        idx.setdefault(_x['d'], []).append((_s, _v['name'], _x))
+                return idx
+
+            _wk_idx = _by_week(_sd.get('generated', ''))
+            _wks = sorted(_wk_idx, reverse=True)
+            _w = st.selectbox(f"주차 선택 — 신호가 있었던 {len(_wks)}주",
+                              _wks, index=0, key="lead_week",
+                              format_func=lambda w: f"{w}  ({len(_wk_idx[w])}종)")
+            _lst = _wk_idx[_w]
+            _wdf = pd.DataFrame([{
+                '코드': _s, '종목': _n[:24], '규칙': ','.join(_x['r']),
+                '종가': _x['close'], 'RS13': _x['rs13'], 'OPM': _x['opm'],
+                'PER': ('적자' if _x['per'] is None else f"{_x['per']:.1f}"),
+                'PSR': _x['psr'], '신고가대비': _x['dist'], '52주낙폭': _x['mdd'],
+                '거래량배': _x['vol'], '시총($B)': _x['mc'],
+                '이후13주': _x.get('f13'), '이후26주': _x.get('f26'), '이후52주': _x.get('f52'),
+                '트리거': _x['trg']} for _s, _n, _x in _lst])
+
+            _f52 = _wdf['이후52주'].dropna()
+            if len(_f52):
+                _k1, _k2, _k3, _k4 = st.columns(4)
+                _k1.metric("신호 종목", f"{len(_wdf)}종")
+                _k2.metric("이후 52주 중앙", f"{_f52.median():+.1f}%")
+                _k3.metric("상승 비율", f"{(_f52 > 0).mean() * 100:.0f}%")
+                _k4.metric("+100% 이상", f"{(_f52 >= 100).mean() * 100:.0f}%",
+                           help="이 전략의 수익은 소수의 큰 상승에서 나온다. "
+                                "중앙값이 낮아도 이 비율이 유니버스 평균(6.4%)보다 높으면 신호가 작동한 것이다.")
+            else:
+                st.caption("이 주차는 아직 52주가 지나지 않아 이후 성적을 알 수 없다.")
+
+            def _fw(v):
+                if v != v:
+                    return ''
+                a = min(abs(v) / 150, 1) * .72 + .06
+                c = '31,107,69' if v >= 0 else '160,48,40'
+                return f'background-color: rgba({c},{a:.2f}); color:' + ('#fff' if a > .42 else '#12161b')
+
+            st.dataframe(
+                _wdf.sort_values('이후52주', ascending=False, na_position='last').style
+                    .map(_fw, subset=['이후13주', '이후26주', '이후52주'])
+                    .format({'이후13주': '{:+.1f}%', '이후26주': '{:+.1f}%',
+                             '이후52주': '{:+.1f}%'}, na_rep='진행 중'),
+                use_container_width=True, hide_index=True, row_height=26,
+                height=_dfh(min(len(_wdf), 16)))
+
         with st.expander("필터 단계별 잔존 · 기각된 조건"):
             st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
                          use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))
