@@ -79,6 +79,11 @@ def simulate(sig, close):
 def cmd_build():
     d = load()
     d = d[d.as_of <= "2026-08-10"]
+    # 전방 수익률 — "그 주에 걸린 신호가 이후 어떻게 됐나"를 주차별 조회에서 보려면 필요하다.
+    px = d.pivot(index="as_of", columns="sym", values="close").sort_index()
+    for h in (13, 26, 52):
+        f = (px.shift(-h) / px - 1).stack().rename(f"f{h}").reset_index()
+        d = d.merge(f, on=["as_of", "sym"], how="left")
     dates = sorted(d.as_of.unique())
     di = {t: k for k, t in enumerate(dates)}
     flags = {k: fn(d) for k, (_, fn) in RULES.items()}
@@ -127,6 +132,7 @@ def cmd_build():
                 per=_r(r.per), psr=_r(r.psr), dist=_r(r.dist_52w), mdd=_r(r.mdd_52w),
                 vol=_r(r.vol_x_20w), rev=_r(r.rev_yoy),
                 mc=_r(r.marcap / 1e9, 2), adv=_r(r.adv_20d / 1e6, 0),
+                f13=_r(r.f13 * 100, 1), f26=_r(r.f26 * 100, 1), f52=_r(r.f52 * 100, 1),
                 trg=" ".join((["흑자전환"] if r.op_turn == 1 else []) +
                              [v for kk, v in BO.items() if r.get(kk) == 1]) or "-"))
         syms[s] = rec
