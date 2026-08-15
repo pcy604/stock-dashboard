@@ -150,7 +150,7 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
 <div class="wrap">
 
 <header class="top">
-  <p class="eyebrow">Project Cards · 최종갱신 2026-08-11</p>
+  <p class="eyebrow">Project Cards · 최종갱신 2026-08-15</p>
   <h1>주도주 탐지 연구</h1>
   <p>"어떤 종목을 살까"가 아니라 <b>"어떻게 손실을 최소화하고 수익을 극대화할까"</b>를 데이터로 답하는 연구.
   미국 1,279종·8.6년으로 주도주를 기계적으로 정의하고, 진입·청산 규칙을 TSR·MDD로 검증한다.</p>
@@ -175,22 +175,31 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);
 <section class="card" id="c1">
   <div class="chead">
     <div class="ctitle"><span class="cnum">01</span><h2>원페이저</h2></div>
-    <div><span class="badge b-go">🟢 자동 운용 개시</span> <span class="cmeta">2026-08-11</span></div>
+    <div><span class="badge b-stop">🔴 규칙 재설계</span> <span class="cmeta">2026-08-15</span></div>
   </div>
   <dl class="kv">
     <div><dt>문제</dt><dd>종목 선정이 아니라 <b>감정·집중·레버리지</b>가 MDD를 키운다. 2026-06 실제로 1억(KRW) 손실.</dd></div>
     <div><dt>대상</dt><dd>본인 1명. 외부 판매·배포 계획 없음.</dd></div>
     <div><dt>정체</dt><dd><b>"주도주 탐지기"가 아니다.</b> 실제 동작은 <b>강세 모멘텀 + 실적 흑자전환 포착기</b>. 상위 거래가 TSLA·MU·CROX·VRT·ANF인 것과 일관된다. 이름과 실체를 혼동하면 못 잡은 종목을 배신으로 오해하게 된다.</dd></div>
     <div><dt>해법</dt><dd>주도주를 <b>기계적으로 정의</b>(향후 52주 +150%↑) → 공통 특징 발굴 → 진입·청산 규칙 → 백테스트로 TSR·MDD 검증. 규칙이 정하고 사람은 실행만.</dd></div>
-    <div><dt>현재</dt><dd><b>주간 사이클 첫 실행 완료(08-10) · 자동화 등록(매주 토 08:00).</b> 결손이던 08-03 주차가 채워졌고 페이퍼 16건(규칙⑤·⑥ 각 8)이 추적 중. <b>M6a 규율 1/13주.</b> 이제 사람이 매주 할 일은 토요일 아침 알림을 읽는 것뿐이다.</dd></div>
-    <div><dt>규칙⑥</dt><dd><code>RS13&gt;1.5 AND (흑자전환 OR 이익폭증) AND OPM&gt;0</code> → 고점 −20% 트레일링 · 8종목 12.5% · 2주 분할매수 · <b>불타기 없음</b><br><span style="font-size:12px;color:var(--mut)">PSR은 2026-08-08부로 <b>의사결정에서 제외</b> — 표시용 참고지표</span></dd></div><div><dt>결과</dt><dd class="up">CAGR 32.8% / MDD <b>−37.7%</b> / 회복배율 0.87<br><span style="font-weight:400;color:var(--mut);font-size:12.5px">SPY 14.2% / −31.8% / 0.45 · 구 규칙⑤ 27.7% / −23.9% / 1.16</span></dd></div>
+    <div><dt>현재</dt><dd><b>유니버스의 look-ahead를 제거하자 기존 성적이 무너졌다.</b> 수집 하한 $2B→$0.15B, 1,279→2,208종(89만행). 그 위에서 32개 전략을 전수 비교해 <b>규칙을 다시 고르는 중</b>이다. 자동 사이클·알림은 계속 돌고 있다(M6a 1/13주).</dd></div>
+    <div><dt>구조 결정</dt><dd><b>종목 선정과 리스크 관리를 분리한다(08-15).</b> 선정은 <code>흑자전환/이익폭증 + RS 강도</code>로 공격적으로 가고, 낙폭은 <b>선정 조건이 아니라 자산배분 레이어</b>에서 잡는다. 근거는 아래 — 낙폭을 만든 건 조건이 아니라 노출이었다.</dd></div>
+    <div><dt>후보 A</dt><dd><code>이익폭증 AND PER&lt;20 AND RS13&gt;1.5</code> · 12종목<br><span class="up">CAGR 29.9% / MDD <b>−22.8%</b> / 회복 <b>1.31</b> / 승률 47.3% / WF 4/6</span><br><span style="font-size:12px;color:var(--mut)">노출 75% — 회복배율은 이 프로젝트 최고</span></dd></div>
+    <div><dt>후보 B</dt><dd><code>(흑자전환 OR 이익폭증) AND RS13&gt;1.7</code> · 8종목<br><span class="up">CAGR 43.4%</span> / MDD <span class="dn">−51.3%</span> / 회복 0.85 / WF 5/6<br><span style="font-size:12px;color:var(--mut)">노출 95% — 수익 최고, 낙폭도 최고</span></dd></div>
+    <div><dt>기준</dt><dd class="mut">SPY CAGR 14.6% / MDD −31.8% / 회복 0.46</dd></div>
   </dl>
-  <div class="warnbox"><b>🔴 이 전환은 낙폭을 팔아 수익을 산 결정이다.</b>
-  MDD가 −23.9% → <b>−37.7%</b>로 나빠졌고, 이는 <b>SPY(−31.8%)보다 나쁘다.</b>
-  "MDD를 SPY보다 낮게"라는 원래 KPI를 포기하고 CAGR +5.1%p와 사각지대 해소를 택했다.
-  <b>−37% 구간이 실제로 오면 그건 고장이 아니라 오늘의 선택이다.</b><br>
-  바꾼 이유: 주도주 이력 종목 <b>520개 중 90개(17%)가 8년간 PSR&lt;3에 한 번도 진입하지 않았다.</b>
-  NVDA는 신호 발생 주차의 PSR이 최소 10.5·중앙 15.8로 <b>구조적으로 포착 불가</b>였다.</div>
+  <div class="warnbox"><b>🔴 낙폭을 만드는 건 손절이 아니라 노출이다 — 08-15 실측.</b>
+  종목당 −20% 손절을 걸어도 포트폴리오는 −51%까지 빠진다. 이유는 셋이다.<br>
+  ① <b>손절가에 못 판다</b> — 주봉 종가로 판정하므로 그 주에 이미 −35%면 −35%에 팔린다.
+  실제 청산 294건 중 <b>36%가 −20%보다 나쁘게</b> 체결됐고 최악은 −58.5%.<br>
+  ② <b>동시 손절</b> — 2020-03-09 한 주에 7종목이 같이 잘렸다(−16~−49%). 상관이 높아 분산이 작동하지 않는다.<br>
+  ③ <b>손실은 곱해진다</b> — 잘리고 재진입해 또 잘리면 0.8³ = <b>−48.8%</b>.<br>
+  그래서 방어는 손절폭이 아니라 <b>현금 비중</b>에서 나온다. 최악 낙폭 시점의 현금이
+  후보 A는 <b>69.8%</b>, 후보 B는 <b>18.9%</b>였다. 손절 규칙은 둘이 똑같다.</div>
+  <div class="callout" style="padding:11px 14px;margin:12px 0;font-size:13.5px;border-left:3px solid var(--acc);background:var(--sheet2,var(--card2))">
+  <b>그래서 역할을 나눈다.</b> 선정 규칙은 <b>수익을 최대화</b>하는 데만 쓰고,
+  낙폭은 <b>자산배분·노출 상한·레짐 필터</b>라는 별도 레이어가 맡는다.
+  선정 조건에 방어를 섞으면 두 목표가 서로를 갉아먹는다.</div>
   <div class="warnbox" style="border-left-color:var(--warn);background:var(--warnbg)"><b>정직한 자가진단:</b> 규칙⑥의 워크포워드는 <b>CAGR 4/6 · 회복배율 2/6</b>(구 규칙 3/6).
   롤링 12개월 최악 <b>−37.3%p · 최장 45주</b> — 1년 가까이 계속 지는 구간이 실제로 있었다.</div>
   <div class="next"><b>그래서 다음 행동</b>만드는 건 끝났다. <b>`bash leaders_weekly.sh` 를 실제로 돌리는 것</b>만 남았다.</div>
@@ -267,7 +276,7 @@ flowchart TD
   end
 
   subgraph CYC["② 주간 사이클 — 매주 토 08:00 자동 · 약 8분"]
-    B["factor_weekly 53만행"]
+    B["factor_weekly 89만행"]
     E["규칙⑥ 리스트업"]
     F["페이퍼 R5·R6 16건"]
     P["signal.json 생성"]
@@ -365,7 +374,7 @@ flowchart TD
     <div class="tile"><p class="k">회복배율</p><p class="v">0.87</p><p class="s">SPY 0.45 · 구규칙 1.16</p></div>
     <div class="tile"><p class="k">워크포워드</p><p class="v">4 / 6</p><p class="s">CAGR 기준 · 회복배율 2/6</p></div>
     <div class="tile"><p class="k">실계좌 투입</p><p class="v mut">0원</p><p class="s">M7 잠김</p></div>
-    <div class="tile"><p class="k">페이퍼 보유</p><p class="v">16건</p><p class="s">R5 8 · R6 8 · 청산 0</p></div><div class="tile"><p class="k">데이터 신선도</p><p class="v" style="color:var(--ok)">최신</p><p class="s">08-03 주차까지 · 결손 해소</p></div><div class="tile"><p class="k">M6a 규율</p><p class="v">1 / 13주</p><p class="s">연속 ✅ · 완료 11월 초</p></div>
+    <div class="tile"><p class="k">페이퍼 보유</p><p class="v">16건</p><p class="s">R5 8 · R6 8 · 청산 0</p></div><div class="tile"><p class="k">유니버스</p><p class="v">2,208</p><p class="s">89만행 · 수집하한 $0.15B</p></div><div class="tile"><p class="k">M6a 규율</p><p class="v">1 / 13주</p><p class="s">연속 ✅ · 완료 11월 초</p></div><div class="tile"><p class="k">전략 스윕</p><p class="v">32</p><p class="s">조합 전수 비교(08-15)</p></div>
   </div>
 
   <figure>
@@ -462,11 +471,15 @@ flowchart TD
 <section class="card" id="c8">
   <div class="chead">
     <div class="ctitle"><span class="cnum">08</span><h2>열린 전선</h2></div>
-    <div><span class="badge b-hold">🟡 9건 · 해결 10</span> <span class="cmeta">무엇 / 며칠째 / 다음 / 누가</span></div>
+    <div><span class="badge b-stop">🔴 12건 · 해결 12</span> <span class="cmeta">무엇 / 며칠째 / 다음 / 누가</span></div>
   </div>
   <div class="tblwrap"><table>
     <thead><tr><th>항목</th><th class="n">며칠째</th><th>다음 행동</th><th class="n">누가</th></tr></thead>
     <tbody>
+      <tr style="background:var(--nobg)"><td>🔴 <b>규칙⑥이 확정 규칙이 아니게 됐다</b> — 편향 제거 후 재측정하니 회복 0.48·WF 2/6으로 밀렸다. 후보 A(이익폭증+PER&lt;20+RS&gt;1.5, 회복 1.31)와 후보 B((전환|폭증)+RS&gt;1.7, CAGR 43.4)가 앞선다. <b>대시보드·페이퍼는 아직 구 규칙⑥으로 돌고 있다</b></td><td class="n">0</td><td>후보 A·B를 페이퍼에 병렬 추가 후 실측 판정</td><td class="n">나</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>리스크 레이어가 아예 없다</b> — 08-15에 "선정은 공격적, 방어는 자산배분"으로 구조를 정했는데 <b>자산배분·노출 상한·레짐 필터를 하나도 안 만들었다.</b> 지금은 신호만 있으면 무조건 만포지션이라 노출 상한이 존재하지 않는다</td><td class="n">0</td><td>노출 상한 / SPY 40주선 레짐 필터 백테스트</td><td class="n">Claude</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>08-10 주차 데이터 결함</b> — 393종만 있다(정상 2,207종). 가격 캐시가 있으면 재수집을 건너뛰어 신규 종목만 최신이다. <b>이 주차를 포함하면 보유 종목 평가액이 증발해 MDD가 −91%로 잘못 계산된다</b>(실제 −32%)</td><td class="n">0</td><td>백테스트 종료일 08-03 고정 · 다음 주간 사이클이 캐시 갱신</td><td class="n">Claude</td></tr>
+      <tr style="background:var(--warnbg)"><td>🟡 <b>2주 분할매수가 시뮬레이터에 없다</b> — 문서·대시보드는 "2주 분할매수"라고 표기하는데 <code>leaders_boost.run</code>은 목표비중을 일괄 매수한다. 구 규칙 기준 측정값(CAGR −0.2%p·MDD +1.1%p)만 존재</td><td class="n">3</td><td>run에 분할매수 구현 후 재측정</td><td class="n">Claude</td></tr>
       <tr style="background:var(--warnbg)"><td>🟡 <b>자동 실행이 진짜 도는지 미확인</b> — 08-10 실행은 <b>수동</b>이었다. 작업 스케줄러(토 08:00)가 실제로 작동하는지는 <b>08-15에야 알 수 있다.</b> 안 돌면 M6a 카운트가 1주차에서 끊긴다</td><td class="n">0</td><td>08-15(토) 아침 텔레그램 도착 확인</td><td class="n">나</td></tr>
       <tr style="background:var(--warnbg)"><td>🟡 <b>PBF 청산선 −6.3%</b> — 이번 주 그만큼 빠지면 <b>프로젝트 최초의 청산 거래</b>. M6b 표본이 0→1이 되는 순간이고, 주봉 청산 로직이 실전에서 처음 작동하는 시험이다</td><td class="n">0</td><td>08-15 사이클이 자동 판정</td><td class="n">Claude</td></tr>
       <tr style="background:var(--okbg)"><td class="mut">✅ 해결: 주간 사이클 실행 0회 → <b>08-10 첫 실행 완료</b>(8분). 08-03 결손 주차 해소, 자동화 등록(토 08:00)</td><td class="n mut">—</td><td class="mut">2026-08-10</td><td class="n mut">완료</td></tr>
@@ -522,11 +535,17 @@ flowchart TD
 <section class="card" id="c10">
   <div class="chead">
     <div class="ctitle"><span class="cnum">10</span><h2>결정 로그</h2></div>
-    <div><span class="badge b-hold">🟡 31건 · 미검증 1</span> <span class="cmeta">2026-08-11</span></div>
+    <div><span class="badge b-hold">🟡 38건 · 미검증 1</span> <span class="cmeta">2026-08-15</span></div>
   </div>
   <div class="tblwrap"><table>
     <thead><tr><th>결정</th><th>당시 근거</th><th class="n">검증</th></tr></thead>
     <tbody>
+      <tr style="background:var(--nobg)"><td>🔴 <b>유니버스 선정의 look-ahead 제거</b> (2026-08-13~15)</td><td>수집 목록을 <b>2026-05 시점 시총</b>으로 정하고 있었다. 즉 "지금 큰 회사"만 대상이라 그때 컸다가 작아진 종목이 통째로 빠지는 편향이었다. 하한 $2B→$0.5B→<b>$0.15B</b>, 1,279→<b>2,208종</b>(89만행). 거래 필터는 원래 point-in-time이 맞았고 편향은 수집 목록에만 있었다.<br><b>대가: 기존 성적이 대부분 부풀려져 있었다.</b> 소형 대시세 전략 CAGR 47.9→28.4, 회복 0.99→0.50. 규칙⑥도 회복 0.95→0.48</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr style="background:var(--nobg)"><td>🔴 <b>슬롯 경쟁 정렬이 기각된 조건이었다</b> (2026-08-14)</td><td>신호가 슬롯보다 많을 때 <code>dist_52w</code>(신고가 근접) 순으로 채우고 있었다. <b>신고가 근접은 네 번 기각된 조건</b>(리프트 0.4~0.7)인데 선택 우선순위를 정하고 있었다. 정렬을 <code>cfg["sort"]</code>로 분리. 영향이 크다 — 소형 전략에서 TSR 838%→2,342%로 갈렸다</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr style="background:var(--okbg)"><td><b>종목 선정과 리스크 관리를 분리</b> (2026-08-15, 사용자 결정)</td><td>선정 규칙에 방어 조건을 섞지 않고, 낙폭은 <b>자산배분 레이어</b>가 맡는다. 근거: 낙폭을 만든 건 손절폭이 아니라 <b>노출</b>이었다. 노출과 MDD가 거의 일직선이다(75%→−22.8%, 95%→−51.3%, 98%→−51.6%). 손절폭을 −10%까지 조여도 MDD는 −34%였고 CAGR만 반토막 났다</td><td class="n" style="color:var(--warn)">🟡 레이어 미구현</td></tr>
+      <tr style="background:var(--okbg)"><td><b>전략 32조합 전수 스윕</b> (2026-08-15)</td><td>회복배율 1위 <b>이익폭증+PER&lt;20+RS&gt;1.5</b>(1.31), 2위 소형반등(0.85), 3위 (전환|폭증)+RS&gt;1.7(0.85). <b>52주 신고가는 최하위</b>(회복 0.04~0.16) — 다섯 번째 기각. 흑자전환 단독도 0.26으로 약하다. RS 임계는 1.5보다 <b>1.7</b>이 낫다(편향 유니버스에서 철회했던 발견이 재현됨)</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
+      <tr style="background:var(--okbg)"><td><b>궤적 팩터 — 관측은 강하나 포트폴리오는 열세</b> (2026-08-12)</td><td>"영업익 연속 증가 2분기+ · RS&gt;1.2 · PSR&lt;3"이 <b>TRAIN·TEST 양쪽에서 처음으로 리프트 1 초과</b>(1.71/5.10)를 냈다. 그런데 백테스트는 CAGR 11.3·회복 0.31로 SPY 이하. RS를 1.2로 낮춰 노출이 95.8%가 된 탓이다. <b>관측 리프트와 포트폴리오 성과가 다르다는 세 번째 사례</b></td><td class="n" style="color:var(--ok)">✅ 기각</td></tr>
+      <tr style="background:var(--okbg)"><td><b>"증가율의 가속"은 신호가 아니다</b> (2026-08-12)</td><td>사용자 가설을 직접 검증했다. 영업익 YoY 가속 2분기 연속 TRAIN 0.52·TEST 0.79, 3분기 연속 0.61/0.84 — <b>양쪽 다 1 미만</b>. 거래 가능 영역에서 매출·OPM 가속 상위 30%는 수익중앙이 마이너스였다. 반면 <b>"연속 증가"(수준이 아니라 지속)는 작동</b>한다</td><td class="n" style="color:var(--ok)">✅ 기각</td></tr>
       <tr style="background:var(--nobg)"><td>🔴 <b>페이퍼 청산 판정을 일봉 → 주봉으로 통일</b> (2026-08-10)</td><td>백테스트는 <b>주봉 종가</b>로 청산하는데 페이퍼는 <b>일봉 종가</b>로 판정하고 있었다. 일봉 고점은 주봉 고점보다 항상 크거나 같고 판정 횟수도 5배라 <b>페이퍼가 구조적으로 더 빨리·더 자주 털린다.</b> 그 상태로는 M6b가 전략이 아니라 <b>자의 차이</b>를 잰다. 실측 차이: AGL 고점대비 일봉 −11.4% vs 주봉 +0.0%. 일봉 돌파는 <code>daily_breach</code>로 기록만(현재 0건)</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
       <tr style="background:var(--okbg)"><td><b>주간 사이클을 토요일 08:00로</b> (2026-08-10, 사용자 요청)</td><td>백테스트는 <b>신호 주의 금요일 종가</b>에 매수한다(<code>P.iloc[i]</code>) — 즉 금요일 종가가 백테스트와 일치하는 유일한 진입 시점이다. 월요일 실행은 이미 다른 게임. 마감 직후(토 05:00 KST)는 금요일 일봉이 아직 없어 <b>주봉 가드가 주차를 통째로 버리므로</b> 3시간 여유를 뒀다</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
       <tr style="background:var(--okbg)"><td><b>M6a 카운트는 누적이 아니라 연속</b> (2026-08-11)</td><td>완료조건이 "13주 연속"인데 누적으로 세면 걸른 주를 눈감게 된다. 신호주가 7일 간격이 아니면 streak을 1로 리셋하고 "🔴 N주 걸름"을 표시한다. 진입이 없는 주(슬롯 만석)에는 trades가 안 늘어나므로 <code>runs[]</code>에 실행 자체를 따로 기록</td><td class="n" style="color:var(--ok)">✅ 완료</td></tr>
