@@ -51,7 +51,7 @@ def get(url, hdr, tries=5):
     return None
 
 
-def universe(n, lo=5e8, hi=None):
+def universe(n, lo=1.5e8, hi=None):
     """수집 대상 선정. 2026-08-12: lo 2e9 -> 5e8.
 
     ⚠️ 여기서 쓰는 marketcap은 us_marketcap.csv 스냅샷(현재 시점) 값이다.
@@ -210,7 +210,7 @@ def fetch_8k(sym, cik):
         return False
 
 
-def cmd_fetch(n, lo=5e8, hi=None):   # 2026-08-12: 2e9 -> 5e8 (수집 하한만. 매매 필터는 point-in-time)
+def cmd_fetch(n, lo=1.5e8, hi=None):   # 2026-08-14: 5e8 -> 1.5e8 (대시세는 소형에서 시작한다)
     u = universe(n, lo, hi)
     cm = cikmap()
     print(f"유니버스 {len(u)}종 (시총 {lo/1e9:.0f}B~{(hi/1e9 if hi else 999):.0f}B)", flush=True)

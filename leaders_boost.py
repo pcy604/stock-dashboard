@@ -132,7 +132,11 @@ def run(P, M, cfg, start="2018-06-01", end=None):
         if len(pos) < maxpos:
             cand = [s for s in signal(M, i, ent)
                     if s not in pos and px.get(s, np.nan) == px.get(s, np.nan)]
-            dd = M["dist_52w"].iloc[i]
+            # 2026-08-14: 정렬 기준을 cfg로 뺐다. 기존 기본값은 dist_52w(신고가 근접)였는데,
+            # 신고가 근접은 유니버스 검증에서 네 번 기각된 조건이다(리프트 0.4~0.7).
+            # 기각한 조건이 슬롯 경쟁의 우선순위를 정하고 있었다.
+            sk = cfg.get("sort", "dist_52w")
+            dd = M[sk].iloc[i]
             cand.sort(key=lambda s: -(dd.get(s, -999) if dd.get(s, -999) == dd.get(s, -999) else -999))
             for s in cand[:maxpos - len(pos)]:
                 amt = min(unit * V * tiers[0], cash)
