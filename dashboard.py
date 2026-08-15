@@ -910,6 +910,82 @@ else:
                     else:
                         st.info("이번 주 조건 충족 종목 없음")
 
+        # ── 종목 심층 조회 ─────────────────────────────────────────────
+        # market.db는 저장소에 없으므로 leaders_symbol.py가 미리 만든 JSON을 읽는다.
+        st.divider()
+        st.subheader("🔍 종목 심층 조회 — 언제 걸렸고 언제 나갔나")
+        _sd = load_json(Path('results/leaders_symbol_detail.json'))
+        if not _sd:
+            st.info("`python leaders_symbol.py build` 실행 후 커밋하면 조회할 수 있습니다.")
+        else:
+            _syms = _sd['symbols']
+            _opts = sorted(_syms, key=lambda s: (-len(_syms[s].get('rows', [])), s))
+            _pick = st.selectbox(
+                f"종목 검색 — 신호 이력이 있는 {len(_opts)}종",
+                _opts, index=0, key="lead_sym",
+                format_func=lambda s: f"{s} · {_syms[s]['name'][:28]} "
+                                      f"({len(_syms[s].get('rows', []))}회 신호)")
+            _r = _syms[_pick]
+            _D = pd.to_datetime(_sd['dates'])
+            _px = pd.Series([v for v in _r['c']],
+                            index=_D[[i for i in _r['i']]]).astype(float).dropna()
+
+            _cols = {'A': '#17415c', 'B': '#a03028', 'R6': '#8a6a12'}
+            _fig = go.Figure()
+            _fig.add_trace(go.Scatter(x=_px.index, y=_px.values, mode='lines',
+                                      name='주봉 종가', line=dict(color='#12161b', width=1.4)))
+            for _k, _tr in _r.get('trades', {}).items():
+                for _t in _tr:
+                    _a, _b = _D[_t['e']], _D[_t['x']]
+                    _fig.add_vrect(x0=_a, x1=_b, fillcolor=_cols[_k], opacity=.07,
+                                   line_width=0, layer='below')
+                    _fig.add_trace(go.Scatter(
+                        x=[_a], y=[_t['ep']], mode='markers+text',
+                        marker=dict(symbol='triangle-up', size=13, color=_cols[_k],
+                                    line=dict(color='white', width=1)),
+                        text=[f"{_k} {_t['ret']:+.0f}%"], textposition='bottom center',
+                        textfont=dict(size=10, color=_cols[_k]),
+                        name=f"{_k} 진입", showlegend=False,
+                        hovertemplate=f"{_k} 진입 %{{x|%Y-%m-%d}}<br>${_t['ep']:,.2f}<extra></extra>"))
+                    if _t['closed']:
+                        _fig.add_trace(go.Scatter(
+                            x=[_b], y=[_t['xp']], mode='markers',
+                            marker=dict(symbol='triangle-down', size=13,
+                                        color='#1f6b45' if _t['ret'] >= 0 else '#a03028',
+                                        line=dict(color='white', width=1)),
+                            name=f"{_k} 청산", showlegend=False,
+                            hovertemplate=(f"{_k} 청산 %{{x|%Y-%m-%d}}<br>${_t['xp']:,.2f}"
+                                           f"<br>{_t['ret']:+.1f}% · {_t['wk']}주<extra></extra>")))
+            _fig.update_yaxes(type='log', title='주봉 종가(로그)')
+            _fig.update_layout(height=430, margin=dict(l=8, r=8, t=34, b=8),
+                               title=f"{_pick} · {_r['name']}  —  ▲ 진입 / ▼ 고점 −20% 청산",
+                               hovermode='x unified')
+            st.plotly_chart(_fig, use_container_width=True)
+
+            _tr_all = [dict(규칙=_k, 진입=str(_D[_t['e']].date()),
+                            청산=(str(_D[_t['x']].date()) if _t['closed'] else '보유 중'),
+                            진입가=f"${_t['ep']:,.2f}", 청산가=f"${_t['xp']:,.2f}",
+                            수익률=f"{_t['ret']:+.1f}%", 보유=f"{_t['wk']}주")
+                       for _k, _tr in _r.get('trades', {}).items() for _t in _tr]
+            if _tr_all:
+                st.markdown("**매매 내역** — 규칙별 진입·청산·재진입")
+                st.dataframe(pd.DataFrame(_tr_all).sort_values('진입'),
+                             use_container_width=True, hide_index=True,
+                             row_height=25, height=_dfh(len(_tr_all)))
+
+            _rows = _r.get('rows', [])
+            if _rows:
+                st.markdown(f"**신호 주차 데이터 {len(_rows)}건** — 그 주에 각 지표가 얼마였나")
+                st.dataframe(pd.DataFrame([{
+                    '주차': x['d'], '규칙': ','.join(x['r']), '종가': x['close'],
+                    'RS13': x['rs13'], 'RS26': x['rs26'], 'OPM': x['opm'],
+                    'OPM QoQ': x['opmq'], 'PER': x['per'], 'PSR': x['psr'],
+                    '신고가대비': x['dist'], '52주낙폭': x['mdd'], '거래량배': x['vol'],
+                    '매출YoY': x['rev'], '시총($B)': x['mc'], '거래대금($M)': x['adv'],
+                    '트리거': x['trg']} for x in _rows]),
+                    use_container_width=True, hide_index=True, row_height=25,
+                    height=_dfh(min(len(_rows), 14)))
+
         with st.expander("필터 단계별 잔존 · 기각된 조건"):
             st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
                          use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))
