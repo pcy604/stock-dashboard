@@ -101,11 +101,18 @@ def cmd_build():
             if not m.any():
                 continue
             rec["sig"][k] = [int(idx[p]) for p in np.where(m)[0]]
-            rec["trades"][k] = [dict(e=int(idx[t["e"]]), x=int(idx[t["x"]]),
-                                     ep=round(float(close[t["e"]]), 2),
-                                     xp=round(float(close[t["x"]]), 2),
-                                     ret=t["ret"], wk=t["wk"], closed=t["closed"])
-                                for t in simulate(m, close)]
+            tr = []
+            for t in simulate(m, close):
+                # 진입 시점부터 신호가 몇 주 연속으로 계속 떴는가.
+                # 매수 판단 시점에 이미 알 수 있는 정보다 — "며칠째 뜨고 있나".
+                sk, q = 0, t["e"]
+                while q < len(m) and m[q]:
+                    sk += 1; q += 1
+                tr.append(dict(e=int(idx[t["e"]]), x=int(idx[t["x"]]),
+                               ep=round(float(close[t["e"]]), 2),
+                               xp=round(float(close[t["x"]]), 2),
+                               ret=t["ret"], wk=t["wk"], closed=t["closed"], sk=sk))
+            rec["trades"][k] = tr
         # 신호주 지표표 (어느 규칙이든 걸린 주차)
         any_m = np.zeros(len(g), bool)
         for k in rec["sig"]:

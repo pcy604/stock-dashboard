@@ -962,29 +962,75 @@ else:
                                hovermode='x unified')
             st.plotly_chart(_fig, use_container_width=True)
 
-            _tr_all = [dict(규칙=_k, 진입=str(_D[_t['e']].date()),
-                            청산=(str(_D[_t['x']].date()) if _t['closed'] else '보유 중'),
-                            진입가=f"${_t['ep']:,.2f}", 청산가=f"${_t['xp']:,.2f}",
-                            수익률=f"{_t['ret']:+.1f}%", 보유=f"{_t['wk']}주")
-                       for _k, _tr in _r.get('trades', {}).items() for _t in _tr]
-            if _tr_all:
-                st.markdown("**매매 내역** — 규칙별 진입·청산·재진입")
-                st.dataframe(pd.DataFrame(_tr_all).sort_values('진입'),
-                             use_container_width=True, hide_index=True,
-                             row_height=25, height=_dfh(len(_tr_all)))
+            # 진입 주차를 기준으로 매매 결과와 그 주의 지표를 한 표에 합친다
+            _byd = {x['d']: x for x in _r.get('rows', [])}
+            _merged = []
+            for _k, _tr in _r.get('trades', {}).items():
+                for _t in _tr:
+                    _ed = str(_D[_t['e']].date())
+                    _m = _byd.get(_ed, {})
+                    _merged.append({
+                        '규칙': _k, '진입': _ed,
+                        '청산': (str(_D[_t['x']].date()) if _t['closed'] else '보유 중'),
+                        '수익률': _t['ret'], '보유주': _t['wk'], '신호지속': _t.get('sk', 1),
+                        '진입가': _t['ep'], '청산가': _t['xp'],
+                        'RS13': _m.get('rs13'), 'RS26': _m.get('rs26'),
+                        'OPM': _m.get('opm'), 'OPM QoQ': _m.get('opmq'),
+                        # PER은 최근 12개월 순이익이 적자면 산출되지 않는다.
+                        # 흑자전환 직후에는 정상적으로 비어 있는 값이라 '적자'로 표기한다.
+                        'PER': ('적자' if _m.get('per') is None else f"{_m['per']:.1f}"),
+                        'PSR': _m.get('psr'), '신고가대비': _m.get('dist'),
+                        '52주낙폭': _m.get('mdd'), '거래량배': _m.get('vol'),
+                        '매출YoY': _m.get('rev'), '시총($B)': _m.get('mc'),
+                        '거래대금($M)': _m.get('adv'), '트리거': _m.get('trg', '-')})
+            if _merged:
+                _mdf = pd.DataFrame(_merged).sort_values('진입').reset_index(drop=True)
+
+                def _ret_bg(v):
+                    if v != v:
+                        return ''
+                    a = min(abs(v) / 120, 1) * .78 + .06        # 클수록 진하게
+                    return (f'background-color: rgba(31,107,69,{a:.2f}); color:'
+                            + ('#fff' if a > .45 else '#12321c')) if v >= 0 else \
+                           (f'background-color: rgba(160,48,40,{a:.2f}); color:'
+                            + ('#fff' if a > .45 else '#3a1512'))
+
+                def _hold_bg(v):
+                    if v != v:
+                        return ''
+                    a = min(v / 60, 1) * .55 + .04              # 오래 들수록 진하게
+                    return f'background-color: rgba(23,65,92,{a:.2f}); color:' + \
+                           ('#fff' if a > .35 else '#12161b')
+
+                st.markdown(f"**매매·신호 통합 {len(_mdf)}건** — 진입 주차 기준. "
+                            "수익률은 클수록, 보유는 길수록 진하게")
+                st.dataframe(
+                    _mdf.style
+                        .map(_ret_bg, subset=['수익률'])
+                        .map(_hold_bg, subset=['보유주', '신호지속'])
+                        .format({'수익률': '{:+.1f}%', '진입가': '${:,.2f}',
+                                 '청산가': '${:,.2f}', '보유주': '{:.0f}주',
+                                 '신호지속': '{:.0f}주'}, na_rep='—'),
+                    use_container_width=True, hide_index=True, row_height=26,
+                    height=_dfh(len(_mdf)))
+                st.caption("**신호지속** = 진입 시점부터 같은 신호가 연속으로 뜬 주수 "
+                           "(매수 판단 시점에 이미 알 수 있는 값). "
+                           "**PER '적자'** = 최근 12개월 순이익이 아직 마이너스라 산출 불가 — "
+                           "흑자전환 직후에는 정상이다.")
 
             _rows = _r.get('rows', [])
             if _rows:
-                st.markdown(f"**신호 주차 데이터 {len(_rows)}건** — 그 주에 각 지표가 얼마였나")
-                st.dataframe(pd.DataFrame([{
-                    '주차': x['d'], '규칙': ','.join(x['r']), '종가': x['close'],
-                    'RS13': x['rs13'], 'RS26': x['rs26'], 'OPM': x['opm'],
-                    'OPM QoQ': x['opmq'], 'PER': x['per'], 'PSR': x['psr'],
-                    '신고가대비': x['dist'], '52주낙폭': x['mdd'], '거래량배': x['vol'],
-                    '매출YoY': x['rev'], '시총($B)': x['mc'], '거래대금($M)': x['adv'],
-                    '트리거': x['trg']} for x in _rows]),
-                    use_container_width=True, hide_index=True, row_height=25,
-                    height=_dfh(min(len(_rows), 14)))
+                with st.expander(f"신호 주차 전체 {len(_rows)}건 — 진입하지 않은 주 포함"):
+                    st.dataframe(pd.DataFrame([{
+                        '주차': x['d'], '규칙': ','.join(x['r']), '종가': x['close'],
+                        'RS13': x['rs13'], 'RS26': x['rs26'], 'OPM': x['opm'],
+                        'OPM QoQ': x['opmq'],
+                        'PER': ('적자' if x['per'] is None else f"{x['per']:.1f}"),
+                        'PSR': x['psr'], '신고가대비': x['dist'], '52주낙폭': x['mdd'],
+                        '거래량배': x['vol'], '매출YoY': x['rev'], '시총($B)': x['mc'],
+                        '거래대금($M)': x['adv'], '트리거': x['trg']} for x in _rows]),
+                        use_container_width=True, hide_index=True, row_height=25,
+                        height=_dfh(min(len(_rows), 14)))
 
         with st.expander("필터 단계별 잔존 · 기각된 조건"):
             st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
