@@ -867,6 +867,49 @@ else:
         else:
             st.info("이번 주 조건 충족 종목 없음")
 
+        # ── 후보 A·B (2026-08-15~) ────────────────────────────────────
+        # 유니버스 look-ahead를 제거하자 규칙⑥이 밀렸다. 확정 전까지 병렬 관찰한다.
+        _alt = _lsig.get('alt')
+        if _alt:
+            st.divider()
+            st.subheader("🧪 후보 규칙 A·B — 병렬 관찰 중")
+            st.caption("유니버스 선정의 look-ahead를 제거하고(수집 하한 $2B→$0.15B · 1,279→2,208종) "
+                       "32개 조합을 전수 비교한 결과 위 규칙⑥보다 앞선 둘. "
+                       "**아직 확정 규칙이 아니며 페이퍼로만 추적 중이다.**")
+            _tabs = st.tabs([f"A · 회복 {_alt['A']['stat']['recover']}",
+                             f"B · CAGR {_alt['B']['stat']['cagr']}%"])
+            for _t, _k in zip(_tabs, ('A', 'B')):
+                _a = _alt[_k]; _s = _a['stat']
+                with _t:
+                    st.markdown(f"**진입** `{_a['rule']}` · **{_a['slots']}종목** 균등")
+                    _m = st.columns(5)
+                    _m[0].metric("CAGR", f"{_s['cagr']}%", f"SPY {_bt['spy_cagr']}%")
+                    _m[1].metric("MDD", f"{_s['mdd']}%", f"SPY {_bt['spy_mdd']}%",
+                                 delta_color="inverse")
+                    _m[2].metric("회복배율", _s['recover'], f"SPY {_bt['spy_recover']}")
+                    _m[3].metric("승률", f"{_s['winrate']}%")
+                    _m[4].metric("평균 노출", f"{_s['exposure']}%",
+                                 help="낙폭을 만드는 건 손절폭이 아니라 노출이다. "
+                                      "최악 낙폭 시점 현금이 A는 69.8%, B는 18.9%였다.")
+                    if _k == 'B':
+                        st.warning(_a['note'])
+                    else:
+                        st.caption(_a['note'])
+                    st.markdown(f"**이번 주 후보 {_a['n']}종 중 상위 {len(_a['candidates'])}종**")
+                    if _a['candidates']:
+                        st.dataframe(pd.DataFrame([{
+                            '종목': m['name'][:22], '코드': m['sym'],
+                            '종가': f"${m['close']:,.2f}", 'RS13': m['rs_13w'],
+                            'PER': ('-' if m['per'] is None else f"{m['per']:.1f}"),
+                            'PSR': m['psr'],
+                            'OPM': ('-' if m['opm'] is None else f"{m['opm']:.1f}%"),
+                            '시총($B)': m['marcap_b'],
+                            '트리거': ', '.join(m['triggers'])} for m in _a['candidates']]),
+                            use_container_width=True, hide_index=True, row_height=25,
+                            height=_dfh(len(_a['candidates'])))
+                    else:
+                        st.info("이번 주 조건 충족 종목 없음")
+
         with st.expander("필터 단계별 잔존 · 기각된 조건"):
             st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
                          use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))

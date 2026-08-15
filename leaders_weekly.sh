@@ -19,7 +19,7 @@ if [ "${REFRESH_FUND:-0}" = "1" ]; then
   echo "    (분기 갱신 요청 — 재무·8-K 캐시도 삭제)"
   rm -f data/leaders_cache/fq_*.csv data/leaders_cache/ek_*.csv
 fi
-$PY leaders_build.py fetch 1500
+$PY leaders_build.py fetch 2900
 
 echo "--- [2/5] factor_weekly 증분 적재 (~2분)"
 $PY leaders_build.py update

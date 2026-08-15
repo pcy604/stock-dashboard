@@ -1,73 +1,443 @@
 {
- "generated": "2026-08-14",
- "signal_week": "2026-08-03",
+ "generated": "2026-08-15",
+ "signal_week": "2026-08-10",
+ "alt": {
+  "A": {
+   "rule": "이익폭증 AND PER<20 AND RS13>1.5",
+   "slots": 12,
+   "note": "회복배율 1위. PER 조건이 적자 기업을 자동으로 걸러낸다.",
+   "stat": {
+    "cagr": 29.9,
+    "mdd": -22.8,
+    "recover": 1.31,
+    "winrate": 47.3,
+    "wf": "4/6",
+    "exposure": 75.1
+   },
+   "n": 19,
+   "candidates": [
+    {
+     "sym": "PAYS",
+     "name": "Paysign",
+     "close": 13.17,
+     "rs_13w": 2.23,
+     "rs_26w": null,
+     "psr": 2.29,
+     "per": 14.6,
+     "dist_52w": 0.0,
+     "opm": 24.8,
+     "opm_qoq": 1.0,
+     "marcap_b": 0.2,
+     "adv_m": 5.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점"
+     ]
+    },
+    {
+     "sym": "CDNA",
+     "name": "CareDx",
+     "close": 45.32,
+     "rs_13w": 2.16,
+     "rs_26w": null,
+     "psr": 0.96,
+     "per": 4.0,
+     "dist_52w": -2.9,
+     "opm": 85.8,
+     "opm_qoq": 84.8,
+     "marcap_b": 0.4,
+     "adv_m": 27.0,
+     "triggers": [
+      "흑자전환",
+      "영업익 신고점",
+      "순익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "DELL",
+     "name": "Dell",
+     "close": 490.81,
+     "rs_13w": 1.93,
+     "rs_26w": null,
+     "psr": 0.63,
+     "per": 10.0,
+     "dist_52w": 0.0,
+     "opm": 8.3,
+     "opm_qoq": -0.9,
+     "marcap_b": 84.1,
+     "adv_m": 2675.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점"
+     ]
+    },
+    {
+     "sym": "MGNI",
+     "name": "Magnite",
+     "close": 24.73,
+     "rs_13w": 1.83,
+     "rs_26w": null,
+     "psr": 1.73,
+     "per": 7.7,
+     "dist_52w": -4.7,
+     "opm": 16.2,
+     "opm_qoq": 11.5,
+     "marcap_b": 1.3,
+     "adv_m": 45.0,
+     "triggers": [
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "CAKE",
+     "name": "The Cheesecake Factory",
+     "close": 113.38,
+     "rs_13w": 1.81,
+     "rs_26w": null,
+     "psr": 0.44,
+     "per": 9.6,
+     "dist_52w": 0.0,
+     "opm": 7.6,
+     "opm_qoq": 2.0,
+     "marcap_b": 1.7,
+     "adv_m": 107.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점"
+     ]
+    },
+    {
+     "sym": "KRT",
+     "name": "Karat Packaging",
+     "close": 47.91,
+     "rs_13w": 1.73,
+     "rs_26w": null,
+     "psr": 1.12,
+     "per": 11.0,
+     "dist_52w": 0.0,
+     "opm": 27.6,
+     "opm_qoq": 20.3,
+     "marcap_b": 0.6,
+     "adv_m": 4.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "QNST",
+     "name": "QuinStreet",
+     "close": 20.5,
+     "rs_13w": 1.73,
+     "rs_26w": null,
+     "psr": 0.79,
+     "per": 14.2,
+     "dist_52w": -2.8,
+     "opm": 3.0,
+     "opm_qoq": 2.5,
+     "marcap_b": 0.9,
+     "adv_m": 12.0,
+     "triggers": [
+      "흑자전환",
+      "영업익 신고점",
+      "영업익 QoQ+50%"
+     ]
+    },
+    {
+     "sym": "HPE",
+     "name": "Hewlett Packard Enterprise",
+     "close": 58.71,
+     "rs_13w": 1.69,
+     "rs_26w": null,
+     "psr": 0.58,
+     "per": 14.6,
+     "dist_52w": 0.0,
+     "opm": 7.0,
+     "opm_qoq": 1.9,
+     "marcap_b": 22.6,
+     "adv_m": 920.0,
+     "triggers": [
+      "흑자전환",
+      "영업익 신고점",
+      "영업익 QoQ+50%"
+     ]
+    },
+    {
+     "sym": "PD",
+     "name": "PagerDuty",
+     "close": 11.9,
+     "rs_13w": 1.67,
+     "rs_26w": null,
+     "psr": 4.16,
+     "per": 11.0,
+     "dist_52w": -28.9,
+     "opm": 7.6,
+     "opm_qoq": 4.0,
+     "marcap_b": 2.1,
+     "adv_m": 16.0,
+     "triggers": [
+      "흑자전환",
+      "영업익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "MCS",
+     "name": "Marcus Corporation",
+     "close": 30.0,
+     "rs_13w": 1.65,
+     "rs_26w": null,
+     "psr": 0.53,
+     "per": 18.4,
+     "dist_52w": -2.1,
+     "opm": 11.7,
+     "opm_qoq": 24.2,
+     "marcap_b": 0.4,
+     "adv_m": 5.0,
+     "triggers": [
+      "흑자전환",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "NTAP",
+     "name": "NetApp",
+     "close": 207.08,
+     "rs_13w": 1.64,
+     "rs_26w": null,
+     "psr": 3.03,
+     "per": 16.5,
+     "dist_52w": 0.0,
+     "opm": 27.3,
+     "opm_qoq": 2.0,
+     "marcap_b": 21.0,
+     "adv_m": 422.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점"
+     ]
+    },
+    {
+     "sym": "PBF",
+     "name": "PBF Energy",
+     "close": 71.85,
+     "rs_13w": 1.62,
+     "rs_26w": null,
+     "psr": 0.21,
+     "per": 5.3,
+     "dist_52w": -0.2,
+     "opm": 10.9,
+     "opm_qoq": 7.1,
+     "marcap_b": 7.1,
+     "adv_m": 145.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    }
+   ]
+  },
+  "B": {
+   "rule": "(흑자전환 OR 이익폭증) AND RS13>1.7",
+   "slots": 8,
+   "note": "CAGR 1위이자 낙폭 1위. OPM 조건이 없어 적자 기업이 섞인다 — b_opmjump(OPM QoQ +3%p)가 적자 상태에서도 발동하기 때문.",
+   "stat": {
+    "cagr": 43.4,
+    "mdd": -51.3,
+    "recover": 0.85,
+    "winrate": 40.5,
+    "wf": "5/6",
+    "exposure": 94.8
+   },
+   "n": 31,
+   "candidates": [
+    {
+     "sym": "APPS",
+     "name": "Digital Turbine",
+     "close": 12.44,
+     "rs_13w": 2.8,
+     "rs_26w": null,
+     "psr": 0.32,
+     "per": null,
+     "dist_52w": -13.2,
+     "opm": 13.9,
+     "opm_qoq": 6.5,
+     "marcap_b": 0.2,
+     "adv_m": 43.0,
+     "triggers": [
+      "흑자전환",
+      "영업익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "BLZE",
+     "name": "Backblaze",
+     "close": 19.02,
+     "rs_13w": 2.57,
+     "rs_26w": null,
+     "psr": 2.51,
+     "per": null,
+     "dist_52w": 0.0,
+     "opm": -9.8,
+     "opm_qoq": 4.1,
+     "marcap_b": 0.4,
+     "adv_m": 34.0,
+     "triggers": [
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "TWST",
+     "name": "Twist Bioscience",
+     "close": 118.57,
+     "rs_13w": 2.29,
+     "rs_26w": null,
+     "psr": 4.11,
+     "per": null,
+     "dist_52w": 0.0,
+     "opm": -30.6,
+     "opm_qoq": 10.8,
+     "marcap_b": 1.8,
+     "adv_m": 124.0,
+     "triggers": [
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "PAYS",
+     "name": "Paysign",
+     "close": 13.17,
+     "rs_13w": 2.23,
+     "rs_26w": null,
+     "psr": 2.29,
+     "per": 14.6,
+     "dist_52w": 0.0,
+     "opm": 24.8,
+     "opm_qoq": 1.0,
+     "marcap_b": 0.2,
+     "adv_m": 5.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점"
+     ]
+    },
+    {
+     "sym": "BFLY",
+     "name": "Butterfly Network",
+     "close": 8.84,
+     "rs_13w": 2.19,
+     "rs_26w": null,
+     "psr": 1.65,
+     "per": null,
+     "dist_52w": -0.7,
+     "opm": -41.9,
+     "opm_qoq": 10.4,
+     "marcap_b": 0.2,
+     "adv_m": 47.0,
+     "triggers": [
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "CRNX",
+     "name": "Crinetics Pharmaceuticals",
+     "close": 84.7,
+     "rs_13w": 2.19,
+     "rs_26w": null,
+     "psr": 192.31,
+     "per": null,
+     "dist_52w": 0.0,
+     "opm": -1307.8,
+     "opm_qoq": 861.8,
+     "marcap_b": 3.5,
+     "adv_m": 194.0,
+     "triggers": [
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "MAN",
+     "name": "ManpowerGroup",
+     "close": 58.3,
+     "rs_13w": 2.18,
+     "rs_26w": null,
+     "psr": 0.19,
+     "per": null,
+     "dist_52w": 0.0,
+     "opm": 0.6,
+     "opm_qoq": -1.1,
+     "marcap_b": 3.4,
+     "adv_m": 44.0,
+     "triggers": [
+      "흑자전환"
+     ]
+    },
+    {
+     "sym": "CDNA",
+     "name": "CareDx",
+     "close": 45.32,
+     "rs_13w": 2.16,
+     "rs_26w": null,
+     "psr": 0.96,
+     "per": 4.0,
+     "dist_52w": -2.9,
+     "opm": 85.8,
+     "opm_qoq": 84.8,
+     "marcap_b": 0.4,
+     "adv_m": 27.0,
+     "triggers": [
+      "흑자전환",
+      "영업익 신고점",
+      "순익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    }
+   ]
+  }
+ },
  "rule": "RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
  "exit": "고점 대비 −20% 트레일링(주봉) · 12종목 × 8.3% · 2주 분할매수 · 불타기 없음",
- "universe": 1258,
- "n": 17,
+ "universe": 1256,
+ "n": 22,
  "funnel": [
   [
    "유니버스 (시총$2B+ · 거래대금$5M+)",
-   1258
+   1256
   ],
   [
    "+ RS13 > 1.5",
-   36
+   54
   ],
   [
    "+ OPM > 0",
-   20
+   28
   ],
   [
    "+ 흑자전환 OR 이익폭증",
-   17
+   22
   ],
   [
    "(참고) 위에 PSR<3까지 걸면",
-   9
+   11
   ]
  ],
  "candidates": [
   {
-   "sym": "CORT",
-   "name": "Corcept Therapeutics",
-   "close": 110.77,
-   "rs_13w": 2.02,
-   "rs_26w": null,
-   "psr": 2.94,
-   "per": 44.2,
-   "dist_52w": -3.2,
-   "opm": 16.1,
-   "opm_qoq": 46.2,
-   "marcap_b": 2.4,
-   "adv_m": 87.0,
-   "triggers": [
-    "흑자전환",
-    "OPM QoQ+3%p"
-   ]
-  },
-  {
-   "sym": "QLYS",
-   "name": "Qualys",
-   "close": 183.48,
-   "rs_13w": 1.85,
-   "rs_26w": null,
-   "psr": 8.97,
-   "per": 30.5,
-   "dist_52w": 0.0,
-   "opm": 34.7,
-   "opm_qoq": 1.1,
-   "marcap_b": 6.1,
-   "adv_m": 92.0,
-   "triggers": [
-    "영업익 신고점"
-   ]
-  },
-  {
    "sym": "MAN",
    "name": "ManpowerGroup",
-   "close": 56.6,
-   "rs_13w": 1.85,
+   "close": 58.3,
+   "rs_13w": 2.18,
    "rs_26w": null,
    "psr": 0.19,
    "per": null,
@@ -81,48 +451,27 @@
    ]
   },
   {
-   "sym": "OKTA",
-   "name": "Okta",
-   "close": 148.32,
-   "rs_13w": 1.68,
+   "sym": "QLYS",
+   "name": "Qualys",
+   "close": 186.05,
+   "rs_13w": 1.96,
    "rs_26w": null,
-   "psr": 5.49,
-   "per": 66.6,
-   "dist_52w": -0.7,
-   "opm": 7.3,
-   "opm_qoq": 1.3,
-   "marcap_b": 16.4,
-   "adv_m": 376.0,
+   "psr": 8.97,
+   "per": 30.5,
+   "dist_52w": 0.0,
+   "opm": 34.7,
+   "opm_qoq": 1.1,
+   "marcap_b": 6.1,
+   "adv_m": 94.0,
    "triggers": [
-    "영업익 신고점",
-    "순익 신고점"
-   ]
-  },
-  {
-   "sym": "AGL",
-   "name": "Agilon Health",
-   "close": 95.51,
-   "rs_13w": 1.68,
-   "rs_26w": null,
-   "psr": 0.35,
-   "per": null,
-   "dist_52w": -26.4,
-   "opm": 0.3,
-   "opm_qoq": 12.6,
-   "marcap_b": 2.0,
-   "adv_m": 28.0,
-   "triggers": [
-    "흑자전환",
-    "영업익 신고점",
-    "순익 신고점",
-    "OPM QoQ+3%p"
+    "영업익 신고점"
    ]
   },
   {
    "sym": "DELL",
    "name": "Dell",
-   "close": 453.77,
-   "rs_13w": 1.66,
+   "close": 490.81,
+   "rs_13w": 1.93,
    "rs_26w": null,
    "psr": 0.63,
    "per": 10.0,
@@ -130,79 +479,61 @@
    "opm": 8.3,
    "opm_qoq": -0.9,
    "marcap_b": 84.1,
-   "adv_m": 2635.0,
+   "adv_m": 2675.0,
    "triggers": [
     "영업익 신고점",
     "순익 신고점"
    ]
   },
   {
-   "sym": "HPE",
-   "name": "Hewlett Packard Enterprise",
-   "close": 53.22,
-   "rs_13w": 1.62,
+   "sym": "CORT",
+   "name": "Corcept Therapeutics",
+   "close": 114.47,
+   "rs_13w": 1.93,
    "rs_26w": null,
-   "psr": 0.58,
-   "per": 14.6,
-   "dist_52w": 0.0,
-   "opm": 7.0,
-   "opm_qoq": 1.9,
-   "marcap_b": 22.6,
-   "adv_m": 904.0,
+   "psr": 2.94,
+   "per": 44.2,
+   "dist_52w": -0.0,
+   "opm": 16.1,
+   "opm_qoq": 46.2,
+   "marcap_b": 2.4,
+   "adv_m": 84.0,
    "triggers": [
     "흑자전환",
-    "영업익 신고점",
-    "영업익 QoQ+50%"
-   ]
-  },
-  {
-   "sym": "TENB",
-   "name": "Tenable",
-   "close": 36.38,
-   "rs_13w": 1.59,
-   "rs_26w": null,
-   "psr": 5.63,
-   "per": null,
-   "dist_52w": -8.8,
-   "opm": 3.3,
-   "opm_qoq": -0.1,
-   "marcap_b": 5.8,
-   "adv_m": 95.0,
-   "triggers": [
-    "흑자전환"
-   ]
-  },
-  {
-   "sym": "ZBRA",
-   "name": "Zebra Technologies",
-   "close": 376.49,
-   "rs_13w": 1.58,
-   "rs_26w": null,
-   "psr": 2.67,
-   "per": 35.6,
-   "dist_52w": 0.0,
-   "opm": 14.4,
-   "opm_qoq": 5.0,
-   "marcap_b": 14.9,
-   "adv_m": 223.0,
-   "triggers": [
-    "영업익 QoQ+50%",
     "OPM QoQ+3%p"
    ]
   },
   {
-   "sym": "NSP",
-   "name": "Insperity",
-   "close": 52.52,
-   "rs_13w": 1.56,
+   "sym": "CRL",
+   "name": "Charles River Laboratories",
+   "close": 280.05,
+   "rs_13w": 1.76,
    "rs_26w": null,
-   "psr": 0.58,
+   "psr": 3.09,
    "per": null,
    "dist_52w": 0.0,
-   "opm": 0.4,
-   "opm_qoq": -2.9,
-   "marcap_b": 4.0,
-   "adv_m": 28.0,
+   "opm": 12.0,
+   "opm_qoq": 40.5,
+   "marcap_b": 12.4,
+   "adv_m": 173.0,
+   "triggers": [
+    "흑자전환",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
+   "sym": "APPN",
+   "name": "Appian",
+   "close": 35.41,
+   "rs_13w": 1.72,
+   "rs_26w": null,
+   "psr": 3.7,
+   "per": 3190.7,
+   "dist_52w": -18.2,
+   "opm": 1.6,
+   "opm_qoq": 1.9,
+   "marcap_b": 2.8,
+   "adv_m": 21.0,
    "triggers": [
     "흑자전환"
    ]
@@ -210,12 +541,12 @@
   {
    "sym": "AVTR",
    "name": "Avantor",
-   "close": 13.59,
-   "rs_13w": 1.56,
+   "close": 13.66,
+   "rs_13w": 1.7,
    "rs_26w": null,
    "psr": 2.59,
    "per": null,
-   "dist_52w": -11.8,
+   "dist_52w": -11.3,
    "opm": 6.3,
    "opm_qoq": -1.3,
    "marcap_b": 17.0,
@@ -225,10 +556,82 @@
    ]
   },
   {
+   "sym": "TENB",
+   "name": "Tenable",
+   "close": 38.33,
+   "rs_13w": 1.69,
+   "rs_26w": null,
+   "psr": 5.63,
+   "per": null,
+   "dist_52w": -3.9,
+   "opm": 3.3,
+   "opm_qoq": -0.1,
+   "marcap_b": 5.8,
+   "adv_m": 96.0,
+   "triggers": [
+    "흑자전환"
+   ]
+  },
+  {
+   "sym": "OKTA",
+   "name": "Okta",
+   "close": 147.43,
+   "rs_13w": 1.69,
+   "rs_26w": null,
+   "psr": 5.49,
+   "per": 66.6,
+   "dist_52w": -1.3,
+   "opm": 7.3,
+   "opm_qoq": 1.3,
+   "marcap_b": 16.4,
+   "adv_m": 378.0,
+   "triggers": [
+    "영업익 신고점",
+    "순익 신고점"
+   ]
+  },
+  {
+   "sym": "HPE",
+   "name": "Hewlett Packard Enterprise",
+   "close": 58.71,
+   "rs_13w": 1.69,
+   "rs_26w": null,
+   "psr": 0.58,
+   "per": 14.6,
+   "dist_52w": 0.0,
+   "opm": 7.0,
+   "opm_qoq": 1.9,
+   "marcap_b": 22.6,
+   "adv_m": 920.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "영업익 QoQ+50%"
+   ]
+  },
+  {
+   "sym": "GSHD",
+   "name": "Goosehead Insurance",
+   "close": 66.29,
+   "rs_13w": 1.67,
+   "rs_26w": null,
+   "psr": 5.49,
+   "per": 62.5,
+   "dist_52w": -25.9,
+   "opm": 23.5,
+   "opm_qoq": 7.3,
+   "marcap_b": 2.2,
+   "adv_m": 24.0,
+   "triggers": [
+    "영업익 QoQ+50%",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
    "sym": "RHI",
    "name": "Robert Half",
-   "close": 42.74,
-   "rs_13w": 1.54,
+   "close": 43.22,
+   "rs_13w": 1.67,
    "rs_26w": null,
    "psr": 1.42,
    "per": 58.6,
@@ -242,10 +645,47 @@
    ]
   },
   {
+   "sym": "NSP",
+   "name": "Insperity",
+   "close": 52.2,
+   "rs_13w": 1.67,
+   "rs_26w": null,
+   "psr": 0.58,
+   "per": null,
+   "dist_52w": -0.6,
+   "opm": 0.4,
+   "opm_qoq": -2.9,
+   "marcap_b": 4.0,
+   "adv_m": 27.0,
+   "triggers": [
+    "흑자전환"
+   ]
+  },
+  {
+   "sym": "PD",
+   "name": "PagerDuty",
+   "close": 11.9,
+   "rs_13w": 1.67,
+   "rs_26w": null,
+   "psr": 4.16,
+   "per": 11.0,
+   "dist_52w": -28.9,
+   "opm": 7.6,
+   "opm_qoq": 4.0,
+   "marcap_b": 2.1,
+   "adv_m": 16.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "영업익 QoQ+50%",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
    "sym": "NTAP",
    "name": "NetApp",
-   "close": 189.52,
-   "rs_13w": 1.53,
+   "close": 207.08,
+   "rs_13w": 1.64,
    "rs_26w": null,
    "psr": 3.03,
    "per": 16.5,
@@ -253,83 +693,144 @@
    "opm": 27.3,
    "opm_qoq": 2.0,
    "marcap_b": 21.0,
-   "adv_m": 404.0,
+   "adv_m": 422.0,
    "triggers": [
     "영업익 신고점",
     "순익 신고점"
    ]
   },
   {
-   "sym": "HALO",
-   "name": "Halozyme Therapeutics",
-   "close": 103.12,
-   "rs_13w": 1.53,
+   "sym": "PAY",
+   "name": "Paymentus",
+   "close": 41.86,
+   "rs_13w": 1.64,
    "rs_26w": null,
-   "psr": 3.25,
-   "per": 14.1,
+   "psr": 1.95,
+   "per": 33.7,
    "dist_52w": 0.0,
-   "opm": 49.0,
-   "opm_qoq": 69.5,
-   "marcap_b": 4.9,
-   "adv_m": 125.0,
+   "opm": 7.4,
+   "opm_qoq": 0.1,
+   "marcap_b": 2.5,
+   "adv_m": 25.0,
    "triggers": [
-    "흑자전환",
+    "영업익 신고점",
+    "순익 신고점"
+   ]
+  },
+  {
+   "sym": "PBF",
+   "name": "PBF Energy",
+   "close": 71.85,
+   "rs_13w": 1.62,
+   "rs_26w": null,
+   "psr": 0.21,
+   "per": 5.3,
+   "dist_52w": -0.2,
+   "opm": 10.9,
+   "opm_qoq": 7.1,
+   "marcap_b": 7.1,
+   "adv_m": 145.0,
+   "triggers": [
+    "영업익 신고점",
+    "순익 신고점",
+    "영업익 QoQ+50%",
     "OPM QoQ+3%p"
    ]
   },
   {
-   "sym": "PD",
-   "name": "PagerDuty",
-   "close": 11.69,
-   "rs_13w": 1.53,
+   "sym": "TECH",
+   "name": "Bio-Techne",
+   "close": 72.4,
+   "rs_13w": 1.59,
    "rs_26w": null,
-   "psr": 4.16,
-   "per": 11.0,
-   "dist_52w": -30.2,
-   "opm": 7.6,
-   "opm_qoq": 4.0,
-   "marcap_b": 2.1,
-   "adv_m": 17.0,
+   "psr": 8.66,
+   "per": 95.7,
+   "dist_52w": 0.0,
+   "opm": 24.2,
+   "opm_qoq": 5.8,
+   "marcap_b": 10.5,
+   "adv_m": 249.0,
    "triggers": [
     "흑자전환",
     "영업익 신고점",
+    "순익 신고점",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
+   "sym": "NWL",
+   "name": "Newell Brands",
+   "close": 6.24,
+   "rs_13w": 1.57,
+   "rs_26w": null,
+   "psr": 0.41,
+   "per": null,
+   "dist_52w": 0.0,
+   "opm": 14.2,
+   "opm_qoq": 12.0,
+   "marcap_b": 3.0,
+   "adv_m": 46.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "순익 신고점",
     "영업익 QoQ+50%",
     "OPM QoQ+3%p"
    ]
   },
   {
-   "sym": "GSHD",
-   "name": "Goosehead Insurance",
-   "close": 65.2,
+   "sym": "LFST",
+   "name": "LifeStance Health Group",
+   "close": 12.42,
+   "rs_13w": 1.54,
+   "rs_26w": null,
+   "psr": 1.54,
+   "per": 99.3,
+   "dist_52w": 0.0,
+   "opm": 5.5,
+   "opm_qoq": 0.8,
+   "marcap_b": 2.3,
+   "adv_m": 36.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "순익 신고점"
+   ]
+  },
+  {
+   "sym": "PAYC",
+   "name": "Paycom",
+   "close": 218.13,
    "rs_13w": 1.52,
    "rs_26w": null,
-   "psr": 5.49,
-   "per": 62.5,
-   "dist_52w": -27.1,
-   "opm": 23.5,
-   "opm_qoq": 7.3,
-   "marcap_b": 2.2,
-   "adv_m": 24.0,
+   "psr": 5.5,
+   "per": 24.5,
+   "dist_52w": -5.9,
+   "opm": 36.8,
+   "opm_qoq": 7.9,
+   "marcap_b": 11.5,
+   "adv_m": 135.0,
    "triggers": [
-    "영업익 QoQ+50%",
     "OPM QoQ+3%p"
    ]
   },
   {
-   "sym": "APPN",
-   "name": "Appian",
-   "close": 34.64,
-   "rs_13w": 1.5,
+   "sym": "WDAY",
+   "name": "Workday",
+   "close": 198.68,
+   "rs_13w": 1.51,
    "rs_26w": null,
-   "psr": 3.7,
-   "per": 3190.7,
-   "dist_52w": -19.9,
-   "opm": 1.6,
-   "opm_qoq": 1.9,
-   "marcap_b": 2.8,
-   "adv_m": 21.0,
+   "psr": 7.07,
+   "per": 82.2,
+   "dist_52w": -19.5,
+   "opm": 13.3,
+   "opm_qoq": 6.4,
+   "marcap_b": 69.7,
+   "adv_m": 679.0,
    "triggers": [
-    "흑자전환"
+    "영업익 신고점",
+    "영업익 QoQ+50%",
+    "OPM QoQ+3%p"
    ]
   }
  ],
@@ -371,16 +872,16 @@
  },
  "paper": {
   "created": "2026-08-04",
-  "updated": "2026-08-11",
-  "n_total": 16,
-  "n_open": 16,
+  "updated": "2026-08-15",
+  "n_total": 46,
+  "n_open": 46,
   "n_closed": 0,
   "open": [
    {
     "sym": "AGL",
     "log_date": "2026-08-04",
     "entry": 91.61,
-    "peak": 95.51,
+    "peak": 96.9,
     "rs": 2.98,
     "psr": 0.35,
     "triggers": [
@@ -394,7 +895,7 @@
     "sym": "DELL",
     "log_date": "2026-08-04",
     "entry": 405.37,
-    "peak": 453.77,
+    "peak": 490.81,
     "rs": 1.86,
     "psr": 0.63,
     "triggers": [
@@ -418,7 +919,7 @@
     "sym": "MAN",
     "log_date": "2026-08-04",
     "entry": 52.42,
-    "peak": 56.6,
+    "peak": 58.3,
     "rs": 1.69,
     "psr": 0.19,
     "triggers": [
@@ -454,7 +955,7 @@
     "sym": "HPE",
     "log_date": "2026-08-04",
     "entry": 47.9,
-    "peak": 53.22,
+    "peak": 58.71,
     "rs": 1.62,
     "psr": 0.58,
     "triggers": [
@@ -481,7 +982,7 @@
     "sym": "CORT",
     "log_date": "2026-08-10",
     "entry": 110.77,
-    "peak": 110.77,
+    "peak": 114.47,
     "rs": 2.02,
     "psr": 2.94,
     "triggers": [
@@ -493,7 +994,7 @@
     "sym": "QLYS",
     "log_date": "2026-08-10",
     "entry": 183.48,
-    "peak": 183.48,
+    "peak": 186.05,
     "rs": 1.85,
     "psr": 8.97,
     "triggers": [
@@ -504,7 +1005,7 @@
     "sym": "MAN",
     "log_date": "2026-08-10",
     "entry": 56.6,
-    "peak": 56.6,
+    "peak": 58.3,
     "rs": 1.85,
     "psr": 0.19,
     "triggers": [
@@ -527,7 +1028,7 @@
     "sym": "AGL",
     "log_date": "2026-08-10",
     "entry": 95.51,
-    "peak": 95.51,
+    "peak": 96.9,
     "rs": 1.68,
     "psr": 0.35,
     "triggers": [
@@ -541,7 +1042,7 @@
     "sym": "DELL",
     "log_date": "2026-08-10",
     "entry": 453.77,
-    "peak": 453.77,
+    "peak": 490.81,
     "rs": 1.66,
     "psr": 0.63,
     "triggers": [
@@ -553,7 +1054,7 @@
     "sym": "HPE",
     "log_date": "2026-08-10",
     "entry": 53.22,
-    "peak": 53.22,
+    "peak": 58.71,
     "rs": 1.62,
     "psr": 0.58,
     "triggers": [
@@ -566,11 +1067,378 @@
     "sym": "TENB",
     "log_date": "2026-08-10",
     "entry": 36.38,
-    "peak": 36.38,
+    "peak": 38.33,
     "rs": 1.59,
     "psr": 5.63,
     "triggers": [
      "흑자전환"
+    ]
+   },
+   {
+    "sym": "MAN",
+    "log_date": "2026-08-15",
+    "entry": 58.3,
+    "peak": 58.3,
+    "rs": 2.18,
+    "psr": 0.19,
+    "triggers": [
+     "흑자전환"
+    ]
+   },
+   {
+    "sym": "QLYS",
+    "log_date": "2026-08-15",
+    "entry": 186.05,
+    "peak": 186.05,
+    "rs": 1.96,
+    "psr": 8.97,
+    "triggers": [
+     "b_ophigh"
+    ]
+   },
+   {
+    "sym": "DELL",
+    "log_date": "2026-08-15",
+    "entry": 490.81,
+    "peak": 490.81,
+    "rs": 1.93,
+    "psr": 0.63,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh"
+    ]
+   },
+   {
+    "sym": "CORT",
+    "log_date": "2026-08-15",
+    "entry": 114.47,
+    "peak": 114.47,
+    "rs": 1.93,
+    "psr": 2.94,
+    "triggers": [
+     "흑자전환",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "CRL",
+    "log_date": "2026-08-15",
+    "entry": 280.05,
+    "peak": 280.05,
+    "rs": 1.76,
+    "psr": 3.09,
+    "triggers": [
+     "흑자전환",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "APPN",
+    "log_date": "2026-08-15",
+    "entry": 35.41,
+    "peak": 35.41,
+    "rs": 1.72,
+    "psr": 3.7,
+    "triggers": [
+     "흑자전환"
+    ]
+   },
+   {
+    "sym": "AVTR",
+    "log_date": "2026-08-15",
+    "entry": 13.66,
+    "peak": 13.66,
+    "rs": 1.7,
+    "psr": 2.59,
+    "triggers": [
+     "흑자전환"
+    ]
+   },
+   {
+    "sym": "TENB",
+    "log_date": "2026-08-15",
+    "entry": 38.33,
+    "peak": 38.33,
+    "rs": 1.69,
+    "psr": 5.63,
+    "triggers": [
+     "흑자전환"
+    ]
+   },
+   {
+    "sym": "OKTA",
+    "log_date": "2026-08-15",
+    "entry": 147.43,
+    "peak": 147.43,
+    "rs": 1.69,
+    "psr": 5.49,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh"
+    ]
+   },
+   {
+    "sym": "HPE",
+    "log_date": "2026-08-15",
+    "entry": 58.71,
+    "peak": 58.71,
+    "rs": 1.69,
+    "psr": 0.58,
+    "triggers": [
+     "흑자전환",
+     "b_ophigh",
+     "b_opjump"
+    ]
+   },
+   {
+    "sym": "PAYS",
+    "log_date": "2026-08-15",
+    "entry": 13.17,
+    "peak": 13.17,
+    "rs": 2.23,
+    "psr": 2.29,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh"
+    ]
+   },
+   {
+    "sym": "CDNA",
+    "log_date": "2026-08-15",
+    "entry": 45.32,
+    "peak": 45.32,
+    "rs": 2.16,
+    "psr": 0.96,
+    "triggers": [
+     "흑자전환",
+     "b_ophigh",
+     "b_nihigh",
+     "b_opjump",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "DELL",
+    "log_date": "2026-08-15",
+    "entry": 490.81,
+    "peak": 490.81,
+    "rs": 1.93,
+    "psr": 0.63,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh"
+    ]
+   },
+   {
+    "sym": "MGNI",
+    "log_date": "2026-08-15",
+    "entry": 24.73,
+    "peak": 24.73,
+    "rs": 1.83,
+    "psr": 1.73,
+    "triggers": [
+     "b_opjump",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "CAKE",
+    "log_date": "2026-08-15",
+    "entry": 113.38,
+    "peak": 113.38,
+    "rs": 1.81,
+    "psr": 0.44,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh"
+    ]
+   },
+   {
+    "sym": "KRT",
+    "log_date": "2026-08-15",
+    "entry": 47.91,
+    "peak": 47.91,
+    "rs": 1.73,
+    "psr": 1.12,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh",
+     "b_opjump",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "QNST",
+    "log_date": "2026-08-15",
+    "entry": 20.5,
+    "peak": 20.5,
+    "rs": 1.73,
+    "psr": 0.79,
+    "triggers": [
+     "흑자전환",
+     "b_ophigh",
+     "b_opjump"
+    ]
+   },
+   {
+    "sym": "HPE",
+    "log_date": "2026-08-15",
+    "entry": 58.71,
+    "peak": 58.71,
+    "rs": 1.69,
+    "psr": 0.58,
+    "triggers": [
+     "흑자전환",
+     "b_ophigh",
+     "b_opjump"
+    ]
+   },
+   {
+    "sym": "PD",
+    "log_date": "2026-08-15",
+    "entry": 11.9,
+    "peak": 11.9,
+    "rs": 1.67,
+    "psr": 4.16,
+    "triggers": [
+     "흑자전환",
+     "b_ophigh",
+     "b_opjump",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "MCS",
+    "log_date": "2026-08-15",
+    "entry": 30.0,
+    "peak": 30.0,
+    "rs": 1.65,
+    "psr": 0.53,
+    "triggers": [
+     "흑자전환",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "NTAP",
+    "log_date": "2026-08-15",
+    "entry": 207.08,
+    "peak": 207.08,
+    "rs": 1.64,
+    "psr": 3.03,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh"
+    ]
+   },
+   {
+    "sym": "PBF",
+    "log_date": "2026-08-15",
+    "entry": 71.85,
+    "peak": 71.85,
+    "rs": 1.62,
+    "psr": 0.21,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh",
+     "b_opjump",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "APPS",
+    "log_date": "2026-08-15",
+    "entry": 12.44,
+    "peak": 12.44,
+    "rs": 2.8,
+    "psr": 0.32,
+    "triggers": [
+     "흑자전환",
+     "b_ophigh",
+     "b_opjump",
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "BLZE",
+    "log_date": "2026-08-15",
+    "entry": 19.02,
+    "peak": 19.02,
+    "rs": 2.57,
+    "psr": 2.51,
+    "triggers": [
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "TWST",
+    "log_date": "2026-08-15",
+    "entry": 118.57,
+    "peak": 118.57,
+    "rs": 2.29,
+    "psr": 4.11,
+    "triggers": [
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "PAYS",
+    "log_date": "2026-08-15",
+    "entry": 13.17,
+    "peak": 13.17,
+    "rs": 2.23,
+    "psr": 2.29,
+    "triggers": [
+     "b_ophigh",
+     "b_nihigh"
+    ]
+   },
+   {
+    "sym": "BFLY",
+    "log_date": "2026-08-15",
+    "entry": 8.84,
+    "peak": 8.84,
+    "rs": 2.19,
+    "psr": 1.65,
+    "triggers": [
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "CRNX",
+    "log_date": "2026-08-15",
+    "entry": 84.7,
+    "peak": 84.7,
+    "rs": 2.19,
+    "psr": 192.31,
+    "triggers": [
+     "b_opmjump"
+    ]
+   },
+   {
+    "sym": "MAN",
+    "log_date": "2026-08-15",
+    "entry": 58.3,
+    "peak": 58.3,
+    "rs": 2.18,
+    "psr": 0.19,
+    "triggers": [
+     "흑자전환"
+    ]
+   },
+   {
+    "sym": "CDNA",
+    "log_date": "2026-08-15",
+    "entry": 45.32,
+    "peak": 45.32,
+    "rs": 2.16,
+    "psr": 0.96,
+    "triggers": [
+     "흑자전환",
+     "b_ophigh",
+     "b_nihigh",
+     "b_opjump",
+     "b_opmjump"
     ]
    }
   ],
