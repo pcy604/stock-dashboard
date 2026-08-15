@@ -1,6 +1,63 @@
 {
   "items": [
     {
+      "video_id": "11LuxBjp4t4",
+      "title": "다시 오른 코스피, 안심하긴 이르다? 앞으로가 중요한 이유 | 박병창 MP파트너스 대표 [주말 인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-08-15T02:00:15+00:00",
+      "url": "https://www.youtube.com/watch?v=11LuxBjp4t4",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-15T12:28:12.681693+09:00"
+    },
+    {
+      "video_id": "QyaF21-e7QU",
+      "title": "투자자는 오디세우스처럼 해야 합니다｜오종태의 알쓸투잡",
+      "channel": "오종태의투자병법",
+      "published": "2026-08-15T02:35:06+00:00",
+      "url": "https://www.youtube.com/watch?v=QyaF21-e7QU",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-15T12:27:39.926818+09:00"
+    },
+    {
+      "video_id": "44CkANj9-vk",
+      "title": "모닝브리프 주말복습, 이것만 보시면 됩니다! | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.08.10.월 - 26.08.14.금]",
+      "channel": "체슬리TV",
+      "published": "2026-08-15T03:00:08+00:00",
+      "url": "https://www.youtube.com/watch?v=44CkANj9-vk",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-15T12:25:29.291653+09:00"
+    },
+    {
       "video_id": "aHTPoXjl-xQ",
       "title": "항복하지 말고 탈출을 준비하라! 주식시장 지금부터는 / 김효진 박사 [성공예감 별책부록]",
       "channel": "와이스트릿",
@@ -11846,107 +11903,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-07T14:23:49.068843+09:00"
-    },
-    {
-      "video_id": "ZAqO9k8mT-U",
-      "title": "반도체 투자는 답정너 지금 필요한 건 '이것' #반도체 #투자 #사이클 #예측 #대응 #호돌이 #우황제",
-      "channel": "와이스트릿",
-      "published": "2026-08-06T22:00:31+00:00",
-      "url": "https://www.youtube.com/watch?v=ZAqO9k8mT-U",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-07T18:46:10.042772+09:00"
-    },
-    {
-      "video_id": "6lasWzdJFKk",
-      "title": "8월은 방어력을 다질 때, 수익 극대화보다 손실 최소화로 | 명민준, 박보경, 신얼 상상인증권 투자전략팀장 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-08-06T14:18:32+00:00",
-      "url": "https://www.youtube.com/watch?v=6lasWzdJFKk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T09:37:03.428296+09:00"
-    },
-    {
-      "video_id": "z-KxJxbiGDk",
-      "title": "[26.08.07 오전 방송 전체보기] 브렌트유 4% 상승 속 뉴욕증시 하락 마감...스페이스X 주가 '급등'",
-      "channel": "삼프로TV",
-      "published": "2026-08-07T03:14:23+00:00",
-      "url": "https://www.youtube.com/watch?v=z-KxJxbiGDk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "유가 상승이 뉴욕증시 전반의 하락을 이끌었으나, 비상장 기업 스페이스X는 특별한 호재로 가치가 급등하며 개별 기업의 강세를 부각시켰습니다.",
-        "summary": [
-          "브렌트유 가격이 4% 상승하며 인플레이션 우려를 다시 키우고, 연준의 긴축 기조 유지 가능성에 대한 시장의 경계심을 높였습니다. (t=5)",
-          "유가 상승과 경기 침체 우려가 복합적으로 작용하며 뉴욕증시 주요 지수(S&P 500, 나스닥)는 하락 마감했습니다. (t=20)",
-          "비상장 기업인 스페이스X의 주식 가치가 급등했다는 소식이 전해졌는데, 이는 성공적인 자금 조달 라운드 또는 2차 시장 거래에 따른 것으로 추정됩니다. (t=40)",
-          "전반적인 시장 약세 속에서도 스페이스X와 같은 혁신 기업의 강력한 성장 스토리는 투자자들의 관심을 집중시키며 차별화된 움직임을 보였습니다. (t=60)",
-          "에너지 가격 변동성이 시장 전반에 미치는 영향과 함께, 특정 산업 및 개별 기업의 펀더멘털 강세가 공존하는 복잡한 시장 환경을 보여줍니다. (t=75)"
-        ],
-        "tickers": [
-          {
-            "name": "브렌트유",
-            "ticker": "BRN00",
-            "context": "4% 급등하며 인플레이션 우려 및 시장 하락의 주요 원인으로 작용했습니다.",
-            "view": "중립",
-            "t": 10
-          },
-          {
-            "name": "S&P 500",
-            "ticker": "",
-            "context": "유가 상승 및 매크로 우려로 인해 뉴욕증시 전반의 하락세를 나타내는 대표 지수입니다.",
-            "view": "부정",
-            "t": 25
-          },
-          {
-            "name": "SpaceX",
-            "ticker": "",
-            "context": "비상장 주식임에도 특별한 호재로 가치가 급등하며 시장의 관심을 받았습니다.",
-            "view": "긍정",
-            "t": 45
-          }
-        ],
-        "key_points": [
-          {
-            "point": "유가 등 원자재 가격의 급등은 인플레이션 압력을 가중시키고 중앙은행의 통화 긴축 기조를 유지할 가능성을 높여 증시 전반에 하방 압력으로 작용할 수 있습니다.",
-            "t": 15
-          },
-          {
-            "point": "거시경제적 불확실성이 지속되는 상황에서도 스페이스X처럼 독보적인 기술력과 성장 잠재력을 가진 개별 기업은 시장의 흐름과 무관하게 강력한 밸류에이션 상승을 이끌어낼 수 있습니다.",
-            "t": 55
-          },
-          {
-            "point": "비상장 대형 기술 기업의 가치 변동은 우주 산업 등 관련 섹터 상장 기업들의 투자 심리 및 밸류에이션에도 간접적인 영향을 미칠 수 있으므로 추이를 주시할 필요가 있습니다.",
-            "t": 70
-          }
-        ],
-        "actionable": [
-          "글로벌 유가(브렌트유) 및 에너지 섹터 동향을 지속적으로 모니터링하여 인플레이션 및 금리 정책 변화 가능성에 대비하십시오.",
-          "성장성이 높은 비상장 혁신 기업에 대한 간접 투자 기회(예: 관련 ETF, 투자 지주사) 또는 스페이스X와 사업적 연관성이 있는 상장 기업들을 심층적으로 분석하십시오."
-        ]
-      },
-      "source": "video",
-      "attempts": 3,
-      "analyzed_at": "2026-08-07T17:42:26.306408+09:00"
     }
   ],
-  "updated": "2026-08-15T11:12:21.703154+09:00"
+  "updated": "2026-08-15T12:28:13.863415+09:00"
 }
