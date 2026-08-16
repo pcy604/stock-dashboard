@@ -1,6 +1,202 @@
 {
   "items": [
     {
+      "video_id": "64Qpu9rOEkw",
+      "title": "품격있는 기업분석, 코어위브•슈퍼마이크로컴퓨터•네비우스가 말 하고 있는 것은? | 박세익 전무 & 체슬리 학습부장 & 소현철 박사 [별주부전 / 26.08.15.토]",
+      "channel": "체슬리TV",
+      "published": "2026-08-16T03:00:47+00:00",
+      "url": "https://www.youtube.com/watch?v=64Qpu9rOEkw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "AI 인프라 투자 사이클 속 슈퍼마이크로컴퓨터(SMCI)와 코어위브(CRWV)의 실적과 성장 전망을 비교하고, 각 기업의 투자 매력도를 Canslim 기준으로 분석하며 주요 리스크와 기회를 제시합니다.",
+        "summary": [
+          "AI 인프라 투자는 반도체뿐만 아니라 전력, 서버, 클라우드, 통신, 데이터센터 등 밸류체인 전반으로 확산되는 추세입니다.",
+          "슈퍼마이크로컴퓨터(SMCI)는 AI 서버 시스템 공급업체로 FY26년 4분기 매출 11.1B USD 및 영업이익률 17.6%로 회복세를 보이며 FY27년 매출 가이던스를 공격적으로 제시했습니다.",
+          "코어위브(CRWV)는 GPU 기반 AI 컴퓨팅 파워 제공 클라우드 사업자로, 2분기 매출이 전년 대비 112% 증가한 2.58B USD를 기록했고, 장기 매출 백로그는 104.2B USD에 달합니다.",
+          "SMCI는 과거 회계처리 및 내부통제 문제로 인한 신뢰 리스크가 존재하며, CRWV는 공격적인 투자에 따른 자본 효율성 증명과 흑자 전환 시점 확인이 중요합니다.",
+          "Canslim 기준 분석 결과, SMCI는 총점 50점으로 매수 가능 종목으로 판단되나 신뢰 리스크를 반드시 확인해야 하며, CRWV는 총점 45점으로 성장성 강하나 수익성 및 효율성 측면을 계속 주시해야 합니다."
+        ],
+        "tickers": [
+          {
+            "name": "Micron Technology",
+            "ticker": "MU",
+            "context": "주간 수익률 탑20 중 5회 등장 종목으로 언급",
+            "view": "중립",
+            "t": 3
+          },
+          {
+            "name": "Intel",
+            "ticker": "INTC",
+            "context": "주간 수익률 탑20 중 4회 등장 종목으로 언급",
+            "view": "중립",
+            "t": 4
+          },
+          {
+            "name": "AMD",
+            "ticker": "AMD",
+            "context": "주간 수익률 탑20 중 3회 등장 종목으로 언급",
+            "view": "중립",
+            "t": 4
+          },
+          {
+            "name": "Moderna",
+            "ticker": "MRNA",
+            "context": "과거 언급 후 투자하여 수익 중인 종목으로 개인적인 경험 공유",
+            "view": "긍정",
+            "t": 29
+          },
+          {
+            "name": "Palantir Technologies",
+            "ticker": "PLTR",
+            "context": "과거 언급 후 투자하여 수익 중인 종목으로 개인적인 경험 공유",
+            "view": "긍정",
+            "t": 46
+          },
+          {
+            "name": "Super Micro Computer",
+            "ticker": "SMCI",
+            "context": "AI 서버 제조업체로 이번 주 시장 주목주. 주가 28.2% 상승, 매출/마진 개선 및 공격적인 2027년 가이던스 제시. 과거 회계 이슈로 인한 신뢰 리스크 존재.",
+            "view": "중립",
+            "t": 319
+          },
+          {
+            "name": "CoreWeave",
+            "ticker": "CRWV",
+            "context": "GPU 기반 AI 컴퓨팅 인프라 제공 클라우드 사업자로 이번 주 시장 주목주. 주가 15.9% 상승, 매출 및 백로그 급증. 자본 효율성 개선이 관건.",
+            "view": "중립",
+            "t": 319
+          },
+          {
+            "name": "NVIDIA",
+            "ticker": "NVDA",
+            "context": "AI 밸류체인 내 GPU/Network 담당 기업으로 언급. CoreWeave의 주요 파트너 중 하나.",
+            "view": "긍정",
+            "t": 418
+          },
+          {
+            "name": "Broadcom",
+            "ticker": "AVGO",
+            "context": "AI 밸류체인 내 GPU/Network 담당 기업으로 언급.",
+            "view": "중립",
+            "t": 418
+          },
+          {
+            "name": "Arista Networks",
+            "ticker": "ANET",
+            "context": "AI 밸류체인 내 GPU/Network 담당 기업으로 언급.",
+            "view": "중립",
+            "t": 418
+          },
+          {
+            "name": "Vertiv",
+            "ticker": "VRT",
+            "context": "AI 밸류체인 내 Cooling/Power 담당 기업으로 언급.",
+            "view": "중립",
+            "t": 424
+          },
+          {
+            "name": "Amazon",
+            "ticker": "AMZN",
+            "context": "AWS (Amazon Web Services)의 OPM (Operating Profit Margin)을 CoreWeave의 수익성 비교 기준으로 사용.",
+            "view": "중립",
+            "t": 849
+          },
+          {
+            "name": "Microsoft",
+            "ticker": "MSFT",
+            "context": "클라우드 사업을 하는 기업으로 CoreWeave의 가치 평가 시 멀티플 비교 대상. CoreWeave의 큰 고객이기도 함.",
+            "view": "중립",
+            "t": 914
+          },
+          {
+            "name": "Oracle",
+            "ticker": "ORCL",
+            "context": "클라우드 사업을 하는 기업으로 CoreWeave의 가치 평가 시 멀티플 비교 대상.",
+            "view": "중립",
+            "t": 915
+          },
+          {
+            "name": "Dell Technologies",
+            "ticker": "DELL",
+            "context": "SMCI의 서버 OEM 시장 경쟁 기업으로 언급.",
+            "view": "중립",
+            "t": 1216
+          },
+          {
+            "name": "HP Enterprise",
+            "ticker": "HPE",
+            "context": "SMCI의 서버 OEM 시장 경쟁 기업으로 언급.",
+            "view": "중립",
+            "t": 1216
+          },
+          {
+            "name": "Lenovo",
+            "ticker": "0992.HK",
+            "context": "SMCI의 서버 OEM 시장 경쟁 기업으로 언급.",
+            "view": "중립",
+            "t": 1217
+          },
+          {
+            "name": "Nebius Group",
+            "ticker": "NBIS",
+            "context": "CoreWeave와 같은 네오 클라우드 업체 중 하나로, 주가 흐름이 긍정적이며 돈을 버는 모델을 증명한 기업. 엔비디아가 투자한 기업이기도 함.",
+            "view": "긍정",
+            "t": 1330
+          },
+          {
+            "name": "IREN",
+            "ticker": "IREN",
+            "context": "네오 클라우드 업체 중 하나로 언급.",
+            "view": "중립",
+            "t": 1331
+          },
+          {
+            "name": "Lambda",
+            "ticker": "LMDA",
+            "context": "네오 클라우드 업체 중 하나로 언급.",
+            "view": "중립",
+            "t": 1331
+          },
+          {
+            "name": "OCI",
+            "ticker": "010060.KS",
+            "context": "한국 기업으로, 과거 발표 내용 언급 시 개인적인 투자 사례로 언급.",
+            "view": "중립",
+            "t": 1752
+          }
+        ],
+        "key_points": [
+          {
+            "point": "AI 투자는 밸류체인 전반을 움직이는 사이클이며, 개별 기업 실적을 넘어 큰 흐름을 이해하는 것이 중요합니다.",
+            "t": 342
+          },
+          {
+            "point": "슈퍼마이크로컴퓨터(SMCI)의 회계 및 내부통제 이슈는 주가에 큰 영향을 미쳤던 신뢰 문제로, 사업 성장성과 별개로 지속적인 개선 여부를 확인해야 합니다.",
+            "t": 593
+          },
+          {
+            "point": "코어위브(CRWV)는 막대한 백로그(104.2B USD)와 공격적인 전력 확보를 통해 AI 컴퓨팅 수요를 흡수 중이나, 투자 대비 효율적인 매출 및 이익 전환 능력을 증명하는 단계입니다.",
+            "t": 833
+          },
+          {
+            "point": "네오 클라우드 기업들은 대형 클라우드 업체의 고객 포화 및 법용성 한계로 인해 맞춤형, 고성능 GPU 클라우드 수요를 충족하며 새로운 성장 동력을 확보하고 있습니다.",
+            "t": 2901
+          },
+          {
+            "point": "신규 상장 및 수익 미실현 기업 투자는 높은 성장 잠재력과 함께 상당한 위험을 동반하므로, 장기적인 관점에서 흑자 전환 및 효율성 개선 시점을 면밀히 파악해야 합니다."
+          }
+        ],
+        "actionable": [
+          "슈퍼마이크로컴퓨터(SMCI) 투자 시, 회계 불확실성 해소 및 내부 통제 시스템 개선 여부를 최우선적으로 확인하세요.",
+          "코어위브(CRWV) 투자 시, 현재 적자 상태에서 매출 성장률과 함께 자본 효율성 개선 및 흑자 전환 시점에 대한 기업의 구체적인 계획과 진행 상황을 추적하세요.",
+          "네오 클라우드 섹터 전반에 대한 긍정적 시각을 유지하되, 개별 기업의 차별화된 경쟁력(예: GPU 조달 능력, 고객 다변화)과 재무 건전성 지표를 비교 분석하여 투자 결정을 내리세요."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-16T12:34:22.654260+09:00"
+    },
+    {
       "video_id": "mwhIKfuMBCc",
       "title": "묻고 더블로 가! 필승의 1.2.4전법 이건 그래도 됩니다 /최고민수 박민수 작가 (풀버전)",
       "channel": "와이스트릿",
@@ -16,8 +212,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-16T11:14:53.318154+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-16T12:35:10.902667+09:00"
     },
     {
       "video_id": "EvWrgaZr5MU",
@@ -11814,26 +12010,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-07T17:55:40.445155+09:00"
-    },
-    {
-      "video_id": "pIeHgjQ6pVs",
-      "title": "하반기 공모주 시장에 주목해야 하는 이유 #김정현 #공모주 #투자 #하반기 #주식 #공모주투자",
-      "channel": "와이스트릿",
-      "published": "2026-08-07T03:00:25+00:00",
-      "url": "https://www.youtube.com/watch?v=pIeHgjQ6pVs",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-07T21:30:50.815654+09:00"
     }
   ],
-  "updated": "2026-08-16T11:14:54.318399+09:00"
+  "updated": "2026-08-16T12:35:11.902906+09:00"
 }
