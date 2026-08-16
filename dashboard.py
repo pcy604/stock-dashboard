@@ -694,6 +694,93 @@ with t_lead, guard('주도주'):
 
 if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
     with t_lead, guard('주도주 KR'):
+        # 2026-08-16: 미국 규칙⑥ 원문을 KR에 이식한 KR-U6 추가. 실측에서 KR-P1보다 우수해
+        # 기본값으로 둔다(평균 11.5% vs 9.6% · 손익비 3.53 vs 3.05 · 꼬리의존 36% vs 47%).
+        _kr_rule = st.radio(
+            "규칙", ["🇺🇸 규칙⑥ 이식 (KR-U6)", "📈 52주 신고가 (KR-P1)"],
+            horizontal=True, key="kr_rule",
+            help="KR-U6 = 미국 규칙⑥ 조건 그대로(RS13>1.5 · 흑자전환/이익폭증 · OPM>0 · 대형주). "
+                 "KR-P1 = 52주 신고가 기반 자체 규칙.")
+
+    if st.session_state.get('kr_rule', '🇺🇸').startswith('🇺🇸'):
+      with t_lead, guard('주도주 KR-U6'):
+        st.caption(data_stamp('results/leaders_kr6.json'))
+        _u6 = load_json(Path('results/leaders_kr6.json'))
+        if not _u6:
+            st.warning("KR-U6 데이터 없음 → 로컬에서 `python leaders_kr6.py publish` 실행 후 커밋.")
+        else:
+            _b30 = _u6['backtest']['trail30']['US그대로']
+            st.markdown(
+                f"<div style='background:#f0fdf4;border:1px solid #86efac;border-left:4px solid #16a34a;"
+                f"border-radius:10px;padding:13px 17px'>"
+                f"<b style='color:#15803d'>미국 규칙⑥ 원문을 그대로 이식</b>"
+                f"<span style='color:#6b7280;font-size:12.5px'> · 손절만 KR에 맞춰 -30%</span>"
+                f"<div style='font-size:13px;color:#374151;margin-top:6px'>"
+                f"진입 조건은 미국판과 <b>완전히 동일</b>합니다 — RS13&gt;1.5 · (흑자전환 OR 이익폭증) · "
+                f"OPM&gt;0 · 시총 2.8조↑ · 거래대금 70억↑. 이익폭증 4종 정의도 원문 그대로입니다."
+                f"</div></div>", unsafe_allow_html=True)
+            st.markdown(f"**규칙** `{_u6['rule']}`  \n기간 {_u6['period']} · 생성 {_u6['generated']}")
+
+            _c1, _c2, _c3, _c4 = st.columns(4)
+            _c1.metric("거래당 평균수익", f"{_b30['avg']}%")
+            _c2.metric("승률", f"{_b30['winrate']}%", f"중앙값 {_b30['med']}%", delta_color="off")
+            _c3.metric("손익비", f"{_b30['payoff']}", "KR-P1은 3.05", delta_color="off")
+            _c4.metric("상위 1% 의존", f"{_b30['tail']}%", "KR-P1은 46.7%", delta_color="off")
+
+            st.markdown(f"**이번 후보 {_u6['n']}종** — 최근 10주 내 진입 신호, 아직 트레일링 미도달")
+            if _u6['candidates']:
+                st.dataframe(pd.DataFrame([{
+                    '종목': c['name'][:18], '코드': c['sym'], '진입일': c['entry_date'],
+                    '진입가': f"{c['entry_px']:,.0f}", '현재가': f"{c['close']:,.0f}",
+                    '수익률': f"{c['ret']:+.1f}%",
+                    '시총': (f"{c['marcap_jo']}조" if c.get('marcap_jo') else '-'),
+                    '거래대금': (f"{c['adv_eok']:,}억" if c.get('adv_eok') else '-'),
+                    '트레일링 손절가': f"{c['stop']:,.0f}", '경과': f"{c['days']}일",
+                } for c in _u6['candidates']]), use_container_width=True, hide_index=True,
+                    row_height=25, height=_dfh(len(_u6['candidates'])))
+            else:
+                st.info("현재 조건 충족 종목 없음 — 연 29건 빈도라 비어 있는 주가 많습니다.")
+
+            with st.expander("🔬 손절폭이 전부였다 — 진입 조건은 미국판이 더 좋다"):
+                st.markdown("규칙⑥을 **-20%(미국 운용값)로 그대로 쓰면 KR에서 망가진다.** "
+                            "손절만 -30%로 바꾸면 오히려 KR 자체 규칙(KR-P1)을 넘는다:")
+                _rows = []
+                for tr_key, tr_lab in (('trail20', '-20% (미국 운용값)'), ('trail30', '-30% (KR 조정)')):
+                    for lab, v in _u6['backtest'][tr_key].items():
+                        _rows.append({'손절폭': tr_lab, '임계값': lab, '거래': f"{v['n']:,}",
+                                      '승률': f"{v['winrate']}%", '평균수익': f"{v['avg']}%",
+                                      '손익비': v['payoff'], '상위1% 의존': f"{v['tail']}%"})
+                st.dataframe(pd.DataFrame(_rows), use_container_width=True, hide_index=True,
+                             row_height=25, height=_dfh(6))
+                st.markdown("- **-20% → -30%로 바꾸는 것만으로 평균 3.46% → 11.50%.** "
+                            "미국 시장에서 검증된 손절폭이 한국에서는 노이즈에 털린다.")
+                st.markdown("- **시총 컷을 낮추면 급격히 나빠진다**: 2.8조 11.5% → 3천억 5.2% → 1천억 5.1%. "
+                            "동시에 상위 1% 의존도가 36% → 88% → 91%로 폭증한다. "
+                            "**이 규칙은 대형주에서만 작동한다.**")
+                st.caption("⚠️ n=235는 표본이 작다(연 29건). 상위 1% 거래 2~3건이 수익의 36%를 만든다. "
+                           "적은 표본 + 꼬리 의존은 '운이었을 가능성'을 배제하지 못한다.")
+
+            with st.expander("📌 에코프로는 잡히나 — 사례 점검"):
+                st.markdown("""
+**잡힙니다.** 규칙⑥ 이식판이 2023년에 세 번 진입했습니다:
+
+| 진입일 | 결과 |
+|---|---|
+| 2023-02-13 | **+208%** |
+| 2023-04-14 | −10% |
+| 2023-05-12 | +81% |
+
+2023-02-06 종가 28,685원 기준 추정 시총 **3.62조** — 미국 기준 시총 컷($2B=2.8조)을 통과합니다.
+에코프로비엠도 2023-02-21 진입 **+44%**.
+
+> 시총 컷 때문에 코스닥 중소형을 놓칠 거라는 우려가 있었지만, **에코프로는 이미 대형주였습니다.**
+> 오히려 컷을 낮추면 성과가 무너집니다(위 표).
+""")
+            with st.expander("⚠️ 한계"):
+                for c in _u6.get('caveats', []):
+                    st.markdown(f"- {c}")
+    else:
+      with t_lead, guard('주도주 KR-P1'):
         st.caption(data_stamp('results/leaders_kr.json'))
         _kr = load_json(Path('results/leaders_kr.json'))
         if not _kr:
@@ -987,7 +1074,7 @@ else:
                 _mdf = pd.DataFrame(_merged).sort_values('진입').reset_index(drop=True)
 
                 def _ret_bg(v):
-                    if v != v:
+                    if v is None or v != v:      # None 은 v!=v 로 안 걸러진다
                         return ''
                     a = min(abs(v) / 120, 1) * .78 + .06        # 클수록 진하게
                     return (f'background-color: rgba(31,107,69,{a:.2f}); color:'
@@ -996,7 +1083,7 @@ else:
                             + ('#fff' if a > .45 else '#3a1512'))
 
                 def _hold_bg(v):
-                    if v != v:
+                    if v is None or v != v:      # None 은 v!=v 로 안 걸러진다
                         return ''
                     a = min(v / 60, 1) * .55 + .04              # 오래 들수록 진하게
                     return f'background-color: rgba(23,65,92,{a:.2f}); color:' + \
@@ -1076,7 +1163,7 @@ else:
                 st.caption("이 주차는 아직 52주가 지나지 않아 이후 성적을 알 수 없다.")
 
             def _fw(v):
-                if v != v:
+                if v is None or v != v:      # None 은 v!=v 로 안 걸러진다
                     return ''
                 a = min(abs(v) / 150, 1) * .72 + .06
                 c = '31,107,69' if v >= 0 else '160,48,40'
