@@ -1,6 +1,45 @@
 {
   "items": [
     {
+      "video_id": "dSZhZQRyRIw",
+      "title": "미국은 왜 엔화 붕괴를 막았을까? 미국이 일본을 살린 진짜 이유는... | 상지대학교 소현철 외래교수 [주말인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-08-16T23:00:16+00:00",
+      "url": "https://www.youtube.com/watch?v=dSZhZQRyRIw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-17T08:56:43.033800+09:00"
+    },
+    {
+      "video_id": "U_wf5LtH1Gs",
+      "title": "미 재무부 장관 스콧 베센트, 사실 영란은행을 무너뜨렸던 핵심 인물입니다 | 소현철 박사 & 박세익 전무 & 체슬리 학습부장 [별주부전 / 26.08.15.토]",
+      "channel": "체슬리TV",
+      "published": "2026-08-16T23:00:39+00:00",
+      "url": "https://www.youtube.com/watch?v=U_wf5LtH1Gs",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"미국 재무부 장관 스콧 베센트가 조지 소로스의 제자로서 외환 투기로 부를 축적했으나, 현재는 엔화 약세 방어에 나서며 통화 패권 경쟁의 정치적 선택을 보여주고, 원화 강세가 한국 주식 시장에 긍정적이라는 분석이 제시되었다.\",\n  \"summary\": [\n    \"미국 재무부 장관 스콧 베센트는 과거 조지 소로스의 퀀텀 펀드에서 영국 파운드 및 아시아 통화 약세에 베팅하여 큰 수익을 올린 핵심 인물이었다.\",\n    \"2013년에는 소로스 펀드의 CIO로서 아베노믹스로 인한 엔화 약세에 성공적으로 베팅하며 투기적 역량을 발휘했다.\",\n    \"현재 미국 재무부 장관으로서 엔화 약세 방어 메모를 유출하며 일본 경제 붕괴 시 미중 패권 경쟁에서 미국이 불리해질 것을 우려하고 있다.\",\n    \"미국의 국채 이자가 국방비를 초과하는 '퍼거슨 법칙' 상황에 직면하며, 미국은 금융 시스템 안정화가 절실한 상황이다.\",\n    "
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-17T08:55:41.215642+09:00"
+    },
+    {
       "video_id": "_ln2FQ57zrQ",
       "title": "미국이 건드려서는 안 됐던 '진짜 신'의 정체 #이란 #중동 #미국 #트럼프 #패권전쟁 #무역전쟁 #호메이니 #신정체제 #하메네이 #조한범",
       "channel": "와이스트릿",
@@ -12027,45 +12066,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-07T20:33:21.444426+09:00"
-    },
-    {
-      "video_id": "LtpSwiYWq5M",
-      "title": "잃지 않는 주식 투자 여기서는 가능합니다 #김정현 #공모주 #투자 #하반기 #주식 #공모주투자",
-      "channel": "와이스트릿",
-      "published": "2026-08-07T09:00:26+00:00",
-      "url": "https://www.youtube.com/watch?v=LtpSwiYWq5M",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-07T23:00:28.906502+09:00"
-    },
-    {
-      "video_id": "OYdB-pi7cEs",
-      "title": "\"이렇게 되면 또 5,000 볼 수도...\" 최악의 시나리오 | 하창완 하보노의 주식 이야기 대표 [더블 체크]",
-      "channel": "삼프로TV",
-      "published": "2026-08-07T01:21:19+00:00",
-      "url": "https://www.youtube.com/watch?v=OYdB-pi7cEs",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-07T18:44:33.487178+09:00"
     }
   ],
-  "updated": "2026-08-17T07:55:10.511340+09:00"
+  "updated": "2026-08-17T08:56:44.300308+09:00"
 }
