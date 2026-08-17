@@ -317,6 +317,21 @@ def _data_status():
         return []
 
 
+def file_key(path) -> str:
+    """캐시 키용 파일 지문 (수정시각+크기).
+
+    왜 필요한가(2026-08-17): 산출물 JSON의 `generated`(날짜)를 캐시 키로 쓰다가
+    **같은 날 두 번 빌드하면 키가 겹쳐 옛 결과가 계속 나오는** 사고가 났다.
+    f1/f4 열을 추가·재발행했는데도 화면은 '재빌드가 필요하다'를 띄웠다.
+    날짜가 아니라 파일이 바뀌었는지로 키를 잡는다.
+    """
+    try:
+        s = Path(path).stat()
+        return f'{int(s.st_mtime)}:{s.st_size}'
+    except Exception:
+        return '0:0'
+
+
 def data_stamp(path: str, prefix: str = '데이터 기준') -> str:
     """화면에 '이 숫자는 언제 것인가'를 붙인다. 정지 상태면 눈에 띄게 경고한다.
 
@@ -1037,7 +1052,7 @@ else:
         # 같은 주에 걸린 **전 종목의 타율**을 함께 봐야 충분조건에 가까워진다.
         # rows 에 이미 전방수익 f13/f26/f52 가 들어 있어 추가 계산 없이 집계된다.
         @st.cache_data(show_spinner=False)
-        def _week_cohort(_gen: str):
+        def _week_cohort(_fkey: str):
             """주차 → {n, 평균f13, 승률f13, 평균f52, rs13 내림차순 종목목록}"""
             det = load_json(Path('results/leaders_symbol_detail.json')) or {}
             wk = {}
@@ -1057,7 +1072,8 @@ else:
                     sorted(v['syms'], key=lambda x: -(x[1] if x[1] is not None else -1e9)))}
             return wk
 
-        _WK = _week_cohort(_sd.get('generated', '')) if _sd else {}
+        # 캐시 키는 날짜가 아니라 파일 지문 — 같은 날 재발행해도 새로 계산된다
+        _WK = _week_cohort(file_key('results/leaders_symbol_detail.json')) if _sd else {}
         if not _sd:
             st.info("`python leaders_symbol.py build` 실행 후 커밋하면 조회할 수 있습니다.")
         else:
@@ -1200,14 +1216,14 @@ else:
                        "같은 주 신호를 통째로 놓고 이후 성적을 봐야 조건이 실제로 작동하는지 알 수 있다.")
 
             @st.cache_data(show_spinner=False)
-            def _by_week(_gen):
+            def _by_week(_fkey):
                 idx = {}
                 for _s, _v in _sd['symbols'].items():
                     for _x in _v.get('rows', []):
                         idx.setdefault(_x['d'], []).append((_s, _v['name'], _x))
                 return idx
 
-            _wk_idx = _by_week(_sd.get('generated', ''))
+            _wk_idx = _by_week(file_key('results/leaders_symbol_detail.json'))
             _wks = sorted(_wk_idx, reverse=True)
 
             # 441주를 셀렉트박스로만 넘기면 특정 시점을 찾을 수가 없다 — 날짜로 바로 간다.
