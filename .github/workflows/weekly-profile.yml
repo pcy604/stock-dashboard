@@ -41,6 +41,15 @@ jobs:
           restore-keys: |
             longcache-
 
+      # SEC 공시 주식수 갱신. 분기 공시라 주 1회면 충분하고, 매일은 daily-refresh 가
+      # 주가만 다시 곱한다. frames = 분기당 1콜로 5천개사, shares = 빈칸 메우기.
+      - name: 미국 주식수 갱신 (SEC)
+        run: |
+          python marketcap_refresh.py frames
+          python marketcap_refresh.py shares
+          python marketcap_refresh.py build --net-price
+        continue-on-error: true
+
       - name: 기간수익률·계절성·MDD 증분 갱신
         run: python screen_precompute.py
         continue-on-error: true
@@ -52,6 +61,7 @@ jobs:
           # returns.json 누락이 2026-06→07, 07→08 두 번 연속 18일 정지를 만들었다.
           # screen_precompute 가 만드는 3개를 전부 커밋한다.
           git add results/returns.json results/seasonality.json results/mdd.json 2>/dev/null || true
+          git add data/us_shares.csv data/us_marketcap.csv data/us_splits.csv 2>/dev/null || true
           git diff --staged --quiet || git commit -m "auto: 종목 프로파일 갱신 $(date -u +%Y-%m-%d)"
           git push
 

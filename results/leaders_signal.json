@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-15",
+ "generated": "2026-08-18",
  "signal_week": "2026-08-10",
  "alt": {
   "A": {
@@ -14,113 +14,20 @@
     "wf": "4/6",
     "exposure": 75.1
    },
-   "n": 19,
+   "n": 8,
    "candidates": [
-    {
-     "sym": "PAYS",
-     "name": "Paysign",
-     "close": 13.17,
-     "rs_13w": 2.23,
-     "rs_26w": null,
-     "psr": 2.29,
-     "per": 14.6,
-     "dist_52w": 0.0,
-     "opm": 24.8,
-     "opm_qoq": 1.0,
-     "marcap_b": 0.2,
-     "adv_m": 5.0,
-     "triggers": [
-      "영업익 신고점",
-      "순익 신고점"
-     ]
-    },
-    {
-     "sym": "CDNA",
-     "name": "CareDx",
-     "close": 45.32,
-     "rs_13w": 2.16,
-     "rs_26w": null,
-     "psr": 0.96,
-     "per": 4.0,
-     "dist_52w": -2.9,
-     "opm": 85.8,
-     "opm_qoq": 84.8,
-     "marcap_b": 0.4,
-     "adv_m": 27.0,
-     "triggers": [
-      "흑자전환",
-      "영업익 신고점",
-      "순익 신고점",
-      "영업익 QoQ+50%",
-      "OPM QoQ+3%p"
-     ]
-    },
-    {
-     "sym": "DELL",
-     "name": "Dell",
-     "close": 490.81,
-     "rs_13w": 1.93,
-     "rs_26w": null,
-     "psr": 0.63,
-     "per": 10.0,
-     "dist_52w": 0.0,
-     "opm": 8.3,
-     "opm_qoq": -0.9,
-     "marcap_b": 84.1,
-     "adv_m": 2675.0,
-     "triggers": [
-      "영업익 신고점",
-      "순익 신고점"
-     ]
-    },
-    {
-     "sym": "MGNI",
-     "name": "Magnite",
-     "close": 24.73,
-     "rs_13w": 1.83,
-     "rs_26w": null,
-     "psr": 1.73,
-     "per": 7.7,
-     "dist_52w": -4.7,
-     "opm": 16.2,
-     "opm_qoq": 11.5,
-     "marcap_b": 1.3,
-     "adv_m": 45.0,
-     "triggers": [
-      "영업익 QoQ+50%",
-      "OPM QoQ+3%p"
-     ]
-    },
-    {
-     "sym": "CAKE",
-     "name": "The Cheesecake Factory",
-     "close": 113.38,
-     "rs_13w": 1.81,
-     "rs_26w": null,
-     "psr": 0.44,
-     "per": 9.6,
-     "dist_52w": 0.0,
-     "opm": 7.6,
-     "opm_qoq": 2.0,
-     "marcap_b": 1.7,
-     "adv_m": 107.0,
-     "triggers": [
-      "영업익 신고점",
-      "순익 신고점"
-     ]
-    },
     {
      "sym": "KRT",
      "name": "Karat Packaging",
      "close": 47.91,
      "rs_13w": 1.73,
      "rs_26w": null,
-     "psr": 1.12,
-     "per": 11.0,
+     "psr": 1.94,
+     "per": 19.0,
      "dist_52w": 0.0,
      "opm": 27.6,
      "opm_qoq": 20.3,
-     "marcap_b": 0.6,
+     "marcap_b": 1.0,
      "adv_m": 4.0,
      "triggers": [
       "영업익 신고점",
@@ -135,32 +42,13 @@
      "close": 20.5,
      "rs_13w": 1.73,
      "rs_26w": null,
-     "psr": 0.79,
-     "per": 14.2,
+     "psr": 0.99,
+     "per": 17.7,
      "dist_52w": -2.8,
      "opm": 3.0,
      "opm_qoq": 2.5,
-     "marcap_b": 0.9,
+     "marcap_b": 1.2,
      "adv_m": 12.0,
-     "triggers": [
-      "흑자전환",
-      "영업익 신고점",
-      "영업익 QoQ+50%"
-     ]
-    },
-    {
-     "sym": "HPE",
-     "name": "Hewlett Packard Enterprise",
-     "close": 58.71,
-     "rs_13w": 1.69,
-     "rs_26w": null,
-     "psr": 0.58,
-     "per": 14.6,
-     "dist_52w": 0.0,
-     "opm": 7.0,
-     "opm_qoq": 1.9,
-     "marcap_b": 22.6,
-     "adv_m": 920.0,
      "triggers": [
       "흑자전환",
       "영업익 신고점",
@@ -173,12 +61,12 @@
      "close": 11.9,
      "rs_13w": 1.67,
      "rs_26w": null,
-     "psr": 4.16,
-     "per": 11.0,
+     "psr": 1.92,
+     "per": 5.1,
      "dist_52w": -28.9,
      "opm": 7.6,
      "opm_qoq": 4.0,
-     "marcap_b": 2.1,
+     "marcap_b": 0.9,
      "adv_m": 16.0,
      "triggers": [
       "흑자전환",
@@ -188,58 +76,94 @@
      ]
     },
     {
-     "sym": "MCS",
-     "name": "Marcus Corporation",
-     "close": 30.0,
-     "rs_13w": 1.65,
+     "sym": "PBF",
+     "name": "PBF Energy",
+     "close": 71.85,
+     "rs_13w": 1.62,
      "rs_26w": null,
-     "psr": 0.53,
-     "per": 18.4,
-     "dist_52w": -2.1,
-     "opm": 11.7,
-     "opm_qoq": 24.2,
-     "marcap_b": 0.4,
-     "adv_m": 5.0,
+     "psr": 0.25,
+     "per": 6.4,
+     "dist_52w": -0.2,
+     "opm": 10.9,
+     "opm_qoq": 7.1,
+     "marcap_b": 8.7,
+     "adv_m": 145.0,
      "triggers": [
-      "흑자전환",
+      "영업익 신고점",
+      "순익 신고점",
+      "영업익 QoQ+50%",
       "OPM QoQ+3%p"
      ]
     },
     {
-     "sym": "NTAP",
-     "name": "NetApp",
-     "close": 207.08,
-     "rs_13w": 1.64,
+     "sym": "MAX",
+     "name": "MediaAlpha",
+     "close": 13.17,
+     "rs_13w": 1.55,
      "rs_26w": null,
-     "psr": 3.03,
-     "per": 16.5,
+     "psr": 0.6,
+     "per": 7.6,
+     "dist_52w": -6.7,
+     "opm": 6.3,
+     "opm_qoq": -0.9,
+     "marcap_b": 0.7,
+     "adv_m": 8.0,
+     "triggers": [
+      "흑자전환",
+      "순익 신고점"
+     ]
+    },
+    {
+     "sym": "ENVA",
+     "name": "Enova International",
+     "close": 265.45,
+     "rs_13w": 1.54,
+     "rs_26w": null,
+     "psr": 1.92,
+     "per": 18.6,
      "dist_52w": 0.0,
-     "opm": 27.3,
-     "opm_qoq": 2.0,
-     "marcap_b": 21.0,
-     "adv_m": 422.0,
+     "opm": 25.5,
+     "opm_qoq": 1.9,
+     "marcap_b": 6.6,
+     "adv_m": 61.0,
      "triggers": [
       "영업익 신고점",
       "순익 신고점"
      ]
     },
     {
-     "sym": "PBF",
-     "name": "PBF Energy",
-     "close": 71.85,
-     "rs_13w": 1.62,
+     "sym": "ATEX",
+     "name": "Anterix",
+     "close": 91.53,
+     "rs_13w": 1.52,
      "rs_26w": null,
-     "psr": 0.21,
-     "per": 5.3,
-     "dist_52w": -0.2,
-     "opm": 10.9,
-     "opm_qoq": 7.1,
-     "marcap_b": 7.1,
-     "adv_m": 145.0,
+     "psr": 274.53,
+     "per": 19.7,
+     "dist_52w": -12.9,
+     "opm": 1013.0,
+     "opm_qoq": 1589.1,
+     "marcap_b": 1.8,
+     "adv_m": 30.0,
      "triggers": [
-      "영업익 신고점",
-      "순익 신고점",
-      "영업익 QoQ+50%",
+      "흑자전환",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "JILL",
+     "name": "J.Jill",
+     "close": 18.9,
+     "rs_13w": 1.5,
+     "rs_26w": null,
+     "psr": 0.48,
+     "per": 13.5,
+     "dist_52w": -0.1,
+     "opm": 6.1,
+     "opm_qoq": 6.2,
+     "marcap_b": 0.3,
+     "adv_m": 1.0,
+     "triggers": [
+      "흑자전환",
       "OPM QoQ+3%p"
      ]
     }
@@ -265,12 +189,12 @@
      "close": 12.44,
      "rs_13w": 2.8,
      "rs_26w": null,
-     "psr": 0.32,
+     "psr": 2.51,
      "per": null,
      "dist_52w": -13.2,
      "opm": 13.9,
      "opm_qoq": 6.5,
-     "marcap_b": 0.2,
+     "marcap_b": 1.5,
      "adv_m": 43.0,
      "triggers": [
       "흑자전환",
@@ -285,12 +209,12 @@
      "close": 19.02,
      "rs_13w": 2.57,
      "rs_26w": null,
-     "psr": 2.51,
+     "psr": 7.53,
      "per": null,
      "dist_52w": 0.0,
      "opm": -9.8,
      "opm_qoq": 4.1,
-     "marcap_b": 0.4,
+     "marcap_b": 1.2,
      "adv_m": 34.0,
      "triggers": [
       "OPM QoQ+3%p"
@@ -302,12 +226,12 @@
      "close": 118.57,
      "rs_13w": 2.29,
      "rs_26w": null,
-     "psr": 4.11,
+     "psr": 17.22,
      "per": null,
      "dist_52w": 0.0,
      "opm": -30.6,
      "opm_qoq": 10.8,
-     "marcap_b": 1.8,
+     "marcap_b": 7.4,
      "adv_m": 124.0,
      "triggers": [
       "OPM QoQ+3%p"
@@ -319,12 +243,12 @@
      "close": 13.17,
      "rs_13w": 2.23,
      "rs_26w": null,
-     "psr": 2.29,
-     "per": 14.6,
+     "psr": 7.39,
+     "per": 47.1,
      "dist_52w": 0.0,
      "opm": 24.8,
      "opm_qoq": 1.0,
-     "marcap_b": 0.2,
+     "marcap_b": 0.7,
      "adv_m": 5.0,
      "triggers": [
       "영업익 신고점",
@@ -337,12 +261,12 @@
      "close": 8.84,
      "rs_13w": 2.19,
      "rs_26w": null,
-     "psr": 1.65,
+     "psr": 20.22,
      "per": null,
      "dist_52w": -0.7,
      "opm": -41.9,
      "opm_qoq": 10.4,
-     "marcap_b": 0.2,
+     "marcap_b": 2.3,
      "adv_m": 47.0,
      "triggers": [
       "OPM QoQ+3%p"
@@ -354,12 +278,12 @@
      "close": 84.7,
      "rs_13w": 2.19,
      "rs_26w": null,
-     "psr": 192.31,
+     "psr": 497.19,
      "per": null,
      "dist_52w": 0.0,
      "opm": -1307.8,
      "opm_qoq": 861.8,
-     "marcap_b": 3.5,
+     "marcap_b": 9.0,
      "adv_m": 194.0,
      "triggers": [
       "OPM QoQ+3%p"
@@ -371,12 +295,12 @@
      "close": 58.3,
      "rs_13w": 2.18,
      "rs_26w": null,
-     "psr": 0.19,
+     "psr": 0.15,
      "per": null,
      "dist_52w": 0.0,
      "opm": 0.6,
      "opm_qoq": -1.1,
-     "marcap_b": 3.4,
+     "marcap_b": 2.7,
      "adv_m": 44.0,
      "triggers": [
       "흑자전환"
@@ -388,12 +312,12 @@
      "close": 45.32,
      "rs_13w": 2.16,
      "rs_26w": null,
-     "psr": 0.96,
-     "per": 4.0,
+     "psr": 5.12,
+     "per": 21.1,
      "dist_52w": -2.9,
      "opm": 85.8,
      "opm_qoq": 84.8,
-     "marcap_b": 0.4,
+     "marcap_b": 2.3,
      "adv_m": 27.0,
      "triggers": [
       "흑자전환",
@@ -408,28 +332,28 @@
  },
  "rule": "RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
  "exit": "고점 대비 −20% 트레일링(주봉) · 12종목 × 8.3% · 2주 분할매수 · 불타기 없음",
- "universe": 1256,
- "n": 22,
+ "universe": 1353,
+ "n": 28,
  "funnel": [
   [
    "유니버스 (시총$2B+ · 거래대금$5M+)",
-   1256
+   1353
   ],
   [
    "+ RS13 > 1.5",
-   54
+   66
   ],
   [
    "+ OPM > 0",
-   28
+   34
   ],
   [
    "+ 흑자전환 OR 이익폭증",
-   22
+   28
   ],
   [
    "(참고) 위에 PSR<3까지 걸면",
-   11
+   12
   ]
  ],
  "candidates": [
@@ -439,15 +363,36 @@
    "close": 58.3,
    "rs_13w": 2.18,
    "rs_26w": null,
-   "psr": 0.19,
+   "psr": 0.15,
    "per": null,
    "dist_52w": 0.0,
    "opm": 0.6,
    "opm_qoq": -1.1,
-   "marcap_b": 3.4,
+   "marcap_b": 2.7,
    "adv_m": 44.0,
    "triggers": [
     "흑자전환"
+   ]
+  },
+  {
+   "sym": "CDNA",
+   "name": "CareDx",
+   "close": 45.32,
+   "rs_13w": 2.16,
+   "rs_26w": null,
+   "psr": 5.12,
+   "per": 21.1,
+   "dist_52w": -2.9,
+   "opm": 85.8,
+   "opm_qoq": 84.8,
+   "marcap_b": 2.3,
+   "adv_m": 27.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "순익 신고점",
+    "영업익 QoQ+50%",
+    "OPM QoQ+3%p"
    ]
   },
   {
@@ -456,12 +401,12 @@
    "close": 186.05,
    "rs_13w": 1.96,
    "rs_26w": null,
-   "psr": 8.97,
-   "per": 30.5,
+   "psr": 9.4,
+   "per": 32.0,
    "dist_52w": 0.0,
    "opm": 34.7,
    "opm_qoq": 1.1,
-   "marcap_b": 6.1,
+   "marcap_b": 6.4,
    "adv_m": 94.0,
    "triggers": [
     "영업익 신고점"
@@ -473,12 +418,12 @@
    "close": 490.81,
    "rs_13w": 1.93,
    "rs_26w": null,
-   "psr": 0.63,
-   "per": 10.0,
+   "psr": 2.38,
+   "per": 37.9,
    "dist_52w": 0.0,
    "opm": 8.3,
    "opm_qoq": -0.9,
-   "marcap_b": 84.1,
+   "marcap_b": 318.5,
    "adv_m": 2675.0,
    "triggers": [
     "영업익 신고점",
@@ -491,16 +436,52 @@
    "close": 114.47,
    "rs_13w": 1.93,
    "rs_26w": null,
-   "psr": 2.94,
-   "per": 44.2,
+   "psr": 14.89,
+   "per": 224.2,
    "dist_52w": -0.0,
    "opm": 16.1,
    "opm_qoq": 46.2,
-   "marcap_b": 2.4,
+   "marcap_b": 12.4,
    "adv_m": 84.0,
    "triggers": [
     "흑자전환",
     "OPM QoQ+3%p"
+   ]
+  },
+  {
+   "sym": "MGNI",
+   "name": "Magnite",
+   "close": 24.73,
+   "rs_13w": 1.83,
+   "rs_26w": null,
+   "psr": 4.78,
+   "per": 21.3,
+   "dist_52w": -4.7,
+   "opm": 16.2,
+   "opm_qoq": 11.5,
+   "marcap_b": 3.5,
+   "adv_m": 45.0,
+   "triggers": [
+    "영업익 QoQ+50%",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
+   "sym": "CAKE",
+   "name": "The Cheesecake Factory",
+   "close": 113.38,
+   "rs_13w": 1.81,
+   "rs_26w": null,
+   "psr": 1.46,
+   "per": 31.6,
+   "dist_52w": 0.0,
+   "opm": 7.6,
+   "opm_qoq": 2.0,
+   "marcap_b": 5.6,
+   "adv_m": 107.0,
+   "triggers": [
+    "영업익 신고점",
+    "순익 신고점"
    ]
   },
   {
@@ -509,12 +490,12 @@
    "close": 280.05,
    "rs_13w": 1.76,
    "rs_26w": null,
-   "psr": 3.09,
+   "psr": 3.32,
    "per": null,
    "dist_52w": 0.0,
    "opm": 12.0,
    "opm_qoq": 40.5,
-   "marcap_b": 12.4,
+   "marcap_b": 13.4,
    "adv_m": 173.0,
    "triggers": [
     "흑자전환",
@@ -527,13 +508,30 @@
    "close": 35.41,
    "rs_13w": 1.72,
    "rs_26w": null,
-   "psr": 3.7,
-   "per": 3190.7,
+   "psr": 3.33,
+   "per": 2872.8,
    "dist_52w": -18.2,
    "opm": 1.6,
    "opm_qoq": 1.9,
-   "marcap_b": 2.8,
+   "marcap_b": 2.5,
    "adv_m": 21.0,
+   "triggers": [
+    "흑자전환"
+   ]
+  },
+  {
+   "sym": "LIND",
+   "name": "Lindblad Expeditions",
+   "close": 33.58,
+   "rs_13w": 1.71,
+   "rs_26w": null,
+   "psr": 2.65,
+   "per": null,
+   "dist_52w": -1.1,
+   "opm": 6.0,
+   "opm_qoq": -1.5,
+   "marcap_b": 2.2,
+   "adv_m": 20.0,
    "triggers": [
     "흑자전환"
    ]
@@ -544,12 +542,12 @@
    "close": 13.66,
    "rs_13w": 1.7,
    "rs_26w": null,
-   "psr": 2.59,
+   "psr": 1.42,
    "per": null,
    "dist_52w": -11.3,
    "opm": 6.3,
    "opm_qoq": -1.3,
-   "marcap_b": 17.0,
+   "marcap_b": 9.3,
    "adv_m": 95.0,
    "triggers": [
     "흑자전환"
@@ -561,12 +559,12 @@
    "close": 38.33,
    "rs_13w": 1.69,
    "rs_26w": null,
-   "psr": 5.63,
+   "psr": 4.13,
    "per": null,
    "dist_52w": -3.9,
    "opm": 3.3,
    "opm_qoq": -0.1,
-   "marcap_b": 5.8,
+   "marcap_b": 4.2,
    "adv_m": 96.0,
    "triggers": [
     "흑자전환"
@@ -578,12 +576,12 @@
    "close": 147.43,
    "rs_13w": 1.69,
    "rs_26w": null,
-   "psr": 5.49,
-   "per": 66.6,
+   "psr": 8.74,
+   "per": 106.1,
    "dist_52w": -1.3,
    "opm": 7.3,
    "opm_qoq": 1.3,
-   "marcap_b": 16.4,
+   "marcap_b": 26.2,
    "adv_m": 378.0,
    "triggers": [
     "영업익 신고점",
@@ -596,12 +594,12 @@
    "close": 58.71,
    "rs_13w": 1.69,
    "rs_26w": null,
-   "psr": 0.58,
-   "per": 14.6,
+   "psr": 2.0,
+   "per": 49.9,
    "dist_52w": 0.0,
    "opm": 7.0,
    "opm_qoq": 1.9,
-   "marcap_b": 22.6,
+   "marcap_b": 77.7,
    "adv_m": 920.0,
    "triggers": [
     "흑자전환",
@@ -615,12 +613,12 @@
    "close": 66.29,
    "rs_13w": 1.67,
    "rs_26w": null,
-   "psr": 5.49,
-   "per": 62.5,
+   "psr": 6.04,
+   "per": 68.8,
    "dist_52w": -25.9,
    "opm": 23.5,
    "opm_qoq": 7.3,
-   "marcap_b": 2.2,
+   "marcap_b": 2.4,
    "adv_m": 24.0,
    "triggers": [
     "영업익 QoQ+50%",
@@ -633,52 +631,15 @@
    "close": 43.22,
    "rs_13w": 1.67,
    "rs_26w": null,
-   "psr": 1.42,
-   "per": 58.6,
+   "psr": 0.83,
+   "per": 34.2,
    "dist_52w": 0.0,
    "opm": 2.8,
    "opm_qoq": 1.1,
-   "marcap_b": 7.6,
+   "marcap_b": 4.4,
    "adv_m": 73.0,
    "triggers": [
     "영업익 QoQ+50%"
-   ]
-  },
-  {
-   "sym": "NSP",
-   "name": "Insperity",
-   "close": 52.2,
-   "rs_13w": 1.67,
-   "rs_26w": null,
-   "psr": 0.58,
-   "per": null,
-   "dist_52w": -0.6,
-   "opm": 0.4,
-   "opm_qoq": -2.9,
-   "marcap_b": 4.0,
-   "adv_m": 27.0,
-   "triggers": [
-    "흑자전환"
-   ]
-  },
-  {
-   "sym": "PD",
-   "name": "PagerDuty",
-   "close": 11.9,
-   "rs_13w": 1.67,
-   "rs_26w": null,
-   "psr": 4.16,
-   "per": 11.0,
-   "dist_52w": -28.9,
-   "opm": 7.6,
-   "opm_qoq": 4.0,
-   "marcap_b": 2.1,
-   "adv_m": 16.0,
-   "triggers": [
-    "흑자전환",
-    "영업익 신고점",
-    "영업익 QoQ+50%",
-    "OPM QoQ+3%p"
    ]
   },
   {
@@ -687,12 +648,12 @@
    "close": 207.08,
    "rs_13w": 1.64,
    "rs_26w": null,
-   "psr": 3.03,
-   "per": 16.5,
+   "psr": 5.86,
+   "per": 31.8,
    "dist_52w": 0.0,
    "opm": 27.3,
    "opm_qoq": 2.0,
-   "marcap_b": 21.0,
+   "marcap_b": 40.6,
    "adv_m": 422.0,
    "triggers": [
     "영업익 신고점",
@@ -705,12 +666,12 @@
    "close": 41.86,
    "rs_13w": 1.64,
    "rs_26w": null,
-   "psr": 1.95,
-   "per": 33.7,
+   "psr": 4.23,
+   "per": 73.1,
    "dist_52w": 0.0,
    "opm": 7.4,
    "opm_qoq": 0.1,
-   "marcap_b": 2.5,
+   "marcap_b": 5.4,
    "adv_m": 25.0,
    "triggers": [
     "영업익 신고점",
@@ -723,12 +684,12 @@
    "close": 71.85,
    "rs_13w": 1.62,
    "rs_26w": null,
-   "psr": 0.21,
-   "per": 5.3,
+   "psr": 0.25,
+   "per": 6.4,
    "dist_52w": -0.2,
    "opm": 10.9,
    "opm_qoq": 7.1,
-   "marcap_b": 7.1,
+   "marcap_b": 8.7,
    "adv_m": 145.0,
    "triggers": [
     "영업익 신고점",
@@ -738,17 +699,36 @@
    ]
   },
   {
+   "sym": "URGN",
+   "name": "UroGen Pharma",
+   "close": 48.22,
+   "rs_13w": 1.59,
+   "rs_26w": null,
+   "psr": 12.49,
+   "per": null,
+   "dist_52w": 0.0,
+   "opm": 0.2,
+   "opm_qoq": 39.9,
+   "marcap_b": 2.4,
+   "adv_m": 25.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
    "sym": "TECH",
    "name": "Bio-Techne",
    "close": 72.4,
    "rs_13w": 1.59,
    "rs_26w": null,
-   "psr": 8.66,
-   "per": 95.7,
+   "psr": 9.36,
+   "per": 103.4,
    "dist_52w": 0.0,
    "opm": 24.2,
    "opm_qoq": 5.8,
-   "marcap_b": 10.5,
+   "marcap_b": 11.3,
    "adv_m": 249.0,
    "triggers": [
     "흑자전환",
@@ -763,12 +743,12 @@
    "close": 6.24,
    "rs_13w": 1.57,
    "rs_26w": null,
-   "psr": 0.41,
+   "psr": 0.37,
    "per": null,
    "dist_52w": 0.0,
    "opm": 14.2,
    "opm_qoq": 12.0,
-   "marcap_b": 3.0,
+   "marcap_b": 2.7,
    "adv_m": 46.0,
    "triggers": [
     "흑자전환",
@@ -779,20 +759,78 @@
    ]
   },
   {
+   "sym": "HNI",
+   "name": "HNI Corporation",
+   "close": 48.86,
+   "rs_13w": 1.57,
+   "rs_26w": null,
+   "psr": 0.86,
+   "per": 52.3,
+   "dist_52w": -5.3,
+   "opm": 6.3,
+   "opm_qoq": 9.0,
+   "marcap_b": 3.5,
+   "adv_m": 25.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "순익 신고점",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
+   "sym": "COMP",
+   "name": "Compass",
+   "close": 13.02,
+   "rs_13w": 1.57,
+   "rs_26w": null,
+   "psr": 0.93,
+   "per": 147.6,
+   "dist_52w": -2.3,
+   "opm": 2.9,
+   "opm_qoq": 15.9,
+   "marcap_b": 9.9,
+   "adv_m": 126.0,
+   "triggers": [
+    "흑자전환",
+    "영업익 신고점",
+    "순익 신고점",
+    "OPM QoQ+3%p"
+   ]
+  },
+  {
    "sym": "LFST",
    "name": "LifeStance Health Group",
    "close": 12.42,
    "rs_13w": 1.54,
    "rs_26w": null,
-   "psr": 1.54,
-   "per": 99.3,
+   "psr": 3.17,
+   "per": 204.6,
    "dist_52w": 0.0,
    "opm": 5.5,
    "opm_qoq": 0.8,
-   "marcap_b": 2.3,
+   "marcap_b": 4.7,
    "adv_m": 36.0,
    "triggers": [
     "흑자전환",
+    "영업익 신고점",
+    "순익 신고점"
+   ]
+  },
+  {
+   "sym": "ENVA",
+   "name": "Enova International",
+   "close": 265.45,
+   "rs_13w": 1.54,
+   "rs_26w": null,
+   "psr": 1.92,
+   "per": 18.6,
+   "dist_52w": 0.0,
+   "opm": 25.5,
+   "opm_qoq": 1.9,
+   "marcap_b": 6.6,
+   "adv_m": 61.0,
+   "triggers": [
     "영업익 신고점",
     "순익 신고점"
    ]
@@ -803,12 +841,12 @@
    "close": 218.13,
    "rs_13w": 1.52,
    "rs_26w": null,
-   "psr": 5.5,
-   "per": 24.5,
+   "psr": 4.7,
+   "per": 20.9,
    "dist_52w": -5.9,
    "opm": 36.8,
    "opm_qoq": 7.9,
-   "marcap_b": 11.5,
+   "marcap_b": 9.8,
    "adv_m": 135.0,
    "triggers": [
     "OPM QoQ+3%p"
@@ -820,12 +858,12 @@
    "close": 198.68,
    "rs_13w": 1.51,
    "rs_26w": null,
-   "psr": 7.07,
-   "per": 82.2,
+   "psr": 5.13,
+   "per": 59.7,
    "dist_52w": -19.5,
    "opm": 13.3,
    "opm_qoq": 6.4,
-   "marcap_b": 69.7,
+   "marcap_b": 50.5,
    "adv_m": 679.0,
    "triggers": [
     "영업익 신고점",
@@ -872,7 +910,7 @@
  },
  "paper": {
   "created": "2026-08-04",
-  "updated": "2026-08-15",
+  "updated": "2026-08-17",
   "n_total": 46,
   "n_open": 46,
   "n_closed": 0,

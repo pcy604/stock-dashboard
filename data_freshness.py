@@ -40,6 +40,17 @@ def _paper_max_log(d):
                default=None)
 
 
+def _csv_col(col):
+    """CSV 산출물용. raw=True 와 함께 쓰며 getter 가 파일 경로를 받는다."""
+    def get(path):
+        import csv
+        with open(path, encoding='utf-8', newline='') as f:
+            r = csv.DictReader(f)
+            row = next(r, None)
+            return (row or {}).get(col)
+    return get
+
+
 # ── 레지스트리 ─────────────────────────────────────────────────────
 #   path        : results/ 하위 경로
 #   label       : 사람이 읽는 이름
@@ -50,6 +61,21 @@ def _paper_max_log(d):
 #   used_by     : 이 데이터를 쓰는 화면 — "이 숫자가 언제 것인가"를 화면에 붙이는 근거
 #   getter      : 파일 내부 날짜 추출
 SOURCES = [
+    # ★ 2026-08-18 추가 — 이 레지스트리의 두 번째 사각지대였다.
+    #   여기 있는 건 전부 results/ 의 **산출물**이었고, 그 산출물을 만드는 **입력**은
+    #   아무도 안 봤다. data/us_marketcap.csv 가 2024-04 스냅샷인 채 27개월 방치돼
+    #   미국 스크리너 전체가 틀린 시총으로 유니버스를 걸렀는데 경보가 없었다.
+    #   입력도 산출물과 같은 자격으로 감시한다.
+    dict(path='data/us_marketcap.csv', label='미국 시총 (유니버스 기준)',
+         cycle='매일 06:00 (평일)', max_age=4, producer='marketcap_refresh.py build',
+         job='daily-refresh',
+         used_by='🚀 주도주 · 🏆 CANSLIM(US) · 🔥 상승 상위 · 전 미국 스크리너',
+         getter=_csv_col('as_of'), raw=True),
+    dict(path='data/us_shares.csv', label='미국 주식수 (SEC 공시)',
+         cycle='주 1회 (일 08:00)', max_age=10,
+         producer='marketcap_refresh.py frames+shares',
+         job='weekly-profile', used_by='시총·PER·PSR 계산 전체 (point-in-time)',
+         getter=_csv_col('as_of'), raw=True),
     dict(path='results/screener_latest.json', label='주봉 신호 스크리너',
          cycle='매일 06:00 (평일)', max_age=4, producer='weekly_run.py',
          job='daily-refresh', used_by='🔥 상승 상위 · 💼 포트폴리오',
@@ -136,8 +162,11 @@ def statuses(today: datetime | None = None) -> list[dict]:
             row.update(state='missing', note='파일 없음')
             out.append(row); continue
         try:
-            d = json.loads(p.read_text(encoding='utf-8'))
-            ds = s['getter'](d) if isinstance(d, dict) else None
+            if s.get('raw'):                       # CSV 등 — getter 가 경로를 받는다
+                ds = s['getter'](p)
+            else:
+                d = json.loads(p.read_text(encoding='utf-8'))
+                ds = s['getter'](d) if isinstance(d, dict) else None
             if not ds:
                 row.update(state='nodate', note='내부 날짜 필드 없음')
                 out.append(row); continue

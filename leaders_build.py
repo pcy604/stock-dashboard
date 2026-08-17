@@ -54,10 +54,15 @@ def get(url, hdr, tries=5):
 def universe(n, lo=1.5e8, hi=None):
     """수집 대상 선정. 2026-08-12: lo 2e9 -> 5e8.
 
-    ⚠️ 여기서 쓰는 marketcap은 us_marketcap.csv 스냅샷(현재 시점) 값이다.
-    따라서 이 함수는 '무엇을 수집할지'만 정하고, '무엇을 매매할지'는
-    factor_weekly의 주차별 marcap으로 걸어야 한다(point-in-time).
-    수집 하한을 낮게 잡을수록 그 시점엔 컸다가 지금 작아진 종목이 덜 빠진다.
+    여기서 쓰는 marketcap은 us_marketcap.csv 의 **현재 시총**이다. 이 함수는
+    '무엇을 수집할지'만 정하고, '무엇을 매매할지'는 factor_weekly 의 주차별
+    marcap 으로 건다(point-in-time). 수집 하한이 낮을수록 그 시점엔 컸다가
+    지금 작아진 종목이 덜 빠진다.
+
+    ⚠️ 2026-08-18 사고 — 이 CSV 가 2024-04 손수 받은 스냅샷인 채 27개월 방치됐다.
+    수집 단계에서 걸러지면 팩터가 아예 계산되지 않아 **영원히 후보가 못 된다**.
+    AXTI 는 스냅샷 $151M 로 하한에 걸려 빠졌고 그 사이 60배 올랐다.
+    이제 marketcap_refresh.py 가 매일 다시 만든다(daily-refresh). 손으로 받지 마라.
     """
     d = pd.read_csv(os.path.join(DATA, "us_marketcap.csv"))
     d = d[(d.country == "United States") & (d.marketcap >= lo)]
@@ -241,8 +246,52 @@ def bench():
     return pd.read_csv(p, index_col=0, parse_dates=True)["Close"]
 
 
+_SHARES = {}
+
+
+def load_shares():
+    """SEC 공시 주식수 시계열을 {sym: (제출일배열, 주식수배열)} 로 올린다.
+
+    data/us_shares.csv 는 marketcap_refresh.py 가 만든다(SEC companyconcept + frames).
+    shares_adj = 오늘 분할 기준으로 환산한 주식수 — 가격 캐시가 소급 분할조정돼
+    있어서 주식수도 같은 기준이어야 시총이 맞는다.
+    """
+    global _SHARES
+    if _SHARES:
+        return _SHARES
+    p = os.path.join(DATA, "us_shares.csv")
+    if not os.path.exists(p):
+        print("⚠️ data/us_shares.csv 없음 — 시총·PER·PSR 을 채우지 않는다. "
+              "`python marketcap_refresh.py all` 을 먼저 돌려라.", flush=True)
+        _SHARES = {"__none__": None}
+        return _SHARES
+    d = pd.read_csv(p).dropna(subset=["sym", "filed", "shares_adj"])
+    d = d.sort_values(["sym", "filed"])
+    _SHARES = {s: (pd.to_datetime(g.filed.values), g.shares_adj.values.astype(float))
+               for s, g in d.groupby("sym", sort=False)}
+    print(f"주식수 시계열 {len(d):,}행 · {len(_SHARES):,}종", flush=True)
+    return _SHARES
+
+
+def shares_at(sym, when):
+    """그 주차 시점에 **이미 제출돼 있던** 가장 최근 공시의 주식수.
+
+    첫 공시보다 앞선 주차는 첫 공시값을 쓴다 — 그 시절 주식수를 알 방법이 없고,
+    비우면 그 구간이 통째로 유니버스에서 빠져 백테스트 앞부분이 사라진다.
+    """
+    e = load_shares().get(sym)
+    if e is None:
+        return None
+    f, v = e
+    k = int(np.searchsorted(f, pd.Timestamp(when), side="right")) - 1
+    if k < 0:
+        k = 0
+    return float(v[k]) if len(v) else None
+
+
 def build(start="2018-01-01", incremental=False):
     u = pd.read_csv(os.path.join(CACHE, "_universe.csv"))
+    load_shares()
     spy = bench()
     con = sqlite3.connect(DB)
     con.executescript(open(os.path.join(BASE, "leaders_schema.sql"), encoding="utf-8").read())
@@ -392,7 +441,12 @@ def build(start="2018-01-01", incremental=False):
                             r["earn_react_gap"] = (float(dly.Open.iloc[di]) / p0 - 1) * 100
                             r["earn_react_d2"] = (float(dly.Close.iloc[di + 1]) / p0 - 1) * 100
             # ── P ──
-            sh = row.marketcap / float(c.iloc[-1]) if c.iloc[-1] else None   # 근사 주식수
+            # 2026-08-18: 주식수를 `시총 ÷ 최신종가` 로 역산하던 걸 걷어냈다.
+            # us_marketcap.csv 가 2024-04 스냅샷이라 역산 주식수가 (실제주가/스냅샷주가)
+            # 배만큼 틀렸고, 그 오차가 marcap·per·psr 전부에 전 주차 동일 배수로 곱해졌다.
+            # 실측 2,476종 중 오차 ±25% 안은 27.5%뿐. 지금은 SEC 공시 주식수를
+            # 제출일(filed) 기준으로 그 주차에 알 수 있던 값만 쓴다(look-ahead 없음).
+            sh = shares_at(s, d)
             if sh:
                 mc = px * sh
                 r["marcap"] = mc

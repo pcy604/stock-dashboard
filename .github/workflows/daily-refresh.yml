@@ -35,6 +35,16 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # ⚠️ 이 단계가 맨 앞이어야 한다. 아래 스크리너들이 전부 us_marketcap.csv 로
+      #    유니버스를 거른다. 2026-08-18 까지 이 파일은 2024-04 에 손으로 받은
+      #    스냅샷이었고 27개월간 갱신되지 않았다 — 종목의 72%가 틀린 시총으로
+      #    필터링되고 있었다(AXTI $151M 로 표시, 실제 $5.4B).
+      #    주식수(us_shares.csv)는 커밋돼 있고 분기에만 바뀌므로, 매일은 주가만
+      #    다시 곱하면 된다. 주식수 자체 갱신은 weekly-profile 에서 한다.
+      - name: 미국 시총 갱신 (주식수 × 당일 종가)
+        run: python marketcap_refresh.py build --net-price
+        continue-on-error: true
+
       - name: 섹터 맵 갱신
         run: python sectors.py
         continue-on-error: true
@@ -87,6 +97,7 @@ jobs:
           #    (data/portfolio.json 부재로 한 달간 아무것도 커밋 안 된 사고의 원인)
           git add results/*.json || true
           git add data/sectors.json || true
+          git add data/us_marketcap.csv || true
           git add data/portfolio.json 2>/dev/null || true
           # 구루 워크플로가 실행 중(수십 분) 푸시할 수 있으므로 rebase 후 푸시 (레이스 방지)
           git diff --staged --quiet || { git commit -m "auto: 데이터 갱신 $(date -u +%Y-%m-%d)"; git pull --rebase origin main; git push; }
