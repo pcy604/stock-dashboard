@@ -278,34 +278,33 @@ def load_json(path):
     except Exception:
         return None
 
-# ── 전역 규칙: 표의 모든 숫자는 소수 1자리 (2026-08-16) ────────────────
-#   Streamlit 은 float 을 2.470000 처럼 원본 정밀도로 그린다. 표가 수십 개라
-#   호출부마다 format 을 다는 대신 st.dataframe 을 한 번 감싸 전역으로 반올림한다.
-#   Styler 가 들어오면 .data 를 반올림한다(명시적 .format 이 걸린 열은 그 포맷이 우선).
-_ST_DATAFRAME = st.dataframe
+# ── 전역 규칙: 표의 모든 숫자는 소수 1자리 (2026-08-16, 2026-08-17 수정) ──
+#   1차 시도(데이터 round)는 실패했다. 값이 0.1이어도 화면엔 0.100000 으로 나왔는데,
+#   원인은 데이터가 아니라 **pandas Styler 의 기본 표시 정밀도가 6자리**였기 때문이다
+#   (pd.get_option('styler.format.precision') == 6). 그래서 옵션 자체를 1로 낮춘다.
+#   호출부에서 .format({...}) 을 명시한 열은 그 포맷이 그대로 우선한다.
+pd.set_option('styler.format.precision', 1)
 
+#   Styler 를 안 거치는 순수 DataFrame 은 Streamlit 자체 포맷을 타므로
+#   column_config 로 숫자 열에 %.1f 를 지정한다.
+if not getattr(st, '_df1_patched', False):      # 재실행 때 래퍼가 겹겹이 쌓이지 않게
+    _ST_DATAFRAME = st.dataframe
 
-def _round1(obj):
-    try:
-        if isinstance(obj, pd.DataFrame):
-            o = obj.copy()
-            num = o.select_dtypes(include='number').columns
-            if len(num):
-                o[num] = o[num].round(1)
-            return o
-        d = getattr(obj, 'data', None)          # pandas Styler
-        if isinstance(d, pd.DataFrame):
-            obj.data = _round1(d)
-    except Exception:
-        pass                                    # 표시 보정 실패가 화면을 죽이면 안 된다
-    return obj
+    def _dataframe1(data=None, *a, **kw):
+        try:
+            if isinstance(data, pd.DataFrame) and 'column_config' not in kw:
+                cfg = {}
+                for c in data.select_dtypes(include='number').columns:
+                    if pd.api.types.is_float_dtype(data[c]):
+                        cfg[c] = st.column_config.NumberColumn(format='%.1f')
+                if cfg:
+                    kw['column_config'] = cfg
+        except Exception:
+            pass                                # 표시 보정 실패가 화면을 죽이면 안 된다
+        return _ST_DATAFRAME(data, *a, **kw)
 
-
-def _dataframe1(data=None, *a, **kw):
-    return _ST_DATAFRAME(_round1(data), *a, **kw)
-
-
-st.dataframe = _dataframe1
+    st.dataframe = _dataframe1
+    st._df1_patched = True
 
 
 @st.cache_data(ttl=600, show_spinner=False)
@@ -1032,6 +1031,33 @@ else:
         st.divider()
         st.subheader("🔍 종목 심층 조회 — 언제 걸렸고 언제 나갔나")
         _sd = load_json(Path('results/leaders_symbol_detail.json'))
+
+        # ── 주차 코호트 통계 ────────────────────────────────────────
+        # "이 종목이 걸렸다"만으로는 조건의 실효를 못 판단한다(필요조건일 뿐).
+        # 같은 주에 걸린 **전 종목의 타율**을 함께 봐야 충분조건에 가까워진다.
+        # rows 에 이미 전방수익 f13/f26/f52 가 들어 있어 추가 계산 없이 집계된다.
+        @st.cache_data(show_spinner=False)
+        def _week_cohort(_gen: str):
+            """주차 → {n, 평균f13, 승률f13, 평균f52, rs13 내림차순 종목목록}"""
+            det = load_json(Path('results/leaders_symbol_detail.json')) or {}
+            wk = {}
+            for _s, _rec in (det.get('symbols') or {}).items():
+                for _row in _rec.get('rows', []):
+                    w = wk.setdefault(_row['d'], {'syms': []})
+                    w['syms'].append((_s, _row.get('rs13'), _row.get('f13'), _row.get('f52')))
+            for w, v in wk.items():
+                f13 = [x[2] for x in v['syms'] if x[2] is not None]
+                f52 = [x[3] for x in v['syms'] if x[3] is not None]
+                v['n'] = len(v['syms'])
+                v['avg13'] = round(sum(f13) / len(f13), 1) if f13 else None
+                v['win13'] = round(sum(1 for x in f13 if x > 0) / len(f13) * 100) if f13 else None
+                v['avg52'] = round(sum(f52) / len(f52), 1) if f52 else None
+                # RS13 내림차순 순위 (없으면 맨 뒤)
+                v['rank'] = {s: i + 1 for i, (s, _r13, _a, _b) in enumerate(
+                    sorted(v['syms'], key=lambda x: -(x[1] if x[1] is not None else -1e9)))}
+            return wk
+
+        _WK = _week_cohort(_sd.get('generated', '')) if _sd else {}
         if not _sd:
             st.info("`python leaders_symbol.py build` 실행 후 커밋하면 조회할 수 있습니다.")
         else:
@@ -1105,7 +1131,13 @@ else:
                     '신호지속': (_t.get('sk', 1) if _t else None),
                     '진입가': (_t['ep'] if _t else _m.get('close')),
                     '청산가': (_t['xp'] if _t else None),
-                    'RS13': _m.get('rs13'), 'RS26': _m.get('rs26'),
+                    # 주차 코호트 — 이 종목이 그 주 신호 중 몇 번째였나(RS13 순),
+                    # 그리고 그 주 신호 전체의 이후 성적(필요조건 → 충분조건 점검)
+                    '주차순위': (f"{_w['rank'].get(_pick, '-')}/{_w['n']}"
+                              if (_w := _WK.get(_d)) else '-'),
+                    '주차타율': (f"{_w['win13']}%" if _w and _w.get('win13') is not None else '-'),
+                    '주차평균13주': (_w['avg13'] if _w and _w.get('avg13') is not None else None),
+                    'RS4': _m.get('rs4'), 'RS13': _m.get('rs13'), 'RS26': _m.get('rs26'),
                     '매출QoQ': _m.get('revq'),
                     'OPM': _m.get('opm'), 'OPM QoQ': _m.get('opmq'),
                     'PSR': _m.get('psr'),
@@ -1150,11 +1182,14 @@ else:
                     use_container_width=True, hide_index=True, row_height=26,
                     height=_dfh(min(len(_view), 16)))
                 st.caption("한 행 = 신호가 뜬 한 주. **수익률이 '—'인 행은 신호는 떴지만 진입하지 않은 주** "
-                           "(이미 보유 중이라 재진입 안 함). 진입한 주만 보려면 위 체크박스. "
-                           "**신호지속** = 진입 시점부터 같은 신호가 연속으로 뜬 주수 "
-                           "(매수 판단 시점에 이미 알 수 있는 값). "
-                           "**PER '적자'** = 최근 12개월 순이익이 마이너스라 산출 불가 — "
-                           "흑자전환 직후에는 정상이다.")
+                           "(이미 보유 중이라 재진입 안 함). 진입한 주만 보려면 위 체크박스.")
+                st.caption("**주차순위** = 그 주 신호 종목을 RS13 내림차순으로 세웠을 때 이 종목의 순번 / 그 주 총 신호수. "
+                           "**주차타율·주차평균13주** = 그 주에 걸린 **전 종목**의 이후 13주 승률·평균수익 — "
+                           "이 종목이 걸렸다는 건 필요조건일 뿐이고, **그 주 코호트가 전반적으로 올랐는지**를 봐야 "
+                           "조건이 실제로 작동한 것인지 알 수 있다. 내 종목만 올랐다면 조건이 아니라 운이다.")
+                st.caption("**RS4/RS13/RS26** = 4·13·26주 상대강도(시장 대비). "
+                           "**신호지속** = 진입 시점부터 같은 신호가 연속으로 뜬 주수(매수 판단 시점에 이미 알 수 있는 값). "
+                           "**PER '적자'** = 최근 12개월 순이익이 마이너스라 산출 불가 — 흑자전환 직후에는 정상이다.")
 
             # ── 주차별 조회 ────────────────────────────────────────────
             # 종목별 조회만으로는 "이 조건이면 오른다"를 확인할 수 없다.

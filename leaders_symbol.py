@@ -44,7 +44,8 @@ def load():
     d = B.build()
     d["as_of"] = pd.to_datetime(d.as_of)
     c = sqlite3.connect(os.path.join(BASE, "data", "market.db"))
-    ex = pd.read_sql("SELECT as_of,sym,name,rs_26w,mdd_52w,vol_x_20w "
+    # rs_4w 추가(2026-08-17) — leaders_boost.build()가 안 싣는 컬럼이라 여기서 같이 끌어온다
+    ex = pd.read_sql("SELECT as_of,sym,name,rs_4w,rs_26w,mdd_52w,vol_x_20w "
                      "FROM factor_weekly WHERE factor_ver='v1'", c)
     c.close()
     ex["as_of"] = pd.to_datetime(ex.as_of)
@@ -128,7 +129,10 @@ def cmd_build():
                 d=str(pd.Timestamp(r.as_of).date()),
                 r=[k for k in RULES if k in rec["sig"] and di[r.as_of] in rec["sig"][k]],
                 close=round(float(r.close), 2),
-                rs13=_r(r.rs_13w), rs26=_r(r.rs_26w), opm=_r(r.opm), opmq=_r(r.opm_qoq),
+                # rs4 추가(2026-08-17): 주간으로 후보를 받는데 13/26주만 보면 '최근 가속'이
+                # 안 보인다는 지적. 짧은 창은 노이즈가 크지만 판단 재료로는 있어야 한다.
+                rs4=_r(r.rs_4w), rs13=_r(r.rs_13w), rs26=_r(r.rs_26w),
+                opm=_r(r.opm), opmq=_r(r.opm_qoq),
                 per=_r(r.per), psr=_r(r.psr), dist=_r(r.dist_52w), mdd=_r(r.mdd_52w),
                 # 2026-08-16: 화면 요청으로 매출 YoY → QoQ 로 교체(직전 분기 대비 가속을 본다).
                 # rev(YoY)는 기존 JSON 호환을 위해 남겨 두고 revq 를 추가한다.
