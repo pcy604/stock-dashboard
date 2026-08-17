@@ -130,7 +130,9 @@ def cmd_build():
                 close=round(float(r.close), 2),
                 rs13=_r(r.rs_13w), rs26=_r(r.rs_26w), opm=_r(r.opm), opmq=_r(r.opm_qoq),
                 per=_r(r.per), psr=_r(r.psr), dist=_r(r.dist_52w), mdd=_r(r.mdd_52w),
-                vol=_r(r.vol_x_20w), rev=_r(r.rev_yoy),
+                # 2026-08-16: 화면 요청으로 매출 YoY → QoQ 로 교체(직전 분기 대비 가속을 본다).
+                # rev(YoY)는 기존 JSON 호환을 위해 남겨 두고 revq 를 추가한다.
+                vol=_r(r.vol_x_20w), rev=_r(r.rev_yoy), revq=_r(r.rev_qoq),
                 mc=_r(r.marcap / 1e9, 2), adv=_r(r.adv_20d / 1e6, 0),
                 f13=_r(r.f13 * 100, 1), f26=_r(r.f26 * 100, 1), f52=_r(r.f52 * 100, 1),
                 trg=" ".join((["흑자전환"] if r.op_turn == 1 else []) +

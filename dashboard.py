@@ -278,6 +278,36 @@ def load_json(path):
     except Exception:
         return None
 
+# ── 전역 규칙: 표의 모든 숫자는 소수 1자리 (2026-08-16) ────────────────
+#   Streamlit 은 float 을 2.470000 처럼 원본 정밀도로 그린다. 표가 수십 개라
+#   호출부마다 format 을 다는 대신 st.dataframe 을 한 번 감싸 전역으로 반올림한다.
+#   Styler 가 들어오면 .data 를 반올림한다(명시적 .format 이 걸린 열은 그 포맷이 우선).
+_ST_DATAFRAME = st.dataframe
+
+
+def _round1(obj):
+    try:
+        if isinstance(obj, pd.DataFrame):
+            o = obj.copy()
+            num = o.select_dtypes(include='number').columns
+            if len(num):
+                o[num] = o[num].round(1)
+            return o
+        d = getattr(obj, 'data', None)          # pandas Styler
+        if isinstance(d, pd.DataFrame):
+            obj.data = _round1(d)
+    except Exception:
+        pass                                    # 표시 보정 실패가 화면을 죽이면 안 된다
+    return obj
+
+
+def _dataframe1(data=None, *a, **kw):
+    return _ST_DATAFRAME(_round1(data), *a, **kw)
+
+
+st.dataframe = _dataframe1
+
+
 @st.cache_data(ttl=600, show_spinner=False)
 def _data_status():
     """산출물별 실제 데이터 날짜·주기·상태 (data_freshness 레지스트리 단일 원천)."""
@@ -1049,27 +1079,42 @@ else:
                                hovermode='x unified')
             st.plotly_chart(_fig, use_container_width=True)
 
-            # 진입 주차를 기준으로 매매 결과와 그 주의 지표를 한 표에 합친다
+            # ── 신호 주차 × 매매 결과를 한 표로 (2026-08-16 통합) ──────────────
+            # 이전엔 표가 둘이었다: '매매 통합'(진입한 건만)과 '신호 주차 전체'(진입 안 한 주 포함).
+            # 열이 거의 같아 차이를 알기 어려웠다. 이제 **신호가 뜬 모든 주차**를 행으로 두고,
+            # 그 주에 진입했으면 매매 결과 열을 채운다 — "언제 신호가 떴고, 어디서 들어갔고,
+            # 결과가 어땠나"를 한 표에서 본다.
             _byd = {x['d']: x for x in _r.get('rows', [])}
-            _merged = []
+            _tr_by_date = {}
             for _k, _tr in _r.get('trades', {}).items():
                 for _t in _tr:
-                    _ed = str(_D[_t['e']].date())
-                    _m = _byd.get(_ed, {})
-                    _merged.append({
-                        '규칙': _k, '진입': _ed,
-                        '청산': (str(_D[_t['x']].date()) if _t['closed'] else '보유 중'),
-                        '수익률': _t['ret'], '보유주': _t['wk'], '신호지속': _t.get('sk', 1),
-                        '진입가': _t['ep'], '청산가': _t['xp'],
-                        'RS13': _m.get('rs13'), 'RS26': _m.get('rs26'),
-                        'OPM': _m.get('opm'), 'OPM QoQ': _m.get('opmq'),
-                        # PER은 최근 12개월 순이익이 적자면 산출되지 않는다.
-                        # 흑자전환 직후에는 정상적으로 비어 있는 값이라 '적자'로 표기한다.
-                        'PER': ('적자' if _m.get('per') is None else f"{_m['per']:.1f}"),
-                        'PSR': _m.get('psr'), '신고가대비': _m.get('dist'),
-                        '52주낙폭': _m.get('mdd'), '거래량배': _m.get('vol'),
-                        '매출YoY': _m.get('rev'), '시총($B)': _m.get('mc'),
-                        '거래대금($M)': _m.get('adv'), '트리거': _m.get('trg', '-')})
+                    _tr_by_date[str(_D[_t['e']].date())] = (_k, _t)
+
+            _merged = []
+            for _d in sorted(set(_byd) | set(_tr_by_date)):
+                _m = _byd.get(_d, {})
+                _k, _t = _tr_by_date.get(_d, (None, None))
+                _merged.append({
+                    '진입': _d,
+                    '청산': (('보유 중' if not _t['closed'] else str(_D[_t['x']].date()))
+                            if _t else None),
+                    '규칙': (_k if _t else ','.join(_m.get('r', [])) or '-'),
+                    '시총($B)': _m.get('mc'),
+                    '수익률': (_t['ret'] if _t else None),
+                    '보유주': (_t['wk'] if _t else None),
+                    '신호지속': (_t.get('sk', 1) if _t else None),
+                    '진입가': (_t['ep'] if _t else _m.get('close')),
+                    '청산가': (_t['xp'] if _t else None),
+                    'RS13': _m.get('rs13'), 'RS26': _m.get('rs26'),
+                    '매출QoQ': _m.get('revq'),
+                    'OPM': _m.get('opm'), 'OPM QoQ': _m.get('opmq'),
+                    'PSR': _m.get('psr'),
+                    # PER은 최근 12개월 순이익이 적자면 산출되지 않는다.
+                    # 흑자전환 직후에는 정상적으로 비어 있는 값이라 '적자'로 표기한다.
+                    'PER': ('적자' if _m.get('per') is None else f"{_m['per']:.1f}"),
+                    '신고가대비': _m.get('dist'), '52주낙폭': _m.get('mdd'),
+                    '거래량배': _m.get('vol'), '거래대금($M)': _m.get('adv'),
+                    '트리거': _m.get('trg', '-'), '_진입함': bool(_t)})
             if _merged:
                 _mdf = pd.DataFrame(_merged).sort_values('진입').reset_index(drop=True)
 
@@ -1089,35 +1134,27 @@ else:
                     return f'background-color: rgba(23,65,92,{a:.2f}); color:' + \
                            ('#fff' if a > .35 else '#12161b')
 
-                st.markdown(f"**매매·신호 통합 {len(_mdf)}건** — 진입 주차 기준. "
+                _n_in = int(_mdf['_진입함'].sum())
+                _only_in = st.checkbox("진입한 건만 보기", value=False, key="lsd_only_in")
+                _view = _mdf[_mdf['_진입함']] if _only_in else _mdf
+                _view = _view.drop(columns=['_진입함'])
+                st.markdown(f"**신호 주차 {len(_mdf)}건 · 그중 진입 {_n_in}건** — "
                             "수익률은 클수록, 보유는 길수록 진하게")
                 st.dataframe(
-                    _mdf.style
-                        .map(_ret_bg, subset=['수익률'])
-                        .map(_hold_bg, subset=['보유주', '신호지속'])
-                        .format({'수익률': '{:+.1f}%', '진입가': '${:,.2f}',
-                                 '청산가': '${:,.2f}', '보유주': '{:.0f}주',
-                                 '신호지속': '{:.0f}주'}, na_rep='—'),
+                    _view.style
+                         .map(_ret_bg, subset=['수익률'])
+                         .map(_hold_bg, subset=['보유주', '신호지속'])
+                         .format({'수익률': '{:+.1f}%', '진입가': '${:,.2f}',
+                                  '청산가': '${:,.2f}', '보유주': '{:.0f}주',
+                                  '신호지속': '{:.0f}주'}, na_rep='—'),
                     use_container_width=True, hide_index=True, row_height=26,
-                    height=_dfh(len(_mdf)))
-                st.caption("**신호지속** = 진입 시점부터 같은 신호가 연속으로 뜬 주수 "
+                    height=_dfh(min(len(_view), 16)))
+                st.caption("한 행 = 신호가 뜬 한 주. **수익률이 '—'인 행은 신호는 떴지만 진입하지 않은 주** "
+                           "(이미 보유 중이라 재진입 안 함). 진입한 주만 보려면 위 체크박스. "
+                           "**신호지속** = 진입 시점부터 같은 신호가 연속으로 뜬 주수 "
                            "(매수 판단 시점에 이미 알 수 있는 값). "
-                           "**PER '적자'** = 최근 12개월 순이익이 아직 마이너스라 산출 불가 — "
+                           "**PER '적자'** = 최근 12개월 순이익이 마이너스라 산출 불가 — "
                            "흑자전환 직후에는 정상이다.")
-
-            _rows = _r.get('rows', [])
-            if _rows:
-                with st.expander(f"신호 주차 전체 {len(_rows)}건 — 진입하지 않은 주 포함"):
-                    st.dataframe(pd.DataFrame([{
-                        '주차': x['d'], '규칙': ','.join(x['r']), '종가': x['close'],
-                        'RS13': x['rs13'], 'RS26': x['rs26'], 'OPM': x['opm'],
-                        'OPM QoQ': x['opmq'],
-                        'PER': ('적자' if x['per'] is None else f"{x['per']:.1f}"),
-                        'PSR': x['psr'], '신고가대비': x['dist'], '52주낙폭': x['mdd'],
-                        '거래량배': x['vol'], '매출YoY': x['rev'], '시총($B)': x['mc'],
-                        '거래대금($M)': x['adv'], '트리거': x['trg']} for x in _rows]),
-                        use_container_width=True, hide_index=True, row_height=25,
-                        height=_dfh(min(len(_rows), 14)))
 
             # ── 주차별 조회 ────────────────────────────────────────────
             # 종목별 조회만으로는 "이 조건이면 오른다"를 확인할 수 없다.
@@ -3783,6 +3820,39 @@ def _fetch_pf_price(sym: str, market: str):
         return None
 
 
+@st.cache_data(ttl=1800)
+def _pf_trail(sym: str, market: str, buy_date: str):
+    """(매수 후 주봉 최고가, 마지막 52주 신고가 이후 경과 주) — 가드레일 트레일링용.
+
+    2026-08-16: 검증된 청산 규칙이 '매수가 대비 −8%'가 아니라 '고점 대비 −20%
+    트레일링'이라 고점이 필요하다. 판정은 백테(leaders_alloc)와 같은 주봉 종가로 한다.
+    52주 신고가 기준일은 '마지막 신고가'와 '매수 주차' 중 나중 것 — 매수 전부터
+    신고가를 못 낸 종목이 당일 축소 대상이 되는 것을 막는다.
+    """
+    try:
+        import FinanceDataReader as fdr
+        code = sym.replace('.KS', '').replace('.KQ', '')
+        fdr_sym = code if market == 'KR' else sym
+        start = (datetime.now() - timedelta(days=520)).strftime('%Y-%m-%d')
+        s = fdr.DataReader(fdr_sym, start)['Close'].dropna()
+        if s.empty:
+            return None, None
+        w = s.resample('W-MON', label='left', closed='left').last().dropna()
+        if len(w) and (pd.Timestamp(s.index[-1]) - pd.Timestamp(w.index[-1])).days < 4:
+            w = w.iloc[:-1]
+        if not len(w):
+            return None, None
+        bd = pd.Timestamp(buy_date).normalize() if buy_date else w.index[0]
+        bw = bd - timedelta(days=bd.weekday())
+        since = w[w.index >= bw]
+        peak = float(since.max()) if len(since) else float(w.iloc[-1])
+        hi = w.index[(w >= w.rolling(52, min_periods=10).max() - 1e-9).values]
+        ref = max(hi[-1], bw) if len(hi) else bw
+        return peak, (pd.Timestamp(w.index[-1]) - ref).days / 7
+    except Exception:
+        return None, None
+
+
 @st.cache_data(ttl=600)
 def _px_series(sym: str, market: str, days: int = 75):
     """(현재가, 최근 45영업일 종가 리스트) — 현재가와 추세 스파크라인을 호출 1회로."""
@@ -3990,19 +4060,39 @@ with _pf_main, guard('포트폴리오'):
         # ── 🛡️ 원칙 가드레일 ──
         st.divider()
         st.subheader("🛡️ 원칙 가드레일")
-        st.caption("내가 정한 원칙대로 — 상위 2종목만 20%, 나머지는 더 작게, 30% 넘으면 줄이고, "
-                   "레버리지·손절·현금을 기계가 강제합니다. (1억 손실 후 정립한 규칙)")
+        st.caption("내가 정한 원칙대로 — 종목당 **매입 20%**를 4분할로만 채우고, 평가 40% 넘으면 "
+                   "30%로 트림, 청산은 **고점 대비 −20% 트레일링**, 3주간 신고가 없으면 30% 축소. "
+                   "레버리지·현금까지 기계가 강제합니다. (1억 손실 후 정립 → 2026-08-16 백테 검증분 반영)")
+
+        with st.expander("📐 2026-08-16 변경점 — 왜 규칙이 바뀌었나", expanded=False):
+            st.markdown(
+                "| 항목 | 이전 | 지금 | 근거 |\n|---|---|---|---|\n"
+                "| 청산 | 매수가 −8% 고정 | **고점 대비 −20% 트레일링** | 고정 손절은 백테로 검증된 적이 없다. "
+                "주도주는 평균 보유 20주라 −8%면 거의 즉사한다 |\n"
+                "| 종목 캡 | 상위2 20% / 3위~ 12% | **매입 20% 통일 · 4분할** | 백테가 검증한 형태. "
+                "실제 억제는 분할 진입과 현금이 먼저 한다 |\n"
+                "| 트림 | 평가 30% → 20% | **평가 40% → 30%** | 상한(매입)과 트림(평가)은 서로 다른 자 |\n"
+                "| 축소 | 없음 | **3주 신고가 미갱신 → 30%** | 전량 매도는 발동 369회로 재앙, "
+                "30%가 정확히 봉우리 (승률 +2.4%p) |\n")
+            st.caption("검증 조건: 2019-01~2026-08 · 12종 · A 회복 1.57·MDD −20.7% / R6 회복 1.30. "
+                       "⚠️ 생존편향(패널에 상폐 종목 0건)·인샘플 선택이 남아 있어 실전은 이보다 낮게 나오는 게 정상. "
+                       "⚠️ 3위 이하 캡이 12%→20%로 완화된 셈이니 필요하면 아래에서 조이세요.")
 
         with st.expander("⚙️ 원칙 설정 (한 번 정하면 끝)", expanded=False):
             _ga, _gb, _gc = st.columns(3)
-            _g_top  = _ga.slider("상위 2종목 최대 비중 %", 10, 30, 20, key="g_top")
-            _g_low  = _gb.slider("3위~ 종목 최대 비중 %", 5, 20, 12, key="g_low")
-            _g_trim = _gc.slider("자동 축소 임계 %", 20, 50, 30, key="g_trim")
+            _g_top  = _ga.slider("상위 2종목 매입 상한 %", 10, 30, 20, key="g_top")
+            _g_low  = _gb.slider("3위~ 매입 상한 %", 5, 25, 20, key="g_low")
+            _g_trim = _gc.slider("평가비중 트림 임계 %", 25, 60, 40, key="g_trim")
             _gd, _ge, _gf = st.columns(3)
-            _g_lev  = _gd.slider("레버리지 합계 한도 %", 0, 50, 10, key="g_lev")
-            _g_stop = _ge.slider("손절선 -%", 3, 20, 8, key="g_stop")
+            _g_trail = _gd.slider("트레일링 청산 -%", 5, 40, 20, key="g_trail",
+                                  help="고점 대비. 백테 검증값 20%")
+            _g_quiet = _ge.slider("신고가 미갱신 축소 (주)", 1, 12, 3, key="g_quiet")
+            _g_lev   = _gf.slider("레버리지 합계 한도 %", 0, 50, 10, key="g_lev")
+            _gg, _gh, _gi = st.columns(3)
+            _g_trimto = _gg.slider("트림 목표 %", 10, 40, 30, key="g_trimto")
+            _g_stop   = _gh.slider("고정 손절 -% (고점 미상일 때만)", 3, 30, 8, key="g_stop")
             _g_holdval = int(sum(r['_value'] for r in rows_pf if r.get('_value')))
-            _g_cap  = _gf.number_input("총 자본(현금 포함, 원) — 현금비중 점검용", min_value=0,
+            _g_cap  = _gi.number_input("총 자본(현금 포함, 원) — 현금비중 점검용", min_value=0,
                                        value=_g_holdval, step=1_000_000, key="g_cap",
                                        help="보유 평가액보다 크게 입력하면 그 차액을 현금으로 봅니다")
 
@@ -4014,21 +4104,49 @@ with _pf_main, guard('포트폴리오'):
         except Exception:
             _gcmin, _gcmax = 25, 40
 
+        _pk = {}
+        with st.spinner("고점·신고가 확인 중..."):
+            for _p in positions:
+                _pk[_p['sym']] = _pf_trail(_p['sym'], _p.get('market', 'US'),
+                                           _p.get('buy_date', ''))
+        _cost = {p['sym']: float(p.get('buy_price', 0)) * float(p.get('qty', 0))
+                 for p in positions}
         _gpos = [{'sym': r['코드'], 'name': r['종목명'], 'market': r['시장'],
-                  'value': r['_value'], 'pnl_pct': r['수익률'], 'cur_price': r['_cur'], 'qty': r['_qty']}
+                  'value': r['_value'], 'cost': _cost.get(r['코드']),
+                  'pnl_pct': r['수익률'], 'cur_price': r['_cur'], 'qty': r['_qty'],
+                  'peak_price': _pk.get(r['코드'], (None, None))[0],
+                  'weeks_since_high': _pk.get(r['코드'], (None, None))[1]}
                  for r in rows_pf if r.get('_value')]
         try:
             import guardrail as _grd
             _gr = _grd.evaluate(_gpos, total_capital=(_g_cap or None),
                                 top_cap=_g_top, lower_cap=_g_low, trim_threshold=_g_trim,
+                                trim_to=_g_trimto, trail_pct=_g_trail, quiet_wk=_g_quiet,
                                 lev_cap=_g_lev, stop_pct=_g_stop, cash_min=_gcmin, cash_max=_gcmax)
             _gs = _gr['summary']
-            _gx1, _gx2, _gx3, _gx4 = st.columns(4)
+            _gx1, _gx2, _gx3, _gx4, _gx5 = st.columns(5)
             _gx1.metric("원칙 점검", _gr['grade'])
-            _gx2.metric("상위2 비중", f"{_gs.get('top2', 0):.0f}%", help=f"한도 {_g_top*2}% (각 {_g_top}%)")
-            _gx3.metric("레버리지", f"{_gs.get('lev_pct', 0):.0f}%", help=f"한도 {_g_lev}%")
-            _gx4.metric("현금", f"{_gs['cash_pct']:.0f}%" if _gs.get('cash_pct') is not None else "—",
+            _gx2.metric("최대 매입비중", f"{_gs.get('max_cost_w', 0):.0f}%",
+                        help=f"종목당 상한 {_g_top}% (매입 기준). 4분할이면 5/10/15/20%")
+            _gx3.metric("상위3 평가비중", f"{_gs.get('top3', 0):.0f}%",
+                        help="백테에서 상위 3종목이 이익의 39~52%를 만든다 — 여기가 성과의 실체")
+            _gx4.metric("레버리지", f"{_gs.get('lev_pct', 0):.0f}%", help=f"한도 {_g_lev}%")
+            _gx5.metric("현금", f"{_gs['cash_pct']:.0f}%" if _gs.get('cash_pct') is not None else "—",
                         help=f"매크로 권고 {_gcmin}~{_gcmax}%")
+
+            _hd = [h for h in _gr['holdings'] if h.get('drawdown') is not None]
+            if _hd:
+                _hrows = [{'종목': h.get('name', h['sym']), '분할': f"{h.get('tranche','-')}/4",
+                           '매입비중': f"{h['cost_weight']:.1f}%", '평가비중': f"{h['weight']:.1f}%",
+                           '고점대비': f"{h['drawdown']:+.1f}%",
+                           '청산까지': f"{h['drawdown'] + _g_trail:+.1f}%p",
+                           '신고가경과': (f"{h['weeks_since_high']:.0f}주"
+                                     if h.get('weeks_since_high') is not None else '-')}
+                          for h in sorted(_hd, key=lambda x: x['drawdown'])]
+                st.dataframe(pd.DataFrame(_hrows), use_container_width=True, hide_index=True,
+                             row_height=25, height=_dfh(len(_hrows)))
+                st.caption("‘청산까지’가 0에 가까울수록 트레일링 −%.0f%% 선에 붙은 것. "
+                           "‘분할’은 매입비중을 5%%씩으로 환산한 진행도입니다." % _g_trail)
             if not _gr['violations']:
                 st.success("🟢 원칙 준수 중 — 잘하고 있어요. 감정 흔들려도 이 규칙만 지키면 됩니다.")
             else:
