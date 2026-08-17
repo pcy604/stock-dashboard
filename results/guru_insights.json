@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "nfodtx2Q9V0",
+      "title": "전세가 사라지면 결국 이걸 사게 됩니다 #부동산투자 #전세자금 #월세계약 #아파트매매 #송희구",
+      "channel": "와이스트릿",
+      "published": "2026-08-17T05:00:36+00:00",
+      "url": "https://www.youtube.com/watch?v=nfodtx2Q9V0",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-17T14:21:06.887771+09:00"
+    },
+    {
       "video_id": "DZisG5V1bDc",
       "title": "1억 모으기 퀘스트 또 깼습니다! 절약의 달인에서 이제는 투자의 달인까지 노립니다 / 절약의 달인 곽지현 / 와이스토리",
       "channel": "와이스트릿",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-17T13:26:50.786558+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-17T14:21:39.196036+09:00"
     },
     {
       "video_id": "gs_t5MCZ7Mk",
@@ -257,8 +276,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-17T13:26:18.284896+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-17T14:20:34.678704+09:00"
     },
     {
       "video_id": "U_wf5LtH1Gs",
@@ -276,8 +295,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-17T13:25:45.472854+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-17T14:20:02.164538+09:00"
     },
     {
       "video_id": "_ln2FQ57zrQ",
@@ -11899,41 +11918,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-08T09:06:17.671093+09:00"
-    },
-    {
-      "video_id": "AMml0sm13Is",
-      "title": "반도체 미워도 다시 한 번 #반도체 #메모리 #투자 #투자전략 #사이클 #SK하이닉스 #삼성전자 #호돌이 #우황제",
-      "channel": "와이스트릿",
-      "published": "2026-08-07T22:00:11+00:00",
-      "url": "https://www.youtube.com/watch?v=AMml0sm13Is",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "한국 주식시장의 핵심인 반도체 투자는 기술 이해보다 사이클 분석이 중요하다.",
-        "summary": [
-          "대한민국 시가총액의 약 48%를 차지하는 반도체 산업은 국내 투자자에게 필수적인 학습 대상이다.",
-          "미국 시장의 반도체 비중은 약 15%로, 한국에 비해 다른 산업들의 비중이 더 분산되어 있다.",
-          "반도체 투자는 복잡한 기술 이해가 아닌 산업의 사이클을 파악하는 것이 핵심이며, 기술적 특징은 사이클에 녹아들어 있다."
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "국내 증시에 투자한다면, 시가총액 비중이 압도적인 반도체 산업에 대한 공부는 기본 중의 기본이다.",
-            "t": 20
-          },
-          {
-            "point": "반도체 투자는 기술적 지식보다는 사이클 분석에 초점을 맞춰야 하며, 기술은 사이클을 이해하는 데 도움이 되는 요소다.",
-            "t": 46
-          }
-        ],
-        "actionable": [
-          "한국 주식시장에 투자하는 경우, 반드시 반도체 산업의 동향과 사이클을 면밀히 분석해야 한다.",
-          "반도체 기술 자체보다 시장의 흐름과 사이클에 기반한 투자 전략을 수립하라."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-08T07:17:54.993160+09:00"
     }
   ],
-  "updated": "2026-08-17T13:26:51.786793+09:00"
+  "updated": "2026-08-17T14:21:40.196311+09:00"
 }
