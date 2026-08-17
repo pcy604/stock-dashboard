@@ -443,6 +443,54 @@ def quote(sym):
         return None, None
 
 
+# SIC 6726 투자회사(ETF·폐쇄형펀드·트러스트) / 6221 원자재 / 6770 SPAC
+_ETF_SIC = {"6726", "6221", "6770"}
+
+
+def _drop_untrustworthy(m):
+    """시총을 **믿을 수 없는 행은 파일에 넣지 않는다.**
+
+    이 CSV 는 leaders_build 말고도 perf_run·turnaround_run·backtest_run·universe
+    네 곳이 더 읽는다. 거기엔 티커 위생 필터가 없어서, 여기서 안 거르면
+    GLD(금 ETF) 가 '주도주 후보'로 올라온다. 남기느니 빼는 게 맞다 —
+    이 파일은 '미국 영업회사의 신뢰 가능한 시총' 목록이다.
+
+    빼는 것과 이유:
+      · 외국 사기업 — dei 주식수가 현지 보통주라 ADR 비율만큼 시총이 틀린다
+        (TSM $11.2조, LTM $30조). 비율 테이블 없이는 못 고친다.
+      · 우선주(-P)·워런트(…W) — 모회사와 CIK 를 공유해 모회사 주식수를 가져온다
+        (JPM-PC 가 $964B 로 잡혔다).
+      · 같은 CIK 의 중복 클래스 — GOOGL/GOOG/GOOGM/GOOGN 이 4번 계상된다.
+      · ETF·트러스트·SPAC — 영업회사가 아니다.
+    """
+    n0 = len(m)
+    dom = {}
+    sic = {}
+    if os.path.exists(DOM_CSV):
+        d = pd.read_csv(DOM_CSV)
+        dom = dict(zip(d.sym.astype(str), d.country.astype(str)))
+        if "sic" in d.columns:
+            sic = dict(zip(d.sym.astype(str),
+                           d.sic.astype(str).str.split(".").str[0]))
+    s = m.Symbol.astype(str).str.upper()
+    keep = (~s.str.contains(r"-P") & ~s.str.match(r"^[A-Z]{4}W$") & (s.str.len() <= 5)
+            & ~s.map(lambda x: dom.get(x) == "Foreign")
+            & ~s.map(lambda x: sic.get(x, "") in _ETF_SIC))
+    m = m[keep].copy()
+    try:                                   # CIK 중복 → 짧은 티커 하나만
+        cm = json.load(open(os.path.join(DATA, "edgar_cik.json"), encoding="utf-8"))
+        cik = m.Symbol.astype(str).str.upper().map({k.upper(): str(v) for k, v in cm.items()})
+        m = (m.assign(_c=cik, _l=m.Symbol.astype(str).str.len())
+              .sort_values(["_c", "_l", "Symbol"])
+              .drop_duplicates("_c", keep="first")
+              .drop(columns=["_c", "_l"]))
+    except Exception:
+        pass
+    print(f"  신뢰 불가 {n0 - len(m):,}행 제외 "
+          f"(외국·우선주·워런트·중복클래스·ETF) → {len(m):,}종", flush=True)
+    return m
+
+
 def cmd_build(net_price=False):
     sh = load_shares_series()
     sp = split_factors()
@@ -509,7 +557,9 @@ def cmd_build(net_price=False):
     ts.to_csv(OUT_SH, index=False)
     print(f"→ {OUT_SH}  ({len(ts_rows):,}행 · {len(sh)}종)", flush=True)
 
-    m = pd.DataFrame(mc_rows).sort_values("marketcap", ascending=False).reset_index(drop=True)
+    m = pd.DataFrame(mc_rows)
+    m = _drop_untrustworthy(m)
+    m = m.sort_values("marketcap", ascending=False).reset_index(drop=True)
     m.insert(0, "Rank", m.index + 1)
     m = m[["Rank", "Name", "Symbol", "marketcap", "price (USD)", "country",
            "shares", "px_date", "as_of"]]

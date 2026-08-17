@@ -67,21 +67,37 @@ def benchmark() -> pd.Series:
 
 
 def shares_map() -> dict:
-    """현재 시총 ÷ 현재 종가 = 주식수(근사). 과거 시총 시계열을 만들기 위한 재료."""
+    """상장주식수. universe.listed_shares(FDR 의 KRX 상장주식수)를 그대로 쓴다.
+
+    2026-08-18 이전에는 `현재시총 ÷ 현재종가` 로 역산했다. 미국에서 같은 역산이
+    27개월 낡은 시총과 만나 종목의 72%를 틀리게 만든 사고가 있었고, 한국도 원리는
+    같다 — universe.marcap 스냅샷과 종가 사이의 시차만큼 주식수가 틀어진다
+    (2026-07-02 스냅샷 기준 실측: 삼성전자 1.02배, SK하이닉스 1.30배).
+    listed_shares 컬럼은 스키마에 있었는데 값이 비어 있어 역산할 수밖에 없었다.
+    ingest_kis.kr_universe() 가 채우므로 이제 실제 값을 쓴다.
+    """
     import sqlite3
     out = {}
     try:
         with sqlite3.connect(K.DB) as c:
-            rows = c.execute('SELECT sym, marcap FROM universe WHERE marcap IS NOT NULL').fetchall()
+            rows = c.execute('SELECT sym, listed_shares, marcap FROM universe').fetchall()
     except Exception:
         return out
-    for sym, mc in rows:
-        px = K.load_close(sym)
+    fallback = 0
+    for sym, sh, mc in rows:
+        if sh:
+            out[sym] = float(sh)
+            continue
+        px = K.load_close(sym)             # 상장주식수가 비면 옛 방식으로 보완
         if px is None or len(px) == 0 or not mc:
             continue
         last = float(px.iloc[-1])
         if last > 0:
             out[sym] = float(mc) / last
+            fallback += 1
+    if fallback:
+        print(f'  ⚠️ 상장주식수 없어 역산한 종목 {fallback}개 '
+              f'— ingest_kis 로 universe 를 갱신하면 없어진다')
     return out
 
 
