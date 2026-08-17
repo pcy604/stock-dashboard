@@ -38,6 +38,7 @@ CLI
   python marketcap_refresh.py frames     # SEC frames — 분기당 1콜로 5천개사 (주경로)
   python marketcap_refresh.py shares     # 종목별 companyconcept — frames 빈칸 메우기
   python marketcap_refresh.py splits     # 분할 이력 (Yahoo)
+  python marketcap_refresh.py domicile   # 외국 발행사(ADR) 판정 — 20-F/40-F 제출사
   python marketcap_refresh.py build      # 위 결과 + 종가 → us_marketcap.csv
   python marketcap_refresh.py all        # frames → shares → splits → build
     --all-tickers   가격캐시 없는 종목까지 (edgar_cik 전체 1만종, 신규 발굴용)
@@ -282,6 +283,84 @@ FRAMES_LAG = 60          # frames 에는 제출일이 없다. 분기말 + 60일�
                          # 보수적이어야 look-ahead 가 안 생긴다.
 
 
+# ── 도메사일(외국 발행사) 판정 ──────────────────────────────────
+DOM_CSV = os.path.join(DATA, "us_domicile.csv")
+# 외국 사기업(FPI)은 20-F/40-F 로 보고한다. 이들의 dei 주식수는 **현지 보통주** 수인데
+# 우리가 곱하는 주가는 **ADR 1주 가격**이라 ADR 비율(보통 1:2~1:10)만큼 시총이 부풀려진다.
+#   실측: TSM $11.2조(실제 ~$1조), LTM $30조, TM $2.46조(실제 ~$3천억)
+# 구 스냅샷은 country 열로 이들을 통째로 뺐었다. 그 동작을 유지한다 —
+# ADR 을 넣으려면 ADR 비율 테이블이 따로 필요하고, 없는 채로 넣으면 쓰레기가 섞인다.
+FPI_FORMS = {"20-F", "40-F", "6-K"}
+
+
+def _domicile(sym, cik):
+    try:
+        raw = get(f"https://data.sec.gov/submissions/CIK{cik}.json", SUA, tries=3)
+    except Missing:
+        return None
+    if not raw:
+        return None
+    try:
+        j = json.loads(raw)
+    except Exception:
+        return None
+    forms = set(j.get("filings", {}).get("recent", {}).get("form", []) or [])
+    fpi = bool(forms & FPI_FORMS)
+    ex = j.get("exchanges") or []
+    return dict(sym=sym, country="Foreign" if fpi else "United States",
+                state=j.get("stateOfIncorporation") or "",
+                fiscal_end=j.get("fiscalYearEnd") or "",
+                sic=str(j.get("sic") or ""),
+                sic_desc=(j.get("sicDescription") or "")[:40],
+                exchange=",".join(map(str, ex))[:24])
+
+
+DOM_COLS = ["sym", "country", "state", "fiscal_end", "sic", "sic_desc", "exchange"]
+
+
+def cmd_domicile(syms):
+    have = {}
+    if os.path.exists(DOM_CSV):
+        d = pd.read_csv(DOM_CSV)
+        for c in DOM_COLS:
+            if c not in d.columns:
+                d[c] = ""
+        # sic 이 비어 있는 행은 옛 스키마로 받은 것 — 다시 받아 업종을 채운다.
+        d = d[d.sic.astype(str).str.strip().ne("")]
+        have = {r.sym: r for r in d.itertuples()}
+    cm = cikmap()
+    todo = [s for s in syms if s not in have and s in cm]
+    print(f"도메사일·업종 판정 {len(todo)}종 (기보유 {len(have)})", flush=True)
+    rows = [{c: getattr(r, c, "") for c in DOM_COLS} for r in have.values()]
+    n = {"i": 0}
+
+    def work(s):
+        r = _domicile(s, cm[s])
+        n["i"] += 1
+        if n["i"] % 300 == 0:
+            print(f"  {n['i']}/{len(todo)}", flush=True)
+        return r
+
+    # submissions JSON 은 수 MB 라 무겁다. 8워커로 돌리면 SEC 가 403(속도제한)을
+    # 뱉고 3,000종이 통째로 미판정으로 남는다 — 실측. 4워커로 낮춘다.
+    # 실패는 저장하지 않으므로 다시 돌리면 빠진 것만 증분으로 채운다.
+    with ThreadPoolExecutor(4) as ex:
+        for r in ex.map(work, todo):
+            if r:
+                rows.append(r)
+    d = pd.DataFrame(rows).drop_duplicates("sym")
+    d.to_csv(DOM_CSV, index=False)
+    print(f"→ {DOM_CSV}  (US {int((d.country=='United States').sum()):,} · "
+          f"외국 {int((d.country=='Foreign').sum()):,})", flush=True)
+
+
+def load_domicile():
+    if not os.path.exists(DOM_CSV):
+        return {}
+    d = pd.read_csv(DOM_CSV)
+    return dict(zip(d.sym.astype(str), d.country.astype(str)))
+
+
 def load_shares_series():
     """{sym: DataFrame(end, filed, shares)} — filed 오름차순.
 
@@ -367,7 +446,11 @@ def quote(sym):
 def cmd_build(net_price=False):
     sh = load_shares_series()
     sp = split_factors()
-    print(f"주식수 보유 {len(sh)}종 · 분할 이력 {len(sp)}종", flush=True)
+    dom = load_domicile()
+    if not dom:
+        print("⚠️ data/us_domicile.csv 없음 — 외국 발행사(ADR)를 못 거른다. "
+              "`python marketcap_refresh.py domicile` 을 먼저 돌려라.", flush=True)
+    print(f"주식수 보유 {len(sh)}종 · 분할 이력 {len(sp)}종 · 도메사일 {len(dom)}종", flush=True)
 
     name = {}
     if os.path.exists(OUT_MC):
@@ -418,7 +501,7 @@ def cmd_build(net_price=False):
             continue
         mc_rows.append(dict(Name=name.get(sym, sym), Symbol=sym,
                             marketcap=latest * px, **{"price (USD)": px},
-                            country="United States", shares=latest,
+                            country=dom.get(sym, "United States"), shares=latest,
                             px_date=pxd, as_of=str(pd.Timestamp.today().date())))
 
     ts = pd.DataFrame(ts_rows).sort_values(["sym", "filed"])
@@ -454,5 +537,7 @@ if __name__ == "__main__":
         cmd_shares(syms, force="--force" in fl)
     if cmd in ("splits", "all"):
         cmd_splits(syms)
+    if cmd in ("domicile", "all"):
+        cmd_domicile(sorted(load_shares_series()) or syms)
     if cmd in ("build", "all"):
         cmd_build(net_price="--net-price" in fl)
