@@ -65,11 +65,50 @@ def universe(n, lo=1.5e8, hi=None):
     이제 marketcap_refresh.py 가 매일 다시 만든다(daily-refresh). 손으로 받지 마라.
     """
     d = pd.read_csv(os.path.join(DATA, "us_marketcap.csv"))
-    d = d[(d.country == "United States") & (d.marketcap >= lo)]
+    d = d[d.country == "United States"]
+    d = _clean_tickers(d)
+    d = d[d.marketcap >= lo]
     if hi:
         d = d[d.marketcap <= hi]
     d = d.sort_values("marketcap", ascending=False).head(n)
     return d[["Symbol", "Name", "marketcap"]].rename(columns={"Symbol": "sym", "Name": "name"})
+
+
+# 우선주·워런트·ETF 는 CIK 를 모회사와 공유하거나(JPM-PC → JPM 의 주식수를 가져온다)
+# 애초에 영업회사가 아니다(GLD 는 금 ETF). 2026-08-18 유니버스 재구축에서
+# JPM-PC $964B, GLD $143B, USOI 같은 것들이 상위에 올라와 드러났다.
+_ETF_SIC = {"6726",   # Investment offices NEC — 폐쇄형펀드·ETF·트러스트
+            "6221",   # Commodity contracts — 원자재 ETF
+            "6770"}   # Blank checks — SPAC
+
+
+def _clean_tickers(d):
+    d = d.copy()
+    sym = d.Symbol.astype(str).str.upper()
+    ok = (~sym.str.contains(r"-P")                 # 우선주 (JPM-PC, BAC-PB…)
+          & ~sym.str.match(r"^[A-Z]{4}W$")         # 워런트 (TBLAW…)
+          & (sym.str.len() <= 5))
+    # 같은 CIK 를 공유하면 주식수가 같은 회사의 것이다 → 하나만 남긴다.
+    # 짧은 쪽을 대표로 본다(GOOGL/GOOG/GOOGM/GOOGN → GOOG).
+    try:
+        cm = json.load(open(os.path.join(DATA, "edgar_cik.json"), encoding="utf-8"))
+        cik = sym.map({k.upper(): str(v) for k, v in cm.items()})
+        d2 = d.assign(_s=sym, _c=cik, _ok=ok, _l=sym.str.len())
+        d2 = d2[d2._ok]
+        d2 = (d2.sort_values(["_c", "_l", "_s"])
+                .drop_duplicates("_c", keep="first"))
+        d = d2.drop(columns=["_s", "_c", "_ok", "_l"])
+    except Exception:
+        d = d[ok]
+    # 업종(SIC)으로 ETF·트러스트·SPAC 제거
+    p = os.path.join(DATA, "us_domicile.csv")
+    if os.path.exists(p):
+        dom = pd.read_csv(p)
+        if "sic" in dom.columns:
+            bad = set(dom.loc[dom.sic.astype(str).str.split(".").str[0].isin(_ETF_SIC),
+                              "sym"].astype(str))
+            d = d[~d.Symbol.astype(str).isin(bad)]
+    return d
 
 
 # ───────────────────────── 1) 가격 ─────────────────────────
@@ -289,13 +328,29 @@ def shares_at(sym, when):
     return float(v[k]) if len(v) else None
 
 
-def build(start="2018-01-01", incremental=False):
+def build(start="2018-01-01", incremental=False, newsyms=False):
+    """newsyms=True: 아직 factor_weekly 에 없는 종목만 전 기간 적재한다.
+
+    2026-08-18 유니버스 재구축용. 시총 버그를 고치고 유니버스를 3,181종으로 넓혔는데,
+    기존 2,208종은 marketcap_fix_db.py 로 marcap·per·psr 이 이미 제자리 보정됐다
+    (저장된 종가 × SEC 공시 주식수 — build 의 shares_at() 과 같은 값이다).
+    나머지 팩터는 가격에서만 나오므로 주식수 버그와 무관하다.
+    따라서 기존 종목을 다시 계산할 이유가 없다 — 신규만 채우면 결과가 동일하고
+    전체 재적재(6시간+)를 피할 수 있다.
+    """
     u = pd.read_csv(os.path.join(CACHE, "_universe.csv"))
     load_shares()
     spy = bench()
     con = sqlite3.connect(DB)
     con.executescript(open(os.path.join(BASE, "leaders_schema.sql"), encoding="utf-8").read())
-    if incremental:
+    if newsyms:
+        have = {r[0] for r in con.execute(
+            "SELECT DISTINCT sym FROM factor_weekly WHERE factor_ver=?", (VER,))}
+        before = len(u)
+        u = u[~u.sym.isin(have)]
+        print(f"신규 종목 모드 — 기존 {len(have):,}종 건너뜀, "
+              f"{len(u):,}종만 적재 (유니버스 {before:,})", flush=True)
+    elif incremental:
         last = con.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver=?",
                            (VER,)).fetchone()[0]
         if last:
@@ -482,5 +537,7 @@ if __name__ == "__main__":
         cmd_fetch(int(sys.argv[2]) if len(sys.argv) > 2 else 250)
     elif cmd == "update":
         build(incremental=True)
+    elif cmd == "newsyms":
+        build(newsyms=True)
     else:
         build(sys.argv[2] if len(sys.argv) > 2 else "2018-01-01")
