@@ -1209,18 +1209,45 @@ else:
 
             _wk_idx = _by_week(_sd.get('generated', ''))
             _wks = sorted(_wk_idx, reverse=True)
-            _w = st.selectbox(f"주차 선택 — 신호가 있었던 {len(_wks)}주",
-                              _wks, index=0, key="lead_week",
-                              format_func=lambda w: f"{w}  ({len(_wk_idx[w])}종)")
+
+            # 441주를 셀렉트박스로만 넘기면 특정 시점을 찾을 수가 없다 — 날짜로 바로 간다.
+            # 신호가 있던 주는 441개뿐이라 임의 날짜는 대부분 비어 있으므로,
+            # 고른 날짜 **이전(과거) 방향의 가장 가까운 신호주**로 스냅한다.
+            _wk_d = {w: pd.Timestamp(w).date() for w in _wks}
+            _c1, _c2 = st.columns([1, 2])
+            with _c1:
+                _pick = st.date_input("날짜로 이동", value=_wk_d[_wks[0]],
+                                      min_value=_wk_d[_wks[-1]], max_value=_wk_d[_wks[0]],
+                                      format="YYYY-MM-DD", key="lead_week_date",
+                                      help="신호가 없던 날짜를 고르면 그 이전의 가장 가까운 신호주로 이동한다.")
+            _snap = next((w for w in _wks if _wk_d[w] <= _pick), _wks[-1])
+            # 날짜를 새로 고른 경우에만 주차를 옮긴다. 아래 셀렉트박스로 직접 고른 주차를
+            # 매 rerun 마다 되돌려버리면 셀렉트박스가 못 쓰게 된다.
+            if st.session_state.get('_lead_prev_date') != _pick:
+                st.session_state['_lead_prev_date'] = _pick
+                st.session_state['lead_week'] = _snap
+            with _c2:
+                _w = st.selectbox(f"주차 선택 — 신호가 있었던 {len(_wks)}주",
+                                  _wks, index=0, key="lead_week",
+                                  format_func=lambda w: f"{w}  ({len(_wk_idx[w])}종)")
+            if _wk_d[_w] != _pick:
+                st.caption(f"{_pick} 에는 신호가 없어 **{_w}** 주차로 이동했다.")
+
             _lst = _wk_idx[_w]
+            # 이후 1·4주는 2026-08-17에 추가됐다. 옛 JSON에는 키 자체가 없으므로,
+            # 값이 없는 것(진행 중)과 열이 없는 것을 구분해서 다룬다.
+            _has_f14 = any('f1' in _x for _, _, _x in _lst)
             _wdf = pd.DataFrame([{
-                '코드': _s, '종목': _n[:24], '규칙': ','.join(_x['r']),
+                '코드': _s, '종목': _n[:24], '시총($B)': _x['mc'], '규칙': ','.join(_x['r']),
                 '종가': _x['close'], 'RS13': _x['rs13'], 'OPM': _x['opm'],
                 'PER': ('적자' if _x['per'] is None else f"{_x['per']:.1f}"),
                 'PSR': _x['psr'], '신고가대비': _x['dist'], '52주낙폭': _x['mdd'],
-                '거래량배': _x['vol'], '시총($B)': _x['mc'],
+                '거래량배': _x['vol'],
+                '이후1주': _x.get('f1'), '이후4주': _x.get('f4'),
                 '이후13주': _x.get('f13'), '이후26주': _x.get('f26'), '이후52주': _x.get('f52'),
                 '트리거': _x['trg']} for _s, _n, _x in _lst])
+            if not _has_f14:
+                _wdf = _wdf.drop(columns=['이후1주', '이후4주'])
 
             _f52 = _wdf['이후52주'].dropna()
             if len(_f52):
@@ -1234,20 +1261,29 @@ else:
             else:
                 st.caption("이 주차는 아직 52주가 지나지 않아 이후 성적을 알 수 없다.")
 
-            def _fw(v):
+            # 색 스케일은 창 길이마다 달라야 한다. 52주 기준(±150%)을 1주에 그대로 쓰면
+            # 1주 수익률은 전부 무색으로 보여서 열을 넣어놓고도 못 읽는다.
+            _FSC = {'이후1주': 15, '이후4주': 35, '이후13주': 70, '이후26주': 110, '이후52주': 150}
+
+            def _fw(v, full=150):
                 if v is None or v != v:      # None 은 v!=v 로 안 걸러진다
                     return ''
-                a = min(abs(v) / 150, 1) * .72 + .06
+                a = min(abs(v) / full, 1) * .72 + .06
                 c = '31,107,69' if v >= 0 else '160,48,40'
                 return f'background-color: rgba({c},{a:.2f}); color:' + ('#fff' if a > .42 else '#12161b')
 
+            _fcols = [c for c in ('이후1주', '이후4주', '이후13주', '이후26주', '이후52주')
+                      if c in _wdf.columns]
+            _sty = _wdf.sort_values('이후52주', ascending=False, na_position='last').style
+            for _c in _fcols:
+                _sty = _sty.map(_fw, full=_FSC[_c], subset=[_c])
             st.dataframe(
-                _wdf.sort_values('이후52주', ascending=False, na_position='last').style
-                    .map(_fw, subset=['이후13주', '이후26주', '이후52주'])
-                    .format({'이후13주': '{:+.1f}%', '이후26주': '{:+.1f}%',
-                             '이후52주': '{:+.1f}%'}, na_rep='진행 중'),
+                _sty.format({c: '{:+.1f}%' for c in _fcols}, na_rep='진행 중'),
                 use_container_width=True, hide_index=True, row_height=26,
                 height=_dfh(min(len(_wdf), 16)))
+            if not _has_f14:
+                st.caption("이후 1·4주는 `python leaders_symbol.py build` 를 다시 돌려야 나온다 "
+                           "(현재 JSON에는 그 값이 들어있지 않다).")
 
         with st.expander("필터 단계별 잔존 · 기각된 조건"):
             st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),

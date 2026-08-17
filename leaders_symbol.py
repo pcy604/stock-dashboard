@@ -82,7 +82,9 @@ def cmd_build():
     d = d[d.as_of <= "2026-08-10"]
     # 전방 수익률 — "그 주에 걸린 신호가 이후 어떻게 됐나"를 주차별 조회에서 보려면 필요하다.
     px = d.pivot(index="as_of", columns="sym", values="close").sort_index()
-    for h in (13, 26, 52):
+    # 1·4주 추가(2026-08-17): 13주는 이미 한 분기라 "신호 직후에 뭘 했나"가 안 보인다.
+    # 짧은 창은 노이즈가 크지만, 진입 타이밍 판단에는 짧은 쪽이 실제로 쓰인다.
+    for h in (1, 4, 13, 26, 52):
         f = (px.shift(-h) / px - 1).stack().rename(f"f{h}").reset_index()
         d = d.merge(f, on=["as_of", "sym"], how="left")
     dates = sorted(d.as_of.unique())
@@ -138,6 +140,7 @@ def cmd_build():
                 # rev(YoY)는 기존 JSON 호환을 위해 남겨 두고 revq 를 추가한다.
                 vol=_r(r.vol_x_20w), rev=_r(r.rev_yoy), revq=_r(r.rev_qoq),
                 mc=_r(r.marcap / 1e9, 2), adv=_r(r.adv_20d / 1e6, 0),
+                f1=_r(r.f1 * 100, 1), f4=_r(r.f4 * 100, 1),
                 f13=_r(r.f13 * 100, 1), f26=_r(r.f26 * 100, 1), f52=_r(r.f52 * 100, 1),
                 trg=" ".join((["흑자전환"] if r.op_turn == 1 else []) +
                              [v for kk, v in BO.items() if r.get(kk) == 1]) or "-"))
