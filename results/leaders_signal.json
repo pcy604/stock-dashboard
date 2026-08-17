@@ -14,8 +14,28 @@
     "wf": "4/6",
     "exposure": 75.1
    },
-   "n": 8,
+   "n": 9,
    "candidates": [
+    {
+     "sym": "FRD",
+     "name": "FRD",
+     "close": 45.85,
+     "rs_13w": 2.12,
+     "rs_26w": null,
+     "psr": 0.47,
+     "per": 14.1,
+     "dist_52w": 0.0,
+     "opm": 8.8,
+     "opm_qoq": 6.4,
+     "marcap_b": 0.3,
+     "adv_m": 2.0,
+     "triggers": [
+      "영업익 신고점",
+      "순익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    },
     {
      "sym": "KRT",
      "name": "Karat Packaging",
@@ -181,8 +201,25 @@
     "wf": "5/6",
     "exposure": 94.8
    },
-   "n": 31,
+   "n": 43,
    "candidates": [
+    {
+     "sym": "DBGI",
+     "name": "DBGI",
+     "close": 15.04,
+     "rs_13w": 12.75,
+     "rs_26w": null,
+     "psr": 50.65,
+     "per": null,
+     "dist_52w": -11.3,
+     "opm": -563.8,
+     "opm_qoq": 821.6,
+     "marcap_b": 0.3,
+     "adv_m": 4.0,
+     "triggers": [
+      "OPM QoQ+3%p"
+     ]
+    },
     {
      "sym": "APPS",
      "name": "Digital Turbine",
@@ -196,6 +233,26 @@
      "opm_qoq": 6.5,
      "marcap_b": 1.5,
      "adv_m": 43.0,
+     "triggers": [
+      "흑자전환",
+      "영업익 신고점",
+      "영업익 QoQ+50%",
+      "OPM QoQ+3%p"
+     ]
+    },
+    {
+     "sym": "CTEV",
+     "name": "CTEV",
+     "close": 38.12,
+     "rs_13w": 2.61,
+     "rs_26w": null,
+     "psr": 0.65,
+     "per": null,
+     "dist_52w": -47.2,
+     "opm": 9.1,
+     "opm_qoq": 6.4,
+     "marcap_b": 0.6,
+     "adv_m": 3.0,
      "triggers": [
       "흑자전환",
       "영업익 신고점",
@@ -288,72 +345,34 @@
      "triggers": [
       "OPM QoQ+3%p"
      ]
-    },
-    {
-     "sym": "MAN",
-     "name": "ManpowerGroup",
-     "close": 58.3,
-     "rs_13w": 2.18,
-     "rs_26w": null,
-     "psr": 0.15,
-     "per": null,
-     "dist_52w": 0.0,
-     "opm": 0.6,
-     "opm_qoq": -1.1,
-     "marcap_b": 2.7,
-     "adv_m": 44.0,
-     "triggers": [
-      "흑자전환"
-     ]
-    },
-    {
-     "sym": "CDNA",
-     "name": "CareDx",
-     "close": 45.32,
-     "rs_13w": 2.16,
-     "rs_26w": null,
-     "psr": 5.12,
-     "per": 21.1,
-     "dist_52w": -2.9,
-     "opm": 85.8,
-     "opm_qoq": 84.8,
-     "marcap_b": 2.3,
-     "adv_m": 27.0,
-     "triggers": [
-      "흑자전환",
-      "영업익 신고점",
-      "순익 신고점",
-      "영업익 QoQ+50%",
-      "OPM QoQ+3%p"
-     ]
     }
    ]
   }
  },
  "rule": "RS13 > 1.5  AND  (흑자전환 OR 이익폭증)  AND  OPM > 0",
  "exit": "고점 대비 −20% 트레일링(주봉) · 12종목 × 8.3% · 2주 분할매수 · 불타기 없음",
- "universe": 1353,
- "n": 28,
+ "universe": 1487,
+ "n": 30,
  "funnel": [
   [
    "유니버스 (시총$2B+ · 거래대금$5M+)",
-   1353
+   1487
   ],
   [
    "+ RS13 > 1.5",
-   66
+   74
   ],
   [
    "+ OPM > 0",
-   34
+   36
   ],
   [
    "+ 흑자전환 OR 이익폭증",
-   28
+   30
   ],
   [
    "(참고) 위에 PSR<3까지 걸면",
-   12
+   13
   ]
  ],
  "candidates": [
@@ -446,6 +465,23 @@
    "triggers": [
     "흑자전환",
     "OPM QoQ+3%p"
+   ]
+  },
+  {
+   "sym": "VSXY",
+   "name": "VSXY",
+   "close": 89.02,
+   "rs_13w": 1.84,
+   "rs_26w": null,
+   "psr": 1.05,
+   "per": 33.5,
+   "dist_52w": -9.7,
+   "opm": 4.9,
+   "opm_qoq": -5.2,
+   "marcap_b": 7.1,
+   "adv_m": 140.0,
+   "triggers": [
+    "흑자전환"
    ]
   },
   {
@@ -833,6 +869,23 @@
    "triggers": [
     "영업익 신고점",
     "순익 신고점"
+   ]
+  },
+  {
+   "sym": "CCC",
+   "name": "CCC",
+   "close": 6.97,
+   "rs_13w": 1.53,
+   "rs_26w": null,
+   "psr": 3.87,
+   "per": 105.8,
+   "dist_52w": -29.6,
+   "opm": 16.7,
+   "opm_qoq": -1.4,
+   "marcap_b": 4.2,
+   "adv_m": 54.0,
+   "triggers": [
+    "흑자전환"
    ]
   },
   {
