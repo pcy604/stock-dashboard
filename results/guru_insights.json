@@ -1,6 +1,77 @@
 {
   "items": [
     {
+      "video_id": "dn9c0j5rjT0",
+      "title": "지금은 이런 패턴으로 움직일 가능성이 높습니다ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.18.화]",
+      "channel": "체슬리TV",
+      "published": "2026-08-18T10:00:30+00:00",
+      "url": "https://www.youtube.com/watch?v=dn9c0j5rjT0",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "투자자는 FOMO에 휩쓸리지 않고 좋은 자산을 저렴한 가격에 매수해야 하며, AI 관련 반도체 산업은 장기적으로 성장할 것이나 단기 시장 변동성에 주의하며 박스권 매매 전략을 고려해야 합니다.",
+        "summary": [
+          "포모(FOMO) 현상에 휩쓸려 과열된 주식을 추격 매수하기보다, 위기 상황에서 저렴해진 좋은 자산을 매수하는 것이 현명한 투자 전략입니다.",
+          "일반적인 '위험 관리'라는 명목으로 주가가 폭락했을 때 주식을 팔아 현금화하는 것은 잘못된 조언이며, 오히려 이때가 좋은 자산을 저가에 매수할 기회입니다.",
+          "미국 10년물 국채금리가 4.7%를 넘어가면 한국 시장은 반도체 산업의 호조에도 불구하고 금리가 발목을 잡아 상승이 어렵습니다.",
+          "AI 관련 반도체 산업은 장기적으로 안정적인 성장이 예상되나, 범용 반도체와는 다른 수요-공급 역학을 보이며 금리 및 메모리 공급 확대로 인한 주가 변동성이 당분간 지속될 수 있습니다.",
+          "현재 AI 시대는 닷컴 버블과 달리 실제 실적을 내고 우리 생활에 빠르게 침투하는 혁명의 시기이므로, 지나친 공포나 환상 모두 경계해야 합니다.",
+          "앞으로 1년 반 동안은 시장이 박스권에서 움직일 가능성이 높으므로 신중한 박스권 매매 전략이 필요합니다."
+        ],
+        "tickers": [
+          {
+            "name": "반도체 산업",
+            "ticker": "",
+            "context": "AI 기술 발전과 함께 장기적인 성장이 예상되지만, 단기적으로는 금리 및 공급 확대 노이즈로 인한 변동성이 예상됩니다.",
+            "view": "긍정",
+            "t": 620
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "필라델피아 반도체 지수와 관련하여 언급되며 AI 산업 발전의 수혜를 입을 것으로 예상됩니다.",
+            "view": "긍정",
+            "t": 620
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "필라델피아 반도체 지수와 관련하여 언급되며 AI 산업 발전의 수혜를 입을 것으로 예상됩니다.",
+            "view": "긍정",
+            "t": 620
+          }
+        ],
+        "key_points": [
+          {
+            "point": "포모(FOMO) 현상과 반대로, 좋은 자산은 '바겐세일' 시점에 용기 있게 매수해야 한다.",
+            "t": 45
+          },
+          {
+            "point": "주가가 바닥일 때 '위험 관리' 명목으로 주식을 파는 것은 위험 관리가 아니며, 투자 실력 향상에 도움이 되지 않는다.",
+            "t": 102
+          },
+          {
+            "point": "투자에 있어서 꾸준함이 중요하며, 단발적인 관심이 아닌 지속적인 학습과 경험이 실력으로 이어진다.",
+            "t": 246
+          },
+          {
+            "point": "모든 현상에는 '임계치(티핑 포인트)'가 있으며, 금리 4.7% 이상은 주식 시장에 큰 악재로 작용할 수 있다.",
+            "t": 351
+          },
+          {
+            "point": "현재 AI 혁명은 실적 없이 거품만 있던 닷컴 버블과 다르며, 실질적인 가치를 창출하고 있음을 인지해야 한다.",
+            "t": 717
+          }
+        ],
+        "actionable": [
+          "과열된 시장에서 FOMO에 휘둘리지 않고, 기업의 본질적 가치에 비해 저평가된 시점을 노려 매수 기회를 잡으세요.",
+          "단기적인 시장 변동성(특히 금리 상승)에 대비하여 앞으로 1년 반 정도는 보수적인 박스권 매매 전략을 고려하고, 지나친 희망이나 공포를 경계하세요."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-18T20:02:35.995884+09:00"
+    },
+    {
       "video_id": "bcw_9hEL8Xc",
       "title": "[8월 18일 마감시황] 개미만 또 받아냈다…전강후약, 7천피 '줬다 뺏은' 코스피ㅣ홍선애, 이권희, 김장열 [클로징벨 라이브]",
       "channel": "삼프로TV",
@@ -16,8 +87,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-18T19:04:43.243648+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-18T20:04:37.113325+09:00"
     },
     {
       "video_id": "5_UnOxyJZzY",
@@ -105,8 +176,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-18T19:04:10.880733+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-18T20:03:41.321948+09:00"
     },
     {
       "video_id": "dX74kCInVFw",
@@ -124,8 +195,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-18T19:03:38.231925+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-18T20:03:08.611251+09:00"
     },
     {
       "video_id": "cc142L3vO1A",
@@ -143,8 +214,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-18T19:05:48.349950+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-18T20:05:09.358460+09:00"
     },
     {
       "video_id": "Bc0gtvvF09A",
@@ -11926,58 +11997,7 @@
       "source": "video",
       "attempts": 3,
       "analyzed_at": "2026-08-10T19:59:47.048951+09:00"
-    },
-    {
-      "video_id": "HbHETwzRdLE",
-      "title": "반도체 가격보다 '이것'을 봐야합니다 #반도체 #메모리 #가격 #물량 #사이클 #삼성전자 #SK하이닉스 #호돌이 #우황제",
-      "channel": "와이스트릿",
-      "published": "2026-08-09T22:00:28+00:00",
-      "url": "https://www.youtube.com/watch?v=HbHETwzRdLE",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "반도체 시장의 핵심 동력이 가격(P) 상승에서 물량(Q) 증가로 전환되고 있으며, 투자자들은 이에 따른 실적 성장 둔화 가능성을 주목해야 합니다.",
-        "summary": [
-          "반도체 물량(Q) 증가는 가격(P) 증가와 달리 천천히 일어나며, 가격은 단번에 2~3배, 심지어 10배까지 가파르게 오르는 경향이 있습니다.",
-          "과거 삼성전자 및 SK하이닉스를 포함한 메모리 기업들의 주가 상승 동력은 주로 급격한 가격 상승이었습니다.",
-          "화자는 현재 반도체 시장의 성장 동력이 가격(P) 사이클에서 물량(Q) 사이클로 전환되는 과도기적인 모습을 보이고 있다고 분석합니다.",
-          "가격 상승 속도가 둔화되기 시작하면, 설사 물량 효과(Q-효과)가 나타나더라도 기업 실적의 증가 속도는 점차 느려질 것으로 전망됩니다.",
-          "이러한 성장 동력의 변화는 시장에 새로운 우려를 야기할 수 있으므로, 투자자들은 반도체 가격 동향뿐만 아니라 물량 측면도 면밀히 살펴봐야 합니다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "과거 주가 상승 동력 및 실적 급등의 주요 요인으로 가파른 반도체 가격 상승이 언급되었으며, 향후 물량(Q) 효과가 중요해질 기업으로 지목됨.",
-            "view": "neutral",
-            "t": 15
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "과거 주가 상승 동력 및 실적 급등의 주요 요인으로 가파른 반도체 가격 상승이 언급되었으며, 향후 물량(Q) 효과가 중요해질 기업으로 지목됨.",
-            "view": "neutral",
-            "t": 16
-          }
-        ],
-        "key_points": [
-          {
-            "point": "반도체 가격(P) 상승의 가파른 속도 둔화 시, 시장의 초점은 가격 사이클에서 물량(Q) 사이클로 전환될 것이며 이는 새로운 성장 동력이 될 것입니다.",
-            "t": 30
-          },
-          {
-            "point": "가격 상승이 둔화되면, 물량 증가만으로는 과거와 같은 급격한 실적 증가 속도를 기대하기 어려워 시장의 우려가 커질 수 있습니다.",
-            "t": 116
-          }
-        ],
-        "actionable": [
-          "반도체 섹터 투자 시, 단순히 가격 변동에만 집중하기보다 물량(Q) 증가의 추세와 지속 가능성을 함께 분석하여 기업 실적 전망에 반영하세요.",
-          "반도체 기업의 실적 발표 시, 가격 요인과 물량 요인의 기여도를 분리하여 분석하고, 물량 중심의 성장으로의 전환이 원활하게 이루어지는지 주시하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-10T09:10:56.691465+09:00"
     }
   ],
-  "updated": "2026-08-18T19:06:21.828466+09:00"
+  "updated": "2026-08-18T20:05:10.567030+09:00"
 }
