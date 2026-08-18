@@ -1,6 +1,117 @@
 {
   "items": [
     {
+      "video_id": "kaDYnG8PfTc",
+      "title": "미국 좀 도와라 이번엔 거절 못 합니다 #이란 #중동 #미국 #트럼프 #패권전쟁 #무역전쟁 #조한범",
+      "channel": "와이스트릿",
+      "published": "2026-08-18T22:00:01+00:00",
+      "url": "https://www.youtube.com/watch?v=kaDYnG8PfTc",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T07:59:33.405460+09:00"
+    },
+    {
+      "video_id": "JKEcxZFbFik",
+      "title": "트럼프, 호르무즈 미국 영토 주장…중동 불안에 고금리 압박 지속 [월가 뉴스레터]",
+      "channel": "삼프로TV",
+      "published": "2026-08-18T22:13:08+00:00",
+      "url": "https://www.youtube.com/watch?v=JKEcxZFbFik",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T07:59:00.928867+09:00"
+    },
+    {
+      "video_id": "GKx1CduDF9A",
+      "title": "매일 아침 펀드매니저들의 운용회의 라이브 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.08.19.수]",
+      "channel": "체슬리TV",
+      "published": "2026-08-18T22:02:42+00:00",
+      "url": "https://www.youtube.com/watch?v=GKx1CduDF9A",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "글로벌 경기 둔화 우려 속에서도 AI 및 특정 기술 섹터의 성장은 지속될 것으로 전망하며, 금리 인하 기대감과 기업 실적 개선 여부에 주목해야 합니다.",
+        "summary": [
+          "글로벌 경기 둔화 우려와 고금리 환경이 지속되고 있으나, 연준의 금리 인하 가능성과 기업 실적 개선이 시장의 주요 변수가 될 것입니다. (t: 60)",
+          "AI 기술을 필두로 한 신기술 섹터는 장기적인 성장 동력을 유지하며 시장을 견인할 것으로 예상됩니다. (t: 180)",
+          "환율 변동성 확대와 유가 상승 압력 등 거시 경제 지표의 변화가 국내외 증시에 미치는 영향을 주시해야 합니다. (t: 300)",
+          "방어적 섹터 및 높은 배당 수익률을 가진 기업들에 대한 관심이 필요하며, 장기적인 관점에서 분할 매수 전략이 유효합니다. (t: 420)"
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "반도체 업황 회복과 AI 수요 증가에 따른 실적 개선 기대감",
+            "view": "긍정",
+            "t": 240
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "HBM 등 고대역폭 메모리 시장의 선두 주자로서 AI 수혜 지속",
+            "view": "긍정",
+            "t": 270
+          },
+          {
+            "name": "엔비디아",
+            "ticker": "NVDA",
+            "context": "AI GPU 시장의 독보적인 위치로 인한 지속적인 고성장 전망",
+            "view": "긍정",
+            "t": 360
+          },
+          {
+            "name": "테슬라",
+            "ticker": "TSLA",
+            "context": "전기차 시장 경쟁 심화 및 FSD 기술 발전 추이에 따른 주가 변동성",
+            "view": "중립",
+            "t": 480
+          }
+        ],
+        "key_points": [
+          {
+            "point": "미국 연방준비제도(Fed)의 금리 인하 시점과 폭이 글로벌 증시에 가장 큰 영향을 미칠 핵심 변수입니다.",
+            "t": 120
+          },
+          {
+            "point": "AI 관련 산업의 확장은 장기적인 메가트렌드로, 관련 기업들의 기술 혁신과 실적 성장 여부가 중요합니다.",
+            "t": 180
+          },
+          {
+            "point": "글로벌 공급망 재편 및 지정학적 리스크가 특정 산업 섹터에 미칠 영향에 대한 면밀한 분석이 필요합니다.",
+            "t": 300
+          },
+          {
+            "point": "고금리 장기화에 대비하여 기업의 재무 건전성과 현금흐름이 좋은 가치주에 대한 관심이 요구됩니다.",
+            "t": 420
+          }
+        ],
+        "actionable": [
+          "금리 인하 기대감이 높아지는 시점에 맞춰 기술주 및 성장주에 대한 비중을 점진적으로 확대하는 전략을 고려하세요.",
+          "방어적 성격의 고배당주와 필수소비재 섹터를 포트폴리오에 편입하여 시장 변동성에 대비하세요.",
+          "장기적인 관점에서 AI, 반도체 등 핵심 기술 섹터의 선도 기업들에 대한 분할 매수 전략을 유지하세요."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T07:57:33.608106+09:00"
+    },
+    {
       "video_id": "tyq4GT_2rGg",
       "title": "'장기채 금리 부담돼' 뉴욕증시 동반 하락...미국 반도체 지수 -4.9%_26.08.19 | 여도은, 박명석, 김효진 [월스트리트 모닝브리핑]",
       "channel": "삼프로TV",
@@ -11508,195 +11619,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-10T14:09:18.327062+09:00"
-    },
-    {
-      "video_id": "3jGEjFh33wg",
-      "title": "25년에 32배 불린다 삼성전자 SK하이닉스 믿지 말고 돈의 힘을 믿어라 / 서준식 교수 (풀버전)",
-      "channel": "와이스트릿",
-      "published": "2026-08-10T02:45:18+00:00",
-      "url": "https://www.youtube.com/watch?v=3jGEjFh33wg",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-10T20:03:50.486298+09:00"
-    },
-    {
-      "video_id": "nSaGJomTlkQ",
-      "title": "코스닥만 왜 올랐나? 삼성전자·SK하이닉스 반등하면 수급이 다시 움직인다 | 박병창 MP파트너스 대표 [마켓 인사이드]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T00:17:48+00:00",
-      "url": "https://www.youtube.com/watch?v=nSaGJomTlkQ",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "미국 시장은 AI 관련 기술주와 대형주 위주로 상승세를 보였으나, 한국 시장은 삼성전자·SK하이닉스 등 주요 반도체주의 부진으로 코스피가 하락하고 코스닥은 레버리지 ETF 자금 유입으로 개별 종목 강세를 보이며 디커플링 현상이 심화되었습니다.",
-        "summary": [
-          "지난주 미국 시장은 S&P500이 종가 기준 역사적 신고가를 경신하며 전반적으로 상승했으나, 필라델피아 반도체 지수 (+9.25%) 내에서도 메모리 반도체는 상대적으로 약세, 엔비디아 (+11.5%), 팔란티어 (+39.7%), 오라클 (+13.2%) 등 AI 및 소프트웨어 관련주는 강세를 보였습니다.",
-          "지난주 미국 7월 고용 보고서가 시장 예상치를 크게 하회하며 9월 미국 금리 인상 확률이 낮아졌고, 이는 금리 인상에 대한 우려를 완화하여 증시 상승에 긍정적인 영향을 미쳤습니다.",
-          "한국 시장은 코스피가 -5.1% 하락하고 코스닥이 +10.9% 상승하며 디커플링이 심화되었으며, 삼성전자 (-12%)와 SK하이닉스 (-17.2%)의 큰 폭 하락이 코스피를 끌어내렸습니다.",
-          "코스피 레버리지 ETF에 대한 증거금 규제가 시행되면서 자금이 코스닥 레버리지 ETF로 대거 이동하여 코스닥 지수 상승과 개별 종목 강세를 이끌었습니다.",
-          "메모리 반도체 업황에 대해 씨티은행은 HBM4 ASP 예상보다 낮고 낸드 전망이 부정적이라는 약세 요인을 제시하면서도, HBM 탑재량 증가와 고객사 수요 문의 증가, NAND ASP 30% 상승 가능성 등 긍정적 측면도 반박하는 혼조된 의견을 내놓았습니다.",
-          "워렌 버핏의 버크셔 해서웨이가 14분기 연속 주식 순매도 후 이번 2분기에 구글 등 빅테크 주식을 저가 매수하기 시작했으며, 이는 시장 하락 시 가치주에 대한 투자 기회로 해석될 수 있습니다."
-        ],
-        "tickers": [
-          {
-            "name": "필라델피아 반도체 지수",
-            "ticker": "SOX",
-            "context": "주간 +9.25% 상승",
-            "view": "긍정",
-            "t": 114
-          },
-          {
-            "name": "엔비디아",
-            "ticker": "NVDA",
-            "context": "주간 +11.5% 상승",
-            "view": "긍정",
-            "t": 147
-          },
-          {
-            "name": "마이크론 테크놀로지",
-            "ticker": "MU",
-            "context": "주간 +6.6% 상승했으나, 필라델피아 반도체 지수 대비 상대적으로는 약세",
-            "view": "중립",
-            "t": 123
-          },
-          {
-            "name": "샌디스크",
-            "ticker": "SNDK",
-            "context": "주간 -0.25% 하락했으나 고가 기준 +19% 상승 이력, 필라델피아 반도체 지수 대비 상대적으로 약세",
-            "view": "중립",
-            "t": 126
-          },
-          {
-            "name": "팔란티어",
-            "ticker": "PLTR",
-            "context": "주간 +39.7% 상승",
-            "view": "긍정",
-            "t": 205
-          },
-          {
-            "name": "오라클",
-            "ticker": "ORCL",
-            "context": "주간 +13.2% 상승",
-            "view": "긍정",
-            "t": 208
-          },
-          {
-            "name": "스페이스X",
-            "ticker": "SPCEX",
-            "context": "금요일 +15.8% 급등하며 주간 상승 전환",
-            "view": "긍정",
-            "t": 214
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "주간 -12% 하락",
-            "view": "부정",
-            "t": 539
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "주간 -17.2% 하락",
-            "view": "부정",
-            "t": 545
-          },
-          {
-            "name": "고려아연",
-            "ticker": "010130",
-            "context": "미국 정부의 광물 자급화 전략 추진에 직접 언급되며 지난주 주가 상승",
-            "view": "긍정",
-            "t": 917
-          },
-          {
-            "name": "네이버",
-            "ticker": "035420",
-            "context": "추세적인 상승을 보이던 주가 흐름",
-            "view": "긍정",
-            "t": 2307
-          },
-          {
-            "name": "알테오젠",
-            "ticker": "196870",
-            "context": "8월 코스피 하락 중 50% 급등, 20만 원에서 30만 원 이상으로 상승",
-            "view": "긍정",
-            "t": 1857
-          },
-          {
-            "name": "구글",
-            "ticker": "GOOGL",
-            "context": "버크셔 해서웨이의 매수 종목 중 하나로 언급되며 저가 매수 기회로 여겨짐",
-            "view": "긍정",
-            "t": 3302
-          }
-        ],
-        "key_points": [
-          {
-            "point": "미국 시장은 역사적 신고가 경신 후 AI 관련 기술주 중심으로 강세를 보였으나, 메모리 반도체는 상대적 약세를 나타냈습니다.",
-            "t": 47
-          },
-          {
-            "point": "미국 7월 고용 보고서가 예상치를 크게 하회하면서 9월 금리 인상에 대한 시장의 우려가 줄어들었습니다.",
-            "t": 310
-          },
-          {
-            "point": "한국 시장은 대형 반도체주 하락에도 불구하고 코스닥이 급등하며 코스피와 디커플링이 심화되었고, 이는 KOSPI 레버리지 ETF 규제에 따른 KOSDAQ 레버리지 ETF로의 자금 쏠림 현상 때문입니다.",
-            "t": 1228
-          },
-          {
-            "point": "메모리 반도체 업황에 대해서는 부정적인 요인(스펙 하향 조정, HBM4 ASP 예상 하회, NAND 전망 부진)과 긍정적인 요인(HBM 탑재량 증가, 고객 수요 증가, 장기 공급 계약)이 혼재되어 있습니다.",
-            "t": 3617
-          },
-          {
-            "point": "워렌 버핏이 14분기 연속 주식 순매도 후 이번 2분기에 처음으로 순매수를 시작했으며, 이는 시장의 저가 매수 기회를 시사하는 것으로 해석됩니다.",
-            "t": 3203
-          },
-          {
-            "point": "국내 시장의 투자 심리는 코스피 주요 반도체주의 부진에도 불구하고 코스닥 개별 종목 중심으로 강한 상승세를 보이고 있으며, 시장의 수급이 실적 개선과 성장 스토리에 반응하고 있습니다.",
-            "t": 1545
-          },
-          {
-            "point": "투자 시에는 단순히 오르는 종목을 쫓기보다, 현재 주가의 위치(밸류에이션)와 추세, 그리고 해당 종목의 상승이 지속 가능한지 여부를 신중하게 판단하는 것이 중요합니다.",
-            "t": 2135
-          }
-        ],
-        "actionable": [
-          "이번 주 발표될 CPI(수요일) 및 PPI(목요일) 지표를 통해 물가 및 금리 동향을 면밀히 관찰하고, 시장의 Dovisish 기대가 유지되는지 확인하세요.",
-          "삼성전자, SK하이닉스 등 국내 주요 반도체 주식들의 단기적 반등 시도를 주시하되, 미국 반도체 시장의 섹터 로테이션(메모리 약세, AI 관련 강세)을 고려하여 투자 비중을 조절하는 것을 고려하세요.",
-          "코스닥 시장 내 개별 종목들의 강세가 지속될 것으로 예상되지만, 무조건적인 추격 매수보다는 펀더멘털이 견고하고 주가 위치가 합리적인 종목을 선별하여 접근하는 신중한 전략을 취하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-10T12:03:12.863397+09:00"
-    },
-    {
-      "video_id": "tRoPEKh13ms",
-      "title": "\"기다려 주신 주주분들께...!\" 삼전 주주환원 효과는 어떻게 될까? | 이지은 이지스탁 대표 [더블 체크]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T01:14:00+00:00",
-      "url": "https://www.youtube.com/watch?v=tRoPEKh13ms",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-10T21:33:01.309204+09:00"
     }
   ],
-  "updated": "2026-08-19T06:54:59.476767+09:00"
+  "updated": "2026-08-19T07:59:34.405630+09:00"
 }
