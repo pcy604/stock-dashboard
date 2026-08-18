@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "VvjnB_Lznfc",
+      "title": "AI 토큰 10배 폭증…반도체 공급 부족은 2028년까지 계속된다ㅣ김장열 유니스토리자산운용 리서치센터장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-08-18T11:30:16+00:00",
+      "url": "https://www.youtube.com/watch?v=VvjnB_Lznfc",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-18T20:58:55.541807+09:00"
+    },
+    {
       "video_id": "dn9c0j5rjT0",
       "title": "지금은 이런 패턴으로 움직일 가능성이 높습니다ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.18.화]",
       "channel": "체슬리TV",
@@ -87,8 +106,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-18T20:04:37.113325+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-18T20:59:27.688413+09:00"
     },
     {
       "video_id": "5_UnOxyJZzY",
@@ -176,8 +195,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-18T20:03:41.321948+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-18T20:58:22.678411+09:00"
     },
     {
       "video_id": "dX74kCInVFw",
@@ -195,8 +214,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-18T20:03:08.611251+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-18T20:57:49.369245+09:00"
     },
     {
       "video_id": "cc142L3vO1A",
@@ -11908,96 +11927,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-10T11:57:46.207463+09:00"
-    },
-    {
-      "video_id": "5TNIgjxCuhc",
-      "title": "모건스탠리 \"메모리주 가파른 조정 끝났다“…소비재·화장품 순환매도 매력 | 정부 'ISA·주가누르기 방지법' 손질한다 | 권순우 삼프로TV 취재팀장 [뉴스3]",
-      "channel": "삼프로TV",
-      "published": "2026-08-09T23:10:09+00:00",
-      "url": "https://www.youtube.com/watch?v=5TNIgjxCuhc",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "모건스탠리는 메모리 반도체 시장의 가파른 조정이 끝났다고 분석했으며, 정부는 ISA 및 주가누르기 방지법에 대한 시장 비판에 따라 보완을 검토하고 있고, 네이버와 카카오는 AI 전략에서 상반된 노선을 선택했다.",
-        "summary": [
-          "모건스탠리는 메모리 반도체 산업의 가파른 조정이 마무리되었고, 밸류에이션이 매력적인 재진입 기회를 제공한다고 평가하며, 특히 한국 기업들의 주주환원 정책이 주가 상승의 촉매가 될 것이라고 전망했다.",
-          "정부는 ISA 계좌 개편안과 '주가누르기 방지법'에 대한 자본시장의 부정적 반응에 직면하여, 이재명 대통령 후보의 지시로 '적극적 보완'을 검토 중이다.",
-          "네이버는 엔비디아와의 협력을 통해 AI 인프라 구축에 '정면 돌파'하는 전략을 추진하며 20%의 마진율을 기대하고 있는 반면, 카카오는 AI 인프라 투자 수익률이 낮다고 판단하고 B2C 서비스 연동에 집중하는 '실리 추구' 전략을 펼치고 있다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "메모리 반도체 시장의 가파른 조정이 끝났으며 주주환원 정책에 대한 기대가 높다.",
-            "view": "긍정",
-            "t": 313
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "메모리 반도체 시장의 가파른 조정이 끝났으며 주주환원 정책에 대한 기대가 높다.",
-            "view": "긍정",
-            "t": 313
-          },
-          {
-            "name": "네이버",
-            "ticker": "035420",
-            "context": "AI 인프라에 정면 돌파하며 엔비디아, 브룩필드와의 협력을 통해 AI 팩토리를 구축하고 20%의 마진율을 목표로 한다.",
-            "view": "긍정",
-            "t": 2146
-          },
-          {
-            "name": "카카오",
-            "ticker": "035720",
-            "context": "AI 인프라 투자에 대한 ROI가 낮다고 판단하며 B2C 서비스 연동에 집중하는 '실리 추구' 전략을 펼친다.",
-            "view": "중립",
-            "t": 2146
-          },
-          {
-            "name": "NVIDIA",
-            "ticker": "NVDA",
-            "context": "네이버 AI 팩토리 공동 구축에 지분 투자 및 GPU 안정적 공급 계획.",
-            "view": "긍정",
-            "t": 2215
-          },
-          {
-            "name": "Micron",
-            "ticker": "MU",
-            "context": "메모리 반도체 업체의 주주환원 정책 사례로 언급. 영업이익률 80% 기록.",
-            "view": "긍정",
-            "t": 449
-          },
-          {
-            "name": "Kioxia",
-            "ticker": "",
-            "context": "메모리 반도체 업체의 자사주 매입 사례로 언급.",
-            "view": "긍정",
-            "t": 408
-          }
-        ],
-        "key_points": [
-          {
-            "point": "모건스탠리는 메모리 반도체 산업의 '작은 굴곡'에 진입했으며, 밸류에이션이 매력적인 재진입 기회를 제공한다고 분석했다. 특히 주주환원 정책이 주가 상승의 주요 촉매가 될 것으로 전망했다.",
-            "t": 317
-          },
-          {
-            "point": "정부가 추진하던 ISA 계좌 개편안과 '주가누르기 방지법'에 대해 자본시장의 거센 비판과 실망감이 표출되었으며, 이에 정부가 정책 방향성 재검토 및 보완 의지를 밝혔다.",
-            "t": 1414
-          },
-          {
-            "point": "네이버는 엔비디아와의 협력을 통해 AI 인프라 구축에 대규모 투자하며 장기적인 고마진을 목표로 하는 반면, 카카오는 AI 인프라 투자 대신 기존 B2C 서비스에 AI를 연동하는 실용적인 전략을 채택했다.",
-            "t": 2146
-          }
-        ],
-        "actionable": [
-          "메모리 반도체 기업들의 주주환원 정책 발표 및 실행 여부를 면밀히 주시하고, 이에 따른 주가 변동성을 활용한 투자 전략을 고려한다.",
-          "정부의 ISA 개편안 및 주가누르기 방지법 재검토 진행 상황을 지속적으로 확인하여, 개인 투자자에게 유리하거나 불리할 수 있는 제도 변화에 선제적으로 대응한다.",
-          "네이버와 카카오의 AI 전략이 장기적으로 각 기업의 경쟁력과 수익성에 어떤 영향을 미칠지 심층 분석하여, 투자 포트폴리오에 반영한다."
-        ]
-      },
-      "source": "video",
-      "attempts": 3,
-      "analyzed_at": "2026-08-10T19:59:47.048951+09:00"
     }
   ],
-  "updated": "2026-08-18T20:05:10.567030+09:00"
+  "updated": "2026-08-18T20:59:29.104921+09:00"
 }
