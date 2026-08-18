@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T00:14:48.178367+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T02:03:43.041715+09:00"
     },
     {
       "video_id": "FbUJlYgKDoY",
@@ -32,12 +32,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"급격한 시장 변동성은 개인 투자자 털기일 수 있으며, 하반기에는 반도체, 전력기기 등 펀더멘털이 강한 주도주를 중심으로 한 외국인 자금 유입에 주목해야 합니다.\",\n  \"summary\": [\n    \"최근 시장의 급격한 변동성과 외국인 및 기관의 매매 패턴은 개인 투자자들의 물량을 털어내기 위한 움직임일 수 있으며, 일희일비할 필요가 없습니다. [01:40]\",\n    \"과거 어려운 시장 상황을 넘었음에도 급등락이 반복되는 것은 불안감을 조성하지만, 국제 금리 상승 및 지정학적 요인 등은 장중 급락을 정당화할 만큼 긴급한 상황은 아닙니다. [05:27]\",\n    \"하반기 시장은 중장기 외국인 자금 유입이 주도할 것이며, 이들은 주로 펀더멘털이 확실한 주도주를 선호합니다. [25:00]\",\n    \"특히 반도체, 전력기기, 일부 경기 소비재/화장품, 개별 호재(제약/원전 등) 섹터에 주목할 필요가 있습니다. [22:"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T00:09:32.519592+09:00"
+      "source": "fail",
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T02:03:10.549867+09:00"
     },
     {
       "video_id": "VvjnB_Lznfc",
@@ -11765,5 +11764,5 @@
       "analyzed_at": "2026-08-10T18:12:42.069010+09:00"
     }
   ],
-  "updated": "2026-08-19T00:17:48.842639+09:00"
+  "updated": "2026-08-19T02:03:44.216674+09:00"
 }
