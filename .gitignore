@@ -45,3 +45,24 @@ results/leaders_v2.json
 
 # 사례 차트 PNG (leaders_cases.py가 재생성)
 results/cases/*.png
+data/_volwk.parquet         # 주봉 거래량 패널 (px 캐시에서 재생성 가능)
+data/_fund.parquet          # 재무 플래그 중간 산출물
+data/_turn.parquet
+_grp*.py
+_eps.py
+_cases.py
+_base.py
+_exit*.py
+_final.py
+_stop.py
+_turn*.py
+_hz.py
+_vol*.py
+_ab*.py
+_lag*.py
+_wf.py
+_infl.py
+_trig.py
+_traj.py
+_late.py
+_old_mc.csv
