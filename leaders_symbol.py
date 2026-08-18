@@ -23,17 +23,26 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 OUT_JSON = os.path.join(BASE, "results", "leaders_symbol_detail.json")
 TRAIL = 0.20
 
+# 2026-08-18: L·S 추가. 규칙 A/B/R6 은 **기록 보존용으로 남긴다** —
+# 화면에서 지우면 "무엇이 왜 실패했는지"의 이력이 사라진다. 신규 발행은 L/S 로만 한다.
+# 청산폭이 규칙마다 다르므로 (설명, 조건, 트레일링) 3튜플로 바꿨다.
 RULES = {
-    "A": ("이익폭증 & PER<20 & RS13>1.5",
+    "L": ("[신규] 대형 주도주 — 시총$2B+ · 주간+20%↑ · 거래량전주비<1.5 · (영업익8Q신고점 or OPM+5%p)",
+          lambda d: (d.ret_1w >= 20) & (d.vw < 1.5) & (d.marcap >= 2e9) &
+                    (d.adv_20d >= 5e6) & ((d.F_HI8 == 1) | (d.F_OPM == 1)), 0.30),
+    "S": ("[신규] 소형 대시세 — 시총$2B미만 · 주간+20%↑ · 거래량전주비<1.5 · 재무조건 없음",
+          lambda d: (d.ret_1w >= 20) & (d.vw < 1.5) & (d.marcap < 2e9) &
+                    (d.adv_20d >= 5e6), 0.40),
+    "A": ("[구] 이익폭증 & PER<20 & RS13>1.5",
           lambda d: (d.b_any == 1) & (d.per > 0) & (d.per < 20) & (d.rs_13w > 1.5) &
-                    (d.adv_20d >= 1e6)),
-    "B": ("(흑자전환 OR 이익폭증) & RS13>1.7",
+                    (d.adv_20d >= 1e6), 0.20),
+    "B": ("[구] (흑자전환 OR 이익폭증) & RS13>1.7",
           lambda d: ((d.op_turn == 1) | (d.b_any == 1)) & (d.rs_13w > 1.7) &
-                    (d.adv_20d >= 1e6)),
-    "R6": ("RS13>1.5 & (흑자전환 OR 이익폭증) & OPM>0 · $2B+",
+                    (d.adv_20d >= 1e6), 0.20),
+    "R6": ("[구·종료] RS13>1.5 & (흑자전환 OR 이익폭증) & OPM>0 · $2B+ — 2022년 이후 CAGR 3.8%",
            lambda d: (d.rs_13w > 1.5) & (d.opm > 0) &
                      ((d.op_turn == 1) | (d.b_any == 1)) &
-                     (d.marcap >= 2e9) & (d.adv_20d >= 5e6)),
+                     (d.marcap >= 2e9) & (d.adv_20d >= 5e6), 0.20),
 }
 BO = {"b_ophigh": "영업익신고점", "b_nihigh": "순익신고점",
       "b_opjump": "영업익QoQ50", "b_opmjump": "OPM_QoQ3"}
@@ -45,15 +54,31 @@ def load():
     d["as_of"] = pd.to_datetime(d.as_of)
     c = sqlite3.connect(os.path.join(BASE, "data", "market.db"))
     # rs_4w 추가(2026-08-17) — leaders_boost.build()가 안 싣는 컬럼이라 여기서 같이 끌어온다
-    ex = pd.read_sql("SELECT as_of,sym,name,rs_4w,rs_26w,mdd_52w,vol_x_20w "
+    ex = pd.read_sql("SELECT as_of,sym,name,rs_4w,rs_26w,mdd_52w,vol_x_20w,ret_1w,"
+                     "period_end,op_income,opm AS opm2 "
                      "FROM factor_weekly WHERE factor_ver='v1'", c)
     c.close()
     ex["as_of"] = pd.to_datetime(ex.as_of)
+    # 2026-08-18: L/S 규칙에 필요한 재료. 거래량은 **전주 대비**(vol_x_20w 아님) —
+    # 20주 평균으로 보면 대시세 출발점이 0.86배(조용함)로 나와 아무것도 안 잡힌다.
+    q = (ex.dropna(subset=["period_end"]).drop_duplicates(["sym", "period_end"])
+           [["sym", "period_end", "op_income", "opm2"]].sort_values(["sym", "period_end"]))
+    g = q.groupby("sym")
+    hi8 = g.op_income.transform(lambda s: s.shift(1).rolling(8, min_periods=4).max())
+    q["F_HI8"] = ((q.op_income > 0) & (q.op_income > hi8)).astype(int)
+    q["F_OPM"] = ((q.opm2 - g.opm2.shift(1)) >= 5).astype(int)
+    ex = ex.merge(q[["sym", "period_end", "F_HI8", "F_OPM"]],
+                  on=["sym", "period_end"], how="left").drop(columns=["op_income", "opm2"])
+    v = pd.read_parquet(os.path.join(BASE, "data", "_volwk.parquet"))
+    v["as_of"] = pd.to_datetime(v.as_of)
+    v = v.sort_values(["sym", "as_of"])
+    v["vw"] = v.groupby("sym").vol_wk.transform(lambda s: s / s.shift(1))
+    ex = ex.merge(v[["as_of", "sym", "vw"]], on=["as_of", "sym"], how="left")
     return d.merge(ex, on=["as_of", "sym"], how="left")
 
 
-def simulate(sig, close):
-    """신호 → 진입, 주봉 종가 고점 대비 −20% → 청산. 청산 뒤 재신호면 재진입."""
+def simulate(sig, close, trail=TRAIL):
+    """신호 → 진입, 주봉 종가 고점 대비 −trail → 청산. 청산 뒤 재신호면 재진입."""
     out, i, n = [], 0, len(close)
     while i < n:
         if not sig[i] or not np.isfinite(close[i]):
@@ -64,7 +89,7 @@ def simulate(sig, close):
         while j < n:
             if np.isfinite(close[j]):
                 peak = max(peak, close[j])
-                if close[j] <= peak * (1 - TRAIL):
+                if close[j] <= peak * (1 - trail):
                     break
             j += 1
         closed = j < n
@@ -89,7 +114,7 @@ def cmd_build():
         d = d.merge(f, on=["as_of", "sym"], how="left")
     dates = sorted(d.as_of.unique())
     di = {t: k for k, t in enumerate(dates)}
-    flags = {k: fn(d) for k, (_, fn) in RULES.items()}
+    flags = {k: fn(d) for k, (_, fn, _t) in RULES.items()}
     hit = set()
     for k, f in flags.items():
         hit |= set(d.loc[f.fillna(False), "sym"])
@@ -104,13 +129,13 @@ def cmd_build():
                    i=[int(v) for v in idx],
                    c=[round(float(v), 3) if v == v else None for v in close],
                    sig={}, trades={}, rows=[])
-        for k, (_, fn) in RULES.items():
+        for k, (_, fn, _tr) in RULES.items():
             m = fn(g).fillna(False).values
             if not m.any():
                 continue
             rec["sig"][k] = [int(idx[p]) for p in np.where(m)[0]]
             tr = []
-            for t in simulate(m, close):
+            for t in simulate(m, close, _tr):
                 # 진입 시점부터 신호가 몇 주 연속으로 계속 떴는가.
                 # 매수 판단 시점에 이미 알 수 있는 정보다 — "며칠째 뜨고 있나".
                 sk, q = 0, t["e"]
@@ -139,6 +164,9 @@ def cmd_build():
                 # 2026-08-16: 화면 요청으로 매출 YoY → QoQ 로 교체(직전 분기 대비 가속을 본다).
                 # rev(YoY)는 기존 JSON 호환을 위해 남겨 두고 revq 를 추가한다.
                 vol=_r(r.vol_x_20w), rev=_r(r.rev_yoy), revq=_r(r.rev_qoq),
+                # 2026-08-18: 거래량은 20주 평균이 아니라 **전주 대비**가 신호다.
+                # 20주 평균으로 보면 대시세 출발점이 0.86배(조용함)로 나와 아무것도 안 잡힌다.
+                vwk=_r(r.vw, 2), up=_r(r.ret_1w, 1),
                 mc=_r(r.marcap / 1e9, 2), adv=_r(r.adv_20d / 1e6, 0),
                 f1=_r(r.f1 * 100, 1), f4=_r(r.f4 * 100, 1),
                 f13=_r(r.f13 * 100, 1), f26=_r(r.f26 * 100, 1), f52=_r(r.f52 * 100, 1),
@@ -149,6 +177,7 @@ def cmd_build():
     out = dict(generated=str(pd.Timestamp.today().date()),
                dates=[str(pd.Timestamp(t).date()) for t in dates],
                rules={k: v[0] for k, v in RULES.items()},
+               trails={k: v[2] for k, v in RULES.items()},
                symbols=syms)
     with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
@@ -173,7 +202,7 @@ def cmd_chart(sym):
     r = j["symbols"][sym]
     dt = pd.to_datetime([j["dates"][i] for i in r["i"]])
     c = pd.Series(r["c"], index=dt).astype(float)
-    COL = {"A": "#17415c", "B": "#a03028", "R6": "#8a6a12"}
+    COL = {"L": "#1f6b45", "S": "#7a3fa0", "A": "#17415c", "B": "#a03028", "R6": "#8a6a12"}
     fig, ax = plt.subplots(figsize=(11.5, 4.2), dpi=110)
     fig.patch.set_facecolor("white"); ax.set_facecolor("white")
     ax.plot(c.index, c.values, color="#12161b", lw=1.15, zorder=3)

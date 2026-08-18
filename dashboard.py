@@ -3,6 +3,7 @@
 """
 import json
 import requests
+from collections import defaultdict
 import pandas as pd
 import streamlit as st
 import yfinance as yf
@@ -959,87 +960,79 @@ if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
 """)
 else:
   with t_lead, guard('주도주 US'):
-    st.caption(data_stamp('results/leaders_signal.json'))
-    # 주도주 검증판 — 미국 1,279종·2018~2026 백테스트 + 워크포워드로 확정한 규칙⑤
-    # (구 "주도주 지문" 로직은 2026-08-05 제거 — 신고가 −15% 이내·영익 YoY≥+100% 가 검증에서 기각됨)
-    # ── 검증판 (규칙⑤) — 미국 1,279종·8.6년 백테스트 + 워크포워드로 확정한 규칙 ──
-    _lsig = load_json(Path('results/leaders_signal.json'))
-    if not _lsig:
-        st.warning("주도주 신호 데이터 없음 → 로컬에서 `python leaders_publish.py` 실행 후 커밋.")
+    st.caption(data_stamp('results/leaders_ab.json'))
+    # 2026-08-18 전면 교체. 규칙⑥(RS13>1.5 & OPM>0 & $2B+)은 시총 데이터를 고치고
+    # 다시 재니 2022년 이후 CAGR 3.8% 였다(SPY 13.2%). 앞 구간 33.8% 는 look-ahead 오염이었다.
+    # 대시세 출발 시점을 구조적으로 놓치는 게 원인 — NVDA·TSLA·CVNA·AXTI 가 그때
+    # 시총 $0.07B~$282B 에 대부분 적자였다. 하나의 필터로 못 잡아 L/S 로 쪼갰다.
+    _ab = load_json(Path('results/leaders_ab.json'))
+    if not _ab:
+        st.warning("주도주 신호 데이터 없음 → 로컬에서 `python leaders_ab.py` 실행 후 커밋.")
     else:
-        _bt = _lsig['backtest']
-        st.caption(
-            f"미국 1,279종·2018~2026 백테스트와 워크포워드 6분할로 확정한 규칙. "
-            f"*시장 필터(KR/US)와 무관하게 미국 전용이다.*  \n"
-            f"**진입** `{_lsig['rule']}`  \n"
-            f"**운용** {_lsig['exit']}  \n"
-            f"기준 주차 **{_lsig['signal_week']}** · 유니버스 {_lsig['universe']:,}종 · "
-            f"생성 {_lsig['generated']}")
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("백테스트 CAGR", f"{_bt['cagr']}%", f"SPY {_bt['spy_cagr']}%")
-        c2.metric("MDD", f"{_bt['mdd']}%", f"SPY {_bt['spy_mdd']}%", delta_color="inverse")
-        c3.metric("회복배율", f"{_bt['recover']}", f"SPY {_bt['spy_recover']}")
-        c4.metric("워크포워드", _bt['wf_cagr'], f"회복배율 {_bt['wf_recover']}", delta_color="off")
+        _spyA = _ab['backtest']['SPY']
+        _S1, _S2, _ST = '앞 구간 2018-06~2021-12', '뒤 구간 2022-01~2026-08', '전체'
+        st.markdown(
+            "**진입 신호 = 주간 +20% 급등 + 거래량이 전주보다 안 늘어난 주.** "
+            "637,269 주차-종목에서 이후 1년 +100% 확률이 기저 5.17% → "
+            "**27.4%(5.3배)** 로 가장 강했다. 거래량은 20주 평균이 아니라 "
+            "**전주 대비**로 봐야 보이고, 방향도 직관과 반대다 — 터질 때가 아니라 "
+            "**안 터질 때**가 좋다 (같은 급등에서 거래량 3배↑ 13.4% vs 감소 30.4%)."
+        )
+        st.caption(f"기준 주차 **{_ab['signal_week']}** · 유니버스 {_ab['universe']:,}종 "
+                   f"· 생성 {_ab['generated']}")
 
-        st.markdown(f"**이번 주 후보 {_lsig['n']}종**")
-        if _lsig['candidates']:
-            st.dataframe(pd.DataFrame([{
-                '종목': m['name'][:22], '코드': m['sym'], '종가': f"${m['close']:,.2f}",
-                'RS13': m['rs_13w'], 'PSR': m['psr'],
-                # str/float 혼재 열은 Arrow 직렬화가 실패해 로그가 지저분해진다 → 문자열로 통일
-                'PER': ('-' if m['per'] is None else f"{m['per']:.1f}"),
-                '신고가': f"{m['dist_52w']:+.1f}%",
-                'OPM': ('-' if m['opm'] is None else f"{m['opm']:.1f}%"),
-                'OPM QoQ': ('-' if m['opm_qoq'] is None else f"{m['opm_qoq']:+.1f}"),
-                '시총($B)': m['marcap_b'],
-                '트리거': ', '.join(m['triggers'])} for m in _lsig['candidates']]),
-                use_container_width=True, hide_index=True, row_height=25,
-                height=_dfh(len(_lsig['candidates'])))
-        else:
-            st.info("이번 주 조건 충족 종목 없음")
+        _mix = _ab['backtest']['MIX']
+        _c = st.columns(4)
+        _c[0].metric("L+S 50:50 · 전체 CAGR", f"{_mix[_ST]['cagr']}%",
+                     f"SPY {_spyA[_ST]['cagr']}%")
+        _c[1].metric("MDD", f"{_mix[_ST]['mdd']}%", f"SPY {_spyA[_ST]['mdd']}%",
+                     delta_color="inverse")
+        _c[2].metric("앞 구간 2018~2021", f"{_mix[_S1]['cagr']}%",
+                     f"SPY {_spyA[_S1]['cagr']}%")
+        _c[3].metric("뒤 구간 2022~2026", f"{_mix[_S2]['cagr']}%",
+                     f"SPY {_spyA[_S2]['cagr']}%")
+        st.caption("구간을 갈라 각각 검증했다. **두 국면 모두에서 SPY를 앞선다** — "
+                   "앞 구간에서만 좋고 뒤 구간에서 무너진 구 규칙⑥과 다른 점이다. "
+                   "진입을 1주 늦춰도 22.9%, 2주 늦춰도 18.8%로 우위가 유지된다.")
 
-        # ── 후보 A·B (2026-08-15~) ────────────────────────────────────
-        # 유니버스 look-ahead를 제거하자 규칙⑥이 밀렸다. 확정 전까지 병렬 관찰한다.
-        _alt = _lsig.get('alt')
-        if _alt:
-            st.divider()
-            st.subheader("🧪 후보 규칙 A·B — 병렬 관찰 중")
-            st.caption("유니버스 선정의 look-ahead를 제거하고(수집 하한 $2B→$0.15B · 1,279→2,208종) "
-                       "32개 조합을 전수 비교한 결과 위 규칙⑥보다 앞선 둘. "
-                       "**아직 확정 규칙이 아니며 페이퍼로만 추적 중이다.**")
-            _tabs = st.tabs([f"A · 회복 {_alt['A']['stat']['recover']}",
-                             f"B · CAGR {_alt['B']['stat']['cagr']}%"])
-            for _t, _k in zip(_tabs, ('A', 'B')):
-                _a = _alt[_k]; _s = _a['stat']
-                with _t:
-                    st.markdown(f"**진입** `{_a['rule']}` · **{_a['slots']}종목** 균등")
-                    _m = st.columns(5)
-                    _m[0].metric("CAGR", f"{_s['cagr']}%", f"SPY {_bt['spy_cagr']}%")
-                    _m[1].metric("MDD", f"{_s['mdd']}%", f"SPY {_bt['spy_mdd']}%",
-                                 delta_color="inverse")
-                    _m[2].metric("회복배율", _s['recover'], f"SPY {_bt['spy_recover']}")
-                    _m[3].metric("승률", f"{_s['winrate']}%")
-                    _m[4].metric("평균 노출", f"{_s['exposure']}%",
-                                 help="낙폭을 만드는 건 손절폭이 아니라 노출이다. "
-                                      "최악 낙폭 시점 현금이 A는 69.8%, B는 18.9%였다.")
-                    if _k == 'B':
-                        st.warning(_a['note'])
-                    else:
-                        st.caption(_a['note'])
-                    st.markdown(f"**이번 주 후보 {_a['n']}종 중 상위 {len(_a['candidates'])}종**")
-                    if _a['candidates']:
-                        st.dataframe(pd.DataFrame([{
-                            '종목': m['name'][:22], '코드': m['sym'],
-                            '종가': f"${m['close']:,.2f}", 'RS13': m['rs_13w'],
-                            'PER': ('-' if m['per'] is None else f"{m['per']:.1f}"),
-                            'PSR': m['psr'],
-                            'OPM': ('-' if m['opm'] is None else f"{m['opm']:.1f}%"),
-                            '시총($B)': m['marcap_b'],
-                            '트리거': ', '.join(m['triggers'])} for m in _a['candidates']]),
-                            use_container_width=True, hide_index=True, row_height=25,
-                            height=_dfh(len(_a['candidates'])))
-                    else:
-                        st.info("이번 주 조건 충족 종목 없음")
+        _rt = st.tabs([f"🏛 L · 대형 주도주 ({len(_ab['candidates']['L'])}종)",
+                       f"🚀 S · 소형 대시세 ({len(_ab['candidates']['S'])}종)"])
+        for _t, _k in zip(_rt, ('L', 'S')):
+            with _t:
+                _rr, _bb = _ab['rules'][_k], _ab['backtest'][_k]
+                st.markdown(f"**진입** `{_rr['text']}`")
+                st.markdown(f"**운용** {_rr['exit']} · **{_rr['slots']}칸** 균등 "
+                            f"· 랭킹 = 그 주 상승률")
+                _m = st.columns(4)
+                _m[0].metric("전체 CAGR", f"{_bb[_ST]['cagr']}%",
+                             f"SPY {_spyA[_ST]['cagr']}%")
+                _m[1].metric("MDD", f"{_bb[_ST]['mdd']}%",
+                             f"SPY {_spyA[_ST]['mdd']}%", delta_color="inverse")
+                _m[2].metric("앞 구간", f"{_bb[_S1]['cagr']}%")
+                _m[3].metric("뒤 구간", f"{_bb[_S2]['cagr']}%")
+                st.caption(f"평균 보유 {_bb[_ST]['held']}종 / {_rr['slots']}칸 — "
+                           f"나머지는 현금이다. 신호가 없는 주에는 비워 둔다.")
+                _cd = _ab['candidates'][_k]
+                st.markdown(f"**이번 주 후보 {len(_cd)}종**")
+                if _cd:
+                    st.dataframe(pd.DataFrame([{
+                        '코드': m['sym'], '종목': m['name'], '종가': m['close'],
+                        '그 주 상승': m['up'], '거래량 전주비': m['vw'],
+                        '시총($B)': m['mc'], '이후1주': m.get('f1'),
+                        '이후4주': m.get('f4'), '이후13주': m.get('f13')}
+                        for m in _cd]),
+                        use_container_width=True, hide_index=True, row_height=25,
+                        height=_dfh(len(_cd)))
+                else:
+                    st.info("이번 주 조건 충족 종목 없음")
+
+        with st.expander("⚠️ 이 숫자를 믿을 때 알아야 할 것"):
+            for _cv in _ab.get('caveats', []):
+                st.markdown(f"- {_cv}")
+            st.markdown(
+                "- **구 규칙⑥은 2026-08-18 종료됐다.** 시총 데이터를 고친 뒤 다시 재니 "
+                "2022년 이후 CAGR 3.8%(SPY 13.2%)였다. 과거 신호 이력은 아래 심층 조회와 "
+                "📒 성적표에 그대로 남겨 둔다 — 무엇이 왜 실패했는지가 지워지면 안 된다.")
 
         # ── 종목 심층 조회 ─────────────────────────────────────────────
         # market.db는 저장소에 없으므로 leaders_symbol.py가 미리 만든 JSON을 읽는다.
@@ -1089,7 +1082,11 @@ else:
             _px = pd.Series([v for v in _r['c']],
                             index=_D[[i for i in _r['i']]]).astype(float).dropna()
 
-            _cols = {'A': '#17415c', 'B': '#a03028', 'R6': '#8a6a12'}
+            # 규칙이 늘면 KeyError 로 이 탭이 통째로 죽는다(2026-08-18 L/S 추가 때 발생).
+            # 색이 없는 규칙은 회색으로 떨어뜨린다.
+            _cols = defaultdict(lambda: '#8a8f98',
+                                {'L': '#1f6b45', 'S': '#7a3fa0', 'A': '#17415c',
+                                 'B': '#a03028', 'R6': '#8a6a12'})
             _fig = go.Figure()
             _fig.add_trace(go.Scatter(x=_px.index, y=_px.values, mode='lines',
                                       name='주봉 종가', line=dict(color='#12161b', width=1.4)))
@@ -1161,7 +1158,9 @@ else:
                     # 흑자전환 직후에는 정상적으로 비어 있는 값이라 '적자'로 표기한다.
                     'PER': ('적자' if _m.get('per') is None else f"{_m['per']:.1f}"),
                     '신고가대비': _m.get('dist'), '52주낙폭': _m.get('mdd'),
-                    '거래량배': _m.get('vol'), '거래대금($M)': _m.get('adv'),
+                    # 거래량은 20주 평균이 아니라 전주 대비가 신호다(2026-08-18).
+                    '그주상승': _m.get('up'), '거래량 전주비': _m.get('vwk'),
+                    '거래대금($M)': _m.get('adv'),
                     '트리거': _m.get('trg', '-'), '_진입함': bool(_t)})
             if _merged:
                 _mdf = pd.DataFrame(_merged).sort_values('진입').reset_index(drop=True)
@@ -1250,15 +1249,30 @@ else:
                 st.caption(f"{_pick} 에는 신호가 없어 **{_w}** 주차로 이동했다.")
 
             _lst = _wk_idx[_w]
+            # 2026-08-18: 규칙별로 걸러 볼 수 있어야 한다. 신규 L/S 와 종료된 구 규칙이
+            # 한 표에 섞이면 "새 필터가 그 주에 뭘 잡았나"를 확인할 수가 없다.
+            _rf = st.radio("규칙", ['신규 L+S', 'L 대형', 'S 소형', '구 규칙(A/B/R6)', '전체'],
+                           horizontal=True, key='lead_week_rule')
+            _want = {'신규 L+S': {'L', 'S'}, 'L 대형': {'L'}, 'S 소형': {'S'},
+                     '구 규칙(A/B/R6)': {'A', 'B', 'R6'}}.get(_rf)
+            if _want:
+                _sel = [x for x in _lst if _want & set(x[2]['r'])]
+                # 비면 전체로 되돌린다 — 빈 DataFrame 을 아래로 흘리면 이 섹션이 통째로 죽는다.
+                if _sel:
+                    _lst = _sel
+                else:
+                    st.info(f"이 주차에 **{_rf}** 조건에 걸린 종목이 없어 전체를 보여준다.")
             # 이후 1·4주는 2026-08-17에 추가됐다. 옛 JSON에는 키 자체가 없으므로,
             # 값이 없는 것(진행 중)과 열이 없는 것을 구분해서 다룬다.
             _has_f14 = any('f1' in _x for _, _, _x in _lst)
             _wdf = pd.DataFrame([{
                 '코드': _s, '종목': _n[:24], '시총($B)': _x['mc'], '규칙': ','.join(_x['r']),
-                '종가': _x['close'], 'RS13': _x['rs13'], 'OPM': _x['opm'],
+                '종가': _x['close'], '그주상승': _x.get('up'),
+                # 거래량은 20주 평균이 아니라 **전주 대비**가 신호다(2026-08-18).
+                '거래량 전주비': _x.get('vwk'),
+                'RS13': _x['rs13'], 'OPM': _x['opm'],
                 'PER': ('적자' if _x['per'] is None else f"{_x['per']:.1f}"),
                 'PSR': _x['psr'], '신고가대비': _x['dist'], '52주낙폭': _x['mdd'],
-                '거래량배': _x['vol'],
                 '이후1주': _x.get('f1'), '이후4주': _x.get('f4'),
                 '이후13주': _x.get('f13'), '이후26주': _x.get('f26'), '이후52주': _x.get('f52'),
                 '트리거': _x['trg']} for _s, _n, _x in _lst])
@@ -1301,44 +1315,63 @@ else:
                 st.caption("이후 1·4주는 `python leaders_symbol.py build` 를 다시 돌려야 나온다 "
                            "(현재 JSON에는 그 값이 들어있지 않다).")
 
-        with st.expander("필터 단계별 잔존 · 기각된 조건"):
-            st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
-                         use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))
-            st.markdown("**검증에서 기각된 조건** (넣으면 오히려 성과가 나빠짐)")
-            for r in _bt['rejected']:
-                st.markdown(f"- ~~{r}~~")
+        # ── 구 규칙⑥ 기록 (2026-08-18 종료) ────────────────────────────
+        # 지우지 않는다. 화면에서 실패한 규칙을 지우면 "무엇이 왜 실패했는지"가
+        # 사라지고, 포트폴리오를 자기 증명 지표로 쓰겠다는 원칙이 깨진다.
+        st.divider()
+        with st.expander("📕 구 규칙⑥ 기록 — 2026-08-18 종료 (왜 실패했나)"):
+            _lsig = load_json(Path('results/leaders_signal.json')) or {}
+            _bt = _lsig.get('backtest') or {}
+            st.markdown(
+                "**종료 사유.** `data/us_marketcap.csv` 가 2024-04 스냅샷인 채 27개월 "
+                "방치돼 주식수를 낡은 시총으로 역산하고 있었다. 그 오차가 시총·PER·PSR "
+                "전부에 곱해져 종목의 72%가 틀린 값이었고, 규칙⑥의 `$2B` 문턱은 "
+                "**많이 오른 종목일수록 배제**하는 방향으로 작동했다. "
+                "데이터를 고치고 다시 재니 **2022년 이후 CAGR 3.8%** (SPY 13.2%) 였다. "
+                "앞 구간 33.8% 는 look-ahead 오염과 국면 운이었다.")
+            if _lsig.get('rule'):
+                st.markdown(f"**당시 진입 규칙** `{_lsig['rule']}`")
+            if _lsig.get('funnel'):
+                st.markdown("**필터 단계별 잔존**")
+                st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
+                             use_container_width=True, hide_index=True,
+                             row_height=25, height=_dfh(4))
+            if _bt.get('rejected'):
+                st.markdown("**당시 검증에서 기각된 조건**")
+                for _rj in _bt['rejected']:
+                    st.markdown(f"- ~~{_rj}~~")
+            _pp = _lsig.get('paper')
+            if _pp:
+                st.markdown(f"**📓 포워드 페이퍼 원장** — 시작 {_pp['created']} · "
+                            f"갱신 {_pp.get('updated', '-')} · "
+                            f"보유 {_pp['n_open']} / 청산 {_pp['n_closed']}")
+                if _pp.get('open'):
+                    st.dataframe(pd.DataFrame([{
+                        '종목': t['sym'], '기록일': t['log_date'],
+                        '진입': f"${t['entry']:,.2f}", '고점': f"${t['peak']:,.2f}",
+                        '고점대비': f"{(t['entry']/t['peak']-1)*100:+.1f}%",
+                        'RS13': t['rs'], 'PSR': t['psr'],
+                        '트리거': ', '.join(t['triggers'])} for t in _pp['open']]),
+                        use_container_width=True, hide_index=True, row_height=25,
+                        height=_dfh(len(_pp['open'])))
+                if _pp.get('live'):
+                    _lv = _pp['live']
+                    st.dataframe(pd.DataFrame([
+                        {'지표': '평균 수익', '실전': f"{_lv['avg']:+.1f}%",
+                         '백테스트': num(_bt, 'avg_ret', '{:+.1f}%')},
+                        {'지표': '중앙 수익', '실전': f"{_lv['med']:+.1f}%",
+                         '백테스트': num(_bt, 'med_ret', '{:+.1f}%')},
+                        {'지표': '승률', '실전': f"{_lv['winrate']:.0f}%",
+                         '백테스트': num(_bt, 'winrate', '{:.0f}%')},
+                        {'지표': '평균 보유', '실전': f"{_lv['hold_wk']:.0f}주",
+                         '백테스트': num(_bt, 'hold_wk', '{}주')}]),
+                        use_container_width=True, hide_index=True,
+                        row_height=25, height=_dfh(4))
 
-        _pp = _lsig.get('paper')
-        if _pp:
-            st.markdown(f"**📓 포워드 페이퍼 트레이딩** — 시작 {_pp['created']} · "
-                        f"갱신 {_pp.get('updated','-')} · 보유 {_pp['n_open']} / 청산 {_pp['n_closed']}")
-            if _pp['open']:
-                st.dataframe(pd.DataFrame([{
-                    '종목': t['sym'], '기록일': t['log_date'],
-                    '진입': f"${t['entry']:,.2f}", '고점': f"${t['peak']:,.2f}",
-                    '고점대비': f"{(t['entry']/t['peak']-1)*100:+.1f}%",
-                    'RS13': t['rs'], 'PSR': t['psr'],
-                    '트리거': ', '.join(t['triggers'])} for t in _pp['open']]),
-                    use_container_width=True, hide_index=True, row_height=25,
-                    height=_dfh(len(_pp['open'])))
-            if _pp.get('live'):
-                _lv = _pp['live']
-                st.dataframe(pd.DataFrame([
-                    {'지표': '평균 수익', '실전': f"{_lv['avg']:+.1f}%", '백테스트': num(_bt, 'avg_ret', '{:+.1f}%')},
-                    {'지표': '중앙 수익', '실전': f"{_lv['med']:+.1f}%", '백테스트': num(_bt, 'med_ret', '{:+.1f}%')},
-                    {'지표': '승률', '실전': f"{_lv['winrate']:.0f}%", '백테스트': num(_bt, 'winrate', '{:.0f}%')},
-                    {'지표': '평균 보유', '실전': f"{_lv['hold_wk']:.0f}주", '백테스트': num(_bt, 'hold_wk', '{}주')}]),
-                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(4))
-            else:
-                st.caption(f"청산 거래가 없어 대조 불가. 백테스트 기대값 — "
-                           f"중앙 {num(_bt, 'med_ret', '{:+.1f}%')} · "
-                           f"승률 {num(_bt, 'winrate', '{:.0f}%')} · "
-                           f"평균 보유 {num(_bt, 'hold_wk', '{}주')} · "
-                           f"거래 {num(_bt, 'trades', '{}건')}")
         st.caption(
-            f"⚠️ {_bt['period']} 백테스트. 생존편향(상폐 미포함)·인샘플 규칙선택이 있어 낙관적이며, "
-            f"워크포워드는 CAGR {_bt['wf_cagr']}·회복배율 {_bt['wf_recover']}로 **절반은 SPY에 진다**. "
-            f"조건 충족 종목의 기계적 출력이며 매수 권유가 아님.")
+            "⚠️ 위 L/S 수치는 2018-06~2026-08 백테스트다. 생존편향(상장폐지 미포함)과 "
+            "조합 선택 편향이 있어 낙관적이다. 조건 충족 종목의 기계적 출력이며 "
+            "매수 권유가 아니다.")
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──

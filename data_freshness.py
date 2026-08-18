@@ -109,9 +109,15 @@ SOURCES = [
          cycle='주 1회 (일 08:00)', max_age=9, producer='screen_precompute.py',
          job='weekly-profile', used_by='전 서브탭 (고점대비% 열)',
          getter=_key('date')),
-    dict(path='results/leaders_signal.json', label='주도주 신호 (규칙⑥)',
-         cycle='주 1회', max_age=9, producer='leaders_publish.py',
-         job='수동 (로컬)', used_by='🚀 주도주',
+    # ★ 2026-08-18 — 주도주 주력 신호가 규칙⑥ → L/S 로 교체됐다.
+    dict(path='results/leaders_ab.json', label='주도주 L/S (대형·소형)',
+         cycle='주 1회', max_age=9, producer='leaders_ab.py',
+         job='수동 (로컬 · market.db 필요)', used_by='🚀 주도주 → 🇺🇸',
+         getter=_key('generated')),
+    # 종료된 규칙이지만 화면에 기록으로 남아 있어 계속 감시한다.
+    dict(path='results/leaders_signal.json', label='주도주 신호 (구 규칙⑥·종료)',
+         cycle='주 1회', max_age=99, producer='leaders_publish.py',
+         job='수동 (로컬)', used_by='🚀 주도주 → 📕 구 규칙⑥ 기록',
          getter=_key('generated')),
     dict(path='results/leaders_symbol_detail.json', label='주도주 종목 심층조회',
          cycle='주 1회', max_age=9, producer='leaders_publish.py',
