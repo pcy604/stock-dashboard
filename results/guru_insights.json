@@ -1,6 +1,101 @@
 {
   "items": [
     {
+      "video_id": "mK7jwc9j_m0",
+      "title": "[미방분] 퇴사 안하고 오래 다니고 싶어서 시작했습니다 #퇴사 #입사 #회사 #적금 #기념일 #곽지현 #절약의달인",
+      "channel": "와이스트릿",
+      "published": "2026-08-19T08:00:21+00:00",
+      "url": "https://www.youtube.com/watch?v=mK7jwc9j_m0",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T18:12:44.490443+09:00"
+    },
+    {
+      "video_id": "YKIiFWX6r3s",
+      "title": "\"이렇게 되면 반도체 하방 열어놔야 한다\" 하반기는...? | 하창완 하보노의 주식 이야기 대표 [더블 체크]",
+      "channel": "삼프로TV",
+      "published": "2026-08-19T00:30:21+00:00",
+      "url": "https://www.youtube.com/watch?v=YKIiFWX6r3s",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T18:12:11.926184+09:00"
+    },
+    {
+      "video_id": "BAneFbJjVnw",
+      "title": "\"지금 당장 아틀라스가 해야 할 것\" 중국이 무서운 이유 | 이종원 하나증권 영업1부WM센터 팀장 [더블 크루]",
+      "channel": "삼프로TV",
+      "published": "2026-08-19T01:03:25+00:00",
+      "url": "https://www.youtube.com/watch?v=BAneFbJjVnw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T18:11:39.667671+09:00"
+    },
+    {
+      "video_id": "oSo_w9_g4GI",
+      "title": "[8월 19일 마감시황] SK하이닉스, 40조 자사주 매입·소각 '초강수'…주주환원 새 역사 쓴다ㅣ홍선애, 이권희, 장우진 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-08-19T08:46:42+00:00",
+      "url": "https://www.youtube.com/watch?v=oSo_w9_g4GI",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T18:10:02.851616+09:00"
+    },
+    {
+      "video_id": "0EJJeS_bF8w",
+      "title": "시장은 항상 이렇게 바라봐야 합니다 #박세익 #주식",
+      "channel": "체슬리TV",
+      "published": "2026-08-19T08:00:31+00:00",
+      "url": "https://www.youtube.com/watch?v=0EJJeS_bF8w",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T18:09:29.406000+09:00"
+    },
+    {
       "video_id": "37Ck2p_RxeU",
       "title": "\"스트레스 너무 심하다\" 이럴 때 해야 할 행동 | 하창완 하보노의 주식 이야기 대표 [더블 체크]",
       "channel": "삼프로TV",
@@ -57,8 +152,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T17:14:51.480246+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T18:13:49.006074+09:00"
     },
     {
       "video_id": "NNMPYkBjbcc",
@@ -76,8 +171,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T17:14:19.206350+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T18:13:16.874426+09:00"
     },
     {
       "video_id": "fz7P0nFM8wA",
@@ -184,8 +279,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T17:11:27.405904+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T18:11:07.451264+09:00"
     },
     {
       "video_id": "Tln76jprMiE",
@@ -322,8 +417,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T17:07:48.485441+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T18:10:35.191042+09:00"
     },
     {
       "video_id": "5AStg3rVJnA",
@@ -11258,322 +11353,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-11T07:18:59.831787+09:00"
-    },
-    {
-      "video_id": "okw-BDMWb1g",
-      "title": "CPI 발표 앞두고 금리 또 상승…엔비디아, 인텔 등 자금 조달 지속 [월가 뉴스레터]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T22:03:21+00:00",
-      "url": "https://www.youtube.com/watch?v=okw-BDMWb1g",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-11T09:07:50.263622+09:00"
-    },
-    {
-      "video_id": "MZIOLon4Iow",
-      "title": "미·이란 협상 교착에 WTI 5% 급등...뉴욕증시 하락 마감_26.08.11 | 여도은, 박명석, 한상희 [월스트리트 모닝브리핑]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T20:43:14+00:00",
-      "url": "https://www.youtube.com/watch?v=MZIOLon4Iow",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "미국-이란 협상 교착으로 국제유가(WTI)가 5% 급등하며 뉴욕 증시가 하락 마감한 시장 동향 브리핑입니다.",
-        "summary": [
-          "미국과 이란 간 핵 협상이 교착 상태에 빠져 중동의 지정학적 리스크가 고조되었습니다.",
-          "이에 따라 서부텍사스산 원유(WTI) 가격이 하루 만에 5% 급등하는 모습을 보였습니다.",
-          "유가 급등은 인플레이션 압력에 대한 우려를 다시 키우며 투자 심리를 위축시켰습니다.",
-          "이러한 요인들로 인해 뉴욕 증시의 주요 지수들이 하락 마감했습니다."
-        ],
-        "tickers": [
-          {
-            "name": "WTI",
-            "ticker": "",
-            "context": "미-이란 협상 교착에 따른 국제유가 5% 급등 현상",
-            "view": "긍정",
-            "t": 0
-          }
-        ],
-        "key_points": [
-          {
-            "point": "중동 지역의 지정학적 리스크(미-이란 협상)가 글로벌 에너지 시장 및 유가에 직접적인 영향을 미치고 있습니다.",
-            "t": 0
-          },
-          {
-            "point": "유가 급등은 전 세계적인 인플레이션 압력을 가중시키고 각국 중앙은행의 긴축 정책 기조에 영향을 줄 수 있어 증시 전반에 부담으로 작용합니다.",
-            "t": 0
-          },
-          {
-            "point": "뉴욕 증시의 하락 마감은 유가 상승 외에도 금리 인상 가능성, 기업 실적 등 다양한 거시경제 요인들과 복합적으로 작용했을 가능성을 시사합니다.",
-            "t": 0
-          }
-        ],
-        "actionable": [
-          "국제 유가 및 에너지 관련 섹터의 동향을 지속적으로 모니터링하고 관련 기업들의 실적 전망을 점검하세요.",
-          "미국과 이란을 포함한 중동 지역의 지정학적 상황 변화에 촉각을 세우고 관련 뉴스 플로우를 면밀히 추적하세요.",
-          "유가 상승으로 인한 인플레이션 압력 재점화 가능성에 대비하여 포트폴리오의 방어적인 자산 배분 전략을 검토하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-11T06:24:18.840048+09:00"
-    },
-    {
-      "video_id": "EIC4hb1f0jg",
-      "title": "'8월 전강후강' 아직 유효…삼전닉스 안정되면 코스닥 주도주는 '상승 3법'에서 나온다ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T12:30:15+00:00",
-      "url": "https://www.youtube.com/watch?v=EIC4hb1f0jg",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-11T02:33:46.697066+09:00"
-    },
-    {
-      "video_id": "ebFn3gD8dlI",
-      "title": "주식보다 두 배 올랐다?…내 계좌 손실 줄이는 자산배분 전략ㅣ명민준, 박가영, 송재경 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T13:30:25+00:00",
-      "url": "https://www.youtube.com/watch?v=ebFn3gD8dlI",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "주식, 채권, 환율 등 다양한 자산군과 지역별 시장 흐름을 이해하고 금 투자를 인플레이션 및 리스크 헤지 수단으로 활용하는 자산배분 전략을 모색해야 한다.",
-        "summary": [
-          "투자자들은 종목이나 국내 시장만 보지 않고 자산군 및 지역별 투자 시야를 넓혀야 합니다.",
-          "주식 시장을 이해하려면 주식, 금리, 환율의 상관관계를 파악해야 하며, 더 나아가 자산군별 움직임을 파악하는 것이 중요합니다.",
-          "금은 인플레이션 헤지 및 경기 침체에 대한 보험 역할을 하는 자산으로, 최근 미국 달러 약세와 실질 금리 하락 환경에서 강세를 보이고 있습니다.",
-          "전 세계 중앙은행들이 미국 국채 보유를 줄이고 금 및 기타 통화 자산을 늘리는 추세는 금 가격 상승의 장기적 요인으로 작용할 수 있습니다.",
-          "위험을 분산하고 싶다면 금광업체 ETF(GDX)나 국내 코스피 200 동일가중 ETF 같은 분산 투자를 고려할 수 있습니다."
-        ],
-        "tickers": [
-          {
-            "name": "고려아연",
-            "ticker": "010130",
-            "context": "은 가격 상승으로 주가 상승 예시",
-            "view": "긍정",
-            "t": 4471
-          },
-          {
-            "name": "GDX",
-            "ticker": "GDX",
-            "context": "금광업체 ETF는 금 가격 상승 시 높은 탄력성을 보이고 배당도 지급",
-            "view": "긍정",
-            "t": 1954
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "반도체 주식 투자 예시, 주주환원 잉여현금흐름 관련",
-            "view": "중립",
-            "t": 1045
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "반도체 주식 투자 예시, 주주환원 잉여현금흐름 관련",
-            "view": "중립",
-            "t": 1045
-          },
-          {
-            "name": "엔비디아",
-            "ticker": "NVDA",
-            "context": "주주환원 잘하는 기업 예시",
-            "view": "긍정",
-            "t": 1144
-          },
-          {
-            "name": "TSMC",
-            "ticker": "TSM",
-            "context": "주주환원 잘하는 기업 예시",
-            "view": "긍정",
-            "t": 1145
-          }
-        ],
-        "key_points": [
-          {
-            "point": "자산군별(주식, 채권, 귀금속, 원자재 등) 분산 투자 및 지역별 시장 분석의 중요성 강조.",
-            "t": 57
-          },
-          {
-            "point": "자산군 간의 비동조화(서로 다르게 움직이는 경향)를 활용한 포트폴리오 변동성 관리.",
-            "t": 270
-          },
-          {
-            "point": "금은 경제 불확실성 시기에 가치를 보존하는 '보험' 자산으로 기능.",
-            "t": 308
-          },
-          {
-            "point": "금 가격은 실질 금리 하락과 달러 약세(다른 통화 강세) 환경에서 상승 압력을 받음.",
-            "t": 1543
-          },
-          {
-            "point": "미국 연방 부채 증가와 금 가격 상승 간의 역사적 상관관계가 관찰되며, 이는 달러 및 국채 신뢰도 하락과 관련될 수 있음.",
-            "t": 2329
-          },
-          {
-            "point": "금광업체 ETF는 금 자체 투자보다 높은 탄력성과 배당 수익률을 제공할 수 있는 대안.",
-            "t": 3125
-          },
-          {
-            "point": "소액 투자자나 초심자는 특정 종목에 대한 부담을 줄이기 위해 지수 투자(동일 가중 방식 등)가 효과적일 수 있음.",
-            "t": 3905
-          }
-        ],
-        "actionable": [
-          "Investing.com과 같은 플랫폼을 활용하여 매일 주요 자산군(주식, 채권, 환율, 원자재, 암호화폐)의 움직임을 모니터링하는 습관을 들일 것.",
-          "포트폴리오의 일정 부분에 금을 '보험' 개념으로 포함시키는 것을 고려할 것.",
-          "KRX 금 시장(금 현물 계좌)을 통해 금에 투자하면 양도소득세 면제 혜택을 받을 수 있음(실물 인출 시 부가세 10% 부과).",
-          "금 가격에 대한 노출과 함께 배당 수익 및 더 높은 변동성을 추구한다면 금광업체 ETF(예: GDX) 투자를 고려할 것.",
-          "소액 투자자는 코스피 200 동일가중 ETF 등 여러 종목에 분산 투자하여 개별 종목의 위험을 줄이는 전략을 활용할 것."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-10T23:07:34.980484+09:00"
-    },
-    {
-      "video_id": "KdwqPsXIGgo",
-      "title": "하반기 코스피 vs 코스닥 승자는? 금리 부담 낮아질 때 당장 담아야 할 주식ㅣ이재규 SK증권 PB 차장 [집중 오늘의 주식]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T11:30:22+00:00",
-      "url": "https://www.youtube.com/watch?v=KdwqPsXIGgo",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "금리 인상 부담 완화로 한국 시장의 전반적인 우상향이 기대되며, 특히 소외되었던 코스닥과 대형 낙폭 과대주, 그리고 유망 산업 섹터에 대한 분산 투자가 필요하다.",
-        "summary": [
-          "한국 시장은 코스피와 코스닥 모두 우상향 가능성이 높으며, 특히 코스닥 시장의 반등 강도가 더 강할 것으로 예상된다.",
-          "상반기 반도체 중심의 시장 흐름이 하반기에는 달라질 것이며, 특정 섹터에 대한 과도한 집중은 피하고 대형주 및 낙폭 과대주로의 분산 투자가 중요하다.",
-          "미국 금리 인상에 대한 시장의 부담이 완화되고 거시 지표(환율, 유가, 국채 금리)가 안정세를 보이면서 시장 전반의 긍정적인 흐름이 기대된다.",
-          "포트폴리오 비중은 반도체 20%, 제약바이오 25%, ETF(지수) 30%, 현금 25%를 제안하며, 코스피 60% 대 코스닥 40%의 균형을 유지할 것을 권고한다.",
-          "하반기에는 방산주, 조선주 등 그동안 소외되었던 섹터가 시장의 관심을 받을 수 있으며, 제약·바이오와 같은 성장주 섹터도 긍정적이다."
-        ],
-        "tickers": [
-          {
-            "name": "SK 하이닉스",
-            "ticker": "000660",
-            "context": "반도체 보유자 및 코스닥 보유자 모두 하반기에 추가 우상향 가능성이 높다. 메모리 반도체 조정이 끝났으며, 매력적인 재진입 구간이다.",
-            "view": "긍정",
-            "t": 22
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "반도체 보유자 및 코스닥 보유자 모두 하반기에 추가 우상향 가능성이 높다. 메모리 반도체 조정이 끝났으며, 매력적인 재진입 구간이다.",
-            "view": "긍정",
-            "t": 22
-          },
-          {
-            "name": "알테오젠",
-            "ticker": "196170",
-            "context": "코스닥 시가총액 상위 종목으로 언급, 저점 대비 50% 이상 반등하며 관심을 받고 있다.",
-            "view": "긍정",
-            "t": 744
-          },
-          {
-            "name": "삼성전기",
-            "ticker": "009150",
-            "context": "신규 접근 시 삼성전자나 SK하이닉스보다 나은 선택일 수 있다. 고부가 MLCC 투자 지속으로 범용 MLCC 쇼티지 발생 중이다.",
-            "view": "긍정",
-            "t": 3640
-          },
-          {
-            "name": "한화에어로스페이스",
-            "ticker": "012450",
-            "context": "하반기 좋은 흐름이 예상되는, 그동안 소외되었던 방산주로 언급.",
-            "view": "긍정",
-            "t": 2615
-          },
-          {
-            "name": "LIG넥스원",
-            "ticker": "079550",
-            "context": "하반기 좋은 흐름이 예상되는, 그동안 소외되었던 방산주로 언급.",
-            "view": "긍정",
-            "t": 2615
-          },
-          {
-            "name": "HD현대중공업",
-            "ticker": "329180",
-            "context": "하반기 좋은 흐름이 예상되는, 그동안 소외되었던 조선주로 언급.",
-            "view": "긍정",
-            "t": 2620
-          },
-          {
-            "name": "한화엔진",
-            "ticker": "082740",
-            "context": "하반기 좋은 흐름이 예상되는, 그동안 소외되었던 조선주로 언급.",
-            "view": "긍정",
-            "t": 2622
-          },
-          {
-            "name": "XBI",
-            "ticker": "XBI",
-            "context": "미국 바이오 관련 ETF로, 금리 인하 기대감으로 고점 부근까지 상승 중이다.",
-            "view": "긍정",
-            "t": 3950
-          },
-          {
-            "name": "D&D 파마텍",
-            "ticker": "352070",
-            "context": "하반기 좋은 흐름이 예상되는 제약바이오 섹터 종목으로 언급.",
-            "view": "긍정",
-            "t": 3920
-          },
-          {
-            "name": "한올바이오파마",
-            "ticker": "009420",
-            "context": "하반기 좋은 흐름이 예상되는 제약바이오 섹터 종목으로 언급.",
-            "view": "긍정",
-            "t": 3922
-          }
-        ],
-        "key_points": [
-          {
-            "point": "하반기 시장 흐름은 상반기와 다를 것이며, 코스닥과 코스피 중대형 낙폭 과대주에 관심을 가질 필요가 있다.",
-            "t": 137
-          },
-          {
-            "point": "주식 투자에서 가장 위험한 것은 시장이 아니라 우리의 판단이며, 감정을 배제하고 객관적인 데이터로 판단해야 한다.",
-            "t": 1715
-          },
-          {
-            "point": "최근 거시 지표(환율, 유가, 금리)의 안정화와 미 연준의 금리 인상 확률 하락은 시장에 긍정적인 신호이다.",
-            "t": 2107
-          },
-          {
-            "point": "유동성 공급에 대한 명분이 부족한 현 시장 상황에서는, 개인 투자자의 투심 개선과 함께 소외된 섹터로의 자금 이동이 중요하다.",
-            "t": 3601
-          },
-          {
-            "point": "과거 금융위기나 팬데믹 시기와 달리 현재는 특정한 외부적 위기 없이 시장이 조정받고 있으며, 이는 투자 전략 수립 시 고려해야 할 중요한 요소이다.",
-            "t": 3144
-          }
-        ],
-        "actionable": [
-          "포트폴리오 내 특정 섹터에 비중이 쏠려 있다면 리스크 분산 차원에서 재조정하는 것을 고려하십시오.",
-          "코스피 대형주 중 낙폭이 과대했던 종목과 그동안 시장에서 소외되었던 방산, 조선, 제약·바이오 업종에 대한 관심을 늘려 보십시오.",
-          "전체 투자금의 15~25%는 현금으로 보유하여 시장 변동성에 대비하고 새로운 기회에 활용할 준비를 하십시오."
-        ]
-      },
-      "source": "video",
-      "attempts": 4,
-      "analyzed_at": "2026-08-11T01:33:49.875548+09:00"
     }
   ],
-  "updated": "2026-08-19T17:14:52.480610+09:00"
+  "updated": "2026-08-19T18:13:50.006318+09:00"
 }
