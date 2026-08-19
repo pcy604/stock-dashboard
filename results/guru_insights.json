@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "c__s2MCUx18",
+      "title": "SK하이닉스 40조 소각에 삼성전자도 긴장? 주주환원 경쟁 불붙나ㅣ차영주 와이즈경제연구소 소장 [집중 오늘의 주식]",
+      "channel": "삼프로TV",
+      "published": "2026-08-19T11:30:39+00:00",
+      "url": "https://www.youtube.com/watch?v=c__s2MCUx18",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T21:00:26.999933+09:00"
+    },
+    {
       "video_id": "Uik36xf0ouY",
       "title": "월가가 '미친 짓' 이라고 말 한 이유ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.19.수]",
       "channel": "체슬리TV",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T20:00:25.420934+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T20:59:21.605109+09:00"
     },
     {
       "video_id": "PRpThuoq0eE",
@@ -35,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T19:59:52.934020+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T20:58:10.583692+09:00"
     },
     {
       "video_id": "IAy7Ul3rCrE",
@@ -54,8 +73,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T20:02:03.393727+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T21:01:31.587848+09:00"
     },
     {
       "video_id": "pNj1zY1f81A",
@@ -73,8 +92,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T20:01:30.816385+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T21:00:59.525811+09:00"
     },
     {
       "video_id": "mK7jwc9j_m0",
@@ -92,8 +111,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T20:04:13.478974+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T21:03:08.616526+09:00"
     },
     {
       "video_id": "YKIiFWX6r3s",
@@ -130,8 +149,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T20:03:08.375081+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T21:02:35.929186+09:00"
     },
     {
       "video_id": "oSo_w9_g4GI",
@@ -149,8 +168,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T20:02:35.763275+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T21:02:03.791157+09:00"
     },
     {
       "video_id": "0EJJeS_bF8w",
@@ -168,8 +187,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T20:00:57.879599+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T20:59:53.858264+09:00"
     },
     {
       "video_id": "37Ck2p_RxeU",
@@ -11231,54 +11250,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-11T16:53:51.024230+09:00"
-    },
-    {
-      "video_id": "x6WQ-xcWibA",
-      "title": "이렇게 주식하면 폭망합니다 #박세익 #주식",
-      "channel": "체슬리TV",
-      "published": "2026-08-11T03:00:04+00:00",
-      "url": "https://www.youtube.com/watch?v=x6WQ-xcWibA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "시장의 포모와 시세 변화에 따라 투자자의 인식이 바뀌어 반복적인 실수를 저지르고 결국 폭망할 수 있음을 뉴턴의 사우스시 버블 투자 실패 사례를 통해 경고합니다.",
-        "summary": [
-          "투자자들은 FOMO(Fear Of Missing Out)와 강한 시세에 이끌려 유사한 투자 행동을 반복하는 경향이 있습니다.",
-          "상승장에서 이익을 얻고 다시 시장에 재진입하려는 시도가 고점에서 매수하는 위험으로 이어질 수 있습니다.",
-          "아이작 뉴턴은 사우스시 버블 당시 처음 계획대로 주식을 매도했으나, 이후 주가가 폭등하는 것을 보고 자신의 판단이 틀렸다고 여겨 고점에 다시 매수했다가 큰 손실을 입었습니다.",
-          "이러한 사례는 시장 시세의 움직임이 투자자의 인식을 변화시켜 합리적인 판단을 저해할 수 있음을 보여줍니다."
-        ],
-        "tickers": [
-          {
-            "name": "사우스시",
-            "ticker": "",
-            "context": "아이작 뉴턴이 투자했다가 실패한 역사적인 주식 버블 사례로 언급되었습니다.",
-            "view": "부정",
-            "t": 35
-          }
-        ],
-        "key_points": [
-          {
-            "point": "사람들은 포모(FOMO)와 강한 시세에 이끌려 투자 시 비슷한 행동을 반복하는 경향이 있습니다.",
-            "t": 0
-          },
-          {
-            "point": "주가가 올라오다가 다시 내려갈 때가 항상 문제이며, 이때 투자 판단이 흐려지기 쉽습니다.",
-            "t": 31
-          },
-          {
-            "point": "시세의 움직임을 보면서 투자자의 인식이 바뀌기 때문에 합리적인 의사결정이 어려워질 수 있습니다.",
-            "t": 51
-          }
-        ],
-        "actionable": [
-          "시장 시세 변화가 자신의 투자 인식을 바꿀 수 있음을 인지하고, 감정적인 매매를 경계합니다.",
-          "투자 계획을 세웠다면 단기적인 시장의 급등락에 흔들리지 않고 원칙을 지키도록 노력합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-11T16:51:22.738271+09:00"
     }
   ],
-  "updated": "2026-08-19T20:04:14.479193+09:00"
+  "updated": "2026-08-19T21:03:09.616809+09:00"
 }
