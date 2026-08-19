@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "IAy7Ul3rCrE",
+      "title": "주식 수익, 계속 굴리는 게 정답일까?ㅣ박병창 MP파트너스 [주말인터뷰]",
+      "channel": "삼프로TV",
+      "published": "2026-08-19T09:00:32+00:00",
+      "url": "https://www.youtube.com/watch?v=IAy7Ul3rCrE",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T19:03:56.935376+09:00"
+    },
+    {
+      "video_id": "pNj1zY1f81A",
+      "title": "40조 호재 뜬 SK하이닉스…주가를 누른 건 반도체 악재가 아닌 '금리'ㅣ홍선애, 박병창 MP파트너스 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-19T09:13:22+00:00",
+      "url": "https://www.youtube.com/watch?v=pNj1zY1f81A",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T19:03:24.765066+09:00"
+    },
+    {
       "video_id": "mK7jwc9j_m0",
       "title": "[미방분] 퇴사 안하고 오래 다니고 싶어서 시작했습니다 #퇴사 #입사 #회사 #적금 #기념일 #곽지현 #절약의달인",
       "channel": "와이스트릿",
@@ -16,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T18:12:44.490443+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T19:06:18.609128+09:00"
     },
     {
       "video_id": "YKIiFWX6r3s",
@@ -70,11 +108,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T18:10:02.851616+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T19:04:41.731384+09:00"
     },
     {
       "video_id": "0EJJeS_bF8w",
@@ -89,11 +127,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"주식 시장의 가격 왜곡 현상을 설명하며 효율적 시장 가설과 조지 소로스의 재귀성 이론을 통해 시장을 이해해야 한다고 강조합니다.\",\n  \"summary\": [\n    \"키옥시아 주가가 고점 대비 -45% 하락했으나, 이는 실적을 동반하며 올라온 주식임에도 불구하고 발생한 비정상적인 가격 조정입니다.\",\n    \"과도한 레버리지가 주가 왜곡의 원인으로 지목되었으며, 특정 펀드의 청산 사례를 통해 이러한 현상이 발생했음을 설명합니다.\",\n    \"유진 파마 교수의 효율적 시장 가설로는 기업 펀더멘탈과 괴리된 급격한 주가 변동을 설명하기 어렵습니다.\",\n    \"시장은 항상 효율적인 가격을 제시하는 것이 아니며, 비효율적으로 가격이 형성되는 상황의 원인을 파악하는 것이 중요합니다.\",\n    \"조지 소로스의 재귀성 이론은 인간의 편향으로 인해 시장이 과열(버블)과 붕괴(크래시)를 주기적으로 오가는 불균형 시스템임을 설명하"
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T18:09:29.406000+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T19:02:51.867839+09:00"
     },
     {
       "video_id": "37Ck2p_RxeU",
@@ -152,8 +191,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T18:13:49.006074+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T19:07:22.984087+09:00"
     },
     {
       "video_id": "NNMPYkBjbcc",
@@ -171,8 +210,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T18:13:16.874426+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T19:06:50.785921+09:00"
     },
     {
       "video_id": "fz7P0nFM8wA",
@@ -279,8 +318,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T18:11:07.451264+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T19:05:46.309086+09:00"
     },
     {
       "video_id": "Tln76jprMiE",
@@ -417,8 +456,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T18:10:35.191042+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T19:05:13.970037+09:00"
     },
     {
       "video_id": "5AStg3rVJnA",
@@ -11240,120 +11279,7 @@
       "source": "fail",
       "attempts": 2,
       "analyzed_at": "2026-08-11T09:05:25.962490+09:00"
-    },
-    {
-      "video_id": "GIBLak4viJk",
-      "title": "매일 아침 펀드매니저들의 운용회의 라이브 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.08.11.화]",
-      "channel": "체슬리TV",
-      "published": "2026-08-10T22:16:25+00:00",
-      "url": "https://www.youtube.com/watch?v=GIBLak4viJk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "체슬리투자자문 모닝브리프에서 박세익 전무는 인플레이션 둔화와 견조한 기업 실적을 바탕으로 주식 시장의 긍정적 흐름을 전망하며, AI 및 반도체 섹터의 성장성과 더불어 경기 방어적 배당주 투자의 중요성을 강조했습니다.",
-        "summary": [
-          "글로벌 인플레이션 압력 완화와 미국 연준의 금리 인상 사이클 종료 기대감이 시장에 긍정적으로 작용할 전망입니다.",
-          "국내 증시는 견조한 기업 실적과 AI 및 반도체 산업의 지속적인 성장에 힘입어 상승 모멘텀을 유지할 것으로 예상됩니다.",
-          "고금리 환경 속에서도 우량 배당주의 매력이 부각되며, 포트폴리오의 안정성을 확보하는 데 기여할 수 있습니다.",
-          "환율 변동성 확대 가능성에 대비하며, 수출 기업의 실적과 수급 동향을 면밀히 주시할 필요가 있습니다.",
-          "단기적인 시장 조정 가능성은 항상 열어두되, 장기적 관점에서 우량 자산에 대한 분할 매수 전략이 유효합니다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "글로벌 IT 수요 회복과 AI 반도체 시장의 성장 모멘텀에 대한 기대감",
-            "view": "긍정",
-            "t": 555
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "고대역폭 메모리(HBM) 등 고부가가치 메모리 시장을 선도하며 AI 산업의 핵심 수혜주로 부각",
-            "view": "긍정",
-            "t": 605
-          },
-          {
-            "name": "카카오",
-            "ticker": "035720",
-            "context": "플랫폼 사업 재편 및 신규 성장 동력 확보를 통한 실적 턴어라운드 가능성",
-            "view": "중립",
-            "t": 645
-          }
-        ],
-        "key_points": [
-          {
-            "point": "미국 연방준비제도(Fed)의 금리 인하 기대감이 형성되고 있으며, 이는 글로벌 유동성 환경 개선에 긍정적인 신호로 작용하고 있습니다.",
-            "t": 130
-          },
-          {
-            "point": "국내 증시는 AI 및 반도체 섹터의 견조한 성장세가 전체 지수 상승을 견인하는 핵심 동력이 될 것으로 보입니다.",
-            "t": 330
-          },
-          {
-            "point": "고환율 기조가 장기화될 가능성이 있으며, 이는 수출 기업 실적에는 긍정적이나 수입 물가 상승이라는 부담을 동반합니다.",
-            "t": 400
-          },
-          {
-            "point": "장기적인 관점에서 우량 배당주 및 가치주는 포트폴리오의 안정성을 높이는 중요한 역할을 할 수 있습니다.",
-            "t": 730
-          },
-          {
-            "point": "지정학적 리스크 및 공급망 불안정성은 여전히 시장의 변동성을 확대시킬 수 있는 잠재적 요인으로 상존합니다.",
-            "t": 785
-          }
-        ],
-        "actionable": [
-          "AI 및 반도체 관련 기술 리더 기업에 대한 투자 비중을 유지하고, 관련 산업의 확장성을 면밀히 관찰하십시오.",
-          "인플레이션 헤지 및 포트폴리오의 안정성을 위해 우량 배당주 또는 경기 방어적 성격의 가치주 투자를 고려하십시오.",
-          "환율 변동성 확대에 대비하여 수출 중심 기업의 실적 및 재무 건전성을 주기적으로 점검하고, 포트폴리오 내 환 노출도를 관리하십시오."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-11T08:16:26.032952+09:00"
-    },
-    {
-      "video_id": "iSNpfvVr88g",
-      "title": "이번 상승을 만든 단 하나의 변수 #메모리 #반도체 #사이클 #가격 #물량 #삼성전자 #SK하이닉스 #호돌이 #우황제",
-      "channel": "와이스트릿",
-      "published": "2026-08-10T22:00:02+00:00",
-      "url": "https://www.youtube.com/watch?v=iSNpfvVr88g",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "이번 반도체 시장의 상승세는 판매량 증가보다는 가격의 가파른 급등에 의해 주도되는 독특한 양상을 보이고 있습니다.",
-        "summary": [
-          "모든 사이클은 규칙성과 변칙성을 동시에 가지며, 반도체 시장의 호황 사이클도 예외는 아닙니다.",
-          "과거 반도체 호황기에는 기업 실적 증가가 판매량(Q)과 제품 단가(가격, P)의 동반 상승에 의해 발생했습니다.",
-          "이번 반도체 상승 사이클에서 가장 두드러지는 특징은 보편적인 호황 기간이나 성장 기간에 비해 유달리 가격(P)이 굉장히 가파르게 급등했다는 점입니다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "반도체 산업 상승의 주역으로 언급",
-            "view": "긍정",
-            "t": 0
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "반도체 산업 상승의 주역으로 언급",
-            "view": "긍정",
-            "t": 0
-          }
-        ],
-        "key_points": [
-          {
-            "point": "이번 반도체 시장 상승은 과거 사이클과 달리 판매 물량(Q) 증가보다는 제품 가격(P)의 유달리 가파른 급등이 핵심 변수로 작용하고 있습니다.",
-            "t": 9
-          }
-        ],
-        "actionable": []
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-11T07:18:59.831787+09:00"
     }
   ],
-  "updated": "2026-08-19T18:13:50.006318+09:00"
+  "updated": "2026-08-19T19:07:23.984348+09:00"
 }
