@@ -1,6 +1,44 @@
 {
   "items": [
     {
+      "video_id": "Uik36xf0ouY",
+      "title": "월가가 '미친 짓' 이라고 말 한 이유ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.19.수]",
+      "channel": "체슬리TV",
+      "published": "2026-08-19T09:57:49+00:00",
+      "url": "https://www.youtube.com/watch?v=Uik36xf0ouY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T20:00:25.420934+09:00"
+    },
+    {
+      "video_id": "PRpThuoq0eE",
+      "title": "그냥 ETF 하셔도 충분합니다ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.19.수]",
+      "channel": "체슬리TV",
+      "published": "2026-08-19T10:34:01+00:00",
+      "url": "https://www.youtube.com/watch?v=PRpThuoq0eE",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T19:59:52.934020+09:00"
+    },
+    {
       "video_id": "IAy7Ul3rCrE",
       "title": "주식 수익, 계속 굴리는 게 정답일까?ㅣ박병창 MP파트너스 [주말인터뷰]",
       "channel": "삼프로TV",
@@ -16,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T19:03:56.935376+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T20:02:03.393727+09:00"
     },
     {
       "video_id": "pNj1zY1f81A",
@@ -35,8 +73,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T19:03:24.765066+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T20:01:30.816385+09:00"
     },
     {
       "video_id": "mK7jwc9j_m0",
@@ -54,8 +92,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T19:06:18.609128+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T20:04:13.478974+09:00"
     },
     {
       "video_id": "YKIiFWX6r3s",
@@ -73,8 +111,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T18:12:11.926184+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T20:03:41.050171+09:00"
     },
     {
       "video_id": "BAneFbJjVnw",
@@ -92,8 +130,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T18:11:39.667671+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T20:03:08.375081+09:00"
     },
     {
       "video_id": "oSo_w9_g4GI",
@@ -108,11 +146,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T19:04:41.731384+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T20:02:35.763275+09:00"
     },
     {
       "video_id": "0EJJeS_bF8w",
@@ -127,12 +165,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"주식 시장의 가격 왜곡 현상을 설명하며 효율적 시장 가설과 조지 소로스의 재귀성 이론을 통해 시장을 이해해야 한다고 강조합니다.\",\n  \"summary\": [\n    \"키옥시아 주가가 고점 대비 -45% 하락했으나, 이는 실적을 동반하며 올라온 주식임에도 불구하고 발생한 비정상적인 가격 조정입니다.\",\n    \"과도한 레버리지가 주가 왜곡의 원인으로 지목되었으며, 특정 펀드의 청산 사례를 통해 이러한 현상이 발생했음을 설명합니다.\",\n    \"유진 파마 교수의 효율적 시장 가설로는 기업 펀더멘탈과 괴리된 급격한 주가 변동을 설명하기 어렵습니다.\",\n    \"시장은 항상 효율적인 가격을 제시하는 것이 아니며, 비효율적으로 가격이 형성되는 상황의 원인을 파악하는 것이 중요합니다.\",\n    \"조지 소로스의 재귀성 이론은 인간의 편향으로 인해 시장이 과열(버블)과 붕괴(크래시)를 주기적으로 오가는 불균형 시스템임을 설명하"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T19:02:51.867839+09:00"
+      "source": "fail",
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T20:00:57.879599+09:00"
     },
     {
       "video_id": "37Ck2p_RxeU",
@@ -11241,45 +11278,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-11T16:51:22.738271+09:00"
-    },
-    {
-      "video_id": "jbEfkQCjcM0",
-      "title": "다우 신고가 터졌다…다음은 나스닥? 9월까지 '2막 랠리' 가능성 | 한상희 한화투자증권 수석연구위원 [글로벌 인터뷰]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T22:36:19+00:00",
-      "url": "https://www.youtube.com/watch?v=jbEfkQCjcM0",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-11T09:07:17.735254+09:00"
-    },
-    {
-      "video_id": "h_TlL8j0Huk",
-      "title": "이 대통령 \"호남 반도체, 구마모토처럼\" | 배터리 양극재 업체도 ESS 덕분 '동반 흑자' | 세제개편안 후폭풍 | 류종은 삼프로TV 취재팀장 [뉴스3]",
-      "channel": "삼프로TV",
-      "published": "2026-08-10T23:07:58+00:00",
-      "url": "https://www.youtube.com/watch?v=h_TlL8j0Huk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-11T09:05:25.962490+09:00"
     }
   ],
-  "updated": "2026-08-19T19:07:23.984348+09:00"
+  "updated": "2026-08-19T20:04:14.479193+09:00"
 }
