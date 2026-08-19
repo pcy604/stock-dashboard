@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "ItS-av66OG8",
+      "title": "삼전닉스보다 강한 소부장? 대형주가 버텨야 더 간다ㅣ명민준, 박가영, 유영화 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-08-19T12:30:21+00:00",
+      "url": "https://www.youtube.com/watch?v=ItS-av66OG8",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-19T22:30:01.075993+09:00"
+    },
+    {
       "video_id": "c__s2MCUx18",
       "title": "SK하이닉스 40조 소각에 삼성전자도 긴장? 주주환원 경쟁 불붙나ㅣ차영주 와이즈경제연구소 소장 [집중 오늘의 주식]",
       "channel": "삼프로TV",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-19T21:00:26.999933+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-19T22:30:33.270175+09:00"
     },
     {
       "video_id": "Uik36xf0ouY",
@@ -35,12 +54,12 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T20:59:21.605109+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T22:29:28.112443+09:00"
     },
     {
       "video_id": "PRpThuoq0eE",
-      "title": "그냥 ETF 하셔도 충분합니다ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.19.수]",
+      "title": "레버리지 안 하셔도 수익 내기에 충분합니다ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.19.수]",
       "channel": "체슬리TV",
       "published": "2026-08-19T10:34:01+00:00",
       "url": "https://www.youtube.com/watch?v=PRpThuoq0eE",
@@ -54,8 +73,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-19T20:58:10.583692+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-19T22:28:54.491565+09:00"
     },
     {
       "video_id": "IAy7Ul3rCrE",
@@ -73,8 +92,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T21:01:31.587848+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T22:31:38.252534+09:00"
     },
     {
       "video_id": "pNj1zY1f81A",
@@ -92,8 +111,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-19T21:00:59.525811+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-19T22:31:05.890598+09:00"
     },
     {
       "video_id": "mK7jwc9j_m0",
@@ -11129,128 +11148,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-11T16:54:14.302355+09:00"
-    },
-    {
-      "video_id": "RbowS3QaHdk",
-      "title": "주식은 외로워야 합니다, 인내했던 섹터 다시 보자 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.08.11.화]",
-      "channel": "체슬리TV",
-      "published": "2026-08-11T02:19:41+00:00",
-      "url": "https://www.youtube.com/watch?v=RbowS3QaHdk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "AI 기술의 시장 침투율 현황과 주가에 반영되는 시점을 분석하며, 인내심을 갖고 미래 가치를 선점하는 '퀄리티 주식' 투자 전략의 중요성을 강조합니다.",
-        "summary": [
-          "AI 기술의 전체 도입률은 아직 22%로 초기 단계이며, 특정 섹터에서는 도입률이 낮아 아직 성장 잠재력이 크다고 분석합니다. [5]",
-          "AI 기술 도입이 가장 빠르게 진행된 분야는 정보, 전문/기술, 교육, 금융/보험 등이며, 이로 인해 해당 분야의 구인 건수가 감소하는 현상이 나타나고 있다고 지적합니다. [247]",
-          "주가는 기술 도입 초기(침투율 5% 돌파 시점)에 가장 가파르게 상승하며, 시장의 관심이 40% 이상으로 높아지면 이미 많은 부분이 가격에 반영된 것으로 판단합니다. [123]",
-          "NVIDIA와 TSMC는 높은 성장률과 견조한 현금 흐름을 바탕으로 '퀄리티 주식'으로 평가되며, 시장 변동성에도 불구하고 펀더멘털 가치를 유지하고 있다고 분석합니다. [940]",
-          "코스메틱 산업의 대형 OEM/ODM 기업(코스맥스, 한국콜마)과 자체 브랜드(VT) 기업의 실적 및 밸류에이션 추이를 비교하며, 중국 내수 시장의 회복과 인디 브랜드의 성장을 주목할 것을 조언합니다. [1918]",
-          "주식 투자는 인내를 요하는 '외로운 게임'으로, 단기적인 시장 움직임에 일희일비하기보다는 기업의 본질적 가치와 장기적인 성장 가능성에 집중해야 한다고 강조합니다. [3300]"
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "과거 스마트폰 도입 시 삼성전자가 1등이 되었던 사례를 언급하며 시장 침투율에 따른 성장을 설명했습니다. 최근에는 자체 칩 개발을 통해 TSMC를 쫓고 있다고 언급했습니다. [38, 900]",
-            "view": "긍정"
-          },
-          {
-            "name": "TSMC",
-            "ticker": "TSM",
-            "context": "엔비디아가 자체 칩을 개발해도 결국 TSMC가 만들어줘야 하는 독점적 위치에 있음을 강조했습니다. P/E가 18.6배로 상대적으로 낮아 장기 투자 관점에서 매력적이라고 평가했습니다. [831, 907]",
-            "view": "긍정"
-          },
-          {
-            "name": "NVIDIA",
-            "ticker": "NVDA",
-            "context": "AI 생태계의 핵심으로, 6대 금융기관의 5000억 달러 규모 자금 지원을 받아 '프론티어 AI 클라우드' 프로젝트를 추진하며 AI 시장 지배력을 강화하고 있습니다. P/E가 19.8배로 과거보다 낮아졌음에도 성장성이 여전히 높고, '퀄리티 주식'으로 평가하며 장기적인 관점에서 긍정적으로 전망했습니다. [940, 1018]",
-            "view": "긍정"
-          },
-          {
-            "name": "HD현대중공업",
-            "ticker": "009540",
-            "context": "발전용 엔진 수주가 늘어나고 있으며, 2025~2028년 예상 매출과 영업이익이 꾸준히 증가할 것으로 예측했습니다. P/E 12배 수준으로, 확정된 수주와 재고 관리 측면에서 펀더멘털이 긍정적이라고 보았습니다. [1440, 1601]",
-            "view": "긍정"
-          },
-          {
-            "name": "코스맥스",
-            "ticker": "192820",
-            "context": "코스메틱 ODM 산업의 대장주로 언급되며, 2024년 밸류에이션이 24배까지 올랐다가 10배 미만으로 하락 후 다시 회복하는 과정을 보여주었습니다. 한국 법인의 내수 비중이 크고, 가동률이 높습니다. [1918, 2000, 2219, 2536]",
-            "view": "중립"
-          },
-          {
-            "name": "코스맥스엔비티",
-            "ticker": "222800",
-            "context": "건강기능식품 OEM/ODM 기업으로, 최근 3개월간 주가가 -11.66% 하락했지만, 1년 동안은 15.35% 상승했습니다. [1404]",
-            "view": "중립"
-          },
-          {
-            "name": "한국콜마",
-            "ticker": "161890",
-            "context": "코스메틱 ODM 산업의 대장주로 언급되며, 2024년 밸류에이션이 24배까지 올랐다가 10배 미만으로 하락 후 다시 회복하는 과정을 보여주었습니다. 미국 법인의 수출 비중이 크고, 가동률이 높습니다. [1918, 2000, 2219]",
-            "view": "중립"
-          },
-          {
-            "name": "VT(VTG)",
-            "ticker": "",
-            "context": "최근 1년간 주가가 399% 상승하며 화장품 섹터에서 가장 높은 성장률을 기록했습니다. [1210]",
-            "view": "긍정"
-          },
-          {
-            "name": "SM",
-            "ticker": "041510",
-            "context": "엔터테인먼트 섹터의 기업으로, 실적이 나쁘지 않음에도 불구하고 코스닥 시장 전반의 상승세에 비해 주가 회복이 더디다고 언급했습니다. [2840, 2911]",
-            "view": "부정"
-          },
-          {
-            "name": "JYP Ent.",
-            "ticker": "035900",
-            "context": "엔터테인먼트 섹터의 기업으로, 실적이 나쁘지 않음에도 불구하고 코스닥 시장 전반의 상승세에 비해 주가 회복이 더디다고 언급했습니다. [2840, 2911]",
-            "view": "부정"
-          },
-          {
-            "name": "하이브",
-            "ticker": "352820",
-            "context": "엔터테인먼트 섹터의 기업으로, 실적이 나쁘지 않음에도 불구하고 코스닥 시장 전반의 상승세에 비해 주가 회복이 더디며, 특히 하이브의 부진이 엔터주 전반의 어려움으로 이어진다고 언급했습니다. [2840, 2903]",
-            "view": "부정"
-          }
-        ],
-        "key_points": [
-          {
-            "point": "기술 도입 초기 단계인 AI 시장은 아직 큰 성장 잠재력을 가지고 있으며, 전체 산업 도입률 40% 수준까지는 관련 시장이 지속적으로 확대될 것으로 예상됩니다. [23]",
-            "t": 23
-          },
-          {
-            "point": "기술 침투율 5%를 돌파하는 시점에 주가가 가장 가파르게 상승하며, 40% 이상에서는 시장의 관심이 포화되어 주가 상승 모멘텀이 둔화될 수 있습니다. [123]",
-            "t": 123
-          },
-          {
-            "point": "AI 도입으로 인해 정보, 기술, 교육, 금융과 같은 지식 산업 분야에서 인력 감축이 빠르게 나타나고 있으며, 이는 AI가 보조 역할을 넘어 전문가 역할을 대체하는 단계로 진입했음을 시사합니다. [255, 627]",
-            "t": 255
-          },
-          {
-            "point": "반면, 운송, 창고업, 숙박, 음식 서비스 등 육체노동 기반 산업은 AI 도입률이 아직 낮으며, 향후 물리적 AI(로봇) 도입 시 인력 구조 변화와 생산성 향상이 기대됩니다. [338, 404]",
-            "t": 338
-          },
-          {
-            "point": "주식 투자는 단기적인 시장 변동성에 휩쓸리지 않고 기업의 펀더멘털과 장기적인 성장 스토리에 집중하는 '인내의 게임'이 되어야 합니다. [3300]",
-            "t": 3300
-          },
-          {
-            "point": "현재 화장품 산업은 과거 폭발적 성장 시기와 유사한 밸류에이션 수준에 도달했으며, 특히 중국 내수 시장의 회복과 인디 브랜드의 성장이 대형 OEM/ODM 기업들에게 긍정적인 영향을 미치고 있습니다. [1930, 2705]",
-            "t": 1930
-          }
-        ],
-        "actionable": [
-          "AI 도입률이 아직 낮은 운송, 숙박/음식 서비스 등 물리적 AI/로봇 도입 잠재력이 큰 섹터에 대한 장기적인 투자 기회를 모색해야 합니다. [338]",
-          "단기적인 가격 변동에 일희일비하기보다, 기업의 실적 전망과 펀더멘털을 꾸준히 분석하여 '퀄리티 주식'을 선별하고 인내심을 가지고 장기 투자하는 전략을 유지해야 합니다. [3230]",
-          "화장품, 엔터테인먼트 등 소비재 섹터 내에서도 기업별 실적과 성장 스토리, 밸류에이션을 면밀히 비교하여 옥석을 가려내고, 시장 트렌드에 맞는 종목을 선별하는 것이 중요합니다. [2838]"
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-11T16:53:51.024230+09:00"
     }
   ],
-  "updated": "2026-08-19T21:03:09.616809+09:00"
+  "updated": "2026-08-19T22:31:39.460670+09:00"
 }
