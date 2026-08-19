@@ -13,11 +13,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T01:02:32.731244+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T02:04:42.737475+09:00"
     },
     {
       "video_id": "ItS-av66OG8",
@@ -11113,5 +11113,5 @@
       "analyzed_at": "2026-08-11T18:45:52.308819+09:00"
     }
   ],
-  "updated": "2026-08-20T01:03:06.161328+09:00"
+  "updated": "2026-08-20T02:04:44.035319+09:00"
 }
