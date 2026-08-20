@@ -1,6 +1,82 @@
 {
   "items": [
     {
+      "video_id": "UrCzPBw99xk",
+      "title": "\"중국차 누가 타?\" 이미 다 타고 있습니다 #이선엽 #중국 #자동차 #독일 #기술 #ai",
+      "channel": "와이스트릿",
+      "published": "2026-08-20T08:00:17+00:00",
+      "url": "https://www.youtube.com/watch?v=UrCzPBw99xk",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T17:22:00.635967+09:00"
+    },
+    {
+      "video_id": "zkvFOU_GQjw",
+      "title": "[8월 20일 마감시황] SK하이닉스 40조 소각은 시작일 뿐…반도체 주가의 바닥이 달라진 이유ㅣ홍선애, 박명석, 김장열 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-08-20T08:00:37+00:00",
+      "url": "https://www.youtube.com/watch?v=zkvFOU_GQjw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T17:19:21.291119+09:00"
+    },
+    {
+      "video_id": "wo-R9YbYPpw",
+      "title": "1980년대vs현재",
+      "channel": "유안타증권",
+      "published": "2026-08-20T07:39:03+00:00",
+      "url": "https://www.youtube.com/watch?v=wo-R9YbYPpw",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T17:18:49.452472+09:00"
+    },
+    {
+      "video_id": "lr0HUjQ_wzs",
+      "title": "헐값에 거래되는데 왜 용기가 필요하죠? #박세익 #주식",
+      "channel": "체슬리TV",
+      "published": "2026-08-20T08:00:12+00:00",
+      "url": "https://www.youtube.com/watch?v=lr0HUjQ_wzs",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T17:17:42.080428+09:00"
+    },
+    {
       "video_id": "BPmEocYIKmg",
       "title": "반도체 기초도 모르고 레버리지부터 지르는 모든 주린이들을 위한 반도체 기초초초초 강의 / [야식잡썰 EP.276] / 이대호 기자",
       "channel": "와이스트릿",
@@ -16,8 +92,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T16:36:01.072345+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T17:23:04.388235+09:00"
     },
     {
       "video_id": "n5CW53gvq7Q",
@@ -35,8 +111,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T16:35:28.894005+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T17:22:32.562670+09:00"
     },
     {
       "video_id": "wEmqofICkhc",
@@ -51,11 +127,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T16:34:51.930904+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T17:21:28.580062+09:00"
     },
     {
       "video_id": "rxGEljX3kvA",
@@ -70,11 +146,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T16:34:02.405646+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T17:20:56.832229+09:00"
     },
     {
       "video_id": "Wdy_nmDhRCI",
@@ -89,11 +165,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T16:33:12.227412+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T17:20:25.043716+09:00"
     },
     {
       "video_id": "42V5Dw-lEWk",
@@ -108,12 +184,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"시장 상승의 주요 장애물로 금리, 전쟁 외에 데이터센터 규제 강화로 인한 투자 지연이 지목됩니다.\",\n  \"summary\": [\n    \"시장이 9천피(9000 포인트) 수준으로 상승하기 위해서는 반도체 시장의 주요 하락 요인이었던 데이터센터 관련 이슈 해결이 필수적입니다. [00:00]\",\n    \"과거 반도체 주가 반등은 하이퍼스케일러의 데이터센터 투자가 가시화되면서 이루어졌습니다. [00:17]\",\n    \"기본적으로 금리 인상과 전쟁이라는 거시적 변수가 존재하지만, 새로운 추가 변수로 데이터센터 관련 규제 강화가 부상하고 있습니다. [00:28]\",\n    \"미국 일부 지역에서는 데이터센터에 대한 규제가 지속적으로 강화되고 있으며, 이는 건설 및 확장 속도를 늦추는 요인이 됩니다. [00:41]\",\n    \"데이터센터 건설 지연은 하이퍼스케일러의 투자가 이루어져도 실제 시장에 반영되는 속도를 늦춰 병목 현상을"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T16:32:25.465660+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T17:19:53.205218+09:00"
     },
     {
       "video_id": "IJl4yRAL3Hw",
@@ -183,11 +258,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T16:31:13.761915+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T17:18:17.347489+09:00"
     },
     {
       "video_id": "0-vrEaDvlco",
@@ -10515,223 +10590,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-12T07:28:05.341766+09:00"
-    },
-    {
-      "video_id": "H1besYlSbcM",
-      "title": "매일 아침 펀드매니저들의 운용회의 라이브 | 박세익 전무 & 체슬리투자자문 [모닝브리프 / 26.08.12.수]",
-      "channel": "체슬리TV",
-      "published": "2026-08-11T22:08:09+00:00",
-      "url": "https://www.youtube.com/watch?v=H1besYlSbcM",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "2026년 8월 모닝브리프에서 미국 기술주 강세와 한국 반도체/이차전지/자동차 섹터의 성장 지속을 확인하며, 인플레이션 압력 속 질적 성장 기업 및 장기 분산 투자의 중요성을 강조.",
-        "summary": [
-          "미국 기술주 중심의 글로벌 증시 강세 지속, 인플레이션 완화 기대감이 있으나 중앙은행의 신중한 입장은 유지.",
-          "연준의 '고금리 장기화' 시사에도 불구하고 글로벌 경제 연착륙 기대감이 높아지고 있으며, 이는 시장 안정화에 기여.",
-          "AI 및 고대역폭 메모리(HBM) 수요 증가로 반도체 업황 회복이 본격화되며 관련 기업들의 실적 개선이 기대.",
-          "전기차 시장의 구조적 성장세는 유지되나, 경쟁 심화와 공급망 안정화에 대한 관리가 이차전지 및 완성차 기업의 핵심 과제.",
-          "단기 시장 변동성보다는 장기적 안목으로 질적 성장이 가능한 핵심 기술 기업과 메가트렌드 섹터에 대한 분산 투자가 강조됨."
-        ],
-        "tickers": [
-          {
-            "name": "NVIDIA",
-            "ticker": "NVDA",
-            "context": "AI 기술 리더십과 데이터센터 투자 확대에 따른 지속적인 성장 기대로 시장을 견인하는 핵심 종목.",
-            "view": "긍정",
-            "t": 45
-          },
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "HBM을 포함한 메모리 반도체 업황 회복 및 파운드리 기술력 강화로 반도체 사이클 전환의 수혜주.",
-            "view": "긍정",
-            "t": 350
-          },
-          {
-            "name": "LG에너지솔루션",
-            "ticker": "373220",
-            "context": "전기차 시장의 구조적 성장세에도 불구하고 경쟁 심화 및 원자재 가격 변동성으로 인한 기술력 및 수주 역량의 중요성 부각.",
-            "view": "중립",
-            "t": 400
-          },
-          {
-            "name": "현대차",
-            "ticker": "005380",
-            "context": "글로벌 시장 점유율 확대와 전기차 라인업 강화, 견조한 실적을 바탕으로 안정적인 성장세를 이어갈 것으로 전망.",
-            "view": "긍정",
-            "t": 450
-          }
-        ],
-        "key_points": [
-          {
-            "point": "글로벌 경제는 연착륙 기조를 유지하며, 미국 중심의 기술주 강세가 시장을 주도할 것으로 예상되며 투자심리 개선에 긍정적.",
-            "t": 180
-          },
-          {
-            "point": "인플레이션 압력은 점진적으로 완화되고 있으나, 서비스 물가 및 중앙은행의 신중한 통화 정책 기조는 상당 기간 지속될 가능성.",
-            "t": 250
-          },
-          {
-            "point": "AI 기술 발전과 고성능 반도체(HBM) 수요 폭증으로 반도체 산업은 새로운 성장 사이클에 진입했으며, 이는 장기적인 투자 기회를 제공.",
-            "t": 300
-          },
-          {
-            "point": "전기차 및 이차전지 시장은 장기적인 성장 동력을 보유하고 있으나, 신규 진입자 증가 및 공급망 이슈에 대한 면밀한 분석과 선별적 투자가 필요.",
-            "t": 380
-          },
-          {
-            "point": "불확실성 높은 시장 환경에서는 기업의 본질적 가치와 이익 성장에 집중하고, 산업 트렌드에 부합하는 섹터에 분산 투자하는 전략이 유효.",
-            "t": 600
-          }
-        ],
-        "actionable": [
-          "AI, 반도체, 미래 모빌리티 등 장기 성장 테마 내에서 질적 우위와 기술 경쟁력을 가진 기업 중심으로 포트폴리오 비중을 확대.",
-          "글로벌 인플레이션 지표와 주요국 중앙은행의 통화 정책 변화에 대한 지속적인 모니터링을 통해 시장의 큰 흐름을 파악.",
-          "단기적인 시장 변동성에 일희일비하기보다, 분할 매수/매도 전략을 통해 현금 비중을 조절하며 조정 시 장기 성장주 매수 기회로 활용."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T07:24:06.033564+09:00"
-    },
-    {
-      "video_id": "w6Zfi8dY6ao",
-      "title": "미·이란 협상 불안과 CPI 발표 경계감 속 뉴욕증시 하락 마감_26.08.12 | 여도은, 박명석, 김효진 [월스트리트 모닝브리핑]",
-      "channel": "삼프로TV",
-      "published": "2026-08-11T20:27:54+00:00",
-      "url": "https://www.youtube.com/watch?v=w6Zfi8dY6ao",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "미국-이란 협상 불확실성 및 임박한 CPI 발표에 대한 경계감으로 뉴욕 증시가 하락 마감했으며, 투자자들은 거시 경제 지표와 지정학적 이슈를 주시하고 있습니다.",
-        "summary": [
-          "뉴욕 증시는 미국-이란 협상 불안감과 다가오는 CPI 발표에 대한 경계감으로 전반적인 하락세를 보였습니다. [15]",
-          "미국-이란 협상 관련 불확실성은 지정학적 리스크를 고조시키고 잠재적인 유가 변동성 증가 우려를 낳았습니다. [30]",
-          "임박한 CPI 발표는 인플레이션 경로와 연방준비제도(Fed)의 향후 통화 정책 방향에 대한 시장의 높은 관심을 반영합니다. [90]",
-          "고인플레이션 우려가 지속되고 금리 인상 압력이 커질 수 있다는 전망이 투자 심리에 부담으로 작용했습니다. [105]",
-          "주요 시장 참여자들은 거시 경제 지표와 지정학적 상황 변화에 따라 시장 변동성이 커질 수 있음을 경고했습니다. [180]"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "미국-이란 협상 난항으로 인한 지정학적 리스크 고조 및 에너지 시장에 미칠 잠재적 영향에 주목해야 합니다. [45]",
-            "t": 45
-          },
-          {
-            "point": "임박한 소비자물가지수(CPI) 발표 결과는 연준의 통화 긴축 기조 유지 여부와 금리 인상 가능성에 대한 중요한 단서를 제공할 것입니다. [120]",
-            "t": 120
-          },
-          {
-            "point": "이러한 거시 경제 및 지정학적 불확실성은 뉴욕 증시 전반의 투자 심리를 위축시키고 변동성을 확대시키는 주요 요인으로 작용하고 있습니다. [180]",
-            "t": 180
-          }
-        ],
-        "actionable": [
-          "향후 발표될 CPI 데이터 및 연방준비제도(Fed)의 금리 관련 메시지에 촉각을 세우고, 이에 따른 시장 반응을 면밀히 관찰해야 합니다. [210]",
-          "미국-이란 협상 진행 상황과 중동 지역의 지정학적 리스크 변화가 국제 유가 및 관련 산업에 미치는 영향을 지속적으로 모니터링해야 합니다. [225]",
-          "시장 불확실성이 높은 시기에는 포트폴리오의 방어적 자산 비중을 점검하거나 리밸런싱을 통해 위험 관리를 강화하는 것을 고려할 수 있습니다. [240]"
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T06:27:22.044294+09:00"
-    },
-    {
-      "video_id": "xlSqV_hx5VU",
-      "title": "거래량이 실종된 코스피, 당분간 주도주는 기대하지 마세요ㅣ명민준, 김유민, 황유현 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-08-11T12:30:23+00:00",
-      "url": "https://www.youtube.com/watch?v=xlSqV_hx5VU",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-12T03:39:48.932124+09:00"
-    },
-    {
-      "video_id": "35WG25DeY4Q",
-      "title": "삼전닉스 도대체 왜 발목이 묶인거에요?ㅣ명민준, 김유민, 이지환 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-08-11T13:30:05+00:00",
-      "url": "https://www.youtube.com/watch?v=35WG25DeY4Q",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "최근 코스닥 강세와 반도체 하락은 수급 회피와 심리적 요인 때문이며, 삼성전자/SK하이닉스는 펀더멘털 훼손이 아닌 외국인 수급과 악재 소멸에 따른 회복 가능성이 높으므로 단기 시황에 흔들리지 말고 거래량 추세로 시장 국면을 파악해야 합니다.",
-        "summary": [
-          "최근 코스닥 상승은 반도체 주춤세에 따른 일시적 수급 쏠림과 순환매 성격이 강하며, 개인 투자자들은 단기적인 관점으로 접근하는 것이 좋습니다.",
-          "삼성전자/SK하이닉스의 최근 하락은 '반도체 고점론'과 '중국 반도체 위험론' 등 외부적 악재가 약화되고 있음에도 불구하고 심리적 요인과 주주환원 부족으로 인한 수급 이탈이 컸습니다.",
-          "SK하이닉스 차트 분석 결과, 과거 저점에서의 대량 거래는 손바뀜을 의미하며, 이후 거래량 감소와 함께 하락폭을 유지하는 것은 하락 추세가 강하지 않음을 시사합니다.",
-          "객관적으로 거래량을 통해 시장 국면을 파악하는 것이 중요하며, 거래량 증가 시 추세(상승/하락), 감소 시 역추세(조정/반등)로 해석하고, 현재 반도체는 매도세보다는 매수세 부재로 인한 조정 국면입니다."
-        ],
-        "tickers": [
-          {
-            "name": "삼성전자",
-            "ticker": "005930",
-            "context": "외국인 수급 유입 및 공매도 감소가 나타나 수급상 긍정적인 변화를 보입니다.",
-            "view": "긍정",
-            "t": 2185
-          },
-          {
-            "name": "SK하이닉스",
-            "ticker": "000660",
-            "context": "최근 저점에서 대규모 거래량 발생 후 현재 가격대가 지지되고 있으며, 펀더멘털 훼손이 아닌 심리적 요인과 수급에 의해 밀린 것으로 분석됩니다.",
-            "view": "긍정",
-            "t": 3225
-          },
-          {
-            "name": "코스닥",
-            "ticker": "",
-            "context": "반도체가 어려울 때 상승하는 경향이 있으며, 단기 거래는 유효하나 너무 긴 호흡으로 접근하는 것은 위험할 수 있습니다.",
-            "view": "중립",
-            "t": 46
-          }
-        ],
-        "key_points": [
-          {
-            "point": "최근 시장의 여러 종목 상승은 반도체 부진에 따른 수남매 성격이 강하며, 개인 투자자들은 짧은 관점으로 대응해야 합니다.",
-            "t": 46
-          },
-          {
-            "point": "반도체 주식의 가격 하락 국면에서 거래량이 줄어드는 것은 역추세나 조정/반등의 가능성을 나타내며, 너무 겁내지 말고 버텨야 하는 시점입니다.",
-            "t": 2819
-          },
-          {
-            "point": "과거 '반도체 고점론'과 '중국 반도체 위험론' 등 부정적 시각이 희석되고 있으며, 현재 하락은 주로 수급과 심리적 요인에 기인합니다.",
-            "t": 600
-          },
-          {
-            "point": "거래량이 늘어나는 쪽은 추세, 줄어드는 쪽은 역추세(조정/반등)로 해석하며, 이는 시장 국면을 파악하는 유용한 방법입니다.",
-            "t": 2819
-          },
-          {
-            "point": "최대 거래량이 터진 구간은 고점이나 저점일 가능성이 높으며, 현재 SK하이닉스 차트의 저점 구간 거래량은 매도세가 아닌 매수세 부재의 신뢰성 있는 저점 신호로 해석됩니다.",
-            "t": 2933
-          },
-          {
-            "point": "개인 투자자는 시장의 국면을 파악하고, 기술적 분석의 보조 지표보다는 캔들과 거래량을 주 지표로 삼아 단순하게 시장을 보는 것이 중요합니다.",
-            "t": 2307
-          },
-          {
-            "point": "현재는 공포 구간이 아닌 버텨야 하는 구간이며, 삼성전자/SK하이닉스가 적극적인 주주환원 정책을 보인다면 주가 회복이 빠르게 나타날 수 있습니다.",
-            "t": 3340
-          }
-        ],
-        "actionable": [
-          "KOSDAQ 종목은 단기적인 시각으로 접근하여 수익을 취하고, 과도한 물타기나 장기 보유는 지양합니다.",
-          "삼성전자, SK하이닉스 등 대형 반도체주는 현재 가격대에서 펀더멘털 훼손 없이 수급에 의한 조정이므로, 무작정 매도하기보다는 시장의 국면을 파악하며 버티는 전략을 고려합니다.",
-          "기술적 분석 시 복잡한 보조 지표보다는 거래량 추이를 중심으로 시장의 추세와 국면을 파악하고 투자 의사결정을 내립니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 4,
-      "analyzed_at": "2026-08-12T03:39:16.550640+09:00"
     }
   ],
-  "updated": "2026-08-20T16:36:35.496663+09:00"
+  "updated": "2026-08-20T17:23:05.388394+09:00"
 }
