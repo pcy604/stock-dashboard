@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "BtfgvJXCRGA",
+      "title": "삼성전자 150조 주주환원…\"한국 기업 역사상 최대 규모\" | 미국 채권 바이백 무용론?…다시 오른 장기채, 유가도 상승 | 권순우 삼프로TV 취재팀장 [뉴스3]",
+      "channel": "삼프로TV",
+      "published": "2026-08-20T23:23:31+00:00",
+      "url": "https://www.youtube.com/watch?v=BtfgvJXCRGA",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-21T08:57:00.609338+09:00"
+    },
+    {
       "video_id": "4yw9vczVpAU",
       "title": "[미방분] 원룸 살면서 아낀 돈으로 결국 아파트 샀습니다 #원룸 #전세 #월세 #자가 #매매 #아파트 #성남 #부동산 #곽지현 #절약의달인",
       "channel": "와이스트릿",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-21T08:04:44.193514+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-21T08:58:38.001043+09:00"
     },
     {
       "video_id": "2qlnxigCfdQ",
@@ -35,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-21T08:04:11.734402+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-21T08:58:05.246621+09:00"
     },
     {
       "video_id": "RVgQWLtFf30",
@@ -51,12 +70,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"거시경제 환경 개선과 강력한 기업 실적, 특히 AI 관련 섹터의 성장에 힘입어 하반기 미국 증시는 변동성 속에서도 상승 기조를 이어갈 것으로 전망됩니다.\",\n  \"summary\": [\n    \"미국 시장은 여전히 통화 정책의 영향을 받지만, 긍정적인 신호(예: 실질 금리 하락)가 예상보다 빠르게 나타나며 시장 분위기를 개선하고 있습니다.\",\n    \"장기 금리 상승에 대한 우려가 있지만, 미국 재무부의 대응과 경제 지표 변화로 인해 심리적 안정감이 커질 것으로 보이며, 증시는 상승세를 유지할 것으로 보입니다.\",\n    \"미국 S&P 500 기업들의 2분기 실적은 예상치를 크게 상회했으며, 특히 커뮤니케이션 및 IT 섹터(AI 및 반도체 관련)가 성장을 주도하고 있습니다.\",\n    \"강력한 실적 개선으로 인해 'AI 버블'에 대한 우려가 희석되고 있으며, AI 혁명은 아직 초기 단계로 앞으로도 성장 잠재력이 높다고"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-21T08:03:39.390079+09:00"
+      "source": "fail",
+      "attempts": 2,
+      "analyzed_at": "2026-08-21T08:57:32.931253+09:00"
     },
     {
       "video_id": "FwwMStbjG2Q",
@@ -10325,49 +10343,7 @@
       "source": "video",
       "attempts": 2,
       "analyzed_at": "2026-08-12T20:29:24.033200+09:00"
-    },
-    {
-      "video_id": "D9AXLNN7sMw",
-      "title": "이럴 때는 절대 주식으로 돈 못 법니다 #박세익 #주식",
-      "channel": "체슬리TV",
-      "published": "2026-08-12T08:00:34+00:00",
-      "url": "https://www.youtube.com/watch?v=D9AXLNN7sMw",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "주식 시장은 소수만이 돈을 버는 게임이며, 대중 심리에 휩쓸려 뒤늦게 몰리면 절대 돈을 벌 수 없습니다.",
-        "summary": [
-          "주식 투자에서 반드시 1등을 노릴 필요는 없으며, 3등처럼 적당한 위치에서도 충분히 수익을 얻을 수 있습니다. (t=0)",
-          "하지만 시장에 늦게 진입하여 7등, 8등, 9등, 10등처럼 대중이 우르르 몰려들 때 투자하면 돈을 벌기 어렵습니다. (t=4)",
-          "주식은 처음에는 소수의 아이디어가 시장의 동의를 얻으며 시작되는 게임입니다. (t=10)",
-          "시장이 아이디어에 동조하지 않으면 주가는 오르지 않으며, 먼저 움직인 빠른 투자자들이 이득을 봅니다. (t=26)",
-          "대중이 2배, 3배의 수익을 기대하며 마지막에 몰려드는 시점에는 절대 돈을 벌 수 없게 됩니다. (t=46)",
-          "결론적으로 주식 시장은 소수만이 돈을 버는 구조를 가지고 있음을 이해해야 합니다. (t=42)"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "주식 투자는 다수가 아닌 소수가 돈을 버는 게임이므로, 대중의 심리에 휩쓸리는 투자는 지양해야 합니다.",
-            "t": 42
-          },
-          {
-            "point": "이미 주가가 많이 오른 후, 모두가 큰 수익을 기대하며 몰려드는 시점은 투자를 피해야 할 때입니다.",
-            "t": 46
-          },
-          {
-            "point": "자신만의 투자 아이디어를 가지고 시장의 동의를 먼저 구하는 '오피니언 리더'의 관점에서 접근하는 것이 중요합니다.",
-            "t": 15
-          }
-        ],
-        "actionable": [
-          "시장의 대중 심리에 휩쓸려 뒤늦게 특정 종목에 과도하게 진입하는 것을 경계하세요.",
-          "자신만의 투자 아이디어를 기반으로 소수의 선발대에 합류하는 것을 목표로 하세요.",
-          "모두가 '돈을 크게 벌었다'고 할 때가 아니라, 남들이 아직 주목하지 않는 아이디어에 집중해야 합니다."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T18:48:24.915395+09:00"
     }
   ],
-  "updated": "2026-08-21T08:04:45.193776+09:00"
+  "updated": "2026-08-21T08:58:39.001308+09:00"
 }
