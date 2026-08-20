@@ -1,6 +1,151 @@
 {
   "items": [
     {
+      "video_id": "BCc5BQmlJVY",
+      "title": "트럼프, 김정은과 회담 추진 한국 증시에 미칠 영향ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.20.목]",
+      "channel": "체슬리TV",
+      "published": "2026-08-20T10:00:10+00:00",
+      "url": "https://www.youtube.com/watch?v=BCc5BQmlJVY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "미국 장기 국채 금리 상승은 유가, 이란 협상 무산, 재정 악화, 빅테크 채권 발행 등이 복합적으로 작용한 결과이며, 이로 인해 증시 변동성이 커지고 우량 자산 투자 기회가 발생하고 있습니다.",
+        "summary": [
+          "부동산 가격은 일자리 밀집 지역의 인구 유입으로 인해 지속적으로 상승하며, 정부의 개입으로는 그 흐름을 막기 어렵습니다.",
+          "돈이 계속 발행되는 상황에서 인플레이션은 필연적이며, 희소성을 가진 우량 자산의 가치는 계속 상승할 수밖에 없습니다.",
+          "미국 30년 만기 국채 금리가 2007년 이후 19년 만에 최고치를 기록하는 등 주요국 국채 금리가 연쇄적으로 상승하고 있습니다.",
+          "장기 국채 금리 상승의 핵심 원인은 유가 상승, 미국-이란 종전 협상 무산, 미 재정 악화, 그리고 아마존, MS 등 빅테크 기업들의 대규모 회사채 발행 등입니다.",
+          "북한은 희토류를 포함한 막대한 자원과 값싼 노동력을 가진 '노다지 땅'이며, 트럼프 대통령은 임기 내 북한 개발을 통한 이익 창출에 관심이 있을 것으로 분석됩니다.",
+          "국내 증시는 미국 국채 금리 상승에 부담을 느끼고 있지만, 낮은 PER(주가수익비율)로 인해 하방 경직성을 보일 가능성이 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "이날 코스피 지수 하락 마감 언급 시 함께 하락한 종목으로 언급",
+            "view": "부정",
+            "t": 418
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "이날 코스피 지수 하락 마감 언급 시 함께 하락한 종목으로 언급",
+            "view": "부정",
+            "t": 418
+          },
+          {
+            "name": "SK스퀘어",
+            "ticker": "402340",
+            "context": "이날 코스피 지수 하락 마감 언급 시 함께 하락한 종목으로 언급",
+            "view": "부정",
+            "t": 418
+          },
+          {
+            "name": "삼성전기",
+            "ticker": "009150",
+            "context": "이날 코스피 지수 하락 마감 언급 시 함께 하락한 종목으로 언급",
+            "view": "부정",
+            "t": 418
+          },
+          {
+            "name": "현대차",
+            "ticker": "005380",
+            "context": "이날 코스피 지수 하락 마감 언급 시 함께 하락한 종목으로 언급",
+            "view": "부정",
+            "t": 418
+          },
+          {
+            "name": "엔비디아",
+            "ticker": "NVDA",
+            "context": "미국발 장기 국채 금리 상승으로 주가 하락",
+            "view": "부정",
+            "t": 769
+          },
+          {
+            "name": "마이크론테크놀로지",
+            "ticker": "MU",
+            "context": "미국발 장기 국채 금리 상승으로 주가 하락",
+            "view": "부정",
+            "t": 769
+          },
+          {
+            "name": "아마존",
+            "ticker": "AMZN",
+            "context": "하이퍼스케일러 기업들의 대규모 회사채 발행이 장기 국채 금리 상승의 한 원인으로 언급",
+            "view": "중립",
+            "t": 925
+          },
+          {
+            "name": "마이크로소프트",
+            "ticker": "MSFT",
+            "context": "하이퍼스케일러 기업들의 대규모 회사채 발행이 장기 국채 금리 상승의 한 원인으로 언급",
+            "view": "중립",
+            "t": 925
+          },
+          {
+            "name": "구글",
+            "ticker": "GOOGL",
+            "context": "하이퍼스케일러 기업들의 대규모 회사채 발행이 장기 국채 금리 상승의 한 원인으로 언급",
+            "view": "중립",
+            "t": 925
+          },
+          {
+            "name": "메타플랫폼스",
+            "ticker": "META",
+            "context": "하이퍼스케일러 기업들의 대규모 회사채 발행이 장기 국채 금리 상승의 한 원인으로 언급",
+            "view": "중립",
+            "t": 925
+          },
+          {
+            "name": "오라클",
+            "ticker": "ORCL",
+            "context": "하이퍼스케일러 기업들의 대규모 회사채 발행이 장기 국채 금리 상승의 한 원인으로 언급",
+            "view": "중립",
+            "t": 925
+          },
+          {
+            "name": "코카콜라",
+            "ticker": "KO",
+            "context": "고금리 장기화 시 자금 조달에 대한 우려가 적은 기업으로 상승 가능성 언급",
+            "view": "긍정",
+            "t": 1231
+          }
+        ],
+        "key_points": [
+          {
+            "point": "대도시 부동산은 '머릿수'에 달려 있으며, 일자리가 많아 사람이 모이면 분업이 이루어지고 부가 향상되어 부동산 가격이 잡히기 어렵다.",
+            "t": 29
+          },
+          {
+            "point": "기축통화국이 돈을 계속 찍어내면 물가 상승은 필연적이고, 물가가 오르면 희소성 있는 자산은 더 오르게 되어, 재테크 시 핵심 우량 자산에 투자해야 한다.",
+            "t": 139
+          },
+          {
+            "point": "트럼프 행정부는 북한의 지하자원(희토류)과 값싼 노동력을 활용한 경제 개발에 관심이 많으며, 이를 본인 임기 내 업적으로 만들고자 할 것이다.",
+            "t": 393
+          },
+          {
+            "point": "미국 장기 국채 금리 상승의 원인은 유가 상승(인플레이션 자극), 미-이란 종전 협상 무산(지정학적 리스크), 미 연방 정부 부채 급증(재정 악화), 그리고 빅테크 기업들의 대규모 회사채 발행(시장 내 자금 경쟁)입니다.",
+            "t": 829
+          },
+          {
+            "point": "KOSPI의 주가수익비율(PER)이 5.6배로 낮은 수준이며, 이는 증시의 '기초 체력'이 견고하여 추가적인 하락에 대한 경직성이 있음을 시사합니다.",
+            "t": 1111
+          },
+          {
+            "point": "고금리 상황이 지속될 수 있지만, 결국 경기가 둔화되면 금리는 다시 하락할 것이며, 현재 고금리는 우량 주식을 싸게 살 수 있는 '바겐세일' 기회를 제공합니다.",
+            "t": 1193
+          }
+        ],
+        "actionable": [
+          "핵심 우량 자산에 집중하여 투자할 것.",
+          "고금리 기간 동안 저평가된 우량 주식의 '바겐세일' 기회를 활용할 것."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T20:02:43.785955+09:00"
+    },
+    {
       "video_id": "KXQ_KZg0hFg",
       "title": "SK하이닉스 13% 급등…바닥은 다졌지만 '추세 상승'을 말하기 이른 이유ㅣ홍선애, 장우진 금시공 대표 [여의도 인사이트]",
       "channel": "삼프로TV",
@@ -16,8 +161,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T19:06:23.682653+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T20:04:20.614613+09:00"
     },
     {
       "video_id": "i2V9FSjpWIM",
@@ -35,8 +180,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T19:04:46.097159+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T20:03:15.878578+09:00"
     },
     {
       "video_id": "UrCzPBw99xk",
@@ -46,16 +191,81 @@
       "url": "https://www.youtube.com/watch?v=UrCzPBw99xk",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "한국 전기차 시장은 물론 독일에서도 중국산 자동차의 점유율이 빠르게 증가하며 기존 강자들을 위협하고 있어 정부와 기업의 적극적인 대응이 필요하다.",
+        "summary": [
+          "한국에서 판매되는 전기차의 70~80%가 이미 중국산이며, 테슬라 차량의 상당 부분도 중국에서 제조되고 있다.",
+          "BYD와 Zeekr 같은 중국 자동차 브랜드들이 한국 시장에 진출하여 의외로 높은 판매량을 기록하고 있다.",
+          "자동차의 본고장인 독일에서조차 중국차의 시장 점유율이 약 10%에 육박하며, 벤츠가 택시로 사용되는 나라에서 중국차가 팔리기 시작한 것은 심각한 위협이다.",
+          "국내외 시장에서 중국차의 급성장은 기존 자동차 강국과 기업들에게 두려움을 안겨주는 요인으로 작용하고 있다.",
+          "중국 자동차의 위협에 대응하기 위해 정부의 정책적 조치와 국내 자동차 기업들의 경쟁력 강화(품질 및 가격 경쟁력)가 시급하다."
+        ],
+        "tickers": [
+          {
+            "name": "테슬라",
+            "ticker": "TSLA",
+            "context": "테슬라 차량의 많은 부분이 중국에서 제조되고 있다",
+            "view": "중립",
+            "t": 8
+          },
+          {
+            "name": "BYD",
+            "ticker": "BYDDY",
+            "context": "비야디(BYD)가 한국 시장에 진출하여 의외로 잘 팔리고 있다",
+            "view": "긍정",
+            "t": 11
+          },
+          {
+            "name": "Zeekr",
+            "ticker": "ZK",
+            "context": "지커(Zeekr)가 한국 시장에 진출하여 의외로 잘 팔리고 있다",
+            "view": "긍정",
+            "t": 11
+          },
+          {
+            "name": "Mercedes-Benz",
+            "ticker": "MBG",
+            "context": "독일 3사 중 하나로, 본고장 독일에서도 중국차에 시장 점유율을 내주고 있다",
+            "view": "부정",
+            "t": 27
+          },
+          {
+            "name": "BMW",
+            "ticker": "BMW",
+            "context": "독일 3사 중 하나로, 본고장 독일에서도 중국차에 시장 점유율을 내주고 있다",
+            "view": "부정",
+            "t": 27
+          },
+          {
+            "name": "Volkswagen",
+            "ticker": "VWAGY",
+            "context": "독일 3사 중 하나로, 본고장 독일에서도 중국차에 시장 점유율을 내주고 있다",
+            "view": "부정",
+            "t": 27
+          }
+        ],
+        "key_points": [
+          {
+            "point": "중국 전기차는 한국 시장에서 높은 점유율을 차지하고 있으며, 테슬라조차 중국 생산의 영향을 받고 있다.",
+            "t": 2
+          },
+          {
+            "point": "자동차 본고장인 독일에서도 중국차의 시장 침투가 심화되어 전통 강자들이 위협받고 있다.",
+            "t": 25
+          },
+          {
+            "point": "정부와 국내 자동차 기업들은 중국차의 가격 경쟁력과 품질 향상에 대한 위협을 인지하고, 강력한 정책 및 기술적 대응 마련이 시급하다.",
+            "t": 42
+          }
+        ],
+        "actionable": [
+          "중국 전기차 관련 정책 변화 및 국내외 자동차 시장 점유율 추이 모니터링",
+          "국내 자동차 및 배터리 기업들의 중국 경쟁력 대응 전략 분석",
+          "정부의 중국산 자동차 수입 및 판매 관련 정책 변화 주시"
+        ]
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T19:09:04.963878+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T20:11:09.381924+09:00"
     },
     {
       "video_id": "zkvFOU_GQjw",
@@ -70,11 +280,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T19:06:55.773887+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T20:05:06.336004+09:00"
     },
     {
       "video_id": "wo-R9YbYPpw",
@@ -92,8 +302,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T19:05:51.287509+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T20:03:48.385085+09:00"
     },
     {
       "video_id": "lr0HUjQ_wzs",
@@ -185,11 +395,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T18:16:16.207716+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T20:09:31.328663+09:00"
     },
     {
       "video_id": "rxGEljX3kvA",
@@ -485,8 +695,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T11:13:23.844835+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T20:10:36.086033+09:00"
     },
     {
       "video_id": "voDeVaf7oe8",
@@ -610,8 +820,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T11:08:54.913396+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T20:10:03.812599+09:00"
     },
     {
       "video_id": "DU1izB9hZtM",
@@ -10429,61 +10639,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-12T09:44:00.348094+09:00"
-    },
-    {
-      "video_id": "dZzICbpzsuI",
-      "title": "미국채 10년물 금리 '최고점'…하반기 금리 결정 향방은? | 신영증권 김효진 박사 [글로벌 인터뷰]",
-      "channel": "삼프로TV",
-      "published": "2026-08-11T22:45:50+00:00",
-      "url": "https://www.youtube.com/watch?v=dZzICbpzsuI",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "미국채 10년물 금리가 고공행진하며 연준의 정책 신뢰도에 의문이 제기되는 가운데, 시장은 유가보다 근원 물가지표와 테일러 준칙의 '적정금리'에 주목하고 있으며, 연준의 명확한 정책 방향 제시가 중요해지고 있습니다.",
-        "summary": [
-          "미국채 10년물 금리가 급등하며 연준의 정책금리(FFR 상단 3.75%)보다 훨씬 높은 4.7%대에 도달, 과거 기준금리 5.5% 수준과 맞먹는 수준입니다. [01:45]",
-          "최근 유가가 고점 대비 28% 하락했음에도 불구하고, 10년물 금리는 오히려 0.37%p 상승하며 유가와 금리의 전통적인 연관성에서 벗어나는 디커플링 현상을 보이고 있습니다. [03:09]",
-          "미국 채권 시장은 현재 유가나 단순한 정책금리 시그널보다는 '테일러 준칙'에 따른 적정금리(현재 5.1%)를 더 중요하게 보고 있으며, 이는 현재 정책금리보다 훨씬 높은 수준입니다. [10:30]",
-          "연준 위원들이 중점적으로 보는 근원 PCE(개인소비지출) 물가지표(현재 3.3%)는 쉽게 내려오지 않으며, 주거비, 금융/보험, 의료 등 전반적인 서비스 물가 상승 압력이 지속되고 있어 우려를 더하고 있습니다. [26:09]",
-          "연준의 정책적 불확실성(예: 소수 의견 대두, 모호한 커뮤니케이션)은 시장에 혼란을 주며, 오히려 물가 안정화를 위해 적시에 명확하게 금리를 인상하는 것이 시장 신뢰 회복에 긍정적일 수 있다는 주장이 나옵니다. [17:42]",
-          "내구재, 비내구재, 서비스 등 전반적인 물가 항목이 2025년 평균 예상치를 상회할 것으로 전망되어, 인플레이션 압력이 단기적 요인이 아니라 구조적인 문제일 수 있다는 인식이 확산되고 있습니다. [27:24]"
-        ],
-        "tickers": [],
-        "key_points": [
-          {
-            "point": "미국 장기금리 상승세 지속: 연준의 단기 정책금리와 달리, 10년물 금리가 가파르게 상승하여 시장에 큰 부담으로 작용하고 있습니다. [01:45]",
-            "t": 105
-          },
-          {
-            "point": "유가-금리 디커플링: 과거 유가 하락 시 금리도 하락하는 경향이 있었으나, 최근 유가가 급락했음에도 미국 장기금리는 오히려 상승하는 이례적인 현상이 관찰됩니다. [03:09]",
-            "t": 296
-          },
-          {
-            "point": "테일러 준칙에 따른 적정금리 주목: 시장은 연준의 모호한 시그널보다는 물가 및 경기 상황을 고려한 '테일러 준칙' 상의 적정금리(현재 약 5.1%)를 기준으로 금리 방향성을 예측하는 경향이 강화되고 있습니다. [09:21]",
-            "t": 1029
-          },
-          {
-            "point": "광범위한 물가 상승 압력: 핵심 물가지표인 근원 PCE가 여전히 높은 수준(3.3%)을 유지하고 있으며, 주거비, 서비스 등 광범위한 품목에서 물가 상승이 지속되어 쉽게 잡히기 어려운 상황입니다. [25:21]",
-            "t": 2609
-          },
-          {
-            "point": "연준의 신뢰도 및 커뮤니케이션 중요성: 연준의 정책 방향에 대한 불확실성(예: 소수 의견 대두)은 시장의 혼란을 가중시키며, 명확하고 자신감 있는 정책 결정과 소통이 시장 안정화에 필수적입니다. [16:09]",
-            "t": 1800
-          },
-          {
-            "point": "금리 인상 시점의 딜레마: 중간 선거 등 정치적 요인으로 인해 9월 금리 동결 가능성이 높지만, 시장에서는 오히려 금리를 늦게 그리고 급하게 올리는 것보다 조기에 점진적으로 인상하여 물가 통제 의지를 보여주는 것을 선호하는 경향이 있습니다. [29:35]",
-            "t": 2130
-          }
-        ],
-        "actionable": [
-          "미국 10년물 국채 금리 및 근원 PCE 물가지수(특히 서비스 물가) 동향을 주의 깊게 모니터링하여 시장의 '적정금리' 인식을 파악하세요.",
-          "연준의 FOMC 의사록 및 위원들의 발언에서 정책금리 인상/동결에 대한 컨센서스 변화와 함께, 물가 통제에 대한 명확한 의지와 자신감 있는 커뮤니케이션 여부를 확인하세요.",
-          "급작스러운 금리 인상 사이클의 반복을 피하기 위해, 연준이 조기에 점진적이고 예측 가능한 방식으로 정책을 운영하는지 주시하며 시장 변동성에 대비하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-12T09:47:34.706407+09:00"
     }
   ],
-  "updated": "2026-08-20T19:10:10.629064+09:00"
+  "updated": "2026-08-20T20:11:10.382218+09:00"
 }
