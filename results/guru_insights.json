@@ -1,6 +1,26 @@
 {
   "items": [
     {
+      "video_id": "r4uoKEGXiFo",
+      "title": "개미만 받아낸 외국인 수급 조롱, '진짜 매집' 구별하는 법ㅣ명민준, 박가영, 이지환 [주린이 구조대]",
+      "channel": "삼프로TV",
+      "published": "2026-08-20T13:30:26+00:00",
+      "url": "https://www.youtube.com/watch?v=r4uoKEGXiFo",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"한국 증시의 단기 변동성은 미국 옵션 만기 전후 빅테크 기업들의 투기적 움직임에 의해 증폭되며, 펀더멘털이 견고한 주식은 장기적 관점에서 인내하는 전략이 유효하다.\",\n  \"summary\": [\n    \"최근 SK하이닉스 등 한국 증시의 급락은 매크로 지표나 펀더멘털 변화보다는 미국 옵션 만기 전후 빅테크 기업들의 투기적 포지션 플레이에 의해 발생했다. [00:26]\",\n    \"SK하이닉스의 주주환원 정책 발표 시점(장 마감 후)은 외국인 투자자들의 선물 매도를 어렵게 하여 숏커버를 유발, 주가 반등에 '절묘한' 역할을 했다. [02:53]\",\n    \"미국 옵션 만기 전후 발생하는 빅테크 기업들의 극단적 변동성은 불합리하며, 이러한 단기 시장 교란에 흔들리지 않고 장기적 관점에서 투자하는 것이 바람직하다. [09:10]\",\n    \"한국 기업들의 높은 ROE와 같은 펀더멘털은 견고하므로, 단기적 투기성 자금의 교"
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T23:21:44.572811+09:00"
+    },
+    {
       "video_id": "g7iIEhCs4Uk",
       "title": "100조 원 역대급 유동성 풀린다…반도체·바이오 폭등의 신호탄 될까ㅣ명민준, 박가영, 유창희 [주린이 구조대]",
       "channel": "삼프로TV",
@@ -13,11 +33,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T22:31:58.771120+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T23:34:08.671442+09:00"
     },
     {
       "video_id": "QmgxlfipbtU",
@@ -32,11 +52,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T22:36:46.433357+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T23:35:38.916045+09:00"
     },
     {
       "video_id": "BCc5BQmlJVY",
@@ -10426,30 +10446,7 @@
       "source": "video",
       "attempts": 2,
       "analyzed_at": "2026-08-12T18:56:01.748864+09:00"
-    },
-    {
-      "video_id": "co-MRii99RY",
-      "title": "#EVENT 요즘은 박람회가 유행이라던데~?",
-      "channel": "유안타증권",
-      "published": "2026-08-12T02:00:23+00:00",
-      "url": "https://www.youtube.com/watch?v=co-MRii99RY",
-      "analysis": {
-        "relevant": false,
-        "one_liner": "2024년 8월에서 9월 초까지 열리는 다양한 국내 박람회 및 페어를 소개하는 영상입니다.",
-        "summary": [
-          "부산 국제 주류 박람회(8/14~8/16, 벡스코)에서는 국내외 주류를 합리적인 가격으로 구매할 수 있습니다.",
-          "오북제(8/22~8/23, 양재 aT센터)에서는 다양한 도서와 문구를 한 번에 만나볼 수 있습니다.",
-          "카페&베이커리페어(8/27~8/30, SETEC)는 디저트를 좋아하는 사람들이 꼭 가야 할 곳으로 소개됩니다.",
-          "키아프 서울(9/2~9/6, 코엑스)은 현대 미술 작품이 모인 글로벌 아트페어입니다."
-        ],
-        "tickers": [],
-        "key_points": [],
-        "actionable": []
-      },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-12T18:55:34.329217+09:00"
     }
   ],
-  "updated": "2026-08-20T22:37:20.069103+09:00"
+  "updated": "2026-08-20T23:35:40.300210+09:00"
 }
