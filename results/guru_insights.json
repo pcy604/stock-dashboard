@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "i2V9FSjpWIM",
+      "title": "7월 폭락 원인으로 지목된 '금리' 국내 증시에 여전히 부담인가?ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.20.목]",
+      "channel": "체슬리TV",
+      "published": "2026-08-20T08:15:49+00:00",
+      "url": "https://www.youtube.com/watch?v=i2V9FSjpWIM",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T18:11:41.185985+09:00"
+    },
+    {
       "video_id": "UrCzPBw99xk",
       "title": "\"중국차 누가 타?\" 이미 다 타고 있습니다 #이선엽 #중국 #자동차 #독일 #기술 #ai",
       "channel": "와이스트릿",
@@ -16,8 +35,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T17:22:00.635967+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T18:16:48.727709+09:00"
     },
     {
       "video_id": "zkvFOU_GQjw",
@@ -32,11 +51,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T17:19:21.291119+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T18:14:06.968307+09:00"
     },
     {
       "video_id": "wo-R9YbYPpw",
@@ -54,8 +73,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T17:18:49.452472+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T18:13:24.127882+09:00"
     },
     {
       "video_id": "lr0HUjQ_wzs",
@@ -65,16 +84,36 @@
       "url": "https://www.youtube.com/watch?v=lr0HUjQ_wzs",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
+        "one_liner": "폭락장은 좋은 자산을 헐값에 살 기회이므로, 잘못된 조언에 현혹되지 말고 이 기회를 활용해야 합니다.",
+        "summary": [
+          "이번 시장을 경험한 투자자들은 주식 투자의 '필살기'를 얻게 될 것입니다.",
+          "폭락장에서 좋은 자산을 헐값에 사는 데는 용기가 필요 없으며, 이는 오히려 기회입니다.",
+          "주식이 반토막 나거나 -60% 바겐세일할 때 현금화하라는 조언은 잘못된 것입니다.",
+          "'비쌀 때 더 비싸진다'는 잘못된 정보에 현혹되지 말고, 정작 싸졌을 때 위험 관리를 명목으로 팔지 않아야 합니다."
+        ],
         "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "key_points": [
+          {
+            "point": "시장의 폭락은 우량 자산을 저렴하게 매수할 수 있는 바겐세일 기간이다.",
+            "t": 5
+          },
+          {
+            "point": "가치가 훼손되지 않은 자산이 헐값에 거래될 때 매수하는 것은 용기가 아닌 합리적인 판단의 영역이다.",
+            "t": 10
+          },
+          {
+            "point": "가격이 저렴할 때 위험 관리를 이유로 자산을 매도하는 것은 오히려 손실을 확정하고 큰 기회를 놓치는 잘못된 조언이다.",
+            "t": 36
+          }
+        ],
+        "actionable": [
+          "시장 침체기에 본질 가치가 우수한 자산이 헐값에 거래될 때, 이를 매수할 수 있는 기회를 적극적으로 포착해야 합니다.",
+          "불안한 시장 상황에서 '비쌀 때 더 비싸진다'거나 '위험 관리'를 명분으로 헐값에 매도하라는 잘못된 조언에 현혹되지 않도록 주의하십시오."
+        ]
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T17:17:42.080428+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T18:12:19.314088+09:00"
     },
     {
       "video_id": "BPmEocYIKmg",
@@ -92,8 +131,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T17:23:04.388235+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T18:17:53.152042+09:00"
     },
     {
       "video_id": "n5CW53gvq7Q",
@@ -111,8 +150,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T17:22:32.562670+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T18:17:20.886638+09:00"
     },
     {
       "video_id": "wEmqofICkhc",
@@ -130,8 +169,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T17:21:28.580062+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T18:16:16.207716+09:00"
     },
     {
       "video_id": "rxGEljX3kvA",
@@ -149,8 +188,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T17:20:56.832229+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T18:15:44.084573+09:00"
     },
     {
       "video_id": "Wdy_nmDhRCI",
@@ -168,8 +207,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T17:20:25.043716+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T18:15:11.680546+09:00"
     },
     {
       "video_id": "42V5Dw-lEWk",
@@ -187,8 +226,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T17:19:53.205218+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T18:14:39.304295+09:00"
     },
     {
       "video_id": "IJl4yRAL3Hw",
@@ -261,8 +300,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T17:18:17.347489+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T18:12:51.881504+09:00"
     },
     {
       "video_id": "0-vrEaDvlco",
@@ -10444,153 +10483,7 @@
       "source": "fail",
       "attempts": 3,
       "analyzed_at": "2026-08-12T09:48:20.755552+09:00"
-    },
-    {
-      "video_id": "xsoaub9Lyt0",
-      "title": "CPI 발표 앞두고 금리 또 상승…엔비디아, 인텔 등 자금 조달 지속 [월가 뉴스레터]",
-      "channel": "삼프로TV",
-      "published": "2026-08-11T22:00:57+00:00",
-      "url": "https://www.youtube.com/watch?v=xsoaub9Lyt0",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "CPI 발표를 앞두고 관망세가 지속되는 가운데, 엔비디아의 금융 파트너십과 AI 산업 전반의 동향, 주요 기술 기업 실적 및 매크로 지표들이 시장의 방향성을 제시하고 있습니다.",
-        "summary": [
-          "뉴욕 증시는 CPI 발표를 앞두고 관망세를 보였으며, 다우, 나스닥, S&P 500 모두 약보합으로 마감했습니다.",
-          "구글은 AI 리더십 이탈 우려로 하락했고, 슈퍼마이크로컴퓨터(SMCI), 코어위브(CRWV), 네비우스(NEBL), 아이렌(IREN) 등 네오클라우드 및 서버 관련 기업들은 실적 발표 후 급등세를 보였습니다.",
-          "엔비디아(NVDA)는 5천억 달러 규모의 금융 파트너십 계획으로 월가에서 논란이 있었으나, 일부에서는 긍정적인 신호로 해석되고 있습니다.",
-          "골드만삭스는 AI 투자 외 다른 기업 투자의 위축 가능성을 경고했지만, UBS는 자빌(Jabil)과 같은 회로기판 제조업체에 대한 투자 의견을 상향 조정했습니다.",
-          "소프트웨어(S/W) 섹터는 최근 강세를 보이며 부활 조짐을 보이고 있으며, 구글(GOOGL)의 제미니(Gemini) 월간 사용자 10억 명 돌파 등 긍정적인 소식도 이어지고 있습니다.",
-          "테슬라(TSLA)는 로보택시 실적 입증이 필요하다는 지적이 있었고, 아크(Ark)는 스페이스X 주식을 계속 매수하고 있습니다."
-        ],
-        "tickers": [
-          {
-            "name": "구글",
-            "ticker": "GOOGL",
-            "context": "하사비스 이슈 이후 주가 하락세 지속",
-            "view": "부정",
-            "t": 55
-          },
-          {
-            "name": "슈퍼마이크로컴퓨터",
-            "ticker": "SMCI",
-            "context": "실적 발표 후 애프터마켓에서 9% 급등",
-            "view": "긍정",
-            "t": 222
-          },
-          {
-            "name": "코어위브",
-            "ticker": "CRWV",
-            "context": "시간 외 거래에서 15% 급등, 네오클라우드 업체의 실적 호조 기대를 반영",
-            "view": "긍정",
-            "t": 406
-          },
-          {
-            "name": "네비우스",
-            "ticker": "NEBL",
-            "context": "실적 발표 앞두고 시간 외 거래에서 5.8% 상승",
-            "view": "긍정",
-            "t": 447
-          },
-          {
-            "name": "아이렌",
-            "ticker": "IREN",
-            "context": "네오클라우드 영역에서 3.5% 상승",
-            "view": "긍정",
-            "t": 530
-          },
-          {
-            "name": "엔비디아",
-            "ticker": "NVDA",
-            "context": "5천억 달러 규모 금융 파트너십으로 월가에서 논란, 웰스파고는 비중확대 의견 유지",
-            "view": "중립",
-            "t": 2028
-          },
-          {
-            "name": "IBM",
-            "ticker": "IBM",
-            "context": "엔비디아 GPU를 활용한 대규모 AI 추론 클러스터 구축 계약 체결",
-            "view": "긍정",
-            "t": 4115
-          },
-          {
-            "name": "테슬라",
-            "ticker": "TSLA",
-            "context": "모건스탠리가 투자자 신뢰 확보를 위해 로보택시 실적 입증 필요 지적",
-            "view": "중립",
-            "t": 3920
-          },
-          {
-            "name": "애플",
-            "ticker": "AAPL",
-            "context": "2027년 유리 소재 아이폰 계획 유지, 새로운 프로 모델 기대",
-            "view": "긍정",
-            "t": 4055
-          },
-          {
-            "name": "스페이스X",
-            "ticker": "SPCEX",
-            "context": "캐시우드가 3,690만 달러 규모 주식 매수",
-            "view": "긍정",
-            "t": 3823
-          },
-          {
-            "name": "로켓랩",
-            "ticker": "RKLB",
-            "context": "2분기 실적 발표 후 주가 목표가 132달러 유지",
-            "view": "긍정",
-            "t": 3901
-          },
-          {
-            "name": "AST 스페이스모바일",
-            "ticker": "ASTS",
-            "context": "캔터 피츠제럴드가 목표가 90달러로 상향 조정",
-            "view": "긍정",
-            "t": 3912
-          }
-        ],
-        "key_points": [
-          {
-            "point": "CPI 발표 대기 장세 지속: 7월 CPI 헤드라인 3.4%, 코어 2.5% 예상. 시장은 CPI 결과에 따라 방향성을 확인할 것으로 보입니다.",
-            "t": 55
-          },
-          {
-            "point": "고용 지표 둔화세: ADP 4주 평균 고용 지표가 둔화세를 보여, 고용 시장 과열 우려가 다소 완화될 조짐입니다.",
-            "t": 924
-          },
-          {
-            "point": "국채 수익률 하락 전망: 로이터 통신은 향후 1년간 미국 국채 수익률이 점진적으로 하락할 것으로 예상했습니다.",
-            "t": 940
-          },
-          {
-            "point": "글로벌 포지셔닝의 변화: 씨티(Citi) 그룹에 따르면 미국 시장에서 공매도 포지션이 취약해지고, 롱 포지션이 강화되는 추세입니다.",
-            "t": 1356
-          },
-          {
-            "point": "S&P 500 기업 실적 호조: 2분기 주당순이익(EPS)이 32% 성장하며 2분기 연속 상승세를 기록했지만, 뱅크오브아메리카는 2027년에는 실적 부진을 우려했습니다.",
-            "t": 1438
-          },
-          {
-            "point": "AI 외 기업 투자 위축 우려: 골드만삭스는 AI 투자가 다른 비즈니스 지출을 위축시킬 수 있다고 경고하며, AI가 GDP 성장에 기여하는 정도가 생각보다 적을 수 있다고 분석했습니다.",
-            "t": 1508
-          },
-          {
-            "point": "컴퓨팅 파워의 필수 인프라 인정: CME(시카고상업거래소)가 AI 컴퓨팅 선물 계약을 출시하며 AI 컴퓨팅 파워가 거래 가능한 자산으로 인정받고, 필수 인프라로 자리 잡는 추세입니다.",
-            "t": 2615
-          },
-          {
-            "point": "소프트웨어 섹터의 부활: 최근 소프트웨어 기업들이 주간 수익률에서 크게 반등하며 하드웨어 섹터를 능가하는 모습을 보이고 있습니다.",
-            "t": 3130
-          }
-        ],
-        "actionable": [
-          "오늘 밤(미국 현지 시각 8/10) 발표될 7월 CPI 지표 결과에 따라 주식 포지션 조정 및 추가 투자 전략을 수립하세요.",
-          "네오클라우드 및 AI 인프라 관련 기업들의 실적 및 발표 내용을 지속적으로 모니터링하여 성장 잠재력이 높은 종목에 주목하세요."
-        ]
-      },
-      "source": "video",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T07:28:05.341766+09:00"
     }
   ],
-  "updated": "2026-08-20T17:23:05.388394+09:00"
+  "updated": "2026-08-20T18:17:54.152321+09:00"
 }
