@@ -1,8 +1,27 @@
 {
   "items": [
     {
+      "video_id": "KXQ_KZg0hFg",
+      "title": "SK하이닉스 13% 급등…바닥은 다졌지만 '추세 상승'을 말하기 이른 이유ㅣ홍선애, 장우진 금시공 대표 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-20T09:10:10+00:00",
+      "url": "https://www.youtube.com/watch?v=KXQ_KZg0hFg",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-20T19:06:23.682653+09:00"
+    },
+    {
       "video_id": "i2V9FSjpWIM",
-      "title": "7월 폭락 원인으로 지목된 '금리' 국내 증시에 여전히 부담인가?ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.20.목]",
+      "title": "\"7월 같은 폭락장은 없다\" 선조정 받은 코스피, 영향 제한적ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.20.목]",
       "channel": "체슬리TV",
       "published": "2026-08-20T08:15:49+00:00",
       "url": "https://www.youtube.com/watch?v=i2V9FSjpWIM",
@@ -13,11 +32,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-20T18:11:41.185985+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-20T19:04:46.097159+09:00"
     },
     {
       "video_id": "UrCzPBw99xk",
@@ -35,8 +54,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T18:16:48.727709+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T19:09:04.963878+09:00"
     },
     {
       "video_id": "zkvFOU_GQjw",
@@ -51,11 +70,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T18:14:06.968307+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T19:06:55.773887+09:00"
     },
     {
       "video_id": "wo-R9YbYPpw",
@@ -73,8 +92,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-20T18:13:24.127882+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-20T19:05:51.287509+09:00"
     },
     {
       "video_id": "lr0HUjQ_wzs",
@@ -131,8 +150,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T18:17:53.152042+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T19:10:09.628855+09:00"
     },
     {
       "video_id": "n5CW53gvq7Q",
@@ -150,8 +169,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T18:17:20.886638+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T19:09:37.317069+09:00"
     },
     {
       "video_id": "wEmqofICkhc",
@@ -188,8 +207,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T18:15:44.084573+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T19:08:32.422095+09:00"
     },
     {
       "video_id": "Wdy_nmDhRCI",
@@ -207,8 +226,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T18:15:11.680546+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T19:08:00.129101+09:00"
     },
     {
       "video_id": "42V5Dw-lEWk",
@@ -226,8 +245,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T18:14:39.304295+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T19:07:27.959130+09:00"
     },
     {
       "video_id": "IJl4yRAL3Hw",
@@ -300,8 +319,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-20T18:12:51.881504+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-20T19:05:18.755257+09:00"
     },
     {
       "video_id": "0-vrEaDvlco",
@@ -10464,26 +10483,7 @@
       "source": "video",
       "attempts": 2,
       "analyzed_at": "2026-08-12T09:47:34.706407+09:00"
-    },
-    {
-      "video_id": "a_2dgW8yDdk",
-      "title": "반도체 피크아웃 아직은 아닙니다 #반도체 #메모리 #피크아웃 #가격 #물량 #호돌이 #우황제",
-      "channel": "와이스트릿",
-      "published": "2026-08-11T22:00:16+00:00",
-      "url": "https://www.youtube.com/watch?v=a_2dgW8yDdk",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-12T09:48:20.755552+09:00"
     }
   ],
-  "updated": "2026-08-20T18:17:54.152321+09:00"
+  "updated": "2026-08-20T19:10:10.629064+09:00"
 }
