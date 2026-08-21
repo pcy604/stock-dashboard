@@ -1,6 +1,25 @@
 {
   "items": [
     {
+      "video_id": "PfwUgAB3cVY",
+      "title": "삼전닉스 움직임이 만든 원화 강세, 환율 방향은 더 아래로?ㅣ홍선애, 김준송 김준송TV 대표 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-21T11:30:11+00:00",
+      "url": "https://www.youtube.com/watch?v=PfwUgAB3cVY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-21T20:59:17.976617+09:00"
+    },
+    {
       "video_id": "Tu_pi7JoUc0",
       "title": "한국 주식, 큰 기로에 섰다 앞으로 ‘사팔’ 안 해도 되는 이유ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.21.금]",
       "channel": "체슬리TV",
@@ -91,11 +110,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-21T20:09:31.413110+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-21T21:00:24.508935+09:00"
     },
     {
       "video_id": "mlrgZ5oNTzo",
@@ -110,11 +129,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-21T20:08:58.386760+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-21T20:59:50.521902+09:00"
     },
     {
       "video_id": "AnNpub6LL7Y",
@@ -129,11 +148,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-21T20:03:14.322433+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-21T20:58:44.586361+09:00"
     },
     {
       "video_id": "s_2jVaQKXJY",
@@ -10788,26 +10807,7 @@
       "source": "video",
       "attempts": 1,
       "analyzed_at": "2026-08-12T23:14:35.929305+09:00"
-    },
-    {
-      "video_id": "phJkTgYnGgY",
-      "title": "아직은 추세 이탈 아닌 변동성…삼전닉스 매도 신호는 없었다ㅣ명민준, 박가영, 차영주 [주린이 구조대]",
-      "channel": "삼프로TV",
-      "published": "2026-08-12T13:30:31+00:00",
-      "url": "https://www.youtube.com/watch?v=phJkTgYnGgY",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-13T02:37:54.695608+09:00"
     }
   ],
-  "updated": "2026-08-21T20:10:05.047639+09:00"
+  "updated": "2026-08-21T21:00:25.747424+09:00"
 }
