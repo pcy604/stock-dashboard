@@ -152,9 +152,14 @@ def cmd_build():
             any_m |= RULES[k][1](g).fillna(False).values
         for p in np.where(any_m)[0]:
             r = g.iloc[p]
+            _rs = [k for k in RULES if k in rec["sig"] and di[r.as_of] in rec["sig"][k]]
+            # 이 종목이 그 규칙에서 몇 번째로 낸 신호인가. 연속일 필요 없고,
+            # 보유 중 재신호도 센다. 규칙에는 안 쓰고 판단 재료로만 띄운다
+            # (2026-08-22 측정: S 3번째+ 는 통계 검증을 통과했지만 임계 격자가
+            #  1:27.8 2:27.4 3:37.3 4:27.0 5:35.3 으로 지그재그였다).
+            _n = (rec["sig"][_rs[0]].index(di[r.as_of]) + 1) if _rs else 0
             rec["rows"].append(dict(
-                d=str(pd.Timestamp(r.as_of).date()),
-                r=[k for k in RULES if k in rec["sig"] and di[r.as_of] in rec["sig"][k]],
+                d=str(pd.Timestamp(r.as_of).date()), r=_rs, n=_n,
                 close=round(float(r.close), 2),
                 # rs4 추가(2026-08-17): 주간으로 후보를 받는데 13/26주만 보면 '최근 가속'이
                 # 안 보인다는 지적. 짧은 창은 노이즈가 크지만 판단 재료로는 있어야 한다.
