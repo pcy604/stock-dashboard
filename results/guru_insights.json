@@ -1,6 +1,110 @@
 {
   "items": [
     {
+      "video_id": "SDXXH2TjdL4",
+      "title": "[8월 21일 마감시황] 삼전닉스 빼면 뭐가 올랐나? 주주환원은 만병통치약이 아니다ㅣ홍선애, 김장열, 장우진 [클로징벨 라이브]",
+      "channel": "삼프로TV",
+      "published": "2026-08-21T08:10:40+00:00",
+      "url": "https://www.youtube.com/watch?v=SDXXH2TjdL4",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-21T18:20:29.343303+09:00"
+    },
+    {
+      "video_id": "mlrgZ5oNTzo",
+      "title": "삼성전자, 역대급 주주환원! 최대 110조원 '통 큰 환원' 결정ㅣ홍선애, 민재기 KB증권 PRIME CLUB 팀장 [여의도 인사이트]",
+      "channel": "삼프로TV",
+      "published": "2026-08-21T08:52:05+00:00",
+      "url": "https://www.youtube.com/watch?v=mlrgZ5oNTzo",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-21T18:19:57.218215+09:00"
+    },
+    {
+      "video_id": "AnNpub6LL7Y",
+      "title": "SK하닉 끌어올릴 한방 더 있다? 최태원의 장담 “사팔 말라”ㅣ체슬리투자자문 박세익 전무 [워매신박 / 26.08.21.금]",
+      "channel": "체슬리TV",
+      "published": "2026-08-21T07:34:09+00:00",
+      "url": "https://www.youtube.com/watch?v=AnNpub6LL7Y",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "",
+        "summary": [],
+        "tickers": [],
+        "key_points": [],
+        "actionable": [],
+        "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
+      },
+      "source": "fail",
+      "attempts": 1,
+      "analyzed_at": "2026-08-21T18:19:24.600580+09:00"
+    },
+    {
+      "video_id": "s_2jVaQKXJY",
+      "title": "하루에 176% 수익 난 종목은 여기에서 찾으세요  #박세익 #주식투자",
+      "channel": "체슬리TV",
+      "published": "2026-08-21T08:00:25+00:00",
+      "url": "https://www.youtube.com/watch?v=s_2jVaQKXJY",
+      "analysis": {
+        "relevant": true,
+        "one_liner": "영상은 과거 모더나(MRNA)의 176% 급등 사례를 언급하며, 연말부터 내년까지의 화려한 주식장과 '별주부전' 코너에서 나올 유망 종목에 주목할 것을 권한다.",
+        "summary": [
+          "과거 한 방송에서 모더나(MRNA)와 팔란티어(PLTR) 매수 여부를 두고 토론이 있었다.",
+          "모더나(MRNA)는 실제로 하루 만에 176.97% 급등하는 모습을 보였다.",
+          "일부 패널은 모더나 차트를 분석하며 '매수해야 한다'는 강한 긍정적 의견을 제시했다.",
+          "또 다른 패널은 '제2의 코로나'를 기대하며 모더나를 가져가겠다고 언급했다.",
+          "연말부터 내년까지 '굉장히 화려한 종목장'이 펼쳐질 것으로 전망된다.",
+          "매주 토요일 오후 5시에 방영되는 '별주부전' 코너에서 소개되는 종목들을 유심히 지켜볼 것을 조언한다."
+        ],
+        "tickers": [
+          {
+            "name": "Moderna",
+            "ticker": "MRNA",
+            "context": "과거 매수 토론 대상이었으며, 실제로 하루 만에 176.97% 급등한 종목으로 언급됨.",
+            "view": "긍정",
+            "t": 1
+          },
+          {
+            "name": "Palantir",
+            "ticker": "PLTR",
+            "context": "모더나와 함께 과거 매수 토론 대상이었던 종목으로 언급됨.",
+            "view": "중립",
+            "t": 4
+          }
+        ],
+        "key_points": [
+          {
+            "point": "올 연말부터 내년까지 주식 시장에 '굉장히 화려한 종목장'이 전개될 것으로 예상된다.",
+            "t": 34
+          }
+        ],
+        "actionable": [
+          "매주 토요일 오후 5시에 방송되는 '별주부전' 코너에서 소개되는 종목들을 면밀히 분석하고 주시한다."
+        ]
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-21T18:18:28.760887+09:00"
+    },
+    {
       "video_id": "qvEWmI2f1Kg",
       "title": "110조원 물렸다! 이제 여기로 무게 중심 쏠립니다 / 한지영 연구원 (풀버전)",
       "channel": "와이스트릿",
@@ -13,11 +117,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-21T16:46:43.663441+09:00"
+      "attempts": 2,
+      "analyzed_at": "2026-08-21T18:26:46.066851+09:00"
     },
     {
       "video_id": "PTNNGU-B9n0",
@@ -300,11 +404,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-21T16:35:29.977218+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-21T18:21:33.671494+09:00"
     },
     {
       "video_id": "jVO661jP_s4",
@@ -319,12 +423,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"미국 비트코인 현물 ETF로 7개월 만에 최대 순유입을 기록한 가운데, 디지털 자산 규제 완화 기대감과 거시경제적 요인이 비트코인 및 이더리움의 최근 급등을 이끌고 있습니다.\",\n  \"summary\": [\n    \"미국 비트코인 현물 ETF는 8월 17일부터 19일까지 3거래일 동안 10억 달러 이상의 순유입을 기록하며 7개월 만에 최대치를 경신했습니다.\",\n    \"CFTC와 백악관의 디지털 자산 규제 관련 논의(클래리티 법안, 전략적 비트코인 비축 등)가 9월 통과 가능성을 높이며 시장 기대감을 형성했습니다.\",\n    \"이더리움은 비트코인보다 더 높은 상승률을 보였으며, SEC의 디지털 자산 규정안(토큰 증권/스테이블 코인 규제 완화)이 이더리움 네트워크의 유동성 우위와 결합될 경우 긍정적인 영향을 미칠 것으로 전망됩니다.\",\n    \"비트코인의 현물 수요가 2025년 10월 이후 처음으로 양수로 전환되는 등 "
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-21T16:30:34.525175+09:00"
+      "source": "fail",
+      "attempts": 3,
+      "analyzed_at": "2026-08-21T18:21:01.555283+09:00"
     },
     {
       "video_id": "5-xAALcVOxs",
@@ -1092,16 +1195,103 @@
       "url": "https://www.youtube.com/watch?v=RVgQWLtFf30",
       "analysis": {
         "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+        "one_liner": "하반기 미국 증시는 펀더멘탈 개선과 매크로 완화 신호에 힘입어 상승세를 유지할 것이나, 지정학적 리스크와 금리 변동성에 대비한 인내심 있는 투자가 필요합니다.",
+        "summary": [
+          "매크로 통화 정책의 영향이 여전하지만, 물가 지표(PC)가 연준의 정책 금리 아래로 내려오면서 실질 금리가 마이너스 구간에 진입하는 등 긍정적 신호가 예상보다 빠르게 나타나고 있습니다.",
+          "미국 증시는 8월 초 역사적 사상 최고치를 경신했으며, 이는 물가 압력 완화와 함께 위험 자산 선호 심리가 높아진 결과입니다. 향후 추세는 중동 지정학적 리스크가 악화되지 않는다는 전제 하에 우상향이 전망됩니다.",
+          "미국 재무부의 국채 바이백 확대 발표 등 발 빠른 대응으로 장기 금리의 급격한 상승 압력은 완화될 것으로 보이며, 10년물 5%, 30년물 5.5%를 인계치로 설정하고 이를 넘어서지 않는다면 증시 방향성에는 큰 영향이 없을 것입니다.",
+          "2분기 S&P 500 기업들의 EPS 증가율이 예상치(23.1%)를 크게 상회한 50.4%를 기록했으며, 특히 커뮤니케이션 서비스와 IT 섹터(반도체 포함)가 실적을 주도하고 있습니다. 이는 AI 버블 논란을 잠재우고 밸류에이션 매력을 부각합니다.",
+          "미국의 고용 시장 냉각 조짐(7월 비농업 부문 고용자 수 3개월 평균 5만 명 감소)과 물가 하락세는 연준이 공격적인 금리 인상을 지속하기 어렵게 만들 것이며, 4분기에는 연준의 통화 정책이 더욱 우호적으로 바뀔 가능성이 있습니다."
+        ],
+        "tickers": [
+          {
+            "name": "ACE 반도체Plus전략산업 ETF",
+            "ticker": "0228GO",
+            "context": "대한민국을 이끄는 전략산업 ETF로 언급되며, 반도체 산업의 중요성을 강조",
+            "view": "중립",
+            "t": 0
+          },
+          {
+            "name": "KODEX 200커버드콜액티브 ETF",
+            "ticker": "0219E0",
+            "context": "KOSPI 200 기반 ETF로 언급",
+            "view": "중립",
+            "t": 143
+          },
+          {
+            "name": "KODEX 미국CPU반도체TOP10 ETF",
+            "ticker": "0225V0",
+            "context": "AI 에이전트 전성시대에 CPU가 판을 바꾼다는 설명과 함께 언급",
+            "view": "긍정",
+            "t": 340
+          },
+          {
+            "name": "Intel",
+            "ticker": "INTC",
+            "context": "미국 CPU 3대장 중 하나로, AI 관련 산업에서 중요성 언급",
+            "view": "긍정",
+            "t": 340
+          },
+          {
+            "name": "AMD",
+            "ticker": "AMD",
+            "context": "미국 CPU 3대장 중 하나로, AI 관련 산업에서 중요성 언급",
+            "view": "긍정",
+            "t": 340
+          },
+          {
+            "name": "ARM",
+            "ticker": "ARM",
+            "context": "미국 CPU 3대장 중 하나로, AI 관련 산업에서 중요성 언급",
+            "view": "긍정",
+            "t": 340
+          },
+          {
+            "name": "SK하이닉스",
+            "ticker": "000660",
+            "context": "주주환원 정책을 이미 시작했으며, 삼성전자도 뒤따를 것으로 예상",
+            "view": "긍정",
+            "t": 2213
+          },
+          {
+            "name": "삼성전자",
+            "ticker": "005930",
+            "context": "SK하이닉스에 이어 주주환원 정책을 발표할 것으로 예상",
+            "view": "긍정",
+            "t": 2217
+          }
+        ],
+        "key_points": [
+          {
+            "point": "실질 정책 금리가 마이너스 구간에 진입(정책 금리 < 물가 하락)하면 물가 하락, 금리 불안 진정, 위험 자산 선호 심리 증가로 증시에 긍정적입니다. 6월 미국 PC 데이터 발표 시점이 전환점 역할을 했습니다.",
+            "t": 220
+          },
+          {
+            "point": "장기 금리가 높은 수준을 유지하더라도 증시는 상승 가능하며, 10년물 5%, 30년물 5.5%를 넘어서지 않는 한 증시 방향성에 큰 악영향을 미치지 않을 것입니다.",
+            "t": 545
+          },
+          {
+            "point": "미국 2분기 S&P 500 기업들의 EPS 증가율이 6월 말 추정치 23.1%에서 50.4%로 급등했으며, 연간 EPS 증가율도 30.5%로 예상되어 미국 증시의 밸류에이션 매력이 높습니다.",
+            "t": 1053
+          },
+          {
+            "point": "AI 관련주가 버블이라는 우려는 과도하며, 커뮤니케이션 서비스 및 IT 섹터의 실적 호조가 이를 뒷받침하고 있습니다. AI 혁명 사이클은 이제 시작 단계에 불과하며 반도체 산업에 지속적인 관심이 필요합니다.",
+            "t": 1255
+          },
+          {
+            "point": "미국 중간 선거와 관련된 과거 증시 하락은 이미 5~6월에 반영되었을 가능성이 높으며, 하반기에는 연준의 통화 정책이 긍정적인 방향으로 전환될 여지가 있습니다.",
+            "t": 1626
+          }
+        ],
+        "actionable": [
+          "물가 및 고용 지표와 같은 매크로 지표 변화를 지속적으로 모니터링하여 연준의 통화 정책 변화 가능성을 예측하세요.",
+          "AI 관련 핵심 섹터인 커뮤니케이션 서비스 및 IT(특히 반도체) 기업들의 실적과 성장 가능성을 면밀히 분석하고 투자 기회를 모색하세요.",
+          "미국 증시의 장기적인 우상향 기조를 믿고 단기적인 시장 변동성이나 지정학적 리스크에 일희일비하기보다 인내심을 갖고 투자 전략을 유지하세요."
+        ]
       },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-21T11:22:40.802601+09:00"
+      "source": "video",
+      "attempts": 4,
+      "analyzed_at": "2026-08-21T18:26:13.834133+09:00"
     },
     {
       "video_id": "FwwMStbjG2Q",
@@ -10492,83 +10682,7 @@
       "source": "fail",
       "attempts": 4,
       "analyzed_at": "2026-08-13T01:35:47.410085+09:00"
-    },
-    {
-      "video_id": "e7uZxqRFIgc",
-      "title": "규정 없어서 못 막는다고? 단일종목 레버리지 교육 차라리 이렇게 합니다 #국장 #변동성 #레버리지 #야식잡썰 #이대호",
-      "channel": "와이스트릿",
-      "published": "2026-08-12T10:00:02+00:00",
-      "url": "https://www.youtube.com/watch?v=e7uZxqRFIgc",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 4,
-      "analyzed_at": "2026-08-13T00:37:25.870181+09:00"
-    },
-    {
-      "video_id": "pv6XY4H2ask",
-      "title": "\"지금 AI는 2단계\" 그다음 주인공 기업은 누구? | 손정우 테크밸리인사이트 대표 [더블 업]",
-      "channel": "삼프로TV",
-      "published": "2026-08-12T00:51:47+00:00",
-      "url": "https://www.youtube.com/watch?v=pv6XY4H2ask",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-12T20:32:39.055534+09:00"
-    },
-    {
-      "video_id": "e5741qrJQFA",
-      "title": "반도체·화장품 동시에 터졌다… 지금 시장에서 주목할 종목은? |  손수연 하나증권 용산WM센터 PB [더블 크루]",
-      "channel": "삼프로TV",
-      "published": "2026-08-12T01:20:14+00:00",
-      "url": "https://www.youtube.com/watch?v=e5741qrJQFA",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-12T21:33:12.013058+09:00"
-    },
-    {
-      "video_id": "nzbzMi9rlNw",
-      "title": "변동성이 지나간 뒤...시장의 저점과 고점은 무엇으로 판단할 수 있을까? | 백찬규, 여도은, 허재무 [아침N투자]",
-      "channel": "삼프로TV",
-      "published": "2026-08-12T02:34:03+00:00",
-      "url": "https://www.youtube.com/watch?v=nzbzMi9rlNw",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-12T21:32:39.814142+09:00"
     }
   ],
-  "updated": "2026-08-21T16:46:57.225366+09:00"
+  "updated": "2026-08-21T18:26:47.067119+09:00"
 }
