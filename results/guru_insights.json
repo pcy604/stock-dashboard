@@ -94,8 +94,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-21T19:15:15.219620+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-21T20:09:31.413110+09:00"
     },
     {
       "video_id": "mlrgZ5oNTzo",
@@ -113,8 +113,8 @@
         "_error": "Server disconnected without sending a response."
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-21T19:14:56.943752+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-21T20:08:58.386760+09:00"
     },
     {
       "video_id": "AnNpub6LL7Y",
@@ -132,8 +132,8 @@
         "_error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'The input token count exceeds the maximum number of tokens allowed 1048576.', 'status': 'INVALID_ARGUMENT'}}"
       },
       "source": "fail",
-      "attempts": 2,
-      "analyzed_at": "2026-08-21T19:07:06.420192+09:00"
+      "attempts": 3,
+      "analyzed_at": "2026-08-21T20:03:14.322433+09:00"
     },
     {
       "video_id": "s_2jVaQKXJY",
@@ -198,8 +198,8 @@
         "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-21T19:19:59.446714+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-21T20:10:04.047394+09:00"
     },
     {
       "video_id": "PTNNGU-B9n0",
@@ -10809,5 +10809,5 @@
       "analyzed_at": "2026-08-13T02:37:54.695608+09:00"
     }
   ],
-  "updated": "2026-08-21T19:20:00.446964+09:00"
+  "updated": "2026-08-21T20:10:05.047639+09:00"
 }
