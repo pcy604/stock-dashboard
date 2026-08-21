@@ -39,6 +39,27 @@ _ACCOUNTS = {
 }
 
 
+def _match(pairs, names):
+    """계정명 매칭 — **정확일치 우선**, 없을 때만 부분일치.
+
+    부분일치를 먼저 하면 DART 재무상태표에 '부채총계'보다 앞서 실리는
+    **'자본과부채총계'**(=자산총계와 같은 값)가 `'부채총계' in nm`에 걸려
+    부채총계 자리를 차지한다. 에코프로비엠 2026.2Q 실측 — 참값 부채 3.33조인데
+    5.43조(=자산총계)로 기록되고 있었다. 자산=부채+자본이 깨지므로
+    부채비율·부채/자본 지표가 전부 틀린다.
+    (`자본총계`는 '자본과부채총계'의 부분문자열이 아니라 영향 없었음.)
+
+    pairs = [(공백제거 계정명, 값)] 문서 순서. 정확일치도 문서 순서로 첫 건을
+    쓰므로 기존 동작(BS의 자본총계가 SCE의 자본총계보다 먼저)은 그대로 유지된다."""
+    for nm, val in pairs:
+        if nm in names:
+            return val
+    for nm, val in pairs:
+        if any(n in nm for n in names):
+            return val
+    return None
+
+
 def _key():
     import os
     k = ''
@@ -104,17 +125,10 @@ def financials(corp_code, year, period='annual'):
     j = r.json()
     if j.get('status') != '000':
         return {'_status': j.get('status'), '_msg': j.get('message')}
-    out = {k: None for k in _ACCOUNTS}
-    for row in j.get('list', []):
-        # 연결(CFS) 우선, 없으면 개별(OFS)
-        nm = row.get('account_nm', '')
-        val = _to_num(row.get('thstrm_amount'))
-        for key, names in _ACCOUNTS.items():
-            if out[key] is None and any(n in nm for n in names):
-                # 연결재무제표 우선
-                if row.get('fs_div', 'CFS') == 'CFS' or out[key] is None:
-                    out[key] = val
-    return out
+    # 연결(CFS) 우선, 없으면 개별(OFS) — DART가 응답에서 CFS를 먼저 실어주므로 문서 순서로 충분
+    pairs = [((row.get('account_nm') or '').replace(' ', '').strip(),
+              _to_num(row.get('thstrm_amount'))) for row in j.get('list', [])]
+    return {key: _match(pairs, names) for key, names in _ACCOUNTS.items()}
 
 
 _YOY_KEYS = {'net_income': ['당기순이익'], 'revenue': ['매출액', '수익(매출액)', '영업수익'],
@@ -187,7 +201,12 @@ def canslim_growth(corp_code):
 _STMT_KEYS = {
     'revenue':     ['매출액', '수익(매출액)', '영업수익'],
     'gross':       ['매출총이익'],
-    'net_income_q': ['분기순이익', '반기순이익'],   # 분기·반기보고서의 순이익 명칭
+    # 분기·반기보고서의 순이익 명칭. '반기손이익(손실)'은 오타가 아니라 에코프로비엠이
+    # 실제로 그렇게 제출한 계정명이고 DART가 원문 그대로 넘긴다(2026 반기 실측) —
+    # 제출자 표기 흔들림을 목록으로 흡수한다.
+    'net_income_q': ['분기순이익', '반기순이익', '분기손이익', '반기손이익',
+                     '분기순손익', '반기순손익'],
+    'eps':         ['기본주당순이익', '기본주당이익', '기본및희석주당순이익', '주당순이익'],
     'sga':         ['판매비와관리비', '판매비및관리비'],
     'op_income':   ['영업이익'],
     'net_income':  ['당기순이익'],
@@ -195,6 +214,25 @@ _STMT_KEYS = {
     'op_cf':       ['영업활동현금흐름', '영업활동으로인한현금흐름'],
     'inv_cf':      ['투자활동현금흐름', '투자활동으로인한현금흐름'],
     'fin_cf':      ['재무활동현금흐름', '재무활동으로인한현금흐름'],
+    # 아래는 포토카드(재무3표·밸류에이션)용으로 추가. 전부 실제 응답에서 계정명을
+    # 확인하고 넣었다(에코프로비엠·삼성전자 2026 반기 대조).
+    'cogs':        ['매출원가'],
+    'cash':        ['현금및현금성자산'],
+    'ar':          ['매출채권', '매출채권및기타채권'],
+    'inventory':   ['재고자산'],
+    'ppe':         ['유형자산'],
+}
+
+# 계정을 찾을 재무제표 구분. **부분일치가 다른 제표로 새는 것을 막는다.**
+#   '현금및현금성자산'은 현금흐름표에 `기초현금및현금성자산`·`분기말현금및현금성자산`·
+#   `현금및현금성자산의순증감`으로 여러 번 나온다 — BS로 못 박지 않으면 재무상태표의
+#   현금 대신 기초잔액이나 증감액을 집어올 수 있다(정확일치가 먼저 걸려서 지금은
+#   안 터지지만, 계정명에 주석번호를 붙이는 제출자 하나면 바로 터진다).
+# BS=재무상태표 · IS/CIS=손익계산서 · CF=현금흐름표. None이면 제표 무관.
+_STMT_SJ = {
+    'assets': 'BS', 'liabilities': 'BS', 'equity': 'BS', 'cash': 'BS',
+    'ar': 'BS', 'inventory': 'BS', 'ppe': 'BS',
+    'op_cf': 'CF', 'inv_cf': 'CF', 'fin_cf': 'CF',
 }
 
 
@@ -212,19 +250,34 @@ def _acnt_all(corp_code, year, reprt):
 
 
 def _extract_all(j):
-    out = {k: None for k in _STMT_KEYS}
-    out['gross'] = None; out['capex'] = None
-    for row in j.get('list', []):
-        nm = (row.get('account_nm') or '').replace(' ', '').strip()   # 공백 정규화 ('재무활동 현금흐름' 대응)
-        for key, names in _STMT_KEYS.items():
-            if out[key] is None and any(n == nm or n in nm for n in names):
-                out[key] = _to_num(row.get('thstrm_amount'))
-        if out['capex'] is None and row.get('sj_div') == 'CF' and '유형자산' in nm and '취득' in nm:
-            out['capex'] = _to_num(row.get('thstrm_amount'))
+    rows = j.get('list', [])
+    # 공백 정규화 ('재무활동 현금흐름' 대응)
+    pairs = [((row.get('account_nm') or '').replace(' ', '').strip(),
+              _to_num(row.get('thstrm_amount')), (row.get('sj_div') or '')) for row in rows]
+
+    def _pick(key, names):
+        sj = _STMT_SJ.get(key)
+        # 손익은 IS·CIS(포괄손익) 어느 쪽으로도 오므로 제표를 안 건다.
+        cand = [(n, v) for n, v, s in pairs if sj is None or s == sj]
+        return _match(cand, names)
+
+    out = {key: _pick(key, names) for key, names in _STMT_KEYS.items()}
+    # 매출액 계정을 아예 안 싣고 매출원가·매출총이익만 싣는 제출자가 있다
+    # (에코프로비엠 2026 반기 실측 — 매출 None인데 매출총이익 52.2B은 있음).
+    # 항등식으로 되살린다. 원문에 매출액이 있으면 그쪽이 우선.
+    if out['revenue'] is None and out['gross'] is not None and out['cogs'] is not None:
+        out['revenue'] = out['gross'] + out['cogs']
+    out['capex'] = None
+    for nm, val, sj in pairs:
+        if sj == 'CF' and '유형자산' in nm and '취득' in nm:
+            out['capex'] = val
+            break
     return out
 
 
-_IS_KEYS = ['revenue', 'gross', 'sga', 'op_income', 'net_income']   # 분기보고서에 3개월치로 실림
+# 분기보고서에 3개월치로 실림 → Q4 = FY − (1~3Q). 잔액항목(자산·현금·재고 등)은
+# 기말치라 여기 넣으면 안 된다.
+_IS_KEYS = ['revenue', 'gross', 'cogs', 'sga', 'op_income', 'net_income']
 _CF_KEYS = ['op_cf', 'inv_cf', 'fin_cf', 'capex']                   # 분기보고서에 누적으로만 실림
 
 
@@ -239,7 +292,8 @@ def statements(corp_code, freq='annual', n=5):
         for yy in range(y - 1, y - 1 - n, -1):
             j = _acnt_all(corp_code, yy, '11011')
             if j:
-                e = _extract_all(j); e['period'] = str(yy); e['eps'] = None
+                e = _extract_all(j); e['period'] = str(yy)
+                e.pop('net_income_q', None)   # 분기 전용 폴백 키 — 연간 행엔 남기지 않는다
                 rows.append(e)
         return rows
 
@@ -264,6 +318,10 @@ def statements(corp_code, freq='annual', n=5):
                 a, b = reps['FY'].get(k), reps.get('3Q', {}).get(k)
                 q4[k] = (a - b) if (a is not None and b is not None) else None
             q4['period'] = f'{yy}.4Q'
+            # EPS는 차감으로 못 만든다 — 주식수가 분기마다 달라 FY−(1~3Q)가 4Q EPS가
+            # 아니다. dict(reps['FY'])를 복사해 왔으므로 그대로 두면 **연간 EPS가 4Q
+            # EPS인 척** 남는다. 틀린 값보다 빈 값이 낫다.
+            q4['eps'] = None
             out_q.append(q4)
         for cur, prev in (('3Q', '2Q'), ('2Q', '1Q'), ('1Q', None)):
             if cur not in reps:
@@ -278,7 +336,6 @@ def statements(corp_code, freq='annual', n=5):
             e['period'] = f'{yy}.{cur}'
             out_q.append(e)
         for e in out_q:
-            e['eps'] = None
             e.pop('net_income_q', None)
             rows.append(e)
             if len(rows) >= n:
