@@ -1,6 +1,31 @@
 {
   "items": [
     {
+      "video_id": "0Klm-OqKeCI",
+      "title": "[미방분] 이 집에는 돈 주고 산 게 거의 없습니다 #당근 #당근마켓 #중고거래 #무료나눔 #곽지현 #절약의달인",
+      "channel": "와이스트릿",
+      "published": "2026-08-21T22:00:20+00:00",
+      "url": "https://www.youtube.com/watch?v=0Klm-OqKeCI",
+      "analysis": {
+        "relevant": false,
+        "one_liner": "이 영상은 당근마켓 무료 나눔 및 중고거래를 통해 생활용품을 저렴하게 마련하는 방법을 보여주며 절약을 실천하는 개인의 사례를 소개합니다.",
+        "summary": [
+          "이 집에는 돈 주고 산 물건이 거의 없으며, 대부분 당근마켓 무료 나눔이나 저렴한 중고거래를 통해 얻은 것들입니다.",
+          "모니터 받침대, 배양토, 책꽂이, 바구니, 컴퓨터 테이블, 침대 매트리스는 무료 나눔으로 얻었습니다.",
+          "식탁과 의자는 당근마켓에서 10만 원에 구매했는데, 새것은 40만~50만 원 상당입니다.",
+          "걸이형 네트망 2개는 당근마켓에서 4만 원에, 화장실 선반은 1만 원에, 식기 건조대는 1만 8천 원~2만 원에 구매했습니다.",
+          "커튼은 회사 동료에게서 필요한 물건을 받아 온 사례입니다.",
+          "영상의 주요 내용은 개인의 절약 습관과 중고거래 활용법이며, 투자 관련 내용은 포함되어 있지 않습니다."
+        ],
+        "tickers": [],
+        "key_points": [],
+        "actionable": []
+      },
+      "source": "video",
+      "attempts": 1,
+      "analyzed_at": "2026-08-22T07:57:29.763252+09:00"
+    },
+    {
       "video_id": "5Z6Fp-f4868",
       "title": "신기한 차트 분석, 말도 안 되게 저평가 되어 있던 기업들 | 체슬리투자자문 박세익 전무 [체슬리 오피셜 멤버십 / 26.08.20.목]",
       "channel": "체슬리TV",
@@ -10818,26 +10843,7 @@
       "source": "fail",
       "attempts": 4,
       "analyzed_at": "2026-08-13T17:24:25.918109+09:00"
-    },
-    {
-      "video_id": "q2i6fylE_Ek",
-      "title": "나스닥, CPI 예상치 부합에 상승…코어위브, 네비우스 등 네오클라우드 급등 [월가 뉴스레터]",
-      "channel": "삼프로TV",
-      "published": "2026-08-12T22:03:22+00:00",
-      "url": "https://www.youtube.com/watch?v=q2i6fylE_Ek",
-      "analysis": {
-        "relevant": true,
-        "one_liner": "",
-        "summary": [],
-        "tickers": [],
-        "key_points": [],
-        "actionable": [],
-        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
-      },
-      "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-13T09:45:42.095560+09:00"
     }
   ],
-  "updated": "2026-08-22T06:58:59.064946+09:00"
+  "updated": "2026-08-22T07:57:30.763551+09:00"
 }
