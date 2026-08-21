@@ -1,319 +1,582 @@
+<title>주식 대시보드 검인 시트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=Nanum+Myeongjo:wght@400;700;800&display=swap">
+
 <style>
-  :root{
-    --bg:#eef1f5; --panel:#ffffff; --panel-2:#f4f6f9; --line:#dde3ec;
-    --ink:#18202e; --ink-2:#3d4a5c; --mut:#6b7789;
-    --accent:#4f5fe6; --accent-soft:#eaecfd;
-    --gain:#1f9d57; --gain-bg:#e4f4ea; --loss:#d6414a; --loss-bg:#fbe8e9;
-    --warn:#c07d16; --warn-bg:#f8efdc;
-    --font-ui:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
-    --font-mono:'SF Mono','JetBrains Mono','D2Coding',ui-monospace,'Cascadia Code',monospace;
+:root{
+  --paper:#F6F7F9; --sheet:#FFFFFF; --ink:#15181F; --muted:#5C6472;
+  --line:#DDE1E8; --line-hard:#C3CAD6; --wash:#EDF0F4;
+  --red:#C8323C; --blue:#1F5FBF; --gold:#B07D18; --green:#1E7A5A;
+  --red-bg:#FBEDEE; --blue-bg:#EAF1FC; --gold-bg:#FAF3E3; --green-bg:#E8F4EF;
+  --shadow:0 1px 2px rgba(21,24,31,.06), 0 8px 24px -16px rgba(21,24,31,.30);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1217; --sheet:#171B23; --ink:#E6E9EF; --muted:#98A1B2;
+    --line:#262C38; --line-hard:#3A4354; --wash:#1E2430;
+    --red:#E8626B; --blue:#77ABF5; --gold:#DCA946; --green:#48AE86;
+    --red-bg:#2A171A; --blue-bg:#141F31; --gold-bg:#2A2214; --green-bg:#132821;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
   }
-  @media (prefers-color-scheme:dark){:root{
-    --bg:#0c1119; --panel:#141b28; --panel-2:#1a2331; --line:#26313f;
-    --ink:#e7edf5; --ink-2:#b3becd; --mut:#7d8a9c;
-    --accent:#7c8bff; --accent-soft:#1c2440;
-    --gain:#37c07e; --gain-bg:#12301f; --loss:#f0555b; --loss-bg:#361518;
-    --warn:#e0a13a; --warn-bg:#33260f;
-  }}
-  :root[data-theme="light"]{
-    --bg:#eef1f5; --panel:#ffffff; --panel-2:#f4f6f9; --line:#dde3ec;
-    --ink:#18202e; --ink-2:#3d4a5c; --mut:#6b7789;
-    --accent:#4f5fe6; --accent-soft:#eaecfd;
-    --gain:#1f9d57; --gain-bg:#e4f4ea; --loss:#d6414a; --loss-bg:#fbe8e9;
-    --warn:#c07d16; --warn-bg:#f8efdc;
-  }
-  :root[data-theme="dark"]{
-    --bg:#0c1119; --panel:#141b28; --panel-2:#1a2331; --line:#26313f;
-    --ink:#e7edf5; --ink-2:#b3becd; --mut:#7d8a9c;
-    --accent:#7c8bff; --accent-soft:#1c2440;
-    --gain:#37c07e; --gain-bg:#12301f; --loss:#f0555b; --loss-bg:#361518;
-    --warn:#e0a13a; --warn-bg:#33260f;
-  }
-  *{box-sizing:border-box}
-  .deck{font-family:var(--font-ui);background:var(--bg);color:var(--ink);
-    padding:22px clamp(14px,3vw,34px) 60px;line-height:1.55;-webkit-font-smoothing:antialiased}
-  .deck h1,.deck h2,.deck h3,.deck p{margin:0}
-  .num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+}
+:root[data-theme="dark"]{
+  --paper:#0F1217; --sheet:#171B23; --ink:#E6E9EF; --muted:#98A1B2;
+  --line:#262C38; --line-hard:#3A4354; --wash:#1E2430;
+  --red:#E8626B; --blue:#77ABF5; --gold:#DCA946; --green:#48AE86;
+  --red-bg:#2A171A; --blue-bg:#141F31; --gold-bg:#2A2214; --green-bg:#132821;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
 
-  .topbar{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px 16px;
-    padding-bottom:16px;margin-bottom:22px;border-bottom:1px solid var(--line)}
-  .topbar__id{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700}
-  .topbar__name{font-size:23px;font-weight:800;letter-spacing:-.01em}
-  .topbar__sub{font-size:13px;color:var(--mut)}
-  .topbar__meta{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut)}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,56px) clamp(14px,3vw,28px) 80px;
+  display:flex; flex-direction:column; gap:clamp(18px,2.6vw,30px)}
 
-  .verdict{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--warn);
-    border-radius:12px;padding:14px 18px;margin-bottom:22px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
-  .verdict b{color:var(--ink);font-weight:700}
-  .verdict p{font-size:14.5px;color:var(--ink-2);max-width:80ch}
+/* ── 표지 ───────────────────────────── */
+.cover{border-top:3px solid var(--ink); padding-top:22px}
+.cover .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--muted)}
+.cover h1{font-family:"Nanum Myeongjo",serif; font-weight:800; text-wrap:balance;
+  font-size:clamp(30px,6vw,52px); line-height:1.15; margin:.28em 0 .18em; letter-spacing:-.01em}
+.cover .sub{color:var(--muted); max-width:64ch; font-size:15.5px}
+.cover .meta{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:18px;
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted)}
+.cover .meta b{color:var(--ink); font-weight:600}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;align-items:start}
-  .wide{grid-column:span 2}
-  @media (max-width:720px){.wide{grid-column:span 1}.grid{grid-template-columns:1fr}}
+.verdict{margin-top:22px; border:1px solid var(--line-hard); background:var(--sheet);
+  border-left:4px solid var(--red); padding:16px 18px; box-shadow:var(--shadow)}
+.verdict h2{font-family:"Nanum Myeongjo",serif; font-weight:800; font-size:18px; margin:0 0 6px}
+.verdict p{margin:0; color:var(--muted); font-size:14.5px}
+.verdict strong{color:var(--ink)}
 
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:16px 17px 15px;position:relative;overflow:hidden}
-  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--mut)}
-  .card.s-go::before{background:var(--gain)} .card.s-warn::before{background:var(--warn)} .card.s-block::before{background:var(--loss)}
-  .card__head{display:flex;align-items:center;gap:10px;margin-bottom:3px}
-  .card__n{font-family:var(--font-mono);font-size:12px;color:var(--mut);font-weight:600}
-  .card__title{font-size:16px;font-weight:700;letter-spacing:-.01em}
-  .badge{margin-left:auto;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
-  .b-go{background:var(--gain-bg);color:var(--gain)} .b-warn{background:var(--warn-bg);color:var(--warn)} .b-block{background:var(--loss-bg);color:var(--loss)}
-  .card__upd{font-size:11px;color:var(--mut);font-family:var(--font-mono);margin-bottom:11px}
-  .card__body{font-size:13.5px;color:var(--ink-2)}
+/* ── 카드 ───────────────────────────── */
+.card{background:var(--sheet); border:1px solid var(--line); box-shadow:var(--shadow)}
+.card > header{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  padding:14px 18px; border-bottom:1px solid var(--line); background:var(--wash)}
+.num{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600;
+  color:var(--blue); letter-spacing:.06em}
+.card > header h2{font-family:"Nanum Myeongjo",serif; font-weight:800;
+  font-size:clamp(17px,2.6vw,21px); margin:0; flex:1 1 auto; letter-spacing:-.01em}
+.stamp{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  letter-spacing:.08em; padding:3px 9px; border:1px solid currentColor; white-space:nowrap}
+.s-red{color:var(--red); background:var(--red-bg)}
+.s-gold{color:var(--gold); background:var(--gold-bg)}
+.s-green{color:var(--green); background:var(--green-bg)}
+.s-blue{color:var(--blue); background:var(--blue-bg)}
+.body{padding:18px}
+.body > * + *{margin-top:14px}
+p{margin:0}
+.lede{font-size:15.5px}
+.muted{color:var(--muted)}
+.tiny{font-size:12.5px; color:var(--muted); font-family:"IBM Plex Mono",monospace;
+  line-height:1.6}
+b,strong{font-weight:600}
+mark{background:var(--gold-bg); color:var(--ink); padding:0 3px}
 
-  .kv{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13.5px}
-  .kv dt{color:var(--mut);white-space:nowrap} .kv dd{margin:0;color:var(--ink)}
+/* 다음 행동 */
+.next{display:flex; gap:10px; align-items:flex-start; border-top:1px dashed var(--line-hard);
+  padding-top:12px; margin-top:16px; font-size:14px}
+.next .k{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.1em;
+  color:var(--blue); white-space:nowrap; padding-top:3px; font-weight:600}
 
-  .next{margin-top:13px;padding-top:11px;border-top:1px dashed var(--line);
-    font-size:13px;color:var(--ink);display:flex;gap:7px;align-items:flex-start}
-  .next b{color:var(--accent);font-weight:700;flex-shrink:0}
+/* 표 */
+.scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:560px}
+th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted); font-weight:600; white-space:nowrap;
+  border-bottom:1px solid var(--line-hard)}
+td.n,th.n{text-align:right; font-family:"IBM Plex Mono",monospace;
+  font-variant-numeric:tabular-nums; white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
 
-  .ladder{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
-  .ladder li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
-  .step{font-family:var(--font-mono);font-size:11px;font-weight:700;padding:2px 6px;border-radius:5px;flex-shrink:0;margin-top:1px}
-  .st-done{background:var(--gain-bg);color:var(--gain)} .st-now{background:var(--accent-soft);color:var(--accent)}
-  .st-wait{background:var(--panel-2);color:var(--mut)} .st-block{background:var(--loss-bg);color:var(--loss)}
-  .ladder .cond{color:var(--mut);font-size:12.5px}
+/* 등급 */
+.g{display:inline-block; min-width:30px; text-align:center; font-family:"IBM Plex Mono",monospace;
+  font-weight:600; font-size:12.5px; padding:2px 7px; border:1px solid currentColor}
+.gA{color:var(--green); background:var(--green-bg)}
+.gB{color:var(--blue); background:var(--blue-bg)}
+.gC{color:var(--gold); background:var(--gold-bg)}
+.gD{color:var(--red); background:var(--red-bg)}
 
-  .flow{display:flex;flex-direction:column;gap:9px}
-  .flow__src{display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px}
-  .chip{border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--ink-2);background:var(--panel-2)}
-  .loop{border:1px solid var(--line);border-radius:10px;padding:9px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .loop.dashed{border-style:dashed;border-color:var(--loss)}
-  .loop__tag{font-weight:700;font-size:13px;flex-shrink:0}
-  .loop__steps{font-size:12px;color:var(--ink-2);font-family:var(--font-mono)}
-  .loop__owner{margin-left:auto;font-size:11px;color:var(--mut)}
-  .arrow{text-align:center;color:var(--mut);font-size:13px;line-height:1}
-  .merge{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:9px 12px;font-size:13px}
-  .merge b{color:var(--accent)}
+/* 지표 그리드 */
+.grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
+.stat{border:1px solid var(--line); padding:12px 13px; background:var(--paper)}
+.stat .l{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.08em;
+  color:var(--muted); text-transform:uppercase}
+.stat .v{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+  font-size:23px; font-weight:600; line-height:1.25; margin-top:3px}
+.stat .n2{font-size:12px; color:var(--muted); margin-top:2px; font-family:"IBM Plex Sans KR",sans-serif}
+.v-red{color:var(--red)} .v-green{color:var(--green)} .v-gold{color:var(--gold)}
+.v-mut{color:var(--muted)}
 
-  .quad{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;
-    aspect-ratio:1.5/1;min-height:210px;position:relative}
-  .qcell{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:12px;display:flex;flex-direction:column;gap:4px;background:var(--panel-2)}
-  .qcell.us{border-color:var(--accent);background:var(--accent-soft)}
-  .qcell .qh{font-size:10.5px;letter-spacing:.05em;color:var(--mut);text-transform:uppercase;font-weight:700}
-  .qcomp{font-size:12px;color:var(--ink)}
-  .qaxis{font-size:10.5px;color:var(--mut);text-align:center;letter-spacing:.03em}
-  .qaxis.y{writing-mode:vertical-rl;text-orientation:mixed}
-  .quadwrap{display:grid;grid-template-columns:16px 1fr;grid-template-rows:1fr 16px;gap:5px;align-items:center}
+/* 전선 목록 */
+.front{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0}
+.front li{display:grid; grid-template-columns:auto 1fr; gap:0 14px;
+  padding:13px 0 13px 14px; border-bottom:1px solid var(--line); border-left:3px solid var(--line-hard)}
+.front li:last-child{border-bottom:none}
+.front li.hot{border-left-color:var(--red)}
+.front li.warm{border-left-color:var(--gold)}
+.front .tag{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  letter-spacing:.06em; padding-top:3px; white-space:nowrap}
+.front .t-hot{color:var(--red)} .front .t-warm{color:var(--gold)}
+.front h4{margin:0 0 3px; font-size:14.5px; font-weight:600}
+.front p{font-size:13.5px; color:var(--muted)}
+.front .who{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--blue); margin-top:4px}
 
-  .swot{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .sq{border-radius:9px;padding:9px 11px;font-size:12.5px}
-  .sq h4{margin:0 0 5px;font-size:12px;font-weight:700;letter-spacing:.02em}
-  .sq.s{background:var(--gain-bg)} .sq.s h4{color:var(--gain)}
-  .sq.w{background:var(--loss-bg)} .sq.w h4{color:var(--loss)}
-  .sq.o{background:var(--accent-soft)} .sq.o h4{color:var(--accent)}
-  .sq.t{background:var(--warn-bg)} .sq.t h4{color:var(--warn)}
-  .sq ul{margin:0;padding-left:15px;color:var(--ink-2)} .sq li{margin-bottom:2px}
-  .sq .act{margin-top:5px;font-size:11.5px;color:var(--ink);border-top:1px dashed color-mix(in srgb,var(--ink) 20%,transparent);padding-top:4px}
-  .sq .act b{font-weight:700}
+/* SWOT */
+.swot{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.quad{border:1px solid var(--line); padding:13px 14px; background:var(--paper)}
+.quad h4{margin:0 0 9px; font-family:"IBM Plex Mono",monospace; font-size:11px;
+  letter-spacing:.12em; text-transform:uppercase}
+.quad ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:9px}
+.quad li{font-size:13.5px; line-height:1.55}
+.quad .act{display:block; font-size:12.5px; color:var(--blue); margin-top:2px}
+.q-s h4{color:var(--green)} .q-w h4{color:var(--red)}
+.q-o h4{color:var(--blue)} .q-t h4{color:var(--gold)}
 
-  .metrics{display:flex;flex-direction:column;gap:0}
-  .metric{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:baseline;
-    padding:8px 0;border-bottom:1px solid var(--line)}
-  .metric:last-child{border-bottom:0}
-  .metric__lab{font-size:12.5px;color:var(--ink-2)}
-  .metric__lab small{display:block;color:var(--mut);font-size:11px}
-  .metric__val{font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
-  .up{color:var(--gain)} .down{color:var(--loss)} .flat{color:var(--mut)}
+/* 2x2 맵 */
+.map{position:relative; border:1px solid var(--line-hard); background:var(--paper);
+  aspect-ratio:1.35/1; min-height:280px}
+.map .ax{position:absolute; background:var(--line-hard)}
+.map .axh{left:0; right:0; top:50%; height:1px}
+.map .axv{top:0; bottom:0; left:50%; width:1px}
+.map .lbl{position:absolute; font-family:"IBM Plex Mono",monospace; font-size:10.5px;
+  letter-spacing:.06em; color:var(--muted); text-transform:uppercase}
+.map .pt{position:absolute; transform:translate(-50%,-50%); text-align:center;
+  font-size:12.5px; line-height:1.35; max-width:130px}
+.map .pt i{display:block; width:9px; height:9px; margin:0 auto 4px;
+  background:var(--muted); border-radius:50%; font-style:normal}
+.map .pt.us{font-weight:600; color:var(--red)}
+.map .pt.us i{background:var(--red); width:13px; height:13px; box-shadow:0 0 0 4px var(--red-bg)}
 
-  .fires{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
-  .fire{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px;
-    padding-bottom:8px;border-bottom:1px solid var(--line)}
-  .fire:last-child{border-bottom:0;padding-bottom:0}
-  .fire__what{font-weight:600;color:var(--ink)}
-  .fire__age{font-family:var(--font-mono);font-size:11px;padding:2px 7px;border-radius:20px;background:var(--panel-2);color:var(--mut);white-space:nowrap;height:fit-content}
-  .fire__age.hot{background:var(--loss-bg);color:var(--loss)}
-  .fire__next{grid-column:1/2;font-size:12px;color:var(--ink-2)}
-  .fire__who{font-size:11px;color:var(--mut)}
+/* 인용 패널 */
+.legend{display:flex; flex-direction:column; gap:0}
+.legend .who{display:grid; grid-template-columns:150px 1fr; gap:0 20px;
+  padding:16px 0; border-bottom:1px solid var(--line)}
+.legend .who:last-child{border-bottom:none}
+.legend .nm{font-family:"Nanum Myeongjo",serif; font-weight:700; font-size:16px; line-height:1.3}
+.legend .nm span{display:block; font-family:"IBM Plex Mono",monospace; font-weight:400;
+  font-size:11px; color:var(--muted); margin-top:3px; letter-spacing:.04em}
+.legend dl{margin:0; display:flex; flex-direction:column; gap:8px}
+.legend dt{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted)}
+.legend dd{margin:2px 0 0; font-size:13.8px; line-height:1.62}
+.legend .hit dt{color:var(--red)}
+.legend .nod dt{color:var(--green)}
+.legend .do dt{color:var(--blue)}
 
-  .log{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-  .log li{font-size:13px}
-  .log .d{font-family:var(--font-mono);font-size:11px;color:var(--accent);font-weight:700}
-  .log .why{color:var(--mut);font-size:12px}
-  .log .pred{color:var(--ink-2);font-size:12px;margin-top:2px}
-  .log .pred b{color:var(--warn)}
+/* mermaid */
+pre.mermaid{background:var(--paper); border:1px solid var(--line); padding:14px;
+  overflow-x:auto; margin:0; text-align:center}
 
-  .miss{margin-top:22px;background:var(--panel);border:1px dashed var(--loss);border-radius:12px;padding:14px 18px}
-  .miss h3{font-size:14px;font-weight:700;color:var(--loss);margin:0 0 8px}
-  .miss ol{margin:0;padding-left:20px;font-size:13px;color:var(--ink-2)} .miss li{margin-bottom:3px}
-  .foot{margin-top:26px;font-size:11px;color:var(--mut);text-align:center;font-family:var(--font-mono)}
+/* 마일스톤 */
+.miles{list-style:none; margin:0; padding:0}
+.miles li{display:grid; grid-template-columns:auto 1fr; gap:0 14px; padding:12px 0;
+  border-bottom:1px solid var(--line)}
+.miles li:last-child{border-bottom:none}
+.miles .m{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:12.5px;
+  color:var(--blue); padding-top:2px}
+.miles h4{margin:0 0 3px; font-size:14.5px; font-weight:600}
+.miles .cond{font-size:13px; color:var(--muted)}
+.miles .cond b{color:var(--ink); font-weight:600}
+
+footer{border-top:1px solid var(--line); padding-top:18px; font-family:"IBM Plex Mono",monospace;
+  font-size:11.5px; color:var(--muted); line-height:1.8}
+
+@media (max-width:640px){
+  .legend .who{grid-template-columns:1fr; gap:10px}
+  .map{aspect-ratio:auto; min-height:400px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 </style>
 
-<div class="deck">
-  <header class="topbar">
-    <span class="topbar__id">Stock Screener</span>
-    <span class="topbar__name">한·미 시그널 + 규율 엔진</span>
-    <span class="topbar__sub">자기교정 투자 시스템 · pcy604/stock-dashboard</span>
-    <span class="topbar__meta"><span class="badge b-warn">🟡 검증 대기</span><span class="num">2026-07-25</span></span>
-  </header>
+<div class="wrap">
+
+<div class="cover">
+  <div class="eyebrow">검인 시트 · 전수 점검</div>
+  <h1>주식 대시보드 검인 시트</h1>
+  <p class="sub">4개 탭 · 4개 서브탭 · 20개 자동 산출물을 <b>기획 의도 / 실제 작동 / 검증 수준</b> 세 축으로 채점했다. 코드와 실제 산출물을 읽고 매긴 등급이며, 확인하지 못한 것은 <span class="muted">❓미측정</span>으로 남겼다.</p>
+  <div class="meta">
+    <span>점검일 <b>2026-08-22</b></span>
+    <span>저장소 <b>pcy604/stock-dashboard</b></span>
+    <span>커밋 <b>20c5bfb</b></span>
+    <span>dashboard.py <b>4,541줄</b></span>
+    <span>사용자 <b>1명</b></span>
+  </div>
 
   <div class="verdict">
-    <span style="font-size:20px;line-height:1.2">🧭</span>
-    <p><b>한 줄 진단 —</b> 기능은 상용 수준으로 성숙했고 자기교정 루프도 돈다. 그러나 <b>① 종목선정 알파는 아직 미검증</b>(8/11 첫 판독)이고, <b>② 핵심인 가드레일 루프가 꺼져 있다</b>(실보유 미입력). 지금 필요한 건 새 기능이 아니라 <b>검증 결과와 실계좌 연동</b>이다.</p>
+    <h2>종합 소견 — 기계는 살아 있고, 자기 채점기는 고장 나 있다</h2>
+    <p>파이프라인 <b>20/20 정상</b>, 주도주 L/S 규칙은 지연·플라시보·슬롯 대조까지 통과한 <b>드물게 견고한</b> 부분이다. 그런데 이 프로젝트가 스스로 내건 차별점인 <strong>자기교정 루프의 절반이 죽어 있다</strong> — 신호 6개 중 3개의 실전 성적이 <code>NaN</code>이고, 그 <code>NaN</code>이 <strong>최고 신뢰도 1.29</strong>로 둔갑해 추천과 비중에 반영되는 중이다. 원인은 <b>단 4건</b>의 오염 거래, 전부 EA(인수로 가격 중단)다. 이 대화 내내 경계하던 <strong>생존 편향이 실제로 시스템을 망가뜨린 물증</strong>이다.</p>
   </div>
+</div>
 
-  <div class="grid">
-
-    <!-- 1 원페이저 -->
-    <section class="card s-go">
-      <div class="card__head"><span class="card__n">01</span><h2 class="card__title">원페이저</h2><span class="badge b-go">🟢 진행</span></div>
-      <p class="card__upd">최종갱신 2026-07-25</p>
-      <div class="card__body">
-        <dl class="kv">
-          <dt>문제</dt><dd>개인은 종목선정이 아니라 <b>집중·레버리지·감정</b>으로 잃는다 (본인 6월 ₩1억 손실이 증거)</dd>
-          <dt>대상</dt><dd>규율이 필요한 자기주도 투자자 <span class="num">(현재 1명)</span></dd>
-          <dt>해법</dt><dd>추천을 스스로 채점·교정하고(성적표), 사용자의 규율을 감시하는(가드레일) 시스템</dd>
-          <dt>지금</dt><dd>기능 성숙 · 검증 초기</dd>
-        </dl>
-      </div>
-      <p class="next"><b>다음 →</b><span>8/11 신뢰계수 반영 후 첫 개선 판독으로 "선정 엣지 유무"를 데이터로 결론.</span></p>
-    </section>
-
-    <!-- 2 마스터플랜 -->
-    <section class="card s-warn">
-      <div class="card__head"><span class="card__n">02</span><h2 class="card__title">마스터플랜</h2><span class="badge b-warn">🟡 M2 진행</span></div>
-      <p class="card__upd">최종갱신 2026-07-25 · 완료조건 = 검증가능</p>
-      <div class="card__body">
-        <ul class="ladder">
-          <li><span class="step st-done">M0</span><span>파이프라인 무인화 <span class="cond">— 매일 06시 자동 + 정지 감시 ✓</span></span></li>
-          <li><span class="step st-done">M1</span><span>성적표 루프 <span class="cond">— 신호 채점·신뢰계수 자동반영 ✓</span></span></li>
-          <li><span class="step st-now">M2</span><span>검증 게이트 <span class="cond">— 신호당 표본 30건 + 개선픽 알파 판독 (8/11)</span></span></li>
-          <li><span class="step st-block">M3</span><span>실계좌 규율 <span class="cond">— KIS 연동, 실보유 매일 자동채점 (미착수)</span></span></li>
-          <li><span class="step st-wait">M4</span><span>방향 확정 <span class="cond">— 8월 데이터로 선정 vs 규율집중 (A/B/C)</span></span></li>
-          <li><span class="step st-wait">M5</span><span>공개 트랙레코드 <span class="cond">— 검증 통과 시 공개 URL (조건부)</span></span></li>
-        </ul>
-      </div>
-      <p class="next"><b>다음 →</b><span>M2 완료조건(표본 30건)까지 매주 가상매매 축적 — 시간이 만드는 자산.</span></p>
-    </section>
-
-    <!-- 7 트랙션 보드 -->
-    <section class="card s-warn wide">
-      <div class="card__head"><span class="card__n">07</span><h2 class="card__title">트랙션 보드 — 시스템 성과 (허영지표 대신 행동지표)</h2><span class="badge b-warn">🟡 알파 미검증</span></div>
-      <p class="card__upd">측정 시작 2026-06-14 · 최종갱신 2026-07-25</p>
-      <div class="card__body metrics">
-        <div class="metric"><div class="metric__lab">신호 4주 실전EV — 컵핸들 <small>유일하게 백테 상회 (n=8)</small></div><div class="metric__val up">+3.5%</div></div>
-        <div class="metric"><div class="metric__lab">신호 4주 실전EV — 이평수렴 / 52주신고가 <small>신뢰계수 ×0.20 / ×0.29로 자동 강등</small></div><div class="metric__val down">-0.8% / -2.1%</div></div>
-        <div class="metric"><div class="metric__lab">주간 포트 알파 (vs KOSPI·SPY) <small>W27 → W29, 표본 적어 소음 수준</small></div><div class="metric__val"><span class="down">-3.2%p</span> → <span class="up">+3.5%p</span></div></div>
-        <div class="metric"><div class="metric__lab">가상매매 누적 / 신뢰계수 반영 후 픽 <small>개선검증 첫 4주 판독 2026-08-11</small></div><div class="metric__val">200+ / <span class="flat">D-17</span></div></div>
-        <div class="metric"><div class="metric__lab">컨센 리비전 스냅샷 <small>510종목 1주차 · 방향은 2주차부터</small></div><div class="metric__val flat">1주차</div></div>
-        <div class="metric"><div class="metric__lab">실사용자 / 실계좌 연동 / 수익 <small>개인 도구 — 외부 사용자·매출 미해당</small></div><div class="metric__val flat">1명 / ❌ / ❓</div></div>
-      </div>
-      <p class="next"><b>다음 →</b><span>이 카드가 3·5·6번을 검증한다. 8/11 판독에서 개선픽 알파가 (+)면 M4를 "선정 유지"로, (−)면 "규율 집중"으로 확정.</span></p>
-    </section>
-
-    <!-- 8 열린 전선 -->
-    <section class="card s-block">
-      <div class="card__head"><span class="card__n">08</span><h2 class="card__title">열린 전선</h2><span class="badge b-block">🔴 6건</span></div>
-      <p class="card__upd">최종갱신 2026-07-25 · 무엇 / 다음 / 누가</p>
-      <div class="card__body">
-        <ul class="fires">
-          <li><span class="fire__what">포트폴리오 미입력 → 가드레일 루프 꺼짐</span><span class="fire__age hot">핵심</span><span class="fire__next">→ 💼탭에 실보유 종목 입력하면 매일 규율 채점 시작</span><span class="fire__who">누가: 사용자 (5분)</span></li>
-          <li><span class="fire__what">KIS 실계좌 자동연동</span><span class="fire__age">대기</span><span class="fire__next">→ 수동입력 없이 실보유 자동 채점 (kis_client 존재)</span><span class="fire__who">누가: Claude + 사용자 계정</span></li>
-          <li><span class="fire__what">8/11 검증 첫 판독</span><span class="fire__age">D-17</span><span class="fire__next">→ 매주 가상매매 축적, 시간이 해결</span><span class="fire__who">누가: 시간</span></li>
-          <li><span class="fire__what">CANSLIM I(기관수급) 컬럼 공백</span><span class="fire__age hot">지속</span><span class="fire__next">→ KRX 계정을 Secrets(KRX_ID/PW)에 등록 시 복구</span><span class="fire__who">누가: 사용자</span></li>
-          <li><span class="fire__what">영업현금흐름 축 (Piotroski 완성)</span><span class="fire__age">대기</span><span class="fire__next">→ DB 스키마에 op_cf·부채 추가</span><span class="fire__who">누가: Claude</span></li>
-          <li><span class="fire__what">Gemini 세그먼트 추출 정확도 미검증</span><span class="fire__age">신규</span><span class="fire__next">→ 몇 종목 원문 대조로 신뢰도 확인</span><span class="fire__who">누가: 사용자 눈</span></li>
-        </ul>
-      </div>
-      <p class="next"><b>다음 →</b><span>1번(포트폴리오 입력)이 유일하게 사용자만 할 수 있고, 나머지 루프를 켠다. 이것부터.</span></p>
-    </section>
-
-    <!-- 4 워크플로우 -->
-    <section class="card s-warn wide">
-      <div class="card__head"><span class="card__n">04</span><h2 class="card__title">워크플로우 — 실제로 도는 것</h2><span class="badge b-warn">🟡 1개 루프 꺼짐</span></div>
-      <p class="card__upd">최종갱신 2026-07-25 · 점선 🔴 = 안 도는 구간</p>
-      <div class="card__body flow">
-        <div class="flow__src">
-          <span class="chip">DART·EDGAR 공식재무</span><span class="chip">FDR 가격</span><span class="chip">FRED 매크로</span><span class="chip">네이버 컨센</span><span class="chip">Gemini 추출</span>
-        </div>
-        <div class="arrow">▼ 매일 06시 무인 (GitHub Actions)</div>
-        <div class="loop"><span class="loop__tag">① 시스템 자기교정</span><span class="loop__steps">신호 발굴 → 가상매매 → 1·4·13주 채점 → 신뢰계수 보정 ↻</span><span class="loop__owner">자동</span></div>
-        <div class="loop dashed"><span class="loop__tag">② 행동 교정 (가드레일)</span><span class="loop__steps">보유 → 원칙 대조 → "몇 주 줄여라" → 준수율 ↻</span><span class="loop__owner">🔴 미입력</span></div>
-        <div class="loop"><span class="loop__tag">③ 인프라 감시</span><span class="loop__steps">파이프라인 → 신선도·실패율 검사 → 이상시 경보 ↻</span><span class="loop__owner">자동</span></div>
-        <div class="arrow">▼</div>
-        <div class="merge"><b>주간 성적표 브리핑</b> — 일요일 08시 텔레그램. 세 루프 결과 합류.</div>
-      </div>
-      <p class="next"><b>다음 →</b><span>②번 점선을 실선으로: 포트폴리오 입력(즉시) 또는 KIS 연동(자동). 이 루프가 이 시스템의 존재 이유.</span></p>
-    </section>
-
-    <!-- 5 경쟁 지형 -->
-    <section class="card s-go wide">
-      <div class="card__head"><span class="card__n">05</span><h2 class="card__title">경쟁 지형 — 우리 자리</h2><span class="badge b-go">🟢 공백 확보</span></div>
-      <p class="card__upd">최종갱신 2026-07-25 · 조사 완료</p>
-      <div class="card__body">
-        <div class="quadwrap">
-          <div class="qaxis y">실패 공개 ↑ · 성과 은폐 ↓</div>
-          <div class="quad">
-            <div class="qcell"><span class="qh">규율 · 실패공개</span><span class="qcomp">로보어드바이저 <span class="fire__who">(핀트·파운트) — 돈 위임, 규율 대행</span></span></div>
-            <div class="qcell us"><span class="qh">◆ 우리 자리 (공백)</span><span class="qcomp"><b>규율 엔진 + 실패까지 공개</b> — 계좌는 내가, 원칙은 기계가 감시</span></div>
-            <div class="qcell"><span class="qh">추천 · 성과은폐</span><span class="qcomp">Danelfin · Tickeron · Composer <span class="fire__who">— 큐레이션된 성과만 마케팅</span></span></div>
-            <div class="qcell"><span class="qh">자동매매</span><span class="qcomp">퀀터스 · 젠포트 <span class="fire__who">— 전략 백테·자동실행</span></span></div>
-          </div>
-          <div></div>
-          <div class="qaxis">종목추천 ← → 규율·리스크관리</div>
-        </div>
-      </div>
-      <p class="next"><b>다음 →</b><span>"실패까지 공개하는 규율 시스템"은 경쟁사에 0개. 단, 이 축의 생사는 8/11 검증에 달림 — 못 이기면 축 자체를 접는다.</span></p>
-    </section>
-
-    <!-- 6 SWOT -->
-    <section class="card s-go wide">
-      <div class="card__head"><span class="card__n">06</span><h2 class="card__title">SWOT — 각 칸 대응 액션</h2><span class="badge b-go">🟢 능동</span></div>
-      <p class="card__upd">최종갱신 2026-07-25</p>
-      <div class="card__body swot">
-        <div class="sq s"><h4>강점 S</h4><ul><li>정직성 — 실패를 기록·강등</li><li>3-루프 자기교정</li><li>전부 무료 스택</li></ul><p class="act"><b>액션:</b> 공개 트랙레코드로 정직성을 무기화</p></div>
-        <div class="sq w"><h4>약점 W</h4><ul><li>검증된 알파 없음</li><li>단일파일 2,900줄·테스트 0</li><li>사용자 1명</li></ul><p class="act"><b>액션:</b> 8/11 판독으로 알파 유무 결론</p></div>
-        <div class="sq o"><h4>기회 O</h4><ul><li>규율 엔진 시장 공백</li><li>SEC PDT 폐지 → 자기규율 수요↑</li><li>데이터·엔진 이미 보유</li></ul><p class="act"><b>액션:</b> KIS 연동으로 규율 자동화 선점</p></div>
-        <div class="sq t"><h4>위협 T</h4><ul><li>무료 데이터 의존 (pykrx 로그인화)</li><li>Gemini 추출 정확도</li><li>선정 엣지 부재 가능성</li></ul><p class="act"><b>액션:</b> 조용한실패 감시 유지 + 벡터로 함정 차단</p></div>
-      </div>
-      <p class="next"><b>다음 →</b><span>W(알파)와 O(규율)가 정면충돌 — 8월 데이터가 어느 쪽에 베팅할지 결정한다.</span></p>
-    </section>
-
-    <!-- 10 결정 로그 -->
-    <section class="card s-go">
-      <div class="card__head"><span class="card__n">10</span><h2 class="card__title">결정 로그</h2><span class="badge b-go">🟢 예측 추적</span></div>
-      <p class="card__upd">최종갱신 2026-07-25</p>
-      <div class="card__body">
-        <ul class="log">
-          <li><span class="d">06-20</span> 종목선정 매달리기 중단 → 생존(매도·리스크)에 집중<div class="why">근거: 레짐 백테 — 선정 변별력 비일관</div></li>
-          <li><span class="d">07-24</span> 역발상 KR 엔진 추가<div class="why">근거: 모멘텀이 조정장에 눈감음 (국장 폭락 시 KR 1종목)</div></li>
-          <li><span class="d">07-24</span> 펀더멘털 벡터 (위치+속도+가속)<div class="pred"><b>예측:</b> 벡터 필터가 함정 424종목 걸러 성과↑ → 8월 검증</div></li>
-          <li><span class="d">미결</span> A/B/C 방향 <span class="why">— 8월 데이터로 결정 예약</span></li>
-        </ul>
-      </div>
-      <p class="next"><b>다음 →</b><span>07-24 벡터 예측을 8/11 성적표에서 채점 — 맞았는지 데이터로 확인.</span></p>
-    </section>
-
-    <!-- 3 수익화 -->
-    <section class="card s-block">
-      <div class="card__head"><span class="card__n">03</span><h2 class="card__title">수익화 구조</h2><span class="badge b-block">🔴 미착수</span></div>
-      <p class="card__upd">최종갱신 2026-07-25 · 정직한 ❓</p>
-      <div class="card__body">
-        <dl class="kv">
-          <dt>누가 낸다</dt><dd>❓ 미정 — 현재 개인용, 외부 사용자 0</dd>
-          <dt>얼마 낸다</dt><dd>❓ 미측정</dd>
-          <dt>왜 낸다</dt><dd>가설 — "실패까지 공개하는 규율 엔진"은 무료 대안(Danelfin류)에 없음</dd>
-          <dt>몇 명이면</dt><dd>❓ 미측정</dd>
-          <dt>선결조건</dt><dd>M2 검증 통과 — 그 전 수익화는 근거 없음</dd>
-        </dl>
-      </div>
-      <p class="next"><b>다음 →</b><span>지금 수익화 설계는 시기상조. 8월 검증 후 공개 트랙레코드로 수요검증부터.</span></p>
-    </section>
-
+<!-- 01 원페이저 -->
+<section class="card">
+  <header><span class="num">01</span><h2>원페이저 — 이게 뭔가</h2><span class="stamp s-gold">문서 낡음</span></header>
+  <div class="body">
+    <p class="lede"><b>문제.</b> 2026년 6월 1억 원 손실. 원인은 종목 선정이 아니라 <b>극단적 집중 + 레버리지 + 감정</b>이었다.</p>
+    <p class="lede"><b>해법.</b> 목적을 두 개로 재정의했다 — ① 원칙을 기계가 강제한다(가드레일) ② 시스템이 자기 추천을 스스로 채점·교정한다(성적표). 종목 발굴은 이 둘의 <b>입력으로 격하</b>됐다.</p>
+    <p class="lede"><b>대상.</b> 사용자 1명. 외부 사용자 0명. 분기 계약상 <b>유지 모드</b>이고 주력은 buza-bot이다.</p>
+    <p class="lede"><b>차별점.</b> 경쟁 서비스는 "뭘 살까"를 팔고 성공 사례만 마케팅한다. 이쪽은 반대로 <b>실패를 기록하는 원장</b>과 <b>계좌 주인을 채점하는 규율 엔진</b>이다. 이번 주에만 개선 시도 7건을 전부 기각하고 그 기각 근거를 코드에 박제했다.</p>
+    <p class="tiny">⚠️ PROJECT.md는 "대시보드 5탭 · 6개 서브탭 · 🎙️구루 인사이트 탭"으로 적혀 있으나 실제는 <b>4탭 · 4서브탭</b>이고 구루 탭은 2026-08-11에 제거됐다. 최종 갱신 2026-07-19 이후 한 달 넘게 방치돼 있다.</p>
+    <div class="next"><span class="k">다음 행동</span><span>PROJECT.md를 실제 구조로 갱신한다. 남에게 보여줄 첫 문서가 사실과 다르면 나머지 신뢰가 같이 깎인다.</span></div>
   </div>
+</section>
 
-  <div class="miss">
-    <h3>❓ 먼저 이것부터 측정·실행하라 (카드의 ❓를 채우는 순서)</h3>
-    <ol>
-      <li><b>포트폴리오 입력</b> — 가드레일 루프(②)를 켜는 유일한 열쇠. 오늘, 5분. (사용자)</li>
-      <li><b>8/11 개선검증 판독</b> — 알파·선정엣지·방향(A/B/C)이 전부 여기서 결정. (시간)</li>
-      <li><b>Gemini 세그먼트 정확도</b> — 몇 종목 원문 대조로 신뢰도 확인. (사용자)</li>
-      <li><b>수익화·사용자 지표</b> — M2 통과 전엔 측정 대상 아님. 그때까지 ❓가 정답.</li>
+<!-- 02 채점표 -->
+<section class="card">
+  <header><span class="num">02</span><h2>탭별 완성도 채점</h2><span class="stamp s-red">D 1건 · C 2건</span></header>
+  <div class="body">
+    <div class="scroll"><table>
+      <thead><tr><th>탭 / 기능</th><th>기획 의도</th><th>실제 작동</th><th>검증 수준</th><th class="n">등급</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>🔎 발굴 › 🚀 주도주</b></td>
+          <td>검증된 규칙으로 대시세 후보 포착</td>
+          <td>L 3종 · S 7종 신호 발행, 주차별·심층 조회 정상</td>
+          <td>8년 백테 + 진입 1·2주 지연 + 플라시보 20회 + 슬롯 대조. <b>개선 시도 7건 전부 기각 기록</b></td>
+          <td class="n"><span class="g gA">A</span></td>
+        </tr>
+        <tr>
+          <td><b>자동 파이프라인</b></td>
+          <td>사람 손 없이 매일·매주 산출</td>
+          <td>산출물 20종 전부 🟢 (최대 경과 7일)</td>
+          <td>data_freshness 자체 감시 + 텔레그램 정지 경보</td>
+          <td class="n"><span class="g gA">A</span></td>
+        </tr>
+        <tr>
+          <td><b>🔍 종목 분석</b></td>
+          <td>한 종목을 끝까지 파는 조회 도구</td>
+          <td>12개 섹션 — 5단 차트·공식재무 3표·사업부문별 매출·손익 흐름·밸류에이션 밴드·내부자 거래(DART/SEC)·월별 상승률·골든크로스</td>
+          <td>조회 도구라 백테 대상 아님. 08-21 부채총계→자산총계 오집 버그 수정됨</td>
+          <td class="n"><span class="g gA">A−</span></td>
+        </tr>
+        <tr>
+          <td><b>🔎 발굴 › 💎 가치(KR)</b></td>
+          <td>DART 공식재무로 저평가 우량주</td>
+          <td>PER·PBR·ROE·영업익 슬라이더 정상, 113KB 스냅샷 2일 경과</td>
+          <td>공식 재무 기반이라 데이터 신뢰도는 높음. <b>수익률 검증은 없음</b></td>
+          <td class="n"><span class="g gB">B</span></td>
+        </tr>
+        <tr>
+          <td><b>💼 포트폴리오 › 보유·추적</b></td>
+          <td>가드레일이 원칙 위반을 지적</td>
+          <td>20%캡·30%트림·레버리지 10%·손절 −8%·매크로 현금비중 로직 존재. 보유 데이터는 GitHub API 저장이라 <span class="muted">❓실사용 미확인</span></td>
+          <td>규칙 기반이라 백테 대상 아님. <b>준수율 이력이 실제로 쌓이는지 미확인</b></td>
+          <td class="n"><span class="g gB">B−</span></td>
+        </tr>
+        <tr>
+          <td><b>🌍 매크로</b></td>
+          <td>사이클 국면 → 현금비중 10~70% 권고</td>
+          <td>3렌즈·사이클 궤적·전이 감시판·중앙은행 금리·M2·수익률곡선·CPI 정상</td>
+          <td><code>regime_backtest.py</code>가 있으나 <b>최근 재검증 기록 없음</b>. 권고가 실제로 맞았는지 채점 안 됨</td>
+          <td class="n"><span class="g gC">C+</span></td>
+        </tr>
+        <tr>
+          <td><b>🔎 발굴 › 🏆 CANSLIM</b></td>
+          <td>오닐 7요소 스코어카드 (KR/US)</td>
+          <td>슬라이더 실시간, KR 30KB · US 59KB 스냅샷 정상</td>
+          <td>4기 연도별 백테(2021~25)에서 <b>위닝 스코어 등급의 변별력이 "비일관"</b> 판정. 그 이후 재검증 없이 화면에 남아 있음</td>
+          <td class="n"><span class="g gC">C</span></td>
+        </tr>
+        <tr>
+          <td><b>🔎 발굴 › 🔥 상승 상위</b></td>
+          <td>기간별 상승률 + 계절성 + 위닝점수</td>
+          <td>정상 작동</td>
+          <td>화면에 <b>"참고용 탐색"</b>으로 명시. 의도된 미검증이라 감점은 아니나, 위닝점수를 표시하는 이상 02·07번 문제를 그대로 물려받음</td>
+          <td class="n"><span class="g gC">C</span></td>
+        </tr>
+        <tr>
+          <td><b>💼 › 📒 성적표</b></td>
+          <td><b>이 프로젝트의 심장</b> — 신호가 실제로 맞았나를 채점해 신뢰계수로 자동 강등</td>
+          <td>가상매매 1,126건 누적. 4주 실현 440건. <b>13주 실현 0건.</b> 신뢰계수 6개 중 <b>3개가 NaN인데 최고값 1.29 부여</b></td>
+          <td>루프 자체가 고장. 강등이 실제로 작동한 건 이평수렴(0.59) 하나뿐</td>
+          <td class="n"><span class="g gD">D</span></td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="tiny">등급 기준 — A: 검증까지 끝남 · B: 작동하나 성과 검증 없음 · C: 검증에서 문제가 나왔는데 화면에 그대로 남음 · D: 기능 자체가 오작동</p>
+    <div class="next"><span class="k">다음 행동</span><span>D 하나를 고치는 게 C 두 개를 손보는 것보다 크다. 성적표가 살아나야 CANSLIM·상승상위의 신뢰계수도 같이 정상화된다.</span></div>
+  </div>
+</section>
+
+<!-- 03 워크플로우 -->
+<section class="card">
+  <header><span class="num">03</span><h2>실제로 도는 흐름 — 그리고 죽은 가지</h2><span class="stamp s-gold">데드 2건</span></header>
+  <div class="body">
+    <pre class="mermaid">
+flowchart LR
+  A["DART 공시"] --> DB[("market.db")]
+  B["FinanceDataReader"] --> DB
+  C["SEC EDGAR"] --> DB
+  DB --> D{"배치"}
+  D -->|"매일 06:00"| E["스크리너 · CANSLIM · 가치"]
+  D -->|"주 1회"| F["주도주 L/S · 페이퍼 원장"]
+  E --> J["results/*.json"]
+  F --> J
+  J --> S["Streamlit 대시보드"]
+  J --> T["텔레그램 3종"]
+  F -.-> P["신뢰계수"]
+  P -.->|"3/6 NaN"| W["위닝점수 · 추천 · 사이징"]
+  X["turnaround_run"] -.-> Y["turnaround_latest.json"]
+  Y -.-> Z["읽는 곳 없음"]
+  G["guru_youtube"] --> H["guru_insights.json<br/>615KB · 매일"]
+  H --> T
+  H -.-> I["대시보드 탭 제거됨<br/>2026-08-11"]
+  style W fill:#FBEDEE,stroke:#C8323C,color:#15181F
+  style P fill:#FBEDEE,stroke:#C8323C,color:#15181F
+  style Z fill:#FAF3E3,stroke:#B07D18,color:#15181F
+  style I fill:#FAF3E3,stroke:#B07D18,color:#15181F
+    </pre>
+    <p class="tiny">실선 = 실제로 도는 경로 · 점선 = 끊겼거나 오작동하는 경로</p>
+    <div class="scroll"><table>
+      <thead><tr><th>죽은 가지</th><th>규모</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr><td><code>turnaround_latest.json</code></td><td class="n">84 B</td><td><code>turnaround_run.py</code>가 쓰지만 <b>읽는 코드가 저장소 전체에 없다.</b> 완전한 데드</td></tr>
+        <tr><td><code>leaders_paper.json</code></td><td class="n">43 KB</td><td>구 규칙⑥ 페이퍼 원장. 규칙 종료 후 대시보드 참조 0건</td></tr>
+        <tr><td><code>guru_insights.json</code></td><td class="n">615 KB</td><td>데드는 아님(텔레그램이 소비). 다만 <b>매일 8회 자동 커밋</b>으로 저장소를 부풀린다 — 08-21 하루 커밋 8건이 전부 이것</td></tr>
+      </tbody>
+    </table></div>
+    <div class="next"><span class="k">다음 행동</span><span>turnaround 계열을 지우고, guru_insights를 커밋 대상에서 빼거나 하루 1회로 줄인다. 죽은 가지가 남아 있으면 "초록불인데 실은 죽어 있는" 상태를 구분할 수 없게 된다.</span></div>
+  </div>
+</section>
+
+<!-- 04 열린 전선 -->
+<section class="card">
+  <header><span class="num">04</span><h2>열린 전선</h2><span class="stamp s-red">🔴 3 · 🟡 4</span></header>
+  <div class="body">
+    <ul class="front">
+      <li class="hot"><span class="tag t-hot">🔴 치명</span><div>
+        <h4>신뢰계수 NaN — 측정 불가 신호가 최고 신뢰도를 받는다</h4>
+        <p>EA(인수로 가격 중단) 거래 <b>단 4건</b>의 수익률이 NaN이다. 집계가 <code>sum(rets)/n</code>이라 nan-safe가 아니어서 신호 전체 EV가 NaN이 되고, <code>max(0.0, min(1.3, NaN))</code>이 파이썬에서 <b>1.3을 돌려줘</b> 최고 신뢰도가 부여된다. 52주신고가(n=194) · 5일라이딩(n=258) · RSI/MACD(n=342) 세 개가 전부 1.29. 하필 표본이 가장 큰 것들이고, 이 값이 위닝점수 → 추천 → 사이징으로 흘러간다.</p>
+        <p class="who">담당 Claude · 예상 15분 · 파일 paper_trade.py:180, 244</p></div></li>
+      <li class="hot"><span class="tag t-hot">🔴 치명</span><div>
+        <h4>13주 성적표가 한 건도 안 쌓였다</h4>
+        <p>가상매매 1,126건 중 4주 실현은 440건인데 <b>13주 실현은 0건</b>이다. 신뢰계수도 4주 기준으로만 돌고 있다. 4주는 노이즈가 큰 구간이라, 이 시스템의 실제 보유 기간(주도주는 −30% 트레일까지 수개월)과 채점 기준이 어긋나 있다.</p>
+        <p class="who">담당 Claude · 원인 미규명 — 13주 만기 처리 코드가 도는지부터 확인 필요</p></div></li>
+      <li class="hot"><span class="tag t-hot">🔴 구조</span><div>
+        <h4>생존 편향 — 유니버스에 상장폐지 종목이 없다</h4>
+        <p>모든 백테스트 숫자가 낙관 편향돼 있다. 이번에 <b>추상적 위험이 아님이 증명됐다</b> — EA 4건이 실제로 신뢰계수를 무너뜨렸다. 5기에서 기각한 "S 3회차+" 안도 정확히 이 편향의 증폭기였다.</p>
+        <p class="who">담당 형 판단 필요 · 유니버스 재구축은 큰 작업이고 분기 계약(유지 모드)과 충돌</p></div></li>
+      <li class="warm"><span class="tag t-warm">🟡 위생</span><div>
+        <h4>PROJECT.md가 한 달 넘게 낡았다</h4>
+        <p>"5탭 · 6서브탭 · 구루 인사이트 탭"으로 적혀 있으나 실제는 4탭 · 4서브탭이고 구루 탭은 08-11 제거됐다.</p>
+        <p class="who">담당 Claude · 예상 10분</p></div></li>
+      <li class="warm"><span class="tag t-warm">🟡 위생</span><div>
+        <h4>죽은 산출물 2건이 계속 생성된다</h4>
+        <p><code>turnaround_latest.json</code>(읽는 곳 없음), <code>leaders_paper.json</code>(규칙 종료 후 미참조).</p>
+        <p class="who">담당 Claude · 예상 20분</p></div></li>
+      <li class="warm"><span class="tag t-warm">🟡 부채</span><div>
+        <h4>dashboard.py 4,541줄 단일 파일</h4>
+        <p>탭마다 <code>guard()</code>로 감싸 한 탭이 죽어도 전체가 안 죽게는 해뒀다. 다만 서브탭 핸들 순서 의존처럼 <b>주석으로만 방어된 함정</b>이 남아 있다.</p>
+        <p class="who">담당 보류 — 1인 프로젝트에 모듈 분리는 과잉. 죽은 코드 제거로 대체</p></div></li>
+      <li class="warm"><span class="tag t-warm">🟡 검증</span><div>
+        <h4>CANSLIM·매크로가 "검증 실패 후 방치" 상태</h4>
+        <p>위닝 스코어 등급은 4기에 "변별력 비일관" 판정을 받았고, 매크로 현금비중 권고는 맞았는지 채점된 적이 없다. 둘 다 화면에는 그대로 있다.</p>
+        <p class="who">담당 형 판단 — 재검증할지, 화면에 한계를 공시할지(주도주 방식), 내릴지</p></div></li>
+    </ul>
+    <div class="next"><span class="k">다음 행동</span><span>🔴 1번(15분)이 가장 값싸고 파급이 크다. 이것만 고쳐도 02번 카드의 D가 B로 올라간다.</span></div>
+  </div>
+</section>
+
+<!-- 05 트랙션 -->
+<section class="card">
+  <header><span class="num">05</span><h2>트랙션 보드</h2><span class="stamp s-gold">❓ 4건</span></header>
+  <div class="body">
+    <div class="grid">
+      <div class="stat"><div class="l">파이프라인 신선도</div><div class="v v-green">20/20</div><div class="n2">전 산출물 🟢 · 최대 경과 7일</div></div>
+      <div class="stat"><div class="l">가상매매 누적</div><div class="v">1,126</div><div class="n2">4주 실현 440 · 13주 실현 <b>0</b></div></div>
+      <div class="stat"><div class="l">신뢰계수 유효</div><div class="v v-red">2/6</div><div class="n2">3개 NaN · 1개 표본 7건</div></div>
+      <div class="stat"><div class="l">규칙 개선 시도</div><div class="v v-gold">0/7</div><div class="n2">5기 전수 기각 — 현행이 이김</div></div>
+      <div class="stat"><div class="l">외부 사용자</div><div class="v v-mut">0</div><div class="n2">사용자 1명 · 유지 모드</div></div>
+      <div class="stat"><div class="l">실계좌 성과</div><div class="v v-mut">❓</div><div class="n2">미측정 — 기록 경로 없음</div></div>
+      <div class="stat"><div class="l">가드레일 준수율</div><div class="v v-mut">❓</div><div class="n2">미측정 — 보유 데이터 확인 불가</div></div>
+      <div class="stat"><div class="l">대시보드 사용 빈도</div><div class="v v-mut">❓</div><div class="n2">미측정 — 로깅 없음</div></div>
+    </div>
+    <p class="tiny">❓ 4건 중 <b>실계좌 성과와 가드레일 준수율</b>이 치명적이다. 이 둘이 없으면 "원칙을 기계가 강제한다"는 이 프로젝트의 1번 목적이 <b>작동하는지 자체를 알 수 없다.</b> 신호 정확도(성적표)는 열심히 재면서 정작 형 자신의 행동은 안 재고 있다.</p>
+    <div class="next"><span class="k">다음 행동</span><span>먼저 측정할 것 — ① 가드레일 준수율이 실제로 기록되는지 확인 ② 실계좌 월말 잔고를 수기로라도 한 줄씩 남긴다. 없는 숫자로는 3·6·7번 카드가 전부 희망사항이 된다.</span></div>
+  </div>
+</section>
+
+<!-- 06 마스터플랜 -->
+<section class="card">
+  <header><span class="num">06</span><h2>마스터플랜</h2><span class="stamp s-blue">유지 모드</span></header>
+  <div class="body">
+    <ol class="miles">
+      <li><span class="m">M1</span><div><h4>자기교정 루프 복구</h4>
+        <p class="cond">완료조건: 신호 6개 <b>전부</b> 실전EV가 숫자로 산출되고 NaN 0건. 신뢰계수가 백테 미달 신호를 실제로 1 아래로 강등한다.</p></div></li>
+      <li><span class="m">M2</span><div><h4>13주 채점 가동</h4>
+        <p class="cond">완료조건: 13주 실현 <b>30건 이상</b> 누적. 4주와 13주의 신뢰계수가 따로 표시된다.</p></div></li>
+      <li><span class="m">M3</span><div><h4>내 행동을 측정 대상에 넣기</h4>
+        <p class="cond">완료조건: 가드레일 준수율이 <b>4주 연속</b> 기록되고, 실계좌 월말 잔고가 3개월치 쌓인다.</p></div></li>
+      <li><span class="m">M4</span><div><h4>규칙 동결 후 실전 기록</h4>
+        <p class="cond">완료조건: L/S 신호를 <b>12주 연속</b> 실제로 집행하고 페이퍼 원장 대비 체결 괴리를 보고한다. 이 기간 규칙 파라미터는 손대지 않는다.</p></div></li>
+      <li><span class="m">M5</span><div><h4>생존 편향 제거 <span class="muted">(조건부)</span></h4>
+        <p class="cond">완료조건: 상장폐지 종목을 포함한 유니버스로 L/S를 재측정하고 CAGR 변화폭을 공시한다. <b>분기 계약상 유지 모드와 충돌하므로 형의 명시적 승인이 필요하다.</b></p></div></li>
     </ol>
+    <div class="next"><span class="k">다음 행동</span><span>M1은 오늘 끝난다. M4가 진짜 관문이다 — 이 프로젝트는 8년 백테스트는 일곱 번 돌렸지만 <b>12주 연속 실전 집행 기록은 아직 없다.</b></span></div>
   </div>
+</section>
 
-  <p class="foot">Stock Screener 프로젝트 카드 · 커밋 3a24cf1 기준 · 숫자 없는 칸은 지어내지 않고 ❓로 둠</p>
+<!-- 07 SWOT -->
+<section class="card">
+  <header><span class="num">07</span><h2>SWOT — 칸마다 대응 하나씩</h2><span class="stamp s-blue">분기 점검</span></header>
+  <div class="body">
+    <div class="swot">
+      <div class="quad q-s"><h4>강점 Strengths</h4><ul>
+        <li>실패까지 기록하는 원장 문화. 5기 문서에 기각된 개선안 7건의 근거가 전부 남아 있다.<span class="act">→ 이 문화 자체를 공개 콘텐츠로 (블로그 연재 소재)</span></li>
+        <li>파이프라인 20/20 자동. 사람 손 없이 매일 돈다.<span class="act">→ pipeline-sentinel 주기 점검 유지</span></li>
+        <li>L/S가 지연·플라시보·슬롯 대조를 전부 통과한 유일한 규칙.<span class="act">→ 규칙 동결하고 M4 실전 기록으로</span></li>
+      </ul></div>
+      <div class="quad q-w"><h4>약점 Weaknesses</h4><ul>
+        <li>자기교정 루프의 절반이 NaN. 심장이 멈춘 상태로 초록불이 켜져 있었다.<span class="act">→ 오늘 수정</span></li>
+        <li>실효 표본이 두 자릿수. 슬롯 경쟁이 벌어진 주는 8년간 16주뿐이다.<span class="act">→ "표본 쌓기 전 튜닝 금지"를 규칙으로 못 박기 (이미 leaders_ab.py에 명시)</span></li>
+        <li>내 행동(준수율·실계좌)은 안 재면서 신호만 잰다.<span class="act">→ M3</span></li>
+      </ul></div>
+      <div class="quad q-o"><h4>기회 Opportunities</h4><ul>
+        <li>"개선안 7건을 전부 기각한 기록"은 성공담보다 희소한 콘텐츠다.<span class="act">→ ship-public으로 5기 정리</span></li>
+        <li>DART 공식재무 SQLite 파이프라인은 개인 프로젝트에서 드물다.<span class="act">→ buza-bot과 market.db 공유 검토</span></li>
+        <li>실패 원장 자체가 신뢰 자산 — 외부 사용자를 받을 때의 차별점.<span class="act">→ 단 M4 완료 전에는 꺼내지 않는다</span></li>
+      </ul></div>
+      <div class="quad q-t"><h4>위협 Threats</h4><ul>
+        <li>생존 편향이 모든 숫자를 낙관 쪽으로 민다. EA 사례로 실증됐다.<span class="act">→ M5, 단 승인 필요</span></li>
+        <li>Streamlit Cloud 단일 의존. 배포처가 죽으면 화면이 통째로 사라진다.<span class="act">→ 백업 경로 ❓미검토</span></li>
+        <li>분기 계약은 유지 모드인데 이번 주에 대규모 작업이 들어갔다.<span class="act">→ kill-or-keep 재점검 (다음 점검 09-30)</span></li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 경쟁 지형 -->
+<section class="card">
+  <header><span class="num">08</span><h2>경쟁 지형</h2><span class="stamp s-gold">포지션 아님 · 가설</span></header>
+  <div class="body">
+    <div class="map">
+      <div class="ax axh"></div><div class="ax axv"></div>
+      <div class="lbl" style="left:10px;top:8px">블랙박스 ↑</div>
+      <div class="lbl" style="left:10px;bottom:8px">공개 검증 ↓</div>
+      <div class="lbl" style="left:12px;top:50%;transform:translateY(-50%)">← 뭘 살까</div>
+      <div class="lbl" style="right:12px;top:50%;transform:translateY(-50%)">어떻게 안 망할까 →</div>
+      <div class="pt" style="left:22%;top:20%"><i></i>AI 종목추천 서비스</div>
+      <div class="pt" style="left:26%;top:44%"><i></i>증권사 HTS·MTS</div>
+      <div class="pt" style="left:38%;top:74%"><i></i>퀀트 백테 툴<br>(젠포트·퀀트킹)</div>
+      <div class="pt" style="left:63%;top:26%"><i></i>TradingView<br>커뮤니티 전략</div>
+      <div class="pt us" style="left:76%;top:76%"><i></i>이 프로젝트</div>
+    </div>
+    <p class="tiny">우하단(어떻게 안 망할까 × 공개 검증)은 <b>비어 있는 자리가 맞다.</b> 다만 사용자가 1명이므로 이건 점유한 포지션이 아니라 <b>검증되지 않은 가설</b>이다. 그 자리가 비어 있는 이유가 "아무도 안 해서"인지 "돈이 안 돼서"인지 아직 모른다 — 실제로 퀀트 백테 툴들은 전부 "뭘 살까" 쪽으로 이동했다.</p>
+    <div class="next"><span class="k">다음 행동</span><span>이 카드는 M4 완료 전까지 갱신하지 않는다. 사용자 1명으로 그린 지형도는 상상도에 가깝다.</span></div>
+  </div>
+</section>
+
+<!-- 09 수익화 -->
+<section class="card">
+  <header><span class="num">09</span><h2>수익화 구조</h2><span class="stamp s-gold">해당 없음</span></header>
+  <div class="body">
+    <p class="lede"><b>누가 낸다</b> — 아무도. <b>얼마</b> — 0원. <b>왜 낸다</b> — 검증된 적 없음. <b>몇 명이면 의미 있나</b> — 이 프로젝트에는 해당 없음.</p>
+    <p>분기 계약상 이 프로젝트는 <b>유지 모드</b>이고 수익화 대상은 buza-bot이다. 이 카드를 억지로 채우면 나머지 카드까지 소설이 되므로 비워 둔다. 다만 자산이 될 만한 것은 있다.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>가능성</th><th>실체</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr><td>개인 도구로 유지</td><td>비용은 Streamlit Cloud 무료 티어 + 데이터 API</td><td><b>현재 선택</b></td></tr>
+        <tr><td>방법론 콘텐츠</td><td>"개선안 7건 전부 기각" 같은 기록. 블로그 주간 연재가 이미 돌고 있다</td><td>진행 중 · 수익 <span class="muted">❓</span></td></tr>
+        <tr><td>DART 재무 파이프라인 분리</td><td>공식 공시 → SQLite, 합계검증 통과분만 적재. 개인 프로젝트에서 드문 자산</td><td>미검토 · 지불 의사 <span class="muted">❓</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="next"><span class="k">다음 행동</span><span>이 카드는 09-30 분기 점검 전까지 손대지 않는다. 지금 수익화를 고민하는 것 자체가 계약 위반이다.</span></div>
+  </div>
+</section>
+
+<!-- 10 사용자의 목소리 -->
+<section class="card">
+  <header><span class="num">10</span><h2>사용자의 목소리</h2><span class="stamp s-red">설명 부채</span></header>
+  <div class="body">
+    <p class="tiny">사용자가 1명이므로 VOC = 형이 실제로 한 말. 이번 세션(2026-08-22)에서 나온 것을 그대로 옮긴다.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>발언</th><th>드러난 것</th><th>대응</th></tr></thead>
+      <tbody>
+        <tr><td>"19-10-21 TSLA, 23-05-22 NVDA 같은 명백한 신호가 있었는데도 못 잡았다니…"</td><td>규칙의 한계가 화면에 안 보였다</td><td>미감지 사유와 재측정 결과를 대시보드 한계 패널에 공시 ✅</td></tr>
+        <tr><td>"$2B인 게 솔직히 너무 작은 거 같아. 미국 시장에서 시총 2조면 별 거 아닌데"</td><td><b>이름이 틀렸다.</b> "대형 주도주"인데 $2B는 미국 기준 스몰캡</td><td>경계는 데이터로 정당화됨. <b>이름은 아직 안 고침</b> ⚠️</td></tr>
+        <tr><td>"이게 뭔지도 모르겠는데??" <span class="muted">(신뢰계수)</span></td><td><b>가장 중요한 신호.</b> 이 프로젝트의 핵심 차별점인 자기교정 지표를, 만든 사람이 화면에서 이해하지 못한다</td><td>설명 부채 — 대응 필요 🔴</td></tr>
+      </tbody>
+    </table></div>
+    <p>세 번째가 결정적이다. 신뢰계수는 이 프로젝트가 "남들과 다르다"고 내세우는 바로 그 장치인데, <b>화면만 봐서는 무엇인지 알 수 없게 만들어져 있다.</b> 외부 사용자 이전에 사용자 본인에게 전달이 안 되고 있다는 뜻이고, 이건 UI 문제가 아니라 기획 문제다.</p>
+    <div class="next"><span class="k">다음 행동</span><span>성적표 탭 상단에 "이 숫자가 무엇이고 왜 중요한가"를 세 줄로 박는다. 주도주 탭의 한계 패널이 이미 좋은 선례다. 그리고 L의 이름을 "실적이 받쳐주는 급등주"로 바꾼다.</span></div>
+  </div>
+</section>
+
+<!-- 11 결정 로그 -->
+<section class="card">
+  <header><span class="num">11</span><h2>결정 로그</h2><span class="stamp s-blue">검증 예약</span></header>
+  <div class="body">
+    <div class="scroll"><table>
+      <thead><tr><th>날짜</th><th>결정</th><th>당시 근거</th><th>나중에 검증할 것</th></tr></thead>
+      <tbody>
+        <tr><td class="n">08-18</td><td>규칙⑥ 폐기, L/S 도입</td><td>시총 데이터 수정 후 재측정하니 2022년 이후 CAGR 3.8%(SPY 13.2%). 앞 구간 33.8%는 look-ahead 오염이었다</td><td>L/S가 2027-08까지 SPY를 상회하는가</td></tr>
+        <tr><td class="n">08-22</td><td>NVDA·TSLA 미감지를 트레이드오프로 수용</td><td>시총 계단 문턱을 쓰면 잡히지만 CAGR 25.4→16.2%, MDD −39.8→−52.2%</td><td>반증 조건 명시됨 — 대형 대시세 표본이 늘거나 $50B·+10%가 격자에서 이웃과 함께 오르면 재개</td></tr>
+        <tr><td class="n">08-22</td><td>개선 시도 7건 전부 기각, <b>3단계 기준</b> 도입</td><td>격자 최고를 고르면 매번 봉우리가 나온다. 실효 표본이 16주뿐이라서다</td><td>기준(격자 → 1·2주 지연 → 기여 주차 열기)이 진짜 개선까지 죽이고 있지 않은가</td></tr>
+        <tr><td class="n">08-22</td><td>신호회차를 <b>표시만</b> 하고 규칙엔 미반영</td><td>S 3회차+가 37.3%로 지연·플라시보·슬롯 대조를 통과했으나 임계 격자가 1:27.8 2:27.4 3:37.3 4:27.0 5:35.3 지그재그</td><td>실전 신호 30건 쌓이면 재판정</td></tr>
+        <tr><td class="n">08-11</td><td>구루 인사이트 탭을 페이지에서 제거</td><td>화면 통폐합 — 텔레그램 다이제스트로 충분</td><td><b>결과: JSON은 여전히 매일 생성·커밋 중.</b> 정리가 안 됐다 ⚠️</td></tr>
+      </tbody>
+    </table></div>
+    <div class="next"><span class="k">다음 행동</span><span>08-11 결정의 뒷정리가 안 된 게 이번에 드러났다. 앞으로 "제거" 결정에는 <b>산출물·크론까지 함께 정리</b>를 완료조건으로 넣는다.</span></div>
+  </div>
+</section>
+
+<!-- 12 전설들의 피드백 -->
+<section class="card">
+  <header><span class="num">12</span><h2>다섯 사람이라면 뭐라고 할까</h2><span class="stamp s-gold">사고 실험</span></header>
+  <div class="body">
+    <p class="tiny">⚠️ 실제 발언이 아니다. 각자가 공개적으로 남긴 <b>알려진 원칙</b>을 이 대시보드에 적용해 본 가상 리뷰이며, 인용부호를 쓰지 않은 것도 그 때문이다.</p>
+    <div class="legend">
+
+      <div class="who"><div class="nm">워런 버핏<span>능력범위 · 회전율</span></div>
+        <dl>
+          <div class="hit"><dt>지적</dt><dd>8년 데이터로 일곱 번 튜닝했는데 정작 판단이 갈린 주는 <b>16주</b>다. 그가 늘 경계한 "이해한 것 이상으로 정교한 장치"에 가깝다. 그리고 −30% 트레일은 <b>좋은 사업을 파는 장치</b>다 — 그의 관점에서 회전율은 비용이지 실력이 아니다.</dd></div>
+          <div class="nod"><dt>인정</dt><dd>재무조건(영업익 8분기 신고점·OPM 개선)을 요구하고, 그게 없으면 2022년 이후 전멸한다는 걸 <b>숫자로 확인한 것</b>. 실적이 받쳐주는 것만 산다는 원칙이 데이터로 재발견됐다.</dd></div>
+          <div class="do"><dt>그래서</dt><dd>M4에서 실전 집행할 때 회전율과 거래비용을 함께 기록한다. 페이퍼 원장에는 편도 0.1%만 반영돼 있다.</dd></div>
+        </dl></div>
+
+      <div class="who"><div class="nm">윌리엄 오닐<span>CANSLIM 원저자 · 거래량</span></div>
+        <dl>
+          <div class="hit"><dt>지적</dt><dd>그의 방법론은 <b>거래량 급증</b>을 돌파의 확인 신호로 요구한다. 그런데 이 시스템의 최강 신호는 정반대로 <b>거래량 전주비 1.5배 미만</b>을 요구한다. 정면 충돌이다. 게다가 그의 이름을 단 CANSLIM 탭은 "변별력 비일관" 판정을 받은 뒤 재검증 없이 화면에 남아 있다.</dd></div>
+          <div class="nod"><dt>인정</dt><dd>충돌을 덮지 않고 <b>측정해서 공시했다</b> — 같은 급등에서 거래량 3배↑는 +100% 확률 13.4%, 감소는 30.4%. 자기 스승과 다른 결론이 나왔을 때 데이터를 택한 것.</dd></div>
+          <div class="do"><dt>그래서</dt><dd>CANSLIM 탭에 주도주 탭과 같은 한계 패널을 붙이거나, 재검증하거나, 내린다. 셋 중 하나를 고른다.</dd></div>
+        </dl></div>
+
+      <div class="who"><div class="nm">하워드 막스<span>2차적 사고 · 사이클</span></div>
+        <dl>
+          <div class="hit"><dt>지적</dt><dd>매크로 탭이 현금비중 10~70%를 <b>권고</b>하는데, 그 권고가 맞았는지 채점된 적이 없다. 사이클의 위치를 아는 것과 타이밍을 맞히는 것은 다른 일이라는 게 그의 핵심 주장이고, 이 탭은 그 구분을 하지 않는다.</dd></div>
+          <div class="nod"><dt>인정</dt><dd>개선안 7건이 전부 기각된 것을 실패가 아니라 결과로 기록한 점. 그리고 "무작위로 신호를 버린 20회"와 비교한 플라시보 검증은 <b>2차적 사고</b> 그 자체다 — 좋아 보이는 것이 남들이 이미 아는 것인지 묻는 절차니까.</dd></div>
+          <div class="do"><dt>그래서</dt><dd>매크로 권고를 성적표에 편입한다. 현금비중 권고 시점 이후 3·6개월 시장 수익률을 기록해 권고가 맞았는지 채점한다.</dd></div>
+        </dl></div>
+
+      <div class="who"><div class="nm">제시 리버모어<span>피라미딩 · 파산 4회</span></div>
+        <dl>
+          <div class="hit"><dt>지적</dt><dd>그의 서명 기법인 <b>불타기(피라미딩)</b>가 이 시스템에서 두 번 기각됐다 — CAGR을 3~5%p 깎는다는 이유로. 그의 관점에서 이건 확신을 표현할 수단을 스스로 없앤 것이다.</dd></div>
+          <div class="nod"><dt>인정</dt><dd>그는 네 번 파산했고 원인은 규율이었다. 이 프로젝트의 <b>가드레일</b>(20% 캡·레버리지 10%·손절 −8%)이 정확히 그가 갖지 못했던 장치다. 그리고 피라미딩이 MDD를 −39.8%에서 −28.8%로 낮춘다는 것도 같이 측정했다.</dd></div>
+          <div class="do"><dt>그래서</dt><dd>피라미딩을 "수익 카드"가 아니라 <b>"위험 카드"</b>로 재분류해 남겨 둔다. 형이 흔들림을 줄이고 싶어질 때 꺼낼 옵션이다.</dd></div>
+        </dl></div>
+
+      <div class="who"><div class="nm">스탠리 드러켄밀러<span>집중 · 즉각적 번복</span></div>
+        <dl>
+          <div class="hit"><dt>지적</dt><dd>6칸 균등 배분은 <b>확신의 크기를 표현하지 못한다</b>. 그의 방식은 확신이 설 때 압도적으로 싣는 것이다. 그리고 그는 틀렸다고 판단하면 즉시 뒤집는데, 이 시스템은 −30% 트레일에 닿을 때까지 기다린다.</dd></div>
+          <div class="nod"><dt>인정</dt><dd>비중 상한 20%와 3차 피라미딩을 실제로 재봤고, 균등이 이긴다는 결과를 받아들였다. <b>자기 취향이 아니라 측정 결과를 택한 것.</b></dd></div>
+          <div class="do"><dt>그래서</dt><dd>"확신을 실을 자리가 없다"는 지적은 <b>미해결로 남긴다.</b> 이 시스템은 애초에 형의 집중이 1억 손실을 낸 뒤 그걸 막으려고 만들어졌다 — 여기서는 드러켄밀러가 틀린 조언을 하는 셈이다.</dd></div>
+        </dl></div>
+
+    </div>
+    <div class="next"><span class="k">다음 행동</span><span>다섯 지적 중 셋(오닐의 CANSLIM 방치, 막스의 매크로 미채점, 리버모어의 피라미딩 재분류)은 실행 가능하고 04·06번 카드에 이미 올라가 있다. 나머지 둘은 이 프로젝트가 <b>의도적으로 감수한 선택</b>이다.</span></div>
+  </div>
+</section>
+
+<footer>
+  검인 2026-08-22 · 근거는 저장소 코드와 실제 산출물 · 확인 못 한 값은 ❓미측정으로 남김<br>
+  갱신 시 같은 파일(docs/cards/deck.html)을 다시 발행해 URL을 유지한다
+</footer>
+
 </div>
