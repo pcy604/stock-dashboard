@@ -13,11 +13,12 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_parse_error": true,
+        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"삼성의 주주환원 정책 발표에 따른 시장 반응과 함께, 국내 주식시장에서 장기 투자의 적합성과 외국인 수급을 결정하는 거시 경제 및 지정학적 요인들이 논의되었습니다.\",\n  \"summary\": [\n    \"삼성전자([00:49])의 110조 원 규모 주주환원 계획(현금배당 30조 원, 자사주 매입 후 임직원 지급 15조 원)은 시장의 직접적인 자사주 소각 기대에 미치지 못해 주가 하락으로 이어졌습니다.\",\n    \"차영주 소장([01:16])은 삼성전자의 주주환원 규모 자체는 크지만, 시장의 기대치와 방식(현금 배당 위주)으로 인한 실망감이 있었음을 지적하며, 장기적으로는 긍정적일 수 있다고 보았습니다.\",\n    \"현재 시장의 변동성이 심한 가운데, 단기 투자자는 리스크 관리와 시장에서 멀어지는 것을 고려해야 하며([10:36]), 장기 투자자는 회사의 '실적'([18:15])에 집중하고 지속적으로 기업을 관찰하는 "
       },
-      "source": "fail",
-      "attempts": 1,
-      "analyzed_at": "2026-08-21T23:21:19.136632+09:00"
+      "source": "video",
+      "attempts": 2,
+      "analyzed_at": "2026-08-22T00:09:50.054517+09:00"
     },
     {
       "video_id": "aAy9zvkafVE",
@@ -32,12 +33,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_parse_error": true,
-        "_raw": "{\n  \"relevant\": true,\n  \"one_liner\": \"삼성전자의 110조원 주주환원 정책은 시장의 높은 기대치와 규제 문제로 인해 발표 당일 주가에는 '셀 온' 현상으로 실망감을 안겨주었으나, 장기적으로는 긍정적인 요인이 될 수 있으며, 국내 증시의 구조적인 변화를 촉진할 것으로 전망됩니다.\",\n  \"summary\": [\n    \"삼성전자는 국내 기업 역사상 최대 규모인 110조원 규모의 주주환원(현금배당 30조원, 임직원 보상/자사주 매입 15조원 포함)을 결정했으나, 시장의 기대를 충족시키지 못하며 '셀 온' 현상으로 주가가 하락했습니다.\",\n    \"시장에서는 주주환원 규모가 최대 200조원까지 점쳐졌던 점, 그리고 자사주 매입/소각보다는 현금 배당과 임직원 보상 위주인 점이 실망감의 주요 원인으로 분석됩니다.\",\n    \"이는 삼성전자가 금융 계열사 금산분리 룰(금산법 10% 룰)로 인해 대규모 자사주 소각에 제약이 있었던 복합적인 상황이 작용한 결과입니다.\","
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
-      "source": "video",
-      "attempts": 2,
-      "analyzed_at": "2026-08-21T23:25:01.436415+09:00"
+      "source": "fail",
+      "attempts": 3,
+      "analyzed_at": "2026-08-22T00:10:22.576057+09:00"
     },
     {
       "video_id": "PfwUgAB3cVY",
@@ -52,11 +52,11 @@
         "tickers": [],
         "key_points": [],
         "actionable": [],
-        "_error": "Server disconnected without sending a response."
+        "_error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
       },
       "source": "fail",
-      "attempts": 3,
-      "analyzed_at": "2026-08-21T23:29:45.063445+09:00"
+      "attempts": 4,
+      "analyzed_at": "2026-08-22T00:10:54.936541+09:00"
     },
     {
       "video_id": "Tu_pi7JoUc0",
@@ -10658,5 +10658,5 @@
       "analyzed_at": "2026-08-13T09:42:33.197655+09:00"
     }
   ],
-  "updated": "2026-08-21T23:29:46.284036+09:00"
+  "updated": "2026-08-22T00:10:56.093188+09:00"
 }
