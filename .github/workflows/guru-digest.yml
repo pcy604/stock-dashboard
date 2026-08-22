@@ -33,13 +33,56 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # 분석 이력 캐시 — **커밋 주기를 줄이기 전에 반드시 있어야 하는 스텝.**
+      # guru_youtube.py 의 '이미 분석함' 판정(done)은 results/guru_insights.json 하나만
+      # 본다. 그래서 커밋을 매시간 안 하면 러너가 매번 빈 이력으로 시작해 최근 12시간
+      # 영상을 **시간마다 다시 분석**하고, 그건 곧 Gemini 무료쿼터 소진이다.
+      # 캐시가 이력을 이어받아 dedup 을 담당하고, 커밋은 대시보드 표시용으로만 남긴다.
+      # (weekly-profile 의 longcache 와 같은 패턴 — 이 레포에서 이미 검증됨.
+      #  매시간 실행이라 7일 미사용 만료에 걸릴 일이 없다.)
+      - name: 분석 이력 캐시 복원/저장
+        uses: actions/cache@v4
+        with:
+          path: results/guru_insights.json
+          key: guru-insights-${{ github.run_id }}
+          restore-keys: |
+            guru-insights-
+
       - name: 구루 유튜브 요약 + 텔레그램
         run: python guru_youtube.py
 
+      # ⚠️ 커밋은 **하루 한 번만** 한다 (텔레그램 전송은 위 스텝에서 매시간 그대로).
+      #
+      # 왜: git 은 파일이 바뀔 때마다 전체를 한 벌씩 영구 보관한다. 매시간 619KB 짜리
+      # guru_insights.json 을 통째로 커밋해 온 결과 이 파일 하나가 .git 히스토리에서
+      # **508MB**를 차지한다(최근 7일 150커밋 ≈ 주 93MB). 그런데 이 파일은 최근 200건
+      # 롤링 윈도라, 그 508MB는 **파일 자신이 이미 버린 데이터**다. 아무도 안 읽는다.
+      # 레포 전체 .git 이 978MB이고 그 88%가 이런 자동커밋 산출물이다 — 모든 워크플로
+      # checkout 과 Streamlit Cloud 배포가 이 무게를 매번 끌고 다닌다.
+      #
+      # 대가: 대시보드의 구루 인사이트가 최대 24시간 묵는다. 텔레그램(실제 제품)은
+      # 영향 없다(위 스텝에서 매시간 그대로 나간다). 주 93MB → 주 4MB.
+      #
+      # 커밋 시각을 **UTC 04시**로 잡은 이유: guru-roundup 이 04:40 에 이 파일을 읽어
+      # 일일 종합을 발송한다. 이 크론은 매시 :37 이므로 04:37 커밋 → 04:40 종합 순서가
+      # 되어 roundup 이 항상 최신본을 본다. 22시로 잡았다면 roundup 이 18시간 묵은
+      # 파일을 읽어 그날 새벽 영상을 통째로 놓쳤을 것이다.
+      - name: 커밋 시각인지 판정 (하루 1회)
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$(date -u +%H)" = "04" ]; then
+            echo "commit=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "commit=no" >> "$GITHUB_OUTPUT"
+            echo "커밋 시각 아님(UTC $(date -u +%H)시) — 분석·전송만 하고 커밋은 04시에"
+          fi
+
       - name: 변경분 커밋 & 푸시
+        if: steps.gate.outputs.commit == 'yes'
         run: |
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
+          git pull --rebase --autostash || true
           git add results/guru_insights.json results/guru_chart_latest.png 2>/dev/null || true
           git diff --staged --quiet || git commit -m "auto: 구루 인사이트 갱신 $(date -u +%Y-%m-%d)"
           git push
