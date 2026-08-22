@@ -269,7 +269,7 @@ def gate_of(M, key):
 
 
 # ── 시뮬레이션 ──────────────────────────────────────────────────────
-def sim(M, gate, N, trail, a, b):
+def sim(M, gate, N, trail, a, b, keep_pos=False):
     """주 1회 빈 슬롯만 채우고, 진입 후 주봉 종가 고점 대비 −trail 에서 그 주 종가 청산."""
     px = M["close"]
     dates = px.index[(px.index >= a) & (px.index <= b)]
@@ -300,15 +300,51 @@ def sim(M, gate, N, trail, a, b):
                 if amt <= 0:
                     break
                 cash -= amt
-                pos[s] = dict(sh=amt / p[s] * (1 - FEE), peak=p[s], last=p[s])
+                pos[s] = dict(sh=amt / p[s] * (1 - FEE), peak=p[s], last=p[s],
+                              entry=float(p[s]), ed=str(t.date()), wk=0,
+                              w0=float(amt / val * 100))   # 진입 당시 비중
         for s, o in pos.items():
             v = p.get(s)
             if v == v and v is not None:
                 o["last"] = v
+            o["wk"] = o.get("wk", 0) + 1
         eq.append((t, cash + sum(o["sh"] * o["last"] for o in pos.values())))
         nh.append(len(pos))
     e = pd.Series(dict(eq))
+    if keep_pos:
+        return e, float(np.mean(nh)), pos, cash
     return e, float(np.mean(nh))
+
+
+def live_book(M, gate, key, nm):
+    """지금 규칙대로 샀다면 어떤 포지션을 들고 있는가 — 실계좌와 대조할 기준선.
+
+    2026-08-22: 보유 종목을 사람이 입력하는 방식은 3개월간 한 번도 채워지지 않았다.
+    그래서 입력을 요구하지 않고, **규칙이 만든 가상 장부**를 대신 보여준다.
+    이건 규율 엔진이 아니라 기준선이다 — 형의 실제 집중·레버리지는 못 막는다.
+    다만 '지금 규칙대로면 무엇을 몇 % 들고 얼마가 현금인가'는 눈으로 대조할 수 있다.
+    """
+    r = RULES[key]
+    a, b = SEGMENTS[2][1], SEGMENTS[2][2]
+    _, _, pos, cash = sim(M, gate, r["slots"], r["trail"], a, b, keep_pos=True)
+    px = M["close"]
+    val = cash + sum(o["sh"] * o["last"] for o in pos.values())
+    rows = []
+    for s, o in pos.items():
+        cur = o["last"]
+        dd = cur / o["peak"] - 1                      # 고점 대비 현재 낙폭
+        room = (1 - r["trail"]) * o["peak"] / cur - 1  # 청산선까지 남은 거리
+        rows.append(dict(
+            sym=s, name=(nm.get(s) or s)[:24], ed=o["ed"], wk=int(o.get("wk", 0)),
+            entry=_r(o["entry"]), cur=_r(cur),
+            ret=_r((cur / o["entry"] - 1) * 100, 1),
+            peak=_r(o["peak"]), dd=_r(dd * 100, 1),
+            stop=_r(o["peak"] * (1 - r["trail"])),
+            room=_r(room * 100, 1),
+            w=_r(o["sh"] * cur / val * 100, 1), w0=_r(o.get("w0"), 1)))
+    rows.sort(key=lambda x: -(x["w"] or 0))
+    return dict(slots=r["slots"], filled=len(pos),
+                cash_pct=_r(cash / val * 100, 1), positions=rows)
 
 
 def stat(e):
@@ -353,6 +389,13 @@ def build():
               f"MDD {bt['MIX'][lab]['mdd']:>6.1f}%", flush=True)
     bt["SPY"] = {lab: spy_stat(a, b) for lab, a, b in SEGMENTS}
 
+    # 지금 규칙대로면 무엇을 들고 있나 — 실계좌와 눈으로 대조할 기준선
+    _nm0 = d.drop_duplicates("sym").set_index("sym")["name"].to_dict()
+    book = {k: live_book(M, gates[k], k, _nm0) for k in RULES}
+    for k, bk in book.items():
+        print(f"  {k} 장부 — {bk['filled']}/{bk['slots']}칸 · 현금 {bk['cash_pct']}%",
+              flush=True)
+
     # ── 주차별 신호 이력 (대시보드 주차별 조회용) ──
     last = M["close"].index.max()
     nm = d.drop_duplicates("sym").set_index("sym")["name"].to_dict()
@@ -393,7 +436,7 @@ def build():
         rules={k: {"name": v["name"], "text": v["text"], "exit": v["exit"],
                    "slots": v["slots"], "trail": int(v["trail"] * 100)}
                for k, v in RULES.items()},
-        backtest=bt, candidates=cands, weeks=weeks,
+        backtest=bt, candidates=cands, weeks=weeks, book=book,
         caveats=[
             "생존 편향 — 유니버스가 '오늘 상장된 종목'이라 상장폐지 회사가 빠져 있다. 실제는 더 나쁘다.",
             "L은 평균 3.5종만 보유한다. 칸을 6→7로 늘리면 뒤 구간이 28.4%→11.0%로 꺾인다 — 한두 종목이 결과를 좌우한다.",

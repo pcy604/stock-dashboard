@@ -1125,6 +1125,59 @@ else:
                 else:
                     st.info("이번 주 조건 충족 종목 없음")
 
+                # ── 🛡 지금 규칙대로면 (가상 장부) ──────────────────────────
+                # 2026-08-22: 보유를 사람이 입력하는 방식은 3개월간 한 번도 채워지지
+                # 않았다. 그래서 입력을 요구하지 않고 **규칙이 만든 가상 장부**를
+                # 띄운다. 이건 규율 엔진이 아니라 **기준선**이다 — 실계좌의 집중·
+                # 레버리지를 막지는 못한다. 다만 "지금 규칙대로면 무엇을 몇 % 들고
+                # 얼마가 현금인가"를 눈으로 대조할 수는 있다.
+                _bk = (_ab.get('book') or {}).get(_k)
+                if _bk:
+                    st.markdown("---")
+                    st.markdown(f"**🛡 지금 규칙대로면 — {_bk['filled']}/{_bk['slots']}칸 "
+                                f"· 현금 {_bk['cash_pct']}%**")
+                    _bp = _bk['positions']
+                    if _bp:
+                        st.dataframe(pd.DataFrame([{
+                            '코드': r['sym'], '종목': r['name'], '비중%': r['w'],
+                            '진입일': r['ed'], '보유주': r['wk'],
+                            '진입비중%': r.get('w0'),
+                            '진입가': r['entry'], '현재가': r['cur'], '수익률%': r['ret'],
+                            '고점': r['peak'], '고점대비%': r['dd'],
+                            '청산선': r['stop'], '청산까지%': r['room']}
+                            for r in _bp]),
+                            use_container_width=True, hide_index=True, row_height=25,
+                            height=_dfh(len(_bp)))
+                        # 가드레일 엔진을 실제로 돌린다 — 3개월 만에 처음 입력이 생겼다.
+                        try:
+                            import guardrail as _gr
+                            # 매입 비중 상한은 점검하지 않는다 — 이 규칙은 N칸 균등이라
+                            # 진입 비중이 항상 1/N(L 16.7% · S 10%)로 **구조적으로 충족**된다.
+                            # 여기서 볼 것은 '진입 뒤 커진 평가 비중'이고 그건 트림 기준(40%)이다.
+                            _gp = [{'sym': r['sym'], 'name': r['name'], 'market': 'US',
+                                    'value': r['w'], 'pnl_pct': r['ret'],
+                                    'cur_price': r['cur'],
+                                    'peak_price': r['peak']} for r in _bp]
+                            _gv = _gr.evaluate(_gp, top_cap=100, lower_cap=100,
+                                               trail_pct=int(_rr['trail']))
+                            st.markdown(f"**가드레일 판정 {_gv['grade']}** — "
+                                        f"{_gv['summary'].get('msg', '')}")
+                            if _gv['violations']:
+                                for _v in _gv['violations']:
+                                    st.warning(f"{_v['sev']} **{_v['sym']}** · "
+                                               f"{_v['rule']} — {_v['msg']}")
+                            st.caption(
+                                "⚠️ 이건 **가상 장부에 대한 판정**이지 형 실계좌 판정이 "
+                                "아니다. 규칙대로 산 포트폴리오조차 종목 상한을 넘길 수 "
+                                "있다는 걸 보여주는 용도다 — 대시세 한 종목이 커지면 "
+                                "규칙 자체가 집중을 만든다. **매입 비중 상한은 점검하지 "
+                                "않는다** — N칸 균등이라 진입 비중이 항상 1/N 로 구조적으로 "
+                                "충족된다(진입비중% 열이 그것이다). 보는 것은 진입 뒤 커진 "
+                                "평가 비중(트림 40%)·레버리지 한도이고, 청산 기준은 이 규칙의 "
+                                f"−{int(_rr['trail'])}% 트레일링을 그대로 쓴다.")
+                        except Exception as _e:
+                            st.caption(f"가드레일 판정 실패: {type(_e).__name__}")
+
         with st.expander("⚠️ 이 숫자를 믿을 때 알아야 할 것"):
             for _cv in _ab.get('caveats', []):
                 st.markdown(f"- {_cv}")
