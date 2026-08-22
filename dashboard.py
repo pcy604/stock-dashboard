@@ -963,6 +963,59 @@ if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
 "내년에 하나 나온다"는 맞지만 "그게 뭔지 미리 안다"는 틀리다. → 한 종목을 맞히는 게 아니라
 **후보 여러 개를 규칙으로 태우는 것**이 유일한 방법.
 """)
+
+    # ── 포워드 원장 (두 규칙 공통) ──────────────────────────────────
+    # 백테스트는 '지금 시점에서 과거를 다시 계산'이라 생존편향·데이터 개정·규칙
+    # 사후조정이 섞인다. 원장은 '신호를 낸 그날 이후'만 쌓아 그 오염이 안 들어온다.
+    with t_lead, guard('주도주 KR 포워드 원장'):
+        _kp = load_json(Path('results/leaders_kr_paper.json'))
+        st.divider()
+        st.markdown("#### 📒 포워드 원장 — 신호를 낸 뒤 실제로 어떻게 됐나")
+        if not _kp:
+            st.info("아직 원장이 없습니다 → `python leaders_kr_paper.py update` "
+                    "(weekly-profile이 매주 자동 실행)")
+        else:
+            st.caption(f"시작 {_kp.get('started','-')} · 갱신 {_kp.get('updated','-')} — "
+                       f"위 백테스트와 달리 **사후 계산이 아니라 발행 이후 누적**입니다.")
+            _rows, _closed_all = [], 0
+            for _rn, _pos in (_kp.get('positions') or {}).items():
+                _cl = [r for r in _pos.values() if r.get('state') == 'closed' and r.get('ret') is not None]
+                _op = [r for r in _pos.values() if r.get('state') != 'closed' and r.get('ret') is not None]
+                _w = [r['ret'] for r in _cl if r['ret'] > 0]
+                _l = [r['ret'] for r in _cl if r['ret'] <= 0]
+                _closed_all += len(_cl)
+                _rows.append({
+                    '규칙': _rn, '누적': len(_pos), '보유': len(_op), '청산': len(_cl),
+                    '청산 평균': (f"{sum(r['ret'] for r in _cl)/len(_cl):+.1f}%" if _cl else '—'),
+                    '승률': (f"{len(_w)/len(_cl)*100:.0f}%" if _cl else '—'),
+                    # 손익비는 이익·손실 표본이 둘 다 있어야 의미가 있다. 한쪽만으로
+                    # 계산하면 큰 수가 찍혀 오해를 만든다.
+                    '손익비': (f"{(sum(_w)/len(_w))/abs(sum(_l)/len(_l)):.2f}" if _w and _l else '—'),
+                    '보유 평균(미실현)': (f"{sum(r['ret'] for r in _op)/len(_op):+.1f}%" if _op else '—'),
+                })
+            st.dataframe(pd.DataFrame(_rows), use_container_width=True, hide_index=True,
+                         row_height=25, height=_dfh(len(_rows)))
+            if _closed_all < 30:
+                st.warning(f"청산 표본 **{_closed_all}건** — 30건 미만이면 승률·손익비는 노이즈입니다. "
+                           f"이 표는 백테스트를 대체하지 않고, 백테스트가 실전에서 재현되는지만 봅니다.")
+            _cur_rule = 'KR-U6' if st.session_state.get('kr_rule', '🇺🇸').startswith('🇺🇸') else 'KR-P1'
+            _p = (_kp.get('positions') or {}).get(_cur_rule) or {}
+            if _p:
+                with st.expander(f"{_cur_rule} 원장 상세 {len(_p)}종"):
+                    st.dataframe(pd.DataFrame([{
+                        '종목': r.get('name', s)[:18], '코드': s,
+                        '상태': ('청산' if r.get('state') == 'closed' else '보유'),
+                        '최초포착': r.get('first_seen'), '진입일': r.get('entry_date'),
+                        '진입가': (f"{r['entry_px']:,.0f}" if r.get('entry_px') else '-'),
+                        '현재가': (f"{r['close']:,.0f}" if r.get('close') else '-'),
+                        '수익률': (f"{r['ret']:+.1f}%" if r.get('ret') is not None else '-'),
+                        '고점수익': (f"{r['peak_gain']:+.1f}%" if r.get('peak_gain') is not None else '-'),
+                        '경과': (f"{r['days']}일" if r.get('days') else '-'),
+                        '청산일': r.get('exit_date') or '-',
+                    } for s, r in sorted(_p.items(),
+                                         key=lambda x: -(x[1].get('ret') or -999))]),
+                        use_container_width=True, hide_index=True, row_height=25,
+                        height=_dfh(len(_p)))
 else:
   with t_lead, guard('주도주 US'):
     st.caption(data_stamp('results/leaders_ab.json'))

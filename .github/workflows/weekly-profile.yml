@@ -65,6 +65,7 @@ jobs:
         run: |
           python leaders_kr.py publish
           python leaders_kr6.py publish
+          python leaders_kr_paper.py update
         continue-on-error: true
 
       - name: 결과 커밋 & 푸시
@@ -75,7 +76,7 @@ jobs:
           # screen_precompute 가 만드는 3개를 전부 커밋한다.
           git add results/returns.json results/seasonality.json results/mdd.json 2>/dev/null || true
           git add data/us_shares.csv data/us_marketcap.csv data/us_splits.csv 2>/dev/null || true
-          git add results/leaders_kr.json results/leaders_kr6.json 2>/dev/null || true
+          git add results/leaders_kr.json results/leaders_kr6.json results/leaders_kr_paper.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "auto: 종목 프로파일 갱신 $(date -u +%Y-%m-%d)"
           git push
 
