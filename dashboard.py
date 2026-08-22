@@ -1075,15 +1075,43 @@ else:
                 _cd = _ab['candidates'][_k]
                 st.markdown(f"**이번 주 후보 {len(_cd)}종**")
                 if _cd:
-                    st.dataframe(pd.DataFrame([{
-                        '코드': m['sym'], '종목': m['name'], '종가': m['close'],
-                        '그 주 상승': m['up'], '거래량 전주비': m['vw'],
-                        '신호회차': m.get('n'),
-                        '시총($B)': m['mc'], '이후1주': m.get('f1'),
-                        '이후4주': m.get('f4'), '이후13주': m.get('f13')}
-                        for m in _cd]),
+                    # 2026-08-22: 후보표를 심층조회·주차별 조회와 **같은 원본·같은 열**로
+                    # 맞췄다. 종목 코드와 상승률만 보고 판단할 수는 없다 — 밸류에이션·
+                    # 낙폭·트리거까지 한 화면에서 봐야 한다. 원본이 같으므로 세 화면의
+                    # 숫자가 어긋날 일도 없다.
+                    _det = (load_json(Path('results/leaders_symbol_detail.json'))
+                            or {}).get('symbols', {})
+                    _wk = _ab['signal_week']
+
+                    def _cand_row(m):
+                        _x = next((z for z in _det.get(m['sym'], {}).get('rows', [])
+                                   if z['d'] == _wk and _k in z.get('r', [])), None)
+                        row = {'코드': m['sym'], '종목': m['name'],
+                               '시총($B)': m['mc'], '종가': m['close'],
+                               '그주상승': m['up'], '신호회차': m.get('n'),
+                               '거래량 전주비': m['vw']}
+                        if _x:
+                            row.update({
+                                'RS4': _x.get('rs4'), 'RS13': _x.get('rs13'),
+                                'OPM': _x.get('opm'), 'OPM QoQ': _x.get('opmq'),
+                                'PER': ('적자' if _x.get('per') is None
+                                        else f"{_x['per']:.1f}"),
+                                'PSR': _x.get('psr'), '매출 QoQ': _x.get('revq'),
+                                '신고가대비': _x.get('dist'), '52주낙폭': _x.get('mdd'),
+                                '거래대금($M)': _x.get('adv'),
+                                '트리거': _x.get('trg', '-')})
+                        row.update({'이후1주': m.get('f1'), '이후4주': m.get('f4'),
+                                    '이후13주': m.get('f13')})
+                        return row
+
+                    st.dataframe(pd.DataFrame([_cand_row(m) for m in _cd]),
                         use_container_width=True, hide_index=True, row_height=25,
                         height=_dfh(len(_cd)))
+                    st.caption(
+                        "열 구성은 아래 **주차별 조회**와 같다(원본도 같은 파일이다). "
+                        "**이후1·4·13주는 이번 주 후보라 아직 비어 있는 게 정상** — "
+                        "다음 주부터 채워진다. RS4/RS13 = 시장 대비 4주·13주 상대강도, "
+                        "OPM QoQ = 영업이익률 전분기 대비 변화(%p), 신고가대비·52주낙폭은 %.")
                     st.caption(
                         "**신호회차** = 이 종목이 이 규칙에서 몇 번째로 낸 신호인가. "
                         "연속일 필요 없고, 몇 년 떨어져 있어도 누적되며 보유 중 재신호도 센다. "
