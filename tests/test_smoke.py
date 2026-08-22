@@ -68,6 +68,36 @@ def test_data_registry_matches_files():
     assert not missing, f'레지스트리에 있으나 파일 없음: {missing}'
 
 
+def test_registry_paths_are_tracked():
+    """레지스트리에 등록한 파일은 **저장소에 있어야** 한다.
+
+    2026-08-22: data/_volwk.parquet(1.6M행, 미추적)을 감시 목록에 넣었더니
+    로컬은 통과하고 **러너에서만** test_data_registry_matches_files 가 깨졌다.
+    푸시마다 도는 smoke 가 연속 실패해 알림 메일이 쏟아졌다.
+    로컬에서 바로 잡히도록 여기서 한 번 더 건다 — CI 에서만 터지는 검사는
+    '조용한 실패'의 반대편, 즉 '시끄러운 뒷북'이다.
+    """
+    import shutil
+    import subprocess
+    import data_freshness
+    git = shutil.which('git') or shutil.which('git.exe')
+    if not git:
+        pytest.skip('git 실행 파일을 찾을 수 없음')
+    try:
+        out = subprocess.run([git, 'ls-files'], cwd=ROOT,
+                             capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        pytest.skip('git 실행 실패')
+    if out.returncode != 0:
+        pytest.skip('git 저장소가 아님')
+    tracked = set(out.stdout.split())
+    untracked = [s['path'] for s in data_freshness.SOURCES
+                 if s['path'] not in tracked]
+    assert not untracked, (
+        f'저장소에 없는 파일이 감시 목록에 있다: {untracked} — '
+        f'러너에서 스모크가 깨진다. 파일 대신 발행물 안의 날짜 키를 감시해라.')
+
+
 def test_no_data_source_unwatched():
     """대시보드가 읽는 results/*.json 중 레지스트리에 없는 게 있으면 사각지대가 생긴다."""
     import re

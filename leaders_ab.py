@@ -429,8 +429,15 @@ def build():
         hit = g.loc[last]
         cands[k] = [x for x in weeks.get(str(last.date()), []) if x["r"] == k]
 
+    # 거래량 패널(_volwk.parquet)은 저장소에 없다(1.6M행). 그런데 이게 밀리면
+    # vw 가 NaN 이 되어 **가짜 '신호 0종'**이 뜨므로 반드시 감시해야 한다.
+    # 파일을 직접 등록하면 러너에 파일이 없어 스모크가 깨진다(2026-08-22 CI 실패).
+    # 그래서 기준일을 **발행물 안에 실어** 배포된 화면에서도 보이게 한다.
+    _vwrows = M["vw"].notna().any(axis=1)
+    vol_asof = (str(M["vw"].index[_vwrows][-1].date()) if bool(_vwrows.any()) else None)
+
     out = dict(
-        generated=str(pd.Timestamp.today().date()),
+        generated=str(pd.Timestamp.today().date()), vol_asof=vol_asof,
         signal_week=str(last.date()),
         universe=int(M["close"].loc[last].notna().sum()),
         rules={k: {"name": v["name"], "text": v["text"], "exit": v["exit"],
