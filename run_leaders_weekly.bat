@@ -25,7 +25,9 @@ if exist ".git\rebase-merge" (
     echo [ERROR]   확인 : git status      취소 : git rebase --abort
     exit /b 1
 )
-git pull --rebase origin main
+rem 2026-08-22: --autostash 추가. 작업 트리가 더러우면 pull 이 실패하고
+rem 스크립트를 부르기도 전에 중단돼 로그조차 안 남았다(08-22 08:00 실행이 그렇게 죽었다).
+git pull --rebase --autostash origin main
 if errorlevel 1 (
     echo [ERROR] 원격 동기화 실패 - 되돌리고 중단합니다.
     git rebase --abort
@@ -44,7 +46,7 @@ if %RC% NEQ 0 (
     exit /b %RC%
 )
 
-"%DIR%\..\..\AppData\Local\Python\bin\python.exe" -c "import os,sys,json,datetime;p=r'%DIR%\results\leaders_signal.json';d=json.load(open(p,encoding='utf-8'));g=d.get('generated','');t=str(datetime.date.today());print('[OK] 신호 파일 갱신됨 '+g) if g==t else (print('[WARN] 신호 파일이 오늘 날짜가 아님: '+str(g)+' (오늘 '+t+')') or sys.exit(2))"
+"%DIR%\..\..\AppData\Local\Python\bin\python.exe" -c "import os,sys,json,datetime;p=r'%DIR%\results\leaders_ab.json';d=json.load(open(p,encoding='utf-8'));g=d.get('generated','');t=str(datetime.date.today());print('[OK] 신호 파일 갱신됨 '+g) if g==t else (print('[WARN] 신호 파일이 오늘 날짜가 아님: '+str(g)+' (오늘 '+t+')') or sys.exit(2))"
 if errorlevel 2 (
     echo [WARN] 사이클은 끝났지만 산출물이 갱신되지 않았습니다. 커밋하지 않고 종료합니다.
     exit /b 2
@@ -53,8 +55,10 @@ if errorlevel 2 (
 rem ── 대시보드 반영 ─────────────────────────────────────────────────────
 rem 신호·페이퍼 원장을 바로 올려야 토요일 아침에 대시보드에서 볼 수 있다.
 rem 위에서 이미 pull 해뒀으므로 여기서는 rebase 없이 커밋+푸시만 한다.
-git add results/leaders_signal.json 2>nul
-git add results/leaders_paper.json 2>nul
+git add results/leaders_ab.json 2>nul
+git add results/leaders_symbol_detail.json 2>nul
+git add results/leaders_kr.json 2>nul
+git add results/leaders_kr6.json 2>nul
 git diff --staged --quiet || (
     git commit -m "data: 주도주 주간 사이클 %date:~0,10%"
     git push origin main
