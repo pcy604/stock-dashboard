@@ -1,11 +1,23 @@
 """
 포트폴리오 원칙 가드레일 — 감정이 아니라 규칙이 포지션을 강제한다.
 ─────────────────────────────────────────────────────────────────
-사용자 원칙(2026-06-23, 1억 손실 후 정립):
-  · 상위 2종목만 각 20%까지. 나머지(3위~)는 더 작게(하한캡).
-  · 어떤 종목이든 30%(트림 임계) 넘으면 → 즉시 일부 매도해 20%로.
-  · 현금은 매크로 신호 따라(10~70%).
-  · (기본) 레버리지 ETF 합계 10% 이내, 종목별 손절 -8%.
+사용자 원칙(2026-06-23, 1억 손실 후 정립 / 2026-08-16 백테 검증분 반영):
+  · 종목당 **매입** 비중 20% 상한 · 균등 4분할(5%씩) — 증명된 만큼만 준다
+  · **평가** 비중 40% 초과 → 리밸런싱에서 30%로 트림
+  · 청산은 **고점 대비 −20% 트레일링** (전 물량 공통)
+  · 보유 종목이 **3주간 52주 신고가 미갱신 → 30% 축소** (1회)
+  · 현금은 매크로 신호 따라(10~70%) · 레버리지 ETF 합계 10% 이내
+
+2026-08-16 변경 — 왜 바꿨나
+  ① 손절: 기존 '매수가 대비 −8% 고정'은 백테로 검증된 적이 없다. 주도주 전략은
+     평균 보유가 20주라 −8% 고정이면 거의 모든 포지션이 즉사한다. 검증된 규칙은
+     고점 대비 −20% 트레일링이고(2019-01~2026-08 · A 회복 1.57 · MDD −20.7%),
+     peak_price가 있는 포지션은 트레일링으로, 없으면 기존 고정 손절로 판정한다.
+  ② 종목 캡: '상위2 20% / 3위~ 12%' 구분을 없애고 매입 20%로 통일. 백테가
+     검증한 형태가 그것이고, 실제 억제는 현금(=분할 진입)이 먼저 한다.
+     ⚠️ 3위 이하는 12%→20%로 완화되는 셈이니 lower_cap 슬라이더로 조일 수 있다.
+  ③ 트림 임계: 30%→20% 였던 것을 **40%→30%** 로. 상한(20%)은 매입 기준이고
+     트림(40%)은 평가 기준이라 서로 다른 자다.
 
 "인간의 비이성적 판단을 없애고, 정한 원칙대로." — 이 엔진의 목적.
 실제 매매는 사용자가 실행(자동 주문 아님). 엔진은 '무엇을 얼마나' 정확히 지시한다.
@@ -41,12 +53,15 @@ def is_leveraged(sym, name=''):
 
 
 def evaluate(positions, total_capital=None,
-             top_cap=20.0, lower_cap=12.0, trim_threshold=30.0,
-             lev_cap=10.0, stop_pct=8.0,
+             top_cap=20.0, lower_cap=20.0, trim_threshold=40.0, trim_to=30.0,
+             lev_cap=10.0, stop_pct=8.0, trail_pct=20.0,
+             quiet_wk=3, cut_frac=30.0, tranche_pct=5.0,
              cash_min=None, cash_max=None):
     """
-    positions: [{sym,name,market,value,pnl_pct,buy_price,cur_price,qty}, ...]
-        value = 현재 평가금액. pnl_pct = 수익률%.
+    positions: [{sym,name,market,value,cost,pnl_pct,cur_price,peak_price,
+                 weeks_since_high,qty}, ...]
+        value        현재 평가금액          cost   매입원가(없으면 캡 점검은 평가로 대용)
+        peak_price   매수 후 주봉 최고가    weeks_since_high  마지막 52주 신고가 이후 주수
     total_capital: 현금 포함 총자본 (있으면 현금% 점검). None이면 보유분만.
     반환: dict(grade, holdings[], violations[], summary{})
     """
@@ -57,42 +72,73 @@ def evaluate(positions, total_capital=None,
 
     # 비중은 항상 '현재 보유가치' 기준 (총자본 아님)
     base = invested
+    cost_base = sum(p.get('cost') or p['value'] for p in holds)
     for p in holds:
         p['weight'] = p['value'] / base * 100
+        p['cost_weight'] = (p.get('cost') or p['value']) / cost_base * 100
+        p['tranche'] = min(4, max(1, round(p['cost_weight'] / tranche_pct))) if tranche_pct else None
         p['lev'] = is_leveraged(p['sym'], p.get('name'))
     holds.sort(key=lambda x: -x['weight'])
 
     violations = []   # {sev, sym, rule, msg, trim_value, trim_pct}
 
-    # ── 종목별 집중도 ──
-    for i, p in enumerate(holds):
-        rank = i + 1
+    # ── 평가 비중 트림 (40% 초과 → 30%로) ──
+    for p in holds:
         w = p['weight']
-        # 캡: 상위 2종목 = top_cap, 그 외 = lower_cap. 단 30%↑는 긴급.
-        cap = top_cap if rank <= 2 else lower_cap
         if w > trim_threshold:
-            target = top_cap
-            trim_v = (w - target) / 100 * base
+            trim_v = (w - trim_to) / 100 * base
             violations.append({'sev': '🔴', 'sym': p['sym'], 'name': p.get('name', p['sym']),
-                'rule': f'단일종목 {trim_threshold:.0f}% 초과',
-                'msg': f"{p.get('name', p['sym'])} {w:.0f}% → {target:.0f}%로 즉시 축소",
-                'trim_value': trim_v, 'trim_pct': w - target,
-                'qty_cut': trim_v / p['cur_price'] if p.get('cur_price') else None})
-        elif w > cap + 0.5:
-            trim_v = (w - cap) / 100 * base
-            violations.append({'sev': '🟠', 'sym': p['sym'], 'name': p.get('name', p['sym']),
-                'rule': f"{'상위' if rank<=2 else '하위'}종목 {cap:.0f}% 초과",
-                'msg': f"{p.get('name', p['sym'])} {w:.0f}% → {cap:.0f}%로 축소",
-                'trim_value': trim_v, 'trim_pct': w - cap,
+                'rule': f'평가비중 {trim_threshold:.0f}% 초과',
+                'msg': f"{p.get('name', p['sym'])} 평가 {w:.0f}% → {trim_to:.0f}%로 트림",
+                'trim_value': trim_v, 'trim_pct': w - trim_to,
                 'qty_cut': trim_v / p['cur_price'] if p.get('cur_price') else None})
 
-    # ── 손절선 ──
+    # ── 매입 비중 상한 (종목당 20%) ──
+    for i, p in enumerate(holds):
+        cap = top_cap if i < 2 else lower_cap
+        cw = p['cost_weight']
+        if cw > cap + 0.5:
+            trim_v = (cw - cap) / 100 * cost_base
+            violations.append({'sev': '🟠', 'sym': p['sym'], 'name': p.get('name', p['sym']),
+                'rule': f'매입비중 {cap:.0f}% 초과',
+                'msg': f"{p.get('name', p['sym'])} 매입 {cw:.0f}% — 신규 매수 중단, "
+                       f"{cap:.0f}%까지 축소",
+                'trim_value': trim_v, 'trim_pct': cw - cap,
+                'qty_cut': trim_v / p['cur_price'] if p.get('cur_price') else None})
+
+    # ── 청산: 고점 대비 트레일링 (peak 없으면 기존 고정 손절로 대체) ──
     for p in holds:
-        if p.get('pnl_pct') is not None and p['pnl_pct'] <= -stop_pct:
+        peak, cur = p.get('peak_price'), p.get('cur_price')
+        if peak and cur:
+            dd = (cur / peak - 1) * 100
+            p['drawdown'] = dd
+            if dd <= -trail_pct:
+                violations.append({'sev': '🔴', 'sym': p['sym'], 'name': p.get('name', p['sym']),
+                    'rule': f'트레일링 -{trail_pct:.0f}% 이탈',
+                    'msg': f"{p.get('name', p['sym'])} 고점대비 {dd:+.0f}% — 전량 청산",
+                    'trim_value': p['value'], 'trim_pct': p['weight'], 'qty_cut': p.get('qty')})
+        elif p.get('pnl_pct') is not None and p['pnl_pct'] <= -stop_pct:
             violations.append({'sev': '🔴', 'sym': p['sym'], 'name': p.get('name', p['sym']),
-                'rule': f'손절선 -{stop_pct:.0f}% 이탈',
+                'rule': f'손절선 -{stop_pct:.0f}% 이탈 (고점 미상)',
                 'msg': f"{p.get('name', p['sym'])} {p['pnl_pct']:+.0f}% — 손절선 이탈, 전량 매도 검토",
                 'trim_value': p['value'], 'trim_pct': p['weight'], 'qty_cut': p.get('qty')})
+
+    # ── 3주간 52주 신고가 미갱신 → 30% 축소 ──
+    # 이미 트레일링에 걸려 전량 청산 대상인 종목은 제외한다. 백테도 청산을 먼저
+    # 판정하고 살아남은 종목만 축소하므로, 같은 종목에 두 지시가 겹치면 안 된다.
+    _exiting = {v['sym'] for v in violations if '이탈' in v['rule']}
+    for p in holds:
+        q = p.get('weeks_since_high')
+        if p['sym'] in _exiting:
+            continue
+        if q is not None and q >= quiet_wk:
+            cut_v = p['value'] * cut_frac / 100
+            violations.append({'sev': '🟠', 'sym': p['sym'], 'name': p.get('name', p['sym']),
+                'rule': f'{quiet_wk}주 신고가 미갱신',
+                'msg': f"{p.get('name', p['sym'])} {q:.0f}주째 신고가 없음 — "
+                       f"{cut_frac:.0f}% 축소(모멘텀 소진)",
+                'trim_value': cut_v, 'trim_pct': p['weight'] * cut_frac / 100,
+                'qty_cut': cut_v / p['cur_price'] if p.get('cur_price') else None})
 
     # ── 레버리지 합계 ──
     lev_w = sum(p['weight'] for p in holds if p['lev'])
@@ -131,7 +177,10 @@ def evaluate(positions, total_capital=None,
         'invested': invested, 'base': base, 'cash_pct': cash_pct,
         'top1': holds[0]['weight'] if holds else 0,
         'top2': sum(p['weight'] for p in holds[:2]),
+        'top3': sum(p['weight'] for p in holds[:3]),
         'lev_pct': lev_w, 'n_pos': len(holds),
+        'max_cost_w': max((p['cost_weight'] for p in holds), default=0),
+        'n_full': sum(1 for p in holds if p.get('tranche') == 4),
         'n_red': n_red, 'n_org': n_org, 'msg': gmsg,
     }
     return {'grade': grade, 'holdings': holds, 'violations': violations, 'summary': summary}
