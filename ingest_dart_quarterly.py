@@ -30,6 +30,7 @@ ingest_dart_quarterly.py — KR 분기 재무 적재 (DART 다중회사 주요�
 """
 from __future__ import annotations
 
+import os
 import sqlite3
 import sys
 import time
@@ -158,11 +159,22 @@ def quarterly(con=None) -> 'pd.DataFrame':
               op_turn(흑자전환), op_yoy(영업익 YoY %), rev_yoy
     """
     import pandas as pd
-    close_after = con is None
-    con = con or sqlite3.connect(DB)
-    d = pd.read_sql('SELECT sym,year,q,revenue,op_income,net_income FROM fundamentals_q', con)
-    if close_after:
-        con.close()
+    if con is None and not os.path.exists(DB):
+        # 러너에는 market.db(574MB, gitignore)가 없다. 그래서 KR-U6가 자동 갱신에서
+        # 빠져 있었고 대시보드에 며칠 묵은 신호가 떠 있었다 — 레포에 실은 export를
+        # 읽어 러너에서도 돌게 한다(0.75MB parquet, export_kr_fundq.py 참고).
+        import export_kr_fundq
+        d = export_kr_fundq.load()
+        if d is None or d.empty:
+            print('[quarterly] market.db도 kr_fundamentals_q.parquet도 없음 — 빈 결과')
+            return pd.DataFrame()
+        d = d[['sym', 'year', 'q', 'revenue', 'op_income', 'net_income']]
+    else:
+        close_after = con is None
+        con = con or sqlite3.connect(DB)
+        d = pd.read_sql('SELECT sym,year,q,revenue,op_income,net_income FROM fundamentals_q', con)
+        if close_after:
+            con.close()
     if d.empty:
         return d
     piv = d.pivot_table(index=['sym', 'year'], columns='q',

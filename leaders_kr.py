@@ -165,10 +165,19 @@ def earn_ok_at(g, when, min_op_yoy=100.0) -> bool:
 
 
 def names() -> dict:
+    """sym → 종목명. market.db(러너엔 없음)가 없으면 커밋된 export로 폴백한다 —
+    없으면 후보표에 이름 없이 6자리 코드만 뜬다."""
     try:
         import sqlite3
         with sqlite3.connect(DB) as c:
-            return dict(c.execute('SELECT sym, name FROM universe').fetchall())
+            m = dict(c.execute('SELECT sym, name FROM universe').fetchall())
+        if m:
+            return m
+    except Exception:
+        pass
+    try:
+        import export_kr_fundq
+        return {s: v[0] for s, v in export_kr_fundq.load_universe().items()}
     except Exception:
         return {}
 
