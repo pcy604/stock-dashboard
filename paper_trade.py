@@ -171,9 +171,14 @@ def _agg_by_signal(trades, horizon):
     """각 신호 플래그를 가진 가상매매들의 실현수익 집계."""
     out = {}
     for flag in SIG_FLAGS:
-        rets = [t['realized'][horizon]['ret']
-                for t in trades
-                if t['flags'].get(flag) and horizon in t['realized']]
+        # ⚠️ NaN 방어 — 상장폐지·인수로 가격이 끊긴 종목의 실현수익은 NaN 으로 기록된다.
+        #    2026-08-22: EA 4건이 sum(rets)/n 을 오염시켜 신호 3개(n=194·258·342)의
+        #    실전EV 가 통째로 NaN 이 됐고, 그 NaN 이 아래 _reliability_mult 에서
+        #    최고값 1.3 으로 둔갑해 **측정 불가 신호가 최고 신뢰도**를 받고 있었다.
+        rets = [r for t in trades
+                if t['flags'].get(flag) and horizon in t['realized']
+                for r in [t['realized'][horizon].get('ret')]
+                if r is not None and r == r]
         if len(rets) < 1:
             out[flag] = None
             continue
@@ -237,6 +242,10 @@ def _reliability_mult(live_ev, ref_ev, n):
        - 실전이 백테스트만큼 나오면 ~1.0, 못 미치면 <1, 초과하면 >1(상한 1.3)
        - 표본이 적으면 1.0 쪽으로 수축(shrinkage) — 섣부른 과신/과소 방지
     """
+    # NaN 은 '못 쟀다'는 뜻이다. 파이썬에서 min(1.3, nan) 은 1.3 을 돌려주므로
+    # 그냥 두면 측정 불가가 최고 신뢰도가 된다 — 반드시 먼저 걸러 1.0(중립)으로 보낸다.
+    if live_ev is None or live_ev != live_ev or ref_ev != ref_ev:
+        return 1.0
     if ref_ev <= 0:
         raw = 1.0 if live_ev >= 0 else 0.5
     else:

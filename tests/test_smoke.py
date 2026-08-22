@@ -21,9 +21,11 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 # 기대하는 탭 구성 — 이름이 바뀌면 테스트도 같이 고쳐야 한다(의도한 변경인지 확인용)
-EXPECTED_TOP_TABS = ['💼 포트폴리오', '🔎 종목 발굴', '🔍 종목 분석', '🌍 매크로']
-EXPECTED_SUB = ['🚀 주도주', '🏆 CANSLIM', '🔥 상승 상위', '💎 가치 발굴 (KR)',
-                '📒 성적표 — 신호가 실제로 맞았나']
+# 💼 포트폴리오와 📒 성적표는 2026-08-22 제거했다(사유는 dashboard.py 상단 주석).
+# 지운 탭이 되살아나면 그것도 회귀이므로, 있어야 할 목록과 **없어야 할 목록**을 같이 건다.
+EXPECTED_TOP_TABS = ['🔎 종목 발굴', '🔍 종목 분석', '🌍 매크로']
+EXPECTED_SUB = ['🚀 주도주', '🏆 CANSLIM', '🔥 상승 상위', '💎 가치 발굴 (KR)']
+REMOVED_TABS = ['💼 포트폴리오', '📒 성적표 — 신호가 실제로 맞았나']
 
 
 @pytest.fixture(scope='module')
@@ -55,6 +57,8 @@ def test_tab_structure(app):
     labels = [t.label for t in app.tabs]
     for want in EXPECTED_TOP_TABS + EXPECTED_SUB:
         assert want in labels, f'탭 없음: {want} (현재: {labels})'
+    for gone in REMOVED_TABS:
+        assert gone not in labels, f'제거한 탭이 되살아났다: {gone}'
 
 
 def test_data_registry_matches_files():

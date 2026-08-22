@@ -204,33 +204,35 @@ footer{border-top:1px solid var(--line); padding-top:18px; font-family:"IBM Plex
   <div class="meta">
     <span>점검일 <b>2026-08-22</b></span>
     <span>저장소 <b>pcy604/stock-dashboard</b></span>
-    <span>커밋 <b>20c5bfb</b></span>
-    <span>dashboard.py <b>4,541줄</b></span>
+    <span>2차 검인 <b>탭 정리 후</b></span>
+    <span>dashboard.py <b>3,953줄</b></span>
     <span>사용자 <b>1명</b></span>
   </div>
 
   <div class="verdict">
-    <h2>종합 소견 — 기계는 살아 있고, 자기 채점기는 고장 나 있다</h2>
-    <p>파이프라인 <b>20/20 정상</b>, 주도주 L/S 규칙은 지연·플라시보·슬롯 대조까지 통과한 <b>드물게 견고한</b> 부분이다. 그런데 이 프로젝트가 스스로 내건 차별점인 <strong>자기교정 루프의 절반이 죽어 있다</strong> — 신호 6개 중 3개의 실전 성적이 <code>NaN</code>이고, 그 <code>NaN</code>이 <strong>최고 신뢰도 1.29</strong>로 둔갑해 추천과 비중에 반영되는 중이다. 원인은 <b>단 4건</b>의 오염 거래, 전부 EA(인수로 가격 중단)다. 이 대화 내내 경계하던 <strong>생존 편향이 실제로 시스템을 망가뜨린 물증</strong>이다.</p>
+    <h2>종합 소견 — 검인 후 잘라냈다. 남은 건 전부 도는 것뿐이다</h2>
+    <p>1차 검인에서 <strong>자기교정 루프의 절반이 죽어 있음</strong>을 찾았다 — 인수로 가격이 끊긴 EA <b>4건</b>이 실전EV를 <code>NaN</code>으로 만들었고, 파이썬에서 <code>min(1.3, NaN)</code>이 1.3을 돌려주는 탓에 <strong>측정 불가가 최고 신뢰도 1.29</strong>로 둔갑해 있었다. 52주신고가는 실전 −0.99%인데 1.29를 받고 있었다(<b>수정 후 0.05 — 26배 과대평가</b>).</p>
+    <p style="margin-top:10px">같은 날 <strong>💼 포트폴리오 탭을 통째로 제거</strong>했다. 보유 데이터가 git 이력에 한 번도 없었고, 매도 점검 3룰은 이 프로젝트 자신의 백테스트가 열등하다고 판정한 청산 방식을 권하고 있었다. <b>4,541줄 → 3,953줄.</b> 목표는 주당 주식 공부 2시간, 시대의 주도주를 진득하게 — 남긴 것은 그 목표에 쓰이는 것뿐이다.</p>
   </div>
 </div>
 
 <!-- 01 원페이저 -->
 <section class="card">
-  <header><span class="num">01</span><h2>원페이저 — 이게 뭔가</h2><span class="stamp s-gold">문서 낡음</span></header>
+  <header><span class="num">01</span><h2>원페이저 — 이게 뭔가</h2><span class="stamp s-green">문서 갱신됨</span></header>
   <div class="body">
     <p class="lede"><b>문제.</b> 2026년 6월 1억 원 손실. 원인은 종목 선정이 아니라 <b>극단적 집중 + 레버리지 + 감정</b>이었다.</p>
     <p class="lede"><b>해법.</b> 목적을 두 개로 재정의했다 — ① 원칙을 기계가 강제한다(가드레일) ② 시스템이 자기 추천을 스스로 채점·교정한다(성적표). 종목 발굴은 이 둘의 <b>입력으로 격하</b>됐다.</p>
     <p class="lede"><b>대상.</b> 사용자 1명. 외부 사용자 0명. 분기 계약상 <b>유지 모드</b>이고 주력은 buza-bot이다.</p>
     <p class="lede"><b>차별점.</b> 경쟁 서비스는 "뭘 살까"를 팔고 성공 사례만 마케팅한다. 이쪽은 반대로 <b>실패를 기록하는 원장</b>과 <b>계좌 주인을 채점하는 규율 엔진</b>이다. 이번 주에만 개선 시도 7건을 전부 기각하고 그 기각 근거를 코드에 박제했다.</p>
-    <p class="tiny">⚠️ PROJECT.md는 "대시보드 5탭 · 6개 서브탭 · 🎙️구루 인사이트 탭"으로 적혀 있으나 실제는 <b>4탭 · 4서브탭</b>이고 구루 탭은 2026-08-11에 제거됐다. 최종 갱신 2026-07-19 이후 한 달 넘게 방치돼 있다.</p>
-    <div class="next"><span class="k">다음 행동</span><span>PROJECT.md를 실제 구조로 갱신한다. 남에게 보여줄 첫 문서가 사실과 다르면 나머지 신뢰가 같이 깎인다.</span></div>
+    <p class="tiny">✅ PROJECT.md를 실제 구조(<b>3탭 · 4서브탭</b>)로 갱신했고, "이 프로젝트의 심장" 절에 <b>루프가 3개월간 고장나 있었다</b>는 사실과 <b>규율 엔진은 현재 미구현</b>이라는 사실을 명시했다.</p>
+    <p class="tiny">⚠️ 남은 모순 — 목적 ①(원칙을 기계가 강제)이 화면에서 사라졌다. 이 프로젝트는 이제 <b>목적 ②(자기 채점)만 남은 발굴 도구</b>이거나, 규율 엔진을 다른 형태로 다시 만들어야 한다.</p>
+    <div class="next"><span class="k">다음 행동</span><span>규율을 되살릴 거면 화면이 아니라 <b>텔레그램 주간 질문 3개</b> 같은 형태가 맞다. 3개월간 한 번도 안 쓴 입력 폼을 다시 만들 이유는 없다.</span></div>
   </div>
 </section>
 
 <!-- 02 채점표 -->
 <section class="card">
-  <header><span class="num">02</span><h2>탭별 완성도 채점</h2><span class="stamp s-red">D 1건 · C 2건</span></header>
+  <header><span class="num">02</span><h2>탭별 완성도 채점</h2><span class="stamp s-gold">D 제거 · C 3건</span></header>
   <div class="body">
     <div class="scroll"><table>
       <thead><tr><th>탭 / 기능</th><th>기획 의도</th><th>실제 작동</th><th>검증 수준</th><th class="n">등급</th></tr></thead>
@@ -263,13 +265,7 @@ footer{border-top:1px solid var(--line); padding-top:18px; font-family:"IBM Plex
           <td>공식 재무 기반이라 데이터 신뢰도는 높음. <b>수익률 검증은 없음</b></td>
           <td class="n"><span class="g gB">B</span></td>
         </tr>
-        <tr>
-          <td><b>💼 포트폴리오 › 보유·추적</b></td>
-          <td>가드레일이 원칙 위반을 지적</td>
-          <td>20%캡·30%트림·레버리지 10%·손절 −8%·매크로 현금비중 로직 존재. 보유 데이터는 GitHub API 저장이라 <span class="muted">❓실사용 미확인</span></td>
-          <td>규칙 기반이라 백테 대상 아님. <b>준수율 이력이 실제로 쌓이는지 미확인</b></td>
-          <td class="n"><span class="g gB">B−</span></td>
-        </tr>
+
         <tr>
           <td><b>🌍 매크로</b></td>
           <td>사이클 국면 → 현금비중 10~70% 권고</td>
@@ -292,11 +288,11 @@ footer{border-top:1px solid var(--line); padding-top:18px; font-family:"IBM Plex
           <td class="n"><span class="g gC">C</span></td>
         </tr>
         <tr>
-          <td><b>💼 › 📒 성적표</b></td>
-          <td><b>이 프로젝트의 심장</b> — 신호가 실제로 맞았나를 채점해 신뢰계수로 자동 강등</td>
-          <td>가상매매 1,126건 누적. 4주 실현 440건. <b>13주 실현 0건.</b> 신뢰계수 6개 중 <b>3개가 NaN인데 최고값 1.29 부여</b></td>
-          <td>루프 자체가 고장. 강등이 실제로 작동한 건 이평수렴(0.59) 하나뿐</td>
-          <td class="n"><span class="g gD">D</span></td>
+          <td><b>💼 포트폴리오 (전체)</b><br><span class="muted">가드레일 · 매도점검 · AI추천 · 성적표 · 사이징</span></td>
+          <td>원칙 강제 + 자기 채점</td>
+          <td><b>2026-08-22 제거.</b> 보유 데이터가 git 이력에 한 번도 없었고, 매도 3룰은 자체 백테가 열등 판정한 방식이었으며, 성적표는 안 쓰는 신호 6종만 채점했다</td>
+          <td>—</td>
+          <td class="n"><span class="g gD">삭제</span></td>
         </tr>
       </tbody>
     </table></div>
@@ -307,7 +303,7 @@ footer{border-top:1px solid var(--line); padding-top:18px; font-family:"IBM Plex
 
 <!-- 03 워크플로우 -->
 <section class="card">
-  <header><span class="num">03</span><h2>실제로 도는 흐름 — 그리고 죽은 가지</h2><span class="stamp s-gold">데드 2건</span></header>
+  <header><span class="num">03</span><h2>실제로 도는 흐름 — 그리고 죽은 가지</h2><span class="stamp s-gold">데드 4건</span></header>
   <div class="body">
     <pre class="mermaid">
 flowchart LR
@@ -321,15 +317,15 @@ flowchart LR
   F --> J
   J --> S["Streamlit 대시보드"]
   J --> T["텔레그램 3종"]
-  F -.-> P["신뢰계수"]
-  P -.->|"3/6 NaN"| W["위닝점수 · 추천 · 사이징"]
+  E --> P["신뢰계수<br/>6/6 유효"]
+  P -->|"수정 완료"| W["위닝점수 → 🔥 상승 상위"]
   X["turnaround_run"] -.-> Y["turnaround_latest.json"]
   Y -.-> Z["읽는 곳 없음"]
   G["guru_youtube"] --> H["guru_insights.json<br/>615KB · 매일"]
   H --> T
   H -.-> I["대시보드 탭 제거됨<br/>2026-08-11"]
-  style W fill:#FBEDEE,stroke:#C8323C,color:#15181F
-  style P fill:#FBEDEE,stroke:#C8323C,color:#15181F
+  style W fill:#E8F4EF,stroke:#1E7A5A,color:#15181F
+  style P fill:#E8F4EF,stroke:#1E7A5A,color:#15181F
   style Z fill:#FAF3E3,stroke:#B07D18,color:#15181F
   style I fill:#FAF3E3,stroke:#B07D18,color:#15181F
     </pre>
@@ -340,41 +336,43 @@ flowchart LR
         <tr><td><code>turnaround_latest.json</code></td><td class="n">84 B</td><td><code>turnaround_run.py</code>가 쓰지만 <b>읽는 코드가 저장소 전체에 없다.</b> 완전한 데드</td></tr>
         <tr><td><code>leaders_paper.json</code></td><td class="n">43 KB</td><td>구 규칙⑥ 페이퍼 원장. 규칙 종료 후 대시보드 참조 0건</td></tr>
         <tr><td><code>guru_insights.json</code></td><td class="n">615 KB</td><td>데드는 아님(텔레그램이 소비). 다만 <b>매일 8회 자동 커밋</b>으로 저장소를 부풀린다 — 08-21 하루 커밋 8건이 전부 이것</td></tr>
+        <tr><td><code>paper_trades.json</code></td><td class="n">740 KB</td><td><b>신규 데드</b> — 성적표 제거로 화면 소비처가 사라졌다. 채점은 계속 돈다(신뢰계수 산출에는 여전히 필요)</td></tr>
+        <tr><td><code>weekly_portfolio.json</code> 외</td><td class="n">143 KB</td><td><b>신규 데드</b> — AI 추천·성적표가 유일한 소비처였다. <code>weekly_portfolio_history.json</code>도 동일</td></tr>
       </tbody>
     </table></div>
-    <div class="next"><span class="k">다음 행동</span><span>turnaround 계열을 지우고, guru_insights를 커밋 대상에서 빼거나 하루 1회로 줄인다. 죽은 가지가 남아 있으면 "초록불인데 실은 죽어 있는" 상태를 구분할 수 없게 된다.</span></div>
+    <div class="next"><span class="k">다음 행동</span><span>신선도표의 <code>used_by</code> 라벨 5건을 "⚠️ 화면 없음"으로 정정했다 — 표가 거짓말하지 않게. 다음은 <b>산출은 되는데 아무도 안 읽는 크론 3개</b>(turnaround·weekly_portfolio·leaders_paper)를 끌지 결정하는 것.</span></div>
   </div>
 </section>
 
 <!-- 04 열린 전선 -->
 <section class="card">
-  <header><span class="num">04</span><h2>열린 전선</h2><span class="stamp s-red">🔴 3 · 🟡 4</span></header>
+  <header><span class="num">04</span><h2>열린 전선</h2><span class="stamp s-gold">해결 4 · 잔여 3</span></header>
   <div class="body">
     <ul class="front">
-      <li class="hot"><span class="tag t-hot">🔴 치명</span><div>
-        <h4>신뢰계수 NaN — 측정 불가 신호가 최고 신뢰도를 받는다</h4>
-        <p>EA(인수로 가격 중단) 거래 <b>단 4건</b>의 수익률이 NaN이다. 집계가 <code>sum(rets)/n</code>이라 nan-safe가 아니어서 신호 전체 EV가 NaN이 되고, <code>max(0.0, min(1.3, NaN))</code>이 파이썬에서 <b>1.3을 돌려줘</b> 최고 신뢰도가 부여된다. 52주신고가(n=194) · 5일라이딩(n=258) · RSI/MACD(n=342) 세 개가 전부 1.29. 하필 표본이 가장 큰 것들이고, 이 값이 위닝점수 → 추천 → 사이징으로 흘러간다.</p>
-        <p class="who">담당 Claude · 예상 15분 · 파일 paper_trade.py:180, 244</p></div></li>
-      <li class="hot"><span class="tag t-hot">🔴 치명</span><div>
-        <h4>13주 성적표가 한 건도 안 쌓였다</h4>
-        <p>가상매매 1,126건 중 4주 실현은 440건인데 <b>13주 실현은 0건</b>이다. 신뢰계수도 4주 기준으로만 돌고 있다. 4주는 노이즈가 큰 구간이라, 이 시스템의 실제 보유 기간(주도주는 −30% 트레일까지 수개월)과 채점 기준이 어긋나 있다.</p>
-        <p class="who">담당 Claude · 원인 미규명 — 13주 만기 처리 코드가 도는지부터 확인 필요</p></div></li>
+      <li><span class="tag" style="color:var(--green)">✅ 해결</span><div>
+        <h4>신뢰계수 NaN — 수정 완료</h4>
+        <p>뿌리(nan-safe 집계)와 증상(NaN이 1.3으로 둔갑) 둘 다 고쳤다. <b>52주신고가 1.29 → 0.05</b>(실전EV −0.99%, 백테 +1.0% — <b>26배 과대평가</b>였다), RSI/MACD 1.29 → 0.37. 5일라이딩의 1.29만 진짜였다(실전 0.71% &gt; 백테 0.4%). 이제 6개 전부 실측값이고 NaN 0건이다.</p>
+        <p class="who">2026-08-22 · paper_trade.py 두 곳 · signal_live_weights.json 재발행</p></div></li>
+      <li class="hot"><span class="tag t-hot">🔴 구조</span><div>
+        <h4>자기 채점이 주력 규칙을 안 잰다 <span class="muted">(성적표 제거로 확대됨)</span></h4>
+        <p>신뢰계수는 <b>구 신호 6종</b>만 채점한다. 주력인 주도주 L/S는 채점 대상이 아니고, L/S 전용 페이퍼 원장(<code>leaders_paper.json</code>)은 화면 참조 0건이다. 게다가 13주 실현은 1,126건 중 <b>0건</b> — 4주로만 도는데, 주도주의 실제 보유는 −30% 트레일까지 수개월이다. 성적표 화면까지 없어진 지금, <b>남은 신뢰계수는 관측할 수 없는 곳에서 조용히 위닝점수를 곱하고 있다.</b></p>
+        <p class="who">담당 형 판단 — ① L/S 채점기를 새로 만든다 ② 신뢰계수 적용을 아예 뗀다 ③ 그대로 둔다</p></div></li>
       <li class="hot"><span class="tag t-hot">🔴 구조</span><div>
         <h4>생존 편향 — 유니버스에 상장폐지 종목이 없다</h4>
         <p>모든 백테스트 숫자가 낙관 편향돼 있다. 이번에 <b>추상적 위험이 아님이 증명됐다</b> — EA 4건이 실제로 신뢰계수를 무너뜨렸다. 5기에서 기각한 "S 3회차+" 안도 정확히 이 편향의 증폭기였다.</p>
         <p class="who">담당 형 판단 필요 · 유니버스 재구축은 큰 작업이고 분기 계약(유지 모드)과 충돌</p></div></li>
+      <li><span class="tag" style="color:var(--green)">✅ 해결</span><div>
+        <h4>PROJECT.md 갱신 완료</h4>
+        <p>3탭 · 4서브탭으로 정정하고 "제거된 화면(이력)" 절을 추가했다. "이 프로젝트의 심장" 절에는 <b>루프가 3개월간 고장나 있었다</b>는 사실과 <b>규율 엔진은 현재 미구현</b>이라는 사실을 그대로 적었다.</p>
+        <p class="who">2026-08-22</p></div></li>
       <li class="warm"><span class="tag t-warm">🟡 위생</span><div>
-        <h4>PROJECT.md가 한 달 넘게 낡았다</h4>
-        <p>"5탭 · 6서브탭 · 구루 인사이트 탭"으로 적혀 있으나 실제는 4탭 · 4서브탭이고 구루 탭은 08-11 제거됐다.</p>
-        <p class="who">담당 Claude · 예상 10분</p></div></li>
-      <li class="warm"><span class="tag t-warm">🟡 위생</span><div>
-        <h4>죽은 산출물 2건이 계속 생성된다</h4>
-        <p><code>turnaround_latest.json</code>(읽는 곳 없음), <code>leaders_paper.json</code>(규칙 종료 후 미참조).</p>
-        <p class="who">담당 Claude · 예상 20분</p></div></li>
-      <li class="warm"><span class="tag t-warm">🟡 부채</span><div>
-        <h4>dashboard.py 4,541줄 단일 파일</h4>
-        <p>탭마다 <code>guard()</code>로 감싸 한 탭이 죽어도 전체가 안 죽게는 해뒀다. 다만 서브탭 핸들 순서 의존처럼 <b>주석으로만 방어된 함정</b>이 남아 있다.</p>
-        <p class="who">담당 보류 — 1인 프로젝트에 모듈 분리는 과잉. 죽은 코드 제거로 대체</p></div></li>
+        <h4>아무도 안 읽는데 계속 도는 크론 4건</h4>
+        <p><code>turnaround_latest</code> · <code>leaders_paper</code> · <code>weekly_portfolio</code>(+history) · <code>paper_trades</code>. 마지막 것은 신뢰계수 산출에 여전히 필요하니 남긴다. 신선도표의 <code>used_by</code> 라벨 5건은 <b>"⚠️ 화면 없음"으로 정정</b>해 표가 거짓말하지 않게 했다.</p>
+        <p class="who">담당 형 판단 — 크론을 끌지 결정</p></div></li>
+      <li><span class="tag" style="color:var(--green)">✅ 완화</span><div>
+        <h4>dashboard.py 4,541줄 → 3,953줄</h4>
+        <p>포트폴리오 탭 3개 블록(548줄)과 호출자가 사라진 보유 헬퍼 4개·상수 2개·<code>_kelly_pct</code>까지 제거. <b>13% 감소.</b> 스모크 렌더 시간도 400초 → 56초로 줄었다. 모듈 분리는 여전히 보류 — 1인 프로젝트에 과잉이다.</p>
+        <p class="who">2026-08-22 · 회귀 방지로 <code>REMOVED_TABS</code> 검사를 스모크에 추가</p></div></li>
       <li class="warm"><span class="tag t-warm">🟡 검증</span><div>
         <h4>CANSLIM·매크로가 "검증 실패 후 방치" 상태</h4>
         <p>위닝 스코어 등급은 4기에 "변별력 비일관" 판정을 받았고, 매크로 현금비중 권고는 맞았는지 채점된 적이 없다. 둘 다 화면에는 그대로 있다.</p>
@@ -386,20 +384,20 @@ flowchart LR
 
 <!-- 05 트랙션 -->
 <section class="card">
-  <header><span class="num">05</span><h2>트랙션 보드</h2><span class="stamp s-gold">❓ 4건</span></header>
+  <header><span class="num">05</span><h2>트랙션 보드</h2><span class="stamp s-gold">❓ 3건</span></header>
   <div class="body">
     <div class="grid">
       <div class="stat"><div class="l">파이프라인 신선도</div><div class="v v-green">20/20</div><div class="n2">전 산출물 🟢 · 최대 경과 7일</div></div>
       <div class="stat"><div class="l">가상매매 누적</div><div class="v">1,126</div><div class="n2">4주 실현 440 · 13주 실현 <b>0</b></div></div>
-      <div class="stat"><div class="l">신뢰계수 유효</div><div class="v v-red">2/6</div><div class="n2">3개 NaN · 1개 표본 7건</div></div>
+      <div class="stat"><div class="l">신뢰계수 유효</div><div class="v v-green">6/6</div><div class="n2">NaN 0건 · 4개가 백테 미달</div></div>
       <div class="stat"><div class="l">규칙 개선 시도</div><div class="v v-gold">0/7</div><div class="n2">5기 전수 기각 — 현행이 이김</div></div>
       <div class="stat"><div class="l">외부 사용자</div><div class="v v-mut">0</div><div class="n2">사용자 1명 · 유지 모드</div></div>
       <div class="stat"><div class="l">실계좌 성과</div><div class="v v-mut">❓</div><div class="n2">미측정 — 기록 경로 없음</div></div>
-      <div class="stat"><div class="l">가드레일 준수율</div><div class="v v-mut">❓</div><div class="n2">미측정 — 보유 데이터 확인 불가</div></div>
+      <div class="stat"><div class="l">dashboard.py</div><div class="v v-green">3,953</div><div class="n2">−588줄 · 렌더 400s→56s</div></div>
       <div class="stat"><div class="l">대시보드 사용 빈도</div><div class="v v-mut">❓</div><div class="n2">미측정 — 로깅 없음</div></div>
     </div>
-    <p class="tiny">❓ 4건 중 <b>실계좌 성과와 가드레일 준수율</b>이 치명적이다. 이 둘이 없으면 "원칙을 기계가 강제한다"는 이 프로젝트의 1번 목적이 <b>작동하는지 자체를 알 수 없다.</b> 신호 정확도(성적표)는 열심히 재면서 정작 형 자신의 행동은 안 재고 있다.</p>
-    <div class="next"><span class="k">다음 행동</span><span>먼저 측정할 것 — ① 가드레일 준수율이 실제로 기록되는지 확인 ② 실계좌 월말 잔고를 수기로라도 한 줄씩 남긴다. 없는 숫자로는 3·6·7번 카드가 전부 희망사항이 된다.</span></div>
+    <p class="tiny">가드레일 준수율은 <b>더 이상 ❓가 아니라 해당 없음</b>이다 — 규율 엔진을 화면에서 뗐다. 대신 이 프로젝트가 내걸던 목적 ①(원칙을 기계가 강제)이 <b>지금은 존재하지 않는다</b>는 사실이 남는다.</p>
+    <div class="next"><span class="k">다음 행동</span><span>남은 ❓ 셋 중 <b>실계좌 성과</b>가 가장 급하다. 8년 백테스트는 일곱 번 돌렸는데 실계좌 기록은 한 줄도 없다. 월말 잔고 한 줄부터 시작한다.</span></div>
   </div>
 </section>
 
@@ -501,7 +499,8 @@ flowchart LR
       <tbody>
         <tr><td>"19-10-21 TSLA, 23-05-22 NVDA 같은 명백한 신호가 있었는데도 못 잡았다니…"</td><td>규칙의 한계가 화면에 안 보였다</td><td>미감지 사유와 재측정 결과를 대시보드 한계 패널에 공시 ✅</td></tr>
         <tr><td>"$2B인 게 솔직히 너무 작은 거 같아. 미국 시장에서 시총 2조면 별 거 아닌데"</td><td><b>이름이 틀렸다.</b> "대형 주도주"인데 $2B는 미국 기준 스몰캡</td><td>경계는 데이터로 정당화됨. <b>이름은 아직 안 고침</b> ⚠️</td></tr>
-        <tr><td>"이게 뭔지도 모르겠는데??" <span class="muted">(신뢰계수)</span></td><td><b>가장 중요한 신호.</b> 이 프로젝트의 핵심 차별점인 자기교정 지표를, 만든 사람이 화면에서 이해하지 못한다</td><td>설명 부채 — 대응 필요 🔴</td></tr>
+        <tr><td>"이게 뭔지도 모르겠는데??" <span class="muted">(신뢰계수)</span></td><td><b>가장 중요한 신호.</b> 핵심 차별점 지표를 만든 사람이 화면에서 이해하지 못한다</td><td>버그는 고쳤고 <b>화면 자체를 없앴다.</b> 설명 부채는 "설명을 더하는" 대신 "지표를 화면에서 뺀" 방식으로 닫혔다 — 남은 신뢰계수는 이제 보이지 않는 곳에서 돈다 ⚠️</td></tr>
+        <tr><td>"포트폴리오 탭을 지우는 게 맞는 거 같아. 목표는 주당 2시간, 시대의 주도주를 진득하게"</td><td><b>목적으로 화면을 잘라낸 첫 사례.</b> 기능이 아니라 목표 기준으로 판단했다</td><td>탭 통째 제거 ✅ — 데이터가 그 판단을 뒷받침했다(보유 데이터 0건, 매도룰 자체 모순)</td></tr>
       </tbody>
     </table></div>
     <p>세 번째가 결정적이다. 신뢰계수는 이 프로젝트가 "남들과 다르다"고 내세우는 바로 그 장치인데, <b>화면만 봐서는 무엇인지 알 수 없게 만들어져 있다.</b> 외부 사용자 이전에 사용자 본인에게 전달이 안 되고 있다는 뜻이고, 이건 UI 문제가 아니라 기획 문제다.</p>
@@ -520,6 +519,8 @@ flowchart LR
         <tr><td class="n">08-22</td><td>NVDA·TSLA 미감지를 트레이드오프로 수용</td><td>시총 계단 문턱을 쓰면 잡히지만 CAGR 25.4→16.2%, MDD −39.8→−52.2%</td><td>반증 조건 명시됨 — 대형 대시세 표본이 늘거나 $50B·+10%가 격자에서 이웃과 함께 오르면 재개</td></tr>
         <tr><td class="n">08-22</td><td>개선 시도 7건 전부 기각, <b>3단계 기준</b> 도입</td><td>격자 최고를 고르면 매번 봉우리가 나온다. 실효 표본이 16주뿐이라서다</td><td>기준(격자 → 1·2주 지연 → 기여 주차 열기)이 진짜 개선까지 죽이고 있지 않은가</td></tr>
         <tr><td class="n">08-22</td><td>신호회차를 <b>표시만</b> 하고 규칙엔 미반영</td><td>S 3회차+가 37.3%로 지연·플라시보·슬롯 대조를 통과했으나 임계 격자가 1:27.8 2:27.4 3:37.3 4:27.0 5:35.3 지그재그</td><td>실전 신호 30건 쌓이면 재판정</td></tr>
+        <tr><td class="n">08-22</td><td><b>💼 포트폴리오 탭 통째 제거</b>(성적표 포함)</td><td>목표는 주당 2시간 + 주도주 진득하게. 보유 데이터가 git 이력에 한 번도 없었고(가드레일 미작동), 매도 3룰이 자체 백테와 충돌했으며, 성적표는 안 쓰는 신호 6종만 채점했다</td><td>발굴 도구로 좁힌 뒤 <b>주식 공부 시간이 실제로 줄었는가.</b> 그리고 규율 엔진 없이 집중·레버리지를 스스로 통제할 수 있는가 — 2026-06 손실의 원인이 그것이었다</td></tr>
+        <tr><td class="n">08-22</td><td>신뢰계수 NaN 버그 수정</td><td>EA 4건이 <code>sum(rets)/n</code>을 오염, <code>min(1.3,NaN)</code>이 1.3 반환 → 측정 불가가 최고 신뢰도</td><td>52주신고가 0.05로 강등된 뒤 🔥 상승 상위의 추천 구성이 실제로 나아지는가</td></tr>
         <tr><td class="n">08-11</td><td>구루 인사이트 탭을 페이지에서 제거</td><td>화면 통폐합 — 텔레그램 다이제스트로 충분</td><td><b>결과: JSON은 여전히 매일 생성·커밋 중.</b> 정리가 안 됐다 ⚠️</td></tr>
       </tbody>
     </table></div>
