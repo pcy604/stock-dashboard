@@ -29,11 +29,14 @@ leaders_ab.py — 주도주 규칙 L(대형) · S(소형) 발행
   꼬리만 산다 — 소형 대시세는 출발 시점에 전부 적자였기 때문이다.
 
 측정 (2018-06~2026-08, 편도 0.1%, 진입가 = 신호 주차 종가):
-    L 단독 6칸  : 앞 26.4% / 뒤 28.4% / 전체 25.4%
-    S 단독 10칸 : 앞 39.1% / 뒤 22.4% / 전체 23.5%
-    L+S 50:50  : 앞 33.1% / 뒤 25.5% / **전체 24.5%**  MDD −38.0%
+  ⚠️ 2026-08-22 L 에 눌림목 4분할 진입을 채택하면서 L 성적이 바뀌었다(아래는 반영분).
+    L 단독 6칸  : 앞 14.7% / 뒤 22.1% / 전체 18.3%   MDD −27.2%   ← 분할 진입
+    S 단독 10칸 : 앞 33.6% / 뒤 20.7% / 전체 23.3%   MDD −49.4%   ← 일괄
+    L+S 50:50  : 앞 25.0% / 뒤 21.4% / **전체 21.0%**  MDD −35.3%
     SPY        : 앞 18.3% / 뒤 13.2% /     15.1%       MDD −31.8%
-  진입을 1주 늦춰도 22.9%, 2주 늦춰도 18.8% — 금요일 종가 체결에만 성립하는
+  참고 — L 을 일괄로 두면 전체 24.9% / MDD −39.8% 다. 분할은 CAGR 6.6%p 를 내고
+  MDD 12.6%p 를 사는 **보험**이지 수익 규칙이 아니다. 아래 '분할 진입' 절 참조.
+  진입을 1주 늦춰도 18.4%, 2주 늦춰도 15.1% — 금요일 종가 체결에만 성립하는
   미시구조 착시가 아니다.
 
 ⚠️ 남은 한계 (화면에도 같이 띄운다)
@@ -140,6 +143,25 @@ $2B 경계는 왜 이 값인가 (2026-08-22) — 이름이 오해를 부른다
   다섯 번째 기각이고 리프트(0.4~0.7)까지 일관된다. 덧붙여 데이터가 2018-06
   부터라 "사상 첫"이 실제로는 "2018-06 이후 첫"이다.
 
+분할 진입 — 왜 넣었나, 그리고 무엇을 포기했나 (2026-08-22 채택)
+  L 에만 눌림목 4분할을 쓴다. 신호 주에 슬롯의 1/4 만 사고, 2회차부터는
+  ① 진입 후 고점 대비 −5~10% 눌리고 ② 직전 매수가를 넘고 ③ 20주선 위일 때만
+  1/4 씩 추가한다. 못 채운 몫은 현금으로 남고, **그 현금이 MDD 를 낮추는 실체다**
+  (현재 가상 장부: L 6/6칸인데 현금 36.8%).
+
+  측정 (정시 / 1주지연 / 2주지연):
+    일괄          24.9% / 24.9% / 19.7%   MDD −39.8 / −34.3 / −40.7
+    눌림목 4분할   18.3% / 18.4% / 15.1%   MDD −27.2 / −31.9 / −29.4   ← 채택
+    추세 4분할    21.2% / 19.7% / 16.1%   MDD −29.0 / −32.9 / −31.2
+  · CAGR 은 일괄이 세 시점 전부 이긴다. MDD 는 분할이 세 시점 전부 이긴다.
+  · 회복력(CAGR/MDD)은 정시엔 추세4분할 0.73 최고인데 1주 지연에 일괄 0.72 로
+    뒤집혀 결론이 안 난다. 즉 **어느 축을 볼 것인가가 선택이지 데이터가 정해주지 않는다.**
+  · 2026-06 손실이 '한 번에 실은 것'에서 왔으므로 MDD 축을 택했다.
+  · **S 에는 안 쓴다.** 분할이 CAGR 만 깎고(23.3% → 12.4~20.9%) MDD 는 그대로였다
+    (−49.4% → −50.1%). 소형 대시세는 초기 폭발을 놓치면 끝이라서다.
+  · 이전에 잰 '피라미딩'(2026-08-22 오전)은 **추세형**(+25%·+50% 오를 때 추가)이었다.
+    설계도(260731)의 눌림목형은 그때 안 재봤다 — 다시 재서 채택한 것이다.
+
 ⚠️ 워크포워드 — 위 성적은 전부 인샘플이다 (2026-08-22)
   주차별 코호트 표(같은 주 걸린 전 종목의 이후 1·4·13주)는 **공시이지 검증이 아니다.**
   파라미터를 고른 것이 바로 그 8년이라, 같은 데이터로 채점하면 잘 나오는 게 당연하다.
@@ -196,11 +218,22 @@ RULES = {
               slots=6, trail=0.30, mc_lo=2e9, mc_hi=None, fund=True,
               text="시총 $2B+ · 주간 +20%↑ · 거래량 전주비 <1.5배 · "
                    "(영업익 8분기 신고점 OR OPM 전분기比 +5%p↑)",
-              exit="진입 후 주봉 종가 고점 대비 −30% → 그 주 종가 전량. 재신호 시 재진입"),
+              exit="진입 후 주봉 종가 고점 대비 −30% → 그 주 종가 전량. 재신호 시 재진입",
+              # 2026-08-22 채택 — 눌림목 4분할. **수익 규칙이 아니라 보험이다.**
+              #   측정(정시/1주지연/2주지연): 일괄 24.9/24.9/19.7% · 눌림목4분할 18.3/18.4/15.1%
+              #   MDD                      : 일괄 −39.8/−34.3/−40.7% · 분할 −27.2/−31.9/−29.4%
+              #   → CAGR 6.6%p 를 내고 MDD 12.6%p 를 산다. MDD 우위는 세 시점 전부 일관.
+              #   2026-06 손실이 '한 번에 실은 것'에서 왔으므로 그 대가를 치르기로 했다.
+              tranche=dict(k=4, lo=0.05, hi=0.10),
+              tranche_text="1/4 씩 4회. 2회차부터는 진입 후 고점 대비 −5~10% 눌리고, "
+                           "직전 매수가를 넘고, 20주선 위일 때만 추가"),
     "S": dict(name="소형 대시세",
               slots=10, trail=0.40, mc_lo=None, mc_hi=2e9, fund=False,
               text="시총 $2B 미만 · 주간 +20%↑ · 거래량 전주비 <1.5배 · 재무 조건 없음",
-              exit="진입 후 주봉 종가 고점 대비 −40% → 그 주 종가 전량. 재신호 시 재진입"),
+              exit="진입 후 주봉 종가 고점 대비 −40% → 그 주 종가 전량. 재신호 시 재진입",
+              # S 는 일괄이다. 분할이 CAGR 만 깎고(23.3% → 12.4~20.9%) MDD 는 그대로였다
+              #   (−49.4% → −50.1%). 소형 대시세는 초기 폭발을 놓치면 끝이라서다.
+              tranche=None, tranche_text="일괄 진입 (분할은 측정상 손해만 봤다)"),
 }
 MIN_ADV = 5e6            # 일평균 거래대금 $5M — 못 사는 신호는 백테스트에 넣지 않는다
 SEGMENTS = [("앞 구간 2018-06~2021-12", "2018-06-01", "2021-12-31"),
@@ -212,7 +245,7 @@ SEGMENTS = [("앞 구간 2018-06~2021-12", "2018-06-01", "2021-12-31"),
 def load():
     c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
     d = pd.read_sql(f"""SELECT as_of,sym,name,close,ret_1w,adv_20d,marcap,period_end,
-                               op_income,opm,rs_13w,rs_26w,dist_52w,per,psr,rev_yoy
+                               op_income,opm,rs_13w,rs_26w,dist_52w,per,psr,rev_yoy,ma20
                         FROM factor_weekly WHERE factor_ver='{VER}'""", c)
     c.close()
     d["as_of"] = pd.to_datetime(d.as_of)
@@ -269,14 +302,25 @@ def gate_of(M, key):
 
 
 # ── 시뮬레이션 ──────────────────────────────────────────────────────
-def sim(M, gate, N, trail, a, b, keep_pos=False):
-    """주 1회 빈 슬롯만 채우고, 진입 후 주봉 종가 고점 대비 −trail 에서 그 주 종가 청산."""
-    px = M["close"]
+def sim(M, gate, N, trail, a, b, keep_pos=False, tranche=None):
+    """주 1회 빈 슬롯만 채우고, 진입 후 주봉 종가 고점 대비 −trail 에서 그 주 종가 청산.
+
+    tranche=dict(k, lo, hi) 를 주면 **눌림목 분할 진입**을 한다(2026-08-22 채택, L 전용).
+      · 신호 주에 슬롯의 1/k 만 산다
+      · 2회차부터는 세 조건을 동시에 만족할 때만 1/k 씩 추가한다
+          ① 진입 후 고점 대비 낙폭이 lo~hi 사이   ② 직전 매수가보다 위
+          ③ 20주 이동평균 위
+      · 못 채운 몫은 현금으로 남는다 — 그게 MDD 를 낮추는 실체다.
+    """
+    px, ma = M["close"], M.get("ma20")
     dates = px.index[(px.index >= a) & (px.index <= b)]
     cash, pos, eq, nh = 1.0, {}, [], []
     W = 1.0 / N
+    k = (tranche or {}).get("k", 1)
+    lo, hi = (tranche or {}).get("lo", 0), (tranche or {}).get("hi", 0)
     for t in dates:
         p = px.loc[t]
+        mrow = ma.loc[t] if ma is not None else None
         for s in list(pos):
             v = p.get(s)
             if v is None or v != v:
@@ -289,6 +333,24 @@ def sim(M, gate, N, trail, a, b, keep_pos=False):
         #    NaN 이 그대로 나와 그 뒤 자산곡선 전체가 NaN 이 된다(2026-08-18 SKYT).
         val = cash + sum(o["sh"] * (v if (v := p.get(s)) == v and v is not None
                                     else o["last"]) for s, o in pos.items())
+        # ── 눌림목 추가 매수 (2~k 회차) ──────────────────────
+        if tranche:
+            for s_, o in pos.items():
+                if o["step"] >= k:
+                    continue
+                v = p.get(s_)
+                if v != v or v is None:
+                    continue
+                dd = 1 - v / o["peak"]                     # 진입 후 고점 대비 낙폭
+                mv = mrow.get(s_) if mrow is not None else None
+                if (lo <= dd <= hi) and v > o["lastbuy"]                         and mv == mv and mv is not None and v > mv:
+                    amt = min(val * W / k, cash)
+                    if amt > 0:
+                        cash -= amt
+                        o["sh"] += amt / v * (1 - FEE)
+                        o["lastbuy"] = v
+                        o["step"] += 1
+
         if len(pos) < N:
             gg = gate.loc[t]
             rk = M["ret_1w"].loc[t]
@@ -296,12 +358,13 @@ def sim(M, gate, N, trail, a, b, keep_pos=False):
                     if s not in pos and p.get(s) == p.get(s) and (p.get(s) or 0) > 0]
             cand.sort(key=lambda s: -(rk.get(s) if rk.get(s) == rk.get(s) else -9e9))
             for s in cand[:N - len(pos)]:
-                amt = min(val * W, cash)
+                amt = min(val * W / k, cash)          # 분할이면 1/k 만
                 if amt <= 0:
                     break
                 cash -= amt
                 pos[s] = dict(sh=amt / p[s] * (1 - FEE), peak=p[s], last=p[s],
                               entry=float(p[s]), ed=str(t.date()), wk=0,
+                              lastbuy=float(p[s]), step=1, ksteps=k,
                               w0=float(amt / val * 100))   # 진입 당시 비중
         for s, o in pos.items():
             v = p.get(s)
@@ -326,7 +389,8 @@ def live_book(M, gate, key, nm):
     """
     r = RULES[key]
     a, b = SEGMENTS[2][1], SEGMENTS[2][2]
-    _, _, pos, cash = sim(M, gate, r["slots"], r["trail"], a, b, keep_pos=True)
+    _, _, pos, cash = sim(M, gate, r["slots"], r["trail"], a, b, keep_pos=True,
+                          tranche=r.get("tranche"))
     px = M["close"]
     val = cash + sum(o["sh"] * o["last"] for o in pos.values())
     rows = []
@@ -341,7 +405,8 @@ def live_book(M, gate, key, nm):
             peak=_r(o["peak"]), dd=_r(dd * 100, 1),
             stop=_r(o["peak"] * (1 - r["trail"])),
             room=_r(room * 100, 1),
-            w=_r(o["sh"] * cur / val * 100, 1), w0=_r(o.get("w0"), 1)))
+            w=_r(o["sh"] * cur / val * 100, 1), w0=_r(o.get("w0"), 1),
+            step=int(o.get("step", 1)), ksteps=int(o.get("ksteps", 1))))
     rows.sort(key=lambda x: -(x["w"] or 0))
     return dict(slots=r["slots"], filled=len(pos),
                 cash_pct=_r(cash / val * 100, 1), positions=rows)
@@ -366,7 +431,8 @@ def spy_stat(a, b):
 # ── 발행 ────────────────────────────────────────────────────────────
 def build():
     d = load()
-    M = matrices(d, ["close", "ret_1w", "adv_20d", "marcap", "vw", "F_HI8", "F_OPM"])
+    M = matrices(d, ["close", "ret_1w", "adv_20d", "marcap", "vw", "F_HI8", "F_OPM",
+                     "ma20"])   # ma20 = 눌림목 분할 진입 판정용(20주선 위에서만 추가)
     _nv = assert_vol_fresh(M)   # 거래량 패널이 밀렸으면 여기서 죽는다(가짜 0 방지)
     print(f"거래량 패널 확인 — 마지막 주차 vw {_nv:,}종")
     gates = {k: gate_of(M, k) for k in RULES}
@@ -376,7 +442,8 @@ def build():
     for k, r in RULES.items():
         bt[k] = {}
         for lab, a, b in SEGMENTS:
-            e, held = sim(M, gates[k], r["slots"], r["trail"], a, b)
+            e, held = sim(M, gates[k], r["slots"], r["trail"], a, b,
+                          tranche=r.get("tranche"))
             eq[(k, lab)] = e
             bt[k][lab] = {**stat(e), "held": round(held, 1), "slots": r["slots"]}
             print(f"  {k} {lab:<22} CAGR {bt[k][lab]['cagr']:>6.1f}% "
@@ -441,6 +508,7 @@ def build():
         signal_week=str(last.date()),
         universe=int(M["close"].loc[last].notna().sum()),
         rules={k: {"name": v["name"], "text": v["text"], "exit": v["exit"],
+                   "tranche": v.get("tranche"), "tranche_text": v.get("tranche_text"),
                    "slots": v["slots"], "trail": int(v["trail"] * 100)}
                for k, v in RULES.items()},
         backtest=bt, candidates=cands, weeks=weeks, book=book,
