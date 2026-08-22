@@ -54,6 +54,19 @@ jobs:
         run: python screen_precompute.py
         continue-on-error: true
 
+      # 주도주 KR — 지금까지 어느 워크플로에도 없어 손으로만 돌렸고, 그래서 대시보드
+      # 🇰🇷 탭이 US(자동)보다 며칠씩 묵은 신호를 띄우고 있었다.
+      # 여기 붙이는 이유: 위 캐시 스텝이 이미 data/longcache 를 복원해 두므로,
+      # KR 가격 이력이 러너에 그대로 있다. 별도 워크플로를 만들면 139MB 캐시를
+      # 한 벌 더 굴려야 한다.
+      # market.db(574MB, gitignore)는 러너에 없다 — 분기재무·universe 는
+      # export_kr_fundq.py 가 만든 커밋된 parquet(0.71MB + 79KB)로 폴백한다.
+      - name: 주도주 KR 신호 갱신 (KR-P1 · KR-U6)
+        run: |
+          python leaders_kr.py publish
+          python leaders_kr6.py publish
+        continue-on-error: true
+
       - name: 결과 커밋 & 푸시
         run: |
           git config user.name  "github-actions"
@@ -62,6 +75,7 @@ jobs:
           # screen_precompute 가 만드는 3개를 전부 커밋한다.
           git add results/returns.json results/seasonality.json results/mdd.json 2>/dev/null || true
           git add data/us_shares.csv data/us_marketcap.csv data/us_splits.csv 2>/dev/null || true
+          git add results/leaders_kr.json results/leaders_kr6.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "auto: 종목 프로파일 갱신 $(date -u +%Y-%m-%d)"
           git push
 

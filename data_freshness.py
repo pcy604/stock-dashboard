@@ -40,6 +40,14 @@ def _paper_max_log(d):
                default=None)
 
 
+def _mtime(p):
+    """내용에 날짜 컬럼이 없는 산출물(parquet 등)용 — 파일 수정시각을 신선도로 쓴다.
+    raw=True 와 함께 쓴다. 내용 기반 날짜가 있으면 그쪽이 항상 낫다(파일을 건드리기만
+    해도 갱신된 척하게 되므로)."""
+    from datetime import datetime as _d
+    return _d.fromtimestamp(p.stat().st_mtime).strftime('%Y-%m-%d')
+
+
 def _csv_col(col):
     """CSV 산출물용. raw=True 와 함께 쓰며 getter 가 파일 경로를 받는다."""
     def get(path):
@@ -123,13 +131,21 @@ SOURCES = [
          cycle='주 1회', max_age=9, producer='leaders_publish.py',
          job='수동 (로컬)', used_by='🚀 주도주 → 🇺🇸 (종목별 상세)',
          getter=_key('generated', 'updated')),
+    # KR-U6의 '흑자전환·이익폭증' 판정이 이 파일에 걸려 있다. 러너엔 market.db가
+    # 없어 이 export만 보므로, 이게 낡으면 **옛 재무로 최신 신호를 내면서 초록불**이다.
+    # 분기 공시 주기(+공시 시차)를 고려해 100일. 로컬에서만 갱신 가능:
+    #   python ingest_dart_quarterly.py && python export_kr_fundq.py export
+    dict(path='data/kr_fundamentals_q.parquet', label='KR 분기재무 (KR-U6 입력)',
+         cycle='분기 1회', max_age=100, producer='export_kr_fundq.py export',
+         job='수동 (로컬 · market.db 필요)', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',
+         getter=_mtime, raw=True),
     dict(path='results/leaders_kr6.json', label='주도주 KR (KR-U6·규칙⑥ 이식)',
          cycle='주 1회', max_age=9, producer='leaders_kr6.py publish',
-         job='수동 (로컬 · longcache+DART 필요)', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',
+         job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',
          getter=_key('generated')),
     dict(path='results/leaders_kr.json', label='주도주 KR (KR-P1)',
          cycle='주 1회', max_age=9, producer='leaders_kr.py publish',
-         job='수동 (로컬 · longcache 필요)', used_by='🚀 주도주 → 🇰🇷 한국',
+         job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 한국',
          getter=_key('generated')),
     dict(path='results/leaders_paper.json', label='주도주 페이퍼 원장',
          cycle='주 1회', max_age=9, producer='leaders_paper.py',

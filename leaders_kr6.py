@@ -78,10 +78,24 @@ def shares_map() -> dict:
     """
     import sqlite3
     out = {}
+    rows = []
     try:
         with sqlite3.connect(K.DB) as c:
             rows = c.execute('SELECT sym, listed_shares, marcap FROM universe').fetchall()
     except Exception:
+        rows = []
+    if not rows:
+        # market.db는 574MB라 gitignore돼 러너엔 없다. 빈 dict를 그대로 돌려주면
+        # **시총 필터가 통째로 안 걸려 규칙 자체가 달라진다**(조용한 오작동) —
+        # 커밋된 export로 폴백하고, 그것도 없으면 아래에서 명시적으로 경고한다.
+        try:
+            import export_kr_fundq
+            rows = [(s, v[1], v[2]) for s, v in export_kr_fundq.load_universe().items()]
+        except Exception:
+            rows = []
+    if not rows:
+        print('  ⚠️ universe 없음(market.db·kr_universe.parquet 둘 다) — '
+              '시총 필터를 걸 수 없어 규칙⑥ 이식이 무의미해진다. 중단.')
         return out
     fallback = 0
     for sym, sh, mc in rows:
