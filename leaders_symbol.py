@@ -33,17 +33,14 @@ RULES = {
     "S": ("[신규] 소형 대시세 — 시총$2B미만 · 주간+20%↑ · 거래량전주비<1.5 · 재무조건 없음",
           lambda d: (d.ret_1w >= 20) & (d.vw < 1.5) & (d.marcap < 2e9) &
                     (d.adv_20d >= 5e6), 0.40),
-    "A": ("[구] 이익폭증 & PER<20 & RS13>1.5",
-          lambda d: (d.b_any == 1) & (d.per > 0) & (d.per < 20) & (d.rs_13w > 1.5) &
-                    (d.adv_20d >= 1e6), 0.20),
-    "B": ("[구] (흑자전환 OR 이익폭증) & RS13>1.7",
-          lambda d: ((d.op_turn == 1) | (d.b_any == 1)) & (d.rs_13w > 1.7) &
-                    (d.adv_20d >= 1e6), 0.20),
-    "R6": ("[구·종료] RS13>1.5 & (흑자전환 OR 이익폭증) & OPM>0 · $2B+ — 2022년 이후 CAGR 3.8%",
-           lambda d: (d.rs_13w > 1.5) & (d.opm > 0) &
-                     ((d.op_turn == 1) | (d.b_any == 1)) &
-                     (d.marcap >= 2e9) & (d.adv_20d >= 5e6), 0.20),
 }
+# 2026-08-22: 구 규칙 A/B/R6 을 여기서 뺐다.
+#   A/B/R6 이 12,144 행 중 9,707 행(80%)을 차지해 주차별 조회를 열면 **폐기된 규칙이
+#   화면을 뒤덮고** 정작 현행 L/S 가 묻혔다. 규칙⑥은 2026-08-18 에 종료됐고
+#   (2022년 이후 CAGR 3.8% · SPY 13.2%), A/B 는 애초에 페이퍼 원장용이었다.
+#   이력은 지우지 않는다 — 규칙⑥의 신호·퍼널·페이퍼 원장은 results/leaders_signal.json
+#   과 화면의 📕 구 규칙⑥ 기록 확장패널에 그대로 남아 있고, HISTORY.md 4~5기가
+#   왜 실패했는지 기록한다. 여기서 빼는 것은 '현재 판단에 쓰는 표'에서 빼는 것이다.
 BO = {"b_ophigh": "영업익신고점", "b_nihigh": "순익신고점",
       "b_opjump": "영업익QoQ50", "b_opmjump": "OPM_QoQ3"}
 
@@ -211,7 +208,7 @@ def cmd_chart(sym):
     r = j["symbols"][sym]
     dt = pd.to_datetime([j["dates"][i] for i in r["i"]])
     c = pd.Series(r["c"], index=dt).astype(float)
-    COL = {"L": "#1f6b45", "S": "#7a3fa0", "A": "#17415c", "B": "#a03028", "R6": "#8a6a12"}
+    COL = {"L": "#1f6b45", "S": "#7a3fa0"}
     fig, ax = plt.subplots(figsize=(11.5, 4.2), dpi=110)
     fig.patch.set_facecolor("white"); ax.set_facecolor("white")
     ax.plot(c.index, c.values, color="#12161b", lw=1.15, zorder=3)
