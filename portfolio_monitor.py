@@ -70,6 +70,38 @@ def get_current_price(sym: str, market: str) -> float | None:
         return None
 
 
+def _trail_stats(sym, market, buy_date):
+    """(매수 후 주봉 최고가, 마지막 52주 신고가 이후 경과 주).
+
+    가드레일이 트레일링 −20%로 판정하려면 고점이 필요하다. 판정 자는 백테
+    (leaders_alloc)·대시보드와 동일하게 주봉 종가이며, 신고가 기준일은
+    '마지막 신고가'와 '매수 주차' 중 나중 것을 쓴다.
+    """
+    try:
+        import FinanceDataReader as fdr
+        import pandas as pd
+        from datetime import datetime, timedelta
+        code = str(sym).replace('.KS', '').replace('.KQ', '')
+        s = fdr.DataReader(code if market == 'KR' else sym,
+                           (datetime.now() - timedelta(days=520)).strftime('%Y-%m-%d'))['Close'].dropna()
+        if s.empty:
+            return None, None
+        w = s.resample('W-MON', label='left', closed='left').last().dropna()
+        if len(w) and (pd.Timestamp(s.index[-1]) - pd.Timestamp(w.index[-1])).days < 4:
+            w = w.iloc[:-1]
+        if not len(w):
+            return None, None
+        bd = pd.Timestamp(buy_date).normalize() if buy_date else w.index[0]
+        bw = bd - timedelta(days=bd.weekday())
+        since = w[w.index >= bw]
+        peak = float(since.max()) if len(since) else float(w.iloc[-1])
+        hi = w.index[(w >= w.rolling(52, min_periods=10).max() - 1e-9).values]
+        ref = max(hi[-1], bw) if len(hi) else bw
+        return peak, (pd.Timestamp(w.index[-1]) - ref).days / 7
+    except Exception:
+        return None, None
+
+
 def main():
     positions = load_portfolio()
     if not positions:
@@ -164,10 +196,21 @@ def main():
     # ── 🛡️ 가드레일 준수 이력 스냅샷 (매일 1회, 실제 매매와 무관한 관측) ──
     try:
         import guardrail
-        gpos = [{'sym': r['sym'], 'name': r.get('name', r['sym']), 'market': r.get('market', 'US'),
-                  'value': (r['cur_price'] * float(r.get('qty', 0))) if r.get('cur_price') else None,
-                  'pnl_pct': r.get('pnl_pct'), 'cur_price': r.get('cur_price'), 'qty': r.get('qty')}
-                 for r in results if r.get('cur_price')]
+        # 2026-08-16: 검증된 청산 규칙이 트레일링(-20%)이라 고점·신고가 경과가 필요하다.
+        # 이걸 안 넘기면 guardrail이 구 고정손절로 폴백해서, 매일 쌓이는 준수 이력이
+        # 대시보드와 다른 자로 채점된다.
+        gpos = []
+        for r in results:
+            if not r.get('cur_price'):
+                continue
+            pk, qw = _trail_stats(r['sym'], r.get('market', 'US'), r.get('buy_date'))
+            gpos.append({
+                'sym': r['sym'], 'name': r.get('name', r['sym']),
+                'market': r.get('market', 'US'),
+                'value': r['cur_price'] * float(r.get('qty', 0)),
+                'cost': float(r.get('buy_price', 0)) * float(r.get('qty', 0)),
+                'pnl_pct': r.get('pnl_pct'), 'cur_price': r.get('cur_price'),
+                'qty': r.get('qty'), 'peak_price': pk, 'weeks_since_high': qw})
         cash_min = cash_max = None
         try:
             import weekly_portfolio as wp
