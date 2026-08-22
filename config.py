@@ -44,7 +44,8 @@ TELEGRAM_TOKEN    = _secret(".telegram_token")
 TELEGRAM_CHAT_ID  = _secret(".telegram_chat", "5064831796")
 
 # 주간 신호종목 요약 텔레그램. daily-refresh가 weekly_run을 매일 돌려서
-# 매일 발송되던 스팸이라 기본 OFF. 매도 알림(portfolio_monitor)은 별개로 유지.
+# 매일 발송되던 스팸이라 기본 OFF.
+# (매도 알림 portfolio_monitor 는 2026-08-22 폐기 — 감시할 보유 데이터가 없었다)
 WEEKLY_SIGNAL_TELEGRAM = False
 
 # ── 구루 유튜브 요약 (guru_youtube.py) ──────────────────────────────
