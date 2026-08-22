@@ -126,10 +126,14 @@ SOURCES = [
     # ★ 2026-08-22 추가 — 이 파일이 밀리면 새 주차의 vw 가 NaN 이 되어
     #   `vw < 1.5` 가 항상 거짓이 되고 **가짜 '신호 0종'**이 뜬다. 그날 사이클은
     #   EXIT=0 으로 성공을 보고했다. 감시하지 않으면 또 조용히 죽는다.
-    dict(path='data/_volwk.parquet', label='주봉 거래량 패널 (L/S 의 vw 입력)',
+    # 파일 자체(data/_volwk.parquet)는 1.6M행이라 저장소에 없다. 러너에 없는 파일을
+    # 등록하면 스모크의 '레지스트리에 있으나 파일 없음' 검사가 깨진다(2026-08-22 CI
+    # 실패가 그것이었다). 그래서 leaders_ab.py 가 발행물에 기준일(vol_asof)을 실어
+    # 보내고, 여기서는 그 값을 본다 — 배포된 화면에서도 보인다.
+    dict(path='results/leaders_ab.json', label='주봉 거래량 패널 (L/S 의 vw 입력)',
          cycle='주 1회 (토 08:00)', max_age=9, producer='volwk_build.py',
          job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → L/S 신호 자체',
-         getter=_mtime, raw=True),
+         getter=_key('vol_asof')),
     dict(path='results/leaders_signal.json', label='주도주 신호 (구 규칙⑥·닫힌 기록)',
          cycle='갱신 없음', max_age=99999, producer='leaders_publish.py (수동)',
          job='없음 — 2026-08-22 주간 사이클에서 제외', used_by='🚀 주도주 → 📕 구 규칙⑥ 기록',
