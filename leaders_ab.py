@@ -236,6 +236,21 @@ def load():
     return d.merge(v[["as_of", "sym", "vw"]], on=["as_of", "sym"], how="left")
 
 
+def assert_vol_fresh(M):
+    """마지막 주차의 vw 가 통째로 비어 있으면 신호가 구조적으로 0이 된다.
+       2026-08-22: _volwk.parquet 가 한 주 밀린 채 발행돼 '신호 0종'이 떴고
+       사이클은 성공(EXIT=0)을 보고했다. 그런 발행은 아예 막는다."""
+    last = M["close"].index.max()
+    n = int(M["vw"].loc[last].notna().sum())
+    if n < 50:
+        raise SystemExit(
+            f"[중단] {last:%Y-%m-%d} 주차의 거래량 전주비(vw)가 {n}종밖에 없다. "
+            "data/_volwk.parquet 가 밀렸다는 뜻이고, 이대로 발행하면 "
+            "'신호 0종'이라는 가짜 결과가 화면에 뜬다. "
+            "→ python volwk_build.py 를 먼저 돌려라.")
+    return n
+
+
 def matrices(d, cols):
     return {k: d.pivot_table(index="as_of", columns="sym", values=k).sort_index()
             for k in cols}
@@ -316,6 +331,8 @@ def spy_stat(a, b):
 def build():
     d = load()
     M = matrices(d, ["close", "ret_1w", "adv_20d", "marcap", "vw", "F_HI8", "F_OPM"])
+    _nv = assert_vol_fresh(M)   # 거래량 패널이 밀렸으면 여기서 죽는다(가짜 0 방지)
+    print(f"거래량 패널 확인 — 마지막 주차 vw {_nv:,}종")
     gates = {k: gate_of(M, k) for k in RULES}
 
     print("백테스트 —", flush=True)

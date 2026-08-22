@@ -119,17 +119,24 @@ SOURCES = [
          getter=_key('date')),
     # ★ 2026-08-18 — 주도주 주력 신호가 규칙⑥ → L/S 로 교체됐다.
     dict(path='results/leaders_ab.json', label='주도주 L/S (대형·소형)',
-         cycle='주 1회', max_age=9, producer='leaders_ab.py',
-         job='수동 (로컬 · market.db 필요)', used_by='🚀 주도주 → 🇺🇸',
+         cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_ab.py',
+         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → 🇺🇸',
          getter=_key('generated')),
     # 종료된 규칙이지만 화면에 기록으로 남아 있어 계속 감시한다.
-    dict(path='results/leaders_signal.json', label='주도주 신호 (구 규칙⑥·종료)',
-         cycle='주 1회', max_age=99, producer='leaders_publish.py',
-         job='수동 (로컬)', used_by='🚀 주도주 → 📕 구 규칙⑥ 기록',
+    # ★ 2026-08-22 추가 — 이 파일이 밀리면 새 주차의 vw 가 NaN 이 되어
+    #   `vw < 1.5` 가 항상 거짓이 되고 **가짜 '신호 0종'**이 뜬다. 그날 사이클은
+    #   EXIT=0 으로 성공을 보고했다. 감시하지 않으면 또 조용히 죽는다.
+    dict(path='data/_volwk.parquet', label='주봉 거래량 패널 (L/S 의 vw 입력)',
+         cycle='주 1회 (토 08:00)', max_age=9, producer='volwk_build.py',
+         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → L/S 신호 자체',
+         getter=_mtime, raw=True),
+    dict(path='results/leaders_signal.json', label='주도주 신호 (구 규칙⑥·닫힌 기록)',
+         cycle='갱신 없음', max_age=99999, producer='leaders_publish.py (수동)',
+         job='없음 — 2026-08-22 주간 사이클에서 제외', used_by='🚀 주도주 → 📕 구 규칙⑥ 기록',
          getter=_key('generated')),
     dict(path='results/leaders_symbol_detail.json', label='주도주 종목 심층조회',
-         cycle='주 1회', max_age=9, producer='leaders_publish.py',
-         job='수동 (로컬)', used_by='🚀 주도주 → 🇺🇸 (종목별 상세)',
+         cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_symbol.py',
+         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → 🇺🇸 (주차별·심층·신호회차)',
          getter=_key('generated', 'updated')),
     # KR-U6의 '흑자전환·이익폭증' 판정이 이 파일에 걸려 있다. 러너엔 market.db가
     # 없어 이 export만 보므로, 이게 낡으면 **옛 재무로 최신 신호를 내면서 초록불**이다.
