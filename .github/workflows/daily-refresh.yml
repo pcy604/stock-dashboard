@@ -81,10 +81,6 @@ jobs:
           if [ "$(date -u +%u)" = "1" ]; then python consensus_snapshot.py; else echo "월요일 아님 — 스킵"; fi
         continue-on-error: true
 
-      - name: 포트폴리오 모니터 + 매도 알림(텔레그램)
-        run: python portfolio_monitor.py
-        continue-on-error: true
-
       - name: 파이프라인 신선도 검사 (정지 시 텔레그램 경보)
         run: python pipeline_health.py
         continue-on-error: true
