@@ -4193,8 +4193,8 @@
           "market": "KR",
           "weight_pct": 6.8,
           "entry": 39800.0,
-          "total_score": 61.9,
-          "win_score": 36.5,
+          "total_score": 61.7,
+          "win_score": 36.1,
           "fund_score": 100.0,
           "signals": [
             "52주신고가",
@@ -4210,8 +4210,8 @@
           "market": "KR",
           "weight_pct": 6.8,
           "entry": 137300.0,
-          "total_score": 47.5,
-          "win_score": 33.3,
+          "total_score": 47.6,
+          "win_score": 33.4,
           "fund_score": 68.8,
           "signals": [
             "52주신고가",
@@ -4255,6 +4255,22 @@
           ],
           "stop": 75.2,
           "target": 92.18
+        },
+        {
+          "sym": "192820",
+          "name": "코스맥스",
+          "market": "KR",
+          "weight_pct": 6.8,
+          "entry": 271000.0,
+          "total_score": 43.3,
+          "win_score": 26.9,
+          "fund_score": 67.9,
+          "signals": [
+            "이평선수렴",
+            "RSI/MACD"
+          ],
+          "stop": 252030.0,
+          "target": 308940.0
         },
         {
           "sym": "OMER",
@@ -4309,22 +4325,6 @@
           ],
           "stop": 125.43,
           "target": 153.75
-        },
-        {
-          "sym": "029460",
-          "name": "케이씨",
-          "market": "KR",
-          "weight_pct": 6.8,
-          "entry": 34200.0,
-          "total_score": 38.2,
-          "win_score": 23.4,
-          "fund_score": 60.3,
-          "signals": [
-            "이평선수렴",
-            "RSI/MACD"
-          ],
-          "stop": 31806.0,
-          "target": 38988.0
         },
         {
           "sym": "ET",
@@ -4374,8 +4374,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 39800.0,
-          "total_score": 61.9,
-          "win_score": 36.5,
+          "total_score": 61.7,
+          "win_score": 36.1,
           "fund_score": 100.0,
           "signals": [
             "52주신고가",
@@ -4391,8 +4391,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 137300.0,
-          "total_score": 47.5,
-          "win_score": 33.3,
+          "total_score": 47.6,
+          "win_score": 33.4,
           "fund_score": 68.8,
           "signals": [
             "52주신고가",
@@ -4436,6 +4436,22 @@
           ],
           "stop": 75.2,
           "target": 92.18
+        },
+        {
+          "sym": "192820",
+          "name": "코스맥스",
+          "market": "KR",
+          "weight_pct": 3.4,
+          "entry": 271000.0,
+          "total_score": 43.3,
+          "win_score": 26.9,
+          "fund_score": 67.9,
+          "signals": [
+            "이평선수렴",
+            "RSI/MACD"
+          ],
+          "stop": 252030.0,
+          "target": 308940.0
         },
         {
           "sym": "OMER",
@@ -4490,22 +4506,6 @@
           ],
           "stop": 125.43,
           "target": 153.75
-        },
-        {
-          "sym": "029460",
-          "name": "케이씨",
-          "market": "KR",
-          "weight_pct": 3.4,
-          "entry": 34200.0,
-          "total_score": 38.2,
-          "win_score": 23.4,
-          "fund_score": 60.3,
-          "signals": [
-            "이평선수렴",
-            "RSI/MACD"
-          ],
-          "stop": 31806.0,
-          "target": 38988.0
         },
         {
           "sym": "ET",
@@ -4610,8 +4610,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 75200.0,
-          "total_score": 32.7,
-          "win_score": 33.5,
+          "total_score": 32.8,
+          "win_score": 33.6,
           "fund_score": 31.6,
           "signals": [
             "52주신고가",
