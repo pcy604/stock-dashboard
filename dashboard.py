@@ -736,6 +736,81 @@ with t_gain, guard('상승 상위'):
 
 # ── 주도주 (섹터/전체 상대강도) ──
 with t_lead, guard('주도주'):
+    # ── ⚡ 이익 가속 신호 (2026-08-23 신설) ────────────────────────
+    # L/S 규칙(+20% 급등·거래량<1.5·재무)은 8년간 TSLA 0회·NVDA 0회·WDC 0회였다.
+    # 대박 시작점을 역산하니 시작점은 '급등한 주'가 아니었고(NVDA 그 주 −7.0%),
+    # 공통점은 수준이 아니라 **성장률의 기울기 변화**에 있었다.
+    # 이 화면의 일은 포트폴리오 운용이 아니라 **주도주가 신호에 걸리게 하는 것**이다.
+    _ac = load_json(Path('results/leaders_accel.json'))
+    if _ac:
+        _acp = _ac['perf']
+        st.markdown("### ⚡ 이익 가속 — 성장률이 빨라지는 종목")
+        st.caption(f"**{_ac['rule']['text']}** · 기준 주차 {_ac['signal_week']} · "
+                   f"생성 {_ac['generated']}")
+        _m = st.columns(5)
+        _m[0].metric("신호 1건 평균 (1년)", f"{_acp['mean']}%",
+                     f"기저 {_acp['base_mean']}%")
+        _m[1].metric("시장 대비 초과 (평균)", f"{_acp['alpha_mean']}%")
+        _m[2].metric("2배 이상", f"{_acp['w2']}%", f"기저 {_acp['base_w2']}%")
+        _m[3].metric("4배 이상", f"{_acp['w4']}%", f"기저 {_acp['base_w4']}%")
+        _m[4].metric("10배 이상", f"{_acp['w10']}%", f"기저 {_acp['base_w10']}%")
+        st.caption(
+            f"신호 {_acp['n']:,}건 중 1년이 지난 {_acp['n_scored']:,}건 기준. "
+            f"상위 10% {_acp['p90']}% · 상위 1% {_acp['p99']}% · 최대 {_acp['mx']}%. "
+            f"**중앙값은 {_acp['median']}%로 낮다 — 이 분포는 U자이고, 등가중으로 담으면 "
+            f"받는 것은 평균이다.** 중앙값으로 판정하면 꼬리를 통째로 놓친다.")
+        with st.expander("⚠️ 이 신호를 쓸 때 알아야 할 것"):
+            st.markdown(
+                "- **신호 목록이지 포트폴리오 규칙이 아니다.** 이 규칙을 등가중으로 "
+                "돌리면 CAGR 12.7%로 SPY(15.1%)에 진다. 평균 74종을 들게 되어 한 종목 "
+                "비중이 1.4%라, 802% 대박이 나도 전체엔 11%밖에 기여를 못 한다. "
+                "**비중은 사람이 준다.**")
+            st.markdown(
+                "- **상위 5% 거래가 전체 수익의 94%를 만든다.** 꼬리에 전적으로 의존한다.")
+            st.markdown(
+                "- **연도 편차가 극심하다** — 2020 알파 +13.5% · 2023 −25.3% · "
+                "2024 −22.2%.")
+            st.markdown(
+                "- 문턱을 +25%로 조이면 모든 지표가 좋아지지만(알파평균 +36.8%) "
+                "주도주를 놓친다. **+10%를 택한 이유는 포착이다** — 급등 +10%면 "
+                "NVDA 13회·TSLA 21회·PLTR 10회·MU 22회가 걸리는데, +20%로 올리면 "
+                "1·8·4·3회로 줄어든다.")
+            st.markdown(
+                "- 유니버스에 상장폐지 종목이 없다 — 모든 숫자가 낙관 편향이다.")
+            st.markdown(
+                "- 근거: He & Narayanamoorthy(2020, JAE) *Earnings Acceleration and "
+                "Stock Returns* · Minervini SEPA. 단 Minervini 의 '매출 20%↑' 같은 "
+                "**수준 조건은 여기서 독이다**(알파 −23.3%) — NVDA 는 대상승 시작 시점 "
+                "매출 YoY 가 +3.0%였고 이후 1년 내내 역성장했다.")
+        _cd = _ac['candidates']
+        st.markdown(f"**이번 주 신호 {len(_cd)}종** — 칸 수 제한 없이 전부 보여준다")
+        if _cd:
+            st.dataframe(pd.DataFrame([{
+                '코드': m['sym'], '종목': m['name'], '신호회차': m['n'],
+                '그주상승': m['up'], '시총($B)': m['mc'], '종가': m['close'],
+                '고점대비': m['dd'], '매출가속': m['rva'], '이익가속': m['oia'],
+                '매출YoY': m['revy'], 'GPM': m['gpm'], 'ΔGPM': m['dgpm'],
+                'OPM': m['opm'], 'ΔOPM': m['dopm'], '영업익($M)': m['oi'],
+                'RS4': m['rs4'], 'RS13': m['rs13'], 'PER': m['per'], 'PSR': m['psr'],
+                '이후1주': m.get('f1'), '이후4주': m.get('f4'), '이후13주': m.get('f13')}
+                for m in _cd]), use_container_width=True, hide_index=True,
+                row_height=25, height=_dfh(len(_cd)))
+            st.caption(
+                "**신호회차** = 이 종목이 이 규칙에서 몇 번째 신호인가. 회차가 쌓인다는 건 "
+                "성장률 가속이 반복된다는 뜻이다. **매출가속·이익가속**은 성장률의 전분기 대비 "
+                "변화(%p)이고 둘 다 양수여야 신호가 켜진다. 이후 수익률은 이번 주 신호라 "
+                "아직 비어 있는 게 정상이다.")
+        else:
+            st.info("이번 주 조건 충족 종목 없음")
+        if _ac.get('by_year'):
+            with st.expander("📅 연도별 신호 성적 (신호 1건당 1년 후)"):
+                st.dataframe(pd.DataFrame([{
+                    '연도': y, '신호': v['n'], '평균': v['mean'],
+                    '시장대비': v['alpha'], '2배+%': v['w2'], '4배+%': v['w4']}
+                    for y, v in sorted(_ac['by_year'].items())]),
+                    use_container_width=True, hide_index=True, row_height=25)
+        st.divider()
+
     # 2026-08-15: KR 규칙(KR-P1) 추가. US 규칙⑥과 근거 강도가 달라 탭을 나눈다.
     _lead_mkt = st.radio("시장", ["🇺🇸 미국 (규칙⑥)", "🇰🇷 한국 (KR-P1)"],
                          horizontal=True, key="lead_mkt",

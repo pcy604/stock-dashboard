@@ -55,6 +55,7 @@ if errorlevel 2 (
 rem ── 대시보드 반영 ─────────────────────────────────────────────────────
 rem 신호·페이퍼 원장을 바로 올려야 토요일 아침에 대시보드에서 볼 수 있다.
 rem 위에서 이미 pull 해뒀으므로 여기서는 rebase 없이 커밋+푸시만 한다.
+git add results/leaders_accel.json 2>nul
 git add results/leaders_ab.json 2>nul
 git add results/leaders_symbol_detail.json 2>nul
 git add results/leaders_kr.json 2>nul

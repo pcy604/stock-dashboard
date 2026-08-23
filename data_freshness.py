@@ -118,6 +118,11 @@ SOURCES = [
          job='weekly-profile', used_by='전 서브탭 (고점대비% 열)',
          getter=_key('date')),
     # ★ 2026-08-18 — 주도주 주력 신호가 규칙⑥ → L/S 로 교체됐다.
+    # ★ 2026-08-23 신설 — 이익 가속 신호. 주도주 탭의 첫 화면이라 밀리면 바로 보인다.
+    dict(path='results/leaders_accel.json', label='이익 가속 신호',
+         cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_accel.py',
+         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → ⚡ 이익 가속',
+         getter=_key('generated')),
     dict(path='results/leaders_ab.json', label='주도주 L/S (대형·소형)',
          cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_ab.py',
          job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → 🇺🇸',
