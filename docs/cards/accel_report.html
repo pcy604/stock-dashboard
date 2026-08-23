@@ -1,0 +1,608 @@
+<title>이익 가속 신호 검증</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap">
+
+<style>
+:root{
+  --ground:#FBFBFC; --panel:#FFFFFF; --ink:#15171D; --ink-2:#4A4F5C; --ink-3:#7C828F;
+  --rule:#E1E3E9; --rule-2:#EFF0F4;
+  --accent:#2B4B8C; --accent-soft:#EBEFF8;
+  --warn:#8A6212; --warn-soft:#FAF3E2;
+  --neg:#8C3A3A; --neg-soft:#FAEDED;
+  --pos:#2B6A52;
+  --shadow:0 1px 2px rgba(21,23,29,.05), 0 8px 24px -16px rgba(21,23,29,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1116; --panel:#161921; --ink:#E7E9EF; --ink-2:#A8AEBC; --ink-3:#727988;
+    --rule:#272B36; --rule-2:#1E222B;
+    --accent:#8AA6E4; --accent-soft:#1B2334;
+    --warn:#D9AE5C; --warn-soft:#2A2318;
+    --neg:#D98080; --neg-soft:#2B1C1C;
+    --pos:#6FBF9C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F1116; --panel:#161921; --ink:#E7E9EF; --ink-2:#A8AEBC; --ink-3:#727988;
+  --rule:#272B36; --rule-2:#1E222B;
+  --accent:#8AA6E4; --accent-soft:#1B2334;
+  --warn:#D9AE5C; --warn-soft:#2A2318;
+  --neg:#D98080; --neg-soft:#2B1C1C;
+  --pos:#6FBF9C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:'IBM Plex Sans KR','Malgun Gothic',system-ui,sans-serif;
+  font-weight:300; font-size:16px; line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+  margin:0; padding:0;
+}
+.wrap{max-width:860px; margin:0 auto; padding:0 24px 120px}
+@media(max-width:640px){ .wrap{padding:0 16px 80px} body{font-size:15px} }
+
+/* ── 머리말 ─────────────────────────────── */
+.masthead{padding:72px 0 0; border-bottom:1px solid var(--rule); margin-bottom:52px}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:0 0 20px;
+}
+h1{
+  font-family:'Gowun Batang','Newsreader',serif; font-weight:700;
+  font-size:clamp(34px,6vw,52px); line-height:1.22; letter-spacing:-.015em;
+  margin:0 0 18px; text-wrap:balance;
+}
+h1 em{font-style:normal; color:var(--accent)}
+.standfirst{
+  font-size:clamp(16px,2.4vw,18.5px); color:var(--ink-2); line-height:1.7;
+  max-width:60ch; margin:0 0 32px; font-weight:300;
+}
+.byline{
+  display:flex; flex-wrap:wrap; gap:8px 22px; padding:0 0 24px;
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-3);
+}
+.byline b{font-weight:500; color:var(--ink-2)}
+
+/* ── 섹션 ─────────────────────────────── */
+section{margin:0 0 68px; scroll-margin-top:24px}
+.sec-head{display:flex; align-items:baseline; gap:14px; margin:0 0 8px}
+.sec-num{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500;
+  color:var(--accent); letter-spacing:.08em; flex:none; padding-top:3px;
+}
+h2{
+  font-family:'Gowun Batang',serif; font-weight:700;
+  font-size:clamp(23px,3.6vw,30px); line-height:1.34; letter-spacing:-.012em;
+  margin:0; text-wrap:balance;
+}
+.sec-sub{color:var(--ink-2); font-size:15px; margin:0 0 26px; padding-left:34px; max-width:62ch}
+@media(max-width:640px){ .sec-sub{padding-left:0} }
+p{margin:0 0 18px; max-width:64ch}
+strong{font-weight:600}
+a{color:var(--accent)}
+
+/* ── 지표 스트립 ─────────────────────────── */
+.stats{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+  border-radius:3px; overflow:hidden; margin:0 0 12px;
+}
+.stat{background:var(--panel); padding:18px 18px 16px}
+.stat .k{
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 8px;
+}
+.stat .v{
+  font-family:'Newsreader',serif; font-size:30px; font-weight:600; line-height:1;
+  letter-spacing:-.02em; font-variant-numeric:tabular-nums;
+}
+.stat .d{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-3); margin-top:7px}
+.stat.hero .v{color:var(--accent)}
+
+/* ── 표 ─────────────────────────────── */
+.tw{overflow-x:auto; margin:0 0 14px; border:1px solid var(--rule); border-radius:3px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:480px}
+th{
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:500;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3);
+  text-align:right; padding:13px 14px; border-bottom:1px solid var(--rule);
+  white-space:nowrap; background:var(--rule-2);
+}
+th:first-child,td:first-child{text-align:left}
+td{
+  padding:10px 14px; border-bottom:1px solid var(--rule-2); text-align:right;
+  font-variant-numeric:tabular-nums; font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+  color:var(--ink-2); white-space:nowrap;
+}
+td:first-child{font-family:'IBM Plex Sans KR',sans-serif; font-weight:500; color:var(--ink); font-size:13px}
+tbody tr:last-child td{border-bottom:none}
+tr.mark td{background:var(--accent-soft)}
+tr.bad td{background:var(--neg-soft)}
+tr.base td{color:var(--ink-3)}
+.neg{color:var(--neg)} .pos{color:var(--pos)} .em{color:var(--accent); font-weight:500}
+
+/* ── 노트 / 경고 ───────────────────────── */
+.note{
+  border-left:2px solid var(--accent); background:var(--accent-soft);
+  padding:16px 20px; margin:0 0 22px; font-size:14.5px; line-height:1.68; border-radius:0 3px 3px 0;
+}
+.note.warn{border-color:var(--warn); background:var(--warn-soft)}
+.note.neg{border-color:var(--neg); background:var(--neg-soft)}
+.note p:last-child{margin-bottom:0}
+.note .lab{
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; display:block; margin-bottom:7px; color:var(--accent); font-weight:500;
+}
+.note.warn .lab{color:var(--warn)} .note.neg .lab{color:var(--neg)}
+
+.cap{font-size:12.5px; color:var(--ink-3); line-height:1.62; margin:0 0 30px; max-width:66ch}
+.cap b{color:var(--ink-2); font-weight:500}
+
+/* ── 궤적 카드 ─────────────────────────── */
+.traj{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin:0 0 16px}
+.tcard{border:1px solid var(--rule); border-radius:3px; padding:16px 16px 12px; background:var(--panel); box-shadow:var(--shadow)}
+.tcard h4{margin:0 0 2px; font-size:14px; font-weight:600; font-family:'IBM Plex Sans KR',sans-serif}
+.tcard .sub{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-3); margin:0 0 10px; letter-spacing:.04em}
+.tcard .seq{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-2); margin-top:8px; font-variant-numeric:tabular-nums}
+
+/* ── 차트 ─────────────────────────────── */
+.chart{border:1px solid var(--rule); border-radius:3px; background:var(--panel); padding:22px 18px 14px; margin:0 0 14px; box-shadow:var(--shadow); overflow-x:auto}
+.chart svg{display:block; min-width:600px; width:100%; height:auto}
+.legend{display:flex; flex-wrap:wrap; gap:6px 20px; margin:12px 0 0; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-3)}
+.legend i{display:inline-block; width:11px; height:11px; border-radius:2px; margin-right:6px; vertical-align:-1px}
+
+/* ── 종목 칩 ───────────────────────────── */
+.chips{display:flex; flex-wrap:wrap; gap:7px; margin:0 0 16px}
+.chip{
+  border:1px solid var(--rule); border-radius:3px; padding:6px 11px; background:var(--panel);
+  font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-2); display:flex; gap:8px; align-items:baseline;
+}
+.chip b{color:var(--ink); font-weight:500}
+.chip .n{color:var(--accent); font-weight:500}
+.chip.dim{opacity:.62}
+
+ul{margin:0 0 20px; padding-left:20px; max-width:64ch}
+li{margin-bottom:9px; line-height:1.68}
+li::marker{color:var(--ink-3)}
+hr.div{border:none; border-top:1px solid var(--rule); margin:0 0 44px}
+
+footer{border-top:1px solid var(--rule); padding-top:26px; margin-top:24px; font-size:12.5px; color:var(--ink-3); line-height:1.7}
+footer code{font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:var(--rule-2); padding:2px 6px; border-radius:2px; color:var(--ink-2)}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Stock Screener · 규칙 검증 리포트</p>
+  <h1>대박 종목의 공통점은 수준이 아니라 <em>기울기의 변화</em>였다</h1>
+  <p class="standfirst">
+    8년간 TSLA를 0회, NVDA를 0회 잡던 규칙을 버리고 다시 짰다.
+    시대의 주도주가 출발하던 주에 공통으로 켜져 있던 것은 급등도, 좋은 실적도 아니었다 —
+    <strong>성장률의 2차 미분</strong>이었다.
+  </p>
+  <div class="byline">
+    <span>측정기간 <b>2018-06 → 2026-08</b></span>
+    <span>유니버스 <b>2,401종</b></span>
+    <span>신호 <b>7,551건</b></span>
+    <span>기준주차 <b>2026-08-17</b></span>
+    <span>발행 <b>2026-08-24</b></span>
+  </div>
+</header>
+
+<!-- ① 무엇이 틀렸나 -->
+<section>
+  <div class="sec-head"><span class="sec-num">01</span><h2>기존 규칙은 왜 주도주를 놓쳤나</h2></div>
+  <p class="sec-sub">문제는 재무 조건이 아니라 <strong>+20% 급등</strong>이라는 진입 문턱이었다.</p>
+
+  <p>기존 L/S 규칙은 8년 동안 이렇게 잡았다 — TSLA <strong>0회</strong>, NVDA <strong>0회</strong>,
+  WDC <strong>0회</strong>, PLTR 1회, MU 2회. 시대의 주도주를 하나도 못 건드렸다는 뜻이다.
+  원인을 찾으려고 대박이 실제로 시작된 주를 역산했더니, 그 주들은 급등한 주가 아니었다.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>대상승 시작 주</th><th>그 주 등락</th><th>52주 고점 대비</th><th>거래량 20주평균비</th></tr></thead>
+      <tbody>
+        <tr><td>TSLA 2019-08-26</td><td>+6.7%</td><td class="neg">−38.3%</td><td>0.59</td></tr>
+        <tr><td>NVDA 2022-10-10</td><td class="neg">−7.0%</td><td class="neg">−65.9%</td><td>—</td></tr>
+        <tr><td>PLTR 2024-07-29</td><td class="neg">−9.0%</td><td class="neg">−13.4%</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">셋 다 <b>+20% 문턱을 통과할 수 없는 주</b>다. 둘은 아예 하락 마감이었고,
+  고점 대비 −38%·−66% 지점, 즉 아무도 쳐다보지 않을 때가 출발점이었다.
+  급등을 요구하는 순간 이 구간은 구조적으로 걸러진다.</p>
+
+  <div class="note neg">
+    <span class="lab">내가 잘못 재고 있던 것</span>
+    <p>실적 <strong>수준</strong>으로는 공통점이 나오지 않았다 — TSLA는 적자, NVDA는 흑자지만 급락 중,
+    AXTI는 매출 역성장. 여기서 "공통점이 없다"고 결론냈던 것이 오답이었다.
+    수준이 아니라 <strong>변화율</strong>을, 그것도 마진의 변화가 아니라
+    <strong>성장률의 변화</strong>를 봤어야 했다.</p>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ② 무엇이 맞나 -->
+<section>
+  <div class="sec-head"><span class="sec-num">02</span><h2>분기 궤적을 그리자 보였다</h2></div>
+  <p class="sec-sub">매출이 아니라 마진과 이익이 먼저 돌고, 매출은 한참 뒤에 따라온다.</p>
+
+  <div class="traj">
+    <div class="tcard">
+      <h4>NVDA — 매출총이익률</h4>
+      <p class="sub">2022 Q3 → 2023 Q3</p>
+      <svg viewBox="0 0 200 64" xmlns="http://www.w3.org/2000/svg" aria-label="NVDA GPM 43.5에서 70.1로 상승">
+        <polyline points="8,23.9 54,18.1 100,12.5 146,11.7 192,8.5" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="192" cy="8.5" r="3.2" fill="var(--accent)"/>
+      </svg>
+      <p class="seq">43.5 → 53.6 → 63.3 → 64.6 → 70.1</p>
+      <p class="sub" style="margin-top:6px">그동안 매출은 −16.5 / −20.8 / −13.2% 역성장</p>
+    </div>
+    <div class="tcard">
+      <h4>TSLA — 영업이익률</h4>
+      <p class="sub">2019 Q1 → Q4</p>
+      <svg viewBox="0 0 200 64" xmlns="http://www.w3.org/2000/svg" aria-label="TSLA OPM 마이너스11.5에서 4.9로 전환">
+        <line x1="0" y1="58.9" x2="200" y2="58.9" stroke="var(--rule)" stroke-width="1"/>
+        <polyline points="8,55.7 69.3,50.6 130.7,46.7 192,46.2" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="192" cy="46.2" r="3.2" fill="var(--accent)"/>
+      </svg>
+      <p class="seq">−11.5 → −2.6 → 4.1 → 4.9</p>
+      <p class="sub" style="margin-top:6px">ΔOPM −17.2 → +8.9 · 2차 미분 +26.1</p>
+    </div>
+    <div class="tcard">
+      <h4>AXTI — 매출총이익률</h4>
+      <p class="sub">스몰캡 · 수십 배 상승 직전</p>
+      <svg viewBox="0 0 200 64" xmlns="http://www.w3.org/2000/svg" aria-label="AXTI GPM 마이너스6.4에서 44.9로 상승">
+        <line x1="0" y1="58.9" x2="200" y2="58.9" stroke="var(--rule)" stroke-width="1"/>
+        <polyline points="8,52.8 54,44.4 100,36.2 146,32.0 192,23.1" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="192" cy="23.1" r="3.2" fill="var(--accent)"/>
+      </svg>
+      <p class="seq">−6.4 → 8.0 → 22.3 → 29.6 → 44.9</p>
+      <p class="sub" style="margin-top:6px">매출은 역성장 중이었다</p>
+    </div>
+  </div>
+  <p class="cap">세 종목의 공통점은 <b>레벨이 높다</b>가 아니라 <b>기울기가 돌았다</b>이다.
+  NVDA는 매출이 1년 내내 역성장하는 동안 마진이 43.5%에서 70.1%로 올라갔다.
+  "매출 20% 이상 성장" 같은 수준 조건을 걸면 이 구간이 통째로 잘려나간다 — 실측에서 그 조건은 알파를 <b>−23.3%</b>로 만든다.</p>
+
+  <div class="note">
+    <span class="lab">학술 근거</span>
+    <p><strong>He &amp; Narayanamoorthy (2020), <i>Journal of Accounting and Economics</i></strong> —
+    "Earnings Acceleration and Stock Returns". 이익 가속(이익 성장률의 분기 대비 변화)은
+    <strong>월 1.8% 초과수익</strong>을 내며, book-to-market · PEAD · gross profitability와 맞먹는 독립 팩터다.
+    시장이 이익을 '계절적 랜덤워크'로 가정해 가속이 담고 있는 2~3분기 뒤 성장률 정보를 못 읽는 데서 온다.</p>
+    <p style="margin-top:10px"><strong>Minervini, SEPA</strong> — 대박 종목의 90% 이상이 대상승 전·중에 이익 가속을 동반한다.
+    다만 그가 함께 요구하는 <strong>매출 20%↑ 같은 수준 조건은 이 목적에는 독이다.</strong>
+    NVDA는 대상승 시작 시점 매출 YoY가 +3.0%였다.</p>
+  </div>
+
+  <div class="note">
+    <span class="lab">채택한 정의</span>
+    <p style="font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.9">
+      매출 성장률&nbsp; rv = 매출 YoY<br>
+      이익 성장률&nbsp; oi = (영업익<sub>t</sub> − 영업익<sub>t−4</sub>) ÷ |매출<sub>t</sub>|<br>
+      <span style="color:var(--accent)">가속 = 성장률<sub>t</sub> − 성장률<sub>t−1분기</sub></span><br>
+      신호&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Δrv &gt; 0 <b>AND</b> Δoi &gt; 0 <b>AND</b> 그 주 종가 +10%↑
+    </p>
+    <p style="margin-top:12px">영업이익을 매출로 나눈 것은 <strong>적자 기업에서도 정의되게</strong> 하려는 선택이다
+    (논문은 총자산 기준을 쓴다 — 임의 선택이라는 점을 명시해 둔다).
+    문턱은 <strong>&gt; 0 하나뿐</strong>이고, 얼마나 빨라졌는지는 보지 않는다.
+    재무는 그 주차에 공시로 알 수 있던 분기만 쓴다(look-ahead 차단).</p>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ③ 성과 -->
+<section>
+  <div class="sec-head"><span class="sec-num">03</span><h2>신호 1건이 1년 뒤 어떻게 됐나</h2></div>
+  <p class="sec-sub">이 분포는 U자다. 중앙값으로 판정하면 안 된다 — 등가중으로 담으면 받는 것은 평균이다.</p>
+
+  <div class="stats">
+    <div class="stat hero"><p class="k">평균 수익</p><p class="v">+32.2%</p><p class="d">기저 +13.6%</p></div>
+    <div class="stat hero"><p class="k">시장 대비</p><p class="v">+12.6%</p><p class="d">SPY 동기간 차감</p></div>
+    <div class="stat"><p class="k">2배 이상</p><p class="v">13.5%</p><p class="d">기저 4.9%</p></div>
+    <div class="stat"><p class="k">4배 이상</p><p class="v">1.9%</p><p class="d">기저 0.5%</p></div>
+    <div class="stat"><p class="k">10배 이상</p><p class="v">0.24%</p><p class="d">기저 0.03% · 8배</p></div>
+  </div>
+  <p class="cap">신호 7,551건 중 1년이 경과한 <b>5,908건</b> 기준. 상위 10% +124% · 상위 1% +431% · 최대 +2,064%.
+  <b>중앙값은 +8.7%이고 시장 대비 중앙값은 −9.7%다</b> — 절반 이상은 시장에 진다.
+  그래도 담는 이유는 평균과 꼬리에 있다.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>조건</th><th>표본</th><th>평균</th><th>시장대비</th><th>상위10%</th><th>2배+</th><th>4배+</th><th>10배+</th></tr></thead>
+      <tbody>
+        <tr class="base"><td>기저 (거래대금·시총만)</td><td>598,279</td><td>14.1%</td><td class="neg">−2.2%</td><td>67%</td><td>5.1%</td><td>0.5%</td><td>0.03%</td></tr>
+        <tr class="mark"><td>가속 + 급등 10% <span class="em">← 채택</span></td><td>7,551</td><td class="em">32.2%</td><td class="em">+12.6%</td><td>124%</td><td>13.5%</td><td>1.9%</td><td>0.24%</td></tr>
+        <tr class="base"><td>(대조) 급등 10%만</td><td>29,995</td><td>29.8%</td><td>+9.3%</td><td>123%</td><td>13.4%</td><td>1.9%</td><td>0.16%</td></tr>
+        <tr><td>가속 + 급등 25%</td><td>810</td><td>59.9%</td><td>+36.8%</td><td>213%</td><td>24.0%</td><td>5.1%</td><td>0.74%</td></tr>
+        <tr class="base"><td>(대조) 급등 25%만</td><td>3,758</td><td>52.5%</td><td>+27.1%</td><td>188%</td><td>23.7%</td><td>4.0%</td><td>0.37%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">가속 조건은 <b>같은 급등폭의 대조군을 전 항목에서 이긴다.</b>
+  특히 10배 확률이 정확히 두 배씩 벌어진다(0.16 → 0.24 · 0.37 → 0.74). 급등만으로는 만들어지지 않는 차이다.</p>
+
+  <div class="note warn">
+    <span class="lab">문턱을 25%로 올리지 않은 이유</span>
+    <p>모든 지표는 조일수록 좋아진다(알파 +36.8%). 그런데 <strong>주도주를 놓친다.</strong></p>
+    <div class="tw" style="margin:14px 0 0; background:transparent; border-color:var(--rule)">
+      <table style="min-width:420px">
+        <thead><tr><th>문턱</th><th>NVDA</th><th>TSLA</th><th>PLTR</th><th>MU</th><th>BE</th><th>WDC</th></tr></thead>
+        <tbody>
+          <tr class="mark"><td>+10% (채택)</td><td class="em">13회</td><td class="em">21회</td><td class="em">10회</td><td class="em">22회</td><td class="em">15회</td><td class="em">11회</td></tr>
+          <tr><td>+20%</td><td>1회</td><td>8회</td><td>4회</td><td>3회</td><td>7회</td><td>2회</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px"><strong>이 화면의 일은 포트폴리오 운용이 아니라, 주도주가 신호에 걸리게 하는 것이다.</strong>
+    비중과 매매는 사람이 한다. 그래서 포착률을 택했다.</p>
+  </div>
+
+  <p style="margin-top:26px"><strong>실제로 걸린 주도주</strong> — 규칙이 시대의 종목을 반복해서 부른다.</p>
+  <div class="chips">
+    <span class="chip"><b>SMCI</b><span class="n">25회</span></span>
+    <span class="chip"><b>MU</b><span class="n">22회</span></span>
+    <span class="chip"><b>TSLA</b><span class="n">21회</span></span>
+    <span class="chip"><b>AMD</b><span class="n">17회</span></span>
+    <span class="chip"><b>RKLB</b><span class="n">16회</span></span>
+    <span class="chip"><b>BE</b><span class="n">15회</span></span>
+    <span class="chip"><b>AXTI</b><span class="n">15회</span></span>
+    <span class="chip"><b>NVDA</b><span class="n">13회</span></span>
+    <span class="chip"><b>WDC</b><span class="n">11회</span></span>
+    <span class="chip"><b>PLTR</b><span class="n">10회</span></span>
+    <span class="chip"><b>ANET</b><span class="n">10회</span></span>
+    <span class="chip"><b>CELH</b><span class="n">10회</span></span>
+    <span class="chip"><b>MSTR</b><span class="n">10회</span></span>
+    <span class="chip dim"><b>APP</b><span class="n">4회</span></span>
+    <span class="chip dim"><b>VST</b><span class="n">4회</span></span>
+    <span class="chip dim"><b>COIN</b><span class="n">4회</span></span>
+    <span class="chip dim"><b>CVNA</b><span class="n">3회</span></span>
+    <span class="chip dim"><b>SNOW</b><span class="n">3회</span></span>
+  </div>
+  <p class="cap">TSLA는 2019-10-21에 처음 걸렸고, NVDA는 2020-02-10, PLTR은 2023-05-15에 처음 걸렸다.
+  AXTI 같은 스몰캡도 15회 잡힌다.</p>
+</section>
+
+<hr class="div">
+
+<!-- ④ 불타기 검증 -->
+<section>
+  <div class="sec-head"><span class="sec-num">04</span><h2>"계속 뜨는 종목을 계속 불타기"는 맞는가</h2></div>
+  <p class="sec-sub">실측은 이 가설을 <strong>반만</strong> 지지한다. 지지하지 않는 쪽부터 본다.</p>
+
+  <div class="chart">
+    <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="신호 회차별 시장대비 초과수익과 10배 확률 차트">
+      <!-- grid -->
+      <line x1="70" y1="30" x2="690" y2="30" stroke="var(--rule-2)" stroke-width="1"/>
+      <line x1="70" y1="108.75" x2="690" y2="108.75" stroke="var(--rule-2)" stroke-width="1"/>
+      <line x1="70" y1="187.5" x2="690" y2="187.5" stroke="var(--rule)" stroke-width="1.2"/>
+      <line x1="70" y1="240" x2="690" y2="240" stroke="var(--rule-2)" stroke-width="1"/>
+      <!-- y labels left (alpha) -->
+      <text x="62" y="34" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">+18%</text>
+      <text x="62" y="112" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">+9%</text>
+      <text x="62" y="191" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-2)">0</text>
+      <text x="62" y="244" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">−6%</text>
+      <!-- y labels right (10x) -->
+      <text x="698" y="244" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">0</text>
+      <text x="698" y="55" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">0.63%</text>
+
+      <!-- bars: alpha -->
+      <rect x="92.3" y="77.25" width="44" height="110.25" fill="var(--accent)" opacity=".26" rx="1"/>
+      <rect x="180.9" y="65" width="44" height="122.5" fill="var(--accent)" opacity=".26" rx="1"/>
+      <rect x="269.4" y="49.25" width="44" height="138.25" fill="var(--accent)" opacity=".26" rx="1"/>
+      <rect x="358" y="83.4" width="44" height="104.1" fill="var(--accent)" opacity=".26" rx="1"/>
+      <rect x="446.6" y="63.25" width="44" height="124.25" fill="var(--accent)" opacity=".26" rx="1"/>
+      <rect x="535.1" y="143.75" width="44" height="43.75" fill="var(--accent)" opacity=".26" rx="1"/>
+      <rect x="623.7" y="187.5" width="44" height="41.1" fill="var(--neg)" opacity=".38" rx="1"/>
+
+      <!-- bar value labels -->
+      <text x="114.3" y="71" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-2)">+12.6</text>
+      <text x="202.9" y="58.7" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-2)">+14.0</text>
+      <text x="291.4" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-2)">+15.8</text>
+      <text x="380" y="77.1" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-2)">+11.9</text>
+      <text x="468.6" y="57" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-2)">+14.2</text>
+      <text x="557.1" y="137.5" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--ink-2)">+5.0</text>
+      <text x="645.7" y="243" text-anchor="middle" font-family="IBM Plex Mono" font-size="10.5" fill="var(--neg)">−4.7</text>
+
+      <!-- line: 10x prob -->
+      <polyline points="114.3,216 202.9,210 291.4,201 380,159 468.6,51 557.1,189 645.7,240"
+                fill="none" stroke="var(--warn)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="114.3" cy="216" r="3.4" fill="var(--warn)"/>
+      <circle cx="202.9" cy="210" r="3.4" fill="var(--warn)"/>
+      <circle cx="291.4" cy="201" r="3.4" fill="var(--warn)"/>
+      <circle cx="380" cy="159" r="3.4" fill="var(--warn)"/>
+      <circle cx="468.6" cy="51" r="5" fill="var(--warn)"/>
+      <circle cx="557.1" cy="189" r="3.4" fill="var(--warn)"/>
+      <circle cx="645.7" cy="240" r="3.4" fill="var(--warn)"/>
+      <text x="468.6" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" font-weight="500" fill="var(--warn)">0.63% · 7건</text>
+
+      <!-- x labels -->
+      <text x="114.3" y="262" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-2)">1회</text>
+      <text x="202.9" y="262" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-2)">2회</text>
+      <text x="291.4" y="262" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-2)">3회</text>
+      <text x="380" y="262" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-2)">4-5회</text>
+      <text x="468.6" y="262" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-2)">6-9회</text>
+      <text x="557.1" y="262" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-2)">10-19회</text>
+      <text x="645.7" y="262" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--ink-2)">20회+</text>
+      <text x="380" y="286" text-anchor="middle" font-family="IBM Plex Sans KR" font-size="11.5" fill="var(--ink-3)">신호 회차 (그 종목이 이 규칙에서 몇 번째 신호인가)</text>
+      <!-- 10x sample counts -->
+      <text x="114.3" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">1건</text>
+      <text x="202.9" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">1건</text>
+      <text x="291.4" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">1건</text>
+      <text x="380" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">3건</text>
+      <text x="468.6" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--warn)">7건</text>
+      <text x="557.1" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">1건</text>
+      <text x="645.7" y="306" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--ink-3)">0건</text>
+      <text x="62" y="306" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink-3)">10배 실건수</text>
+    </svg>
+    <div class="legend">
+      <span><i style="background:var(--accent); opacity:.4"></i>시장 대비 초과수익 (좌축)</span>
+      <span><i style="background:var(--warn)"></i>10배 이상 확률 (우축)</span>
+    </div>
+  </div>
+  <p class="cap"><b>두 선이 반대로 움직인다.</b> 평균 초과수익은 3회차에서 정점을 찍고 10회부터 꺾여 20회를 넘으면 음수가 된다.
+  반면 10배 확률은 6-9회차에서 최고점을 찍는다.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>회차</th><th>표본</th><th>평균</th><th>시장대비</th><th>중앙값</th><th>2배+</th><th>10배+</th><th>10배 실건수</th></tr></thead>
+      <tbody>
+        <tr><td>1회</td><td>1,279</td><td>35.9%</td><td>+12.6%</td><td>+17.0%</td><td>13.4%</td><td>0.08%</td><td>1</td></tr>
+        <tr><td>2회</td><td>1,009</td><td>36.7%</td><td>+14.0%</td><td>+13.0%</td><td>14.3%</td><td>0.10%</td><td>1</td></tr>
+        <tr><td>3회</td><td>783</td><td>36.7%</td><td class="pos">+15.8%</td><td>+15.0%</td><td>14.7%</td><td>0.13%</td><td>1</td></tr>
+        <tr><td>4-5회</td><td>1,101</td><td>29.2%</td><td>+11.9%</td><td>+3.6%</td><td>12.2%</td><td>0.27%</td><td>3</td></tr>
+        <tr class="mark"><td>6-9회</td><td>1,103</td><td>29.6%</td><td>+14.2%</td><td class="neg">−0.0%</td><td>14.1%</td><td class="em">0.63%</td><td class="em">7</td></tr>
+        <tr><td>10-19회</td><td>598</td><td>22.3%</td><td>+5.0%</td><td class="neg">−2.5%</td><td>12.5%</td><td>0.17%</td><td>1</td></tr>
+        <tr class="bad"><td>20회+</td><td>35</td><td>13.8%</td><td class="neg">−4.7%</td><td class="neg">−1.8%</td><td>11.4%</td><td>0.00%</td><td>0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note neg">
+    <span class="lab">가설을 지지하지 않는 쪽</span>
+    <p>회차가 쌓일수록 성과가 좋아지지 <strong>않는다.</strong> 시장 대비 초과수익은 3회차(+15.8%)가 정점이고
+    10회부터 +5.0%로 꺾이며 20회를 넘으면 <strong>−4.7%로 음수</strong>다.
+    중앙값은 6회차부터 0 아래로 내려간다. "계속 뜨니까 계속 담는다"를 성과가 그대로 지지하지는 않는다.</p>
+  </div>
+
+  <div class="note">
+    <span class="lab">가설을 지지하는 쪽</span>
+    <p>지지하는 항목은 정확히 하나다 — <strong>10배 확률이 6-9회차에서 1회차의 8배</strong>(0.08% → 0.63%)가 된다.
+    같은 구간에서 중앙값은 0으로 내려간다. 즉 <strong>대부분 실패하고 가끔 초대박</strong>인 구조로 바뀐다.
+    승률이 낮아도 되고 수익률이 아니라 수익금을 노리는 방식에는, 이 모양이 맞다.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="lab">⚠️ 그런데 그 근거는 7건이다</span>
+    <p>6-9회차의 0.63%는 <strong>1,103건 중 7건</strong>이다. 구간별 10배 실건수는 1 · 1 · 1 · 3 · 7 · 1 · 0건뿐이다.
+    <strong>7건으로 판정하고 있다는 사실을 잊으면 안 된다.</strong>
+    한 종목만 빠져도 이 결론은 흔들린다. 확정된 법칙이 아니라 현재까지의 정황이다.</p>
+  </div>
+
+  <p><strong>종목 단위로 보면 훨씬 강한 신호가 나온다</strong> — 다만 쓸 수 없는 신호다.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>그 종목의 총 신호 횟수</th><th>종목 수</th><th>평균</th><th>시장대비</th><th>2배 간 종목</th></tr></thead>
+      <tbody>
+        <tr><td>1회</td><td>270</td><td>7.0%</td><td class="neg">−12.5%</td><td>2.6%</td></tr>
+        <tr><td>2-3회</td><td>396</td><td>9.5%</td><td class="neg">−11.4%</td><td>2.5%</td></tr>
+        <tr><td>4-7회</td><td>381</td><td>27.0%</td><td>+6.6%</td><td>5.8%</td></tr>
+        <tr><td>8-15회</td><td>204</td><td>42.6%</td><td class="pos">+23.3%</td><td>15.2%</td></tr>
+        <tr class="mark"><td>16회+</td><td>28</td><td class="em">51.3%</td><td class="em">+34.3%</td><td class="em">25.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note neg">
+    <span class="lab">여기 함정이 있다</span>
+    <p>차이가 엄청나 보이지만 <strong>이건 사후 정보다.</strong>
+    "총 16회 이상 신호가 난 종목"은 <strong>지금 알 수 없다</strong> — 그 종목이 앞으로 몇 번 더 신호를 낼지 모르기 때문이다.
+    실전에서 쓸 수 있는 숫자는 위의 회차별 표뿐이고, 그쪽은 훨씬 밋밋하다.
+    이 표를 근거로 삼으면 미래를 보고 산 것이 된다.</p>
+  </div>
+
+  <div class="note">
+    <span class="lab">그래서 이렇게 한다</span>
+    <p>반복 신호는 <strong>계속 띄운다.</strong> 회차 상한을 코드로 강제하지 않는다 — 비중과 매매는 사람이 하기 때문이다.
+    대신 <strong>회차가 10을 넘으면 화면에 경고를 띄운다.</strong> 후보 표에 신호회차 열을 항상 찍는 이유가 이것이다.</p>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ⑤ 한계 -->
+<section>
+  <div class="sec-head"><span class="sec-num">05</span><h2>이 규칙이 깨지는 지점</h2></div>
+  <p class="sec-sub">쓰기 전에 알아야 하는 것들. 낙관 편향이 어디에 숨어 있는지 먼저 적는다.</p>
+
+  <div class="note neg">
+    <span class="lab">가장 중요한 한계</span>
+    <p><strong>이건 신호 목록이지 포트폴리오 규칙이 아니다.</strong>
+    이 규칙을 등가중 포트폴리오로 그대로 돌리면 CAGR <strong>12.7%</strong>로 SPY(15.1%)에 <strong>진다.</strong>
+    평균 74종을 들게 되어 한 종목 비중이 1.4%밖에 안 되기 때문이다 —
+    802% 대박이 하나 나와도 전체 수익엔 11%밖에 기여하지 못한다.
+    <strong>이 화면은 후보를 부르는 일까지만 하고, 비중은 사람이 준다.</strong></p>
+  </div>
+
+  <p><strong>연도별 편차가 극심하다.</strong> 8년 중 3년이 시장 대비 마이너스다.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>연도</th><th>신호</th><th>평균</th><th>시장대비</th><th>2배+</th><th>4배+</th></tr></thead>
+      <tbody>
+        <tr><td>2019</td><td>237</td><td>25.2%</td><td>+13.5%</td><td>12.2%</td><td>1.7%</td></tr>
+        <tr class="mark"><td>2020</td><td>1,352</td><td class="em">86.5%</td><td class="em">+46.9%</td><td>27.4%</td><td>5.2%</td></tr>
+        <tr class="bad"><td>2021</td><td>1,193</td><td class="neg">−3.6%</td><td class="neg">−6.1%</td><td>4.6%</td><td>0.3%</td></tr>
+        <tr class="bad"><td>2022</td><td>800</td><td>3.0%</td><td class="neg">−4.8%</td><td>4.1%</td><td>0.4%</td></tr>
+        <tr class="bad"><td>2023</td><td>694</td><td>18.0%</td><td class="neg">−10.0%</td><td>8.8%</td><td>0.6%</td></tr>
+        <tr><td>2024</td><td>936</td><td>17.1%</td><td>+1.6%</td><td>9.8%</td><td>1.2%</td></tr>
+        <tr class="mark"><td>2025</td><td>696</td><td class="em">58.4%</td><td class="em">+34.8%</td><td>22.8%</td><td>3.5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">2020과 2025 두 해가 전체 성과를 만든다. 그 두 해를 빼면 이 규칙은 시장을 못 이긴다.
+  <b>회복장에 강하고 횡보·긴축장에 약한 규칙</b>이라고 읽는 편이 정확하다.</p>
+
+  <ul style="margin-top:24px">
+    <li><strong>상위 5% 거래가 전체 수익의 94%를 만든다.</strong> 꼬리에 전적으로 의존한다. 꼬리를 못 들면 이 규칙은 아무것도 아니다.</li>
+    <li><strong>유니버스에 상장폐지 종목이 없다.</strong> 생존 편향이 걸려 있어 여기 있는 모든 숫자가 낙관 쪽으로 치우쳐 있다. 실제 성과는 이보다 낮다.</li>
+    <li><strong>영업이익을 매출로 나눈 것은 임의 선택이다.</strong> 논문은 총자산으로 스케일한다. 매출로 나누면 매출이 작은 회사에서 값이 발산한다.</li>
+    <li><strong>발산 종목을 두 겹으로 막았다.</strong> ① 분기매출 $10M 하한 — 매출 $0 종목(AMLX·JOBY)의 이익가속이 <code>inf</code>로 나와 조건을 그냥 통과했다. ② |이익가속| ≤ 10 상한 — MSTR은 분기매출이 $10M을 넘는데도 OPM이 −11,641%(비트코인 손상차손)라 지표가 무의미했다. 두 장치를 넣어도 성과는 거의 그대로다(평균 31.8 → 32.2%).</li>
+    <li><strong>중앙값은 시장에 진다</strong>(시장 대비 −9.7%). 절반 이상의 신호는 SPY보다 못하다. 이걸 알고도 담는 선택이다.</li>
+    <li><strong>워크포워드 검증을 아직 안 했다.</strong> 위 숫자는 전 구간 인샘플이다. 다음 과제다.</li>
+  </ul>
+</section>
+
+<hr class="div">
+
+<!-- ⑥ 이번 주 -->
+<section>
+  <div class="sec-head"><span class="sec-num">06</span><h2>이번 주 신호 19종</h2></div>
+  <p class="sec-sub">기준 주차 2026-08-17. 칸 수 제한 없이 전부 띄운다.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>코드</th><th>회차</th><th>그주 상승</th><th>시총($B)</th><th>매출가속</th><th>이익가속</th><th>OPM</th><th>매출 YoY</th></tr></thead>
+      <tbody>
+        <tr class="mark"><td>MRVI</td><td>10</td><td>+51.6%</td><td>1.3</td><td>52.1</td><td>112.8</td><td class="neg">−3.3</td><td>+40.5</td></tr>
+        <tr><td>PSNL</td><td>3</td><td>+30.9%</td><td>1.9</td><td>54.9</td><td>40.8</td><td class="neg">−150.2</td><td>+30.0</td></tr>
+        <tr><td>AMR</td><td>8</td><td>+26.5%</td><td>2.7</td><td>14.5</td><td>11.7</td><td class="neg">−2.0</td><td class="neg">−1.2</td></tr>
+        <tr><td>COIN</td><td>4</td><td>+25.6%</td><td>49.2</td><td>12.0</td><td>44.2</td><td class="neg">−9.3</td><td class="neg">−18.5</td></tr>
+        <tr><td>IOVA</td><td>6</td><td>+18.8%</td><td>3.8</td><td>27.1</td><td>41.1</td><td class="neg">−113.5</td><td>+44.8</td></tr>
+        <tr class="mark"><td>SCCO</td><td>10</td><td>+17.0%</td><td>182.4</td><td>4.4</td><td>1.9</td><td class="pos">61.2</td><td>+40.6</td></tr>
+        <tr><td>CRGY</td><td>4</td><td>+16.4%</td><td>4.6</td><td>30.9</td><td>22.8</td><td class="pos">41.6</td><td>+55.3</td></tr>
+        <tr><td>FCX</td><td>9</td><td>+15.3%</td><td>110.1</td><td>22.6</td><td>21.5</td><td class="pos">34.2</td><td>+12.2</td></tr>
+        <tr class="mark"><td>CELH</td><td>10</td><td>+14.7%</td><td>8.4</td><td>20.4</td><td>4.9</td><td class="pos">17.8</td><td>+137.7</td></tr>
+        <tr><td>RGLD</td><td>5</td><td>+12.3%</td><td>21.9</td><td>57.2</td><td>16.5</td><td class="pos">63.3</td><td>+142.5</td></tr>
+        <tr class="bad"><td>CVI</td><td>17</td><td>+12.1%</td><td>4.0</td><td>35.2</td><td>7.3</td><td>2.8</td><td>+55.5</td></tr>
+        <tr class="mark"><td>SDGR</td><td>10</td><td>+12.1%</td><td>1.5</td><td>9.2</td><td>15.7</td><td class="neg">−70.6</td><td>+7.5</td></tr>
+        <tr><td>SG</td><td>6</td><td>+11.3%</td><td>0.8</td><td>0.7</td><td>7.1</td><td class="neg">−21.3</td><td class="neg">−2.9</td></tr>
+        <tr class="bad"><td>NVAX</td><td>21</td><td>+11.1%</td><td>1.5</td><td>2.8</td><td>105.5</td><td class="neg">−96.8</td><td class="neg">−76.3</td></tr>
+        <tr><td>TALO</td><td>8</td><td>+10.8%</td><td>2.9</td><td>11.2</td><td>34.6</td><td class="neg">−25.3</td><td class="neg">−7.9</td></tr>
+        <tr class="bad"><td>PR</td><td>14</td><td>+10.5%</td><td>19.9</td><td>10.6</td><td>10.6</td><td class="pos">33.7</td><td>+0.8</td></tr>
+        <tr><td>RIVN</td><td>1</td><td>+10.5%</td><td>23.1</td><td>15.9</td><td>33.1</td><td class="neg">−50.4</td><td>+27.2</td></tr>
+        <tr class="bad"><td>BLMN</td><td>15</td><td>+10.2%</td><td>1.0</td><td>0.6</td><td>3.2</td><td>5.6</td><td>+1.0</td></tr>
+        <tr><td>CMG</td><td>4</td><td>+10.1%</td><td>46.7</td><td>1.9</td><td>1.7</td><td class="pos">15.7</td><td>+9.3</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap"><b>파란 줄</b>은 회차 10 — 10배 확률이 가장 높았던 6-9회 구간을 막 지난 지점이다.
+  <b>붉은 줄</b>은 회차 14 이상 — 실측상 시장 대비 초과수익이 꺾이는 구간이라 추가 매수 전에 한 번 멈출 자리다.
+  CVI 17회 · NVAX 21회 · BLMN 15회는 특히 주의. <b>이익가속</b>은 성장률의 전분기 대비 변화를 매출 대비 %p로 표시한 값이다.</p>
+</section>
+
+<footer>
+  <p><strong>재현 방법</strong> — <code>python leaders_accel.py</code> 를 실행하면 <code>results/leaders_accel.json</code> 이 다시 만들어진다.
+  주간 사이클(<code>leaders_weekly.sh</code>)의 2.7단계에 편입돼 있어 매주 자동 갱신된다.
+  대시보드 <b>🔎 종목 발굴 → 주도주</b> 최상단에서 확인할 수 있다.</p>
+  <p style="margin-top:12px">규칙 정의와 측정 기록, 여기 적힌 모든 한계는 <code>leaders_accel.py</code> 상단 문서에 그대로 박혀 있다.
+  이 리포트는 그 문서의 요약이며, 숫자가 갈리면 코드 쪽이 최신이다.</p>
+  <p style="margin-top:12px; color:var(--ink-3)">측정 2018-06 → 2026-08 · 유니버스 2,401종 · 신호 7,551건(성과 산출 5,908건) · 발행 2026-08-24</p>
+</footer>
+
+</div>
