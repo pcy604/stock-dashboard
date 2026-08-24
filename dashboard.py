@@ -735,279 +735,350 @@ with t_gain, guard('상승 상위'):
 
 
 # ── 주도주 (섹터/전체 상대강도) ──
+# 시장 선택 플래그. 라디오 위젯보다 먼저 읽지만, 첫 렌더에서는 위젯 기본값(미국)과
+# 같은 값이 나오므로 문제되지 않는다. guard() 안에서 정의하면 예외 시 NameError 다.
+_LEAD_KR = st.session_state.get('lead_mkt', '').startswith('🇰🇷')
+
 with t_lead, guard('주도주'):
-    # ── ⚡ 이익 가속 신호 (2026-08-23 신설) ────────────────────────
-    # L/S 규칙(+20% 급등·거래량<1.5·재무)은 8년간 TSLA 0회·NVDA 0회·WDC 0회였다.
-    # 대박 시작점을 역산하니 시작점은 '급등한 주'가 아니었고(NVDA 그 주 −7.0%),
-    # 공통점은 수준이 아니라 **성장률의 기울기 변화**에 있었다.
-    # 이 화면의 일은 포트폴리오 운용이 아니라 **주도주가 신호에 걸리게 하는 것**이다.
-    _ac = load_json(Path('results/leaders_accel.json'))
-    if _ac:
-        _acp = _ac['perf']
-        st.markdown("### ⚡ 이익 가속 — 성장률이 빨라지는 종목")
-        st.caption(f"**{_ac['rule']['text']}** · 기준 주차 {_ac['signal_week']} · "
-                   f"생성 {_ac['generated']}")
-        _m = st.columns(5)
-        _m[0].metric("신호 1건 평균 (1년)", f"{_acp['mean']}%",
-                     f"기저 {_acp['base_mean']}%")
-        _m[1].metric("시장 대비 초과 (평균)", f"{_acp['alpha_mean']}%")
-        _m[2].metric("2배 이상", f"{_acp['w2']}%", f"기저 {_acp['base_w2']}%")
-        _m[3].metric("4배 이상", f"{_acp['w4']}%", f"기저 {_acp['base_w4']}%")
-        _m[4].metric("10배 이상", f"{_acp['w10']}%", f"기저 {_acp['base_w10']}%")
-        st.caption(
-            f"신호 {_acp['n']:,}건 중 1년이 지난 {_acp['n_scored']:,}건 기준. "
-            f"상위 10% {_acp['p90']}% · 상위 1% {_acp['p99']}% · 최대 {_acp['mx']}%. "
-            f"**중앙값은 {_acp['median']}%로 낮다 — 이 분포는 U자이고, 등가중으로 담으면 "
-            f"받는 것은 평균이다.** 중앙값으로 판정하면 꼬리를 통째로 놓친다.")
-        with st.expander("⚠️ 이 신호를 쓸 때 알아야 할 것"):
-            st.markdown(
-                "- **신호 목록이지 포트폴리오 규칙이 아니다.** 이 규칙을 등가중으로 "
-                "돌리면 CAGR 12.7%로 SPY(15.1%)에 진다. 평균 74종을 들게 되어 한 종목 "
-                "비중이 1.4%라, 802% 대박이 나도 전체엔 11%밖에 기여를 못 한다. "
-                "**비중은 사람이 준다.**")
-            st.markdown(
-                "- **상위 5% 거래가 전체 수익의 94%를 만든다.** 꼬리에 전적으로 의존한다.")
-            st.markdown(
-                "- **연도 편차가 극심하다** — 2020 알파 +46.9% · 2021 −6.1% · "
-                "2022 −4.8% · 2023 −10.0% · 2025 +34.8%. 8년 중 3년이 마이너스다.")
-            st.markdown(
-                "- 문턱을 +25%로 조이면 모든 지표가 좋아지지만(알파평균 +36.8%) "
-                "주도주를 놓친다. **+10%를 택한 이유는 포착이다** — 급등 +10%면 "
-                "NVDA 13회·TSLA 21회·PLTR 10회·MU 22회가 걸리는데, +20%로 올리면 "
-                "1·8·4·3회로 줄어든다.")
-            st.markdown(
-                "- 유니버스에 상장폐지 종목이 없다 — 모든 숫자가 낙관 편향이다.")
-            st.markdown(
-                "- 근거: He & Narayanamoorthy(2020, JAE) *Earnings Acceleration and "
-                "Stock Returns* · Minervini SEPA. 단 Minervini 의 '매출 20%↑' 같은 "
-                "**수준 조건은 여기서 독이다**(알파 −23.3%) — NVDA 는 대상승 시작 시점 "
-                "매출 YoY 가 +3.0%였고 이후 1년 내내 역성장했다.")
-        _cd = _ac['candidates']
-        st.markdown(f"**이번 주 신호 {len(_cd)}종** — 칸 수 제한 없이 전부 보여준다")
-        if _cd:
-            st.dataframe(pd.DataFrame([{
-                '코드': m['sym'], '종목': m['name'], '신호회차': m['n'],
-                '그주상승': m['up'], '시총($B)': m['mc'], '종가': m['close'],
-                '고점대비': m['dd'], '매출가속': m['rva'], '이익가속': m['oia'],
-                '매출YoY': m['revy'], 'GPM': m['gpm'], 'ΔGPM': m['dgpm'],
-                'OPM': m['opm'], 'ΔOPM': m['dopm'], '영업익($M)': m['oi'],
-                'RS4': m['rs4'], 'RS13': m['rs13'], 'PER': m['per'], 'PSR': m['psr'],
-                '이후1주': m.get('f1'), '이후4주': m.get('f4'), '이후13주': m.get('f13')}
-                for m in _cd]), use_container_width=True, hide_index=True,
-                row_height=25, height=_dfh(len(_cd)))
-            _hi = [m['sym'] for m in _cd if (m.get('n') or 0) > 10]
-            if _hi:
-                st.warning(
-                    f"**회차 10 초과: {', '.join(_hi)}** — 실측상 10회부터 시장대비 "
-                    f"초과수익이 꺾이고(1~3회 +14% → 10-19회 +5.0% → 20회+ −4.7%) "
-                    f"20회를 넘으면 마이너스다. 추가 매수 전에 아래 회차별 표를 볼 것.")
-            st.caption(
-                "**신호회차** = 이 종목이 이 규칙에서 몇 번째 신호인가. **매출가속·이익가속**은 "
-                "성장률의 전분기 대비 변화(%p)이고 둘 다 양수여야 신호가 켜진다. 이후 "
-                "수익률은 이번 주 신호라 아직 비어 있는 게 정상이다.")
-        else:
-            st.info("이번 주 조건 충족 종목 없음")
-        if _ac.get('by_step'):
-            with st.expander("🔥 신호 회차별 성적 — 불타기를 해도 되는가"):
-                st.markdown(
-                    "형이 세운 가설은 **'신호가 계속 뜨는 종목은 계속 불타기'** 였다. "
-                    "실측은 이걸 **반만** 지지한다.")
-                st.dataframe(pd.DataFrame([{
-                    '회차': v['lbl'], '표본': v['n'], '평균': v['mean'],
-                    '시장대비': v['alpha'], '중앙값': v['median'],
-                    '2배+%': v['w2'], '4배+%': v['w4'], '10배+%': v['w10'],
-                    '10배 실건수': v['n10']} for v in _ac['by_step']]),
-                    use_container_width=True, hide_index=True, row_height=25)
-                st.markdown(
-                    "- **지지하지 않는 쪽:** 회차가 늘수록 평균이 좋아지지 **않는다**. "
-                    "10회부터 시장대비 초과가 꺾이고(+5.0%) 20회를 넘으면 음수(−4.7%)다. "
-                    "중앙값은 6회차부터 0 아래로 내려간다.")
-                st.markdown(
-                    "- **지지하는 쪽:** **10배 확률이 6-9회차에서 1회차의 8배**"
-                    "(0.08% → 0.63%)다. 대부분 실패하고 가끔 초대박인 구조 — "
-                    "수익률이 아니라 수익금을 노리는 방식에는 맞는 모양이다.")
-                st.markdown(
-                    "- ⚠️ **그 0.63%는 7건이다.** 7건으로 판정하고 있다는 걸 잊으면 안 된다. "
-                    "회차 구간별 10배 실건수는 1·1·1·3·7·1·0건뿐이다.")
-                st.markdown(
-                    "- 종목 단위로 보면 신호가 많이 뜬 종목이 압도적이다(총 1회 종목 "
-                    "시장대비 −12.5% · 8-15회 +23.3% · 16회+ +34.3%, 2배 간 종목 비율 "
-                    "2.6%→25.0%). **단 이건 사후 정보다** — 지금 이 종목이 앞으로 몇 번 "
-                    "신호를 낼지는 알 수 없다.")
-                st.markdown(
-                    "- **결론:** 반복 신호는 계속 띄운다. 코드로 회차 상한을 강제하지는 "
-                    "않는다(비중은 사람이 준다). 대신 **10회를 넘으면 위에 경고를 띄운다.**")
-        # ── 이익 가속: 종목 심층 조회 ─────────────────────────────
-        # 2026-08-24: 아래 L/S 심층조회는 leaders_symbol_detail.json(=L/S 규칙)이라
-        # 이 규칙의 회차와 숫자가 다르다(SMCI L/S 5회 vs 가속 25회). 규칙이 둘이므로
-        # 화면도 둘로 나눈다. weeks 를 종목별로 역인덱스하면 추가 파일이 필요 없다.
-        @st.cache_data(show_spinner=False)
-        def _accel_bysym(_fkey: str):
-            _d = load_json(Path('results/leaders_accel.json')) or {}
-            out = {}
-            for _w, _rows in (_d.get('weeks') or {}).items():
-                for _m in _rows:
-                    e = out.setdefault(_m['sym'], {'name': _m.get('name') or _m['sym'],
-                                                   'rows': []})
-                    e['rows'].append(dict(_m, d=_w))
-            for e in out.values():
-                e['rows'].sort(key=lambda x: x['d'])
-            return out
-
-        _ab = _accel_bysym(file_key('results/leaders_accel.json'))
-        if _ab:
-            st.markdown("#### 🔍 종목 심층 조회 — 이 종목이 언제 걸렸나")
-            _ao = sorted(_ab, key=lambda x: (-len(_ab[x]['rows']), x))
-            _ap = st.selectbox(
-                f"종목 검색 — 이익 가속 신호 이력이 있는 {len(_ao)}종",
-                _ao, index=0, key="accel_sym",
-                format_func=lambda x: f"{x} · {_ab[x]['name'][:28]} "
-                                      f"({len(_ab[x]['rows'])}회 신호)")
-            _ar = _ab[_ap]['rows']
-            _c = st.columns(4)
-            _c[0].metric("총 신호", f"{len(_ar)}회")
-            _c[1].metric("최초 신호", _ar[0]['d'])
-            _c[2].metric("최근 신호", _ar[-1]['d'])
-            _f52 = [r['f52'] for r in _ar if r.get('f52') is not None]
-            _c[3].metric("신호당 1년 평균",
-                         f"{sum(_f52)/len(_f52):.1f}%" if _f52 else "—",
-                         help="1년이 지난 신호만 집계한다")
-
-            # ── 가격 곡선 + 신호 지점 ──────────────────────────────
-            # 청산 마커가 없는 이유: 이건 신호 목록이고 매매 규칙이 아니다.
-            # 청산은 사람이 정하므로 화면이 정할 수 없다. ▲만 찍는다.
-            # 곡선은 두 규칙이 공유하는 results/price_curves.json 에서 읽는다
-            # (2026-08-25 통합 — 674종이 두 파일에 중복 저장돼 있었다).
-            _pc = load_json(Path('results/price_curves.json')) or {}
-            _cv = (_pc.get('curves') or {}).get(_ap)
-            if _cv and _pc.get('dates'):
-                _AD = pd.to_datetime(_pc['dates'])
-                _apx = pd.Series(_cv['c'], index=_AD[_cv['i']]).astype(float)
-                _f = go.Figure()
-                _f.add_trace(go.Scatter(
-                    x=_apx.index, y=_apx.values, mode='lines', name='주봉 종가',
-                    line=dict(color='#12161b', width=1.4),
-                    hovertemplate='%{x|%Y-%m-%d}<br>$%{y:,.2f}<extra></extra>'))
-                # 회차 10 초과는 색을 달리한다 — 실측상 초과수익이 꺾이는 구간이다
-                for _lo, _hi, _cl, _lb in [(1, 10, '#1f6b45', '회차 1-10'),
-                                           (11, 10**9, '#a03028', '회차 11+')]:
-                    _pts = [r for r in _ar if _lo <= (r['n'] or 0) <= _hi
-                            and r['close'] is not None]
-                    if not _pts:
-                        continue
-                    _f.add_trace(go.Scatter(
-                        x=pd.to_datetime([r['d'] for r in _pts]),
-                        y=[r['close'] for r in _pts], mode='markers+text',
-                        marker=dict(symbol='triangle-up', size=12, color=_cl,
-                                    line=dict(color='white', width=1)),
-                        text=[str(r['n']) for r in _pts],
-                        textposition='bottom center',
-                        textfont=dict(size=9, color=_cl), name=_lb,
-                        customdata=[[r['up'], r['oia'], r['rva'],
-                                     r['f52'] if r.get('f52') is not None else float('nan')]
-                                    for r in _pts],
-                        hovertemplate=('%{x|%Y-%m-%d} · %{text}회차<br>'
-                                       '$%{y:,.2f} · 그주 %{customdata[0]:+.1f}%<br>'
-                                       '매출가속 %{customdata[2]:.1f} · '
-                                       '이익가속 %{customdata[1]:.1f}<br>'
-                                       '이후 1년 %{customdata[3]:+.1f}%<extra></extra>')))
-                _f.update_yaxes(type='log', title='주봉 종가(로그)')
-                _f.update_layout(
-                    height=430, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
-                    title=f"{_ap} · {_ab[_ap]['name']}  —  ▲ 이익 가속 신호 (숫자 = 회차)",
-                    legend=dict(orientation='h', yanchor='bottom', y=1.0,
-                                xanchor='right', x=1))
-                st.plotly_chart(_f, use_container_width=True)
-                st.caption(
-                    "로그 축이다 — 기울기가 같으면 상승률이 같다. **▲ 숫자는 신호 회차**이고 "
-                    "붉은 ▲는 회차 11 이상, 즉 실측상 시장대비 초과수익이 꺾이는 구간이다. "
-                    "**청산 마커가 없는 이유는 이 규칙에 청산이 없기 때문이다** — 신호 목록이고 "
-                    "매매 규칙이 아니라, 언제 팔지는 형이 정한다. 곡선은 첫 신호 26주 전부터 그린다.")
-            st.dataframe(pd.DataFrame([{
-                '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
-                '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
-                '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
-                'GPM': r['gpm'], 'ΔGPM': r['dgpm'], 'OPM': r['opm'], 'ΔOPM': r['dopm'],
-                'RS13': r['rs13'], 'PSR': r['psr'],
-                '이후1주': r.get('f1'), '이후4주': r.get('f4'), '이후13주': r.get('f13'),
-                '이후26주': r.get('f26'), '이후52주': r.get('f52'),
-                '이후104주': r.get('f104')} for r in _ar]),
-                use_container_width=True, hide_index=True, row_height=25,
-                height=_dfh(len(_ar)))
-            st.caption(
-                "**주의** — 아래 L/S 심층조회와 회차가 다르다. 저쪽은 L/S 규칙"
-                "(+20% 급등·거래량<1.5·재무)이고 이쪽은 이익 가속 규칙이다. "
-                "같은 SMCI가 L/S에서 5회, 가속에서 25회로 나오는 게 정상이다. "
-                "가격 곡선은 이 파일에 신호 시점 종가만 있어 표로만 보여준다.")
-
-            # ── 이익 가속: 주차별 조회 ────────────────────────────
-            _wk = _ac.get('weeks') or {}
-            _wks = sorted(_wk, reverse=True)
-            st.markdown("#### 📅 주차별 조회 — 그 주에 함께 걸렸던 종목 전부")
-            _wpick = st.selectbox(
-                f"주차 선택 — 신호가 있었던 {len(_wks)}주",
-                _wks, index=0, key="accel_wk",
-                format_func=lambda w: f"{w}  ({len(_wk[w])}종)")
-            _wr = _wk[_wpick]
-            _wf = [r['f52'] for r in _wr if r.get('f52') is not None]
-            _wc = st.columns(4)
-            _wc[0].metric("그 주 신호", f"{len(_wr)}종")
-            _wc[1].metric("1년 평균", f"{sum(_wf)/len(_wf):.1f}%" if _wf else "미도래")
-            _wc[2].metric("1년 승률",
-                          f"{sum(1 for x in _wf if x > 0)/len(_wf)*100:.0f}%" if _wf else "—")
-            _wc[3].metric("2배 이상",
-                          f"{sum(1 for x in _wf if x >= 100)/len(_wf)*100:.0f}%" if _wf else "—")
-            # ── 그 주 코호트의 이후 1년 분포 ────────────────────
-            # 평균 하나로는 U자 분포가 안 보인다. 종목별 막대로 흩어짐을 그대로 보여준다.
-            _wd = [(r['sym'], r['f52']) for r in _wr if r.get('f52') is not None]
-            if _wd:
-                _wd.sort(key=lambda x: -x[1])
-                _fw = go.Figure(go.Bar(
-                    x=[x[0] for x in _wd], y=[x[1] for x in _wd],
-                    marker_color=['#1f6b45' if v >= 100 else
-                                  '#7fae95' if v > 0 else '#a03028' for _, v in _wd],
-                    hovertemplate='%{x}<br>이후 1년 %{y:+.1f}%<extra></extra>'))
-                _fw.add_hline(y=0, line_width=1, line_color='#7c8290')
-                _fw.add_hline(y=100, line_width=1, line_dash='dot', line_color='#1f6b45',
-                              annotation_text='2배', annotation_position='right')
-                _fw.update_layout(height=300, margin=dict(l=8, r=8, t=34, b=8),
-                                  title=f"{_wpick} 코호트 · 이후 1년 수익률 ({len(_wd)}종)",
-                                  yaxis_title='이후 1년 (%)', showlegend=False)
-                st.plotly_chart(_fw, use_container_width=True)
-                st.caption(
-                    "**진한 초록 = 2배 이상.** 평균 하나로는 이 분포가 안 보인다 — "
-                    "몇 종목이 전체를 끌고 가고 나머지는 시장에 진다. 등가중으로 담으면 "
-                    "받는 것은 평균이지만, 그 평균은 소수 종목이 만든다.")
-            st.dataframe(pd.DataFrame([{
-                '코드': r['sym'], '종목': r['name'], '회차': r['n'],
-                '그주상승': r['up'], '시총($B)': r['mc'], '고점대비': r['dd'],
-                '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
-                'GPM': r['gpm'], 'OPM': r['opm'], 'RS13': r['rs13'], 'PSR': r['psr'],
-                '이후13주': r.get('f13'), '이후52주': r.get('f52'),
-                '이후104주': r.get('f104')} for r in _wr]),
-                use_container_width=True, hide_index=True, row_height=25,
-                height=_dfh(len(_wr)))
-            st.caption(
-                "그 주에 함께 걸린 종목 전부다. **한 종목이 걸렸다는 사실만으로는 "
-                "조건의 실효를 판단할 수 없다** — 같은 주 전 종목의 타율을 함께 봐야 한다. "
-                "위 지표가 그 코호트 성적이다.")
-
-        if _ac.get('by_year'):
-            with st.expander("📅 연도별 신호 성적 (신호 1건당 1년 후)"):
-                st.dataframe(pd.DataFrame([{
-                    '연도': y, '신호': v['n'], '평균': v['mean'],
-                    '시장대비': v['alpha'], '2배+%': v['w2'], '4배+%': v['w4']}
-                    for y, v in sorted(_ac['by_year'].items())]),
-                    use_container_width=True, hide_index=True, row_height=25)
-        st.divider()
-
-    # 2026-08-15: KR 규칙(KR-P1) 추가. US 규칙⑥과 근거 강도가 달라 탭을 나눈다.
-    _lead_mkt = st.radio("시장", ["🇺🇸 미국 (규칙⑥)", "🇰🇷 한국 (KR-P1)"],
+    # 2026-08-15: KR 은 US 와 근거 강도가 달라 화면을 나눈다.
+    # 2026-08-25: 라벨의 '규칙⑥'·'L/S' 는 둘 다 폐기된 이름이다. 미국 규칙은 이익 가속뿐이다.
+    _lead_mkt = st.radio("시장", ["🇺🇸 미국 (이익 가속)", "🇰🇷 한국 (KR-U6 / KR-P1)"],
                          horizontal=True, key="lead_mkt",
-                         help="두 규칙은 검증 수준이 다릅니다 — 미국은 워크포워드까지, "
-                              "한국은 가격 백테스트만 거쳤습니다.")
+                         help="두 규칙은 검증 수준이 다릅니다 — 미국은 8년 백테스트와 "
+                              "청산 연구까지, 한국은 가격 백테스트만 거쳤습니다.")
 
-if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
+    # 이익 가속은 미국 규칙이다. 한국은 아래 KR-U6/KR-P1 로 따로 간다.
+    if not _LEAD_KR:
+        # ── ⚡ 이익 가속 신호 (2026-08-23 신설) ────────────────────────
+        # L/S 규칙(+20% 급등·거래량<1.5·재무)은 8년간 TSLA 0회·NVDA 0회·WDC 0회였다.
+        # 대박 시작점을 역산하니 시작점은 '급등한 주'가 아니었고(NVDA 그 주 −7.0%),
+        # 공통점은 수준이 아니라 **성장률의 기울기 변화**에 있었다.
+        # 이 화면의 일은 포트폴리오 운용이 아니라 **주도주가 신호에 걸리게 하는 것**이다.
+        _ac = load_json(Path('results/leaders_accel.json'))
+        if _ac:
+            _acp = _ac['perf']
+            st.markdown("### ⚡ 이익 가속 — 성장률이 빨라지는 종목")
+            st.caption(f"**{_ac['rule']['text']}** · 기준 주차 {_ac['signal_week']} · "
+                       f"생성 {_ac['generated']}")
+            _m = st.columns(5)
+            _m[0].metric("신호 1건 평균 (1년)", f"{_acp['mean']}%",
+                         f"기저 {_acp['base_mean']}%")
+            _m[1].metric("시장 대비 초과 (평균)", f"{_acp['alpha_mean']}%")
+            _m[2].metric("2배 이상", f"{_acp['w2']}%", f"기저 {_acp['base_w2']}%")
+            _m[3].metric("4배 이상", f"{_acp['w4']}%", f"기저 {_acp['base_w4']}%")
+            _m[4].metric("10배 이상", f"{_acp['w10']}%", f"기저 {_acp['base_w10']}%")
+            st.caption(
+                f"신호 {_acp['n']:,}건 중 1년이 지난 {_acp['n_scored']:,}건 기준. "
+                f"상위 10% {_acp['p90']}% · 상위 1% {_acp['p99']}% · 최대 {_acp['mx']}%. "
+                f"**중앙값은 {_acp['median']}%로 낮다 — 이 분포는 U자이고, 등가중으로 담으면 "
+                f"받는 것은 평균이다.** 중앙값으로 판정하면 꼬리를 통째로 놓친다.")
+            with st.expander("⚠️ 이 신호를 쓸 때 알아야 할 것"):
+                st.markdown(
+                    "- **신호 목록이지 포트폴리오 규칙이 아니다.** 이 규칙을 등가중으로 "
+                    "돌리면 CAGR 12.7%로 SPY(15.1%)에 진다. 평균 74종을 들게 되어 한 종목 "
+                    "비중이 1.4%라, 802% 대박이 나도 전체엔 11%밖에 기여를 못 한다. "
+                    "**비중은 사람이 준다.**")
+                st.markdown(
+                    "- **상위 5% 거래가 전체 수익의 94%를 만든다.** 꼬리에 전적으로 의존한다.")
+                st.markdown(
+                    "- **연도 편차가 극심하다** — 2020 알파 +46.9% · 2021 −6.1% · "
+                    "2022 −4.8% · 2023 −10.0% · 2025 +34.8%. 8년 중 3년이 마이너스다.")
+                st.markdown(
+                    "- 문턱을 +25%로 조이면 모든 지표가 좋아지지만(알파평균 +36.8%) "
+                    "주도주를 놓친다. **+10%를 택한 이유는 포착이다** — 급등 +10%면 "
+                    "NVDA 13회·TSLA 21회·PLTR 10회·MU 22회가 걸리는데, +20%로 올리면 "
+                    "1·8·4·3회로 줄어든다.")
+                st.markdown(
+                    "- 유니버스에 상장폐지 종목이 없다 — 모든 숫자가 낙관 편향이다.")
+                st.markdown(
+                    "- 근거: He & Narayanamoorthy(2020, JAE) *Earnings Acceleration and "
+                    "Stock Returns* · Minervini SEPA. 단 Minervini 의 '매출 20%↑' 같은 "
+                    "**수준 조건은 여기서 독이다**(알파 −23.3%) — NVDA 는 대상승 시작 시점 "
+                    "매출 YoY 가 +3.0%였고 이후 1년 내내 역성장했다.")
+            _cd = _ac['candidates']
+            st.markdown(f"**이번 주 신호 {len(_cd)}종** — 칸 수 제한 없이 전부 보여준다")
+            if _cd:
+                st.dataframe(pd.DataFrame([{
+                    '코드': m['sym'], '종목': m['name'], '신호회차': m['n'],
+                    '그주상승': m['up'], '시총($B)': m['mc'], '종가': m['close'],
+                    '고점대비': m['dd'], '매출가속': m['rva'], '이익가속': m['oia'],
+                    '매출YoY': m['revy'], 'GPM': m['gpm'], 'ΔGPM': m['dgpm'],
+                    'OPM': m['opm'], 'ΔOPM': m['dopm'], '영업익($M)': m['oi'],
+                    'RS4': m['rs4'], 'RS13': m['rs13'], 'PER': m['per'], 'PSR': m['psr'],
+                    '이후1주': m.get('f1'), '이후4주': m.get('f4'), '이후13주': m.get('f13')}
+                    for m in _cd]), use_container_width=True, hide_index=True,
+                    row_height=25, height=_dfh(len(_cd)))
+                _hi = [m['sym'] for m in _cd if (m.get('n') or 0) > 10]
+                if _hi:
+                    st.warning(
+                        f"**회차 10 초과: {', '.join(_hi)}** — 실측상 10회부터 시장대비 "
+                        f"초과수익이 꺾이고(1~3회 +14% → 10-19회 +5.0% → 20회+ −4.7%) "
+                        f"20회를 넘으면 마이너스다. 추가 매수 전에 아래 회차별 표를 볼 것.")
+                st.caption(
+                    "**신호회차** = 이 종목이 이 규칙에서 몇 번째 신호인가. **매출가속·이익가속**은 "
+                    "성장률의 전분기 대비 변화(%p)이고 둘 다 양수여야 신호가 켜진다. 이후 "
+                    "수익률은 이번 주 신호라 아직 비어 있는 게 정상이다.")
+            else:
+                st.info("이번 주 조건 충족 종목 없음")
+            if _ac.get('by_step'):
+                with st.expander("🔥 신호 회차별 성적 — 불타기를 해도 되는가"):
+                    st.markdown(
+                        "형이 세운 가설은 **'신호가 계속 뜨는 종목은 계속 불타기'** 였다. "
+                        "실측은 이걸 **반만** 지지한다.")
+                    st.dataframe(pd.DataFrame([{
+                        '회차': v['lbl'], '표본': v['n'], '평균': v['mean'],
+                        '시장대비': v['alpha'], '중앙값': v['median'],
+                        '2배+%': v['w2'], '4배+%': v['w4'], '10배+%': v['w10'],
+                        '10배 실건수': v['n10']} for v in _ac['by_step']]),
+                        use_container_width=True, hide_index=True, row_height=25)
+                    st.markdown(
+                        "- **지지하지 않는 쪽:** 회차가 늘수록 평균이 좋아지지 **않는다**. "
+                        "10회부터 시장대비 초과가 꺾이고(+5.0%) 20회를 넘으면 음수(−4.7%)다. "
+                        "중앙값은 6회차부터 0 아래로 내려간다.")
+                    st.markdown(
+                        "- **지지하는 쪽:** **10배 확률이 6-9회차에서 1회차의 8배**"
+                        "(0.08% → 0.63%)다. 대부분 실패하고 가끔 초대박인 구조 — "
+                        "수익률이 아니라 수익금을 노리는 방식에는 맞는 모양이다.")
+                    st.markdown(
+                        "- ⚠️ **그 0.63%는 7건이다.** 7건으로 판정하고 있다는 걸 잊으면 안 된다. "
+                        "회차 구간별 10배 실건수는 1·1·1·3·7·1·0건뿐이다.")
+                    st.markdown(
+                        "- 종목 단위로 보면 신호가 많이 뜬 종목이 압도적이다(총 1회 종목 "
+                        "시장대비 −12.5% · 8-15회 +23.3% · 16회+ +34.3%, 2배 간 종목 비율 "
+                        "2.6%→25.0%). **단 이건 사후 정보다** — 지금 이 종목이 앞으로 몇 번 "
+                        "신호를 낼지는 알 수 없다.")
+                    st.markdown(
+                        "- **결론:** 반복 신호는 계속 띄운다. 코드로 회차 상한을 강제하지는 "
+                        "않는다(비중은 사람이 준다). 대신 **10회를 넘으면 위에 경고를 띄운다.**")
+            # ── 이익 가속: 종목 심층 조회 ─────────────────────────────
+            # weeks 를 종목별로 역인덱스하면 추가 파일 없이 심층조회가 된다.
+            # 2026-08-25: 나란히 있던 L/S 심층조회는 제거했다(규칙 자체가 폐기).
+            @st.cache_data(show_spinner=False)
+            def _accel_bysym(_fkey: str):
+                _d = load_json(Path('results/leaders_accel.json')) or {}
+                out = {}
+                for _w, _rows in (_d.get('weeks') or {}).items():
+                    for _m in _rows:
+                        e = out.setdefault(_m['sym'], {'name': _m.get('name') or _m['sym'],
+                                                       'rows': []})
+                        e['rows'].append(dict(_m, d=_w))
+                for e in out.values():
+                    e['rows'].sort(key=lambda x: x['d'])
+                return out
+
+            _ab = _accel_bysym(file_key('results/leaders_accel.json'))
+            if _ab:
+                st.markdown("#### 🔍 종목 심층 조회 — 이 종목이 언제 걸렸나")
+                _ao = sorted(_ab, key=lambda x: (-len(_ab[x]['rows']), x))
+                _ap = st.selectbox(
+                    f"종목 검색 — 이익 가속 신호 이력이 있는 {len(_ao)}종",
+                    _ao, index=0, key="accel_sym",
+                    format_func=lambda x: f"{x} · {_ab[x]['name'][:28]} "
+                                          f"({len(_ab[x]['rows'])}회 신호)")
+                _ar = _ab[_ap]['rows']
+                _c = st.columns(4)
+                _c[0].metric("총 신호", f"{len(_ar)}회")
+                _c[1].metric("최초 신호", _ar[0]['d'])
+                _c[2].metric("최근 신호", _ar[-1]['d'])
+                _f52 = [r['f52'] for r in _ar if r.get('f52') is not None]
+                _c[3].metric("신호당 1년 평균",
+                             f"{sum(_f52)/len(_f52):.1f}%" if _f52 else "—",
+                             help="1년이 지난 신호만 집계한다")
+
+                # ── 가격 곡선 + 신호 지점 ──────────────────────────────
+                # 청산 마커가 없는 이유: 이건 신호 목록이고 매매 규칙이 아니다.
+                # 청산은 사람이 정하므로 화면이 정할 수 없다. ▲만 찍는다.
+                # 곡선은 두 규칙이 공유하는 results/price_curves.json 에서 읽는다
+                # (2026-08-25 통합 — 674종이 두 파일에 중복 저장돼 있었다).
+                _pc = load_json(Path('results/price_curves.json')) or {}
+                _cv = (_pc.get('curves') or {}).get(_ap)
+                if _cv and _pc.get('dates'):
+                    _AD = pd.to_datetime(_pc['dates'])
+                    _apx = pd.Series(_cv['c'], index=_AD[_cv['i']]).astype(float)
+                    _f = go.Figure()
+                    _f.add_trace(go.Scatter(
+                        x=_apx.index, y=_apx.values, mode='lines', name='주봉 종가',
+                        line=dict(color='#12161b', width=1.4),
+                        hovertemplate='%{x|%Y-%m-%d}<br>$%{y:,.2f}<extra></extra>'))
+                    # 회차 10 초과는 색을 달리한다 — 실측상 초과수익이 꺾이는 구간이다
+                    for _lo, _hi, _cl, _lb in [(1, 10, '#1f6b45', '회차 1-10'),
+                                               (11, 10**9, '#a03028', '회차 11+')]:
+                        _pts = [r for r in _ar if _lo <= (r['n'] or 0) <= _hi
+                                and r['close'] is not None]
+                        if not _pts:
+                            continue
+                        _f.add_trace(go.Scatter(
+                            x=pd.to_datetime([r['d'] for r in _pts]),
+                            y=[r['close'] for r in _pts], mode='markers+text',
+                            marker=dict(symbol='triangle-up', size=12, color=_cl,
+                                        line=dict(color='white', width=1)),
+                            text=[str(r['n']) for r in _pts],
+                            textposition='bottom center',
+                            textfont=dict(size=9, color=_cl), name=_lb,
+                            customdata=[[r['up'], r['oia'], r['rva'],
+                                         r['f52'] if r.get('f52') is not None else float('nan')]
+                                        for r in _pts],
+                            hovertemplate=('%{x|%Y-%m-%d} · %{text}회차<br>'
+                                           '$%{y:,.2f} · 그주 %{customdata[0]:+.1f}%<br>'
+                                           '매출가속 %{customdata[2]:.1f} · '
+                                           '이익가속 %{customdata[1]:.1f}<br>'
+                                           '이후 1년 %{customdata[3]:+.1f}%<extra></extra>')))
+                    _f.update_yaxes(type='log', title='주봉 종가(로그)')
+                    _f.update_layout(
+                        height=430, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
+                        title=f"{_ap} · {_ab[_ap]['name']}  —  ▲ 이익 가속 신호 (숫자 = 회차)",
+                        legend=dict(orientation='h', yanchor='bottom', y=1.0,
+                                    xanchor='right', x=1))
+                    st.plotly_chart(_f, use_container_width=True)
+                    st.caption(
+                        "로그 축이다 — 기울기가 같으면 상승률이 같다. **▲ 숫자는 신호 회차**이고 "
+                        "붉은 ▲는 회차 11 이상, 즉 실측상 시장대비 초과수익이 꺾이는 구간이다. "
+                        "**청산 마커가 없는 이유는 이 규칙에 청산이 없기 때문이다** — 신호 목록이고 "
+                        "매매 규칙이 아니라, 언제 팔지는 형이 정한다. 곡선은 첫 신호 26주 전부터 그린다.")
+
+                    # ── MDD(고점 대비 낙폭) 곡선 ───────────────────────
+                    # 2026-08-25 청산 연구에서 나온 것: 주도주는 정점에 닿기 전에
+                    # 중앙 -23% 를 견디고, 절반이 -25% 를 한 번 겪는다. 그래서 이 화면의
+                    # 일은 "이 종목이 얼마나 흔들렸나"를 신호 위치와 같은 축에서 보이는 것.
+                    # ⚠️ 주봉 종가 기준이라 장중 낙폭은 이보다 깊다(prices 테이블이 비어 있다).
+                    _ddc = (_apx / _apx.cummax() - 1) * 100
+                    # ⚠️ x 축은 리스트가 아니라 DatetimeIndex 로 넘긴다 — Timestamp 리스트는
+                    #    이미지 렌더러(kaleido)에서 직렬화가 깨진다(2026-08-25 확인).
+                    _sig_dt = pd.to_datetime([r['d'] for r in _ar if r.get('close')])
+                    _sig_dd = [float(_ddc.get(_t, float('nan'))) for _t in _sig_dt]
+                    # 신호로 샀다면 진입가 대비 이후 1년간 최악 낙폭 — 손절선을 정하는 근거
+                    _wr = []
+                    for _r in _ar:
+                        _c0 = _r.get('close')
+                        if not _c0:
+                            continue
+                        _fw = _apx[_apx.index > pd.Timestamp(_r['d'])].iloc[:52]
+                        if len(_fw):
+                            _wr.append(_fw.min() / _c0 - 1)
+                    _fd = go.Figure()
+                    _fd.add_trace(go.Scatter(
+                        x=_ddc.index, y=_ddc.values, mode='lines', name='고점 대비 낙폭',
+                        line=dict(color='#0e5a6b', width=1.2), fill='tozeroy',
+                        fillcolor='rgba(14,90,107,0.16)',
+                        hovertemplate='%{x|%Y-%m-%d}<br>고점 대비 %{y:.1f}%<extra></extra>'))
+                    if len(_sig_dt):        # DatetimeIndex 는 truthy 판정이 안 된다
+                        _fd.add_trace(go.Scatter(
+                            x=_sig_dt, y=_sig_dd, mode='markers', name='신호 시점',
+                            marker=dict(symbol='triangle-up', size=9, color='#1f6b45',
+                                        line=dict(color='white', width=1)),
+                            hovertemplate='%{x|%Y-%m-%d}<br>살 때 이미 고점 대비 '
+                                          '%{y:.1f}%<extra></extra>'))
+                    # 참고선은 **같은 축(고점 대비)** 의 값이어야 한다. 채택 손절선(-25%)은
+                    # '진입가 대비'라 이 축에 그으면 축을 섞는다 — 그건 아래 지표 카드로 뺐다.
+                    # add_hline 의 주석은 위치를 어디로 줘도 곡선을 덮는다(종목마다 모양이
+                    # 다르다). 그래서 선을 트레이스로 넣어 이름을 **범례**로 뺀다.
+                    _fd.add_trace(go.Scatter(
+                        x=_ddc.index[[0, -1]], y=[-23, -23],   # 리스트 아님(직렬화)
+                        mode='lines', line=dict(color='#a03028', width=1, dash='dash'),
+                        name='정점 전 견딘 낙폭 중앙 -23%', hoverinfo='skip'))
+                    _fd.update_yaxes(title='고점 대비 낙폭(%)', ticksuffix='%',
+                                     rangemode='tozero')
+                    _fd.update_layout(
+                        height=250, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
+                        title=f"{_ap} — 고점 대비 낙폭(MDD) · ▲ 신호 시점",
+                        legend=dict(orientation='h', yanchor='bottom', y=1.0,
+                                    xanchor='right', x=1))
+                    st.plotly_chart(_fd, use_container_width=True)
+                    _mc = st.columns(3)
+                    _mc[0].metric("이 구간 최대 낙폭", f"{_ddc.min():.0f}%")
+                    _mc[1].metric("살 때 이미 빠져 있던 정도(중앙)",
+                                  f"{pd.Series(_sig_dd).median():.0f}%" if _sig_dd else "—",
+                                  help="이 규칙은 신고가가 아니라 낙폭 한가운데서 산다 — "
+                                       "전 종목 중앙 -10.8%")
+                    _mc[2].metric("신호 후 1년 최악(진입가 대비, 중앙)",
+                                  f"{pd.Series(_wr).median()*100:.0f}%" if _wr else "—",
+                                  help="이 종목을 신호마다 샀다면 1년 안에 최대 이만큼 물렸다. "
+                                       "손절선을 이보다 좁게 잡으면 이 종목은 못 들고 간다.")
+                    st.caption(
+                        "위 곡선은 **그 시점까지의 최고가 대비** 얼마나 내려와 있는지다(0%가 신고가). "
+                        "▲ 가 0% 근처가 아니라 골짜기에 찍히는 게 이 규칙의 특징이다 — "
+                        "**우리는 신고가가 아니라 낙폭 한가운데서 산다.** 그래서 손절은 고점이 아니라 "
+                        "**산 가격 기준**으로 잰다(청산 연구 04) — 그 숫자가 오른쪽 지표다. "
+                        "붉은 점선은 같은 축의 기준값으로, 주도주 1,843개가 정점에 닿기까지 "
+                        "견뎠던 낙폭의 중앙값이다. "
+                        "⚠️ 주봉 종가 기준이라 장중 낙폭은 이보다 깊다.")
+                st.dataframe(pd.DataFrame([{
+                    '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
+                    '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
+                    '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
+                    'GPM': r['gpm'], 'ΔGPM': r['dgpm'], 'OPM': r['opm'], 'ΔOPM': r['dopm'],
+                    'RS13': r['rs13'], 'PSR': r['psr'],
+                    '이후1주': r.get('f1'), '이후4주': r.get('f4'), '이후13주': r.get('f13'),
+                    '이후26주': r.get('f26'), '이후52주': r.get('f52'),
+                    '이후104주': r.get('f104')} for r in _ar]),
+                    use_container_width=True, hide_index=True, row_height=25,
+                    height=_dfh(len(_ar)))
+                st.caption(
+                    "회차는 이 종목이 이익 가속 신호를 몇 번째로 낸 것인지다. "
+                    "실측상 11회를 넘어가면 시장 대비 초과수익이 꺾인다.")
+
+                # ── 이익 가속: 주차별 조회 ────────────────────────────
+                _wk = _ac.get('weeks') or {}
+                _wks = sorted(_wk, reverse=True)
+                st.markdown("#### 📅 주차별 조회 — 그 주에 함께 걸렸던 종목 전부")
+                _wpick = st.selectbox(
+                    f"주차 선택 — 신호가 있었던 {len(_wks)}주",
+                    _wks, index=0, key="accel_wk",
+                    format_func=lambda w: f"{w}  ({len(_wk[w])}종)")
+                _wr = _wk[_wpick]
+                _wf = [r['f52'] for r in _wr if r.get('f52') is not None]
+                _wc = st.columns(4)
+                _wc[0].metric("그 주 신호", f"{len(_wr)}종")
+                _wc[1].metric("1년 평균", f"{sum(_wf)/len(_wf):.1f}%" if _wf else "미도래")
+                _wc[2].metric("1년 승률",
+                              f"{sum(1 for x in _wf if x > 0)/len(_wf)*100:.0f}%" if _wf else "—")
+                _wc[3].metric("2배 이상",
+                              f"{sum(1 for x in _wf if x >= 100)/len(_wf)*100:.0f}%" if _wf else "—")
+                # ── 그 주 코호트의 이후 1년 분포 ────────────────────
+                # 평균 하나로는 U자 분포가 안 보인다. 종목별 막대로 흩어짐을 그대로 보여준다.
+                _wd = [(r['sym'], r['f52']) for r in _wr if r.get('f52') is not None]
+                if _wd:
+                    _wd.sort(key=lambda x: -x[1])
+                    _fw = go.Figure(go.Bar(
+                        x=[x[0] for x in _wd], y=[x[1] for x in _wd],
+                        marker_color=['#1f6b45' if v >= 100 else
+                                      '#7fae95' if v > 0 else '#a03028' for _, v in _wd],
+                        hovertemplate='%{x}<br>이후 1년 %{y:+.1f}%<extra></extra>'))
+                    _fw.add_hline(y=0, line_width=1, line_color='#7c8290')
+                    _fw.add_hline(y=100, line_width=1, line_dash='dot', line_color='#1f6b45',
+                                  annotation_text='2배', annotation_position='right')
+                    _fw.update_layout(height=300, margin=dict(l=8, r=8, t=34, b=8),
+                                      title=f"{_wpick} 코호트 · 이후 1년 수익률 ({len(_wd)}종)",
+                                      yaxis_title='이후 1년 (%)', showlegend=False)
+                    st.plotly_chart(_fw, use_container_width=True)
+                    st.caption(
+                        "**진한 초록 = 2배 이상.** 평균 하나로는 이 분포가 안 보인다 — "
+                        "몇 종목이 전체를 끌고 가고 나머지는 시장에 진다. 등가중으로 담으면 "
+                        "받는 것은 평균이지만, 그 평균은 소수 종목이 만든다.")
+                st.dataframe(pd.DataFrame([{
+                    '코드': r['sym'], '종목': r['name'], '회차': r['n'],
+                    '그주상승': r['up'], '시총($B)': r['mc'], '고점대비': r['dd'],
+                    '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
+                    'GPM': r['gpm'], 'OPM': r['opm'], 'RS13': r['rs13'], 'PSR': r['psr'],
+                    '이후13주': r.get('f13'), '이후52주': r.get('f52'),
+                    '이후104주': r.get('f104')} for r in _wr]),
+                    use_container_width=True, hide_index=True, row_height=25,
+                    height=_dfh(len(_wr)))
+                st.caption(
+                    "그 주에 함께 걸린 종목 전부다. **한 종목이 걸렸다는 사실만으로는 "
+                    "조건의 실효를 판단할 수 없다** — 같은 주 전 종목의 타율을 함께 봐야 한다. "
+                    "위 지표가 그 코호트 성적이다.")
+
+            if _ac.get('by_year'):
+                with st.expander("📅 연도별 신호 성적 (신호 1건당 1년 후)"):
+                    st.dataframe(pd.DataFrame([{
+                        '연도': y, '신호': v['n'], '평균': v['mean'],
+                        '시장대비': v['alpha'], '2배+%': v['w2'], '4배+%': v['w4']}
+                        for y, v in sorted(_ac['by_year'].items())]),
+                        use_container_width=True, hide_index=True, row_height=25)
+            st.divider()
+
+if _LEAD_KR:
     with t_lead, guard('주도주 KR'):
         # 2026-08-16: 미국 규칙⑥ 원문을 KR에 이식한 KR-U6 추가. 실측에서 KR-P1보다 우수해
         # 기본값으로 둔다(평균 11.5% vs 9.6% · 손익비 3.53 vs 3.05 · 꼬리의존 36% vs 47%).
@@ -1281,594 +1352,6 @@ if st.session_state.get('lead_mkt', '').startswith('🇰🇷'):
                                          key=lambda x: -(x[1].get('ret') or -999))]),
                         use_container_width=True, hide_index=True, row_height=25,
                         height=_dfh(len(_p)))
-else:
-  with t_lead, guard('주도주 US'):
-    st.caption(data_stamp('results/leaders_ab.json'))
-    RULE_FREEZE = '2026-08-18'   # L/S 규칙 확정일 — 이후 신호만 아웃오브샘플이다
-
-# 2026-08-18 전면 교체. 규칙⑥(RS13>1.5 & OPM>0 & $2B+)은 시총 데이터를 고치고
-    # 다시 재니 2022년 이후 CAGR 3.8% 였다(SPY 13.2%). 앞 구간 33.8% 는 look-ahead 오염이었다.
-    # 대시세 출발 시점을 구조적으로 놓치는 게 원인 — NVDA·TSLA·CVNA·AXTI 가 그때
-    # 시총 $0.07B~$282B 에 대부분 적자였다. 하나의 필터로 못 잡아 L/S 로 쪼갰다.
-    _ab = load_json(Path('results/leaders_ab.json'))
-    if not _ab:
-        st.warning("주도주 신호 데이터 없음 → 로컬에서 `python leaders_ab.py` 실행 후 커밋.")
-    else:
-        _spyA = _ab['backtest']['SPY']
-        _S1, _S2, _ST = '앞 구간 2018-06~2021-12', '뒤 구간 2022-01~2026-08', '전체'
-        st.markdown(
-            "**진입 신호 = 주간 +20% 급등 + 거래량이 전주보다 안 늘어난 주.** "
-            "637,269 주차-종목에서 이후 1년 +100% 확률이 기저 5.17% → "
-            "**27.4%(5.3배)** 로 가장 강했다. 거래량은 20주 평균이 아니라 "
-            "**전주 대비**로 봐야 보이고, 방향도 직관과 반대다 — 터질 때가 아니라 "
-            "**안 터질 때**가 좋다 (같은 급등에서 거래량 3배↑ 13.4% vs 감소 30.4%)."
-        )
-        st.caption(f"기준 주차 **{_ab['signal_week']}** · 유니버스 {_ab['universe']:,}종 "
-                   f"· 생성 {_ab['generated']}")
-
-        _mix = _ab['backtest']['MIX']
-        _c = st.columns(4)
-        _c[0].metric("L+S 50:50 · 전체 CAGR", f"{_mix[_ST]['cagr']}%",
-                     f"SPY {_spyA[_ST]['cagr']}%")
-        _c[1].metric("MDD", f"{_mix[_ST]['mdd']}%", f"SPY {_spyA[_ST]['mdd']}%",
-                     delta_color="inverse")
-        _c[2].metric("앞 구간 2018~2021", f"{_mix[_S1]['cagr']}%",
-                     f"SPY {_spyA[_S1]['cagr']}%")
-        _c[3].metric("뒤 구간 2022~2026", f"{_mix[_S2]['cagr']}%",
-                     f"SPY {_spyA[_S2]['cagr']}%")
-        st.caption("구간을 갈라 각각 검증했다. **두 국면 모두에서 SPY를 앞선다** — "
-                   "앞 구간에서만 좋고 뒤 구간에서 무너진 구 규칙⑥과 다른 점이다. "
-                   "진입을 1주 늦춰도 우위가 유지된다(L 18.4% · 2주 15.1%). "
-                   "⚠️ 2026-08-23 부터 L 의 재무조건에 **흑자전환**이 들어갔다 — "
-                   "8Q신고점·OPM+5%p 만 보던 것이 TSLA·WDC 를 8년간 한 번도 못 잡던 "
-                   "원인이었다. 아래 참조.")
-
-        _rt = st.tabs([f"🏛 L · 대형 주도주 ({len(_ab['candidates']['L'])}종)",
-                       f"🚀 S · 소형 대시세 ({len(_ab['candidates']['S'])}종)"])
-        for _t, _k in zip(_rt, ('L', 'S')):
-            with _t:
-                _rr, _bb = _ab['rules'][_k], _ab['backtest'][_k]
-                st.markdown(f"**진입** `{_rr['text']}`")
-                st.markdown(f"**운용** {_rr['exit']} · **{_rr['slots']}칸** 균등 "
-                            f"· 랭킹 = 그 주 상승률")
-                if _rr.get('tranche_text'):
-                    st.markdown(f"**진입** {_rr['tranche_text']}")
-                if _k == 'L':
-                    st.info(
-                        "**2026-08-23 재무조건에 흑자전환(op_turn)을 추가했다.** "
-                        "08-18 에 규칙⑥→L/S 로 갈아탈 때 재무조건이 '영업익 8분기 "
-                        "신고점 or OPM +5%p' 로 좁아지면서 흑자전환이 빠졌는데, 그게 "
-                        "**TSLA·WDC 를 8년간 한 번도 못 잡던 원인**이었다. "
-                        "TSLA 2020-03-23 은 급등(+20.3%)도 거래량(0.73)도 통과했는데, "
-                        "영업익 $359M 흑자전환이었음에도 8Q신고점이 아니고"
-                        "(2018Q3 $417M 이 더 높다) OPM 개선폭이 +0.7%p 라 "
-                        "재무조건에서만 탈락했다. — 결과: CAGR 24.9% → **25.5%**, "
-                        "MDD −39.8% → **−33.2%**, 뒤 구간 28.5% → **40.9%**, "
-                        "초대박 포착 24 → **28종**, 3배+ 거래 3 → **5건**, "
-                        "TSLA 0 → **3회** · WDC 0 → **1회**. — **같은 날 눌림목 "
-                        "4분할 진입은 철회했다** (흑자전환과 서로를 갉아먹는다: "
-                        "분할+흑자전환 18.0% vs 일괄+흑자전환 25.5%). 흑자전환 종목은 "
-                        "초기에 확 오르는데 눌림목을 기다리면 그 상승을 놓친다. "
-                        "'신호 추매'(같은 종목 재신호 시 추가)도 재고 기각했다 — "
-                        "보유 중 재신호가 8년에 17번뿐이라 추매가 아니라 노출을 "
-                        "1/k 로 줄이는 규칙이 된다(1/2×2 17.0% · 1/3×3 11.2% · "
-                        "1/4×4 8.6%).", icon="💡")
-                _m = st.columns(4)
-                _m[0].metric("전체 CAGR", f"{_bb[_ST]['cagr']}%",
-                             f"SPY {_spyA[_ST]['cagr']}%")
-                _m[1].metric("MDD", f"{_bb[_ST]['mdd']}%",
-                             f"SPY {_spyA[_ST]['mdd']}%", delta_color="inverse")
-                _m[2].metric("앞 구간", f"{_bb[_S1]['cagr']}%")
-                _m[3].metric("뒤 구간", f"{_bb[_S2]['cagr']}%")
-                st.caption(f"평균 보유 {_bb[_ST]['held']}종 / {_rr['slots']}칸 — "
-                           f"나머지는 현금이다. 신호가 없는 주에는 비워 둔다.")
-                _cd = _ab['candidates'][_k]
-                st.markdown(f"**이번 주 후보 {len(_cd)}종**")
-                if _cd:
-                    # 2026-08-22: 후보표를 심층조회·주차별 조회와 **같은 원본·같은 열**로
-                    # 맞췄다. 종목 코드와 상승률만 보고 판단할 수는 없다 — 밸류에이션·
-                    # 낙폭·트리거까지 한 화면에서 봐야 한다. 원본이 같으므로 세 화면의
-                    # 숫자가 어긋날 일도 없다.
-                    _det = (load_json(Path('results/leaders_symbol_detail.json'))
-                            or {}).get('symbols', {})
-                    _wk = _ab['signal_week']
-
-                    def _cand_row(m):
-                        _x = next((z for z in _det.get(m['sym'], {}).get('rows', [])
-                                   if z['d'] == _wk and _k in z.get('r', [])), None)
-                        row = {'코드': m['sym'], '종목': m['name'],
-                               '시총($B)': m['mc'], '종가': m['close'],
-                               '그주상승': m['up'], '신호회차': m.get('n'),
-                               '거래량 전주비': m['vw']}
-                        if _x:
-                            row.update({
-                                'RS4': _x.get('rs4'), 'RS13': _x.get('rs13'),
-                                'OPM': _x.get('opm'), 'OPM QoQ': _x.get('opmq'),
-                                'PER': ('적자' if _x.get('per') is None
-                                        else f"{_x['per']:.1f}"),
-                                'PSR': _x.get('psr'), '매출 QoQ': _x.get('revq'),
-                                '신고가대비': _x.get('dist'), '52주낙폭': _x.get('mdd'),
-                                '거래대금($M)': _x.get('adv'),
-                                '트리거': _x.get('trg', '-')})
-                        row.update({'이후1주': m.get('f1'), '이후4주': m.get('f4'),
-                                    '이후13주': m.get('f13')})
-                        return row
-
-                    st.dataframe(pd.DataFrame([_cand_row(m) for m in _cd]),
-                        use_container_width=True, hide_index=True, row_height=25,
-                        height=_dfh(len(_cd)))
-                    st.caption(
-                        "열 구성은 아래 **주차별 조회**와 같다(원본도 같은 파일이다). "
-                        "**이후1·4·13주는 이번 주 후보라 아직 비어 있는 게 정상** — "
-                        "다음 주부터 채워진다. RS4/RS13 = 시장 대비 4주·13주 상대강도, "
-                        "OPM QoQ = 영업이익률 전분기 대비 변화(%p), 신고가대비·52주낙폭은 %.")
-                    st.caption(
-                        "**신호회차** = 이 종목이 이 규칙에서 몇 번째로 낸 신호인가. "
-                        "연속일 필요 없고, 몇 년 떨어져 있어도 누적되며 보유 중 재신호도 센다. "
-                        "**규칙에는 안 들어간다 — 판단 재료로만 띄운다.** "
-                        "2026-08-22 측정에서 S 3회차 이상만 사는 안이 37.3%(현행 27.8%)로 "
-                        "지연·플라시보·슬롯 대조를 전부 통과했지만, 임계값이 "
-                        "1회 27.8 · 2회 27.4 · 3회 37.3 · 4회 27.0 · 5회 35.3 으로 "
-                        "지그재그라 '3회'라는 숫자를 못 믿어 채택하지 않았다. "
-                        "L 은 정반대로 회차가 쌓일수록 나빠진다(3회차 −3.7%). "
-                        "실전 신호로 표본이 쌓이면 다시 판단한다.")
-                else:
-                    st.info("이번 주 조건 충족 종목 없음")
-
-                # ── 🛡 지금 규칙대로면 (가상 장부) ──────────────────────────
-                # 2026-08-22: 보유를 사람이 입력하는 방식은 3개월간 한 번도 채워지지
-                # 않았다. 그래서 입력을 요구하지 않고 **규칙이 만든 가상 장부**를
-                # 띄운다. 이건 규율 엔진이 아니라 **기준선**이다 — 실계좌의 집중·
-                # 레버리지를 막지는 못한다. 다만 "지금 규칙대로면 무엇을 몇 % 들고
-                # 얼마가 현금인가"를 눈으로 대조할 수는 있다.
-                _bk = (_ab.get('book') or {}).get(_k)
-                if _bk:
-                    st.markdown("---")
-                    st.markdown(f"**🛡 지금 규칙대로면 — {_bk['filled']}/{_bk['slots']}칸 "
-                                f"· 현금 {_bk['cash_pct']}%**")
-                    _bp = _bk['positions']
-                    if _bp:
-                        st.dataframe(pd.DataFrame([{
-                            '코드': r['sym'], '종목': r['name'], '비중%': r['w'],
-                            '진입회차': (f"{r.get('step')}/{r.get('ksteps')}"
-                                     if (r.get('ksteps') or 1) > 1 else '일괄'),
-                            '진입일': r['ed'], '보유주': r['wk'],
-                            '진입비중%': r.get('w0'),
-                            '진입가': r['entry'], '현재가': r['cur'], '수익률%': r['ret'],
-                            '고점': r['peak'], '고점대비%': r['dd'],
-                            '청산선': r['stop'], '청산까지%': r['room']}
-                            for r in _bp]),
-                            use_container_width=True, hide_index=True, row_height=25,
-                            height=_dfh(len(_bp)))
-                        # 가드레일 엔진을 실제로 돌린다 — 3개월 만에 처음 입력이 생겼다.
-                        try:
-                            import guardrail as _gr
-                            # 매입 비중 상한은 점검하지 않는다 — 이 규칙은 N칸 균등이라
-                            # 진입 비중이 항상 1/N(L 16.7% · S 10%)로 **구조적으로 충족**된다.
-                            # 여기서 볼 것은 '진입 뒤 커진 평가 비중'이고 그건 트림 기준(40%)이다.
-                            _gp = [{'sym': r['sym'], 'name': r['name'], 'market': 'US',
-                                    'value': r['w'], 'pnl_pct': r['ret'],
-                                    'cur_price': r['cur'],
-                                    'peak_price': r['peak']} for r in _bp]
-                            _gv = _gr.evaluate(_gp, top_cap=100, lower_cap=100,
-                                               trail_pct=int(_rr['trail']))
-                            st.markdown(f"**가드레일 판정 {_gv['grade']}** — "
-                                        f"{_gv['summary'].get('msg', '')}")
-                            if _gv['violations']:
-                                for _v in _gv['violations']:
-                                    st.warning(f"{_v['sev']} **{_v['sym']}** · "
-                                               f"{_v['rule']} — {_v['msg']}")
-                            st.caption(
-                                "⚠️ 이건 **가상 장부에 대한 판정**이지 형 실계좌 판정이 "
-                                "아니다. 규칙대로 산 포트폴리오조차 종목 상한을 넘길 수 "
-                                "있다는 걸 보여주는 용도다 — 대시세 한 종목이 커지면 "
-                                "규칙 자체가 집중을 만든다. **매입 비중 상한은 점검하지 "
-                                "않는다** — N칸 균등이라 진입 비중이 항상 1/N 로 구조적으로 "
-                                "충족된다(진입비중% 열이 그것이다). 보는 것은 진입 뒤 커진 "
-                                "평가 비중(트림 40%)·레버리지 한도이고, 청산 기준은 이 규칙의 "
-                                f"−{int(_rr['trail'])}% 트레일링을 그대로 쓴다.")
-                        except Exception as _e:
-                            st.caption(f"가드레일 판정 실패: {type(_e).__name__}")
-
-        with st.expander("⚠️ 이 숫자를 믿을 때 알아야 할 것"):
-            for _cv in _ab.get('caveats', []):
-                st.markdown(f"- {_cv}")
-            st.markdown(
-                "- **구 규칙⑥은 2026-08-18 종료됐다.** 시총 데이터를 고친 뒤 다시 재니 "
-                "2022년 이후 CAGR 3.8%(SPY 13.2%)였다. 과거 신호 이력은 아래 심층 조회와 "
-                "📒 성적표에 그대로 남겨 둔다 — 무엇이 왜 실패했는지가 지워지면 안 된다.")
-            st.markdown(
-                "- **NVDA·TSLA 는 이 규칙이 한 주도 못 잡는다.** 시총이 크면 주간 +20% "
-                "자체가 거의 안 나오기 때문이다($50B+ 에서 +15%↑ 주는 8년간 60주 미만). "
-                "2026-08-22 에 고치려고 재봤다 — 시총별로 문턱을 낮추면(20/15/10%) "
-                "NVDA 23주·TSLA 36주가 잡히지만 전체 CAGR 이 25.4%→16.2%, MDD 는 "
-                "−39.8%→−52.2% 로 나빠진다. 거래량 조건을 <2.0 으로 풀면 23.8%, "
-                "아예 없애면 13.3% 다. 대형 전용 규칙을 따로 만드는 것도 안 됐다 — "
-                "잘 나오는 조합($50B+·+10%·3칸, 27.5%)은 파라미터 격자에서 이웃 셀이 "
-                "전부 8~20% 인 고립점이고 평균 보유가 2.7종이다. **미감지는 버그가 "
-                "아니라 측정해서 받아들인 트레이드오프다.**")
-            st.markdown(
-                "- **2026-08-22 에 진입·청산·비중·랭킹 네 축을 전부 다시 재봤고, "
-                "현행보다 나은 걸 하나도 못 찾았다.** 트레일 −35%(30.5%)와 PSR 낮은 순 "
-                "정렬(35.0%)이 격자에서는 현행을 앞섰지만, 진입을 1주만 늦추면 뒤집히거나 "
-                "우위가 2020년 3~4월 두 주에서 전부 나왔다. 피라미딩·MA20 이탈 청산·"
-                "4주 누적 상승·연속 양봉은 모두 기각됐다. **이 시스템에서 슬롯 경쟁이 "
-                "실제로 벌어진 주는 8년간 16주뿐이다** — 격자를 돌리면 언제나 봉우리가 "
-                "나오지만 대부분 열 몇 번의 판단이 만든 것이다. 자세한 건 HISTORY.md 5기.")
-            st.markdown(
-                "- **워크포워드를 돌려봤더니 5분할 중 1번만 SPY를 이겼다(2026-08-22).** "
-                "TRAIN 3년으로 파라미터를 고르고 TEST 1년에 그대로 적용했더니 "
-                "TRAIN 27~49% 가 TEST 에서 −26.9 / −6.8 / −5.1 / −11.2 / +73.3% 였다. "
-                "**현행 고정 파라미터도 똑같이 1/5** — 파라미터를 고르는 행위 자체가 "
-                "아웃오브샘플에서 아무 정보도 주지 않았다. 다만 TEST 가 1년짜리라 "
-                "표본이 얇다(L 은 연간 신호 60여 건). 구간을 길게 잘라 보면 "
-                "**L 은 최근 15개월을 빼도 20.2%(SPY 13.2%)로 버티지만, "
-                "S 는 2022-01~2025-05 구간에서 5.8% 로 SPY(8.7%)에 진다** — "
-                "S 성적은 최근 15개월(98.1%)이 거의 다 만든 것이다.")
-
-        # ── 종목 심층 조회 ─────────────────────────────────────────────
-        # market.db는 저장소에 없으므로 leaders_symbol.py가 미리 만든 JSON을 읽는다.
-        st.divider()
-        st.subheader("🔍 종목 심층 조회 (L/S 규칙) — 언제 걸렸고 언제 나갔나")
-        _sd = load_json(Path('results/leaders_symbol_detail.json'))
-
-        # ── 주차 코호트 통계 ────────────────────────────────────────
-        # "이 종목이 걸렸다"만으로는 조건의 실효를 못 판단한다(필요조건일 뿐).
-        # 같은 주에 걸린 **전 종목의 타율**을 함께 봐야 충분조건에 가까워진다.
-        # rows 에 이미 전방수익 f13/f26/f52 가 들어 있어 추가 계산 없이 집계된다.
-        @st.cache_data(show_spinner=False)
-        def _week_cohort(_fkey: str):
-            """주차 → {n, 평균f13, 승률f13, 평균f52, rs13 내림차순 종목목록}"""
-            det = load_json(Path('results/leaders_symbol_detail.json')) or {}
-            wk = {}
-            for _s, _rec in (det.get('symbols') or {}).items():
-                for _row in _rec.get('rows', []):
-                    w = wk.setdefault(_row['d'], {'syms': []})
-                    w['syms'].append((_s, _row.get('rs13'), _row.get('f13'), _row.get('f52')))
-            for w, v in wk.items():
-                f13 = [x[2] for x in v['syms'] if x[2] is not None]
-                f52 = [x[3] for x in v['syms'] if x[3] is not None]
-                v['n'] = len(v['syms'])
-                v['avg13'] = round(sum(f13) / len(f13), 1) if f13 else None
-                v['win13'] = round(sum(1 for x in f13 if x > 0) / len(f13) * 100) if f13 else None
-                v['avg52'] = round(sum(f52) / len(f52), 1) if f52 else None
-                # RS13 내림차순 순위 (없으면 맨 뒤)
-                v['rank'] = {s: i + 1 for i, (s, _r13, _a, _b) in enumerate(
-                    sorted(v['syms'], key=lambda x: -(x[1] if x[1] is not None else -1e9)))}
-            return wk
-
-        # 캐시 키는 날짜가 아니라 파일 지문 — 같은 날 재발행해도 새로 계산된다
-        _WK = _week_cohort(file_key('results/leaders_symbol_detail.json')) if _sd else {}
-        if not _sd:
-            st.info("`python leaders_symbol.py build` 실행 후 커밋하면 조회할 수 있습니다.")
-        else:
-            _syms = _sd['symbols']
-            _opts = sorted(_syms, key=lambda s: (-len(_syms[s].get('rows', [])), s))
-            _pick = st.selectbox(
-                f"종목 검색 — L/S 신호 이력이 있는 {len(_opts)}종",
-                _opts, index=0, key="lead_sym",
-                format_func=lambda s: f"{s} · {_syms[s]['name'][:28]} "
-                                      f"({len(_syms[s].get('rows', []))}회 신호)")
-            _r = _syms[_pick]
-            _D = pd.to_datetime(_sd['dates'])
-            # 곡선은 통합 파일에서 읽는다(2026-08-25). trades 의 e/x 인덱스는
-            # leaders_symbol_detail 의 dates 기준인데, 두 파일의 날짜 축이 451주차로
-            # 완전히 같아서 그대로 쓸 수 있다 — 축이 어긋나면 마커가 밀린다.
-            _pcv = load_json(Path('results/price_curves.json')) or {}
-            _cvr = (_pcv.get('curves') or {}).get(_pick)
-            if not _cvr:
-                st.warning(f"{_pick} 가격 곡선이 없다. `python curves_build.py` 를 돌려라.")
-                st.stop()
-            _px = pd.Series(_cvr['c'],
-                            index=_D[_cvr['i']]).astype(float).dropna()
-
-            # 규칙이 늘면 KeyError 로 이 탭이 통째로 죽는다(2026-08-18 L/S 추가 때 발생).
-            # 색이 없는 규칙은 회색으로 떨어뜨린다.
-            _cols = defaultdict(lambda: '#8a8f98',
-                                {'L': '#1f6b45', 'S': '#7a3fa0', 'A': '#17415c',
-                                 'B': '#a03028', 'R6': '#8a6a12'})
-            _fig = go.Figure()
-            _fig.add_trace(go.Scatter(x=_px.index, y=_px.values, mode='lines',
-                                      name='주봉 종가', line=dict(color='#12161b', width=1.4)))
-            for _k, _tr in _r.get('trades', {}).items():
-                for _t in _tr:
-                    _a, _b = _D[_t['e']], _D[_t['x']]
-                    _fig.add_vrect(x0=_a, x1=_b, fillcolor=_cols[_k], opacity=.07,
-                                   line_width=0, layer='below')
-                    _fig.add_trace(go.Scatter(
-                        x=[_a], y=[_t['ep']], mode='markers+text',
-                        marker=dict(symbol='triangle-up', size=13, color=_cols[_k],
-                                    line=dict(color='white', width=1)),
-                        text=[f"{_k} {_t['ret']:+.0f}%"], textposition='bottom center',
-                        textfont=dict(size=10, color=_cols[_k]),
-                        name=f"{_k} 진입", showlegend=False,
-                        hovertemplate=f"{_k} 진입 %{{x|%Y-%m-%d}}<br>${_t['ep']:,.2f}<extra></extra>"))
-                    if _t['closed']:
-                        _fig.add_trace(go.Scatter(
-                            x=[_b], y=[_t['xp']], mode='markers',
-                            marker=dict(symbol='triangle-down', size=13,
-                                        color='#1f6b45' if _t['ret'] >= 0 else '#a03028',
-                                        line=dict(color='white', width=1)),
-                            name=f"{_k} 청산", showlegend=False,
-                            hovertemplate=(f"{_k} 청산 %{{x|%Y-%m-%d}}<br>${_t['xp']:,.2f}"
-                                           f"<br>{_t['ret']:+.1f}% · {_t['wk']}주<extra></extra>")))
-            _fig.update_yaxes(type='log', title='주봉 종가(로그)')
-            _fig.update_layout(height=430, margin=dict(l=8, r=8, t=34, b=8),
-                               title=f"{_pick} · {_r['name']}  —  ▲ 진입 / ▼ 고점 −20% 청산",
-                               hovermode='x unified')
-            st.plotly_chart(_fig, use_container_width=True)
-
-            # ── 신호 주차 × 매매 결과를 한 표로 (2026-08-16 통합) ──────────────
-            # 이전엔 표가 둘이었다: '매매 통합'(진입한 건만)과 '신호 주차 전체'(진입 안 한 주 포함).
-            # 열이 거의 같아 차이를 알기 어려웠다. 이제 **신호가 뜬 모든 주차**를 행으로 두고,
-            # 그 주에 진입했으면 매매 결과 열을 채운다 — "언제 신호가 떴고, 어디서 들어갔고,
-            # 결과가 어땠나"를 한 표에서 본다.
-            _byd = {x['d']: x for x in _r.get('rows', [])}
-            _tr_by_date = {}
-            for _k, _tr in _r.get('trades', {}).items():
-                for _t in _tr:
-                    _tr_by_date[str(_D[_t['e']].date())] = (_k, _t)
-
-            _merged = []
-            for _d in sorted(set(_byd) | set(_tr_by_date)):
-                _m = _byd.get(_d, {})
-                _k, _t = _tr_by_date.get(_d, (None, None))
-                _merged.append({
-                    '진입': _d,
-                    '청산': (('보유 중' if not _t['closed'] else str(_D[_t['x']].date()))
-                            if _t else None),
-                    '규칙': (_k if _t else ','.join(_m.get('r', [])) or '-'),
-                    '시총($B)': _m.get('mc'),
-                    '수익률': (_t['ret'] if _t else None),
-                    '보유주': (_t['wk'] if _t else None),
-                    '신호지속': (_t.get('sk', 1) if _t else None),
-                    '진입가': (_t['ep'] if _t else _m.get('close')),
-                    '청산가': (_t['xp'] if _t else None),
-                    # 주차 코호트 — 이 종목이 그 주 신호 중 몇 번째였나(RS13 순),
-                    # 그리고 그 주 신호 전체의 이후 성적(필요조건 → 충분조건 점검)
-                    '주차순위': (f"{_w['rank'].get(_pick, '-')}/{_w['n']}"
-                              if (_w := _WK.get(_d)) else '-'),
-                    '주차타율': (f"{_w['win13']}%" if _w and _w.get('win13') is not None else '-'),
-                    '주차평균13주': (_w['avg13'] if _w and _w.get('avg13') is not None else None),
-                    'RS4': _m.get('rs4'), 'RS13': _m.get('rs13'), 'RS26': _m.get('rs26'),
-                    '매출QoQ': _m.get('revq'),
-                    'OPM': _m.get('opm'), 'OPM QoQ': _m.get('opmq'),
-                    'PSR': _m.get('psr'),
-                    # PER은 최근 12개월 순이익이 적자면 산출되지 않는다.
-                    # 흑자전환 직후에는 정상적으로 비어 있는 값이라 '적자'로 표기한다.
-                    'PER': ('적자' if _m.get('per') is None else f"{_m['per']:.1f}"),
-                    '신고가대비': _m.get('dist'), '52주낙폭': _m.get('mdd'),
-                    # 거래량은 20주 평균이 아니라 전주 대비가 신호다(2026-08-18).
-                    '그주상승': _m.get('up'), '거래량 전주비': _m.get('vwk'),
-                    '거래대금($M)': _m.get('adv'),
-                    '트리거': _m.get('trg', '-'), '_진입함': bool(_t)})
-            if _merged:
-                _mdf = pd.DataFrame(_merged).sort_values('진입').reset_index(drop=True)
-
-                def _ret_bg(v):
-                    if v is None or v != v:      # None 은 v!=v 로 안 걸러진다
-                        return ''
-                    a = min(abs(v) / 120, 1) * .78 + .06        # 클수록 진하게
-                    return (f'background-color: rgba(31,107,69,{a:.2f}); color:'
-                            + ('#fff' if a > .45 else '#12321c')) if v >= 0 else \
-                           (f'background-color: rgba(160,48,40,{a:.2f}); color:'
-                            + ('#fff' if a > .45 else '#3a1512'))
-
-                def _hold_bg(v):
-                    if v is None or v != v:      # None 은 v!=v 로 안 걸러진다
-                        return ''
-                    a = min(v / 60, 1) * .55 + .04              # 오래 들수록 진하게
-                    return f'background-color: rgba(23,65,92,{a:.2f}); color:' + \
-                           ('#fff' if a > .35 else '#12161b')
-
-                _n_in = int(_mdf['_진입함'].sum())
-                _only_in = st.checkbox("진입한 건만 보기", value=False, key="lsd_only_in")
-                _view = _mdf[_mdf['_진입함']] if _only_in else _mdf
-                _view = _view.drop(columns=['_진입함'])
-                st.markdown(f"**신호 주차 {len(_mdf)}건 · 그중 진입 {_n_in}건** — "
-                            "수익률은 클수록, 보유는 길수록 진하게")
-                st.dataframe(
-                    _view.style
-                         .map(_ret_bg, subset=['수익률'])
-                         .map(_hold_bg, subset=['보유주', '신호지속'])
-                         .format({'수익률': '{:+.1f}%', '진입가': '${:,.2f}',
-                                  '청산가': '${:,.2f}', '보유주': '{:.0f}주',
-                                  '신호지속': '{:.0f}주'}, na_rep='—'),
-                    use_container_width=True, hide_index=True, row_height=26,
-                    height=_dfh(min(len(_view), 16)))
-                st.caption("한 행 = 신호가 뜬 한 주. **수익률이 '—'인 행은 신호는 떴지만 진입하지 않은 주** "
-                           "(이미 보유 중이라 재진입 안 함). 진입한 주만 보려면 위 체크박스.")
-                st.caption("**주차순위** = 그 주 신호 종목을 RS13 내림차순으로 세웠을 때 이 종목의 순번 / 그 주 총 신호수. "
-                           "**주차타율·주차평균13주** = 그 주에 걸린 **전 종목**의 이후 13주 승률·평균수익 — "
-                           "이 종목이 걸렸다는 건 필요조건일 뿐이고, **그 주 코호트가 전반적으로 올랐는지**를 봐야 "
-                           "조건이 실제로 작동한 것인지 알 수 있다. 내 종목만 올랐다면 조건이 아니라 운이다.")
-                st.caption("**RS4/RS13/RS26** = 4·13·26주 상대강도(시장 대비). "
-                           "**신호지속** = 진입 시점부터 같은 신호가 연속으로 뜬 주수(매수 판단 시점에 이미 알 수 있는 값). "
-                           "**PER '적자'** = 최근 12개월 순이익이 마이너스라 산출 불가 — 흑자전환 직후에는 정상이다.")
-
-            # ── 주차별 조회 ────────────────────────────────────────────
-            # 종목별 조회만으로는 "이 조건이면 오른다"를 확인할 수 없다.
-            # 같은 주에 함께 걸렸던 종목이 어떻게 됐는지 다 봐야 조건의 실효를 판정할 수 있다.
-            st.divider()
-            st.subheader("📅 주차별 조회 (L/S 규칙) — 그 주에 함께 걸렸던 종목 전부")
-            st.caption("종목 하나만 보면 성공 사례만 눈에 들어온다. "
-                       "같은 주 신호를 통째로 놓고 이후 성적을 봐야 조건이 실제로 작동하는지 알 수 있다.")
-            # 이 코호트 표는 '공시'이지 '검증'이 아니다. 규칙의 파라미터를 고른 바로 그
-            # 8년으로 다시 채점하는 것이라, 답을 보고 만든 정답지로 채점하는 것과 같다.
-            # 진짜 아웃오브샘플은 규칙 확정일(2026-08-18) 이후뿐이고, 그건 아직 몇 주다.
-            st.warning(
-                f"**이 표는 공시이지 검증이 아니다.** 규칙(+20%·거래량<1.5·$2B·6칸·−30%)의 "
-                f"파라미터를 고른 것이 바로 이 8년 데이터다. 같은 데이터로 다시 채점하면 "
-                f"잘 나오는 게 당연하다. **진짜 아웃오브샘플은 규칙 확정일 "
-                f"{RULE_FREEZE} 이후 주차뿐이다.**", icon="⚠️")
-
-            @st.cache_data(show_spinner=False)
-            def _by_week(_fkey):
-                idx = {}
-                for _s, _v in _sd['symbols'].items():
-                    for _x in _v.get('rows', []):
-                        idx.setdefault(_x['d'], []).append((_s, _v['name'], _x))
-                return idx
-
-            _wk_idx = _by_week(file_key('results/leaders_symbol_detail.json'))
-            _wks = sorted(_wk_idx, reverse=True)
-
-            # 441주를 셀렉트박스로만 넘기면 특정 시점을 찾을 수가 없다 — 날짜로 바로 간다.
-            # 신호가 있던 주는 441개뿐이라 임의 날짜는 대부분 비어 있으므로,
-            # 고른 날짜 **이전(과거) 방향의 가장 가까운 신호주**로 스냅한다.
-            _wk_d = {w: pd.Timestamp(w).date() for w in _wks}
-            _c1, _c2 = st.columns([1, 2])
-            with _c1:
-                _pick = st.date_input("날짜로 이동", value=_wk_d[_wks[0]],
-                                      min_value=_wk_d[_wks[-1]], max_value=_wk_d[_wks[0]],
-                                      format="YYYY-MM-DD", key="lead_week_date",
-                                      help="신호가 없던 날짜를 고르면 그 이전의 가장 가까운 신호주로 이동한다.")
-            _snap = next((w for w in _wks if _wk_d[w] <= _pick), _wks[-1])
-            # 날짜를 새로 고른 경우에만 주차를 옮긴다. 아래 셀렉트박스로 직접 고른 주차를
-            # 매 rerun 마다 되돌려버리면 셀렉트박스가 못 쓰게 된다.
-            if st.session_state.get('_lead_prev_date') != _pick:
-                st.session_state['_lead_prev_date'] = _pick
-                st.session_state['lead_week'] = _snap
-            with _c2:
-                _w = st.selectbox(f"주차 선택 — 신호가 있었던 {len(_wks)}주",
-                                  _wks, index=0, key="lead_week",
-                                  format_func=lambda w: f"{w}  ({len(_wk_idx[w])}종)")
-            if _wk_d[_w] != _pick:
-                st.caption(f"{_pick} 에는 신호가 없어 **{_w}** 주차로 이동했다.")
-
-            _lst = _wk_idx[_w]
-            # 2026-08-18: 규칙별로 걸러 볼 수 있어야 한다. 신규 L/S 와 종료된 구 규칙이
-            # 한 표에 섞이면 "새 필터가 그 주에 뭘 잡았나"를 확인할 수가 없다.
-            # 2026-08-22: 구 규칙(A/B/R6)을 아예 뺐다. 폐기된 규칙이 80% 를 차지해
-            # 현행 L/S 가 묻혔고, 조건에 걸린 게 없을 때 '전체로 폴백'하는 바람에
-            # **구 규칙 신호가 L+S 인 척 화면을 채웠다**(2026-08-22 스크린샷).
-            # 없으면 없다고 말하는 게 맞다 — 신호 0 종은 그 자체로 정보다.
-            _rf = st.radio("규칙", ['L+S 전체', 'L 대형', 'S 소형'],
-                           horizontal=True, key='lead_week_rule')
-            _want = {'L+S 전체': {'L', 'S'}, 'L 대형': {'L'}, 'S 소형': {'S'}}[_rf]
-            _lst = [x for x in _lst if _want & set(x[2]['r'])]
-            # 이후 1·4주는 2026-08-17에 추가됐다. 옛 JSON에는 키 자체가 없으므로,
-            # 값이 없는 것(진행 중)과 열이 없는 것을 구분해서 다룬다.
-            if not _lst:
-                # 폴백(전체 보여주기)을 없앤 대가로 빈 주차가 생긴다. 그건 정상이고,
-                # '신호 없음'은 그 자체로 정보다 — 없는데 있는 척하지 않는다.
-                st.info(f"이 주차에 **{_rf}** 조건에 걸린 종목이 없다. "
-                        f"신호가 없는 주에는 아무것도 사지 않는다 — 그게 규칙이다.")
-            # 빈 목록이어도 아래 코드가 죽지 않도록 열 이름을 가진 빈 표를 만든다.
-            _WCOLS = ['코드', '종목', '시총($B)', '규칙', '종가', '그주상승', '신호회차',
-                      '거래량 전주비', 'RS13', 'OPM', 'PER', 'PSR', '신고가대비',
-                      '52주낙폭', '이후1주', '이후4주', '이후13주', '이후26주',
-                      '이후52주', '트리거']
-            _has_f14 = any('f1' in _x for _, _, _x in _lst)
-            _wdf = pd.DataFrame([{
-                '코드': _s, '종목': _n[:24], '시총($B)': _x['mc'], '규칙': ','.join(_x['r']),
-                '종가': _x['close'], '그주상승': _x.get('up'),
-                '신호회차': _x.get('n'),
-                # 거래량은 20주 평균이 아니라 **전주 대비**가 신호다(2026-08-18).
-                '거래량 전주비': _x.get('vwk'),
-                'RS13': _x['rs13'], 'OPM': _x['opm'],
-                'PER': ('적자' if _x['per'] is None else f"{_x['per']:.1f}"),
-                'PSR': _x['psr'], '신고가대비': _x['dist'], '52주낙폭': _x['mdd'],
-                '이후1주': _x.get('f1'), '이후4주': _x.get('f4'),
-                '이후13주': _x.get('f13'), '이후26주': _x.get('f26'), '이후52주': _x.get('f52'),
-                '트리거': _x['trg']} for _s, _n, _x in _lst],
-                columns=_WCOLS)
-            if not _has_f14:
-                _wdf = _wdf.drop(columns=['이후1주', '이후4주'])
-
-            _f52 = _wdf['이후52주'].dropna()
-            if len(_f52):
-                _k1, _k2, _k3, _k4 = st.columns(4)
-                _k1.metric("신호 종목", f"{len(_wdf)}종")
-                _k2.metric("이후 52주 중앙", f"{_f52.median():+.1f}%")
-                _k3.metric("상승 비율", f"{(_f52 > 0).mean() * 100:.0f}%")
-                _k4.metric("+100% 이상", f"{(_f52 >= 100).mean() * 100:.0f}%",
-                           help="이 전략의 수익은 소수의 큰 상승에서 나온다. "
-                                "중앙값이 낮아도 이 비율이 유니버스 평균(6.4%)보다 높으면 신호가 작동한 것이다.")
-            else:
-                st.caption("이 주차는 아직 52주가 지나지 않아 이후 성적을 알 수 없다.")
-
-            # 색 스케일은 창 길이마다 달라야 한다. 52주 기준(±150%)을 1주에 그대로 쓰면
-            # 1주 수익률은 전부 무색으로 보여서 열을 넣어놓고도 못 읽는다.
-            _FSC = {'이후1주': 15, '이후4주': 35, '이후13주': 70, '이후26주': 110, '이후52주': 150}
-
-            def _fw(v, full=150):
-                if v is None or v != v:      # None 은 v!=v 로 안 걸러진다
-                    return ''
-                a = min(abs(v) / full, 1) * .72 + .06
-                c = '31,107,69' if v >= 0 else '160,48,40'
-                return f'background-color: rgba({c},{a:.2f}); color:' + ('#fff' if a > .42 else '#12161b')
-
-            _fcols = [c for c in ('이후1주', '이후4주', '이후13주', '이후26주', '이후52주')
-                      if c in _wdf.columns]
-            _sty = _wdf.sort_values('이후52주', ascending=False, na_position='last').style
-            for _c in _fcols:
-                _sty = _sty.map(_fw, full=_FSC[_c], subset=[_c])
-            st.dataframe(
-                _sty.format({c: '{:+.1f}%' for c in _fcols}, na_rep='진행 중'),
-                use_container_width=True, hide_index=True, row_height=26,
-                height=_dfh(min(len(_wdf), 16)))
-            if not _has_f14:
-                st.caption("이후 1·4주는 `python leaders_symbol.py build` 를 다시 돌려야 나온다 "
-                           "(현재 JSON에는 그 값이 들어있지 않다).")
-
-        # ── 구 규칙⑥ 기록 (2026-08-18 종료) ────────────────────────────
-        # 지우지 않는다. 화면에서 실패한 규칙을 지우면 "무엇이 왜 실패했는지"가
-        # 사라지고, 포트폴리오를 자기 증명 지표로 쓰겠다는 원칙이 깨진다.
-        st.divider()
-        with st.expander("📕 구 규칙⑥ 기록 — 2026-08-18 종료 (왜 실패했나)"):
-            _lsig = load_json(Path('results/leaders_signal.json')) or {}
-            _bt = _lsig.get('backtest') or {}
-            st.markdown(
-                "**종료 사유.** `data/us_marketcap.csv` 가 2024-04 스냅샷인 채 27개월 "
-                "방치돼 주식수를 낡은 시총으로 역산하고 있었다. 그 오차가 시총·PER·PSR "
-                "전부에 곱해져 종목의 72%가 틀린 값이었고, 규칙⑥의 `$2B` 문턱은 "
-                "**많이 오른 종목일수록 배제**하는 방향으로 작동했다. "
-                "데이터를 고치고 다시 재니 **2022년 이후 CAGR 3.8%** (SPY 13.2%) 였다. "
-                "앞 구간 33.8% 는 look-ahead 오염과 국면 운이었다.")
-            if _lsig.get('rule'):
-                st.markdown(f"**당시 진입 규칙** `{_lsig['rule']}`")
-            if _lsig.get('funnel'):
-                st.markdown("**필터 단계별 잔존**")
-                st.dataframe(pd.DataFrame(_lsig['funnel'], columns=['단계', '종목수']),
-                             use_container_width=True, hide_index=True,
-                             row_height=25, height=_dfh(4))
-            if _bt.get('rejected'):
-                st.markdown("**당시 검증에서 기각된 조건**")
-                for _rj in _bt['rejected']:
-                    st.markdown(f"- ~~{_rj}~~")
-            _pp = _lsig.get('paper')
-            if _pp:
-                st.markdown(f"**📓 포워드 페이퍼 원장** — 시작 {_pp['created']} · "
-                            f"갱신 {_pp.get('updated', '-')} · "
-                            f"보유 {_pp['n_open']} / 청산 {_pp['n_closed']}")
-                if _pp.get('open'):
-                    st.dataframe(pd.DataFrame([{
-                        '종목': t['sym'], '기록일': t['log_date'],
-                        '진입': f"${t['entry']:,.2f}", '고점': f"${t['peak']:,.2f}",
-                        '고점대비': f"{(t['entry']/t['peak']-1)*100:+.1f}%",
-                        'RS13': t['rs'], 'PSR': t['psr'],
-                        '트리거': ', '.join(t['triggers'])} for t in _pp['open']]),
-                        use_container_width=True, hide_index=True, row_height=25,
-                        height=_dfh(len(_pp['open'])))
-                if _pp.get('live'):
-                    _lv = _pp['live']
-                    st.dataframe(pd.DataFrame([
-                        {'지표': '평균 수익', '실전': f"{_lv['avg']:+.1f}%",
-                         '백테스트': num(_bt, 'avg_ret', '{:+.1f}%')},
-                        {'지표': '중앙 수익', '실전': f"{_lv['med']:+.1f}%",
-                         '백테스트': num(_bt, 'med_ret', '{:+.1f}%')},
-                        {'지표': '승률', '실전': f"{_lv['winrate']:.0f}%",
-                         '백테스트': num(_bt, 'winrate', '{:.0f}%')},
-                        {'지표': '평균 보유', '실전': f"{_lv['hold_wk']:.0f}주",
-                         '백테스트': num(_bt, 'hold_wk', '{}주')}]),
-                        use_container_width=True, hide_index=True,
-                        row_height=25, height=_dfh(4))
-
-        st.caption(
-            "⚠️ 위 L/S 수치는 2018-06~2026-08 백테스트다. 생존편향(상장폐지 미포함)과 "
-            "조합 선택 편향이 있어 낙관적이다. 조건 충족 종목의 기계적 출력이며 "
-            "매수 권유가 아니다.")
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
