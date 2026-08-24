@@ -123,6 +123,13 @@ SOURCES = [
          cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_accel.py',
          job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → ⚡ 이익 가속',
          getter=_key('generated')),
+    # ★ 2026-08-25 신설 — 두 심층조회가 같은 곡선을 각자 갖고 있어 합쳤다(674종 중복).
+    # 이게 밀리면 차트의 ▲ 는 최신인데 곡선만 지난주까지 그려진다 — 조용히 어긋난다.
+    dict(path='results/price_curves.json', label='가격 곡선 (L/S·가속 공용)',
+         cycle='주 1회 (토 08:00)', max_age=9, producer='curves_build.py',
+         job='leaders_weekly (로컬 스케줄러)',
+         used_by='🚀 주도주 → 심층조회 차트 (L/S·이익가속 양쪽)',
+         getter=_key('generated')),
     dict(path='results/leaders_ab.json', label='주도주 L/S (대형·소형)',
          cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_ab.py',
          job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → 🇺🇸',

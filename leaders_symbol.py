@@ -126,9 +126,9 @@ def cmd_build():
         g = g.sort_values("as_of")
         idx = g.as_of.map(di).values
         close = g.close.values.astype(float)
+        # 2026-08-25: 곡선(i/c)을 여기서 빼고 results/price_curves.json 으로 합쳤다.
+        # 이익가속 심층조회가 같은 종목의 같은 종가를 따로 저장해 674종이 중복이었다.
         rec = dict(name=(g.name.dropna().iloc[0] if g.name.notna().any() else s),
-                   i=[int(v) for v in idx],
-                   c=[round(float(v), 3) if v == v else None for v in close],
                    sig={}, trades={}, rows=[])
         for k, (_, fn, _tr) in RULES.items():
             m = fn(g).fillna(False).values
@@ -180,8 +180,16 @@ def cmd_build():
                              [v for kk, v in BO.items() if r.get(kk) == 1]) or "-"))
         syms[s] = rec
 
+    # 신호 구간만 싣는다. 곡선은 curves_build.py 가 두 규칙의 spans 를 합쳐 만든다.
+    # ⚠️ curves_build.py 는 반드시 이 스크립트 뒤에 돌아야 한다.
+    spans = {}
+    for _s, _rec in syms.items():          # ⚠️ _r 은 모듈의 반올림 함수다. 가리면 안 된다.
+        _ix = [v for _k in _rec["sig"] for v in _rec["sig"][_k]]
+        if _ix:
+            spans[_s] = (min(_ix), max(_ix))
+
     out = dict(generated=str(pd.Timestamp.today().date()),
-               dates=[str(pd.Timestamp(t).date()) for t in dates],
+               dates=[str(pd.Timestamp(t).date()) for t in dates], spans=spans,
                rules={k: v[0] for k, v in RULES.items()},
                trails={k: v[2] for k, v in RULES.items()},
                symbols=syms)
@@ -206,8 +214,14 @@ def cmd_chart(sym):
     if sym not in j["symbols"]:
         print(f"{sym}: 신호 이력 없음"); return
     r = j["symbols"][sym]
-    dt = pd.to_datetime([j["dates"][i] for i in r["i"]])
-    c = pd.Series(r["c"], index=dt).astype(float)
+    cv_p = os.path.join(BASE, "results", "price_curves.json")
+    if not os.path.exists(cv_p):
+        print("price_curves.json 이 없다. python curves_build.py 를 먼저 돌려라."); return
+    cv = json.load(open(cv_p, encoding="utf-8"))["curves"].get(sym)
+    if not cv:
+        print(f"{sym}: 곡선 없음. curves_build.py 를 다시 돌려라."); return
+    dt = pd.to_datetime([j["dates"][i] for i in cv["i"]])
+    c = pd.Series(cv["c"], index=dt).astype(float)
     COL = {"L": "#1f6b45", "S": "#7a3fa0"}
     fig, ax = plt.subplots(figsize=(11.5, 4.2), dpi=110)
     fig.patch.set_facecolor("white"); ax.set_facecolor("white")

@@ -38,6 +38,12 @@ $PY leaders_ab.py publish
 echo "--- [4/5] 종목 심층조회 JSON (주차별 코호트 · 신호회차)"
 $PY leaders_symbol.py build
 
+# ⚠️ 반드시 발행 스크립트 **뒤에** 온다. 두 규칙의 spans 를 읽어 곡선을 합치기 때문이다.
+#    앞으로 옮기면 곡선이 지난주 신호 기준이 되고, 화면에선 "최근 ▲ 가 곡선 밖에 있다"로
+#    나타난다 — 에러 없이 조용히 틀린다.
+echo "--- [4.5/5] 가격 곡선 통합 발행 (L/S·가속 공용 · 2026-08-25 중복 제거)"
+$PY curves_build.py
+
 echo "--- [5/5] 한국 주도주"
 $PY leaders_kr.py publish || echo "    [WARN] KR 실패 — 미국 산출물은 이미 갱신됐다"
 $PY leaders_kr6.py publish || echo "    [WARN] KR6 실패 — 미국 산출물은 이미 갱신됐다"
