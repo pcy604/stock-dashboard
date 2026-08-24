@@ -1,0 +1,230 @@
+<title>주도주 매도 카드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --ground:#EDF1F0; --card:#FFFFFF; --ink:#0C1A20; --body:#3A4C53;
+  --muted:#6C7E85; --faint:#9CABB1; --edge:#D3DCDB;
+  --sea:#14606F; --rust:#A83C26; --moss:#3F6B4A; --buoy:#B37F06;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A1418; --card:#111F26; --ink:#EAF0F1; --body:#B7C6CA;
+    --muted:#8CA0A6; --faint:#61757C; --edge:#22343B;
+    --sea:#63B6C5; --rust:#DE7963; --moss:#7FB891; --buoy:#E9BB4A;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A1418; --card:#111F26; --ink:#EAF0F1; --body:#B7C6CA;
+  --muted:#8CA0A6; --faint:#61757C; --edge:#22343B;
+  --sea:#63B6C5; --rust:#DE7963; --moss:#7FB891; --buoy:#E9BB4A;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--body);
+  font-family:"IBM Plex Sans KR","Malgun Gothic",system-ui,sans-serif;
+  font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1160px; margin:0 auto; padding:44px 22px 96px}
+
+/* 표지 */
+.cover{
+  background:var(--card); border:1px solid var(--edge); border-radius:14px;
+  padding:44px 40px; display:flex; flex-direction:column; gap:16px; margin-bottom:22px;
+}
+.kicker{
+  font-family:"IBM Plex Mono",monospace; font-size:.7rem; font-weight:600;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--sea);
+}
+.cover h1{
+  font-family:"Nanum Myeongjo",Batang,serif; font-weight:800; color:var(--ink);
+  font-size:clamp(2.1rem,6vw,3.2rem); line-height:1.16; margin:0; text-wrap:balance;
+}
+.cover p{margin:0; max-width:600px; font-size:1.02rem; color:var(--muted)}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
+.chip{
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--muted);
+  border:1px solid var(--edge); border-radius:999px; padding:4px 12px;
+}
+
+/* 카드 격자 */
+.deck{display:grid; grid-template-columns:repeat(auto-fill,minmax(288px,1fr)); gap:22px}
+.card{
+  background:var(--card); border:1px solid var(--edge); border-radius:14px;
+  padding:26px 26px 28px; display:flex; flex-direction:column; gap:14px;
+  min-height:330px;
+}
+.top{display:flex; align-items:center; gap:10px}
+.no{
+  font-family:"IBM Plex Mono",monospace; font-size:.74rem; font-weight:600;
+  color:var(--card); background:var(--sea); border-radius:6px; padding:2px 8px;
+}
+.tag{
+  font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--faint);
+}
+.card h2{
+  font-family:"Nanum Myeongjo",Batang,serif; font-weight:700; color:var(--ink);
+  font-size:1.42rem; line-height:1.38; margin:0; text-wrap:balance;
+}
+.figure{display:flex; flex-direction:column; gap:2px; margin-top:auto}
+.big{
+  font-family:"IBM Plex Mono",monospace; font-weight:600; letter-spacing:-.02em;
+  font-size:3.1rem; line-height:1; color:var(--sea); font-variant-numeric:tabular-nums;
+}
+.big.alert{color:var(--rust)}
+.big.good{color:var(--moss)}
+.unit{font-size:.82rem; color:var(--faint); line-height:1.5}
+.say{font-size:.95rem; color:var(--body); line-height:1.66}
+.say b{color:var(--ink); font-weight:600}
+
+/* 카드 04 전용 미니 표 */
+.mini{display:flex; flex-direction:column; gap:1px; background:var(--edge); border-radius:8px; overflow:hidden; margin-top:auto}
+.mini div{
+  background:var(--card); display:flex; justify-content:space-between; align-items:baseline;
+  gap:12px; padding:10px 13px; font-size:.88rem;
+}
+.mini span:first-child{color:var(--body)}
+.mini span:last-child{font-family:"IBM Plex Mono",monospace; font-weight:600; font-variant-numeric:tabular-nums}
+.mini .win{background:color-mix(in srgb,var(--moss) 12%,var(--card))}
+.mini .win span:first-child{color:var(--ink); font-weight:600}
+.mini .win span:last-child{color:var(--moss)}
+.mini .bad span:last-child{color:var(--rust)}
+
+footer{
+  margin-top:36px; font-family:"IBM Plex Mono",monospace; font-size:.72rem;
+  color:var(--faint); line-height:1.9; text-align:center;
+}
+@media (max-width:520px){
+  .wrap{padding:28px 16px 64px} .cover{padding:32px 26px}
+  .card{min-height:0}
+}
+</style>
+
+<div class="wrap">
+
+<div class="cover">
+  <span class="kicker">stock_screener · 2026-08-25</span>
+  <h1>주도주, 언제 팔까</h1>
+  <p>현행 진입 규칙(이익 가속)이 8년간 낸 신호 <b>7,551건</b>을 전부 따라가며
+  매도 방법 <b>18가지</b>를 비교했다. 한 장에 결론 하나씩.</p>
+  <div class="chips">
+    <span class="chip">미국 2,702종</span>
+    <span class="chip">2018~2026 주봉</span>
+    <span class="chip">수수료 0.1%</span>
+    <span class="chip">백테스트 · 실현수익 아님</span>
+  </div>
+</div>
+
+<div class="deck">
+
+  <div class="card">
+    <div class="top"><span class="no">01</span><span class="tag">사실</span></div>
+    <h2>주도주는 원래 크게 흔들린다</h2>
+    <p class="say">10배 가는 종목도 <b>정점에 닿기 전에</b> 이만큼 빠지고 올라갔다.
+    절반은 −25%를, 셋 중 하나는 −30%를 겪었다.</p>
+    <div class="figure">
+      <span class="big alert">−23%</span>
+      <span class="unit">정점 전에 견뎌야 했던 낙폭 (중앙값 · 런 1,843개)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">02</span><span class="tag">전제</span></div>
+    <h2>우리는 고점에서 사지 않는다</h2>
+    <p class="say">신호가 뜰 때 이미 신고가에서 내려온 상태다.
+    NVDA는 <b>−66%</b>, TSLA는 <b>−38%</b>에서 신호가 났다.</p>
+    <div class="figure">
+      <span class="big">−10.8%</span>
+      <span class="unit">매수 시점의 52주 신고가와의 거리 (중앙값)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">03</span><span class="tag">기각</span></div>
+    <h2>“고점 대비 −30%”는 쓰면 안 된다</h2>
+    <p class="say">바닥에서 샀는데 고점을 기준으로 재니, 정상적인 흔들림에 다 잘려나간다.
+    안 팔았으면 <b>0.46%</b>였다.</p>
+    <div class="figure">
+      <span class="big alert">0.07%</span>
+      <span class="unit">고점 트레일 −30% 를 쓸 때 10배 난 트레이드 비율</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">04</span><span class="tag">채택</span></div>
+    <h2>산 가격에서 −25%</h2>
+    <p class="say">고점이 아니라 <b>내가 산 값</b>에서 재라. 그것만 바꿔도 성적이 두 배 이상이다.</p>
+    <div class="mini">
+      <div><span>아예 안 판다</span><span>+12.1%</span></div>
+      <div class="win"><span>산 값 대비 −25%</span><span>+10.9%</span></div>
+      <div class="bad"><span>고점 대비 −30%</span><span>+4.5%</span></div>
+    </div>
+    <span class="unit">트레이드당 초과수익(알파) 평균 · SPY 차감</span>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">05</span><span class="tag">금지</span></div>
+    <h2>−8% 손절은 여기 쓰지 마라</h2>
+    <p class="say">01번 카드가 이유다. 견뎌야 하는 낙폭이 −23%인데 −8%에서 자르면
+    <b>주도주는 시작도 하기 전에 전부 잘린다.</b></p>
+    <div class="figure">
+      <span class="big alert">−8%</span>
+      <span class="unit">기존 원칙의 손절선 — 이 규칙에는 적용 금지</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">06</span><span class="tag">자기반성</span></div>
+    <h2>내가 낸 가설은 틀렸다</h2>
+    <p class="say">“이익 가속으로 샀으니 감속하면 팔자.” 그럴듯했는데
+    실제로는 <b>석 달 뒤 매도</b>로 작동했다. 10배 트레이드 <b>0건</b>.</p>
+    <div class="figure">
+      <span class="big alert">18위</span>
+      <span class="unit">‘가속 꺼지면 매도’ 의 순위 — 18종 중 꼴찌</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">07</span><span class="tag">반전</span></div>
+    <h2>칸이 5개뿐이면 얘기가 다르다</h2>
+    <p class="say">안 팔면 2019년에 5칸을 채우고 <b>8년간 거래가 끝</b>이다.
+    파는 진짜 이유는 위험이 아니라 <b>다음 후보에게 자리를 내주려고</b>다.</p>
+    <div class="figure">
+      <span class="big">5건</span>
+      <span class="unit">안 팔았을 때 8년간 총 거래 수 (5칸 기준)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">08</span><span class="tag">경고</span></div>
+    <h2>이 숫자들을 다 믿지는 마라</h2>
+    <p class="say">데이터에 <b>망해서 사라진 회사가 없다.</b>
+    그래서 “안 파는 게 낫다”는 실제보다 부풀려져 있다. 진짜 답은 더 손절 쪽이다.</p>
+    <div class="figure">
+      <span class="big alert">0개</span>
+      <span class="unit">데이터에 들어 있는 상장폐지 종목 수</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top"><span class="no">09</span><span class="tag">할 일</span></div>
+    <h2>다음 세 가지</h2>
+    <p class="say"><b>1.</b> 망한 회사를 데이터에 넣기 (08번 때문에 최우선)<br>
+    <b>2.</b> 교체 규칙 — 새 신호와 보유 종목 중 뭘 남길지 (07번 때문에)<br>
+    <b>3.</b> 일봉 복구 — 지금은 주 단위라 장중을 못 본다</p>
+    <div class="figure">
+      <span class="big good">1 → 2 → 3</span>
+      <span class="unit">순서대로. 1번 전에는 나머지 숫자가 다 흔들린다</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  코드 leaders_accel_exit.py · leaders_accel_exit2.py · 커밋 900752a<br>
+  자세한 근거는 리포트 문서에. 이 카드의 모든 수치는 백테스트다.
+</footer>
+
+</div>
