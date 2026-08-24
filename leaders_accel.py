@@ -111,7 +111,8 @@ MAX_OIA = 10.0        # 이익가속 절대값 상한. 매출이 사업 규모�
 def load():
     c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
     d = pd.read_sql(f"""SELECT as_of,sym,name,close,marcap,adv_20d,ret_1w,dist_52w,
-                               mdd_52w,rs_4w,rs_13w,vol_x_20w,per,psr,period_end,
+                               mdd_52w,rs_4w,rs_13w,vol_x_20w,per,psr,net_income,
+                               period_end,
                                revenue,op_income,gross_profit,rev_yoy,gpm,opm,opm_qoq
                         FROM factor_weekly WHERE factor_ver='{VER}'""", c)
     c.close()
@@ -120,7 +121,7 @@ def load():
     # 분기 패널에서 가속을 만든다 — period_end 기준이라 그 주차에 알 수 있던 값만 쓴다
     q = (d.dropna(subset=["period_end"]).drop_duplicates(["sym", "period_end"])
            [["sym", "period_end", "revenue", "op_income", "gross_profit",
-             "rev_yoy", "gpm", "opm"]].sort_values(["sym", "period_end"]))
+             "net_income", "rev_yoy", "gpm", "opm"]].sort_values(["sym", "period_end"]))
     g = q.groupby("sym")
     # ⚠️ 매출로 나누므로 매출이 0에 가까우면 발산한다. 2026-08-23 최초 발행에서
     #    분기매출 $0M 종목(AMLX·JOBY 등)의 이익가속이 inf 로 나와 조건을 그냥 통과했다.
@@ -132,10 +133,13 @@ def load():
     q["rv_g"] = q.rev_yoy
     q["oi_a"] = q.oi_g - g["oi_g"].shift(1)      # 이익 가속 (%p)
     q["rv_a"] = q.rv_g - g["rv_g"].shift(1)      # 매출 가속 (%p)
+    # 순이익 YoY(%) — PEG 의 분모. 전년 동기가 적자면 성장률이 정의되지 않는다.
+    _ni4 = g.net_income.shift(4)
+    q["ni_yoy"] = np.where(_ni4 > 0, (q.net_income - _ni4) / _ni4 * 100, np.nan)
     q["dgpm"] = q.gpm - g.gpm.shift(1)
     q["dopm"] = q.opm - g.opm.shift(1)
     q["ACC"] = ((q.rv_a > 0) & (q.oi_a > 0) & (q.oi_a.abs() <= MAX_OIA)).astype(int)
-    return d.merge(q[["sym", "period_end", "oi_a", "rv_a", "dgpm", "dopm", "ACC"]],
+    return d.merge(q[["sym", "period_end", "oi_a", "rv_a", "dgpm", "dopm", "ni_yoy", "ACC"]],
                    on=["sym", "period_end"], how="left")
 
 
@@ -156,10 +160,28 @@ def _r(v, n=2):
     return round(float(v), n)
 
 
+def _peg(M, tt, s):
+    """PEG = PER ÷ 순이익 YoY 성장률(%).
+
+    ⚠️ 정식 PEG 는 EPS 성장률을 쓴다. 이 DB 에 EPS 시계열이 없어 **순이익**으로 대신한다
+       (주식 수 변동을 무시한다는 뜻 — 대규모 증자·자사주 소각이 있으면 어긋난다).
+    ⚠️ 적자(PER<0)이거나 전년 동기가 적자면 성장률이 정의되지 않으므로 None 을 낸다.
+       억지로 숫자를 만들면 '싸 보이는 적자 기업'이 만들어진다.
+    ⚠️ 분모가 0 에 가까우면 발산하므로 성장률 1% 미만은 버린다."""
+    per = M["per"].loc[tt].get(s)
+    g = M["ni_yoy"].loc[tt].get(s)
+    if per is None or g is None or per != per or g != g:
+        return None
+    if per <= 0 or g < 1:
+        return None
+    return round(float(per) / float(g), 2)
+
+
 def build():
     d = load()
     COLS = ["close", "marcap", "adv_20d", "ret_1w", "dist_52w", "mdd_52w", "rs_4w",
-            "rs_13w", "vol_x_20w", "per", "psr", "revenue", "op_income", "rev_yoy",
+            "rs_13w", "vol_x_20w", "per", "psr", "ni_yoy",
+            "revenue", "op_income", "rev_yoy",
             "gpm", "opm", "oi_a", "rv_a", "dgpm", "dopm", "ACC"]
     M = matrices(d, COLS)
     px = M["close"]
@@ -236,6 +258,7 @@ def build():
                 oi=_r((M["op_income"].loc[tt].get(s) or np.nan) / 1e6, 0),
                 rs4=_r(M["rs_4w"].loc[tt].get(s)), rs13=_r(M["rs_13w"].loc[tt].get(s)),
                 per=_r(M["per"].loc[tt].get(s), 1), psr=_r(M["psr"].loc[tt].get(s), 2),
+                peg=_peg(M, tt, s),
                 **{f"f{h}": _r((fwd[h].loc[tt].get(s) or np.nan) * 100, 1)
                    for h in (1, 4, 13, 26, 52, 104)}))
         rows.sort(key=lambda x: -(x["up"] or 0))

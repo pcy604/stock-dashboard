@@ -57,16 +57,16 @@
     <text class="oc-f oc-lay-d" x="795" y="228">지금이 들어갈 자리인가</text>
   </g>
 
-  <!-- ── ② 탭 4개 ── -->
-  <text class="oc-f oc-sec" x="40" y="278">② 위쪽 탭 4개 — 왼쪽부터 의사결정 순서대로 놓여 있다</text>
+  <!-- ── ② 화면 구성 ── -->
+  <text class="oc-f oc-sec" x="40" y="278">② 화면은 셋 — 위쪽 탭이 왼쪽부터 의사결정 순서다 (첫 칸은 그중 핵심 화면)</text>
 
   <g>
     <rect x="40" y="292" width="540" height="98" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
     <rect x="40" y="292" width="5" height="98" rx="2.5" fill="#2563eb"/>
-    <text class="oc-f oc-card-t" x="62" y="320">💼 포트폴리오 <tspan class="oc-f oc-card-w">— 내 돈이 지금 어떻게 되고 있나</tspan></text>
-    <text class="oc-f oc-card-d" x="62" y="345">보유 종목의 수익률·비중·손절선을 매일 자동 추적하고 경고를 보냅니다.</text>
-    <text class="oc-f oc-card-d" x="62" y="365">📒 성적표 = 지난 신호가 실제로 맞았는지 숨김 없이 공개하는 곳.</text>
-    <text class="oc-f oc-card-w" x="62" y="384">👉 샀다면 반드시 여기에 손절가까지 등록</text>
+    <text class="oc-f oc-card-t" x="62" y="320">🚀 주도주 <tspan class="oc-f oc-card-w">— 이 도구가 가장 자신 있는 화면 (종목 발굴 안에 있음)</tspan></text>
+    <text class="oc-f oc-card-d" x="62" y="345">매출·영업이익 성장률이 동시에 빨라진 종목. 8년 신호 7,551건 실측.</text>
+    <text class="oc-f oc-card-d" x="62" y="365">1건당 1년 평균 +32%(시장 대비 +12.5%) · 10배 확률은 시장의 9배.</text>
+    <text class="oc-f oc-card-w" x="62" y="384">👉 단, 신호 목록이지 포트폴리오가 아님 — 비중은 사람이 정한다</text>
   </g>
   <g>
     <rect x="602" y="292" width="518" height="98" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
@@ -122,9 +122,9 @@
   <g>
     <rect x="904" y="550" width="216" height="76" rx="12" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
     <circle cx="932" cy="578" r="14" fill="#4338ca"/><text class="oc-f oc-step-n" x="927" y="583">4</text>
-    <text class="oc-f oc-step-t" x="954" y="576">💼 손절선까지 등록</text>
-    <text class="oc-f oc-step-d" x="954" y="597">샀으면 포트폴리오 탭에</text>
-    <text class="oc-f oc-step-d" x="954" y="615">손절가와 함께 기록.</text>
+    <text class="oc-f oc-step-t" x="954" y="576">✂️ 손절가를 먼저</text>
+    <text class="oc-f oc-step-d" x="954" y="597">사기 전에 얼마에 자를지 정한다.</text>
+    <text class="oc-f oc-step-d" x="954" y="615">주도주 실측값 = 진입가 −25%.</text>
   </g>
 
   <!-- ── 경고 + 출처 ── -->
