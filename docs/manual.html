@@ -1,0 +1,386 @@
+<title>Stock Dashboard 사용설명서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F7; --card:#FFFFFF; --sunk:#EAEEEF;
+  --ink:#131A1D; --body:#3D4A4F; --muted:#6E7C82; --faint:#9EABB0;
+  --line:#DCE3E4; --hair:#E9EEEF;
+  --brand:#0F5C4A; --brand-soft:#E3EFEA;
+  --warn:#8A6212; --warn-soft:#F6EEDA;
+  --stop:#9B3423; --stop-soft:#F7E6E2;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1214; --card:#141C1F; --sunk:#101819;
+    --ink:#ECF1F2; --body:#BDC9CD; --muted:#8B999F; --faint:#5F6E74;
+    --line:#243033; --hair:#1B2528;
+    --brand:#5FC0A3; --brand-soft:#132E28;
+    --warn:#E0B356; --warn-soft:#2C2517;
+    --stop:#E08573; --stop-soft:#2F1D19;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1214; --card:#141C1F; --sunk:#101819;
+  --ink:#ECF1F2; --body:#BDC9CD; --muted:#8B999F; --faint:#5F6E74;
+  --line:#243033; --hair:#1B2528;
+  --brand:#5FC0A3; --brand-soft:#132E28;
+  --warn:#E0B356; --warn-soft:#2C2517;
+  --stop:#E08573; --stop-soft:#2F1D19;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--body);
+  font-family:"IBM Plex Sans KR","Malgun Gothic",system-ui,sans-serif;
+  font-size:16px; line-height:1.72; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 22px 90px}
+h1,h2,h3{font-family:"Gothic A1","Malgun Gothic",sans-serif; color:var(--ink); margin:0; text-wrap:balance}
+h1{font-size:clamp(2.1rem,5.5vw,3.1rem); font-weight:800; line-height:1.16; letter-spacing:-.02em}
+h2{font-size:1.5rem; font-weight:800; line-height:1.3; letter-spacing:-.01em}
+h3{font-size:1.02rem; font-weight:700; line-height:1.4}
+p{margin:0}
+b,strong{font-weight:600; color:var(--ink)}
+code{font-family:"IBM Plex Mono",monospace; font-size:.88em; background:var(--sunk);
+     padding:1px 5px; border-radius:3px}
+.num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--brand); outline-offset:3px}
+
+header{padding:64px 0 0; display:flex; flex-direction:column; gap:18px}
+.kick{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--brand); font-weight:600}
+.lede{font-size:1.08rem; max-width:640px; color:var(--body)}
+.rule{height:1px; background:var(--line); margin:34px 0 0}
+
+section{margin-top:52px; display:flex; flex-direction:column; gap:20px}
+.h2row{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+.h2row .sub{font-size:.88rem; color:var(--muted)}
+
+/* 빠른 시작 */
+.steps{display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:14px}
+.step{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 18px 20px;
+      display:flex; flex-direction:column; gap:7px}
+.step .n{font-family:"IBM Plex Mono",monospace; font-size:.72rem; font-weight:600;
+         color:var(--brand); letter-spacing:.1em}
+.step .t{font-family:"Gothic A1",sans-serif; font-weight:700; color:var(--ink); font-size:1.02rem}
+.step .d{font-size:.89rem; color:var(--muted); line-height:1.6}
+
+/* 기능 카드 */
+.feat{background:var(--card); border:1px solid var(--line); border-radius:10px;
+      padding:20px 22px; display:flex; flex-direction:column; gap:11px}
+.feat.top{border-left:4px solid var(--brand)}
+.fh{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.badge{font-family:"IBM Plex Mono",monospace; font-size:.66rem; font-weight:600;
+       letter-spacing:.06em; padding:3px 9px; border-radius:999px; white-space:nowrap}
+.b-ok{background:var(--brand-soft); color:var(--brand)}
+.b-mid{background:var(--warn-soft); color:var(--warn)}
+.b-raw{background:var(--stop-soft); color:var(--stop)}
+.what{font-size:.95rem}
+.pm{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line);
+    border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.pm>div{background:var(--card); padding:12px 14px; display:flex; flex-direction:column; gap:5px}
+.pm .lab{font-family:"IBM Plex Mono",monospace; font-size:.65rem; letter-spacing:.1em;
+         text-transform:uppercase}
+.pm .good .lab{color:var(--brand)} .pm .bad .lab{color:var(--stop)}
+.pm .txt{font-size:.88rem; line-height:1.6; color:var(--body)}
+@media (max-width:560px){ .pm{grid-template-columns:1fr} }
+
+/* 표 */
+.scroll{overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--card)}
+table{border-collapse:collapse; width:100%; font-size:.87rem}
+th,td{padding:10px 14px; text-align:left; border-bottom:1px solid var(--hair); vertical-align:top}
+thead th{background:var(--sunk); font-family:"IBM Plex Mono",monospace; font-size:.66rem;
+         letter-spacing:.1em; text-transform:uppercase; color:var(--muted); white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+td b{color:var(--ink)}
+
+/* 경고 */
+.must{display:flex; flex-direction:column; gap:12px}
+.m{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--stop);
+   border-radius:8px; padding:16px 20px; display:flex; flex-direction:column; gap:5px}
+.m .t{font-family:"Gothic A1",sans-serif; font-weight:700; color:var(--ink)}
+.m .d{font-size:.9rem; color:var(--muted); line-height:1.65}
+
+details{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:0}
+summary{cursor:pointer; padding:18px 22px; font-family:"Gothic A1",sans-serif;
+        font-weight:700; color:var(--ink); list-style:none; display:flex;
+        justify-content:space-between; align-items:center; gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"펼치기"; font-family:"IBM Plex Mono",monospace; font-size:.68rem;
+               color:var(--muted); font-weight:500; letter-spacing:.08em}
+details[open] summary::after{content:"접기"}
+.dbody{padding:0 22px 22px; display:flex; flex-direction:column; gap:14px;
+       font-size:.92rem; color:var(--muted); line-height:1.68}
+.dbody b{color:var(--ink)}
+.drop{display:flex; gap:12px; align-items:flex-start}
+.drop .x{color:var(--stop); font-family:"IBM Plex Mono",monospace; font-weight:600; flex:none}
+
+footer{margin-top:56px; padding-top:20px; border-top:1px solid var(--line);
+       font-family:"IBM Plex Mono",monospace; font-size:.71rem; color:var(--faint); line-height:1.9}
+@media (max-width:560px){ .wrap{padding:0 16px 60px} header{padding-top:40px} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="kick">Stock Dashboard · 사용설명서 · 2026-08-25</span>
+  <h1>공시와 가격을<br>매일 자동으로 읽는 도구</h1>
+  <p class="lede">공식 공시(DART·SEC EDGAR)와 시장 가격을 매일 모아
+  <b>뭘 살까 · 언제 살까 · 얼마나 견뎌야 하나</b>를 숫자로 계산합니다.
+  화면은 셋뿐입니다 — 종목 발굴, 종목 분석, 매크로.</p>
+  <p class="lede" style="color:var(--muted);font-size:.95rem">
+  기능마다 <b>신뢰 등급</b>을 붙였습니다. 잘 되는 것만 보여주지 않는 게 이 도구의 원칙이라,
+  근거가 약한 화면은 약하다고 적어뒀습니다.</p>
+  <div class="rule"></div>
+</header>
+
+<section>
+  <div class="h2row"><h2>3분 사용법</h2><span class="sub">이 순서대로만 쓰면 됩니다</span></div>
+  <div class="steps">
+    <div class="step"><span class="n">STEP 1</span><span class="t">🌍 매크로</span>
+      <span class="d">지금이 사이클 어디인지, 현금을 몇 % 들고 있을지 확인합니다.</span></div>
+    <div class="step"><span class="n">STEP 2</span><span class="t">🔎 종목 발굴</span>
+      <span class="d">후보를 3~5개 고릅니다. <b>🚀 주도주</b>부터 보세요 — 가장 검증된 화면입니다.</span></div>
+    <div class="step"><span class="n">STEP 3</span><span class="t">🔍 종목 분석</span>
+      <span class="d">그 회사 재무가 실제로 좋아지는 중인지 공시 원문으로 확인합니다.</span></div>
+    <div class="step"><span class="n">STEP 4</span><span class="t">손절가를 먼저</span>
+      <span class="d">사기 전에 <b>얼마에 자를지</b>를 정합니다. 주도주 규칙의 실측값은 <b>진입가 −25%</b>입니다.</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="h2row"><h2>🔎 종목 발굴</h2><span class="sub">기계가 조건에 맞는 종목을 골라 목록으로 줍니다</span></div>
+
+  <div class="feat top">
+    <div class="fh"><h3>🚀 주도주 — 이익 가속 (미국)</h3><span class="badge b-ok">검증됨 · 8년 실측</span></div>
+    <p class="what">매출과 영업이익의 <b>성장률이 동시에 빨라진</b> 분기에, 주가가 그 주 +10% 이상 오른 종목을 잡습니다.
+    수준(매출이 크다)이 아니라 <b>기울기의 변화</b>를 봅니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">8년 신호 <span class="num">7,551</span>건 실측.
+      1건당 1년 평균 <b>+32%</b>(시장 대비 <b>+12.5%</b>), <b>10배 확률이 시장 전체의 9배</b>.
+      NVDA·TSLA·PLTR의 대상승 출발점을 실제로 잡습니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt"><b>신호 목록이지 포트폴리오 규칙이 아닙니다.</b>
+      6칸 등가중으로 그대로 돌리면 연 12.7%로 SPY(15.1%)에 집니다. 평균 74종이 걸리므로
+      <b>비중은 사람이 정해야</b> 합니다. 중앙값은 낮습니다 — 대부분 실패하고 소수가 전부를 만듭니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>🔍 종목 심층 조회 — 가격 곡선 · 낙폭(MDD)</h3><span class="badge b-ok">사실 조회</span></div>
+    <p class="what">한 종목이 <b>언제 걸렸는지 전 이력</b>과, 그때 주가가 고점 대비 얼마나 빠져 있었는지를 같은 축에서 봅니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">"이 종목을 신호마다 샀다면 1년 안에 최대 얼마나 물렸나"를
+      숫자로 줍니다 — <b>손절선을 정하는 근거</b>입니다. (예: SMCI −24%, TSLA −38%)</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt">주봉 종가 기준이라 <b>장중 낙폭은 이보다 깊습니다.</b>
+      과거 사실 조회이지 예측이 아닙니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>📅 주차별 조회 — 같은 주에 걸린 종목 전부</h3><span class="badge b-ok">사실 조회</span></div>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">한 종목이 걸렸다는 사실만으로 규칙을 판단하지 않도록,
+      <b>그 주 전체의 타율</b>을 같이 보여줍니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt">성적이 나오려면 1년이 지나야 합니다 —
+      <b>최근 1년 주차는 성적란이 비어 있습니다.</b></span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>🇰🇷 주도주 — 한국 (KR-U6 · KR-P1)</h3><span class="badge b-mid">참고 · 검증 얕음</span></div>
+    <p class="what">미국 규칙을 이식한 것(U6)과 52주 신고가 기반 자체 규칙(P1), 두 가지를 고를 수 있습니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">DART 공식 재무를 씁니다.
+      신호를 낸 뒤 실제 성과를 쌓는 <b>포워드 원장</b>이 함께 돌아갑니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt"><b>한국은 분기 재무가 얕아 '이익 변곡' 조건을 못 넣었습니다.</b>
+      가격 백테스트만 거쳤으니 <b>미국과 같은 무게로 쓰면 안 됩니다.</b></span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>🏆 CANSLIM</h3><span class="badge b-mid">탐색용</span></div>
+    <p class="what">윌리엄 오닐의 7기준(이익 급증·신고가·주도주 등)을 슬라이더로 직접 조정해 통과 종목을 봅니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">한·미 둘 다. 기준을 직접 만져보며
+      <b>조건이 종목 수를 어떻게 바꾸는지</b> 감을 잡기 좋습니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt">기준을 사용자가 바꾸므로
+      <b>그 조합의 성적표가 없습니다.</b> "내가 만든 기준"이 잘 맞는지는 아무도 모릅니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>🔥 상승 상위</h3><span class="badge b-raw">약함 · 참고만</span></div>
+    <p class="what">기간별 상승률 순위에 셋업 점수(위닝점수)·계절성·고점 대비 낙폭을 붙인 표입니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">지금 시장에서 <b>무엇이 움직이는지</b>를
+      한 표에서 훑기 좋습니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt"><b>상승률은 과거입니다.</b>
+      점수 근거인 구 신호 6개 중 <b>4개가 실측에서 백테스트에 못 미쳐</b> 자동 강등돼 있습니다
+      (52주신고가 신뢰계수 <span class="num">0.05</span>). 점수를 그대로 믿으면 안 됩니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>💎 가치 발굴 (한국)</h3><span class="badge b-mid">중간</span></div>
+    <p class="what">싸고(PER·PBR) 돈 잘 버는(ROE·영업익 성장) 종목. 위치뿐 아니라 <b>궤적</b>(ΔROE·ΔOPM)까지 봅니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">DART 공식 재무라 데이터가 단단합니다.
+      <b>"싸지만 나빠지는 중"인 밸류 함정</b>을 궤적으로 걸러냅니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt">한국 전용. 함정을 <b>궤적 하나로만</b> 거르므로
+      완전하지 않습니다. 싼 데에는 대개 이유가 있습니다.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="h2row"><h2>🔍 종목 분석</h2><span class="sub">종목코드를 넣으면 그 회사 하나를 깊게 봅니다</span></div>
+
+  <div class="feat top">
+    <div class="fh"><h3>📊 공식 재무제표</h3><span class="badge b-ok">최고 신뢰 · 공시 원문</span></div>
+    <p class="what">한국은 DART, 미국은 SEC EDGAR에서 직접 가져옵니다. 연간·분기 모두, 컨센서스(E) 병기.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">포털 스크래핑이 아니라 <b>공시 원문</b>입니다.
+      <b>분기 합 = 연간</b> 검증을 통과한 데이터만 씁니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt">컨센서스는 무료 소스라 <b>현금흐름 추정치가 없습니다</b> → '-'.
+      없는 값을 추정해 채우지 않습니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>💵 손익 흐름 · 마진 궤적</h3><span class="badge b-ok">사실 조회</span></div>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">매출이 순이익까지 <b>어디서 새는지</b> 한 장으로.
+      8분기 마진 추이를 같이 보여줘 한 시점이 아니라 방향을 봅니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt">공시된 항목만 그립니다.
+      회사가 안 나눠 공시하면 그 칸은 비어 있습니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>🏭 사업부문별 매출 구조</h3><span class="badge b-mid">AI 추출 · 원문 대조 권장</span></div>
+    <p class="what">이 회사가 어느 사업에서 돈을 버는지. 회사가 실제로 공시하는 지표(매출총이익/영업이익)를 자동 판별해 씁니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">매출 비중과 이익 비중의 <b>괴리</b>가 드러납니다
+      (삼성 = DX가 매출 56%인데 이익은 반도체가 대부분).</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt"><b>AI가 공시 원문에서 뽑습니다</b> — 출처를 같이 띄우니 원문 대조를 권합니다.
+      부문별 <b>매출총이익은 대부분 미공시</b>라 '-'인 회사가 많습니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>📆 계절성 · ⚡ 골든크로스 성과 · 👤 내부자 거래</h3><span class="badge b-mid">과거 통계</span></div>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">월별 상승률, 이평선 교차의 실제 성적,
+      임원·주요주주 매매(DART 공시 / SEC Form 4)를 한 화면에서.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt"><b>전부 과거 통계입니다.</b>
+      상장 기간이 짧은 종목은 표본이 몇 건뿐이라 <b>우연과 구분되지 않습니다.</b></span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="h2row"><h2>🌍 매크로</h2><span class="sub">개별 종목이 아니라 시장 전체의 국면을 봅니다</span></div>
+
+  <div class="feat">
+    <div class="fh"><h3>🔭 세 렌즈 · 사이클 궤적 · 전이 감시판 · 현금비중 권고</h3><span class="badge b-raw">미검증 · 이론 규칙</span></div>
+    <p class="what">우라가미 4계절 · 코스톨라니 달걀 · 하워드 막스 시계추. 세 관점으로 현재 위치를 찍고,
+    무엇이 바뀌면 국면이 넘어가는지 감시하고, 권고 현금비중을 냅니다.</p>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">데이터는 <b>FRED 공식</b>(금리·M2·CPI·수익률곡선)입니다.
+      "지금 사도 되는 장인가"를 먼저 묻게 만드는 <b>순서상의 가치</b>가 있습니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt"><b>이 도구에서 근거가 가장 약한 화면입니다.</b>
+      국면 판정과 현금비중 매핑에 <b>백테스트가 없습니다</b> — 검증된 규칙이 아니라 이론입니다.</span></div>
+    </div>
+  </div>
+
+  <div class="feat">
+    <div class="fh"><h3>🏦 금리 · 수익률곡선 · CPI · M2 · 주요 지수</h3><span class="badge b-ok">공식 데이터</span></div>
+    <div class="pm">
+      <div class="good"><span class="lab">강점</span><span class="txt">FRED 원본 그대로. 해석을 얹지 않은 날것의 지표입니다.</span></div>
+      <div class="bad"><span class="lab">한계</span><span class="txt">지표가 많다고 판단이 쉬워지지 않습니다.
+      <b>보조 자료로만</b> 쓰세요.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="h2row"><h2>데이터는 어디서 오나</h2></div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>항목</th><th>출처</th><th>신뢰</th></tr></thead>
+      <tbody>
+        <tr><td><b>재무제표 (한국)</b></td><td>DART 전자공시 원문 → 자체 DB</td><td>공식 · 분기합=연간 검증</td></tr>
+        <tr><td><b>재무제표 (미국)</b></td><td>SEC EDGAR 원문</td><td>공식</td></tr>
+        <tr><td><b>가격</b></td><td>FinanceDataReader</td><td>공식 시세</td></tr>
+        <tr><td><b>매크로</b></td><td>FRED API</td><td>공식</td></tr>
+        <tr><td><b>시가총액</b></td><td>KRX 당일 종가 기준</td><td>공식</td></tr>
+        <tr><td><b>컨센서스</b></td><td>yfinance(미국) · 네이버금융(한국)</td><td>참고 · 현금흐름 추정치 없음</td></tr>
+        <tr><td><b>사업부문 구조</b></td><td>공시 원문 → AI 추출</td><td>원문 대조 권장</td></tr>
+        <tr><td><b>기관 수급 (한국)</b></td><td>pykrx</td><td>⚠️ 2026-07 이후 수집 막힘 — 공백</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:.88rem;color:var(--muted)">
+  <b>원칙: 없는 데이터를 있는 척하지 않습니다.</b> 화면의 <code>-</code>는 오류가 아니라
+  "그 종목에 그 데이터가 없다"는 뜻입니다. 매일 06시 자동 갱신되고,
+  파이프라인이 멈추면 경보가 울립니다.</p>
+</section>
+
+<section>
+  <div class="h2row"><h2>쓰기 전에 꼭 아셔야 할 세 가지</h2></div>
+  <div class="must">
+    <div class="m">
+      <span class="t">1. 모든 백테스트 성적은 실제보다 좋게 나옵니다</span>
+      <span class="d">종목 데이터에 <b>상장폐지된 회사가 빠져 있습니다.</b> 망해서 사라진 회사가 없으니
+      "버티면 회복하더라"는 결론이 실제보다 부풀려집니다. 알고 있는 문제이고, 고치는 중입니다.</span>
+    </div>
+    <div class="m">
+      <span class="t">2. 매수 권유가 아닙니다</span>
+      <span class="d">조건을 충족한 종목의 <b>기계적 출력</b>입니다. 점수와 신호는 확률이지 보장이 아닙니다.
+      이 도구는 판단을 대신하지 않고, 판단할 재료를 정리해 줍니다.</span>
+    </div>
+    <div class="m">
+      <span class="t">3. 손절가 없이 산 종목은 이 시스템 밖에 있습니다</span>
+      <span class="d">가장 많이 연구한 부분이 <b>"언제 파는가"</b>입니다. 주도주 규칙의 실측 채택값은
+      <b>진입가 대비 −25%</b>이고, 고점 대비로 재면 오히려 나빠집니다.
+      그리고 <b>−8% 같은 좁은 손절은 이 규칙에 쓰면 안 됩니다</b> —
+      주도주는 정점에 닿기 전에 중앙 −23%를 견디고 올라갑니다.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <details>
+    <summary>부록 — 해보고 버린 것들</summary>
+    <div class="dbody">
+      <p>이 도구가 지금 모양인 이유는 대부분 <b>안 되는 걸 확인해서</b>입니다.
+      기록으로 남겨둡니다. 쓰는 데는 몰라도 됩니다.</p>
+      <div class="drop"><span class="x">✕</span><span><b>종목 선정에 매달리기.</b> 연도별 백테스트에서 변별력이 일관되지 않았습니다.
+      → 선정보다 <b>생존(매도·리스크)</b>으로 무게를 옮겼습니다.</span></div>
+      <div class="drop"><span class="x">✕</span><span><b>급등+거래량+재무 규칙(L/S).</b> 그럴듯했는데 8년간
+      <b>TSLA·NVDA·WDC를 한 번도 못 잡았습니다.</b> 대상승의 출발점은 '급등한 주'가 아니었습니다.
+      → 성장률의 기울기 변화를 보는 <b>이익 가속</b>으로 교체.</span></div>
+      <div class="drop"><span class="x">✕</span><span><b>고점 대비 트레일링 손절.</b> 이 규칙은 신고가가 아니라
+      <b>낙폭 한가운데서 사기 때문에</b> 전제가 안 맞았습니다. 10배 확률을 7배 줄였습니다.
+      → <b>진입가 기준 손절</b>로.</span></div>
+      <div class="drop"><span class="x">✕</span><span><b>"20주 이평선 깨면 판다".</b> 가장 상식적인 규칙인데,
+      실제로는 정점보다 <b>중앙 72주 먼저</b> 나갔습니다.</span></div>
+      <div class="drop"><span class="x">✕</span><span><b>"이익 가속이 꺼지면 판다".</b> 진입 논리의 정반대라
+      맞아 보였지만 <b>18개 청산 방법 중 꼴찌</b>였습니다. 분기마다 깜빡여서 사실상 '석 달 뒤 매도'였습니다.</span></div>
+      <div class="drop"><span class="x">✕</span><span><b>포트폴리오 탭.</b> 보유 종목을 손으로 입력해야 했는데
+      <b>한 번도 입력된 적이 없어</b> 작동한 적이 없습니다. → 제거.</span></div>
+      <div class="drop"><span class="x">✕</span><span><b>성적표 탭.</b> 정작 주력 규칙은 채점하지 않고
+      <b>안 쓰는 신호만 채점</b>하고 있었습니다. → 제거하고 채점을 규칙 안으로 옮겼습니다.</span></div>
+      <p style="color:var(--body)"><b>남은 원칙 하나 —</b> 성적이 나쁜 신호를 화면에서 지우지 않습니다.
+      지우는 순간 다른 추천 서비스와 같아집니다.</p>
+    </div>
+  </details>
+</section>
+
+<footer>
+  개인 리서치 도구 · 투자 자문이 아닙니다 · 모든 수치는 백테스트이며 실현 수익이 아닙니다<br>
+  데이터 기준 2026-08-25 · 매일 06시(KST) 자동 갱신
+</footer>
+
+</div>

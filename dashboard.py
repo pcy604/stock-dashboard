@@ -28,6 +28,54 @@ def guard(section: str):
         st.caption(f"`{type(e).__name__}: {e}`")
 
 
+# ── 표에 숫자 강도 색 입히기 ─────────────────────────────────────────
+# 열 이름으로 성격을 판별한다. 세 갈래뿐이다.
+#   낮을수록 좋음 (밸류에이션·신호회차) · 높을수록 좋음 (성장·모멘텀) · 0 기준 (수익률)
+# ⚠️ 구간 상한을 못 박는 이유: PER 900 같은 이상치 하나가 나머지 색을 전부 회색으로
+#    뭉갠다. 자동 min/max 로 두면 색이 정보를 잃는다.
+_C_LOW = {'PER': (0, 60), 'PBR': (0, 10), 'PSR': (0, 15), 'PEG': (0, 3),
+          '회차': (1, 20), '신호회차': (1, 20)}
+_C_HIGH = {'매출가속': (-20, 40), '이익가속': (-20, 40), '매출YoY': (-20, 60),
+           'GPM': (0, 70), 'OPM': (-20, 40), 'ΔGPM': (-10, 10), 'ΔOPM': (-10, 10),
+           'RS4': (0.8, 2.0), 'RS13': (0.8, 2.0), '그주상승': (10, 40),
+           '고점대비': (-60, 0), '영업익($M)': (0, 500)}
+_C_FWD = ('이후1주', '이후4주', '이후13주', '이후26주', '이후52주', '이후104주')
+_C_2DP = ('PER', 'PBR', 'PSR', 'PEG', 'RS4', 'RS13', '시총($B)', '종가')
+
+
+def color_table(df: pd.DataFrame):
+    """숫자 강도를 배경색으로 보여주는 Styler. st.dataframe 에 그대로 넘긴다.
+
+    빈 칸은 'None' 이 아니라 '-' 로 낸다 — 없는 데이터를 있는 척하지 않되,
+    파이썬 내부 표현을 화면에 흘리지도 않는다."""
+    for c in list(_C_LOW) + list(_C_HIGH) + list(_C_FWD):
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors='coerce')
+    st_ = df.style
+    for c, (lo, hi) in _C_LOW.items():
+        if c in df.columns and df[c].notna().any():
+            st_ = st_.background_gradient(cmap='RdYlGn_r', subset=[c], vmin=lo, vmax=hi)
+    for c, (lo, hi) in _C_HIGH.items():
+        if c in df.columns and df[c].notna().any():
+            st_ = st_.background_gradient(cmap='RdYlGn', subset=[c], vmin=lo, vmax=hi)
+    _f = [c for c in _C_FWD if c in df.columns and df[c].notna().any()]
+    if _f:
+        st_ = st_.background_gradient(cmap='RdYlGn', subset=_f, vmin=-50, vmax=100)
+    # ⚠️ background_gradient 는 결측을 matplotlib 의 'bad color'(검정)로 칠한다.
+    #    이 규칙은 적자·흑자전환 종목을 많이 잡아 PER·PEG 가 대부분 비는데, 그대로 두면
+    #    표가 새까매진다. 그라디언트 뒤에 얹어서 결측만 배경을 지운다(뒤 스타일이 이긴다).
+    _grad = [c for c in list(_C_LOW) + list(_C_HIGH) + list(_C_FWD) if c in df.columns]
+    if _grad:
+        st_ = st_.map(lambda v: 'background-color:transparent' if pd.isna(v) else '',
+                      subset=_grad)
+    fmt = {c: ('{:.2f}' if c in _C_2DP else '{:.1f}')
+           for c in df.columns if pd.api.types.is_numeric_dtype(df[c])}
+    for c in ('회차', '신호회차'):
+        if c in fmt:
+            fmt[c] = '{:.0f}'
+    return st_.format(fmt, na_rep='-')
+
+
 def num(d: dict, key: str, fmt: str = '{}', dash: str = '-'):
     """JSON에 없는 키를 '-'로 안전 표시. 데이터 스키마가 코드보다 늦게 따라올 때 대비."""
     v = (d or {}).get(key)
@@ -478,15 +526,15 @@ _ONBOARD_TEXT = """
 **생각하는 방식 — 3층 프레임**
 🟡 가치(뭘 살까: 재무 3표·ROE·흑자전환) × ⚖️ 멀티플(비싼가: PER·PBR·PSR) × 🔵 가격(언제 살까: 차트·주봉 신호·계절성)
 
-**탭 4개**
-- 💼 **포트폴리오** — 보유 종목의 수익률·비중·손절선 자동 추적 + **📒 성적표**(지난 신호가 실제로 맞았는지 전부 공개)
-- 🔎 **종목 발굴** — 조건에 맞는 종목을 기계가 골라 목록으로. 🚀주도주·🏆CANSLIM이 검증된 규칙, 나머지는 탐색용
+**탭 3개**
+- 🔎 **종목 발굴** — 조건에 맞는 종목을 기계가 골라 목록으로. 🚀주도주가 가장 검증된 규칙, 나머지는 탐색용
 - 🔍 **종목 분석** — 종목코드(US `NVDA` / KR `005930`) 입력 → 차트·공식 재무 3표·멀티플·목표주가·AI 사업요약
 - 🌍 **매크로** — 지금이 사이클의 어느 국면인지(우라가미 4계절·코스톨라니 달걀·막스 시계추)와 권고 현금비중
 
 **처음이라면 이 순서**
 ① 🌍 매크로에서 지금 국면과 권고 현금비중 확인 → ② 🔎 종목 발굴에서 후보 3~5개(🚀주도주부터) →
-③ 🔍 종목 분석으로 재무가 실제로 좋아지는지 확인 → ④ 💼 포트폴리오에 손절가와 함께 기록
+③ 🔍 종목 분석으로 재무가 실제로 좋아지는지 확인 → ④ 손절가를 정하고 나서 산다
+   (진입가 대비 −25%가 주도주 규칙의 실측 채택값입니다)
 
 ⚠️ **의사결정 보조 도구**입니다. 점수·신호는 확률이지 보장이 아니며 매수 권유가 아닙니다.
 숫자에 `-`가 보이는 칸은 오류가 아니라 **그 종목에 해당 데이터가 없다는 뜻**입니다.
@@ -550,8 +598,8 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     # 2026-08-12 통폐합: ⚡타이밍 발굴 서브탭 제거.
     #   · 계절성·고점대비 낙폭 → 🔥상승 상위의 필터로 흡수(같은 데이터를 두 화면에서 보던 중복)
     #   · 🧮 사이징 계산기 → 💼포트폴리오로 이동(발굴이 아니라 집행 단계의 도구다)
-    st.caption("🚀주도주·🏆CANSLIM = 백테스트로 검증된 규칙 · 🔥상승상위·💎가치 = 후보 탐색용 — "
-               "시장 필터는 위 하나로 전 서브탭 공통 · 📒성적표와 🧮사이징 계산기는 💼포트폴리오 탭에 있습니다")
+    st.caption("🚀주도주 = 8년 백테스트와 청산 연구까지 마친 규칙 · 🏆CANSLIM = 기준을 직접 바꾸는 탐색 "
+               "· 🔥상승상위·💎가치 = 후보 탐색용 — 시장 필터는 위 하나로 전 서브탭 공통")
     t_lead, tab3, t_gain, t_value = st.tabs([
         "🚀 주도주", "🏆 CANSLIM", "🔥 상승 상위", "💎 가치 발굴 (KR)"])
 
@@ -798,16 +846,24 @@ with t_lead, guard('주도주'):
             _cd = _ac['candidates']
             st.markdown(f"**이번 주 신호 {len(_cd)}종** — 칸 수 제한 없이 전부 보여준다")
             if _cd:
-                st.dataframe(pd.DataFrame([{
+                st.dataframe(color_table(pd.DataFrame([{
                     '코드': m['sym'], '종목': m['name'], '신호회차': m['n'],
                     '그주상승': m['up'], '시총($B)': m['mc'], '종가': m['close'],
                     '고점대비': m['dd'], '매출가속': m['rva'], '이익가속': m['oia'],
                     '매출YoY': m['revy'], 'GPM': m['gpm'], 'ΔGPM': m['dgpm'],
                     'OPM': m['opm'], 'ΔOPM': m['dopm'], '영업익($M)': m['oi'],
-                    'RS4': m['rs4'], 'RS13': m['rs13'], 'PER': m['per'], 'PSR': m['psr'],
+                    'RS4': m['rs4'], 'RS13': m['rs13'],
+                    'PER': m.get('per'), 'PSR': m.get('psr'), 'PEG': m.get('peg'),
                     '이후1주': m.get('f1'), '이후4주': m.get('f4'), '이후13주': m.get('f13')}
-                    for m in _cd]), use_container_width=True, hide_index=True,
+                    for m in _cd])), use_container_width=True, hide_index=True,
                     row_height=25, height=_dfh(len(_cd)))
+                st.caption(
+                    "**색은 숫자의 강도다** — 밸류에이션(PER·PSR·PEG)은 낮을수록 초록, "
+                    "성장·모멘텀은 높을수록 초록, 이후 수익률은 0 기준이다. "
+                    "**PEG 는 PER ÷ 순이익 YoY 다** — 이 DB 에 EPS 시계열이 없어 순이익으로 대신하므로 "
+                    "주식 수 변동은 반영되지 않는다. 적자이거나 전년 동기가 적자면 정의되지 않아 '-' 이고, "
+                    "이 규칙은 흑자전환 직전 종목을 자주 잡으므로 빈 칸이 많은 게 정상이다. "
+                    "**PBR 은 없다** — 자기자본 시계열이 한국 835종뿐이고 이 화면은 미국 전용이다.")
                 _hi = [m['sym'] for m in _cd if (m.get('n') or 0) > 10]
                 if _hi:
                     st.warning(
@@ -1002,15 +1058,16 @@ with t_lead, guard('주도주'):
                         "붉은 점선은 같은 축의 기준값으로, 주도주 1,843개가 정점에 닿기까지 "
                         "견뎠던 낙폭의 중앙값이다. "
                         "⚠️ 주봉 종가 기준이라 장중 낙폭은 이보다 깊다.")
-                st.dataframe(pd.DataFrame([{
+                st.dataframe(color_table(pd.DataFrame([{
                     '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
                     '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
                     '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
                     'GPM': r['gpm'], 'ΔGPM': r['dgpm'], 'OPM': r['opm'], 'ΔOPM': r['dopm'],
-                    'RS13': r['rs13'], 'PSR': r['psr'],
+                    'RS13': r['rs13'], 'PER': r.get('per'),
+                    'PSR': r.get('psr'), 'PEG': r.get('peg'),
                     '이후1주': r.get('f1'), '이후4주': r.get('f4'), '이후13주': r.get('f13'),
                     '이후26주': r.get('f26'), '이후52주': r.get('f52'),
-                    '이후104주': r.get('f104')} for r in _ar]),
+                    '이후104주': r.get('f104')} for r in _ar])),
                     use_container_width=True, hide_index=True, row_height=25,
                     height=_dfh(len(_ar)))
                 st.caption(
@@ -1055,13 +1112,14 @@ with t_lead, guard('주도주'):
                         "**진한 초록 = 2배 이상.** 평균 하나로는 이 분포가 안 보인다 — "
                         "몇 종목이 전체를 끌고 가고 나머지는 시장에 진다. 등가중으로 담으면 "
                         "받는 것은 평균이지만, 그 평균은 소수 종목이 만든다.")
-                st.dataframe(pd.DataFrame([{
+                st.dataframe(color_table(pd.DataFrame([{
                     '코드': r['sym'], '종목': r['name'], '회차': r['n'],
                     '그주상승': r['up'], '시총($B)': r['mc'], '고점대비': r['dd'],
                     '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
-                    'GPM': r['gpm'], 'OPM': r['opm'], 'RS13': r['rs13'], 'PSR': r['psr'],
+                    'GPM': r['gpm'], 'OPM': r['opm'], 'RS13': r['rs13'],
+                    'PER': r.get('per'), 'PSR': r.get('psr'), 'PEG': r.get('peg'),
                     '이후13주': r.get('f13'), '이후52주': r.get('f52'),
-                    '이후104주': r.get('f104')} for r in _wr]),
+                    '이후104주': r.get('f104')} for r in _wr])),
                     use_container_width=True, hide_index=True, row_height=25,
                     height=_dfh(len(_wr)))
                 st.caption(
