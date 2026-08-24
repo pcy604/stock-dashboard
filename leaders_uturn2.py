@@ -48,13 +48,14 @@ def panel():
     return M, spy
 
 
-def collect(M, spy, key, trig=TRIG):
+def collect(M, spy, key, trig=TRIG, gate=None, extra=()):
     """전부 넘파이로 — 판다스 .get 을 루프 안에서 부르면 분 단위로 느려진다."""
     px = M["close"]
-    g = AB.gate_of(M, key).reindex_like(px).fillna(False)
+    g = (AB.gate_of(M, key) if gate is None else gate).reindex_like(px).fillna(False)
     idx, syms = px.index, list(px.columns)
     col = {s: j for j, s in enumerate(syms)}
     A = {k: M[k].reindex_like(px).values for k in M}
+    A.update({k: v.reindex_like(px).values for k, v in dict(extra).items()})
     V = A["close"]
     spy_dd = (spy / spy.rolling(52, min_periods=8).max() - 1).values
     spy_r4 = spy.pct_change(4).values
@@ -94,6 +95,7 @@ def collect(M, spy, key, trig=TRIG):
                 revq=f("rev_qoq"), revy=f("rev_yoy"), wse=f("weeks_since_earn"),
                 react=f("earn_react_w0"), mcap=f("marcap"), mdd52=f("mdd_52w"),
                 spy_dd=spy_dd[k], spy_r4=spy_r4[k],
+                **{k2: A[k2][k, jc] for k2 in dict(extra)},
                 fwd13=fw(13), fwd26=fw(26), fwd52=fw(52),
                 max52=(nxt.max() / x - 1) if len(nxt) else np.nan,
                 min52=(nxt.min() / x - 1) if len(nxt) else np.nan,
