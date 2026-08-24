@@ -124,7 +124,7 @@
     <circle cx="932" cy="578" r="14" fill="#4338ca"/><text class="oc-f oc-step-n" x="927" y="583">4</text>
     <text class="oc-f oc-step-t" x="954" y="576">✂️ 손절가를 먼저</text>
     <text class="oc-f oc-step-d" x="954" y="597">사기 전에 얼마에 자를지 정한다.</text>
-    <text class="oc-f oc-step-d" x="954" y="615">주도주 실측값 = 진입가 −25%.</text>
+    <text class="oc-f oc-step-d" x="954" y="615">단 −8% 처럼 좁으면 안 된다.</text>
   </g>
 
   <!-- ── 경고 + 출처 ── -->
