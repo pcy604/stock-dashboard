@@ -1,0 +1,547 @@
+<style>
+  :root{
+    --paper:#F5F8FC; --panel:#FFFFFF; --panel2:#EDF2F8; --line:#D6E0EC; --line2:#E8EEF6;
+    --ink:#0A1524; --ink2:#33475F; --mut:#6B8199;
+    --signal:#0E7C99; --signal-bg:#DFF1F7;
+    --gain:#12855A; --gain-bg:#DCF2E8; --loss:#C43B3B; --loss-bg:#FBE4E4;
+    --warn:#9A6B10; --warn-bg:#F8EEDA;
+    --mono:ui-monospace,'SF Mono','Cascadia Mono',Consolas,'D2Coding',monospace;
+    --ui:-apple-system,BlinkMacSystemFont,'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#070C14; --panel:#0E1622; --panel2:#16202E; --line:#22303F; --line2:#1A2432;
+    --ink:#E6EDF8; --ink2:#AFC0D4; --mut:#7A90A8;
+    --signal:#45C8E8; --signal-bg:#0D2A35;
+    --gain:#35D68A; --gain-bg:#0C2C1E; --loss:#F2686A; --loss-bg:#311516;
+    --warn:#F0AD3E; --warn-bg:#2E2210;
+  }}
+  :root[data-theme="light"]{
+    --paper:#F5F8FC; --panel:#FFFFFF; --panel2:#EDF2F8; --line:#D6E0EC; --line2:#E8EEF6;
+    --ink:#0A1524; --ink2:#33475F; --mut:#6B8199;
+    --signal:#0E7C99; --signal-bg:#DFF1F7;
+    --gain:#12855A; --gain-bg:#DCF2E8; --loss:#C43B3B; --loss-bg:#FBE4E4;
+    --warn:#9A6B10; --warn-bg:#F8EEDA;
+  }
+  :root[data-theme="dark"]{
+    --paper:#070C14; --panel:#0E1622; --panel2:#16202E; --line:#22303F; --line2:#1A2432;
+    --ink:#E6EDF8; --ink2:#AFC0D4; --mut:#7A90A8;
+    --signal:#45C8E8; --signal-bg:#0D2A35;
+    --gain:#35D68A; --gain-bg:#0C2C1E; --loss:#F2686A; --loss-bg:#311516;
+    --warn:#F0AD3E; --warn-bg:#2E2210;
+  }
+  *{box-sizing:border-box}
+  .rp{font-family:var(--ui);background:var(--paper);color:var(--ink);line-height:1.5;
+      padding:20px clamp(12px,2.6vw,30px) 56px;-webkit-font-smoothing:antialiased}
+  .rp h1,.rp h2,.rp h3,.rp p{margin:0}
+  .n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .g{color:var(--gain)} .r{color:var(--loss)} .w{color:var(--warn)} .m{color:var(--mut)}
+
+  .mast{border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:8px;
+        display:flex;flex-wrap:wrap;gap:8px 20px;align-items:flex-end}
+  .mast__t{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .mast__t small{display:block;font-size:11px;font-weight:600;letter-spacing:.2em;
+        text-transform:uppercase;color:var(--signal);margin-bottom:3px}
+  .mast__px{margin-left:auto;text-align:right;font-family:var(--mono)}
+  .mast__px b{font-size:23px;font-weight:700;display:block;line-height:1.1}
+  .mast__px span{font-size:11px;color:var(--mut)}
+  .srcline{font-size:11px;color:var(--mut);margin-bottom:20px;font-family:var(--mono)}
+
+  .pg{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+      padding:15px 17px 16px;margin-bottom:11px;page-break-inside:avoid}
+  .pg__h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+      padding-bottom:9px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+  .pg__n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--paper);
+      background:var(--ink);padding:2px 6px;border-radius:2px;flex-shrink:0}
+  .pg__t{font-size:16px;font-weight:700;letter-spacing:-.01em}
+  .pg__tag{margin-left:auto;font-size:10.5px;font-family:var(--mono);letter-spacing:.08em;
+      text-transform:uppercase;color:var(--mut)}
+  .say{font-size:13px;color:var(--ink2);margin-top:11px;padding-top:9px;
+      border-top:1px dashed var(--line);display:flex;gap:7px}
+  .say b{color:var(--signal);flex-shrink:0;font-weight:700}
+
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;
+      background:var(--line);border:1px solid var(--line);margin-bottom:12px}
+  .kpi>div{background:var(--panel);padding:9px 11px}
+  .kpi dt{font-size:10.5px;color:var(--mut);letter-spacing:.04em;margin-bottom:2px}
+  .kpi dd{margin:0;font-family:var(--mono);font-size:18px;font-weight:700;line-height:1.15}
+  .kpi small{font-size:10.5px;font-weight:500;color:var(--mut);display:block;margin-top:1px;font-family:var(--ui)}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:5px 8px;border-bottom:1px solid var(--line2);text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
+      border-bottom:1px solid var(--line);font-weight:600}
+  td.n,th.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  tr.tot td{border-top:1px solid var(--ink);border-bottom:none;font-weight:700}
+  tr.sub td:first-child{padding-left:18px;color:var(--ink2)}
+  .scroll{overflow-x:auto}
+  svg{display:block;width:100%;height:auto}
+  .lgd{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--ink2);margin-top:6px}
+  .lgd i{display:inline-block;width:9px;height:9px;border-radius:1px;margin-right:4px;vertical-align:-1px}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+  .bl{display:flex;flex-direction:column;gap:7px}
+  .bl__row{display:grid;grid-template-columns:96px 1fr auto;gap:9px;align-items:center;font-size:12.5px}
+  .bl__bar{height:17px;background:var(--panel2);border-radius:2px;overflow:hidden}
+  .bl__bar i{display:block;height:100%}
+  .bl__v{font-family:var(--mono);font-size:12px;min-width:74px;text-align:right}
+
+  .mx{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10.5px}
+  .mx td,.mx th{padding:4px 2px;text-align:center;border:1px solid var(--line2)}
+  .mx th{color:var(--mut);font-size:9.5px}
+  .mx td:first-child,.mx th:first-child{text-align:left;padding-left:5px;font-weight:700}
+
+  .tl{display:flex;flex-direction:column;gap:0}
+  .tl__i{display:grid;grid-template-columns:74px 1fr;gap:12px;padding:8px 0;
+      border-bottom:1px solid var(--line2);font-size:12.5px}
+  .tl__i:last-child{border-bottom:0}
+  .tl__d{font-family:var(--mono);font-size:11px;color:var(--signal);font-weight:700;padding-top:1px}
+  .tl__b b{display:block;font-weight:700;font-size:13px}
+  .tl__b span{color:var(--ink2)}
+  .pill{display:inline-block;font-size:10px;font-family:var(--mono);padding:1px 5px;
+      border-radius:2px;margin-left:5px;vertical-align:1px}
+  .p-go{background:var(--gain-bg);color:var(--gain)} .p-w{background:var(--warn-bg);color:var(--warn)}
+  .p-r{background:var(--loss-bg);color:var(--loss)} .p-s{background:var(--signal-bg);color:var(--signal)}
+
+  .chk{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:start;
+      padding:7px 0;border-bottom:1px solid var(--line2);font-size:12.5px}
+  .chk:last-child{border-bottom:0}
+  .chk__i{font-family:var(--mono);font-weight:700;text-align:center}
+  .note{background:var(--panel2);border-left:2px solid var(--signal);padding:8px 11px;
+      font-size:12px;color:var(--ink2);margin-top:10px}
+</style>
+
+<div class="rp">
+  <div class="mast">
+    <h1 class="mast__t"><small>Nasdaq · Satellogic Inc.</small>SATL 딥다이브 — 16분야</h1>
+    <div class="mast__px"><b>$3.81</b><span>2026-07-23 종가 · 시총 $0.55B</span></div>
+  </div>
+  <p class="srcline">출처: Q1 FY26 실적발표(2026-05-11) · IR 프레젠테이션(2026-05-12) · 주가 FDR · 회계수치 단위 $K/$M · 미공시 항목은 ❓ 표기(추정 없음)</p>
+
+  <!-- 01 업력 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">01</span><h2 class="pg__t">업력</h2><span class="pg__tag">Company profile</span></div>
+    <dl class="kpi">
+      <div><dt>창업</dt><dd class="n">2010</dd><small>16년차 · 아르헨티나 출발</small></div>
+      <div><dt>창업자</dt><dd style="font-size:14px">Kargieman<br>Richarte</dd><small>2인 공동창업</small></div>
+      <div><dt>상장</dt><dd class="n">2022</dd><small>SPAC · Nasdaq SATL</small></div>
+      <div><dt>본사</dt><dd style="font-size:15px">New York</dd><small>미국 법인전환 완료</small></div>
+      <div><dt>임직원</dt><dd class="m">❓</dd><small>본 자료 미공시</small></div>
+    </dl>
+    <div class="tl">
+      <div class="tl__i"><span class="tl__d">2010</span><span class="tl__b"><b>창업</b><span>Emiliano Kargieman · Gerardo Richarte — 저비용 위성 수직계열화 착수</span></span></div>
+      <div class="tl__i"><span class="tl__d">2022</span><span class="tl__b"><b>Nasdaq 상장</b><span>SPAC 합병 · 티커 SATL</span></span></div>
+      <div class="tl__i"><span class="tl__d">2025~26</span><span class="tl__b"><b>미국 법인전환(domestication)</b><span>미 국방·정보 조달 접근성 확보 목적 <span class="pill p-s">전략 전환</span></span></span></div>
+      <div class="tl__i"><span class="tl__d">2026 Q1</span><span class="tl__b"><b>운영 변곡점</b><span>창사 최초 분기 영업현금흐름 흑자 <span class="pill p-go">+$0.2M</span></span></span></div>
+    </div>
+    <p class="say"><b>코멘트</b><span>16년간 적자를 감내한 하드웨어 기업. "미래 잠재력 → 스케일 가능 플랫폼" 전환을 회사가 자기 언어로 선언한 분기가 Q1 FY26.</span></p>
+  </section>
+
+  <!-- 02 CEO -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">02</span><h2 class="pg__t">CEO · 경영진</h2><span class="pg__tag">Leadership</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>인물</th><th style="text-align:left">직위</th><th style="text-align:left">비고</th></tr></thead>
+      <tbody>
+        <tr><td><b>Emiliano Kargieman</b></td><td style="text-align:left">창업자 · CEO</td><td style="text-align:left">2010년 공동창업, 현재까지 경영</td></tr>
+        <tr><td><b>Rick Dunn</b></td><td style="text-align:left">CFO</td><td style="text-align:left">비용규율·현금흐름 전환 주도</td></tr>
+        <tr><td>Gerardo Richarte</td><td style="text-align:left">공동창업자</td><td style="text-align:left">기술 기반 설계</td></tr>
+        <tr><td>Gen. Joseph Dunford (Ret.)</td><td style="text-align:left">이사회</td><td style="text-align:left">전 미 합참의장</td></tr>
+        <tr><td>Steven Mnuchin</td><td style="text-align:left">이사회</td><td style="text-align:left">전 미 재무장관</td></tr>
+        <tr><td>Kelly Kennedy</td><td style="text-align:left">이사회</td><td style="text-align:left">—</td></tr>
+        <tr><td>VADM Frank D. Whitworth III (Ret.)</td><td style="text-align:left">전략 자문</td><td style="text-align:left">제8대 NGA(국가지리정보국) 국장 · <span class="pill p-go">Q1 신규</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="say"><b>코멘트</b><span>이사회·자문진이 <b>미 국방·정보 네트워크</b>에 집중 배치. 기술 인선이 아니라 <b>조달 접근 인선</b> — 사업모델이 어디를 향하는지가 인물 구성에 그대로 드러남.</span></p>
+  </section>
+
+  <!-- 03 Holder / RSU -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">03</span><h2 class="pg__t">주주구조 · 주식보상</h2><span class="pg__tag">Cap table</span></div>
+    <div class="two">
+      <div>
+        <div class="scroll"><table>
+          <thead><tr><th>항목</th><th class="n">2026-03-31</th><th class="n">2025-12-31</th></tr></thead>
+          <tbody>
+            <tr><td>Class A 발행</td><td class="n">133,226,678</td><td class="n">125,639,916</td></tr>
+            <tr><td>Class A 유통</td><td class="n">132,658,855</td><td class="n">125,072,093</td></tr>
+            <tr><td>Class B (차등의결)</td><td class="n">10,582,641</td><td class="n">10,582,641</td></tr>
+            <tr><td>자기주식</td><td class="n">567,823</td><td class="n">567,823</td></tr>
+            <tr class="tot"><td>합계 유통</td><td class="n">143,241,496</td><td class="n">135,654,734</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="scroll"><table>
+          <thead><tr><th>희석 · 보상</th><th class="n">Q1 26</th><th class="n">Q1 25</th></tr></thead>
+          <tbody>
+            <tr><td>가중평균 주식수</td><td class="n">140.9M</td><td class="n">96.7M</td></tr>
+            <tr><td>주식보상비용(SBC)</td><td class="n">$735K</td><td class="n">$595K</td></tr>
+            <tr><td>RSU 세금 원천징수</td><td class="n">$303K</td><td class="n">$375K</td></tr>
+            <tr><td>자본잉여금(APIC)</td><td class="n">$506.3M</td><td class="n">$473.5M</td></tr>
+            <tr class="tot"><td>YoY 주식수 증가</td><td class="n r">+45.8%</td><td class="n">—</td></tr>
+          </tbody>
+        </table></div>
+        <div class="note">2026-01 유상증자(Registered Direct) <b class="n">$35M @ $4.73</b> — 현 주가 $3.81은 <b class="r">증자단가 하회</b>. 신규 참여자 손실 구간.</div>
+      </div>
+    </div>
+    <p class="say"><b>리스크</b><span>1년 새 가중평균 주식수 <b class="r">+45.8%</b>. 성장이 주당가치로 이어지려면 매출 증가율이 희석률을 지속 상회해야 함(Q1은 +80% vs +46%로 통과).</span></p>
+  </section>
+
+  <!-- 04 사업부문 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">04</span><h2 class="pg__t">사업부문</h2><span class="pg__tag">Segment · Q1 FY26</span></div>
+    <div class="two">
+      <div>
+        <p class="m" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">사업라인별 매출</p>
+        <div class="bl">
+          <div class="bl__row"><span>Data&nbsp;&amp;&nbsp;Analytics</span><span class="bl__bar"><i style="width:76%;background:var(--signal)"></i></span><span class="bl__v">$4.6M · 76%</span></div>
+          <div class="bl__row"><span>Space Systems</span><span class="bl__bar"><i style="width:24%;background:var(--warn)"></i></span><span class="bl__v">$1.5M · 24%</span></div>
+        </div>
+        <div class="scroll" style="margin-top:10px"><table>
+          <thead><tr><th>라인</th><th class="n">Q1 26</th><th class="n">Q1 25</th><th class="n">YoY</th></tr></thead>
+          <tbody>
+            <tr><td>Data &amp; Analytics<br><small class="m">imagery · CaaS 구독</small></td><td class="n">$4.6M</td><td class="n">$3.0M</td><td class="n g">+53%</td></tr>
+            <tr><td>Space Systems<br><small class="m">위성 자체를 판매·이전</small></td><td class="n">$1.5M</td><td class="n">$0.4M</td><td class="n g">+275%</td></tr>
+            <tr class="tot"><td>합계</td><td class="n">$6.1M</td><td class="n">$3.4M</td><td class="n g">+80%</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <p class="m" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">지역별 매출</p>
+        <div class="bl">
+          <div class="bl__row"><span>아시아·APAC</span><span class="bl__bar"><i style="width:48%;background:var(--gain)"></i></span><span class="bl__v">$3.0M · 48%</span></div>
+          <div class="bl__row"><span>미주</span><span class="bl__bar"><i style="width:34%;background:var(--signal)"></i></span><span class="bl__v">$2.0M · 34%</span></div>
+          <div class="bl__row"><span>유럽</span><span class="bl__bar"><i style="width:18%;background:var(--mut)"></i></span><span class="bl__v">$1.1M · 18%</span></div>
+        </div>
+        <div class="note" style="margin-top:14px">아시아·APAC이 <b class="g">+700% YoY</b>로 최대 지역이 됨 (호주·말레이시아 주도). 미국 기업이지만 <b>매출 절반이 아시아</b> — 주권형 EO 수요가 신흥국에서 먼저 터지는 구조.</div>
+      </div>
+    </div>
+    <p class="say"><b>구조</b><span>D&amp;A(반복매출)가 본체, Space Systems(위성 자체 매각)는 건당 대형·비정기. 후자는 <b>$12M·$18M 단건</b>이 분기 실적을 흔들 수 있는 lumpy 매출 — 분기 성장률을 그대로 추세로 읽으면 안 됨.</span></p>
+  </section>
+
+  <!-- 05 현황 + 기술적분석 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">05</span><h2 class="pg__t">주가 현황 · 기술적 분석</h2><span class="pg__tag">2026-07-23</span></div>
+    <dl class="kpi">
+      <div><dt>현재가</dt><dd class="n">$3.81</dd><small>52주 $1.27~$10.74</small></div>
+      <div><dt>고점 대비</dt><dd class="n r">-64.5%</dd><small>$10.74 → $3.81</small></div>
+      <div><dt>RSI(14)</dt><dd class="n r">22</dd><small>과매도 구간(&lt;30)</small></div>
+      <div><dt>MA50 / MA200</dt><dd class="n" style="font-size:14px">$6.58 / $4.38</dd><small>주가가 둘 다 하회</small></div>
+      <div><dt>YTD</dt><dd class="n g">+94.4%</dd><small>1M <span class="r">-31.5%</span></small></div>
+    </dl>
+    <svg viewBox="0 0 700 200" role="img" aria-label="SATL 24개월 주가 추이">
+      <line x1="34" y1="178" x2="692" y2="178" stroke="var(--line)" stroke-width="1"/>
+      <line x1="34" y1="12" x2="34" y2="178" stroke="var(--line)" stroke-width="1"/>
+      <text x="30" y="16" text-anchor="end" font-size="9" fill="var(--mut)" font-family="var(--mono)">$9.6</text>
+      <text x="30" y="97" text-anchor="end" font-size="9" fill="var(--mut)" font-family="var(--mono)">$5.2</text>
+      <text x="30" y="181" text-anchor="end" font-size="9" fill="var(--mut)" font-family="var(--mono)">$0.9</text>
+      <polyline fill="none" stroke="var(--signal)" stroke-width="2" stroke-linejoin="round"
+        points="34,175.7 61.4,176.5 88.8,175.5 116.3,176.3 143.7,157.6 171.1,140.8 198.5,141.7 225.9,136.8 253.4,127.1 280.8,116.5 308.2,124.8 335.6,126.1 363,132.6 390.5,124 417.9,132.6 445.3,158.7 472.7,163.7 500.1,159.5 527.6,107.4 555,137.9 582.4,91.4 609.8,71.9 637.2,13.7 664.7,86 692,122.5"/>
+      <circle cx="637.2" cy="13.7" r="3.5" fill="var(--warn)"/>
+      <text x="637.2" y="9" text-anchor="middle" font-size="9" fill="var(--warn)" font-family="var(--mono)">$9.51 고점</text>
+      <circle cx="692" cy="122.5" r="3.5" fill="var(--loss)"/>
+      <text x="688" y="115" text-anchor="end" font-size="9" fill="var(--loss)" font-family="var(--mono)">$3.81</text>
+      <text x="34" y="192" font-size="9" fill="var(--mut)" font-family="var(--mono)">24-07</text>
+      <text x="363" y="192" text-anchor="middle" font-size="9" fill="var(--mut)" font-family="var(--mono)">25-07</text>
+      <text x="692" y="192" text-anchor="end" font-size="9" fill="var(--mut)" font-family="var(--mono)">26-07</text>
+    </svg>
+    <p class="say"><b>기술적 판단</b><span>MA50&gt;MA200(정배열)은 유지되나 <b>주가가 두 이평 모두 아래</b> + RSI 22. 추세 훼손 후 과매도 국면 — 신규 진입은 <b>이평 회복 확인 후</b>가 룰에 부합.</span></p>
+  </section>
+
+  <!-- 06 최근 실적 + 어닝콜 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">06</span><h2 class="pg__t">최근 실적 · 어닝콜</h2><span class="pg__tag">Q1 FY26 · 2026-05-11</span></div>
+    <dl class="kpi">
+      <div><dt>매출</dt><dd class="n g">$6.1M</dd><small>+80% YoY</small></div>
+      <div><dt>영업손실</dt><dd class="n">$(6.4)M</dd><small class="g">33% 개선</small></div>
+      <div><dt>Adj. EBITDA</dt><dd class="n">$(4.2)M</dd><small class="g">32% 개선</small></div>
+      <div><dt>영업현금흐름</dt><dd class="n g">+$0.2M</dd><small>창사 최초 흑자</small></div>
+      <div><dt>순손실</dt><dd class="n r">$(118.3)M</dd><small>비현금 $(113)M 포함</small></div>
+      <div><dt>현금</dt><dd class="n">$121.9M</dd><small>vs $94.4M(연말)</small></div>
+    </dl>
+    <p class="m" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 7px">잔여 이행의무(RPO) $64.8M — 인식 시점별</p>
+    <svg viewBox="0 0 700 88" role="img" aria-label="RPO 인식 스케줄">
+      <rect x="0" y="10" width="315" height="26" fill="var(--signal)"/>
+      <rect x="316" y="10" width="85" height="26" fill="var(--gain)"/>
+      <rect x="402" y="10" width="81" height="26" fill="var(--warn)"/>
+      <rect x="484" y="10" width="216" height="26" fill="var(--mut)"/>
+      <text x="8" y="27" font-size="11" fill="#fff" font-family="var(--mono)" font-weight="700">1년 내 $29.2M</text>
+      <text x="324" y="27" font-size="10" fill="#fff" font-family="var(--mono)">$7.9M</text>
+      <text x="410" y="27" font-size="10" fill="#fff" font-family="var(--mono)">$7.5M</text>
+      <text x="492" y="27" font-size="11" fill="#fff" font-family="var(--mono)" font-weight="700">3년 이후 $20.2M</text>
+      <text x="0" y="52" font-size="9.5" fill="var(--mut)" font-family="var(--mono)">&lt;1년 (45%)</text>
+      <text x="316" y="52" font-size="9.5" fill="var(--mut)" font-family="var(--mono)">1-2년</text>
+      <text x="402" y="52" font-size="9.5" fill="var(--mut)" font-family="var(--mono)">2-3년</text>
+      <text x="484" y="52" font-size="9.5" fill="var(--mut)" font-family="var(--mono)">이후 (31%)</text>
+      <text x="0" y="76" font-size="10.5" fill="var(--ink2)">1년 내 인식분 $29.2M = 직전 12개월 매출 $20.4M의 <tspan font-weight="700" fill="var(--gain)">1.4배</tspan> — 계약잔고가 성장의 하한을 형성</text>
+    </svg>
+    <div class="note" style="margin-top:12px">CFO 코멘트 요약 — “순손실 $118.3M 중 <b>$113.0M은 전환사채·워런트·언아웃의 비현금 평가손</b>(주가 상승에 따른 부채 재평가). 영업 실적과 무관.” <b class="g">주가가 오를수록 회계상 순손실이 커지는 구조</b>라 순이익 지표는 이 회사 판단에 부적합.</div>
+    <p class="say"><b>핵심</b><span>이번 분기의 진짜 뉴스는 매출 +80%가 아니라 <b>영업현금흐름 흑자 전환(+$4.9M 스윙)</b>. 수직계열화의 영업레버리지가 처음으로 숫자에 나타남.</span></p>
+  </section>
+
+  <!-- 07 밸류에이션 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">07</span><h2 class="pg__t">밸류에이션</h2><span class="pg__tag">PSR · PER · PBR</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>지표</th><th class="n">값</th><th style="text-align:left">계산 근거</th><th style="text-align:left">판정</th></tr></thead>
+      <tbody>
+        <tr><td><b>시가총액</b></td><td class="n">$0.55B</td><td style="text-align:left">$3.81 × 143.2M주</td><td style="text-align:left" class="m">—</td></tr>
+        <tr><td><b>PSR (TTM)</b></td><td class="n w">26.8x</td><td style="text-align:left">시총 ÷ TTM매출 $20.4M</td><td style="text-align:left"><span class="pill p-w">고평가 구간</span></td></tr>
+        <tr><td>PSR (Q1 연율화)</td><td class="n">22.4x</td><td style="text-align:left">시총 ÷ ($6.1M×4)</td><td style="text-align:left" class="m">성장 반영 시</td></tr>
+        <tr><td><b>PER</b></td><td class="n r">N/A</td><td style="text-align:left">순손실 $(118.3)M</td><td style="text-align:left"><span class="pill p-r">적자</span></td></tr>
+        <tr><td><b>PBR</b></td><td class="n r">N/A</td><td style="text-align:left">자기자본 $(25.5)M</td><td style="text-align:left"><span class="pill p-r">자본잠식</span></td></tr>
+        <tr><td>EV (근사)</td><td class="n">$0.43B</td><td style="text-align:left">시총 − 순현금 $121.9M</td><td style="text-align:left" class="m">전환사채 제외 시</td></tr>
+        <tr class="tot"><td>RPO 대비 시총</td><td class="n">8.4x</td><td style="text-align:left">시총 ÷ RPO $64.8M</td><td style="text-align:left" class="m">계약잔고 배수</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note">PBR·PER이 <b>둘 다 무의미</b>한 종목. 자본잠식은 영업 부실이 아니라 <b>전환사채 시가평가($142.6M 부채 계상)</b> 때문 — 주가가 오르면 부채가 커져 자본이 더 깎이는 회계 구조.</div>
+    <p class="say"><b>결론</b><span>전통 밸류 지표가 전부 작동 안 함 → <b>PSR·RPO배수·현금소진율</b>로 봐야 하는 종목. PSR 26.8x는 매출 성장 80%가 <b>지속될 때만</b> 정당화됨.</span></p>
+  </section>
+
+  <!-- 08 CANSLIM -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">08</span><h2 class="pg__t">CANSLIM 스코어카드</h2><span class="pg__tag">오닐 7요소</span></div>
+    <div class="chk"><span class="chk__i r">✕</span><span><b>C — 분기 실적</b><br><span class="m">매출 +80% ✓ 이나 EPS $(0.84) 적자 지속</span></span><span class="n r">FAIL</span></div>
+    <div class="chk"><span class="chk__i r">✕</span><span><b>A — 연간 실적</b><br><span class="m">순손실 확대(적자 누적 $523M)</span></span><span class="n r">FAIL</span></div>
+    <div class="chk"><span class="chk__i r">✕</span><span><b>N — 신고가 근접</b><br><span class="m">52주 고점 대비 -64.5%</span></span><span class="n r">FAIL</span></div>
+    <div class="chk"><span class="chk__i m">?</span><span><b>S — 수급(거래량)</b><br><span class="m">본 자료로 미산출</span></span><span class="n m">❓</span></div>
+    <div class="chk"><span class="chk__i w">△</span><span><b>L — 주도주(RS)</b><br><span class="m">YTD +94% 강세이나 12개월 +7%로 동종 대비 열위</span></span><span class="n w">약</span></div>
+    <div class="chk"><span class="chk__i m">?</span><span><b>I — 기관 수급</b><br><span class="m">미확인(패시브 편입 위주 — 14번 참조)</span></span><span class="n m">❓</span></div>
+    <div class="chk"><span class="chk__i g">✓</span><span><b>M — 시장 방향</b><br><span class="m">지수 상승추세</span></span><span class="n g">PASS</span></div>
+    <p class="say"><b>판정</b><span>7요소 중 <b class="r">확인 통과는 M 하나</b>. CANSLIM은 <b>이익이 나는 신고가 주도주</b>를 사는 규칙이라, 적자·고점대비 -65%인 이 종목은 <b>구조적으로 부적격</b>. 매수하려면 CANSLIM이 아닌 다른 논리(턴어라운드·계약잔고)를 근거로 삼아야 함.</span></p>
+  </section>
+
+  <!-- 09 손익계산서 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">09</span><h2 class="pg__t">손익계산서</h2><span class="pg__tag">$K · 3M ended Mar 31</span></div>
+    <p class="m" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">영업 워터폴 (Q1 FY26, $M)</p>
+    <svg viewBox="0 0 700 210" role="img" aria-label="영업손익 워터폴">
+      <line x1="0" y1="120" x2="700" y2="120" stroke="var(--line)" stroke-width="1"/>
+      <rect x="40" y="52.8" width="80" height="67.2" fill="var(--signal)"/>
+      <text x="80" y="46" text-anchor="middle" font-size="11" font-weight="700" fill="var(--signal)" font-family="var(--mono)">6.11</text>
+      <text x="80" y="136" text-anchor="middle" font-size="10" fill="var(--mut)">매출</text>
+      <rect x="150" y="52.8" width="80" height="16" fill="var(--loss)" opacity=".75"/>
+      <text x="190" y="46" text-anchor="middle" font-size="10.5" fill="var(--loss)" font-family="var(--mono)">-1.45</text>
+      <text x="190" y="136" text-anchor="middle" font-size="10" fill="var(--mut)">매출원가</text>
+      <rect x="260" y="68.8" width="80" height="33.9" fill="var(--loss)" opacity=".75"/>
+      <text x="300" y="62" text-anchor="middle" font-size="10.5" fill="var(--loss)" font-family="var(--mono)">-3.08</text>
+      <text x="300" y="136" text-anchor="middle" font-size="10" fill="var(--mut)">엔지니어링</text>
+      <rect x="370" y="102.7" width="80" height="72" fill="var(--loss)" opacity=".75"/>
+      <text x="410" y="96" text-anchor="middle" font-size="10.5" fill="var(--loss)" font-family="var(--mono)">-6.55</text>
+      <text x="410" y="188" text-anchor="middle" font-size="10" fill="var(--mut)">판관비</text>
+      <rect x="480" y="174.7" width="80" height="15.3" fill="var(--loss)" opacity=".75"/>
+      <text x="520" y="203" text-anchor="middle" font-size="10.5" fill="var(--loss)" font-family="var(--mono)">-1.39</text>
+      <text x="520" y="168" text-anchor="middle" font-size="10" fill="var(--mut)">감가상각</text>
+      <rect x="590" y="120" width="80" height="70" fill="var(--warn)"/>
+      <text x="630" y="203" text-anchor="middle" font-size="11" font-weight="700" fill="var(--warn)" font-family="var(--mono)">-6.36</text>
+      <text x="630" y="114" text-anchor="middle" font-size="10" fill="var(--mut)">영업손실</text>
+    </svg>
+    <div class="scroll" style="margin-top:12px"><table>
+      <thead><tr><th>항목 ($K)</th><th class="n">Q1 2026</th><th class="n">Q1 2025</th><th class="n">YoY</th></tr></thead>
+      <tbody>
+        <tr class="sub"><td>서비스 매출</td><td class="n">5,371</td><td class="n">3,387</td><td class="n g">+59%</td></tr>
+        <tr class="sub"><td>제품 매출</td><td class="n">736</td><td class="n">—</td><td class="n g">신규</td></tr>
+        <tr><td><b>총매출</b></td><td class="n"><b>6,107</b></td><td class="n">3,387</td><td class="n g">+80%</td></tr>
+        <tr><td>매출원가</td><td class="n">(1,451)</td><td class="n">(1,237)</td><td class="n">+17%</td></tr>
+        <tr><td>엔지니어링</td><td class="n">(3,080)</td><td class="n">(2,493)</td><td class="n">+24%</td></tr>
+        <tr><td>판매관리비</td><td class="n">(6,545)</td><td class="n">(6,485)</td><td class="n">+1%</td></tr>
+        <tr><td>감가상각</td><td class="n">(1,392)</td><td class="n">(2,687)</td><td class="n g">-48%</td></tr>
+        <tr><td><b>영업손실</b></td><td class="n w"><b>(6,361)</b></td><td class="n">(9,515)</td><td class="n g">33% 개선</td></tr>
+        <tr><td>금융상품 평가손 <span class="pill p-r">비현금</span></td><td class="n r">(113,011)</td><td class="n">(22,361)</td><td class="n">—</td></tr>
+        <tr><td>이자수익 순액</td><td class="n g">957</td><td class="n">177</td><td class="n g">+441%</td></tr>
+        <tr class="tot"><td>순손실</td><td class="n r">(118,302)</td><td class="n">(32,581)</td><td class="n">—</td></tr>
+        <tr><td>EPS (희석)</td><td class="n r">$(0.84)</td><td class="n">$(0.34)</td><td class="n">—</td></tr>
+      </tbody>
+    </table></div>
+    <p class="say"><b>구조</b><span>매출총이익률 <b class="g">76%</b>(6.11→4.66)로 소프트웨어급. 적자의 원인은 원가가 아니라 <b>판관비 $6.5M</b>(매출보다 큼). 매출이 판관비를 넘는 시점이 손익분기 — 현 성장률이면 사정거리.</span></p>
+  </section>
+
+  <!-- 10 대차대조표 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">10</span><h2 class="pg__t">대차대조표</h2><span class="pg__tag">$K · 2026-03-31</span></div>
+    <p class="m" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">자산 · 부채 · 자본 변화 (3개월)</p>
+    <svg viewBox="0 0 700 132" role="img" aria-label="대차대조표 3개월 변화">
+      <text x="0" y="14" font-size="10.5" fill="var(--mut)" font-family="var(--mono)">2025-12-31</text>
+      <rect x="98" y="4" width="150" height="20" fill="var(--signal)"/><text x="104" y="18" font-size="10.5" fill="#fff" font-family="var(--mono)">자산 151.3</text>
+      <rect x="300" y="4" width="90" height="20" fill="var(--loss)" opacity=".8"/><text x="306" y="18" font-size="10.5" fill="#fff" font-family="var(--mono)">부채 90.8</text>
+      <rect x="392" y="4" width="60" height="20" fill="var(--gain)"/><text x="398" y="18" font-size="10.5" fill="#fff" font-family="var(--mono)">자본 60.5</text>
+      <text x="0" y="54" font-size="10.5" fill="var(--mut)" font-family="var(--mono)">2026-03-31</text>
+      <rect x="98" y="44" width="187" height="20" fill="var(--signal)"/><text x="104" y="58" font-size="10.5" fill="#fff" font-family="var(--mono)">자산 188.1</text>
+      <rect x="300" y="44" width="212" height="20" fill="var(--loss)" opacity=".8"/><text x="306" y="58" font-size="10.5" fill="#fff" font-family="var(--mono)">부채 213.6</text>
+      <rect x="514" y="44" width="26" height="20" fill="var(--loss)"/><text x="546" y="58" font-size="10.5" fill="var(--loss)" font-family="var(--mono)" font-weight="700">자본 -25.5</text>
+      <text x="0" y="92" font-size="11" fill="var(--ink2)">자산 <tspan fill="var(--gain)" font-weight="700">+$36.8M</tspan> 증가했지만, 부채가 <tspan fill="var(--loss)" font-weight="700">+$122.8M</tspan> 늘어 자본이 마이너스 전환</text>
+      <text x="0" y="112" font-size="11" fill="var(--ink2)">부채 증가분의 대부분 = 전환사채 시가평가 <tspan font-family="var(--mono)" font-weight="700">$56.1M → $142.6M</tspan> (주가 상승분 반영)</text>
+    </svg>
+    <div class="two" style="margin-top:12px">
+      <div class="scroll"><table>
+        <thead><tr><th>자산 ($K)</th><th class="n">26-03</th><th class="n">25-12</th></tr></thead>
+        <tbody>
+          <tr><td>현금성자산</td><td class="n g">121,885</td><td class="n">94,430</td></tr>
+          <tr><td>사용제한 현금</td><td class="n">7,061</td><td class="n">7,407</td></tr>
+          <tr><td>매출채권</td><td class="n">9,964</td><td class="n">8,548</td></tr>
+          <tr><td>재고</td><td class="n">2,359</td><td class="n">2,090</td></tr>
+          <tr><td>유형자산 순액</td><td class="n">28,971</td><td class="n">24,650</td></tr>
+          <tr class="tot"><td>총자산</td><td class="n">188,063</td><td class="n">151,303</td></tr>
+        </tbody>
+      </table></div>
+      <div class="scroll"><table>
+        <thead><tr><th>부채·자본 ($K)</th><th class="n">26-03</th><th class="n">25-12</th></tr></thead>
+        <tbody>
+          <tr><td>전환사채(시가)</td><td class="n r">142,570</td><td class="n">56,110</td></tr>
+          <tr><td>워런트 부채</td><td class="n r">31,640</td><td class="n">5,818</td></tr>
+          <tr><td>계약부채(선수금)</td><td class="n">16,981</td><td class="n">10,609</td></tr>
+          <tr><td>기타</td><td class="n">22,401</td><td class="n">18,240</td></tr>
+          <tr class="tot"><td>총부채</td><td class="n r">213,592</td><td class="n">90,777</td></tr>
+          <tr class="tot"><td>자기자본</td><td class="n r">(25,529)</td><td class="n g">60,526</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="say"><b>해석</b><span>자본잠식이지만 <b>현금 $121.9M · 유동비율 2.4배</b>로 유동성은 양호. 이 자본잠식은 <b>주가가 오를수록 심해지는 회계적 현상</b>이라 재무건전성 지표로 읽으면 오독.</span></p>
+  </section>
+
+  <!-- 11 현금흐름표 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">11</span><h2 class="pg__t">현금흐름표</h2><span class="pg__tag">$K · 3M</span></div>
+    <div class="two">
+      <div>
+        <svg viewBox="0 0 340 150" role="img" aria-label="영업현금흐름 전환">
+          <line x1="0" y1="75" x2="340" y2="75" stroke="var(--line)"/>
+          <rect x="50" y="75" width="90" height="47" fill="var(--loss)" opacity=".8"/>
+          <text x="95" y="136" text-anchor="middle" font-size="12" fill="var(--loss)" font-family="var(--mono)" font-weight="700">-4.72</text>
+          <text x="95" y="68" text-anchor="middle" font-size="10.5" fill="var(--mut)">Q1 2025</text>
+          <rect x="200" y="73" width="90" height="2" fill="var(--gain)"/>
+          <rect x="200" y="61" width="90" height="14" fill="var(--gain)"/>
+          <text x="245" y="52" text-anchor="middle" font-size="12" fill="var(--gain)" font-family="var(--mono)" font-weight="700">+0.16</text>
+          <text x="245" y="95" text-anchor="middle" font-size="10.5" fill="var(--mut)">Q1 2026</text>
+          <path d="M145 90 Q172 100 196 78" fill="none" stroke="var(--signal)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <text x="170" y="118" text-anchor="middle" font-size="10.5" fill="var(--signal)" font-family="var(--mono)">+$4.9M 스윙</text>
+        </svg>
+        <p style="font-size:12px;color:var(--ink2);text-align:center;margin-top:2px">창사 최초 <b>분기 영업현금흐름 흑자</b></p>
+      </div>
+      <div class="scroll"><table>
+        <thead><tr><th>구분 ($K)</th><th class="n">Q1 26</th><th class="n">Q1 25</th></tr></thead>
+        <tbody>
+          <tr><td>순손실</td><td class="n r">(118,302)</td><td class="n">(32,581)</td></tr>
+          <tr class="sub"><td>+ 비현금 평가손</td><td class="n">111,521</td><td class="n">20,691</td></tr>
+          <tr class="sub"><td>+ 감가상각·SBC</td><td class="n">2,127</td><td class="n">3,282</td></tr>
+          <tr class="sub"><td>+ 운전자본</td><td class="n g">4,180</td><td class="n">3,671</td></tr>
+          <tr class="tot"><td>영업활동 CF</td><td class="n g">158</td><td class="n r">(4,722)</td></tr>
+          <tr><td>투자활동 CF</td><td class="n r">(5,550)</td><td class="n">(1,913)</td></tr>
+          <tr class="sub"><td>설비투자(CAPEX)</td><td class="n">(5,550)</td><td class="n">(1,913)</td></tr>
+          <tr><td>재무활동 CF</td><td class="n g">32,503</td><td class="n">1,684</td></tr>
+          <tr class="sub"><td>유상증자 순액</td><td class="n">32,801</td><td class="n">—</td></tr>
+          <tr class="tot"><td>현금 순증</td><td class="n g">27,111</td><td class="n r">(4,951)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="say"><b>진단</b><span>영업 흑자(+$0.2M)지만 <b>CAPEX $5.6M</b>로 잉여현금흐름은 여전히 <b class="r">-$5.4M</b>. 현재 현금 $121.9M이면 이 소진 속도로 <b>20분기+ 버팀</b> — 자금압박은 당면 리스크가 아님.</span></p>
+  </section>
+
+  <!-- 12 TAM -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">12</span><h2 class="pg__t">TAM · 시장규모</h2><span class="pg__tag">Earth Observation</span></div>
+    <svg viewBox="0 0 700 150" role="img" aria-label="EO 시장 규모 전망">
+      <line x1="40" y1="120" x2="690" y2="120" stroke="var(--line)"/>
+      <rect x="70" y="76" width="110" height="44" fill="var(--signal)" opacity=".55"/>
+      <text x="125" y="70" text-anchor="middle" font-size="12" font-family="var(--mono)" font-weight="700" fill="var(--signal)">$5.6~7.7B</text>
+      <text x="125" y="136" text-anchor="middle" font-size="10.5" fill="var(--mut)">2026</text>
+      <rect x="480" y="18" width="110" height="102" fill="var(--signal)"/>
+      <text x="535" y="12" text-anchor="middle" font-size="12" font-family="var(--mono)" font-weight="700" fill="var(--signal)">$12.9~14.6B</text>
+      <text x="535" y="136" text-anchor="middle" font-size="10.5" fill="var(--mut)">2034~35</text>
+      <path d="M185 88 L472 44" stroke="var(--mut)" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="330" y="60" text-anchor="middle" font-size="11" fill="var(--ink2)" font-family="var(--mono)">CAGR 7.7~8.3%</text>
+      <rect x="70" y="115" width="2" height="5" fill="var(--loss)"/>
+      <text x="76" y="112" font-size="10" fill="var(--loss)" font-family="var(--mono)">SATL $20.4M</text>
+    </svg>
+    <div class="scroll" style="margin-top:8px"><table>
+      <thead><tr><th>기관</th><th class="n">2026 규모</th><th class="n">장기 전망</th><th class="n">CAGR</th></tr></thead>
+      <tbody>
+        <tr><td>Fortune Business Insights</td><td class="n">$7.68B</td><td class="n">$14.55B (2034)</td><td class="n">8.31%</td></tr>
+        <tr><td>SNS Insider</td><td class="n">$6.21B (2025)</td><td class="n">$12.92B (2035)</td><td class="n">7.68%</td></tr>
+        <tr><td>Grand View Research</td><td class="n">$5.6B</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr class="tot"><td>SATL 점유율</td><td class="n">≈0.3%</td><td colspan="2" style="text-align:left" class="m">TTM 매출 $20.4M 기준</td></tr>
+      </tbody>
+    </table></div>
+    <p class="say"><b>관점</b><span>시장 CAGR 8%는 <b>평범</b>. 이 종목의 논리는 시장성장이 아니라 <b>점유율 0.3%에서의 침투</b> — TAM이 아니라 <b>수주(RPO)와 주권형 계약 반복성</b>이 진짜 변수.</span></p>
+  </section>
+
+  <!-- 13 경쟁사 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">13</span><h2 class="pg__t">경쟁사 비교</h2><span class="pg__tag">EO 상장 3사</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>항목</th><th class="n">SATL</th><th class="n">PL (Planet Labs)</th><th class="n">BKSY (BlackSky)</th></tr></thead>
+      <tbody>
+        <tr><td>주가</td><td class="n">$3.81</td><td class="n">$22.36</td><td class="n">$22.78</td></tr>
+        <tr><td>1년 수익률</td><td class="n w">+5%</td><td class="n g">+267%</td><td class="n">+11%</td></tr>
+        <tr><td>52주 고점 대비</td><td class="n r">-65%</td><td class="n">-56%</td><td class="n">-56%</td></tr>
+        <tr><td>분기 매출</td><td class="n">$6.1M</td><td class="n m">❓</td><td class="n m">❓</td></tr>
+        <tr><td>사업모델</td><td style="text-align:left">위성 <b>판매</b>+데이터</td><td style="text-align:left" class="m">데이터 구독</td><td style="text-align:left" class="m">데이터+분석</td></tr>
+      </tbody>
+    </table></div>
+    <p class="m" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 7px">SATL의 차별점 (회사 주장 · IR 자료)</p>
+    <div class="chk"><span class="chk__i g">◆</span><span><b>위성 1기 원가 $1.3M</b><br><span class="m">서브미터급 EO 최저 원가 주장 — 수직계열화(자체 제조)</span></span><span class="n g">원가</span></div>
+    <div class="chk"><span class="chk__i g">◆</span><span><b>Pushframe 특허 · 10배 촬영용량</b><br><span class="m">위성당 처리량이 경쟁사 대비 우위 → 상시감시 상품의 해자</span></span><span class="n g">기술</span></div>
+    <div class="chk"><span class="chk__i g">◆</span><span><b>주권형 위성 판매(Space Systems)</b><br><span class="m">데이터만 파는 경쟁사와 달리 <b>궤도 위성 소유권 이전</b> — 수출통제 회피·국가 조달 적합</span></span><span class="n g">모델</span></div>
+    <div class="chk"><span class="chk__i m">◆</span><span><b>해상도 라인업</b><br><span class="m">50cm NewSat · 30cm NextGen · 1m Merlin(일 단위 전지구)</span></span><span class="n m">스펙</span></div>
+    <p class="say"><b>포지션</b><span>동종 3사 모두 고점 대비 반토막이나, <b>SATL만 1년 수익률이 부진</b>(+5% vs PL +267%). 차별점이 사실이라면 <b>실적으로 증명되지 않은 상태</b> — 시장이 아직 안 믿는다는 뜻.</span></p>
+  </section>
+
+  <!-- 14 편입 ETF -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">14</span><h2 class="pg__t">편입 ETF</h2><span class="pg__tag">패시브 수급</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th>ETF</th><th style="text-align:left">성격</th><th style="text-align:left">편입 사유</th></tr></thead>
+      <tbody>
+        <tr><td><b>IWM</b></td><td style="text-align:left">Russell 2000</td><td style="text-align:left" class="m">소형주 지수 — 기계적 편입</td></tr>
+        <tr><td><b>IWO</b></td><td style="text-align:left">Russell 2000 Growth</td><td style="text-align:left" class="m">소형 성장 스타일</td></tr>
+        <tr><td><b>VTI</b></td><td style="text-align:left">Total Market</td><td style="text-align:left" class="m">전체시장 — 기계적 편입</td></tr>
+        <tr><td><b>VXF</b></td><td style="text-align:left">Extended Market</td><td style="text-align:left" class="m">S&amp;P500 제외 시장</td></tr>
+        <tr><td><b>UFO</b></td><td style="text-align:left">Procure Space ETF</td><td style="text-align:left"><span class="pill p-s">유일한 테마 편입</span></td></tr>
+        <tr class="tot"><td>ARKX</td><td style="text-align:left">ARK Space &amp; Defense</td><td style="text-align:left" class="r">상위 보유 미포함</td></tr>
+      </tbody>
+    </table></div>
+    <p class="say"><b>수급 해석</b><span>편입 대부분이 <b>패시브 소형주 지수</b> — "이 종목을 골라서 산 돈"이 아니라 <b>시총이 있어서 담긴 돈</b>. 액티브 테마 자금(ARKX 등)의 확신 편입은 아직 없음 → 기관 신뢰 확보가 향후 리레이팅 조건.</span></p>
+  </section>
+
+  <!-- 15 월간 퀀트 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">15</span><h2 class="pg__t">월간 퀀트 · 골든/데드크로스</h2><span class="pg__tag">2024-08 ~ 2026-07</span></div>
+    <div class="scroll"><table class="mx">
+      <thead><tr><th>연</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead>
+      <tbody>
+        <tr><td>2024</td><td class="m">·</td><td class="m">·</td><td class="m">·</td><td class="m">·</td><td class="m">·</td><td class="m">·</td><td class="m">·</td><td class="r">-4</td><td class="g">+6</td><td class="r">-4</td><td class="g" style="font-weight:700">+100</td><td class="g">+45</td></tr>
+        <tr><td>2025</td><td class="r">-2</td><td class="g">+9</td><td class="g">+17</td><td class="g">+15</td><td class="r">-10</td><td class="r">-2</td><td class="r">-9</td><td class="g">+14</td><td class="r">-12</td><td class="r" style="font-weight:700">-42</td><td class="r">-14</td><td class="g">+13</td></tr>
+        <tr><td>2026</td><td class="g" style="font-weight:700">+146</td><td class="r">-35</td><td class="g">+81</td><td class="g">+19</td><td class="g">+47</td><td class="r">-40</td><td class="r">-33</td><td class="m">·</td><td class="m">·</td><td class="m">·</td><td class="m">·</td><td class="m">·</td></tr>
+      </tbody>
+    </table></div>
+    <div class="lgd"><span><i style="background:var(--gain)"></i>월 상승</span><span><i style="background:var(--loss)"></i>월 하락</span><span class="m">단위 %</span></div>
+    <p class="m" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin:15px 0 7px">이평 크로스 이력 (MA50 × MA200)</p>
+    <div class="tl">
+      <div class="tl__i"><span class="tl__d">25-10-08</span><span class="tl__b"><b>골든크로스 @ $4.04</b><span>진입 신호</span></span></div>
+      <div class="tl__i"><span class="tl__d">25-10-21</span><span class="tl__b"><b>데드크로스 @ $2.32</b><span><b class="r">13일 만에 반전 · -43%</b> — 전형적 휩쏘 <span class="pill p-r">신호 실패</span></span></span></div>
+      <div class="tl__i"><span class="tl__d">26-02-25</span><span class="tl__b"><b>골든크로스 @ $3.21</b><span>현재 유효(MA50 $6.58 &gt; MA200 $4.38) — 단, 주가는 두 이평 아래 <span class="pill p-w">괴리</span></span></span></div>
+    </div>
+    <p class="say"><b>퀀트 시사점</b><span>월 변동폭이 <b>-42% ~ +146%</b>. 이 변동성에서 <b>이평 크로스는 신뢰 불가</b>(13일 휩쏘 전례). 포지션 사이징을 변동성에 맞춰 줄이는 게 신호 정확도보다 중요한 종목.</span></p>
+  </section>
+
+  <!-- 16 체크포인트 -->
+  <section class="pg">
+    <div class="pg__h"><span class="pg__n">16</span><h2 class="pg__t">향후 체크포인트</h2><span class="pg__tag">검증 캘린더</span></div>
+    <div class="tl">
+      <div class="tl__i"><span class="tl__d">26 Q2·Q3</span><span class="tl__b"><b>CEiiA 위성 2기 소유권 이전 (포르투갈 $18M)</b><span>Space Systems 매출 인식 — 분기 실적 급변 요인 <span class="pill p-go">확인 가능</span></span></span></div>
+      <div class="tl__i"><span class="tl__d">26-10</span><span class="tl__b"><b>Merlin 1호기 발사</b><span>일 단위 1m 전지구 재매핑 · <b>고객계약으로 자금 조달 완료</b>(추가 증자 불필요 주장) <span class="pill p-s">최대 이벤트</span></span></span></div>
+      <div class="tl__i"><span class="tl__d">27 상반</span><span class="tl__b"><b>Merlin 초기운용능력(IOC)</b><span>구독형 상시감시 상품의 실질 개시</span></span></div>
+      <div class="tl__i"><span class="tl__d">27 초</span><span class="tl__b"><b>$12M 주권 방위 고객 궤도위성 이전 완료</b><span>2개 분기 연속 주권형 계약 — 모델 반복성 입증 여부</span></span></div>
+      <div class="tl__i"><span class="tl__d">매분기</span><span class="tl__b"><b>영업현금흐름 흑자 유지 여부</b><span>Q1의 +$0.2M이 <b>일회성인지 구조인지</b>가 이 종목 논리의 핵심 <span class="pill p-w">최우선 관찰</span></span></span></div>
+      <div class="tl__i"><span class="tl__d">상시</span><span class="tl__b"><b>희석 · 전환사채</b><span>주식수 +46% YoY, 전환사채 $142.6M — 추가 증자 시 논리 훼손</span></span></div>
+    </div>
+    <div class="note">투자 판단 3문장 — ① 영업현금흐름 흑자가 <b>2분기 연속</b>되면 "잠재력 → 실체" 전환이 확인된다. ② Merlin 10월 발사가 지연되면 2027 스토리 전체가 밀린다. ③ 추가 증자가 나오면 "고객자금으로 조달 완료"라는 회사 주장이 깨지며 신뢰가 크게 훼손된다.</div>
+    <p class="say"><b>다음 행동</b><span>Q2 FY26 실적(8월 예상)에서 <b>영업현금흐름 부호</b>와 <b>CEiiA 매출 인식</b> 두 가지만 먼저 확인하면 논리의 8할이 판별됨.</span></p>
+  </section>
+
+  <p style="font-size:10.5px;color:var(--mut);text-align:center;margin-top:20px;font-family:var(--mono)">
+    SATL 16분야 딥다이브 · IR 원문(2026-05-11/12) + 시장데이터(2026-07-23) 기반 · 미공시 항목은 추정 없이 ❓ · 투자 판단은 본인 책임
+  </p>
+</div>
