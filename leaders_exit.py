@@ -88,7 +88,7 @@ def sim(M, gate, N, exit_fn, a, b, spy_dd):
     dates = px.index[(px.index >= a) & (px.index <= b)]
     cash, pos, eq, trades = 1.0, {}, [], []
     W = 1.0 / N
-    ctxcols = ["ma10", "ma20", "rs_13w"]
+    ctxcols = ["ma10", "ma20", "rs_13w", "ACC"]   # M 에 있는 것만 실림
     for t in dates:
         p = px.loc[t]
         rows = {c: M[c].loc[t] for c in ctxcols if c in M}
