@@ -872,6 +872,54 @@ with t_lead, guard('주도주'):
             _c[3].metric("신호당 1년 평균",
                          f"{sum(_f52)/len(_f52):.1f}%" if _f52 else "—",
                          help="1년이 지난 신호만 집계한다")
+
+            # ── 가격 곡선 + 신호 지점 ──────────────────────────────
+            # 청산 마커가 없는 이유: 이건 신호 목록이고 매매 규칙이 아니다.
+            # 청산은 사람이 정하므로 화면이 정할 수 없다. ▲만 찍는다.
+            _cv = (_ac.get('curves') or {}).get(_ap)
+            if _cv and _ac.get('dates'):
+                _AD = pd.to_datetime(_ac['dates'])
+                _apx = pd.Series(_cv['c'], index=_AD[_cv['i']]).astype(float)
+                _f = go.Figure()
+                _f.add_trace(go.Scatter(
+                    x=_apx.index, y=_apx.values, mode='lines', name='주봉 종가',
+                    line=dict(color='#12161b', width=1.4),
+                    hovertemplate='%{x|%Y-%m-%d}<br>$%{y:,.2f}<extra></extra>'))
+                # 회차 10 초과는 색을 달리한다 — 실측상 초과수익이 꺾이는 구간이다
+                for _lo, _hi, _cl, _lb in [(1, 10, '#1f6b45', '회차 1-10'),
+                                           (11, 10**9, '#a03028', '회차 11+')]:
+                    _pts = [r for r in _ar if _lo <= (r['n'] or 0) <= _hi
+                            and r['close'] is not None]
+                    if not _pts:
+                        continue
+                    _f.add_trace(go.Scatter(
+                        x=pd.to_datetime([r['d'] for r in _pts]),
+                        y=[r['close'] for r in _pts], mode='markers+text',
+                        marker=dict(symbol='triangle-up', size=12, color=_cl,
+                                    line=dict(color='white', width=1)),
+                        text=[str(r['n']) for r in _pts],
+                        textposition='bottom center',
+                        textfont=dict(size=9, color=_cl), name=_lb,
+                        customdata=[[r['up'], r['oia'], r['rva'],
+                                     r['f52'] if r.get('f52') is not None else float('nan')]
+                                    for r in _pts],
+                        hovertemplate=('%{x|%Y-%m-%d} · %{text}회차<br>'
+                                       '$%{y:,.2f} · 그주 %{customdata[0]:+.1f}%<br>'
+                                       '매출가속 %{customdata[2]:.1f} · '
+                                       '이익가속 %{customdata[1]:.1f}<br>'
+                                       '이후 1년 %{customdata[3]:+.1f}%<extra></extra>')))
+                _f.update_yaxes(type='log', title='주봉 종가(로그)')
+                _f.update_layout(
+                    height=430, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
+                    title=f"{_ap} · {_ab[_ap]['name']}  —  ▲ 이익 가속 신호 (숫자 = 회차)",
+                    legend=dict(orientation='h', yanchor='bottom', y=1.0,
+                                xanchor='right', x=1))
+                st.plotly_chart(_f, use_container_width=True)
+                st.caption(
+                    "로그 축이다 — 기울기가 같으면 상승률이 같다. **▲ 숫자는 신호 회차**이고 "
+                    "붉은 ▲는 회차 11 이상, 즉 실측상 시장대비 초과수익이 꺾이는 구간이다. "
+                    "**청산 마커가 없는 이유는 이 규칙에 청산이 없기 때문이다** — 신호 목록이고 "
+                    "매매 규칙이 아니라, 언제 팔지는 형이 정한다. 곡선은 첫 신호 26주 전부터 그린다.")
             st.dataframe(pd.DataFrame([{
                 '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
                 '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
@@ -906,6 +954,27 @@ with t_lead, guard('주도주'):
                           f"{sum(1 for x in _wf if x > 0)/len(_wf)*100:.0f}%" if _wf else "—")
             _wc[3].metric("2배 이상",
                           f"{sum(1 for x in _wf if x >= 100)/len(_wf)*100:.0f}%" if _wf else "—")
+            # ── 그 주 코호트의 이후 1년 분포 ────────────────────
+            # 평균 하나로는 U자 분포가 안 보인다. 종목별 막대로 흩어짐을 그대로 보여준다.
+            _wd = [(r['sym'], r['f52']) for r in _wr if r.get('f52') is not None]
+            if _wd:
+                _wd.sort(key=lambda x: -x[1])
+                _fw = go.Figure(go.Bar(
+                    x=[x[0] for x in _wd], y=[x[1] for x in _wd],
+                    marker_color=['#1f6b45' if v >= 100 else
+                                  '#7fae95' if v > 0 else '#a03028' for _, v in _wd],
+                    hovertemplate='%{x}<br>이후 1년 %{y:+.1f}%<extra></extra>'))
+                _fw.add_hline(y=0, line_width=1, line_color='#7c8290')
+                _fw.add_hline(y=100, line_width=1, line_dash='dot', line_color='#1f6b45',
+                              annotation_text='2배', annotation_position='right')
+                _fw.update_layout(height=300, margin=dict(l=8, r=8, t=34, b=8),
+                                  title=f"{_wpick} 코호트 · 이후 1년 수익률 ({len(_wd)}종)",
+                                  yaxis_title='이후 1년 (%)', showlegend=False)
+                st.plotly_chart(_fw, use_container_width=True)
+                st.caption(
+                    "**진한 초록 = 2배 이상.** 평균 하나로는 이 분포가 안 보인다 — "
+                    "몇 종목이 전체를 끌고 가고 나머지는 시장에 진다. 등가중으로 담으면 "
+                    "받는 것은 평균이지만, 그 평균은 소수 종목이 만든다.")
             st.dataframe(pd.DataFrame([{
                 '코드': r['sym'], '종목': r['name'], '회차': r['n'],
                 '그주상승': r['up'], '시총($B)': r['mc'], '고점대비': r['dd'],

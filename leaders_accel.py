@@ -241,6 +241,31 @@ def build():
         rows.sort(key=lambda x: -(x["up"] or 0))
         weeks[str(tt.date())] = rows
 
+    # ── 가격 곡선 (심층조회 차트용) ────────────────────────────────
+    # 전 구간을 담으면 파일이 커진다. **첫 신호 −26주 ~ 마지막 신호 +104주**만 담는다.
+    # ⚠️ 저장소 .git 이 이미 1GB 다(대용량 JSON 을 매주 커밋해온 결과). 전 구간을
+    #    담으면 이 파일만 주당 6MB, 연 300MB 씩 불어난다. 그래서 창을 잘랐다.
+    #    깨지는 지점: 2020 년에만 신호가 났던 종목은 2022 년 이후 흐름이 안 보인다.
+    #    신호 후 2년까지는 보이므로 판단에는 대체로 충분하다고 봤다.
+    # 인덱스+종가를 따로 실어(sparse) 결측 주차를 건너뛴다.
+    # L/S 심층조회(leaders_symbol_detail.json)와 같은 형식이라 차트 코드를 공유한다.
+    dt_ix = {t: i for i, t in enumerate(px.index)}
+    span = {}
+    for tt in g.index:
+        hit = g.loc[tt]
+        for s in hit[hit].index:
+            lo, hi = span.get(s, (10**9, -1))
+            span[s] = (min(lo, dt_ix[tt]), max(hi, dt_ix[tt]))
+    curves = {}
+    for s, (p0, p1) in span.items():
+        ser = px[s].iloc[max(0, p0 - 26):p1 + 105].dropna()
+        if ser.empty:
+            continue
+        # 로그 축으로 그리므로 유효숫자 4자리면 눈에 차이가 없다
+        curves[s] = dict(i=[dt_ix[t] for t in ser.index],
+                         c=[round(float(v), 1 if v >= 100 else 2 if v >= 10 else 3)
+                            for v in ser.values])
+
     cands = weeks.get(str(last.date()), [])
     out = dict(generated=str(pd.Timestamp.today().date()),
                signal_week=str(last.date()),
@@ -248,6 +273,7 @@ def build():
                rule=dict(surge=SURGE, min_adv=MIN_ADV, min_mc=MIN_MC,
                          text=f"매출·영업이익 성장률이 **동시에 빨라진** 분기 · "
                               f"그 주 종가 +{SURGE:g}%↑ · 거래대금 $5M+ · 시총 $0.3B+"),
+               dates=[str(t.date()) for t in px.index], curves=curves,
                perf=perf, by_year=by_year, by_step=by_step,
                candidates=cands, weeks=weeks)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -256,7 +282,7 @@ def build():
     print(f"신호 {perf['n']:,}건 · 주차 {len(weeks)} · 이번 주 {len(cands)}종")
     print(f"평균 {perf['mean']}% · 알파평균 {perf['alpha_mean']}% · "
           f"2배+ {perf['w2']}% · 4배+ {perf['w4']}% · 10배+ {perf['w10']}%")
-    print(f"→ {OUT}  ({os.path.getsize(OUT)/1e6:.2f} MB)")
+    print(f"→ {OUT}  ({os.path.getsize(OUT)/1e6:.2f} MB · 곡선 {len(curves)}종)")
 
 
 if __name__ == "__main__":
