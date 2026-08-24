@@ -58,6 +58,7 @@ rem 위에서 이미 pull 해뒀으므로 여기서는 rebase 없이 커밋+푸�
 git add results/leaders_accel.json 2>nul
 git add results/leaders_ab.json 2>nul
 git add results/leaders_symbol_detail.json 2>nul
+git add results/price_curves.json 2>nul
 git add results/leaders_kr.json 2>nul
 git add results/leaders_kr6.json 2>nul
 git diff --staged --quiet || (

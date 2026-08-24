@@ -876,9 +876,12 @@ with t_lead, guard('주도주'):
             # ── 가격 곡선 + 신호 지점 ──────────────────────────────
             # 청산 마커가 없는 이유: 이건 신호 목록이고 매매 규칙이 아니다.
             # 청산은 사람이 정하므로 화면이 정할 수 없다. ▲만 찍는다.
-            _cv = (_ac.get('curves') or {}).get(_ap)
-            if _cv and _ac.get('dates'):
-                _AD = pd.to_datetime(_ac['dates'])
+            # 곡선은 두 규칙이 공유하는 results/price_curves.json 에서 읽는다
+            # (2026-08-25 통합 — 674종이 두 파일에 중복 저장돼 있었다).
+            _pc = load_json(Path('results/price_curves.json')) or {}
+            _cv = (_pc.get('curves') or {}).get(_ap)
+            if _cv and _pc.get('dates'):
+                _AD = pd.to_datetime(_pc['dates'])
                 _apx = pd.Series(_cv['c'], index=_AD[_cv['i']]).astype(float)
                 _f = go.Figure()
                 _f.add_trace(go.Scatter(
@@ -1548,8 +1551,16 @@ else:
                                       f"({len(_syms[s].get('rows', []))}회 신호)")
             _r = _syms[_pick]
             _D = pd.to_datetime(_sd['dates'])
-            _px = pd.Series([v for v in _r['c']],
-                            index=_D[[i for i in _r['i']]]).astype(float).dropna()
+            # 곡선은 통합 파일에서 읽는다(2026-08-25). trades 의 e/x 인덱스는
+            # leaders_symbol_detail 의 dates 기준인데, 두 파일의 날짜 축이 451주차로
+            # 완전히 같아서 그대로 쓸 수 있다 — 축이 어긋나면 마커가 밀린다.
+            _pcv = load_json(Path('results/price_curves.json')) or {}
+            _cvr = (_pcv.get('curves') or {}).get(_pick)
+            if not _cvr:
+                st.warning(f"{_pick} 가격 곡선이 없다. `python curves_build.py` 를 돌려라.")
+                st.stop()
+            _px = pd.Series(_cvr['c'],
+                            index=_D[_cvr['i']]).astype(float).dropna()
 
             # 규칙이 늘면 KeyError 로 이 탭이 통째로 죽는다(2026-08-18 L/S 추가 때 발생).
             # 색이 없는 규칙은 회색으로 떨어뜨린다.
