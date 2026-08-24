@@ -837,6 +837,89 @@ with t_lead, guard('주도주'):
                 st.markdown(
                     "- **결론:** 반복 신호는 계속 띄운다. 코드로 회차 상한을 강제하지는 "
                     "않는다(비중은 사람이 준다). 대신 **10회를 넘으면 위에 경고를 띄운다.**")
+        # ── 이익 가속: 종목 심층 조회 ─────────────────────────────
+        # 2026-08-24: 아래 L/S 심층조회는 leaders_symbol_detail.json(=L/S 규칙)이라
+        # 이 규칙의 회차와 숫자가 다르다(SMCI L/S 5회 vs 가속 25회). 규칙이 둘이므로
+        # 화면도 둘로 나눈다. weeks 를 종목별로 역인덱스하면 추가 파일이 필요 없다.
+        @st.cache_data(show_spinner=False)
+        def _accel_bysym(_fkey: str):
+            _d = load_json(Path('results/leaders_accel.json')) or {}
+            out = {}
+            for _w, _rows in (_d.get('weeks') or {}).items():
+                for _m in _rows:
+                    e = out.setdefault(_m['sym'], {'name': _m.get('name') or _m['sym'],
+                                                   'rows': []})
+                    e['rows'].append(dict(_m, d=_w))
+            for e in out.values():
+                e['rows'].sort(key=lambda x: x['d'])
+            return out
+
+        _ab = _accel_bysym(file_key('results/leaders_accel.json'))
+        if _ab:
+            st.markdown("#### 🔍 종목 심층 조회 — 이 종목이 언제 걸렸나")
+            _ao = sorted(_ab, key=lambda x: (-len(_ab[x]['rows']), x))
+            _ap = st.selectbox(
+                f"종목 검색 — 이익 가속 신호 이력이 있는 {len(_ao)}종",
+                _ao, index=0, key="accel_sym",
+                format_func=lambda x: f"{x} · {_ab[x]['name'][:28]} "
+                                      f"({len(_ab[x]['rows'])}회 신호)")
+            _ar = _ab[_ap]['rows']
+            _c = st.columns(4)
+            _c[0].metric("총 신호", f"{len(_ar)}회")
+            _c[1].metric("최초 신호", _ar[0]['d'])
+            _c[2].metric("최근 신호", _ar[-1]['d'])
+            _f52 = [r['f52'] for r in _ar if r.get('f52') is not None]
+            _c[3].metric("신호당 1년 평균",
+                         f"{sum(_f52)/len(_f52):.1f}%" if _f52 else "—",
+                         help="1년이 지난 신호만 집계한다")
+            st.dataframe(pd.DataFrame([{
+                '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
+                '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
+                '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
+                'GPM': r['gpm'], 'ΔGPM': r['dgpm'], 'OPM': r['opm'], 'ΔOPM': r['dopm'],
+                'RS13': r['rs13'], 'PSR': r['psr'],
+                '이후1주': r.get('f1'), '이후4주': r.get('f4'), '이후13주': r.get('f13'),
+                '이후26주': r.get('f26'), '이후52주': r.get('f52'),
+                '이후104주': r.get('f104')} for r in _ar]),
+                use_container_width=True, hide_index=True, row_height=25,
+                height=_dfh(len(_ar)))
+            st.caption(
+                "**주의** — 아래 L/S 심층조회와 회차가 다르다. 저쪽은 L/S 규칙"
+                "(+20% 급등·거래량<1.5·재무)이고 이쪽은 이익 가속 규칙이다. "
+                "같은 SMCI가 L/S에서 5회, 가속에서 25회로 나오는 게 정상이다. "
+                "가격 곡선은 이 파일에 신호 시점 종가만 있어 표로만 보여준다.")
+
+            # ── 이익 가속: 주차별 조회 ────────────────────────────
+            _wk = _ac.get('weeks') or {}
+            _wks = sorted(_wk, reverse=True)
+            st.markdown("#### 📅 주차별 조회 — 그 주에 함께 걸렸던 종목 전부")
+            _wpick = st.selectbox(
+                f"주차 선택 — 신호가 있었던 {len(_wks)}주",
+                _wks, index=0, key="accel_wk",
+                format_func=lambda w: f"{w}  ({len(_wk[w])}종)")
+            _wr = _wk[_wpick]
+            _wf = [r['f52'] for r in _wr if r.get('f52') is not None]
+            _wc = st.columns(4)
+            _wc[0].metric("그 주 신호", f"{len(_wr)}종")
+            _wc[1].metric("1년 평균", f"{sum(_wf)/len(_wf):.1f}%" if _wf else "미도래")
+            _wc[2].metric("1년 승률",
+                          f"{sum(1 for x in _wf if x > 0)/len(_wf)*100:.0f}%" if _wf else "—")
+            _wc[3].metric("2배 이상",
+                          f"{sum(1 for x in _wf if x >= 100)/len(_wf)*100:.0f}%" if _wf else "—")
+            st.dataframe(pd.DataFrame([{
+                '코드': r['sym'], '종목': r['name'], '회차': r['n'],
+                '그주상승': r['up'], '시총($B)': r['mc'], '고점대비': r['dd'],
+                '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
+                'GPM': r['gpm'], 'OPM': r['opm'], 'RS13': r['rs13'], 'PSR': r['psr'],
+                '이후13주': r.get('f13'), '이후52주': r.get('f52'),
+                '이후104주': r.get('f104')} for r in _wr]),
+                use_container_width=True, hide_index=True, row_height=25,
+                height=_dfh(len(_wr)))
+            st.caption(
+                "그 주에 함께 걸린 종목 전부다. **한 종목이 걸렸다는 사실만으로는 "
+                "조건의 실효를 판단할 수 없다** — 같은 주 전 종목의 타율을 함께 봐야 한다. "
+                "위 지표가 그 코호트 성적이다.")
+
         if _ac.get('by_year'):
             with st.expander("📅 연도별 신호 성적 (신호 1건당 1년 후)"):
                 st.dataframe(pd.DataFrame([{
@@ -1354,7 +1437,7 @@ else:
         # ── 종목 심층 조회 ─────────────────────────────────────────────
         # market.db는 저장소에 없으므로 leaders_symbol.py가 미리 만든 JSON을 읽는다.
         st.divider()
-        st.subheader("🔍 종목 심층 조회 — 언제 걸렸고 언제 나갔나")
+        st.subheader("🔍 종목 심층 조회 (L/S 규칙) — 언제 걸렸고 언제 나갔나")
         _sd = load_json(Path('results/leaders_symbol_detail.json'))
 
         # ── 주차 코호트 통계 ────────────────────────────────────────
@@ -1390,7 +1473,7 @@ else:
             _syms = _sd['symbols']
             _opts = sorted(_syms, key=lambda s: (-len(_syms[s].get('rows', [])), s))
             _pick = st.selectbox(
-                f"종목 검색 — 신호 이력이 있는 {len(_opts)}종",
+                f"종목 검색 — L/S 신호 이력이 있는 {len(_opts)}종",
                 _opts, index=0, key="lead_sym",
                 format_func=lambda s: f"{s} · {_syms[s]['name'][:28]} "
                                       f"({len(_syms[s].get('rows', []))}회 신호)")
@@ -1527,7 +1610,7 @@ else:
             # 종목별 조회만으로는 "이 조건이면 오른다"를 확인할 수 없다.
             # 같은 주에 함께 걸렸던 종목이 어떻게 됐는지 다 봐야 조건의 실효를 판정할 수 있다.
             st.divider()
-            st.subheader("📅 주차별 조회 — 그 주에 함께 걸렸던 종목 전부")
+            st.subheader("📅 주차별 조회 (L/S 규칙) — 그 주에 함께 걸렸던 종목 전부")
             st.caption("종목 하나만 보면 성공 사례만 눈에 들어온다. "
                        "같은 주 신호를 통째로 놓고 이후 성적을 봐야 조건이 실제로 작동하는지 알 수 있다.")
             # 이 코호트 표는 '공시'이지 '검증'이 아니다. 규칙의 파라미터를 고른 바로 그
