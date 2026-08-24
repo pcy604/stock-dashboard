@@ -1,0 +1,458 @@
+<title>주도주 탈출 타이밍</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EDF1F0; --surface:#FFFFFF; --sunk:#E2E8E7;
+  --ink:#0C1A20; --body:#26383F; --muted:#5F727A; --faint:#93A3A9;
+  --rule:#CBD6D6; --hair:#DDE5E4;
+  --sea:#14606F; --deep:#0A3140; --shoal:#68A5AE;
+  --buoy:#B37F06; --rust:#A03A26; --moss:#3F6B4A;
+  --tag:#E4EDEC;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A1418; --surface:#0F1E24; --sunk:#0C1920;
+    --ink:#E7EEEF; --body:#C2D0D3; --muted:#8DA1A7; --faint:#5E727A;
+    --rule:#25383F; --hair:#1B2C33;
+    --sea:#5FB2C2; --deep:#8FCBD6; --shoal:#2C6572;
+    --buoy:#E9BB4A; --rust:#D9705A; --moss:#7CB58C;
+    --tag:#16282F;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A1418; --surface:#0F1E24; --sunk:#0C1920;
+  --ink:#E7EEEF; --body:#C2D0D3; --muted:#8DA1A7; --faint:#5E727A;
+  --rule:#25383F; --hair:#1B2C33;
+  --sea:#5FB2C2; --deep:#8FCBD6; --shoal:#2C6572;
+  --buoy:#E9BB4A; --rust:#D9705A; --moss:#7CB58C;
+  --tag:#16282F;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--body);
+  font-family:"IBM Plex Sans KR","Malgun Gothic",system-ui,sans-serif;
+  font-weight:400; font-size:16.5px; line-height:1.78;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1100px; margin:0 auto; padding:0 28px 110px}
+.col{max-width:660px}
+h1,h2,h3{font-family:"Nanum Myeongjo",Batang,serif; color:var(--ink); text-wrap:balance; margin:0}
+h1{font-size:clamp(2.4rem,6vw,3.9rem); font-weight:800; line-height:1.14; letter-spacing:-.01em}
+h2{font-size:clamp(1.45rem,3vw,1.95rem); font-weight:700; line-height:1.3}
+p{margin:0}
+b,strong{font-weight:600; color:var(--ink)}
+em{font-style:italic}
+code,.num{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; font-size:.93em}
+:focus-visible{outline:2px solid var(--buoy); outline-offset:3px}
+
+header{padding:80px 0 0}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:.7rem; font-weight:500;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+}
+.lede{font-size:1.14rem; line-height:1.76; margin-top:26px}
+.meta{
+  display:flex; flex-wrap:wrap; gap:8px 26px; margin-top:34px;
+  padding-top:16px; border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--muted);
+  letter-spacing:.04em;
+}
+
+section{margin-top:72px; display:flex; flex-direction:column; gap:22px}
+.shead{display:flex; gap:18px; align-items:baseline; border-top:2px solid var(--ink); padding-top:15px}
+.snum{
+  font-family:"IBM Plex Mono",monospace; font-size:.76rem; font-weight:600;
+  color:var(--sea); letter-spacing:.08em; flex:none;
+}
+.stack{display:flex; flex-direction:column; gap:18px}
+
+.claim{
+  font-family:"Nanum Myeongjo",Batang,serif; font-size:1.3rem; line-height:1.62;
+  color:var(--ink); border-left:3px solid var(--buoy); padding:2px 0 2px 22px;
+}
+.aside{
+  background:var(--sunk); border:1px solid var(--hair); border-radius:2px;
+  padding:18px 22px; font-size:.93rem; line-height:1.72; color:var(--muted);
+  max-width:660px;
+}
+.aside b{color:var(--ink)}
+.warn{border-left:3px solid var(--rust)}
+
+.scroll{overflow-x:auto; border:1px solid var(--rule); background:var(--surface); border-radius:2px}
+table{border-collapse:collapse; width:100%; font-size:.87rem}
+th,td{padding:9px 14px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--hair)}
+th:first-child,td:first-child{text-align:left}
+thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:.66rem; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  background:var(--sunk); border-bottom:1px solid var(--rule);
+}
+tbody td{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; color:var(--body)}
+tbody td:first-child{font-family:"IBM Plex Sans KR",sans-serif; color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+tr.hi td{background:var(--tag); color:var(--ink); font-weight:500}
+tr.dim td{color:var(--faint)}
+.pos{color:var(--moss)} .neg{color:var(--rust)} .key{color:var(--buoy); font-weight:600}
+.cap{font-size:.79rem; color:var(--muted); line-height:1.65; max-width:660px}
+
+figure{margin:0; display:flex; flex-direction:column; gap:12px}
+svg{display:block; width:100%; height:auto}
+.axis{font-family:"IBM Plex Mono",monospace; font-size:11px; fill:var(--muted)}
+.axlab{font-family:"IBM Plex Mono",monospace; font-size:10px; fill:var(--faint); letter-spacing:.08em}
+.val{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; fill:var(--ink)}
+.onbar{font-family:"IBM Plex Mono",monospace; font-size:11px; fill:var(--surface)}
+
+.verdicts{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule)}
+.v{background:var(--surface); padding:20px 22px; display:flex; flex-direction:column; gap:9px}
+.v .lab{font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.v .big{font-family:"Nanum Myeongjo",serif; font-size:1.55rem; font-weight:700; color:var(--ink); line-height:1.18}
+.v .sub{font-size:.84rem; color:var(--muted); line-height:1.6}
+.v.stop .big{color:var(--rust)} .v.go .big{color:var(--moss)} .v.hold .big{color:var(--buoy)}
+
+ul{margin:0; padding-left:1.15em; display:flex; flex-direction:column; gap:11px; max-width:660px}
+li::marker{color:var(--faint)}
+footer{margin-top:84px; padding-top:20px; border-top:1px solid var(--rule); font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--faint); line-height:1.95}
+@media (max-width:640px){
+  .wrap{padding:0 18px 80px} header{padding-top:48px}
+  .shead{flex-direction:column; gap:5px}
+}
+@media (prefers-reduced-motion:no-preference){
+  header{animation:dive .9s cubic-bezier(.22,.9,.3,1) both}
+}
+@keyframes dive{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">stock_screener · 청산 연구 · 2026-08-25</div>
+  <h1>주도주 탈출<br>타이밍</h1>
+  <p class="lede col">진입 규칙(L/S)은 고정하고 <b>청산만</b> 파고들었다. 미국 2,655종·2018~2026 주봉으로
+  +150% 런 1,843개를 해부하고, 실제 L/S 신호가 맞은 낙폭 2,048건을 라벨링한 뒤,
+  청산 규칙 17종을 워크포워드로 겨뤘다. 결론 셋 중 둘은 <b>연구 도중 내가 내렸던 판단을 뒤집는 것</b>이었다.</p>
+  <div class="meta">
+    <span>런 1,843 · 투자가능 1,108</span>
+    <span>판단의 순간 2,048건</span>
+    <span>청산 17종 × 3구간</span>
+    <span>주봉 종가 · 수수료 0.1%</span>
+  </div>
+</header>
+
+<section>
+  <div class="shead"><span class="snum">요약</span><h2>세 줄</h2></div>
+  <div class="verdicts">
+    <div class="v go">
+      <span class="lab">유지</span>
+      <span class="big">−30% 트레일</span>
+      <span class="sub">최적점이라서가 아니라 <b>고원의 왼쪽 끝</b>이라서. −30~−55%가 전부 4.9~6.5배로 평평하고, −25% 아래는 절벽이다.</span>
+    </div>
+    <div class="v stop">
+      <span class="lab">기각</span>
+      <span class="big">똑똑한 청산</span>
+      <span class="sub">이평 이탈·시장 조건부·시간 청산·포물선 꼭지. 앞구간 1위가 뒤구간에서 원금을 깎았다. <b>순위상관 −0.30.</b></span>
+    </div>
+    <div class="v hold">
+      <span class="lab">보류</span>
+      <span class="big">S(소형) 청산</span>
+      <span class="sub">데이터가 "깊이 빠질수록 좋다"는 역발상 곡선을 낸다. 신호가 아니라 <b>생존편향의 지문</b>으로 본다.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">01</span><h2>트럭은 가는 동안 몇 번 흔들리나</h2></div>
+  <div class="col stack">
+    <p>먼저 사후적으로 주도주를 잡았다. 직전 104주 저점 대비 <b>+150% 이상</b> 오른 뒤 ±26주 구간의
+    최대값을 찍은 주차를 '정점'으로 보고, 저점→정점을 하나의 <b>런</b>으로 정의했다. 정점 시점에
+    시총 $2B 이상·거래대금 $5M 이상인 <b>1,108개 런</b>이 실제로 살 수 있었던 것들이다.</p>
+    <p class="claim">주도주의 절반은 정점에 닿기 전에 이미 −25%를 한 번 겪는다.</p>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 660 262" role="img" aria-label="낙폭 깊이별로 그 낙폭을 최소 한 번 겪는 런의 비율">
+      <line x1="46" y1="30" x2="648" y2="30" stroke="var(--rule)" stroke-width="1"/>
+      <text x="46" y="22" class="axlab">해수면 = 진행 최고가</text>
+      <line x1="46" y1="30" x2="46" y2="240" stroke="var(--rule)" stroke-width="1"/>
+
+      <rect x="46" y="38" width="480" height="26" fill="var(--shoal)" opacity=".55"/>
+      <text x="536" y="56" class="val">84%</text>
+      <text x="54" y="55" class="axis" fill="var(--ink)">−15%</text>
+
+      <rect x="46" y="72" width="383" height="26" fill="var(--sea)" opacity=".6"/>
+      <text x="439" y="90" class="val">67%</text>
+      <text x="54" y="89" class="onbar">−20%</text>
+
+      <rect x="46" y="106" width="291" height="26" fill="var(--sea)" opacity=".78"/>
+      <text x="347" y="124" class="val">51%</text>
+      <text x="54" y="123" class="onbar">−25%</text>
+
+      <rect x="46" y="140" width="211" height="26" fill="var(--deep)" opacity=".85"/>
+      <text x="267" y="158" class="val">37%</text>
+      <text x="54" y="157" class="onbar">−30%</text>
+
+      <rect x="46" y="174" width="103" height="26" fill="var(--deep)"/>
+      <text x="159" y="192" class="val">18%</text>
+      <text x="54" y="191" class="onbar">−40%</text>
+
+      <rect x="46" y="208" width="49" height="26" fill="var(--deep)"/>
+      <text x="105" y="226" class="val">8.5%</text>
+      <text x="54" y="225" class="onbar">−50%</text>
+
+      <line x1="46" y1="138" x2="648" y2="138" stroke="var(--buoy)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="648" y="132" text-anchor="end" class="axlab" fill="var(--buoy)">현행 L 손절선 −30%</text>
+    </svg>
+    <figcaption class="cap">막대 길이 = 그 깊이의 낙폭을 <b>정점에 닿기 전에</b> 최소 한 번 겪은 런의 비율(n=1,843).
+    손절선 위쪽(−15·−20·−25%)에서 벌어지는 일은 전부 견뎌야 하는 것이고, 손절선 아래로 내려간 37%는 정점 전에 잘린다.</figcaption>
+  </figure>
+
+  <div class="col stack">
+    <p>투자가능 런 1,108개 기준으로 정리하면 이렇다. 상승 중 −20% 낙폭은 <b>중앙 1회</b>(0회인 런 38%),
+    −30% 낙폭은 <b>중앙 0회</b>(0회인 런 70%). 견뎌야 했던 최대 낙폭은 중앙 <b>−23%</b>,
+    하위 25%는 <b>−32%</b>다. 그리고 정점을 지난 뒤에는 중앙 <b>−45%</b>, 하위 25%는 <b>−62%</b>까지 빠진다.</p>
+    <div class="aside">위기의 횟수는 생각보다 적고 깊이는 생각보다 깊다. 주도주를 놓치는 건
+    "여러 번 흔들려서"가 아니라 <b>한 번 크게 흔들릴 때</b>다.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">02</span><h2>판단의 순간 — 중앙값과 평균이 반대를 말한다</h2></div>
+  <div class="col stack">
+    <p>이제 사후 표본을 버린다. 정점 전후를 라벨해놓고 "상승 중 낙폭은 100% 회복된다"고 말하는 건
+    동어반복이다 — 정점 전이라고 정의한 이상 회복할 수밖에 없다. 그래서 표본을 <b>실제 L 신호로 산 뒤</b>로 바꿨다.
+    진입 후 고점 대비 −X%를 처음 깬 주차가 '판단의 순간'이고, 그 시점에 알 수 있는 값만 기록했다.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>낙폭 문턱</th><th>n</th><th>이후 52주 중앙</th><th>평균</th><th>음수 비율</th><th>직전 고점 회복</th></tr></thead>
+      <tbody>
+        <tr><td>−10%</td><td>408</td><td class="pos">+18.0%</td><td class="pos">+32.6%</td><td>43%</td><td>74%</td></tr>
+        <tr><td>−15%</td><td>386</td><td class="pos">+4.4%</td><td class="pos">+25.4%</td><td>49%</td><td>65%</td></tr>
+        <tr class="hi"><td>−20%</td><td>359</td><td class="neg">−2.2%</td><td class="pos">+17.7%</td><td>51%</td><td>53%</td></tr>
+        <tr><td>−25%</td><td>333</td><td class="neg">−6.4%</td><td class="pos">+13.2%</td><td>56%</td><td>40%</td></tr>
+        <tr><td>−30% <span class="key">현행</span></td><td>312</td><td class="neg">−6.1%</td><td class="pos">+11.0%</td><td>56%</td><td>34%</td></tr>
+        <tr><td>−40%</td><td>246</td><td class="neg">−12.6%</td><td class="pos">+1.9%</td><td>60%</td><td>21%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">규칙 L · 진입 후 고점 대비 문턱을 처음 깬 시점부터의 수익. 문턱이 깊어질수록 단조 악화한다.</p>
+  <div class="col stack">
+    <p>여기서 나는 <b>틀린 결론을 냈다.</b> "중앙값이 0을 지나는 −15~−20% 사이가 진짜 손절선이고
+    현행 −30%는 한참 늦다" — 표만 보면 그렇게 읽힌다. 그런데 <b>평균은 −30%에서도 +11%로 양수</b>다.
+    소수의 대박이 전부를 캐리하는 구조이기 때문이다.</p>
+    <p class="claim">포트폴리오는 중앙값으로 살지 않는다. 꼬리로 산다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">03</span><h2>절벽 — 트레일 폭에는 봉우리가 없다</h2></div>
+  <div class="col stack">
+    <p>그래서 실제로 돌렸다. 진입은 L 규칙 고정, 6슬롯, 수수료 0.1%, 2019-01~2026-08.
+    청산 폭만 바꿨다.</p>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 660 306" role="img" aria-label="트레일 폭별 자산배수 — 25%와 30% 사이의 절벽">
+      <defs>
+        <linearGradient id="cliff" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--sea)" stop-opacity=".34"/>
+          <stop offset="100%" stop-color="var(--sea)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g class="axis">
+        <text x="42" y="44" text-anchor="end">7배</text>
+        <text x="42" y="116" text-anchor="end">5배</text>
+        <text x="42" y="188" text-anchor="end">3배</text>
+        <text x="42" y="260" text-anchor="end">1배</text>
+      </g>
+      <line x1="50" y1="256" x2="646" y2="256" stroke="var(--rule)"/>
+      <line x1="50" y1="40" x2="50" y2="256" stroke="var(--rule)"/>
+      <path d="M80,272 L150,242 L220,237 L290,58 L360,67 L430,108 L500,79 L570,116 L640,106 L640,256 L80,256 Z" fill="url(#cliff)"/>
+      <path d="M80,272 L150,242 L220,237 L290,58 L360,67 L430,108 L500,79 L570,116 L640,106"
+            fill="none" stroke="var(--sea)" stroke-width="2.4" stroke-linejoin="round"/>
+      <g fill="var(--sea)">
+        <circle cx="80" cy="272" r="3.5"/><circle cx="150" cy="242" r="3.5"/><circle cx="220" cy="237" r="3.5"/>
+        <circle cx="360" cy="67" r="3.5"/><circle cx="430" cy="108" r="3.5"/><circle cx="500" cy="79" r="3.5"/>
+        <circle cx="570" cy="116" r="3.5"/><circle cx="640" cy="106" r="3.5"/>
+      </g>
+      <circle cx="290" cy="58" r="6" fill="var(--buoy)"/>
+      <text x="290" y="44" text-anchor="middle" class="val" fill="var(--buoy)">6.47배 · 현행</text>
+      <line x1="255" y1="40" x2="255" y2="266" stroke="var(--rust)" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <text x="249" y="210" text-anchor="end" class="axlab" fill="var(--rust)">절벽</text>
+      <text x="80" y="290" text-anchor="start" class="axlab">타이트 — 주도주를 정점 전에 버린다</text>
+      <text x="640" y="290" text-anchor="end" class="axlab">고원 — 4.9~6.5배로 평평</text>
+      <g class="axis">
+        <text x="80" y="272" text-anchor="middle">−15</text>
+        <text x="220" y="255" text-anchor="middle">−25</text>
+        <text x="290" y="274" text-anchor="middle">−30</text>
+        <text x="430" y="274" text-anchor="middle">−40</text>
+        <text x="640" y="274" text-anchor="middle">−55</text>
+      </g>
+    </svg>
+    <figcaption class="cap">규칙 L · 2019-01~2026-08 자산배수. −15%는 0.56배로 <b>원금을 절반 깎고</b>, −30%부터 −55%까지는 전부 4.9~6.5배다.
+    최적 파라미터를 찾은 게 아니라 <b>넘지 말아야 할 선</b>을 찾은 것이다.</figcaption>
+  </figure>
+
+  <div class="col stack">
+    <p>01의 해부가 이 절벽을 그대로 설명한다. 런의 <b>51%가 정점 전에 −25%를 겪으므로</b>,
+    −25% 손절은 주도주의 절반을 정점 전에 버린다. 트레이드 수가 그 증거다 —
+    −30%는 8년에 50건인데 −15%는 <b>198건</b>이다. 늘어난 148건은 알파가 아니라 <b>휩쏘</b>다.</p>
+    <div class="aside"><b>이것이 02의 역설을 푼다.</b> 개별 트레이드 중앙값으로는 −20%에서 파는 게 맞지만,
+    팔고 나면 자본은 <em>더 나쁜 다음 신호</em>로 들어간다. 트레이드의 기대값과 규칙의 성과는 다른 문제다.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">04</span><h2>고를 수 있는가 — 워크포워드가 낸 답: 아니다</h2></div>
+  <div class="col stack">
+    <p>여기가 이 연구에서 가장 중요한 표다. 앞구간(2019~2021)에서 규칙을 고르고
+    뒤구간(2022~2026)에서 검증했다.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>청산 규칙</th><th>앞 2019~21</th><th>앞순위</th><th>뒤 2022~26</th><th>뒤순위</th><th>전체 배수</th><th>전체 MDD</th></tr></thead>
+      <tbody>
+        <tr><td>트레일 −30% or 20주선 2주</td><td>2.84</td><td class="key">1위</td><td class="neg">0.72</td><td class="neg">15위</td><td>2.36</td><td>−52%</td></tr>
+        <tr><td>시장 조건부 20/40</td><td>2.52</td><td>2위</td><td>2.33</td><td>7위</td><td>4.28</td><td>−49%</td></tr>
+        <tr><td>20주선 이탈 2주</td><td>2.39</td><td>3위</td><td class="neg">1.02</td><td class="neg">12위</td><td>3.07</td><td>−52%</td></tr>
+        <tr><td>26주 시간청산</td><td>2.34</td><td>4위</td><td class="neg">0.90</td><td class="neg">13위</td><td>1.91</td><td>−68%</td></tr>
+        <tr class="dim"><td>트레일 −20%</td><td>2.24</td><td>6위</td><td class="neg">0.57</td><td class="neg">16위</td><td>1.38</td><td>−59%</td></tr>
+        <tr class="dim"><td>트레일 −15%</td><td>1.83</td><td>13위</td><td class="neg">0.33</td><td class="neg">17위</td><td>0.56</td><td>−75%</td></tr>
+        <tr class="hi"><td>트레일 −30% <span class="key">현행</span></td><td>1.67</td><td class="neg">16위</td><td class="pos">4.88</td><td class="key">1위</td><td class="pos">6.47</td><td>−33%</td></tr>
+        <tr><td>트레일 −35%</td><td>2.15</td><td>9위</td><td class="pos">3.09</td><td>2위</td><td class="pos">6.23</td><td>−38%</td></tr>
+        <tr><td>포물선 꼭지 −20%/+25%</td><td>1.68</td><td class="neg">15위</td><td class="pos">2.99</td><td>3위</td><td>4.52</td><td>−32%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col stack">
+    <p class="claim">앞구간 1위는 뒤구간 15위였고, 뒤구간 1위는 앞구간 16위였다.<br>순위상관 <span class="num">−0.30</span>.</p>
+    <p>워크포워드를 <b>규칙대로</b> 했다면 정답을 버렸을 것이다. 이건 "청산 규칙 중 뭐가 좋은가"에 답이 없다는 뜻이 아니라,
+    <b>이 표본 크기로는 격자에서 이긴 규칙을 믿으면 안 된다</b>는 뜻이다. L은 8년간 슬롯 경쟁이 벌어진 주차가
+    16주뿐이라 순위가 열몇 번의 판단으로 뒤집힌다.</p>
+    <div class="aside warn"><b>그래서 채택 기준을 바꾼다.</b> 성과 순위가 아니라 <b>구조적 이유</b>가 있는 것만 쓴다.
+    −30%가 살아남는 근거는 격자 1위여서가 아니라 ① 고원이 −30~−55%로 넓고 ② 그 위치를 01의 해부가
+    독립적으로 설명하기 때문이다. 성과표와 해부가 <b>서로 다른 데이터에서 같은 선</b>을 가리켰다.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">05</span><h2>U턴의 지문 — 찾았지만 규칙이 되지 못했다</h2></div>
+  <div class="col stack">
+    <p>같은 −20% 낙폭인데 어떤 건 눌림목이고 어떤 건 끝이다. 판단의 순간에 알 수 있는 값만으로
+    5분위 반응곡선을 그렸다. 선형 상관(IC)으로는 재지 않는다 — 이 프로젝트는 U자 팩터를 IC로 재서
+    "무용"이라 오판한 전력이 있다. 규칙 L, n=359, 기저는 −2.2%.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>판단 시점의 특징</th><th>1분위</th><th>2</th><th>3</th><th>4</th><th>5분위</th><th>읽는 법</th></tr></thead>
+      <tbody>
+        <tr><td>20주선 대비 위치</td><td>+0%</td><td>+6%</td><td>+2%</td><td>+5%</td><td class="neg">−39%</td><td>아직 이평선 위 한참 = 더 남았다</td></tr>
+        <tr><td>SPY 52주고점 대비</td><td class="pos">+18%</td><td>+10%</td><td>−19%</td><td>−8%</td><td class="neg">−11%</td><td>시장 탓이면 회복, 혼자면 U턴</td></tr>
+        <tr><td>RS 26주</td><td class="pos">+24%</td><td>−1%</td><td>+1%</td><td>+6%</td><td class="neg">−33%</td><td>세게 오르던 게 크게 꺾인다</td></tr>
+        <tr><td>고점 이후 경과주</td><td class="neg">−24%</td><td>+8%</td><td>−3%</td><td class="pos">+16%</td><td>+2%</td><td>1주 만의 −20%는 나쁜 소식</td></tr>
+        <tr><td>직전 실적 주가반응</td><td class="neg">−20%</td><td>+0%</td><td class="pos">+21%</td><td>+5%</td><td class="neg">−15%</td><td>U자 — 양 끝이 나쁘다</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">각 칸 = 그 분위의 이후 52주 수익 중앙값. 1분위가 가장 작은 값, 5분위가 가장 큰 값.</p>
+  <div class="col stack">
+    <p>지문은 분명히 있다. <b>낙폭이 시작됐는데 아직 20주선보다 한참 위</b>라면 이후 중앙 −39%로,
+    포물선 꼭지가 이제 막 깨진 상태다. <b>시장은 신고가 부근인데 혼자 빠지는 것</b>이 진짜 U턴이고,
+    시장이 같이 조정 중일 때의 −20%는 오히려 이후 +18%다.</p>
+    <p>그런데 이걸 규칙으로 만들면(<code>포물선 꼭지</code>, <code>시장 조건부</code>) 04의 표에서 보듯
+    <b>전체 성과가 현행보다 낮다.</b> 포물선 꼭지가 MDD −32%로 현행 −33%보다 아주 조금 낫지만
+    CAGR을 27.7% → 21.8%로 깎는다. <b>설명력이 있는 것과 규칙으로 돈이 되는 것은 다르다.</b></p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">06</span><h2>20주선 이탈은 추세추종이 아니라 조기 하차다</h2></div>
+  <div class="col stack">
+    <p>가장 상식적인 청산 — "주가가 20주 이동평균을 깨면 추세가 끝난 것" — 을 런 1,108개에 대고 재봤다.</p>
+    <p class="claim">20주선 2주 이탈은 정점보다 중앙 <span class="num">72주 먼저</span> 나간다.</p>
+    <p>같은 런에서 실현수익 중앙값이 <b>트레일 −30%는 +127%, 20주선은 +17%</b>다.
+    20주선이 이긴 런은 <b>9%</b>뿐이다. 주도주는 20주선을 여러 번 깨면서 올라간다 —
+    이평선 이탈은 추세의 종료가 아니라 <b>정상 호흡</b>이다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">07</span><h2>이름들</h2></div>
+  <div class="col stack">
+    <p>사후 해부다. <b>늦은주</b>는 트레일 −30%가 정점 대비 몇 주 뒤에 잘랐는지이고,
+    음수면 <b>정점에 닿기 전에 털렸다</b>는 뜻이다.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>종목</th><th>런</th><th>배수</th><th>−20% 횟수</th><th>최대 견딤</th><th>정점 후 MDD</th><th>트레일 청산</th><th>늦은주</th><th>실현</th></tr></thead>
+      <tbody>
+        <tr><td>AppLovin</td><td>23-03 → 25-02</td><td>41.4x</td><td>2</td><td>−21%</td><td>−57%</td><td>25-02-24</td><td class="pos">+2</td><td class="pos">+2546%</td></tr>
+        <tr><td>Rocket Lab</td><td>24-05 → 26-05</td><td>32.8x</td><td>3</td><td>−46%</td><td>−55%</td><td>25-02-24</td><td class="neg">−65</td><td>+369%</td></tr>
+        <tr><td>Supermicro</td><td>22-04 → 24-03</td><td>32.3x</td><td>4</td><td>−30%</td><td>−84%</td><td>23-09-18</td><td class="neg">−24</td><td>+568%</td></tr>
+        <tr><td>Enphase</td><td>19-01 → 21-01</td><td>31.6x</td><td>2</td><td>−56%</td><td>−44%</td><td>19-09-09</td><td class="neg">−71</td><td>+229%</td></tr>
+        <tr><td>MicroStrategy</td><td>22-12 → 24-11</td><td>29.8x</td><td>4</td><td>−36%</td><td>−80%</td><td>23-03-06</td><td class="neg">−89</td><td class="neg">+36%</td></tr>
+        <tr><td>Celsius</td><td>20-03 → 21-11</td><td>28.1x</td><td>2</td><td>−33%</td><td>−59%</td><td>21-03-08</td><td class="neg">−34</td><td>+1077%</td></tr>
+        <tr><td>Tesla</td><td>19-05 → 21-01</td><td>23.8x</td><td>1</td><td>−53%</td><td>−61%</td><td>20-03-09</td><td class="neg">−43</td><td>+195%</td></tr>
+        <tr><td>IonQ</td><td>23-01 → 24-12</td><td>12.7x</td><td>2</td><td>−65%</td><td>−57%</td><td>23-09-18</td><td class="neg">−67</td><td>+252%</td></tr>
+        <tr><td>Palantir</td><td>24-01 → 25-10</td><td>12.5x</td><td>2</td><td>−38%</td><td>−44%</td><td>25-03-31</td><td class="neg">−30</td><td>+363%</td></tr>
+        <tr><td>Carvana</td><td>20-03 → 21-08</td><td>12.3x</td><td>2</td><td>−25%</td><td class="neg">−99%</td><td>21-12-13</td><td class="pos">+18</td><td>+662%</td></tr>
+        <tr class="hi"><td>NVIDIA</td><td>22-12 → 24-11</td><td>10.1x</td><td>1</td><td>−22%</td><td>−36%</td><td>25-03-31</td><td class="pos">+21</td><td>+546%</td></tr>
+        <tr><td>Vistra</td><td>23-10 → 25-09</td><td>6.8x</td><td>2</td><td>−49%</td><td>−35%</td><td>24-07-22</td><td class="neg">−60</td><td>+128%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col stack">
+    <p><b>정점 전에 털린 비율은 30%다.</b> TSLA는 코로나 폭락 때 정점 43주 전에 +195%로 잘렸고,
+    그 뒤 23.8배까지 갔다. ENPH는 71주 전에 +229%로 나왔다. 이게 −30% 트레일의 <b>실제 비용</b>이고,
+    타이트하게 조이면 이 30%가 훨씬 커진다.</p>
+    <p>반대쪽도 정직하게: NVDA(+21주)·APP(+2주)·CVNA(+18주)처럼 정점을 지나고도 살아남은 트레이드는
+    <b>정점 대비 중앙 9주 뒤</b>에 잘렸다. 포착률(실현 ÷ 도달했던 최대수익) 중앙은 <b>21%</b>.
+    최대수익 +100%에 닿은 16건 중 실현이 +100%를 넘은 건 <b>9건</b>이다.</p>
+    <p class="claim">고점에 파는 건 불가능하다. 고점의 70%를 지키는 게 규칙의 전부다.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">08</span><h2>이 연구가 못 하는 것</h2></div>
+  <ul>
+    <li><b>생존편향이 이 주제의 급소다.</b> 유니버스에 상장폐지 종목이 0건이다. 탈출 연구는 "안 돌아온 종목"이
+    핵심인데 가장 심하게 죽은 표본이 통째로 빠져 있다. <b>손절의 가치는 여기서 구조적으로 과소평가된다</b> —
+    즉 진짜 최적 트레일은 −30%보다 <em>타이트한</em> 쪽일 수 있다. 유니버스를 고쳐야만 풀린다.</li>
+    <li><b>주봉 종가만 있다.</b> <code>prices</code> 테이블이 비어 있어 장중·일봉 낙폭을 못 본다.
+    실제 MDD는 여기 숫자보다 깊고, 트레일 발동 시점도 다르다.</li>
+    <li><b>S(소형 대시세)는 결론 없음.</b> "20주선 아래로 깊을수록·신고가에서 멀수록 이후가 좋다"는
+    완전한 역발상 곡선이 나온다(−40%를 맞아도 이후 중앙 +12%). 안 튄 마이크로캡이 데이터에 없기 때문으로 본다.
+    이 데이터로 S 청산은 건드리지 않는다.</li>
+    <li><b>다중검정.</b> 청산 17종 × 3구간을 돌렸다. 04의 순위상관 −0.30이 이 표 전체를 어떻게 읽어야 하는지 말해준다.</li>
+    <li><b>2020년 의존.</b> 앞구간 성과 대부분이 2020~2021 유동성 장세다. 앞뒤 구간 불일치의 상당 부분이 여기서 온다.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">09</span><h2>그래서 무엇을 바꾸나</h2></div>
+  <div class="col stack">
+    <p><b>바꾸지 않는 것 —</b> L의 −30% 트레일. 다만 근거가 달라졌다. 전에는 "전 기간 격자에서 최고"라
+    잠정이었는데, 이제는 <b>−30~−55% 고원의 왼쪽 끝</b>이고 그 위치를 독립적인 낙폭 해부가 설명한다.
+    파라미터 과적합 우려는 상당 부분 해소됐다.</p>
+    <p><b>기각하는 것 —</b> 이평 이탈 청산, 시간 청산, 시장 조건부 트레일, 그리고 <b>손절을 타이트하게 조이자는 안 전부.</b>
+    특히 사용자 원칙의 "−8% 손절"은 주도주 규칙에 적용하면 안 된다는 게 데이터의 답이다 —
+    −15%조차 원금을 절반으로 깎았다.</p>
+    <p><b>다음에 할 것 —</b> 순서대로.</p>
+    <ul>
+      <li><b>유니버스의 생존편향 제거.</b> 이걸 고치기 전까지 청산 연구의 모든 숫자에 부호가 붙어 있다.
+      다른 어떤 개선보다 이게 먼저다.</li>
+      <li><b>일봉 가격 복구.</b> <code>prices</code>를 채워 장중 기준 트레일과 주봉 종가 기준 트레일의 차이를 재야 한다.</li>
+      <li><b>부분 청산 측정.</b> 이번에 안 돌린 축이다. "절반은 −20%에서, 절반은 −40%에서"가
+      고원의 왼쪽 끝을 넓힐 수 있는지.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  코드 <code>leaders_uturn.py · leaders_uturn2~4.py · leaders_exit.py · leaders_exit2.py</code> · 커밋 <code>0054481</code><br>
+  데이터 <code>data/market.db</code> factor_weekly(v1) · 미국 2,655종 · 2018-06 ~ 2026-08 주봉 종가 · 수수료 0.1%<br>
+  모든 수치는 백테스트이며 실현 수익이 아니다. 생존편향·주봉 해상도 한계는 08절에.
+</footer>
+
+</div>
