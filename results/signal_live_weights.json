@@ -1,11 +1,11 @@
 {
   "horizon": "4w",
-  "updated": "2026-08-23 21:19",
+  "updated": "2026-08-25 21:27",
   "weights": {
     "sig_52w": {
-      "mult": 0.05,
-      "n": 209,
-      "live_ev": -1.3,
+      "mult": 0.04,
+      "n": 232,
+      "live_ev": -1.59,
       "ref_ev": 1.0
     },
     "sig_vol": {
@@ -15,27 +15,27 @@
       "ref_ev": 0.8
     },
     "sig_ma5": {
-      "mult": 1.1,
-      "n": 283,
-      "live_ev": 0.44,
+      "mult": 0.68,
+      "n": 316,
+      "live_ev": 0.27,
       "ref_ev": 0.4
     },
     "sig_cup": {
       "mult": 1.27,
-      "n": 78,
-      "live_ev": 1.15,
+      "n": 83,
+      "live_ev": 0.87,
       "ref_ev": 0.5
     },
     "sig_maconv": {
-      "mult": 0.4,
-      "n": 425,
-      "live_ev": 0.62,
+      "mult": 0.3,
+      "n": 460,
+      "live_ev": 0.46,
       "ref_ev": 1.6
     },
     "sig_rsimacd": {
-      "mult": 0.09,
-      "n": 371,
-      "live_ev": 0.06,
+      "mult": 0.02,
+      "n": 400,
+      "live_ev": -0.06,
       "ref_ev": 0.9
     }
   }
