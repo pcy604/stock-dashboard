@@ -1,0 +1,9 @@
+# 구루 파이프라인 전용 최소 의존성 (guru-digest · guru-bot · guru-roundup 워크플로가 이걸 쓴다)
+# 왜 나눴나: 전체 requirements.txt 는 대시보드용이라 streamlit·pandas·pyarrow·plotly·
+#   yfinance·pykrx·matplotlib 을 끈고 온다. 구루 워크플로는 그중 무엇도 import 하지
+#   않는데 매 실행 설치 비용만 냈다 — guru-digest 회당 5.15분(2026-08 실측, 480회/2,474분)의
+#   대부분이 이 설치였고, Actions 는 job 당 1분 올림 과금이라 그대로 요금이 됐다.
+# 구루 경로에 새 모듈을 추가하면 여기에도 반영할 것.
+requests>=2.31
+google-genai>=1.0
+youtube-transcript-api>=1.0
