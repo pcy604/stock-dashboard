@@ -6,7 +6,7 @@ name: guru-bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/15 * * * *'    # 15분마다 인바운드 폴링 (가벼움)
+    - cron: '7 */6 * * *'     # 2026-08-30: 15분 → 6시간. "가벼움"이 아니었다 — Actions 는 job 당 1분 미만도 1분으로 올림 과금하므로 96회/일 = 최소 2,880분/월이고, 그것만으로 무료 한도(2,000분/월)를 넘는다. 8월 실측 656회/656분. 이 워크플로가 처리하는 건 /add 채널구독뿐이고 그건 한 달에 몇 번 쓰는 명령이다. 급하면 Actions 탭에서 Run workflow.
 
 permissions:
   contents: write
