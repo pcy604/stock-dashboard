@@ -8,7 +8,7 @@ name: guru-digest
 on:
   workflow_dispatch:          # 수동 실행 버튼
   schedule:
-    - cron: '37 * * * *'      # 매시간 :37 (정시 혼잡 회피 + 슬롯 누락 보완). 신규 영상 있을 때만 전송
+    - cron: '37 1,4,7,10,13,16,19,22 * * *'   # 2026-08-30: 매시간 → 3시간. 8월 실측 480회/2,474분 = 회당 5.15분으로, 이 워크플로 하나가 계정 무료 한도(2,000분/월)의 124%를 썬다. 빈도만 줄여서는 모자라서 회당 비용도 requirements-guru.txt 로 같이 줄였다. 시각에 04 를 반드시 포함할 것 — 아래 커밋 게이트가 UTC 04시이고 guru-roundup 이 04:40 에 그 결과를 읽는다.
 
 permissions:
   contents: write
@@ -31,7 +31,7 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements-guru.txt   # 구루 경로는 대시보드 의존성(streamlit·pandas·pyarrow·plotly·yfinance·pykrx)을 하나도 import 하지 않는다 — 설치 비용만 내고 있었다.
 
       # 분석 이력 캐시 — **커밋 주기를 줄이기 전에 반드시 있어야 하는 스텝.**
       # guru_youtube.py 의 '이미 분석함' 판정(done)은 results/guru_insights.json 하나만
