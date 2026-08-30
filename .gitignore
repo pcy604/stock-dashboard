@@ -19,10 +19,14 @@ data/market.db-wal
 # 캐시/결과 (대용량, 재생성 가능)
 data/price_cache/
 data/fin_cache/
-data/shares_cache/          # SEC companyconcept 원본 (종목별 JSON, 재생성 가능)
-data/shares_frames.csv      # SEC frames 원본 — 병합 결과인 us_shares.csv 만 커밋한다
-data/market.db.bak-*        # DB 백업
-_cap*                       # 일회성 진단 스크립트
+# SEC companyconcept 원본 (종목별 JSON, 재생성 가능)
+data/shares_cache/
+# SEC frames 원본 — 병합 결과인 us_shares.csv 만 커밋한다
+data/shares_frames.csv
+# DB 백업
+data/market.db.bak-*
+# 일회성 진단 스크립트
+_cap*
 __pycache__/
 *.pyc
 results/*.csv
@@ -45,8 +49,10 @@ results/leaders_v2.json
 
 # 사례 차트 PNG (leaders_cases.py가 재생성)
 results/cases/*.png
-data/_volwk.parquet         # 주봉 거래량 패널 (px 캐시에서 재생성 가능)
-data/_fund.parquet          # 재무 플래그 중간 산출물
+# 주봉 거래량 패널 (px 캐시에서 재생성 가능)
+data/_volwk.parquet
+# 재무 플래그 중간 산출물
+data/_fund.parquet
 data/_turn.parquet
 _grp*.py
 _eps.py

@@ -130,10 +130,6 @@ SOURCES = [
          job='leaders_weekly (로컬 스케줄러)',
          used_by='🚀 주도주 → 심층조회 차트 (L/S·이익가속 양쪽)',
          getter=_key('generated')),
-    dict(path='results/leaders_ab.json', label='주도주 L/S (대형·소형)',
-         cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_ab.py',
-         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → 🇺🇸',
-         getter=_key('generated')),
     # 종료된 규칙이지만 화면에 기록으로 남아 있어 계속 감시한다.
     # ★ 2026-08-22 추가 — 이 파일이 밀리면 새 주차의 vw 가 NaN 이 되어
     #   `vw < 1.5` 가 항상 거짓이 되고 **가짜 '신호 0종'**이 뜬다. 그날 사이클은
@@ -142,23 +138,7 @@ SOURCES = [
     # 등록하면 스모크의 '레지스트리에 있으나 파일 없음' 검사가 깨진다(2026-08-22 CI
     # 실패가 그것이었다). 그래서 leaders_ab.py 가 발행물에 기준일(vol_asof)을 실어
     # 보내고, 여기서는 그 값을 본다 — 배포된 화면에서도 보인다.
-    dict(path='results/leaders_ab.json', label='주봉 거래량 패널 (L/S 의 vw 입력)',
-         cycle='주 1회 (토 08:00)', max_age=9, producer='volwk_build.py',
-         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → L/S 신호 자체',
-         getter=_key('vol_asof')),
-    dict(path='results/leaders_signal.json', label='주도주 신호 (구 규칙⑥·닫힌 기록)',
-         cycle='갱신 없음', max_age=99999, producer='leaders_publish.py (수동)',
-         job='없음 — 2026-08-22 주간 사이클에서 제외', used_by='🚀 주도주 → 📕 구 규칙⑥ 기록',
-         getter=_key('generated')),
-    dict(path='results/leaders_symbol_detail.json', label='주도주 종목 심층조회',
-         cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_symbol.py',
-         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → 🇺🇸 (주차별·심층·신호회차)',
-         getter=_key('generated', 'updated')),
-    # KR-U6의 '흑자전환·이익폭증' 판정이 이 파일에 걸려 있다. 러너엔 market.db가
-    # 없어 이 export만 보므로, 이게 낡으면 **옛 재무로 최신 신호를 내면서 초록불**이다.
-    # 분기 공시 주기(+공시 시차)를 고려해 100일. 로컬에서만 갱신 가능:
-    #   python ingest_dart_quarterly.py && python export_kr_fundq.py export
-    dict(path='data/kr_fundamentals_q.parquet', label='KR 분기재무 (KR-U6 입력)',
+        dict(path='data/kr_fundamentals_q.parquet', label='KR 분기재무 (KR-U6 입력)',
          cycle='분기 1회', max_age=100, producer='export_kr_fundq.py export',
          job='수동 (로컬 · market.db 필요)', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',
          getter=_mtime, raw=True),
@@ -173,18 +153,6 @@ SOURCES = [
     dict(path='results/leaders_kr_paper.json', label='주도주 KR 포워드 원장',
          cycle='주 1회', max_age=9, producer='leaders_kr_paper.py update',
          job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 (포워드 검증)',
-         getter=_key('updated')),
-    dict(path='results/leaders_paper.json', label='주도주 페이퍼 원장',
-         cycle='주 1회', max_age=9, producer='leaders_paper.py',
-         job='수동 (로컬)', used_by='⚠️ 화면 없음 — 구 규칙⑥ 종료(08-18) 후 미참조',
-         getter=_key('updated')),
-    dict(path='results/paper_trades.json', label='페이퍼 트레이딩 원장',
-         cycle='주 1회 (weekly_run 동시)', max_age=9, producer='paper_trade.py',
-         job='daily-refresh', used_by='⚠️ 화면 없음 — 성적표 제거(08-22)',
-         getter=_paper_max_log),
-    dict(path='results/weekly_portfolio.json', label='주간 추천 포트폴리오',
-         cycle='주 1회 (월 06:00)', max_age=9, producer='weekly_portfolio.py',
-         job='daily-refresh', used_by='⚠️ 화면 없음 — 포트폴리오·성적표 제거(08-22)',
          getter=_key('updated')),
     # 검증 루프의 심장 — 이게 멈추면 '못 하는 신호를 자동 감액'이 조용히 멈춘다
     dict(path='results/signal_live_weights.json', label='실전 신뢰계수 (신호별 가중)',

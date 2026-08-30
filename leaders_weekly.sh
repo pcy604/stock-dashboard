@@ -13,7 +13,7 @@ mkdir -p results
 {
 echo "=== 주도주 주간 사이클  $(date '+%Y-%m-%d %H:%M') ==="
 
-echo "--- [1/5] 가격 캐시 갱신 (~5분)"
+echo "--- [1/4] 가격 캐시 갱신 (~5분)"
 rm -f data/leaders_cache/px_*.csv data/leaders_cache/dy_*.csv
 if [ "${REFRESH_FUND:-0}" = "1" ]; then
   echo "    (분기 갱신 요청 — 재무·8-K 캐시도 삭제)"
@@ -21,27 +21,23 @@ if [ "${REFRESH_FUND:-0}" = "1" ]; then
 fi
 $PY leaders_build.py fetch 2900
 
-echo "--- [2/5] factor_weekly 증분 적재 (~2분)"
+echo "--- [2/4] factor_weekly 증분 적재 (~2분)"
 $PY leaders_build.py update
 
-echo "--- [2.5/5] 주봉 거래량 패널 재생성 (vw = 전주 대비 배수)"
-# ⚠️ 반드시 factor_weekly 적재 직후 · L/S 발행 직전. 이게 빠지면 새 주차의 vw 가
-#    NaN 이 되어 `vw < 1.5` 가 항상 거짓 → **가짜 '신호 0종'**이 뜬다(2026-08-22 사고).
-$PY volwk_build.py
+# 2026-08-31: volwk_build 를 뺐다. 주봉 거래량 배수(vw)는 L/S 전용 조건이었고
+# L/S 가 화면에서 제거되면서 아무도 안 쓰게 됐다.
 
-echo "--- [2.7/5] 이익 가속 신호 발행 (2026-08-23 신설 · 주도주 탭 첫 화면)"
+echo "--- [3/4] 이익 가속 신호 발행 (2026-08-23 신설 · 주도주 탭 첫 화면)"
 $PY leaders_accel.py
 
-echo "--- [3/5] L/S 규칙 백테스트 + 신호 발행 (현행 규칙)"
-$PY leaders_ab.py publish
 
-echo "--- [4/5] 종목 심층조회 JSON (주차별 코호트 · 신호회차)"
-$PY leaders_symbol.py build
 
-# ⚠️ 반드시 발행 스크립트 **뒤에** 온다. 두 규칙의 spans 를 읽어 곡선을 합치기 때문이다.
+# ⚠️ 반드시 leaders_accel.py **뒤에** 온다. spans 를 읽어 곡선을 만들기 때문이다.
 #    앞으로 옮기면 곡선이 지난주 신호 기준이 되고, 화면에선 "최근 ▲ 가 곡선 밖에 있다"로
 #    나타난다 — 에러 없이 조용히 틀린다.
-echo "--- [4.5/5] 가격 곡선 통합 발행 (L/S·가속 공용 · 2026-08-25 중복 제거)"
+# 2026-08-31: L/S 단계 2개를 뺐다. 화면에서 규칙이 제거돼(e13b0f2) 아무도 안 보는
+# 산출물을 매주 만들어 커밋하고 있었다. 곡선도 절반으로 줄었다.
+echo "--- [4/4] 가격 곡선 발행 (심층조회 차트)"
 $PY curves_build.py
 
 echo "--- [5/5] 한국 주도주"

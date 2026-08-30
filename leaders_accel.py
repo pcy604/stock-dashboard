@@ -208,6 +208,7 @@ def build():
         mx=_r(f52.max() * 100, 0),
         w2=_r((f52 >= 1).mean() * 100, 1), w4=_r((f52 >= 3).mean() * 100, 1),
         w10=_r((f52 >= 9).mean() * 100, 2),
+        base_n=int(len(base_f)),
         base_mean=_r(base_f.mean() * 100, 1), base_w2=_r((base_f >= 1).mean() * 100, 1),
         base_w4=_r((base_f >= 3).mean() * 100, 1), base_w10=_r((base_f >= 9).mean() * 100, 2))
     by_year = {}
