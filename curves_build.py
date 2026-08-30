@@ -3,13 +3,13 @@
 가격 곡선 통합 발행 — results/price_curves.json
 
 왜 별도 파일인가 (2026-08-25)
-  L/S 심층조회(leaders_symbol_detail.json)와 이익가속 심층조회(leaders_accel.json)가
-  **같은 종목의 같은 주봉 종가를 각자 저장**하고 있었다. 674종이 겹쳤다.
-    leaders_symbol_detail  곡선 364,026점
-    leaders_accel          곡선 323,315점
-  두 파일의 날짜 축(451주차)은 완전히 같았으므로 곡선만 떼어 한 파일로 합친다.
-  각 규칙 JSON 은 곡선 대신 `spans`(종목 → [첫 신호, 마지막 신호] 인덱스)만 싣고,
-  이 스크립트가 합집합 구간의 곡선을 만든다.
+  L/S 심층조회와 이익가속 심층조회가 **같은 종목의 같은 주봉 종가를 각자 저장**하고
+  있었다(674종 중복). 곡선만 떼어 한 파일로 합쳤다. 규칙 JSON 은 곡선 대신
+  `spans`(종목 → [첫 신호, 마지막 신호] 인덱스)만 싣는다.
+
+  ⚠️ 2026-08-31: L/S 가 화면에서 전면 제거돼(e13b0f2) 소스가 이익가속 하나만 남았다.
+     지금은 "합치는" 역할이 아니라 "곡선을 따로 빼는" 역할이다. 규칙이 늘면 SRC 에
+     추가하면 되고, 그때 합집합 로직이 다시 의미를 갖는다.
 
   ⚠️ 저장소 사정 — .git 이 580MB 다(gc 전 1,006MB). 결과 JSON 을 매주 커밋해온 탓이다.
      히스토리 1위는 guru_insights.json(518MB · 734회 커밋)이고 곡선은 그 다음이다.
@@ -22,7 +22,7 @@
   보이므로 판단에는 대체로 충분하다고 봤다.
 
 의존 순서 (leaders_weekly.sh)
-  leaders_accel.py → leaders_ab.py → leaders_symbol.py → **curves_build.py**
+  leaders_accel.py → **curves_build.py**
   ⚠️ 반드시 두 발행 스크립트 **뒤에** 돌아야 한다. spans 를 읽어야 하기 때문이다.
      순서가 어긋나면 곡선이 지난주 신호 기준으로 만들어지고, 화면에서는
      "차트에 최근 ▲ 가 안 보인다"로 나타난다 — 조용히 틀린다.
@@ -41,8 +41,9 @@ import pandas as pd
 BASE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE, "data", "market.db")
 OUT = os.path.join(BASE, "results", "price_curves.json")
-SRC = [os.path.join(BASE, "results", f)
-       for f in ("leaders_accel.json", "leaders_symbol_detail.json")]
+# 2026-08-31: L/S 규칙이 화면에서 제거돼(e13b0f2) leaders_symbol_detail 을 뺐다.
+# 곡선이 절반으로 줄어든다 — 그쪽 몫은 아무도 안 보는 곡선이었다.
+SRC = [os.path.join(BASE, "results", "leaders_accel.json")]
 PRE, POST = 26, 104          # 첫 신호 앞 26주 ~ 마지막 신호 뒤 104주
 
 
