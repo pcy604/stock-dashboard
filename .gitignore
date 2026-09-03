@@ -72,3 +72,17 @@ _trig.py
 _traj.py
 _late.py
 _old_mc.csv
+
+# 대용량 중간 산출물 — 미무시 상태로 방치돼 있었다(2026-09-04 실측 358MB).
+# 무시가 아니라 "커밋 가능" 상태라는 게 문제다: git add -A 한 번이면 들어가고,
+# GitHub은 100MB 초과 파일을 거부하므로 푸시만 실패한 채 .git은 이미 불어난다.
+# 되돌리려면 filter-repo 수술이라, 애초에 스테이징에 못 오게 막는다.
+# 넷 다 원본(market.db·px 캐시)에서 재생성 가능하다.
+data/_uturn_panel.parquet
+exports/factor_weekly.parquet
+exports/factor_weekly.csv.gz
+exports/earnings_event.csv.gz
+
+# 구루 미니차트 — 생성 후 텔레그램으로 보내고 끝나는 1회용 이미지다. 다시 읽는 코드가
+# 없는데도 매 실행 커밋돼 히스토리에 338회 37MB 를 남겼다(2026-09-04 실측).
+results/guru_chart_latest.png

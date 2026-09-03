@@ -83,6 +83,13 @@ jobs:
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
           git pull --rebase --autostash || true
-          git add results/guru_insights.json results/guru_chart_latest.png 2>/dev/null || true
+          # 2026-09-04: guru_chart_latest.png 를 커밋 목록에서 뺐다. 이 PNG 는 생성 → 텔레그램
+          #   전송 후 아무도 다시 읽지 않는데(대시보드도 안 씀) 매 실행 통째로 커밋돼
+          #   .git 히스토리에 338회 37MB 를 쌓아놨다. 이제 .gitignore 에 있다.
+          # ⚠️ 한 줄에 여러 경로를 넘기지 않는다 — git add 는 경로 하나만 어긋나도(없거나
+          #   무시 대상이면) fatal 로 죽으면서 *아무것도* 스테이징하지 않는다. 예전 코드는
+          #   그 에러를 2>/dev/null || true 로 삼켜서, 실패해도 스텝은 초록불인 채
+          #   guru_insights.json 커밋이 조용히 멈추는 구조였다.
+          git add results/guru_insights.json
           git diff --staged --quiet || git commit -m "auto: 구루 인사이트 갱신 $(date -u +%Y-%m-%d)"
           git push
