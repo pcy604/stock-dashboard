@@ -118,7 +118,7 @@ def analyze_kr(sym, force=False):
             return c
     try:
         import dart_client
-        import guru_youtube as G           # Gemini 클라이언트·재시도 재사용
+        import gemini_client as G           # Gemini 클라이언트·재시도 재사용
         cc = dart_client.corp_map().get(sym)
         if not cc:
             return None
@@ -145,7 +145,7 @@ def analyze_us(sym, force=False):
             return c
     try:
         import edgar_client
-        import guru_youtube as G
+        import gemini_client as G
         txt = edgar_client.business_text(sym, max_chars=90000)
         if not txt:
             return None

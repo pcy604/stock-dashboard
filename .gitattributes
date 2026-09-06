@@ -1,0 +1,31 @@
+# 줄 끝 고정 (2026-09-07)
+#
+# 왜 필요한가
+#   .gitattributes 가 없어서 줄 끝이 환경마다 달라졌다. Windows 로컬에서 만든
+#   data/us_shares.csv 는 CRLF, GitHub Actions(Linux)가 만든 건 LF 라,
+#   같은 내용인데도 **파일 전체가 매번 diff 로 잡혔다** — 299,001줄짜리 CSV 가
+#   내용 변화 없이 저장소에 통째로 다시 저장되는 식이다.
+#   .git 이 1GB 까지 불어난 원인 중 하나다.
+#
+#   저장소에는 LF 로 통일해 넣는다. 작업 트리는 각자 환경대로 둔다.
+
+* text=auto eol=lf
+
+# 바이너리 — 줄 끝 변환 금지
+*.parquet binary
+*.db      binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.pdf     binary
+*.ttf     binary
+*.woff    binary
+*.woff2   binary
+*.gz      binary
+*.zip     binary
+*.xlsx    binary
+
+# Windows 배치는 CRLF 여야 안전하다
+*.bat text eol=crlf
+*.cmd text eol=crlf

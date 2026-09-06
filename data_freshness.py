@@ -159,10 +159,6 @@ SOURCES = [
          cycle='주 1회 (weekly_run 동시)', max_age=9, producer='paper_trade.py',
          job='daily-refresh', used_by='winning_score (🔥 상승 상위 점수 보정) — 관측 화면 없음',
          getter=_key('updated')),
-    dict(path='results/guru_insights.json', label='구루 유튜브 요약',
-         cycle='매일', max_age=3, producer='guru_youtube.py',
-         job='guru-digest', used_by='텔레그램 다이제스트 (화면에는 없음)',
-         getter=_key('updated')),
 ]
 
 

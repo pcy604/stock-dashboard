@@ -48,13 +48,11 @@ TELEGRAM_CHAT_ID  = _secret(".telegram_chat", "5064831796")
 # (매도 알림 portfolio_monitor 는 2026-08-22 폐기 — 감시할 보유 데이터가 없었다)
 WEEKLY_SIGNAL_TELEGRAM = False
 
-# ── 구루 유튜브 요약 (guru_youtube.py) ──────────────────────────────
 # Gemini API 키: data/.gemini_key 파일 또는 환경변수 GEMINI_KEY
+
 GEMINI_KEY = _secret(".gemini_key")
 
 # 구루 다이제스트 전송 대상. 채널(@username 또는 -100…숫자ID) 지정 시 거기로 브로드캐스트,
-# 비우면 개인 챗(TELEGRAM_CHAT_ID)으로. data/.guru_chat 또는 환경변수 GURU_CHAT.
-GURU_BROADCAST_CHAT = _secret(".guru_chat")
 
 # 요약 출력 언어. 예: "한국어", "English", "日本語". 영상 원어와 무관하게 이 언어로 출력.
 GURU_OUTPUT_LANG = "한국어"
