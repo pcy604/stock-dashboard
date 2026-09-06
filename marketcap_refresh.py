@@ -589,9 +589,41 @@ def cmd_build(net_price=False):
 
 
 def universe_syms(all_tickers=False):
+    """대상 심볼. 가격 캐시가 기준이고, 없으면 커밋된 산출물로 폴백한다.
+
+    ⚠️ 2026-09-07 — 여기서 19일짜리 조용한 고장이 났다.
+       data/leaders_cache 는 .gitignore 라 **CI 러너에는 디렉토리 자체가 없다.**
+       os.listdir(CACHE) 가 FileNotFoundError 로 즉시 죽었고,
+         · daily-refresh   `build --net-price`  → continue-on-error 로 삼켜짐
+         · weekly-profile  `shares`             → 단계는 ✓ 인데 산출물은 그대로
+       us_marketcap.csv 는 08-18 이후 20일간, us_shares.csv 도 같이 멈췄다.
+       로컬에는 캐시가 있어서 재현이 안 됐다 — 그래서 오래 안 보였다.
+
+       폴백은 저장소에 커밋돼 있는 us_shares.csv → us_marketcap.csv 순서다.
+       깨지는 지점: 폴백은 지난번 대상 목록이라, 캐시가 없는 환경에서는 신규
+       상장 종목이 영영 안 들어온다. 새 종목 편입은 캐시가 있는 로컬 주간
+       사이클이나 --all-tickers 실행이 담당한다.
+    """
     if all_tickers:
         return sorted(cikmap())
-    return sorted({f[3:-4] for f in os.listdir(CACHE) if f.startswith("px_")})
+    if os.path.isdir(CACHE):
+        syms = sorted({f[3:-4] for f in os.listdir(CACHE) if f.startswith("px_")})
+        if syms:
+            return syms
+    for path, col in ((OUT_SH, "Symbol"), (OUT_MC, "Symbol")):
+        if os.path.exists(path):
+            try:
+                d = pd.read_csv(path)
+                if col in d.columns:
+                    syms = sorted({str(x) for x in d[col].dropna()})
+                    if syms:
+                        print(f"[폴백] 가격 캐시가 없어 {os.path.basename(path)} 에서 "
+                              f"{len(syms):,}종을 대상으로 삼는다", flush=True)
+                        return syms
+            except Exception as e:
+                print(f"[WARN] {os.path.basename(path)} 읽기 실패: {e}", flush=True)
+    print("[ERROR] 대상 심볼을 못 구했다 — 가격 캐시도 커밋된 산출물도 없다", flush=True)
+    return []
 
 
 if __name__ == "__main__":
