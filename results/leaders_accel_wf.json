@@ -1,0 +1,107 @@
+{
+ "generated": "2026-09-07",
+ "hold_weeks": 52,
+ "baseline": 10.0,
+ "surges": [
+  5.0,
+  10.0,
+  15.0,
+  20.0,
+  25.0
+ ],
+ "splits": [
+  {
+   "train": "2018-06~2020-06",
+   "test": "2020-06~2021-06",
+   "pick": 25.0,
+   "train_alpha": 92.0,
+   "train_n": 160,
+   "test_n": 139,
+   "test_alpha": 69.0,
+   "test_mean": 93.8,
+   "test_med": -4.3,
+   "test_w2": 27.3,
+   "base_n": 1393,
+   "base_alpha": 13.9,
+   "base_mean": 36.9,
+   "base_w2": 11.0
+  },
+  {
+   "train": "2019-06~2021-06",
+   "test": "2021-06~2022-06",
+   "pick": 25.0,
+   "train_alpha": 81.9,
+   "train_n": 295,
+   "test_n": 53,
+   "test_alpha": 1.6,
+   "test_mean": -7.9,
+   "test_med": -2.6,
+   "test_w2": 1.9,
+   "base_n": 756,
+   "base_alpha": -4.3,
+   "base_mean": -13.8,
+   "base_w2": 2.2
+  },
+  {
+   "train": "2020-06~2022-06",
+   "test": "2022-06~2023-06",
+   "pick": 25.0,
+   "train_alpha": 50.4,
+   "train_n": 192,
+   "test_n": 70,
+   "test_alpha": -10.9,
+   "test_mean": 4.6,
+   "test_med": -32.0,
+   "test_w2": 8.6,
+   "base_n": 809,
+   "base_alpha": -8.6,
+   "base_mean": 8.3,
+   "base_w2": 5.9
+  },
+  {
+   "train": "2021-06~2023-06",
+   "test": "2023-06~2024-06",
+   "pick": 5.0,
+   "train_alpha": -5.0,
+   "train_n": 5397,
+   "test_n": 2663,
+   "test_alpha": -9.2,
+   "test_mean": 14.3,
+   "test_med": -20.6,
+   "test_w2": 6.2,
+   "base_n": 756,
+   "base_alpha": -6.5,
+   "base_mean": 17.2,
+   "base_w2": 8.7
+  },
+  {
+   "train": "2022-06~2024-06",
+   "test": "2024-06~2025-06",
+   "pick": 25.0,
+   "train_alpha": -3.8,
+   "train_n": 161,
+   "test_n": 118,
+   "test_alpha": 22.0,
+   "test_mean": 40.0,
+   "test_med": -15.9,
+   "test_w2": 16.1,
+   "base_n": 1043,
+   "base_alpha": 16.8,
+   "base_mean": 36.0,
+   "base_w2": 15.8
+  }
+ ],
+ "verdict": {
+  "n_splits": 5,
+  "alpha_positive": 3,
+  "base_positive": 2,
+  "pick_beats_base": 3,
+  "picks": [
+   25.0,
+   25.0,
+   25.0,
+   5.0,
+   25.0
+  ]
+ }
+}

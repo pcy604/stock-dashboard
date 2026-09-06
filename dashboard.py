@@ -1061,6 +1061,51 @@ with t_lead, guard('주도주'):
                     "수익률은 이번 주 신호라 아직 비어 있는 게 정상이다.")
             else:
                 st.info("이번 주 조건 충족 종목 없음")
+            # ── 워크포워드 검증 (2026-09-07) ─────────────────────
+            # 위의 성적은 전부 인샘플이다. 8년을 다 보고 만든 규칙을 그 8년에
+            # 적용한 숫자라 "찾아낸 것"인지 "맞춘 것"인지 구분이 안 된다.
+            # 앞 2년으로 문턱을 고르고 뒤 1년에 그대로 적용해봤다.
+            _wf = load_json(Path('results/leaders_accel_wf.json'))
+            if _wf:
+                _v = _wf['verdict']
+                with st.expander(
+                        f"🧪 워크포워드 검증 — 미래에도 통했나 "
+                        f"(5분할 중 {_v['base_positive']}개 통과)", expanded=False):
+                    st.markdown(
+                        "**앞 2년 → 뒤 1년.** 뒤 1년은 규칙을 만들 때 보지 않은 구간이다. "
+                        "표의 '대조'는 문턱을 고르지 않고 **항상 +10%**(현재 채택값)를 "
+                        "썼을 때다.")
+                    st.dataframe(pd.DataFrame([{
+                        '검증 구간': r['test'], '고른 문턱': f"+{r['pick']:g}%",
+                        '신호': r['test_n'], '시장대비': r['test_alpha'],
+                        '중앙 시장대비': r['test_med'],
+                        '대조(+10%) 신호': r['base_n'],
+                        '대조 시장대비': r['base_alpha'],
+                        '대조 평균': r['base_mean']} for r in _wf['splits']]),
+                        use_container_width=True, hide_index=True, row_height=25)
+                    st.markdown(
+                        f"- **채택 규칙(+10%)은 5분할 중 {_v['base_positive']}개에서만 "
+                        f"시장을 이겼다.** 2021-06~2024-06 은 **3년 연속 마이너스**다. "
+                        f"인샘플 알파 +12.8% 는 사실상 2020-21 과 2024-25 두 구간이 만든다.")
+                    st.markdown(
+                        "- **모든 분할에서 중앙값이 시장에 진다**(−2.6 ~ −32.0%). "
+                        "평균이 양수인 건 소수 대박이 끌어올리기 때문이다. "
+                        "이 규칙을 쓴다는 건 **대부분의 신호가 시장에 지는 것을 받아들이고 "
+                        "꼬리를 기다린다**는 뜻이다.")
+                    st.markdown(
+                        f"- 문턱을 앞 구간 성적으로 고르면 5번 중 4번 **+25%** 를 고른다"
+                        f"(대조군을 이긴 건 {_v['pick_beats_base']}/5). 그런데 +25% 로 올리면 "
+                        f"신호가 1,393건 → 139건으로 줄고 **주도주를 놓친다** "
+                        f"— NVDA 13회→1회 · TSLA 21회→8회. 포착을 택한 게 +10% 다.")
+                    st.markdown(
+                        "- **이전 L/S 규칙은 같은 잣대에서 5분할 중 1개를 통과했다.** "
+                        "이 규칙이 낫지만, 2/5 를 '검증됐다'고 부를 수는 없다.")
+                    st.caption(
+                        "⚠️ 이 검증도 완전한 아웃오브샘플은 아니다. 가속의 정의(영업익을 "
+                        "매출로 스케일)와 안전장치(매출 $10M · |가속| ≤ 10)는 전 구간을 보고 "
+                        "정했다. 그 선택은 워크포워드 밖에 있다. 상장폐지 종목이 없는 것도 "
+                        "TRAIN·TEST 양쪽에 똑같이 낙관 편향을 준다.")
+
             if _ac.get('by_step'):
                 with st.expander("🔥 신호 회차별 성적 — 불타기를 해도 되는가"):
                     st.markdown(
@@ -3386,7 +3431,22 @@ with tab7, guard('종목 분석'):
                         except Exception as _se:
                             _seg = {'_error': str(_se)[:150]}
                     if not _seg or _seg.get('_error') or not _seg.get('segments'):
-                        st.warning(f"부문 데이터 추출 실패 — 사업보고서에 부문표가 없거나 파싱 실패. {(_seg or {}).get('_error','')}")
+                        # 2026-09-07: 원인을 구분해서 보여준다. 그전에는 무엇이 문제든
+                        # "파싱 실패"로만 떠서, Gemini 일일 한도(무료 등급 20건) 때문에
+                        # 안 되는 건지 진짜 부문표가 없는 건지 알 수 없었다.
+                        _emsg = str((_seg or {}).get('_error', ''))
+                        if 'RESOURCE_EXHAUSTED' in _emsg or '429' in _emsg:
+                            st.info(
+                                "**오늘의 AI 분석 한도를 다 썼습니다.** Gemini 무료 등급은 "
+                                "모델당 하루 20건이라 몇 종목만 조회해도 소진됩니다. "
+                                "고장이 아니라 한도이고, **날짜가 바뀌면 다시 됩니다.** "
+                                "이미 분석한 종목은 캐시에서 그대로 나옵니다.")
+                        elif 'GEMINI_KEY' in _emsg:
+                            st.info("Gemini API 키가 설정되지 않았습니다 — "
+                                    "`data/.gemini_key` 또는 환경변수 `GEMINI_KEY`.")
+                        else:
+                            st.warning("부문 데이터 추출 실패 — 사업보고서에 부문표가 없거나 "
+                                       f"파싱에 실패했습니다. {_emsg}")
                     else:
                         _segs = [s for s in _seg['segments'] if s.get('revenue') or s.get('revenue_pct')]
                         # 공시된 부문 이익지표 자동 판별 (회사별로 GP/OP/둘다/없음이 다름 — management approach)

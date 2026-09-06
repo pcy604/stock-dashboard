@@ -125,6 +125,14 @@ SOURCES = [
          getter=_key('generated')),
     # ★ 2026-08-25 신설 — 두 심층조회가 같은 곡선을 각자 갖고 있어 합쳤다(674종 중복).
     # 이게 밀리면 차트의 ▲ 는 최신인데 곡선만 지난주까지 그려진다 — 조용히 어긋난다.
+    # ★ 2026-09-07 신설 — 이익 가속 규칙의 워크포워드 성적.
+    # 규칙이 바뀌면 같이 다시 돌려야 한다. 안 그러면 화면의 '검증 결과'가
+    # 지금 쓰는 규칙이 아닌 옛 규칙의 성적이 된다 — 가장 나쁜 종류의 거짓말이다.
+    dict(path='results/leaders_accel_wf.json', label='이익 가속 워크포워드',
+         cycle='규칙 변경 시 수동', max_age=400, producer='leaders_accel_wf.py',
+         job='수동 (python leaders_accel_wf.py)',
+         used_by='🚀 주도주 → 🧪 워크포워드 검증',
+         getter=_key('generated')),
     dict(path='results/price_curves.json', label='가격 곡선 (L/S·가속 공용)',
          cycle='주 1회 (토 08:00)', max_age=9, producer='curves_build.py',
          job='leaders_weekly (로컬 스케줄러)',
