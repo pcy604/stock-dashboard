@@ -68,6 +68,7 @@ YUA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
                      "(KHTML, like Gecko) Chrome/122.0 Safari/537.36"}
 STALE_DAYS = 20          # 주식수는 분기 공시라 20일이면 충분하다
 WORKERS = 8
+MAX_FETCH = 600       # --net-price 로 하루에 새로 받을 시세 상한 (2026-09-07)
 
 # dei 가 없는 종목(외국계·구형 제출인)을 위한 대체 태그. 앞에서부터 먼저 잡히는 걸 쓴다.
 FALLBACK = ["CommonStockSharesOutstanding", "CommonStockSharesIssued"]
@@ -506,10 +507,28 @@ def cmd_build(net_price=False):
         name = dict(zip(old.Symbol.astype(str), old.Name.astype(str)))
 
     # 캐시에 가격이 없는 종목은 (CI 등에서) 시세를 받아 온다. 로컬은 거의 안 탄다.
+    #
+    # ⚠️ 2026-09-07 — 여기서 19일짜리 조용한 고장이 났다.
+    #   대상은 sh(SEC 주식수 보유 6,260종)인데 가격 캐시는 2,755종뿐이라, 매일
+    #   3,506종을 새로 조회하려 했다. 500종에 약 4분이니 30분 이상 걸리고
+    #   daily-refresh 의 timeout-minutes: 55 를 다른 단계와 합쳐 넘긴다.
+    #   그런데 워크플로에 `continue-on-error: true` 가 붙어 있어 **실패해도 초록불**
+    #   이었고, us_marketcap.csv 는 08-18 이후 19일간 갱신되지 않았다.
+    #   화면에서는 낡은 시총으로 필터가 돌아가는 형태로 나타난다.
+    #
+    #   한 번에 다 받으려 하지 않고 **하루 상한(MAX_FETCH)만큼만** 받는다. 매일
+    #   조금씩 채워지고, 다 채워지면 이 구간은 그냥 비어서 즉시 지나간다.
+    #   깨지는 지점: 새로 편입된 종목은 시총이 채워지기까지 며칠 걸린다. 그동안
+    #   그 종목은 유니버스 선정에서 빠진다 — 조용히 늦게 들어온다.
     prices = {}
     if net_price:
         need = [s for s in sh if not os.path.exists(os.path.join(CACHE, f"px_{s}.csv"))]
-        print(f"가격 캐시 없는 {len(need)}종 시세 조회", flush=True)
+        if len(need) > MAX_FETCH:
+            print(f"가격 캐시 없는 {len(need):,}종 중 {MAX_FETCH}종만 받는다 "
+                  f"(시간 초과 방지 · 나머지는 다음 실행에서)", flush=True)
+            need = need[:MAX_FETCH]
+        else:
+            print(f"가격 캐시 없는 {len(need)}종 시세 조회", flush=True)
         n = {"i": 0}
 
         def w(s):

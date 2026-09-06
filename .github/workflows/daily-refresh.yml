@@ -97,3 +97,9 @@ jobs:
           git add data/portfolio.json 2>/dev/null || true
           # 구루 워크플로가 실행 중(수십 분) 푸시할 수 있으므로 rebase 후 푸시 (레이스 방지)
           git diff --staged --quiet || { git commit -m "auto: 데이터 갱신 $(date -u +%Y-%m-%d)"; git pull --rebase origin main; git push; }
+
+      # 2026-09-07 신설 — 위 단계는 전부 continue-on-error 라 하나가 죽어도 초록불로
+      # 끝난다. 실제로 미국 시총이 08-18 부터 19일간 멈췄는데 아무도 몰랐다.
+      # 여기서 산출물의 실제 날짜를 검사해 낡았으면 실패시킨다. 실패하면 메일이 온다.
+      - name: 산출물 신선도 검증 (조용한 고장 차단)
+        run: python tools/check_freshness_ci.py
