@@ -41,6 +41,19 @@ jobs:
           restore-keys: |
             longcache-
 
+      # ⚠️ 2026-09-07 신설 — 이게 없어서 매주 SEC 를 3,095종 처음부터 받고 있었다.
+      #   fetch_shares 는 data/shares_cache 의 **파일 나이**로 캐시를 판정하는데,
+      #   그 디렉토리는 .gitignore 라 러너에 존재하지 않는다. 늘 캐시 미스가 나서
+      #   STALE_DAYS=20 이 아무 역할도 못 했다. 실측 1시간 이상(원래 4분).
+      #   같은 함정을 data/leaders_cache 도 갖고 있었다(그쪽은 아예 죽었다).
+      - name: SEC 주식수 캐시 복원/저장 (없으면 매주 3천종을 새로 받는다)
+        uses: actions/cache@v4
+        with:
+          path: data/shares_cache
+          key: shares-cache-${{ github.run_id }}
+          restore-keys: |
+            shares-cache-
+
       # SEC 공시 주식수 갱신. 분기 공시라 주 1회면 충분하고, 매일은 daily-refresh 가
       # 주가만 다시 곱한다. frames = 분기당 1콜로 5천개사, shares = 빈칸 메우기.
       - name: 미국 주식수 갱신 (SEC)
