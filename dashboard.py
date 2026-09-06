@@ -33,6 +33,16 @@ def guard(section: str):
 #   낮을수록 좋음 (밸류에이션·신호회차) · 높을수록 좋음 (성장·모멘텀) · 0 기준 (수익률)
 # ⚠️ 구간 상한을 못 박는 이유: PER 900 같은 이상치 하나가 나머지 색을 전부 회색으로
 #    뭉갠다. 자동 min/max 로 두면 색이 정보를 잃는다.
+#
+# ⚠️ 2026-09-07 재작업 — 색을 크게 줄였다.
+#   그전에는 _C_LOW·_C_HIGH·_C_FWD 합쳐 **숫자 열 거의 전부**에 matplotlib
+#   RdYlGn 그라디언트를 칠했다. 20열짜리 표가 셀마다 빨강·노랑·초록으로 물들어
+#   어디를 봐야 할지 알 수 없었다. 색이 많으면 색은 정보가 아니라 소음이다.
+#   지금 규칙은 이렇다:
+#     · 배경색은 **결과와 규칙의 정의**에만 — 이후 수익률, 매출가속·이익가속
+#     · 나머지 재료 열(GPM·OPM·RS·PER…)은 **글자색만** 바꾼다(양수/음수)
+#     · 배경 알파 상한 0.22 — 글자가 배경에 먹히지 않는 선
+#   RdYlGn 대신 화면 토큰(--pos #16704A / --neg #A32C2C)과 같은 색을 쓴다.
 _C_LOW = {'PER': (0, 60), 'PBR': (0, 10), 'PSR': (0, 15), 'PEG': (0, 3),
           '회차': (1, 20), '신호회차': (1, 20)}
 _C_HIGH = {'매출가속': (-20, 40), '이익가속': (-20, 40), '매출YoY': (-20, 60),
@@ -42,9 +52,40 @@ _C_HIGH = {'매출가속': (-20, 40), '이익가속': (-20, 40), '매출YoY': (-
 _C_FWD = ('이후1주', '이후4주', '이후13주', '이후26주', '이후52주', '이후104주')
 _C_2DP = ('PER', 'PBR', 'PSR', 'PEG', 'RS4', 'RS13', '시총($B)', '종가')
 
+# 배경색을 칠할 열 — 결과(이후 수익률)와 이 규칙의 정의(가속) 뿐이다.
+_C_SHADE_HIGH = ('매출가속', '이익가속')
+_POS_RGB, _NEG_RGB = (22, 112, 74), (163, 44, 44)
+
+
+def _shade(v, lo, hi, invert=False):
+    """값을 lo~hi 안에서 정규화해 옅은 배경으로. 범위 밖은 상·하한에서 멈춘다."""
+    if v is None or v != v:
+        return ''
+    t = (float(v) - lo) / (hi - lo) if hi != lo else 0.5
+    t = max(0.0, min(1.0, t))
+    if invert:
+        t = 1.0 - t
+    # 0.5(중립) 에서 멀어질수록 진해진다. 최대 0.22 — 글자가 살아 있는 선.
+    a = abs(t - 0.5) * 2 * 0.22
+    if a < 0.03:
+        return ''
+    r, g, b = _POS_RGB if t >= 0.5 else _NEG_RGB
+    return f'background-color: rgba({r},{g},{b},{a:.3f})'
+
+
+def _ink(v, good_high=True):
+    """배경 대신 글자색만. 재료 열은 이쪽을 쓴다."""
+    if v is None or v != v:
+        return ''
+    x = float(v)
+    if abs(x) < 1e-9:
+        return ''
+    good = (x > 0) if good_high else (x < 0)
+    return f'color: rgb{_POS_RGB}; font-weight:600' if good else f'color: rgb{_NEG_RGB}'
+
 
 def color_table(df: pd.DataFrame):
-    """숫자 강도를 배경색으로 보여주는 Styler. st.dataframe 에 그대로 넘긴다.
+    """숫자 강도를 색으로 보여주는 Styler. st.dataframe 에 그대로 넘긴다.
 
     빈 칸은 'None' 이 아니라 '-' 로 낸다 — 없는 데이터를 있는 척하지 않되,
     파이썬 내부 표현을 화면에 흘리지도 않는다."""
@@ -52,22 +93,24 @@ def color_table(df: pd.DataFrame):
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors='coerce')
     st_ = df.style
-    for c, (lo, hi) in _C_LOW.items():
+
+    # ① 결과 — 이후 수익률. 0 을 기준으로 갈린다.
+    for c in _C_FWD:
         if c in df.columns and df[c].notna().any():
-            st_ = st_.background_gradient(cmap='RdYlGn_r', subset=[c], vmin=lo, vmax=hi)
-    for c, (lo, hi) in _C_HIGH.items():
+            st_ = st_.map(lambda v, c=c: _shade(v, -50, 100), subset=[c])
+
+    # ② 규칙의 정의 — 매출·이익 가속. 이 둘이 양수여야 신호가 켜진다.
+    for c in _C_SHADE_HIGH:
         if c in df.columns and df[c].notna().any():
-            st_ = st_.background_gradient(cmap='RdYlGn', subset=[c], vmin=lo, vmax=hi)
-    _f = [c for c in _C_FWD if c in df.columns and df[c].notna().any()]
-    if _f:
-        st_ = st_.background_gradient(cmap='RdYlGn', subset=_f, vmin=-50, vmax=100)
-    # ⚠️ background_gradient 는 결측을 matplotlib 의 'bad color'(검정)로 칠한다.
-    #    이 규칙은 적자·흑자전환 종목을 많이 잡아 PER·PEG 가 대부분 비는데, 그대로 두면
-    #    표가 새까매진다. 그라디언트 뒤에 얹어서 결측만 배경을 지운다(뒤 스타일이 이긴다).
-    _grad = [c for c in list(_C_LOW) + list(_C_HIGH) + list(_C_FWD) if c in df.columns]
-    if _grad:
-        st_ = st_.map(lambda v: 'background-color:transparent' if pd.isna(v) else '',
-                      subset=_grad)
+            lo, hi = _C_HIGH[c]
+            st_ = st_.map(lambda v, lo=lo, hi=hi: _shade(v, lo, hi), subset=[c])
+
+    # ③ 나머지 재료 열 — 글자색만. 표를 조용하게 둔다.
+    _ink_high = [c for c in _C_HIGH
+                 if c in df.columns and c not in _C_SHADE_HIGH and df[c].notna().any()]
+    if _ink_high:
+        st_ = st_.map(lambda v: _ink(v, True), subset=_ink_high)
+
     fmt = {c: ('{:.2f}' if c in _C_2DP else '{:.1f}')
            for c in df.columns if pd.api.types.is_numeric_dtype(df[c])}
     for c in ('회차', '신호회차'):
@@ -88,24 +131,111 @@ def num(d: dict, key: str, fmt: str = '{}', dash: str = '-'):
 
 st.markdown("""
 <style>
-/* 본문 14px — 13px 컴팩트는 표는 좋았지만 설명 글이 안 읽혔다(2026-08-12).
-   표·탭은 촘촘하게 유지하고 '읽는 텍스트'만 키운다. */
+/* ══════════════════════════════════════════════════════════════════════
+   디자인 토큰 (2026-09-07 재작성)
+
+   왜 토큰인가: 색이 코드 곳곳에 하드코딩돼 있었다(#1f6b45·#a03028·#52514e…).
+   같은 '좋음'을 뜻하는 초록이 화면마다 미묘하게 달랐고, 다크 모드에서는
+   대비가 무너졌다. 여기 한 곳에서만 정의하고 나머지는 var() 로 참조한다.
+
+   색 원칙 — 강조색은 하나(청록빛 남색), 나머지는 의미색이다.
+     · accent  : 이 도구가 계산한 것, 눌러야 하는 것
+     · pos/neg : 수익/손실. **이 둘만 빨강·초록을 쓴다.**
+     · warn    : 주의해서 볼 것(회차 초과·데이터 낡음)
+   히트맵처럼 셀마다 색을 칠하면 어디를 볼지 알 수 없어진다. 색은 아껴 쓴다.
+   ══════════════════════════════════════════════════════════════════════ */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css');
+
+:root {
+  --ink:      #16181D;   /* 본문 */
+  --ink-2:    #4B5058;   /* 보조 설명 */
+  --ink-3:    #767C86;   /* 캡션·단위 */
+  --line:     #E3E5EA;   /* 구분선 */
+  --line-2:   #F0F1F4;   /* 표 내부 얇은 선 */
+  --surface:  #FFFFFF;
+  --surface-2:#F7F8FA;   /* 표 헤더·카드 바닥 */
+  --accent:   #1F4E79;   /* 단일 강조 — 계산된 값·주요 액션 */
+  --accent-2: #EAF0F7;
+  --pos:      #16704A;   /* 수익 */
+  --pos-bg:   #E8F3EE;
+  --neg:      #A32C2C;   /* 손실 */
+  --neg-bg:   #FBECEC;
+  --warn:     #8A5D0F;   /* 주의 */
+  --warn-bg:  #FBF3E2;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink:#E8EAEF; --ink-2:#AEB4BF; --ink-3:#7C838F;
+    --line:#2A2E37; --line-2:#212530;
+    --surface:#14171D; --surface-2:#1B1F27;
+    --accent:#7FA7D4; --accent-2:#1A2432;
+    --pos:#5FBF93; --pos-bg:#152A22;
+    --neg:#E08282; --neg-bg:#2B1A1A;
+    --warn:#D6AA5C; --warn-bg:#2A2317;
+  }
+}
+
+/* ── 타이포 ───────────────────────────────────────────────────────────
+   Pretendard: 한글과 라틴 숫자의 높이가 맞아 표에서 줄이 흔들리지 않는다.
+   CDN 이 막히면 시스템 폰트로 조용히 내려간다(그래도 레이아웃은 유지된다). */
+html, body, [class*="css"], .stApp,
+[data-testid="stMarkdownContainer"], [data-testid="stDataFrame"] {
+  font-family: 'Pretendard', 'Pretendard Variable', -apple-system,
+               'Segoe UI', 'Malgun Gothic', system-ui, sans-serif !important;
+}
 html, body, [class*="css"] { font-size: 14px !important; }
-.stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 12.5px !important; }
-.stTabs [data-baseweb="tab"] { font-size: 14px !important; font-weight: 600; padding: 7px 15px; }
-/* 캡션이 화면의 절반이다 — 회색을 한 단계 진하게(#52514e) + 행간을 벌려 읽히게 */
-[data-testid="stCaptionContainer"] p { font-size: 12.5px !important; line-height: 1.65 !important;
-  color: #52514e !important; }
 [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li {
-  line-height: 1.65 !important; }
-section[data-testid="stSidebar"] * { font-size: 12px !important; }
-[data-testid="metric-container"] [data-testid="stMetricValue"] { font-size: 18px !important; font-weight: 700; }
-[data-testid="metric-container"] label { font-size: 11.5px !important; }
-h1 { font-size: 21px !important; margin-bottom: 8px !important; }
-h2 { font-size: 17px !important; margin-bottom: 6px !important; }
-h3 { font-size: 15px !important; margin-bottom: 5px !important; }
+  line-height: 1.68 !important; color: var(--ink); }
+
+/* 숫자는 폭이 고정돼야 세로로 자릿수가 맞는다 — 표·지표 어디서든 */
+[data-testid="stDataFrame"], [data-testid="stTable"],
+[data-testid="stMetricValue"], [data-testid="stMetricDelta"] {
+  font-variant-numeric: tabular-nums !important;
+  font-feature-settings: 'tnum' 1 !important; }
+
+h1 { font-size: 22px !important; font-weight: 700 !important; letter-spacing: -.02em !important;
+     margin-bottom: 8px !important; color: var(--ink) !important; }
+h2 { font-size: 17.5px !important; font-weight: 660 !important; letter-spacing: -.015em !important;
+     margin-bottom: 6px !important; color: var(--ink) !important; }
+h3 { font-size: 15px !important; font-weight: 640 !important; letter-spacing: -.01em !important;
+     margin-bottom: 5px !important; color: var(--ink) !important; }
 /* 섹션 제목 위에 숨 쉴 자리 — 앞 블록에 붙어 있으면 어디서 끊기는지 안 보인다 */
-h2, h3 { margin-top: 1.6rem !important; }
+h2, h3 { margin-top: 1.7rem !important; }
+
+/* 캡션이 화면의 절반이다. 읽히는 회색 + 넉넉한 행간. */
+[data-testid="stCaptionContainer"] p {
+  font-size: 12.5px !important; line-height: 1.66 !important; color: var(--ink-3) !important; }
+section[data-testid="stSidebar"] * { font-size: 12px !important; }
+
+/* ── 지표(Metric) — 카드로 묶는다 ─────────────────────────────────────
+   숫자 5개가 배경 없이 떠 있으면 어디까지가 한 묶음인지 안 보인다. */
+[data-testid="stMetric"] {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 6px; padding: 12px 14px 10px !important; }
+[data-testid="stMetricValue"] {
+  font-size: 21px !important; font-weight: 700 !important;
+  letter-spacing: -.02em !important; color: var(--ink) !important; }
+[data-testid="stMetricLabel"] p, [data-testid="stMetric"] label {
+  font-size: 11.5px !important; font-weight: 500 !important;
+  color: var(--ink-3) !important; letter-spacing: .01em !important; }
+[data-testid="stMetricDelta"] { font-size: 11.5px !important; }
+
+/* ── 표 ───────────────────────────────────────────────────────────────
+   헤더가 본문과 구분돼야 열을 훑을 수 있다. 셀 배경색은 코드가 칠하므로
+   여기서는 뼈대만 잡는다. */
+.stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 12.5px !important; }
+[data-testid="stDataFrame"] { margin: 0.4rem 0 0.7rem !important;
+  border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+[data-testid="stDataFrame"] thead th {
+  background: var(--surface-2) !important; font-weight: 600 !important;
+  color: var(--ink-2) !important; border-bottom: 1px solid var(--line) !important; }
+
+/* ── 탭 — 밑줄형. 현재 위치가 한눈에 보이게 ── */
+.stTabs [data-baseweb="tab-list"] { gap: 2px; border-bottom: 1px solid var(--line); }
+.stTabs [data-baseweb="tab"] {
+  font-size: 14px !important; font-weight: 600 !important;
+  padding: 8px 16px !important; color: var(--ink-3) !important; }
+.stTabs [aria-selected="true"] { color: var(--accent) !important; }
 
 /* ── 읽는 폭 제한 ─────────────────────────────────────────────
    layout="wide"는 표에는 좋지만 2000px 모니터에서 글줄이 1800px씩 흘러
@@ -119,33 +249,33 @@ h2, h3 { margin-top: 1.6rem !important; }
 [data-testid="stVerticalBlock"] { gap: 0.85rem !important; }
 [data-testid="stVerticalBlockBorderWrapper"] { gap: 0.85rem !important; }
 /* 구분선은 '섹션이 바뀐다'는 신호 — 붙여두면 신호가 죽는다 */
-hr { margin: 1.7rem 0 !important; border-color: #e8e8e4 !important; }
-[data-testid="stMetric"] { padding: 0 !important; }
+hr { margin: 1.8rem 0 !important; border: none !important;
+     border-top: 1px solid var(--line) !important; }
 div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem !important; }
-[data-testid="stCaptionContainer"] p { margin-bottom: 0.1rem !important; }
 [data-testid="stRadio"] > label { margin-bottom: 0 !important; }
-[data-testid="stExpander"] details { padding: 0 !important; }
+[data-testid="stExpander"] details { padding: 0 !important;
+  border: 1px solid var(--line) !important; border-radius: 6px !important; }
+[data-testid="stExpander"] summary { font-weight: 560 !important; }
 /* 테두리 카드 안쪽 여백 — 글이 선에 닿아 있으면 답답하다 */
 [data-testid="stVerticalBlockBorderWrapper"] > div > [data-testid="stVerticalBlock"] {
-  padding: 0.4rem 0.6rem !important; }
-/* 표는 위아래로 조금 띄운다 */
-[data-testid="stDataFrame"] { margin: 0.35rem 0 0.6rem !important; }
+  padding: 0.5rem 0.7rem !important; }
+
+/* 알림 박스 — 의미색으로 통일 */
+[data-testid="stAlert"] { border-radius: 6px !important; font-size: 13px !important; }
 
 /* ── 모바일 반응형 (≤640px) ───────────────────────────────────
    Streamlit은 좁은 화면에서 st.columns를 자동으로 쌓지 않아 카드/표가
-   찌그러진다. 좁은 화면에선 컬럼을 세로로 쌓고 여백·탭을 조정. */
+   찌그러진다. 좁은 화면에선 컬럼을 세로로 쌓고 여백·탭을 조정.
+   이 앱의 주 사용처가 폰이다. */
 @media (max-width: 640px) {
-  /* 컬럼 행을 줄바꿈 + 각 컬럼 전체폭으로 → 세로 스택 */
   [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
   [data-testid="stHorizontalBlock"] > div { flex: 1 1 100% !important; min-width: 100% !important; }
-  /* 본문 좌우 여백 축소해 화면폭 최대 활용 */
-  .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; padding-top: 2.5rem !important; }
-  /* 탭 라벨 촘촘하게 (가로 스크롤은 유지) */
-  .stTabs [data-baseweb="tab"] { padding: 5px 9px !important; font-size: 12px !important; }
-  /* 메트릭 값/표 폰트 약간 축소 */
-  [data-testid="stMetricValue"] { font-size: 16px !important; }
+  .block-container { padding-left: 0.7rem !important; padding-right: 0.7rem !important;
+    padding-top: 2.5rem !important; }
+  .stTabs [data-baseweb="tab"] { padding: 6px 10px !important; font-size: 12.5px !important; }
+  [data-testid="stMetric"] { padding: 10px 12px 8px !important; }
+  [data-testid="stMetricValue"] { font-size: 18px !important; }
   .stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 11px !important; }
-  /* 넓은 정적표(st.table)가 넘칠 때 가로 스크롤 허용 */
   [data-testid="stTable"] { overflow-x: auto !important; display: block !important; }
 }
 </style>
@@ -515,53 +645,105 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
-# ── 📸 온보딩 포토카드 — 처음 온 사람이 탭을 누르기 전에 먼저 보는 30초 설명 ──
+# ── 📸 온보딩 카드 — 처음 온 사람이 탭을 누르기 전에 먼저 보는 30초 설명 ──
 #    세션 첫 렌더에서만 펼쳐두고, 이후 상호작용부터는 접힌다(매일 쓰는 사람 방해 금지).
+#
+#    ⚠️ 2026-09-07 재작성 — SVG(1160px 고정) → 반응형 HTML.
+#    그전에는 docs/onboarding_card.svg 를 st.image 로 띄웠는데, 고정 레이아웃이라
+#    폰(375px)에서 331px 로 줄어 글자가 안 읽혔다. 그래서 "같은 내용 텍스트로 보기"
+#    라는 두 번째 사본을 따로 두고 있었다 — 한 내용을 두 곳에서 관리하니 수치가
+#    어긋나기 시작했다(카드에는 7,551건·+12.5%, 실제는 7,559건·+12.8%).
+#    HTML 로 바꾸면 폰에서도 그대로 읽히고 사본도 하나로 준다.
 _first_visit = 'seen_onboard' not in st.session_state
 st.session_state['seen_onboard'] = True
-_ONBOARD_TEXT = """
-**이 도구는** 공식 공시(DART·SEC EDGAR)와 시장 가격을 매일 자동으로 모아
-"뭘 살까 · 언제 살까 · 얼마나 살까"를 숫자로 계산해 주는 개인 리서치 도구입니다.
 
-**생각하는 방식 — 3층 프레임**
-🟡 가치(뭘 살까: 재무 3표·ROE·흑자전환) × ⚖️ 멀티플(비싼가: PER·PBR·PSR) × 🔵 가격(언제 살까: 차트·주봉 신호·계절성)
+_ONBOARD_HTML = """
+<style>
+  .ob { font-family:'Pretendard',-apple-system,'Malgun Gothic',system-ui,sans-serif;
+        color:var(--ink); line-height:1.62; }
+  .ob-hd { border-bottom:2px solid var(--accent); padding-bottom:12px; margin-bottom:18px; }
+  .ob-hd h3 { font-size:19px; font-weight:700; margin:0 0 6px; letter-spacing:-.02em;
+              color:var(--ink); }
+  .ob-hd p { font-size:13.5px; color:var(--ink-2); margin:0; }
+  .ob-sec { font-size:11px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+            color:var(--accent); margin:22px 0 10px; }
+  .ob-grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+  .ob-card { border:1px solid var(--line); border-radius:7px; padding:13px 15px;
+             background:var(--surface-2); }
+  /* 제목만 블록 — 본문 안의 굵은 글씨까지 잡으면 문장이 토막난다 */
+  .ob-card > b:first-child { display:block; font-size:13.5px; margin-bottom:5px;
+                             color:var(--ink); }
+  .ob-card span b { color:var(--ink); font-weight:640; }
+  .ob-card span { font-size:12.5px; color:var(--ink-2); }
+  .ob-card.key { border-color:var(--accent); background:var(--accent-2); }
+  .ob-steps { display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+              counter-reset:s; }
+  .ob-step { position:relative; border:1px solid var(--line); border-radius:7px;
+             padding:12px 14px 12px 40px; background:var(--surface-2); font-size:12.5px;
+             color:var(--ink-2); }
+  .ob-step::before { counter-increment:s; content:counter(s);
+             position:absolute; left:13px; top:11px; width:19px; height:19px;
+             border-radius:50%; background:var(--accent); color:#fff; font-size:11px;
+             font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .ob-step b { color:var(--ink); }
+  .ob-note { border-left:3px solid var(--warn); background:var(--warn-bg);
+             padding:11px 14px; border-radius:0 6px 6px 0; font-size:12.5px;
+             color:var(--ink-2); margin-top:20px; }
+  .ob-note b { color:var(--ink); }
+  .ob-x { color:var(--ink-3); padding:0 3px; }
+</style>
+<div class="ob">
+  <div class="ob-hd">
+    <h3>시그널 트레이딩 대시보드</h3>
+    <p>공식 공시(DART·SEC EDGAR)와 시장 가격을 매일 자동으로 모아
+       <b>뭘 살까 · 언제 살까 · 얼마나 살까</b>를 숫자로 계산하는 개인 리서치 도구</p>
+  </div>
 
-**탭 3개**
-- 🔎 **종목 발굴** — 조건에 맞는 종목을 기계가 골라 목록으로. 🚀주도주가 가장 검증된 규칙, 나머지는 탐색용
-- 🔍 **종목 분석** — 종목코드(US `NVDA` / KR `005930`) 입력 → 차트·공식 재무 3표·멀티플·목표주가·AI 사업요약
-- 🌍 **매크로** — 지금이 사이클의 어느 국면인지(우라가미 4계절·코스톨라니 달걀·막스 시계추)와 권고 현금비중
+  <div class="ob-sec">생각하는 방식 — 3층 프레임</div>
+  <div class="ob-grid">
+    <div class="ob-card"><b>가치 &mdash; 뭘 살까</b>
+      <span>재무 3표 · ROE · 성장 · 흑자전환<br>회사가 실제로 돈을 버는가</span></div>
+    <div class="ob-card"><b>멀티플 &mdash; 비싼가</b>
+      <span>PER · PBR · PSR<br>가치와 가격을 잇는 다리</span></div>
+    <div class="ob-card"><b>가격 &mdash; 언제 살까</b>
+      <span>차트 · 주봉 신호 · 계절성 · RS<br>지금이 들어갈 자리인가</span></div>
+  </div>
 
-**처음이라면 이 순서**
-① 🌍 매크로에서 지금 국면과 권고 현금비중 확인 → ② 🔎 종목 발굴에서 후보 3~5개(🚀주도주부터) →
-③ 🔍 종목 분석으로 재무가 실제로 좋아지는지 확인 → ④ 손절가를 정하고 나서 산다
-   (손절은 '틀렸을 때의 한도'입니다. 이긴 종목을 파는 규칙은 아직 없습니다 — 고점 대비 트레일은
-    측정한 모든 폭에서 안 파는 것보다 나빴습니다)
+  <div class="ob-sec">화면은 셋 &mdash; 왼쪽부터 의사결정 순서</div>
+  <div class="ob-grid">
+    <div class="ob-card key"><b>🔎 종목 발굴</b>
+      <span>조건에 맞는 종목을 기계가 골라 목록으로 준다.
+      이 도구가 가장 자신 있는 건 <b>주도주 &rarr; 이익 가속</b>이다.<br>
+      <b>신호 목록이지 포트폴리오가 아니다</b> &mdash; 비중은 사람이 정한다.</span></div>
+    <div class="ob-card"><b>🔍 종목 분석</b>
+      <span>종목코드 입력(US <code>NVDA</code> / KR <code>005930</code>) &rarr;
+      차트 · 공식 재무 3표 · 멀티플 · 목표주가 · AI 사업요약</span></div>
+    <div class="ob-card"><b>🌍 매크로</b>
+      <span>지금이 사이클의 어느 국면인지(우라가미 4계절 · 코스톨라니 달걀 ·
+      막스 시계추)와 권고 현금비중</span></div>
+  </div>
 
-⚠️ **의사결정 보조 도구**입니다. 점수·신호는 확률이지 보장이 아니며 매수 권유가 아닙니다.
-숫자에 `-`가 보이는 칸은 오류가 아니라 **그 종목에 해당 데이터가 없다는 뜻**입니다.
+  <div class="ob-sec">처음이라면 이 순서</div>
+  <div class="ob-steps">
+    <div class="ob-step"><b>국면 확인</b><br>매크로 탭에서 지금이 어느 계절인지와 권고 현금비중</div>
+    <div class="ob-step"><b>후보 3~5개</b><br>종목 발굴 &rarr; 주도주부터. 시장(KR/US)을 고른다</div>
+    <div class="ob-step"><b>한 종목씩 검증</b><br>종목 분석에 코드를 넣어 재무가 실제로 좋아지는지 확인</div>
+    <div class="ob-step"><b>손절가를 먼저</b><br>사기 전에 얼마에 자를지 정한다. 정하기 전에는 사지 않는다</div>
+  </div>
+
+  <div class="ob-note">
+    <b>의사결정 보조 도구다.</b> 점수·신호는 확률이지 보장이 아니며 매수 권유가 아니다.
+    숫자에 <code>-</code> 가 보이는 칸은 오류가 아니라 <b>그 종목에 그 데이터가 없다</b>는 뜻이다.<br>
+    손절은 &lsquo;틀렸을 때의 한도&rsquo;다. <b>이긴 종목을 파는 규칙은 아직 없다</b> &mdash;
+    고점 대비 트레일은 측정한 모든 폭에서 안 파는 것보다 나빴다.
+  </div>
+</div>
 """
-with st.expander("📸 처음이신가요? — 30초 사용법 카드 (탭 안내 · 시작 순서 · 전체 사용설명서)",
+with st.expander("📖 처음이신가요? — 30초 사용설명 (화면 안내 · 시작 순서 · 전체 설명서)",
                  expanded=_first_visit):
-    _card = Path('docs/onboarding_card.svg')
-    if _card.exists():
-        _svg = _card.read_text(encoding='utf-8')
-        # st.image(<img> 렌더)는 카드의 CSS가 앱 전역에 새지 않도록 격리해 준다.
-        try:
-            st.image(_svg, use_container_width=True)
-        except Exception:
-            st.html(_svg)
-        st.download_button("🖼️ 카드 이미지 저장 (SVG)", _svg,
-                           file_name="dashboard_사용법_카드.svg", mime="image/svg+xml",
-                           key="dl_onboard")
-        # 카드는 1160px 고정 레이아웃이라 폰(375px)에서는 331px로 줄어 글자가 안 읽힌다.
-        # 이 앱의 주 사용처가 폰이므로, 같은 내용을 흐르는 텍스트로도 제공한다.
-        with st.expander("📱 폰에서는 글자가 작습니다 — 같은 내용 텍스트로 보기"):
-            st.markdown(_ONBOARD_TEXT)
-    else:
-        st.markdown(_ONBOARD_TEXT)
-
+    st.html(_ONBOARD_HTML)
     # 구 '프로젝트 종합' 탭에 있던 전체 사용설명서 — 탭을 없애면서 여기로 이관
-    with st.expander("📖 전체 사용설명서 — 개념 사전 · 데이터 신뢰등급 · 자주 묻는 것"):
+    with st.expander("📚 전체 사용설명서 — 개념 사전 · 데이터 신뢰등급 · 자주 묻는 것"):
         try:
             st.markdown(Path('GUIDE.md').read_text(encoding='utf-8'))
         except Exception:
@@ -859,8 +1041,10 @@ with t_lead, guard('주도주'):
                     for m in _cd])), use_container_width=True, hide_index=True,
                     row_height=25, height=_dfh(len(_cd)))
                 st.caption(
-                    "**색은 숫자의 강도다** — 밸류에이션(PER·PSR·PEG)은 낮을수록 초록, "
-                    "성장·모멘텀은 높을수록 초록, 이후 수익률은 0 기준이다. "
+                    "**색은 아껴 쓴다**(2026-09-07) — 배경을 칠하는 건 두 종류뿐이다. "
+                    "**매출가속·이익가속**(이 규칙이 신호를 켜는 조건)과 **이후 수익률**(결과). "
+                    "나머지 재료 열은 글자색만 바뀐다(양수 초록·음수 빨강). "
+                    "그전에는 숫자 열 거의 전부를 칠해서 어디를 봐야 할지 알 수 없었다. "
                     "**PEG 는 PER ÷ 순이익 YoY 다** — 이 DB 에 EPS 시계열이 없어 순이익으로 대신하므로 "
                     "주식 수 변동은 반영되지 않는다. 적자이거나 전년 동기가 적자면 정의되지 않아 '-' 이고, "
                     "이 규칙은 흑자전환 직전 종목을 자주 잡으므로 빈 칸이 많은 게 정상이다. "
