@@ -6464,8 +6464,8 @@
           "market": "KR",
           "weight_pct": 6.8,
           "entry": 46550.0,
-          "total_score": 56.5,
-          "win_score": 27.5,
+          "total_score": 56.6,
+          "win_score": 27.7,
           "fund_score": 100.0,
           "signals": [
             "52주신고가",
@@ -6481,8 +6481,8 @@
           "market": "KR",
           "weight_pct": 6.8,
           "entry": 97500.0,
-          "total_score": 40.9,
-          "win_score": 16.5,
+          "total_score": 40.8,
+          "win_score": 16.4,
           "fund_score": 77.5,
           "signals": [
             "이평선수렴",
@@ -6498,7 +6498,7 @@
           "weight_pct": 6.8,
           "entry": 38750.0,
           "total_score": 32.9,
-          "win_score": 14.7,
+          "win_score": 14.6,
           "fund_score": 60.3,
           "signals": [
             "5일선라이딩",
@@ -6509,13 +6509,29 @@
           "target": 44175.0
         },
         {
+          "sym": "006120",
+          "name": "SK디스커버리",
+          "market": "KR",
+          "weight_pct": 6.8,
+          "entry": 56400.0,
+          "total_score": 28.9,
+          "win_score": 9.3,
+          "fund_score": 58.3,
+          "signals": [
+            "이평선수렴",
+            "RSI/MACD"
+          ],
+          "stop": 52452.0,
+          "target": 64296.0
+        },
+        {
           "sym": "139130",
           "name": "iM금융지주",
           "market": "KR",
           "weight_pct": 6.8,
           "entry": 18650.0,
-          "total_score": 26.5,
-          "win_score": 10.9,
+          "total_score": 26.6,
+          "win_score": 11.0,
           "fund_score": 50.0,
           "signals": [
             "이평선수렴",
@@ -6595,8 +6611,8 @@
           "market": "KR",
           "weight_pct": 6.8,
           "entry": 8750.0,
-          "total_score": 16.0,
-          "win_score": 6.7,
+          "total_score": 15.8,
+          "win_score": 6.3,
           "fund_score": 30.0,
           "signals": [
             "이평선수렴",
@@ -6604,22 +6620,6 @@
           ],
           "stop": 8137.0,
           "target": 9975.0
-        },
-        {
-          "sym": "055550",
-          "name": "신한지주",
-          "market": "KR",
-          "weight_pct": 6.8,
-          "entry": 113900.0,
-          "total_score": 15.5,
-          "win_score": 12.4,
-          "fund_score": 20.1,
-          "signals": [
-            "52주신고가",
-            "RSI/MACD"
-          ],
-          "stop": 105927.0,
-          "target": 129846.0
         }
       ]
     },
@@ -6637,8 +6637,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 46550.0,
-          "total_score": 56.5,
-          "win_score": 27.5,
+          "total_score": 56.6,
+          "win_score": 27.7,
           "fund_score": 100.0,
           "signals": [
             "52주신고가",
@@ -6654,8 +6654,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 97500.0,
-          "total_score": 40.9,
-          "win_score": 16.5,
+          "total_score": 40.8,
+          "win_score": 16.4,
           "fund_score": 77.5,
           "signals": [
             "이평선수렴",
@@ -6671,7 +6671,7 @@
           "weight_pct": 3.4,
           "entry": 38750.0,
           "total_score": 32.9,
-          "win_score": 14.7,
+          "win_score": 14.6,
           "fund_score": 60.3,
           "signals": [
             "5일선라이딩",
@@ -6682,13 +6682,29 @@
           "target": 44175.0
         },
         {
+          "sym": "006120",
+          "name": "SK디스커버리",
+          "market": "KR",
+          "weight_pct": 3.4,
+          "entry": 56400.0,
+          "total_score": 28.9,
+          "win_score": 9.3,
+          "fund_score": 58.3,
+          "signals": [
+            "이평선수렴",
+            "RSI/MACD"
+          ],
+          "stop": 52452.0,
+          "target": 64296.0
+        },
+        {
           "sym": "139130",
           "name": "iM금융지주",
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 18650.0,
-          "total_score": 26.5,
-          "win_score": 10.9,
+          "total_score": 26.6,
+          "win_score": 11.0,
           "fund_score": 50.0,
           "signals": [
             "이평선수렴",
@@ -6768,8 +6784,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 8750.0,
-          "total_score": 16.0,
-          "win_score": 6.7,
+          "total_score": 15.8,
+          "win_score": 6.3,
           "fund_score": 30.0,
           "signals": [
             "이평선수렴",
@@ -6784,8 +6800,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 113900.0,
-          "total_score": 15.5,
-          "win_score": 12.4,
+          "total_score": 15.6,
+          "win_score": 12.6,
           "fund_score": 20.1,
           "signals": [
             "52주신고가",
@@ -6913,8 +6929,8 @@
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 138900.0,
-          "total_score": 10.2,
-          "win_score": 10.1,
+          "total_score": 10.3,
+          "win_score": 10.2,
           "fund_score": 10.4,
           "signals": [
             "52주신고가",
@@ -6924,29 +6940,13 @@
           "target": 158346.0
         },
         {
-          "sym": "330590",
-          "name": "롯데리츠",
-          "market": "KR",
-          "weight_pct": 3.4,
-          "entry": 3885.0,
-          "total_score": 10.1,
-          "win_score": 4.8,
-          "fund_score": 18.1,
-          "signals": [
-            "이평선수렴",
-            "RSI/MACD"
-          ],
-          "stop": 3613.0,
-          "target": 4429.0
-        },
-        {
           "sym": "000070",
           "name": "삼양홀딩스",
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 60800.0,
-          "total_score": 9.3,
-          "win_score": 8.1,
+          "total_score": 9.2,
+          "win_score": 8.0,
           "fund_score": 11.0,
           "signals": [
             "5일선라이딩",
@@ -6971,7 +6971,7 @@
           "name": "한국전력",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 32250.0,
+          "entry": 32750.0,
           "total_score": 9.94,
           "win_score": null,
           "fund_score": null,
@@ -6987,8 +6987,8 @@
             "d_roe": 8.8,
             "d_opm": 4.8
           },
-          "stop": 29025.0,
-          "target": 38700.0
+          "stop": 29475.0,
+          "target": 39300.0
         },
         {
           "sym": "041510",
@@ -7019,7 +7019,7 @@
           "name": "영원무역홀딩스",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 170800.0,
+          "entry": 170700.0,
           "total_score": 4.21,
           "win_score": null,
           "fund_score": null,
@@ -7035,15 +7035,15 @@
             "d_roe": 1.6,
             "d_opm": 3.0
           },
-          "stop": 153720.0,
-          "target": 204960.0
+          "stop": 153630.0,
+          "target": 204840.0
         },
         {
           "sym": "071050",
           "name": "한국금융지주",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 189500.0,
+          "entry": 190900.0,
           "total_score": 3.68,
           "win_score": null,
           "fund_score": null,
@@ -7059,15 +7059,15 @@
             "d_roe": 6.0,
             "d_opm": null
           },
-          "stop": 170550.0,
-          "target": 227400.0
+          "stop": 171810.0,
+          "target": 229080.0
         },
         {
           "sym": "267250",
           "name": "HD현대",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 242500.0,
+          "entry": 243500.0,
           "total_score": 3.16,
           "win_score": null,
           "fund_score": null,
@@ -7083,22 +7083,22 @@
             "d_roe": 4.8,
             "d_opm": 4.2
           },
-          "stop": 218250.0,
-          "target": 291000.0
+          "stop": 219150.0,
+          "target": 292200.0
         },
         {
           "sym": "006040",
           "name": "동원산업",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 37700.0,
+          "entry": 37800.0,
           "total_score": 3.13,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 4.3",
             "ROE 10%",
-            "낙폭 -48%",
+            "낙폭 -47%",
             "영업익 +3%"
           ],
           "traj": {
@@ -7107,22 +7107,22 @@
             "d_roe": 7.0,
             "d_opm": -0.2
           },
-          "stop": 33930.0,
-          "target": 45240.0
+          "stop": 34020.0,
+          "target": 45360.0
         },
         {
           "sym": "009540",
           "name": "HD한국조선해양",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 347500.0,
+          "entry": 351500.0,
           "total_score": 2.95,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 8.4",
             "ROE 17%",
-            "낙폭 -28%",
+            "낙폭 -27%",
             "영업익 +172%"
           ],
           "traj": {
@@ -7131,15 +7131,15 @@
             "d_roe": 7.0,
             "d_opm": 7.4
           },
-          "stop": 312750.0,
-          "target": 417000.0
+          "stop": 316350.0,
+          "target": 421800.0
         },
         {
           "sym": "081660",
           "name": "미스토홀딩스",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 40550.0,
+          "entry": 40600.0,
           "total_score": 2.9,
           "win_score": null,
           "fund_score": null,
@@ -7155,15 +7155,15 @@
             "d_roe": 5.8,
             "d_opm": 2.1
           },
-          "stop": 36495.0,
-          "target": 48660.0
+          "stop": 36540.0,
+          "target": 48720.0
         },
         {
           "sym": "086280",
           "name": "현대글로비스",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 209000.0,
+          "entry": 210000.0,
           "total_score": 2.55,
           "win_score": null,
           "fund_score": null,
@@ -7179,22 +7179,22 @@
             "d_roe": 4.2,
             "d_opm": 0.8
           },
-          "stop": 188100.0,
-          "target": 250800.0
+          "stop": 189000.0,
+          "target": 252000.0
         },
         {
           "sym": "111770",
           "name": "영원무역",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 74400.0,
+          "entry": 75100.0,
           "total_score": 1.9,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 7.8",
             "ROE 10%",
-            "낙폭 -24%",
+            "낙폭 -23%",
             "영업익 +63%"
           ],
           "traj": {
@@ -7203,8 +7203,8 @@
             "d_roe": 2.8,
             "d_opm": 3.7
           },
-          "stop": 66960.0,
-          "target": 89280.0
+          "stop": 67590.0,
+          "target": 90120.0
         }
       ]
     }

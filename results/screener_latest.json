@@ -1758,7 +1758,7 @@
       "market": "US",
       "sym": "APA",
       "name": "APA",
-      "marcap": 14984534243,
+      "marcap": 15140580162,
       "pct_change": 0.54,
       "signals": [
         "이평선수렴",
@@ -1780,7 +1780,7 @@
       "market": "US",
       "sym": "AR",
       "name": "AR",
-      "marcap": 12116170943,
+      "marcap": 12167403942,
       "pct_change": 2.5,
       "signals": [
         "5일선라이딩",
@@ -1803,7 +1803,7 @@
       "market": "US",
       "sym": "ALSN",
       "name": "Allison Transmission",
-      "marcap": 11024160461,
+      "marcap": 10837542160,
       "pct_change": 3.89,
       "signals": [
         "이평선수렴",
@@ -1914,7 +1914,7 @@
       "market": "US",
       "sym": "ADMA",
       "name": "ADMA Biologics",
-      "marcap": 2154732595,
+      "marcap": 2167917267,
       "pct_change": 3.0,
       "signals": [
         "이평선수렴",
@@ -1958,7 +1958,7 @@
       "market": "US",
       "sym": "AMPH",
       "name": "Amphastar Pharmaceuticals",
-      "marcap": 986029554,
+      "marcap": 985896988,
       "pct_change": 5.32,
       "signals": [
         "5일선라이딩",
@@ -1980,7 +1980,7 @@
       "market": "US",
       "sym": "ARVN",
       "name": "ARVN",
-      "marcap": 613976355,
+      "marcap": 613167022,
       "pct_change": 2.29,
       "signals": [
         "이평선수렴",
@@ -2113,7 +2113,7 @@
       "market": "US",
       "sym": "ABOS",
       "name": "Acumen Pharmaceuticals",
-      "marcap": 229968971,
+      "marcap": 229960795,
       "pct_change": 8.9,
       "signals": [
         "이평선수렴",
@@ -2135,7 +2135,7 @@
       "market": "US",
       "sym": "AMPY",
       "name": "Amplify Energy",
-      "marcap": 203136608,
+      "marcap": 202317275,
       "pct_change": 2.94,
       "signals": [
         "이평선수렴",
