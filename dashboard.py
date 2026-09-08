@@ -4188,11 +4188,20 @@ with guard('데이터 신선도'):
             '마지막 갱신': r['date'] or '-',
             '경과': (f"{max(r['age'], 0)}일" if r['age'] is not None else '-'),
             '갱신 주기': r['cycle'],
-            '쓰이는 화면': r['used_by'],
+            # 2026-09-09: '쓰임' 열 신설. 그전에는 화면이 직접 읽는 것과 계산 입력이
+            # 한 열에 섞여 있어 "우리가 이렇게 많은 데이터를 쓰나?"로 읽혔다.
+            # 실제로 화면이 직접 읽는 건 18개 중 14개다.
+            '쓰임': ('입력' if ('계산' in r['used_by'] or '화면 없음' in r['used_by']
+                              or 'point-in-time' in r['used_by']) else '화면'),
+            '쓰이는 곳': r['used_by'],
             '만드는 것': f"{r['producer']} ({r['job']})",
         } for r in _DS]), use_container_width=True, hide_index=True,
             row_height=25, height=_dfh(len(_DS)))
         st.caption("‘마지막 갱신’은 **파일 안에 기록된 데이터 날짜**입니다(배포 시각이 아님). "
                    "정지 항목은 매일 06:00 `pipeline_health.py`가 텔레그램으로도 알립니다.")
+        st.caption("**쓰임** — `화면`은 대시보드가 직접 읽는 파일, `입력`은 화면이 아니라 "
+                   "**계산의 재료**입니다. 입력이 멈추면 화면에는 에러가 안 뜨고 **숫자만 조용히 "
+                   "낡습니다** — 실제로 미국 시총이 20일 멈춰 있는 동안 종목들이 낡은 시총으로 "
+                   "필터링되고 있었습니다. 그래서 화면에 안 보여도 같이 감시합니다.")
 st.caption("출처: DART·SEC EDGAR(공식 재무) · FinanceDataReader/KRX(가격) · "
            "FRED(매크로) · 네이버금융·yfinance(컨센서스, 참고)")

@@ -152,6 +152,24 @@ def ingest(y0: int, y1: int, syms: list[str] | None = None):
     print(f'완료 · {total:,}행 · {time.time()-t0:.0f}초')
 
 
+def _has_fundq(db_path):
+    """market.db 에 fundamentals_q 테이블이 실제로 있는가.
+
+    파일 존재만으로 판단하면 안 된다 — 다른 스텝이 만든 빈 DB 가 폴백을 막는다.
+    """
+    if not os.path.exists(db_path):
+        return False
+    try:
+        c = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        try:
+            row = c.execute("SELECT name FROM sqlite_master "
+                            "WHERE type='table' AND name='fundamentals_q'").fetchone()
+            return row is not None
+        finally:
+            c.close()
+    except Exception:
+        return False
+
 def quarterly(con=None) -> 'pd.DataFrame':
     """당분기(3개월) 손익 테이블. Q4만 FY에서 차분해 만든다.
 
@@ -159,10 +177,17 @@ def quarterly(con=None) -> 'pd.DataFrame':
               op_turn(흑자전환), op_yoy(영업익 YoY %), rev_yoy
     """
     import pandas as pd
-    if con is None and not os.path.exists(DB):
+    if con is None and not _has_fundq(DB):
         # 러너에는 market.db(574MB, gitignore)가 없다. 그래서 KR-U6가 자동 갱신에서
         # 빠져 있었고 대시보드에 며칠 묵은 신호가 떠 있었다 — 레포에 실은 export를
         # 읽어 러너에서도 돌게 한다(0.75MB parquet, export_kr_fundq.py 참고).
+        #
+        # ⚠️ 2026-09-09 — 조건이 원래 `not os.path.exists(DB)` 였는데 그걸로는 부족했다.
+        #   러너에서 앞선 스텝이 sqlite3.connect(DB) 를 쓰기 모드로 열면 **빈 DB 파일이
+        #   생긴다.** 그러면 파일은 존재하니 폴백이 안 걸리고, 곧바로
+        #   `no such table: fundamentals_q` 로 죽는다. 실제로 KR-U6 가 그 이유로
+        #   11일, 포워드 원장이 18일 멈춰 있었다 — 화면에는 "정지"로만 보였다.
+        #   파일이 아니라 **테이블이 있는지**로 판정해야 한다.
         import export_kr_fundq
         d = export_kr_fundq.load()
         if d is None or d.empty:
