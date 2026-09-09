@@ -47,13 +47,59 @@ def check():
     return stale
 
 
+def runner_errors() -> str:
+    """러너가 남긴 스텝 실패 로그. 신선도와 **독립적으로** 봐야 한다.
+
+    ⚠️ 사람이 로컬에서 생산자를 한 번 돌려 커밋하면 파일이 신선해져 정지 경보가
+    꺼진다. 그런데 러너는 그대로 고장인 채다 — 경보만 사라지고 원인은 남는다.
+    실제로 KR 포워드 원장이 그렇게 19일을 갔다(08-22 이후 github-actions 가 한 번도
+    갱신 못 했는데, 사람이 손으로 커밋할 때마다 경보가 조용해졌다).
+    그래서 실패 로그가 있으면 신선도가 정상이어도 알린다.
+    """
+    p = Path('results/kr_step_errors.txt')
+    try:
+        return p.read_text(encoding='utf-8').strip() if p.exists() else ''
+    except Exception:
+        return ''
+
+
 def main():
     stale = check()
-    if not stale:
+    errs = runner_errors()
+    if not stale and not errs:
         print("✅ 파이프라인 신선도 정상 — 전 산출물이 허용 나이 이내")
         return
+    if not stale:
+        # 신선도는 통과했는데 러너가 죽은 경우 — 위 docstring 의 그 상황이다.
+        msg = ("⚠️ [screener] 산출물은 신선한데 러너 스텝이 실패했다\n"
+               "(사람이 로컬에서 돌려 커밋하면 정지 경보는 꺼진다 — 러너는 그대로다)\n\n"
+               "― 러너가 남긴 실패 로그 ―\n" + errs[:900])
+        print(msg)
+        try:
+            import config
+            from telegram_notifier import send_message
+            if config.TELEGRAM_ENABLED:
+                send_message(config.TELEGRAM_TOKEN, config.TELEGRAM_CHAT_ID, msg)
+                print("(텔레그램 경보 발송됨)")
+        except Exception as e:
+            print(f"(텔레그램 발송 실패: {e})")
+        return
+    # 항목마다 [워크플로] 태그가 붙어 있는데 안내문은 늘 daily-refresh 를 가리켰다.
+    # weekly-profile 항목이 떠도 daily-refresh 로그를 뒤지게 만든 것 — 잘못된 지목이다.
+    wfs = sorted({x.split('[')[1].split(']')[0] for x in stale if '[' in x and ']' in x})
+    where = ' · '.join(wfs) if wfs else 'daily-refresh'
     msg = "🚨 [screener] 데이터 파이프라인 정지 감지\n" + "\n".join(f"· {s}" for s in stale) \
-          + "\n→ GitHub Actions daily-refresh 로그에서 해당 스텝 에러 확인 필요"
+          + f"\n→ GitHub Actions {where} 로그 확인"
+    # 러너가 남긴 실패 로그를 같이 싣는다. 정지만 알리고 원인을 안 실으면 매번 같은
+    # 알림을 받으면서 원인은 계속 모르는 상태가 된다 — KR 포워드 원장이 19일간
+    # 그랬다. continue-on-error 가 삼킨 에러를 파일로 받아 폰까지 옮기는 것이 목적.
+    _err = Path('results/kr_step_errors.txt')
+    try:
+        _body = _err.read_text(encoding='utf-8').strip() if _err.exists() else ''
+    except Exception:
+        _body = ''
+    if _body:
+        msg += "\n\n― 러너가 남긴 실패 로그 ―\n" + _body[:900]
     print(msg)
     try:
         import config

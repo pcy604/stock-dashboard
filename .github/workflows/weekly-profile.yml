@@ -74,11 +74,31 @@ jobs:
       # 한 벌 더 굴려야 한다.
       # market.db(574MB, gitignore)는 러너에 없다 — 분기재무·universe 는
       # export_kr_fundq.py 가 만든 커밋된 parquet(0.71MB + 79KB)로 폴백한다.
-      - name: 주도주 KR 신호 갱신 (KR-P1 · KR-U6)
+      - name: 주도주 KR 신호 갱신 (KR-P1 · KR-U6 · 포워드 원장)
         run: |
-          python leaders_kr.py publish
-          python leaders_kr6.py publish
-          python leaders_kr_paper.py update
+          # ⚠️ 예전엔 세 줄을 그냥 이어 썼다. bash -e 라 앞이 죽으면 뒤는 **실행조차
+          #    안 된다.** 실측(2026-09-09): leaders_kr.json 은 러너가 갱신하는데
+          #    leaders_kr6.json 은 08-31, leaders_kr_paper.json 은 08-22 이후로
+          #    github-actions 가 한 번도 건드린 적이 없었다 — 2번에서 죽어 3번이
+          #    19일간 한 번도 못 돈 것이다. 원장이 멈춘 진짜 이유가 이 한 줄이었다.
+          # ⚠️ 그리고 continue-on-error 가 에러를 통째로 삼켜, 무엇 때문에 죽는지
+          #    20일 가까이 알 수 없었다. 각 스텝을 독립 실행하고 실패한 것만 로그
+          #    꼬리를 파일에 남긴다 — 그 파일은 커밋되고 정지 알림에 실려 폰으로 온다.
+          mkdir -p results
+          : > results/kr_step_errors.txt
+          run_step () {
+            echo "── $1.py $2"
+            if python "$1.py" "$2" > "$1.log" 2>&1; then
+              tail -3 "$1.log"
+            else
+              echo "  ❌ 실패 (exit $?)"
+              { echo "[$1.py $2] 실패:"; tail -15 "$1.log"; echo; } >> results/kr_step_errors.txt
+              tail -15 "$1.log"
+            fi
+          }
+          run_step leaders_kr publish
+          run_step leaders_kr6 publish
+          run_step leaders_kr_paper update
         continue-on-error: true
 
       - name: 결과 커밋 & 푸시
@@ -89,7 +109,12 @@ jobs:
           # screen_precompute 가 만드는 3개를 전부 커밋한다.
           git add results/returns.json results/seasonality.json results/mdd.json 2>/dev/null || true
           git add data/us_shares.csv data/us_marketcap.csv data/us_splits.csv 2>/dev/null || true
-          git add results/leaders_kr.json results/leaders_kr6.json results/leaders_kr_paper.json 2>/dev/null || true
+          # ⚠️ 경로를 한 줄에 여러 개 넘기면 하나만 없어도 git add 가 fatal 로 죽으면서
+          #    *아무것도* 스테이징하지 않는다. 하나씩 넘긴다.
+          for f in results/leaders_kr.json results/leaders_kr6.json \
+                   results/leaders_kr_paper.json results/kr_step_errors.txt; do
+            [ -f "$f" ] && git add "$f"
+          done
           # ⚠️ 2026-09-08 — pull 이 없어서 두 번 연속 푸시가 거부됐다.
           #   ! [rejected] main -> main (fetch first)
           #   이 워크플로는 1시간 40분 넘게 돈다. 그동안 사람이나 daily-refresh 가
