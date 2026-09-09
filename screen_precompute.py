@@ -64,6 +64,15 @@ def _mdd(close):
 LONG_CACHE = Path('data/longcache')
 
 
+def _is_kr(sym: str) -> bool:
+    """한국 종목코드인가. 6자리이고 앞 5자리가 숫자면 KR.
+
+    우선주·전환우선주는 끝자리가 영문이다(00088K, 02826K). isdigit() 로만
+    걸러내면 이것들이 US 로 새어 나간다.
+    """
+    s = str(sym)
+    return len(s) == 6 and s[:5].isdigit()
+
 def _series_for(sym, mkt, init_start):
     """증분 캐시: 기존 데이터는 두고 '새로 생긴 날짜'만 받아 붙인다.
        data/longcache/{sym}.parquet 에 장기 종가 저장.
@@ -134,7 +143,12 @@ def run(start=None):
     _cy = datetime.now().year
 
     def _one(sym):
-        mkt = 'KR' if (sym.isdigit() and len(sym) == 6) else 'US'
+        # ⚠️ 2026-09-10 — `sym.isdigit()` 만 보면 **끝에 영문이 붙은 한국 우선주**를
+        #   놓친다. 00088K(한화3우B) · 00104K(CJ4우) · 00680K(미래에셋증권2우B) ·
+        #   02826K(삼성물산우B) 네 종이 US 로 분류돼 **미국 상승 상위에 섞여 있었다.**
+        #   시총도 원화를 달러로 읽어 $612,749M(612조)로 표시됐다.
+        #   한국 종목코드는 6자리이고 마지막 한 자리만 영문일 수 있다(우선주·전환).
+        mkt = 'KR' if _is_kr(sym) else 'US'
         close = _series_for(sym, mkt, init_start)
         if close is None or len(close) < 30:
             return None

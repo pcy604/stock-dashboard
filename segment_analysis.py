@@ -175,7 +175,9 @@ def _parse_json(text: str) -> dict | None:
 
 if __name__ == '__main__':
     sym = sys.argv[1] if len(sys.argv) > 1 else '005930'
-    _is_kr = sym.isdigit() and len(sym) == 6
+    # 2026-09-10: 우선주 코드는 끝자리가 영문이다(00088K). isdigit() 만 보면
+    # 그것들이 US 로 새어 나가 미국 화면에 섞인다 — 앞 5자리로 판정한다.
+    _is_kr = len(sym) == 6 and sym[:5].isdigit()
     d = analyze(sym, _is_kr, force='--force' in sys.argv)
     if not d or d.get('_error'):
         print('실패:', d)

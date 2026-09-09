@@ -90,7 +90,7 @@ def kr_symbols() -> list[str]:
     out = []
     for f in glob.glob(os.path.join(CACHE, '*.parquet')):
         s = os.path.basename(f)[:-8]
-        if s.isdigit() and len(s) == 6:
+        if len(s) == 6 and s[:5].isdigit():   # 우선주(00088K) 포함
             out.append(s)
     return sorted(out)
 

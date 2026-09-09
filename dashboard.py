@@ -2847,7 +2847,9 @@ def _tf_signal(rsi_val, macd_val, sig_val, price, ma20, ma50):
 def fetch_stock_data(sym: str, days: int):
     import FinanceDataReader as fdr
 
-    is_kr = sym.isdigit() and len(sym) == 6
+    # 2026-09-10: 우선주 코드는 끝자리가 영문이다(00088K). isdigit() 만 보면
+    # 그것들이 US 로 새어 나가 미국 화면에 섞인다 — 앞 5자리로 판정한다.
+    is_kr = len(sym) == 6 and sym[:5].isdigit()
     code  = sym.replace('.KS','').replace('.KQ','')
     fdr_sym = code if is_kr else sym
     start = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
@@ -3292,7 +3294,8 @@ with tab7, guard('종목 분석'):
 
             st.divider()
 
-            is_kr_sym = sym8_clean.isdigit() and len(sym8_clean) == 6
+            # 2026-09-10: 우선주(00088K) 대응 — 앞 5자리로 판정
+            is_kr_sym = len(sym8_clean) == 6 and sym8_clean[:5].isdigit()
             price_unit = '₩' if is_kr_sym else '$'
 
             st.divider()
