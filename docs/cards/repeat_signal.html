@@ -1,0 +1,248 @@
+<title>반복 신호의 실체</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#FBFBFC; --panel:#FFFFFF; --ink:#15171D; --ink-2:#4A4F5C; --ink-3:#7C828F;
+  --rule:#E1E3E9; --rule-2:#EFF0F4;
+  --accent:#1F4E79; --accent-soft:#EAF0F7;
+  --warn:#8A5D0F; --warn-soft:#FBF3E2;
+  --neg:#A32C2C; --neg-soft:#FBECEC;
+  --pos:#16704A;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1116; --panel:#161921; --ink:#E7E9EF; --ink-2:#A8AEBC; --ink-3:#767C86;
+    --rule:#272B36; --rule-2:#1E222B;
+    --accent:#7FA7D4; --accent-soft:#1A2432;
+    --warn:#D6AA5C; --warn-soft:#2A2317;
+    --neg:#E08282; --neg-soft:#2B1A1A;
+    --pos:#5FBF93;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F1116; --panel:#161921; --ink:#E7E9EF; --ink-2:#A8AEBC; --ink-3:#767C86;
+  --rule:#272B36; --rule-2:#1E222B;
+  --accent:#7FA7D4; --accent-soft:#1A2432;
+  --warn:#D6AA5C; --warn-soft:#2A2317;
+  --neg:#E08282; --neg-soft:#2B1A1A;
+  --pos:#5FBF93;
+}
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink);
+  font-family:'IBM Plex Sans KR','Malgun Gothic',system-ui,sans-serif;
+  font-size:15px; line-height:1.72; font-weight:300; margin:0}
+.wrap{max-width:880px; margin:0 auto; padding:56px 24px 100px}
+@media(max-width:640px){.wrap{padding:36px 16px 70px}}
+
+h1{font-size:clamp(27px,4.6vw,36px); font-weight:600; letter-spacing:-.022em;
+   margin:0 0 12px; text-wrap:balance}
+.sub{color:var(--ink-2); margin:0 0 10px; max-width:62ch; font-size:16px}
+.meta{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-3);
+      border-bottom:1px solid var(--rule); padding-bottom:20px; margin-bottom:38px}
+h2{font-size:20px; font-weight:600; letter-spacing:-.018em; margin:46px 0 8px}
+h3{font-size:15.5px; font-weight:600; margin:28px 0 8px}
+p{margin:0 0 16px; max-width:66ch}
+strong{font-weight:600}
+code{font-family:'IBM Plex Mono',monospace; font-size:.9em;
+     background:var(--rule-2); padding:1px 5px; border-radius:3px}
+
+figure{margin:22px 0 10px; border:1px solid var(--rule); border-radius:7px;
+       background:var(--panel); padding:22px 18px 12px; overflow-x:auto}
+figure svg{display:block; width:100%; min-width:600px; height:auto; color:var(--ink)}
+figcaption{font-size:12.5px; color:var(--ink-3); margin-top:14px; line-height:1.6}
+
+.tw{overflow-x:auto; margin:14px 0 8px; border:1px solid var(--rule);
+    border-radius:6px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:13px; min-width:540px}
+th{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:500;
+   letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3);
+   background:var(--rule-2); text-align:right; padding:11px 13px;
+   border-bottom:1px solid var(--rule); white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td{padding:9px 13px; border-bottom:1px solid var(--rule-2); text-align:right;
+   font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-2);
+   font-variant-numeric:tabular-nums; white-space:nowrap}
+td:first-child{font-family:'IBM Plex Sans KR',sans-serif; color:var(--ink); font-weight:500}
+tbody tr:last-child td{border-bottom:none}
+tr.mark td{background:var(--accent-soft)}
+tr.bad td{background:var(--neg-soft)}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .dim{color:var(--ink-3)}
+.em{color:var(--accent); font-weight:600}
+
+.note{border-left:3px solid var(--accent); background:var(--accent-soft);
+      padding:15px 19px; border-radius:0 6px 6px 0; margin:0 0 20px; font-size:14.5px}
+.note.warn{border-color:var(--warn); background:var(--warn-soft)}
+.note.neg{border-color:var(--neg); background:var(--neg-soft)}
+.note p:last-child{margin-bottom:0}
+.note .lab{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; display:block; margin-bottom:6px; color:var(--accent); font-weight:500}
+.note.warn .lab{color:var(--warn)} .note.neg .lab{color:var(--neg)}
+ul{margin:0 0 16px; padding-left:20px; max-width:66ch}
+li{margin-bottom:8px}
+.big{font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:500;
+     color:var(--accent); font-variant-numeric:tabular-nums}
+</style>
+
+<div class="wrap">
+
+<h1>같은 해에 신호가 반복되면 정말 좋은가</h1>
+<p class="sub">회차별 성적표에서 <strong>6-9회 구간이 시장 대비 +42.6%</strong>로 나왔다.
+그 숫자를 그대로 믿어도 되는지 파고든 기록.</p>
+<p class="meta">측정 2018-06 → 2026-08 · 이익 가속 규칙 · 신호 1건당 1년 보유 · 표본 5,929건</p>
+
+<h2>먼저, 42.6%는 무슨 뜻이 아닌가</h2>
+
+<div class="note neg">
+  <span class="lab">오해하기 쉬운 지점</span>
+  <p><strong>"6회차에 사면 42% 번다"가 아니다.</strong>
+  42.6%는 198건의 <strong>평균</strong>이고, 같은 구간의 <strong>중앙값은 6.5%</strong>다.
+  절반은 6.5% 언저리이거나 그 아래다.</p>
+</div>
+
+<div class="tw">
+<table>
+  <thead><tr><th>6-9회 구간 198건</th><th>하위 10%</th><th>하위 25%</th><th>중앙</th><th>상위 25%</th><th>상위 10%</th><th>상위 5%</th></tr></thead>
+  <tbody>
+    <tr><td>1년 수익률</td><td class="neg">−61.8%</td><td class="neg">−29.1%</td><td>+6.5%</td><td class="pos">+88.3%</td><td class="pos">+188.6%</td><td class="pos">+286.6%</td></tr>
+  </tbody>
+</table>
+</div>
+<p>분포가 이렇게 벌어져 있으면 평균은 대표값이 아니다.
+<strong>넷 중 하나는 1년 뒤 30% 넘게 손실</strong>이고, <strong>여섯 중 하나는 반토막</strong>이다.
+그런데도 평균이 57.3%인 이유는 위쪽 꼬리가 길기 때문이다.</p>
+
+<h2>평균을 만든 것은 두 종목이었다</h2>
+
+<div class="tw">
+<table>
+  <thead><tr><th>상위 5건</th><th>신호 주</th><th>1년 수익률</th></tr></thead>
+  <tbody>
+    <tr class="mark"><td>GME</td><td>2020-11-16</td><td class="em">+1,700%</td></tr>
+    <tr class="mark"><td>GME</td><td>2020-11-23</td><td class="em">+1,142%</td></tr>
+    <tr class="mark"><td>BTU</td><td>2021-04-12</td><td class="em">+741%</td></tr>
+    <tr class="mark"><td>BTU</td><td>2021-04-05</td><td class="em">+721%</td></tr>
+    <tr><td>LITE</td><td>2025-09-01</td><td class="pos">+490%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="tw">
+<table>
+  <thead><tr><th>표본을 어떻게 자르나</th><th>건수</th><th>평균</th><th>시장대비</th><th>중앙값</th></tr></thead>
+  <tbody>
+    <tr><td>6-9회 전체</td><td>198</td><td>57.3%</td><td class="em">+42.6%</td><td>+6.5%</td></tr>
+    <tr><td>상위 5건 제외</td><td>193</td><td>34.0%</td><td>—</td><td>—</td></tr>
+    <tr><td>GME·BTU 제외</td><td>189</td><td>34.4%</td><td>+19.7%</td><td>+5.7%</td></tr>
+    <tr class="bad"><td>2019~2021 제외 (회복장 제외)</td><td>103</td><td>30.1%</td><td class="neg">+9.8%</td><td class="neg">−2.9%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>두 종목(GME·BTU)을 빼면 +42.6% 가 +19.7% 로 내려간다.</strong>
+회복장(2019~2021)까지 빼면 <strong>+9.8%</strong>이고 중앙값은 <strong>음수</strong>가 된다.</p>
+
+<h2>연도별로 보면 더 분명하다</h2>
+
+<figure>
+<svg viewBox="0 0 780 260" role="img" xmlns="http://www.w3.org/2000/svg"
+     aria-label="6-9회 구간의 연도별 시장대비 초과수익. 2020년 +109.7%, 2021년 +47.3%에서 2022년 -1.3%로 급락한 뒤 2023년 +12.9%, 2024년 +3.1%, 2025년 +28.1%.">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <line x1="60" y1="30" x2="60" y2="205" stroke="currentColor" opacity=".35"/>
+  <line x1="60" y1="160" x2="740" y2="160" stroke="currentColor" opacity=".55"/>
+  <text x="52" y="164" text-anchor="end" font-size="10.5" opacity=".6">0</text>
+  <text x="52" y="38" text-anchor="end" font-size="10.5" opacity=".6">+120%</text>
+  <text x="52" y="101" text-anchor="end" font-size="10.5" opacity=".6">+60%</text>
+
+  <!-- 막대: 2020 109.7, 2021 47.3, 2022 -1.3, 2023 12.9, 2024 3.1, 2025 28.1 -->
+  <rect x="96"  y="45.2"  width="70" height="114.8" fill="#16704A" opacity=".55" rx="2"/>
+  <rect x="206" y="110.4" width="70" height="49.6"  fill="#16704A" opacity=".45" rx="2"/>
+  <rect x="316" y="160"   width="70" height="3.4"   fill="#A32C2C" opacity=".6" rx="2"/>
+  <rect x="426" y="146.5" width="70" height="13.5"  fill="#16704A" opacity=".35" rx="2"/>
+  <rect x="536" y="156.8" width="70" height="3.2"   fill="#16704A" opacity=".3" rx="2"/>
+  <rect x="646" y="130.6" width="70" height="29.4"  fill="#16704A" opacity=".45" rx="2"/>
+
+  <text x="131" y="39"  text-anchor="middle" font-size="11.5" font-weight="600">+109.7</text>
+  <text x="241" y="104" text-anchor="middle" font-size="11.5" font-weight="600">+47.3</text>
+  <text x="351" y="178" text-anchor="middle" font-size="11.5" font-weight="600" fill="#A32C2C">−1.3</text>
+  <text x="461" y="140" text-anchor="middle" font-size="11.5" font-weight="600">+12.9</text>
+  <text x="571" y="150" text-anchor="middle" font-size="11.5" font-weight="600">+3.1</text>
+  <text x="681" y="124" text-anchor="middle" font-size="11.5" font-weight="600">+28.1</text>
+
+  <text x="131" y="196" text-anchor="middle" font-size="12">2020</text>
+  <text x="241" y="196" text-anchor="middle" font-size="12">2021</text>
+  <text x="351" y="196" text-anchor="middle" font-size="12">2022</text>
+  <text x="461" y="196" text-anchor="middle" font-size="12">2023</text>
+  <text x="571" y="196" text-anchor="middle" font-size="12">2024</text>
+  <text x="681" y="196" text-anchor="middle" font-size="12">2025</text>
+
+  <text x="131" y="214" text-anchor="middle" font-size="10" opacity=".6">41건</text>
+  <text x="241" y="214" text-anchor="middle" font-size="10" opacity=".6">53건</text>
+  <text x="351" y="214" text-anchor="middle" font-size="10" opacity=".6">25건</text>
+  <text x="461" y="214" text-anchor="middle" font-size="10" opacity=".6">23건</text>
+  <text x="571" y="214" text-anchor="middle" font-size="10" opacity=".6">32건</text>
+  <text x="681" y="214" text-anchor="middle" font-size="10" opacity=".6">23건</text>
+  <text x="400" y="240" text-anchor="middle" font-size="11.5" opacity=".65">6-9회 구간의 연도별 시장대비 초과수익 (표본 수 아래)</text>
+</svg>
+<figcaption>2020~2021 두 해가 +109.7%, +47.3%로 전체를 끌어올린다.
+2022년은 마이너스이고 2023~2024년은 한 자릿수다. <strong>회복장에서만 크게 작동한다.</strong></figcaption>
+</figure>
+
+<h2>그래도 남는 것 — 회차가 쌓이면 나아진다</h2>
+
+<div class="tw">
+<table>
+  <thead><tr><th>그 해 회차</th><th>신호</th><th>종목</th><th>평균</th><th>시장대비</th><th>중앙값</th><th>−20% 이하</th><th>반토막</th><th>시장에 짐</th></tr></thead>
+  <tbody>
+    <tr><td>1회</td><td>3,016</td><td>1,282</td><td>26.6%</td><td>+6.5%</td><td>+8.2%</td><td>25.2%</td><td>7.5%</td><td>58.4%</td></tr>
+    <tr><td>2회</td><td>1,408</td><td>821</td><td>34.6%</td><td>+14.4%</td><td>+7.5%</td><td class="dim">—</td><td class="dim">—</td><td class="dim">—</td></tr>
+    <tr><td>3회</td><td>729</td><td>500</td><td>39.4%</td><td>+19.3%</td><td>+11.5%</td><td>30.9%</td><td>11.5%</td><td>53.6%</td></tr>
+    <tr><td>4-5회</td><td>578</td><td>300</td><td>39.5%</td><td>+22.5%</td><td>+10.2%</td><td class="dim">—</td><td class="dim">—</td><td class="dim">—</td></tr>
+    <tr class="mark"><td>6-9회</td><td>198</td><td>100</td><td>57.3%</td><td class="em">+42.6%</td><td>+6.5%</td><td>30.8%</td><td>16.2%</td><td>52.5%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>시장을 이기는 비율은 회차가 올라도 거의 안 변한다</strong>(58.4% → 52.5%가 지는 비율).
+바뀌는 건 <strong>이겼을 때의 크기</strong>다. 그리고 <strong>지는 폭도 같이 커진다</strong> —
+반토막 확률이 7.5%에서 16.2%로 두 배가 된다.</p>
+
+<div class="note warn">
+  <span class="lab">이 규칙의 성격</span>
+  <p>회차가 쌓인 종목은 <strong>더 자주 이기는 게 아니라 더 크게 벌고 더 크게 잃는다.</strong>
+  변동성이 커지는 쪽으로 분포가 벌어진다. 승률이 아니라 <strong>기대값</strong>을 보고 타는 규칙이고,
+  그 기대값은 소수의 대박에 의존한다.</p>
+</div>
+
+<h3>집중도는 회차와 무관했다</h3>
+<p>상위 5% 거래가 전체 수익에서 차지하는 비중은 회차에 관계없이 <strong>52~59%</strong>로 거의 일정하다
+(1회 56.1% · 3회 52.5% · 6-9회 55.8%).
+꼬리 의존은 이 규칙의 고유 성질이지 반복 신호 때문에 생기는 게 아니다.</p>
+
+<h2>결론</h2>
+<ul>
+  <li><strong>+42.6%를 기대값으로 삼으면 안 된다.</strong> GME·BTU 두 종목을 빼면 +19.7%,
+      회복장을 빼면 +9.8%이고 중앙값은 음수가 된다.</li>
+  <li><strong>방향은 맞다.</strong> 회차가 쌓일수록 시장 대비 성적이 좋아지는 흐름은
+      표본을 어떻게 잘라도 유지된다(1회 +6.5% → 3회 +19.3% → 4-5회 +22.5%).
+      다만 크기는 훨씬 작게 잡아야 한다.</li>
+  <li><strong>같이 커지는 위험을 봐야 한다.</strong> 반토막 확률이 7.5% → 16.2%로 두 배다.
+      회차가 쌓인 종목에 비중을 키운다면 그만큼 손실 폭도 각오해야 한다.</li>
+  <li><strong>표본이 얇다.</strong> 6-9회 구간은 198건 · 100종목뿐이다.
+      한 해에 6번 이상 걸리는 종목 자체가 드물어, 앞으로도 표본이 빨리 늘지 않는다.</li>
+</ul>
+
+<div class="note">
+  <span class="lab">재현</span>
+  <p>이 리포트의 모든 숫자는 <code>results/leaders_accel.json</code>의 <code>by_step_y</code>와
+  같은 원본에서 나온다. 화면의 <strong>주도주 → 같은 해에 몇 번째 신호인가</strong>에서
+  요약 표를 볼 수 있다.</p>
+</div>
+
+</div>
