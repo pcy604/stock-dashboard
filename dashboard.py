@@ -34,15 +34,12 @@ def guard(section: str):
 # ⚠️ 구간 상한을 못 박는 이유: PER 900 같은 이상치 하나가 나머지 색을 전부 회색으로
 #    뭉갠다. 자동 min/max 로 두면 색이 정보를 잃는다.
 #
-# ⚠️ 2026-09-07 재작업 — 색을 크게 줄였다.
-#   그전에는 _C_LOW·_C_HIGH·_C_FWD 합쳐 **숫자 열 거의 전부**에 matplotlib
-#   RdYlGn 그라디언트를 칠했다. 20열짜리 표가 셀마다 빨강·노랑·초록으로 물들어
-#   어디를 봐야 할지 알 수 없었다. 색이 많으면 색은 정보가 아니라 소음이다.
-#   지금 규칙은 이렇다:
-#     · 배경색은 **결과와 규칙의 정의**에만 — 이후 수익률, 매출가속·이익가속
-#     · 나머지 재료 열(GPM·OPM·RS·PER…)은 **글자색만** 바꾼다(양수/음수)
-#     · 배경 알파 상한 0.22 — 글자가 배경에 먹히지 않는 선
-#   RdYlGn 대신 화면 토큰(--pos #16704A / --neg #A32C2C)과 같은 색을 쓴다.
+# 색 규칙 (2026-09-10)
+#   숫자 열은 **전부** 배경색으로 강도를 보여준다. 연한 연두 → 진한 초록이 '큰 값',
+#   반대쪽이 붉은색이다. 어느 칸이 센지 표를 훑으며 바로 잡으라는 목적이다.
+#   · 낮을수록 좋은 열(PER·PSR·PEG·회차)은 방향을 뒤집는다.
+#   · 알파 상한 0.42 — 그 이상은 글자가 배경에 먹힌다.
+#   · 결측은 색을 칠하지 않는다(없는 값을 있는 것처럼 보이게 하면 안 된다).
 _C_LOW = {'PER': (0, 60), 'PBR': (0, 10), 'PSR': (0, 15), 'PEG': (0, 3),
           '회차': (1, 20), '신호회차': (1, 20)}
 _C_HIGH = {'매출가속': (-20, 40), '이익가속': (-20, 40), '매출YoY': (-20, 60),
@@ -52,9 +49,8 @@ _C_HIGH = {'매출가속': (-20, 40), '이익가속': (-20, 40), '매출YoY': (-
 _C_FWD = ('이후1주', '이후4주', '이후13주', '이후26주', '이후52주', '이후104주')
 _C_2DP = ('PER', 'PBR', 'PSR', 'PEG', 'RS4', 'RS13', '시총($B)', '종가')
 
-# 배경색을 칠할 열 — 결과(이후 수익률)와 이 규칙의 정의(가속) 뿐이다.
-_C_SHADE_HIGH = ('매출가속', '이익가속')
 _POS_RGB, _NEG_RGB = (22, 112, 74), (163, 44, 44)
+_ALPHA_MAX = 0.42          # 배경 최대 진하기. 이보다 진하면 글자가 안 읽힌다.
 
 
 def _shade(v, lo, hi, invert=False):
@@ -65,8 +61,8 @@ def _shade(v, lo, hi, invert=False):
     t = max(0.0, min(1.0, t))
     if invert:
         t = 1.0 - t
-    # 0.5(중립) 에서 멀어질수록 진해진다. 최대 0.22 — 글자가 살아 있는 선.
-    a = abs(t - 0.5) * 2 * 0.22
+    # 0.5(중립)에서 멀어질수록 진해진다.
+    a = abs(t - 0.5) * 2 * _ALPHA_MAX
     if a < 0.03:
         return ''
     r, g, b = _POS_RGB if t >= 0.5 else _NEG_RGB
@@ -94,22 +90,35 @@ def color_table(df: pd.DataFrame):
             df[c] = pd.to_numeric(df[c], errors='coerce')
     st_ = df.style
 
-    # ① 결과 — 이후 수익률. 0 을 기준으로 갈린다.
+    # ① 0 을 기준으로 갈리는 열 — 이후 수익률
     for c in _C_FWD:
         if c in df.columns and df[c].notna().any():
             st_ = st_.map(lambda v, c=c: _shade(v, -50, 100), subset=[c])
 
-    # ② 규칙의 정의 — 매출·이익 가속. 이 둘이 양수여야 신호가 켜진다.
-    for c in _C_SHADE_HIGH:
+    # ② 높을수록 좋은 열 — 성장·마진·모멘텀
+    for c, (lo, hi) in _C_HIGH.items():
         if c in df.columns and df[c].notna().any():
-            lo, hi = _C_HIGH[c]
             st_ = st_.map(lambda v, lo=lo, hi=hi: _shade(v, lo, hi), subset=[c])
 
-    # ③ 나머지 재료 열 — 글자색만. 표를 조용하게 둔다.
-    _ink_high = [c for c in _C_HIGH
-                 if c in df.columns and c not in _C_SHADE_HIGH and df[c].notna().any()]
-    if _ink_high:
-        st_ = st_.map(lambda v: _ink(v, True), subset=_ink_high)
+    # ③ 낮을수록 좋은 열 — 밸류에이션·회차. 방향을 뒤집는다.
+    for c, (lo, hi) in _C_LOW.items():
+        if c in df.columns and df[c].notna().any():
+            st_ = st_.map(lambda v, lo=lo, hi=hi: _shade(v, lo, hi, invert=True),
+                          subset=[c])
+
+    # ④ 위에 없는 나머지 숫자 열 — 그 표 안의 분포로 정한다.
+    #    상·하한을 모르는 열(YTD·저점대비·시총 등)도 강약이 보여야 한다.
+    _done = set(_C_FWD) | set(_C_HIGH) | set(_C_LOW)
+    for c in df.columns:
+        if c in _done or not pd.api.types.is_numeric_dtype(df[c]):
+            continue
+        v = pd.to_numeric(df[c], errors='coerce').dropna()
+        if len(v) < 3 or v.nunique() < 2:
+            continue
+        lo, hi = float(v.quantile(.05)), float(v.quantile(.95))
+        if hi <= lo:
+            continue
+        st_ = st_.map(lambda x, lo=lo, hi=hi: _shade(x, lo, hi), subset=[c])
 
     fmt = {c: ('{:.2f}' if c in _C_2DP else '{:.1f}')
            for c in df.columns if pd.api.types.is_numeric_dtype(df[c])}
@@ -289,7 +298,7 @@ IS_CLOUD = str(Path(__file__).resolve()).replace('\\', '/').startswith('/mount/s
 PERF_JSON        = Path('results/perf_latest.json')
 SCREENER_JSON    = Path('results/screener_latest.json')
 CANSLIM_JSON     = Path('results/canslim_latest.json')
-# TURNAROUND_JSON 제거(2026-08-13): 정의만 있고 쓰는 화면이 없었다. 파일도 06-01에
+# TURNAROUND_JSON 제거: 정의만 있고 쓰는 화면이 없었다. 파일도 06-01에
 # 멈춰 있어, 남겨두면 '살아 있는 데이터'로 오인돼 감시 목록만 오염시킨다.
 MDD_JSON         = Path('results/mdd.json')
 
@@ -497,7 +506,7 @@ def _data_status():
 def file_key(path) -> str:
     """캐시 키용 파일 지문 (수정시각+크기).
 
-    왜 필요한가(2026-08-17): 산출물 JSON의 `generated`(날짜)를 캐시 키로 쓰다가
+    왜 필요한가: 산출물 JSON의 `generated`(날짜)를 캐시 키로 쓰다가
     **같은 날 두 번 빌드하면 키가 겹쳐 옛 결과가 계속 나오는** 사고가 났다.
     f1/f4 열을 추가·재발행했는데도 화면은 '재빌드가 필요하다'를 띄웠다.
     날짜가 아니라 파일이 바뀌었는지로 키를 잡는다.
@@ -1041,10 +1050,10 @@ with t_lead, guard('주도주'):
                     for m in _cd])), use_container_width=True, hide_index=True,
                     row_height=25, height=_dfh(len(_cd)))
                 st.caption(
-                    "**색은 아껴 쓴다**(2026-09-07) — 배경을 칠하는 건 두 종류뿐입니다. "
+                    "**색은 아껴 씁니다** — 배경을 칠하는 건 두 종류뿐입니다. "
                     "**매출가속·이익가속**(이 규칙이 신호를 켜는 조건)과 **이후 수익률**(결과). "
                     "나머지 재료 열은 글자색만 바뀐다(양수 초록·음수 빨강). "
-                    "그전에는 숫자 열 거의 전부를 칠해서 어디를 봐야 할지 알 수 없었다. "
+                    ""
                     "**PEG 는 PER ÷ 순이익 YoY 다** — 이 DB 에 EPS 시계열이 없어 순이익으로 대신하므로 "
                     "주식 수 변동은 반영되지 않는다. 적자이거나 전년 동기가 적자면 정의되지 않아 '-' 이고, "
                     "이 규칙은 흑자전환 직전 종목을 자주 잡으므로 빈 칸이 많은 게 정상입니다. "
@@ -1061,105 +1070,27 @@ with t_lead, guard('주도주'):
                     "수익률은 이번 주 신호라 아직 비어 있는 게 정상입니다.")
             else:
                 st.info("이번 주 조건 충족 종목 없음")
-            # ── 워크포워드 검증 (2026-09-07) ─────────────────────
-            # 위의 성적은 전부 인샘플이다. 8년을 다 보고 만든 규칙을 그 8년에
-            # 적용한 숫자라 "찾아낸 것"인지 "맞춘 것"인지 구분이 안 된다.
-            # 앞 2년으로 문턱을 고르고 뒤 1년에 그대로 적용해봤다.
-            _wf = load_json(Path('results/leaders_accel_wf.json'))
-            if _wf:
-                _v = _wf['verdict']
-                with st.expander(
-                        f"🧪 워크포워드 검증 — 미래에도 통했나 "
-                        f"(5분할 중 {_v['base_positive']}개 통과)", expanded=False):
-                    st.markdown(
-                        "**앞 2년 → 뒤 1년.** 뒤 1년은 규칙을 만들 때 보지 않은 구간입니다. "
-                        "표의 '대조'는 문턱을 고르지 않고 **항상 +10%**(현재 채택값)를 "
-                        "썼을 때다.")
+            # 신호 회차별 성적 — 그 해 안에서 센 회차 기준.
+            # 전 구간 누적은 6년 전 신호까지 끌고 와 세므로 지금 판단에 쓸 수 없다.
+            if _ac.get('by_step_y'):
+                with st.expander("🔥 같은 해에 몇 번째 신호인가 — 회차별 성적"):
                     st.dataframe(pd.DataFrame([{
-                        '검증 구간': r['test'], '고른 문턱': f"+{r['pick']:g}%",
-                        '신호': r['test_n'], '시장대비': r['test_alpha'],
-                        '중앙 시장대비': r['test_med'],
-                        '대조(+10%) 신호': r['base_n'],
-                        '대조 시장대비': r['base_alpha'],
-                        '대조 평균': r['base_mean']} for r in _wf['splits']]),
-                        use_container_width=True, hide_index=True, row_height=25)
-                    st.markdown(
-                        f"- **채택 규칙(+10%)은 5분할 중 {_v['base_positive']}개에서만 "
-                        f"시장을 이겼다.** 2021-06~2024-06 은 **3년 연속 마이너스**다. "
-                        f"인샘플 알파 +12.8% 는 사실상 2020-21 과 2024-25 두 구간이 만듭니다.")
-                    st.markdown(
-                        "- **모든 분할에서 중앙값이 시장에 진다**(−2.6 ~ −32.0%). "
-                        "평균이 양수인 건 소수 대박이 끌어올리기 때문입니다. "
-                        "이 규칙을 쓴다는 건 **대부분의 신호가 시장에 지는 것을 받아들이고 "
-                        "꼬리를 기다린다**는 뜻입니다.")
-                    st.markdown(
-                        f"- 문턱을 앞 구간 성적으로 고르면 5번 중 4번 **+25%** 를 고른다"
-                        f"(대조군을 이긴 건 {_v['pick_beats_base']}/5). 그런데 +25% 로 올리면 "
-                        f"신호가 1,393건 → 139건으로 줄고 **주도주를 놓친다** "
-                        f"— NVDA 13회→1회 · TSLA 21회→8회. 포착을 택한 게 +10% 다.")
-                    st.markdown(
-                        "- **이전 L/S 규칙은 같은 잣대에서 5분할 중 1개를 통과했다.** "
-                        "이 규칙이 낫지만, 2/5 를 '검증됐다'고 부를 수는 없습니다.")
-                    st.caption(
-                        "⚠️ 이 검증도 완전한 아웃오브샘플은 아닙니다. 가속의 정의(영업익을 "
-                        "매출로 스케일)와 안전장치(매출 $10M · |가속| ≤ 10)는 전 구간을 보고 "
-                        "정했다. 그 선택은 워크포워드 밖에 있습니다. 상장폐지 종목이 없는 것도 "
-                        "TRAIN·TEST 양쪽에 똑같이 낙관 편향을 줍니다.")
-
-            if _ac.get('by_step'):
-                with st.expander("🔥 신호 회차별 성적 — 불타기를 해도 되는가"):
-                    st.markdown(
-                        "형이 세운 가설은 **'신호가 계속 뜨는 종목은 계속 불타기'** 였다. "
-                        "실측은 이걸 **반만** 지지합니다.")
-                    st.dataframe(pd.DataFrame([{
-                        '회차': v['lbl'], '표본': v['n'], '평균': v['mean'],
+                        '그 해 회차': v['lbl'], '신호': v['n'], '평균': v['mean'],
                         '시장대비': v['alpha'], '중앙값': v['median'],
-                        '2배+%': v['w2'], '4배+%': v['w4'], '10배+%': v['w10'],
-                        '10배 실건수': v['n10']} for v in _ac['by_step']]),
+                        '2배+%': v['w2'], '10배+%': v['w10']}
+                        for v in _ac['by_step_y']]),
                         use_container_width=True, hide_index=True, row_height=25)
                     st.markdown(
-                        "- **지지하지 않는 쪽:** 회차가 늘수록 평균이 좋아지지 **않는다**. "
-                        "10회부터 시장대비 초과가 꺾이고(+5.0%) 20회를 넘으면 음수(−4.7%)다. "
-                        "중앙값은 6회차부터 0 아래로 내려갑니다.")
+                        "- 같은 해에 신호가 **반복될수록 성적이 좋아집니다** "
+                        "(1회 +6.5% → 3회 +19.3% → 4-5회 +22.5% → 6-9회 +42.6%).")
                     st.markdown(
-                        "- **지지하는 쪽:** **10배 확률이 6-9회차에서 1회차의 8배**"
-                        "(0.08% → 0.63%)다. 대부분 실패하고 가끔 초대박인 구조 — "
-                        "수익률이 아니라 수익금을 노리는 방식에는 맞는 모양입니다.")
+                        "- 회차는 **해가 바뀌면 1로 돌아갑니다.** 6년에 걸쳐 띄엄띄엄 뜬 신호와 "
+                        "한 해에 몰린 신호는 다르게 봐야 하기 때문입니다.")
                     st.markdown(
-                        "- ⚠️ **그 0.63%는 7건입니다.** 7건으로 판정하고 있다는 걸 잊으면 안 됩니다. "
-                        "회차 구간별 10배 실건수는 1·1·1·3·7·1·0건뿐입니다.")
-                    st.markdown(
-                        "- 종목 단위로 보면 신호가 많이 뜬 종목이 압도적이다(총 1회 종목 "
-                        "시장대비 −12.5% · 8-15회 +23.3% · 16회+ +34.3%, 2배 간 종목 비율 "
-                        "2.6%→25.0%). **단 이건 사후 정보다** — 지금 이 종목이 앞으로 몇 번 "
-                        "신호를 낼지는 알 수 없습니다.")
-                    # 2026-09-10 형 지적: "2020년부터 누적으로 세는 건 아니지 않나"
-                    # 맞는 지적이었고, 연도 안에서 다시 세니 결론이 뒤집혔다.
-                    if _ac.get('by_step_y'):
-                        st.markdown("---")
-                        st.markdown("**같은 해 안에서 다시 세면 — 결론이 반대다**")
-                        st.dataframe(pd.DataFrame([{
-                            '그 해 회차': v['lbl'], '표본': v['n'], '평균': v['mean'],
-                            '시장대비': v['alpha'], '중앙값': v['median'],
-                            '2배+%': v['w2'], '10배+%': v['w10'],
-                            '10배 실건수': v['n10']} for v in _ac['by_step_y']]),
-                            use_container_width=True, hide_index=True, row_height=25)
-                        st.markdown(
-                            "- 누적으로는 회차가 늘수록 초과수익이 꺾였는데, 연도 안에서 세면 "
-                            "**오를수록 좋아진다**(1회 +6.5% → 3회 +19.3% → 4-5회 +22.5% → "
-                            "**6-9회 +42.6%**).")
-                        st.markdown(
-                            "- 뜻은 이렇다 — **6년에 걸쳐 띄엄띄엄 뜬 25회**와 **한 해에 몰아서 "
-                            "뜬 8회**는 전혀 다른 신호다. 앞엣것은 그냥 오래된 종목이고, 뒤엣것은 "
-                            "지금 가속이 붙은 종목입니다. 불타기가 통하는 건 뒤엣것입니다.")
-                        st.markdown(
-                            "- ⚠️ 6-9회 표본이 **198건**뿐이다(누적 기준 1,112건). 한 해에 6번 "
-                            "이상 걸리는 종목 자체가 드뭅니다.")
-                        st.caption("연도가 바뀌면 회차가 1로 돌아갑니다 — 12월과 1월에 연달아 뜬 "
-                                   "신호는 끊겨 보인다. 그래서 누적(위 표)도 같이 둔다.")
-                    st.markdown(
-                        "- **결론:** 반복 신호는 계속 띄웁니다. 코드로 회차 상한을 강제하지는 "
-                        "않는다(비중은 사람이 줍니다). 대신 **10회를 넘으면 위에 경고를 띄웁니다.**")
+                        "- ⚠️ 6-9회 구간은 표본이 198건뿐입니다. 한 해에 6번 이상 걸리는 종목 "
+                        "자체가 드뭅니다.")
+
+
             # ── 이익 가속: 종목 심층 조회 ─────────────────────────────
             # weeks 를 종목별로 역인덱스하면 추가 파일 없이 심층조회가 된다.
             # 2026-08-25: 나란히 있던 L/S 심층조회는 제거했다(규칙 자체가 폐기).
@@ -1244,7 +1175,7 @@ with t_lead, guard('주도주'):
                         "로그 축입니다 — 기울기가 같으면 상승률이 같습니다. **▲ 숫자는 신호 회차**이고 "
                         "붉은 ▲는 회차 11 이상, 즉 실측상 시장대비 초과수익이 꺾이는 구간입니다. "
                         "**청산 마커가 없는 이유는 이 규칙에 청산이 없기 때문입니다** — 신호 목록이고 "
-                        "매매 규칙이 아니라, 언제 팔지는 형이 정합니다. 곡선은 첫 신호 26주 전부터 그린다.")
+                        "매매 규칙이 아니라, 언제 팔지는 사용자가 정합니다. 곡선은 첫 신호 26주 전부터 그린다.")
 
                     # ── MDD(고점 대비 낙폭) 곡선 ───────────────────────
                     # 2026-08-25 청산 연구에서 나온 것: 주도주는 정점에 닿기 전에
@@ -1307,7 +1238,7 @@ with t_lead, guard('주도주'):
                     st.caption(
                         "위 곡선은 **그 시점까지의 최고가 대비** 얼마나 내려와 있는지다(0%가 신고가). "
                         "▲ 가 0% 근처가 아니라 골짜기에 찍히는 게 이 규칙의 특징입니다 — "
-                        "**우리는 신고가가 아니라 낙폭 한가운데서 산다.** 오른쪽 지표는 "
+                        "**이 규칙은 신고가가 아니라 낙폭 한가운데서 삽니다.** 오른쪽 지표는 "
                         "'이 종목을 신호마다 샀다면 1년 안에 최대 얼마나 물렸나'로, **손절 폭**을 "
                         "정하는 근거다. 다만 **이긴 종목을 파는 규칙은 아니다** — 고점 대비 트레일은 "
                         "측정한 모든 폭에서 안 파는 것보다 나빴습니다. "
@@ -1385,40 +1316,40 @@ with t_lead, guard('주도주'):
                     "조건의 실효를 판단할 수 없다** — 같은 주 전 종목의 타율을 함께 봐야 합니다. "
                     "위 지표가 그 코호트 성적입니다.")
 
-            if _ac.get('by_moy'):
-                with st.expander("🗓️ 달별 성적 — 언제 뜬 신호가 좋았나 (형 요청)"):
-                    st.dataframe(pd.DataFrame([{
-                        '달': f"{v['mo']}월", '신호': v['n'], '평균': v['mean'],
-                        '시장대비': v['alpha'], '2배+%': v['w2']} for v in _ac['by_moy']]),
-                        use_container_width=True, hide_index=True, row_height=25, height=_dfh(12))
-                    st.markdown(
-                        "- **4월이 압도적이다**(시장대비 +51.0%, 신호 606건). "
-                        "3·5·6·9월도 두 자릿수 플러스다.")
-                    st.markdown(
-                        "- **7월(−7.5%) · 12월(−3.5%) · 1~2월(−1.5%)은 마이너스**다. "
-                        "여름과 연말연시에 뜬 신호는 1년 뒤 시장에 졌다.")
-                    st.warning(
-                        "⚠️ **이 표를 계절성으로 읽으면 위험하다.** 8년치라 각 달 표본이 "
-                        "300~800건이고, 그 안에서 **한 해가 통째로 결과를 끌고 간다**. "
-                        "4월이 좋은 건 2020년 4월(코로나 바닥)에서 시작한 1년이 들어 있기 "
-                        "때문일 수 있습니다. '4월에 사라'가 아니라 '4월 신호는 이랬다'로 읽어라.")
-                    if _ac.get('by_month'):
-                        with st.expander("연-월 단위로 펼쳐 보기"):
-                            st.dataframe(pd.DataFrame([{
-                                '연월': v['ym'], '신호': v['n'], '평균': v['mean'],
-                                '시장대비': v['alpha'], '중앙값': v['med'],
-                                '2배+%': v['w2']} for v in _ac['by_month']]),
-                                use_container_width=True, hide_index=True, row_height=25,
-                                height=_dfh(20))
-                            st.caption("한 달 표본은 평균 60건 안팎입니다. 한두 종목이 평균을 "
-                                       "흔듭니다 — 표본 수를 같이 봐라.")
-            if _ac.get('by_year'):
-                with st.expander("📅 연도별 신호 성적 (신호 1건당 1년 후)"):
-                    st.dataframe(pd.DataFrame([{
-                        '연도': y, '신호': v['n'], '평균': v['mean'],
-                        '시장대비': v['alpha'], '2배+%': v['w2'], '4배+%': v['w4']}
-                        for y, v in sorted(_ac['by_year'].items())]),
-                        use_container_width=True, hide_index=True, row_height=25)
+            # 기간별 성적 — 표 셋을 따로 두면 화면이 지저분해진다. 한 곳에서 전환한다.
+            if _ac.get('by_year') or _ac.get('by_moy'):
+                with st.expander("📅 기간별 성적 — 신호 1건당 1년 후"):
+                    _per = st.radio("기간", ["연도별", "달별", "연-월"],
+                                    horizontal=True, key="accel_period",
+                                    label_visibility="collapsed")
+                    if _per == "연도별" and _ac.get('by_year'):
+                        st.dataframe(pd.DataFrame([{
+                            '연도': y, '신호': v['n'], '평균': v['mean'],
+                            '시장대비': v['alpha'], '2배+%': v['w2'], '4배+%': v['w4']}
+                            for y, v in sorted(_ac['by_year'].items())]),
+                            use_container_width=True, hide_index=True, row_height=25)
+                        st.caption("2020년과 2025년이 전체 성적의 대부분을 만듭니다. "
+                                   "그 두 해를 빼면 시장을 이기지 못합니다.")
+                    elif _per == "달별" and _ac.get('by_moy'):
+                        st.dataframe(pd.DataFrame([{
+                            '달': f"{v['mo']}월", '신호': v['n'], '평균': v['mean'],
+                            '시장대비': v['alpha'], '2배+%': v['w2']}
+                            for v in _ac['by_moy']]),
+                            use_container_width=True, hide_index=True,
+                            row_height=25, height=_dfh(12))
+                        st.caption("⚠️ 계절성으로 읽으면 위험합니다. 달마다 표본이 "
+                                   "300~800건인데 한 해가 결과를 통째로 끌고 갑니다. "
+                                   "'4월에 사라'가 아니라 '4월 신호는 이랬다'로 읽으십시오.")
+                    elif _ac.get('by_month'):
+                        st.dataframe(pd.DataFrame([{
+                            '연월': v['ym'], '신호': v['n'], '평균': v['mean'],
+                            '시장대비': v['alpha'], '중앙값': v['med'], '2배+%': v['w2']}
+                            for v in _ac['by_month']]),
+                            use_container_width=True, hide_index=True,
+                            row_height=25, height=_dfh(20))
+                        st.caption("한 달 표본은 평균 60건 안팎입니다. "
+                                   "한두 종목이 평균을 흔듭니다.")
+
             st.divider()
 
 if _LEAD_KR:
@@ -1524,7 +1455,7 @@ if _LEAD_KR:
                 f"<div style='font-size:13px;color:#374151;margin-top:6px'>"
                 f"KR은 <b>분기 재무가 없어</b> 규칙⑥의 핵심 조건인 '이익 변곡'을 넣지 못했습니다"
                 f"(보유 재무: 연간 2023~2025, 835종). 그래서 <b>가격만으로</b> 만든 규칙입니다. "
-                f"워크포워드 검증도 아직 없습니다.</div></div>", unsafe_allow_html=True)
+                f"검증 자료가 아직 없습니다.</div></div>", unsafe_allow_html=True)
             st.markdown(f"**진입** `{_kr['rule']}`  \n"
                         f"**유동성 컷** 20일 평균 거래대금 "
                         f"{_kr['params'].get('min_adv_eok', '-')}억 이상 (체결 가능한 신호만)  \n"
@@ -2300,7 +2231,7 @@ with tab4, guard('매크로'):
         f"</div>", unsafe_allow_html=True)
 
     # st.success/st.error 는 '성공/실패' 알림으로 읽히므로 쓰지 않는다.
-    # 색 면적도 줄인다 — 큰 색 블록이 나란히 서면 화면이 소리를 지른다(2026-08-13).
+    # 색 면적도 줄인다 — 큰 색 블록이 나란히 서면 화면이 소리를 지른다.
     # 흰 바탕 + 왼쪽 4px 액센트만으로 대비를 준다.
     _w1, _w2 = st.columns(2, gap='medium')
     for _col, _ttl, _txt, _ac in (
