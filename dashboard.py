@@ -29,100 +29,58 @@ def guard(section: str):
 
 
 # ── 표에 숫자 강도 색 입히기 ─────────────────────────────────────────
-# 열 이름으로 성격을 판별한다. 세 갈래뿐이다.
-#   낮을수록 좋음 (밸류에이션·신호회차) · 높을수록 좋음 (성장·모멘텀) · 0 기준 (수익률)
-# ⚠️ 구간 상한을 못 박는 이유: PER 900 같은 이상치 하나가 나머지 색을 전부 회색으로
-#    뭉갠다. 자동 min/max 로 두면 색이 정보를 잃는다.
-#
-# 색 규칙 (2026-09-10)
-#   숫자 열은 **전부** 배경색으로 강도를 보여준다. 연한 연두 → 진한 초록이 '큰 값',
-#   반대쪽이 붉은색이다. 어느 칸이 센지 표를 훑으며 바로 잡으라는 목적이다.
-#   · 낮을수록 좋은 열(PER·PSR·PEG·회차)은 방향을 뒤집는다.
-#   · 알파 상한 0.42 — 그 이상은 글자가 배경에 먹힌다.
-#   · 결측은 색을 칠하지 않는다(없는 값을 있는 것처럼 보이게 하면 안 된다).
-_C_LOW = {'PER': (0, 60), 'PBR': (0, 10), 'PSR': (0, 15), 'PEG': (0, 3),
-          '회차': (1, 20), '신호회차': (1, 20)}
-_C_HIGH = {'매출가속': (-20, 40), '이익가속': (-20, 40), '매출YoY': (-20, 60),
-           'GPM': (0, 70), 'OPM': (-20, 40), 'ΔGPM': (-10, 10), 'ΔOPM': (-10, 10),
-           'RS4': (0.8, 2.0), 'RS13': (0.8, 2.0), '그주상승': (10, 40),
-           '고점대비': (-60, 0), '영업익($M)': (0, 500)}
-_C_FWD = ('이후1주', '이후4주', '이후13주', '이후26주', '이후52주', '이후104주')
+# 규칙은 하나다: **그 열 안에서 값이 클수록 진한 초록.**
+#   · 색조는 초록 하나만 쓴다. 붉은색은 안 쓴다 — 음수라고 나쁜 게 아니고,
+#     이 색은 좋고 나쁨이 아니라 **크기**를 나타낸다.
+#   · 기준은 열마다 따로 잡는다. 열이 담는 게 서로 다르기 때문이다
+#     (YTD 는 수백 %, RS 는 1 근처, 시총은 조 단위).
+#     그 표 안의 5~95 분위로 정규화하고 바깥값은 양 끝에서 멈춘다 —
+#     이상치 하나가 나머지를 전부 연하게 뭉개는 걸 막는다.
+#   · 회차·주차·코드처럼 **크기가 의미 없는 열은 칠하지 않는다.**
+#   · 결측은 칠하지 않는다. 없는 값을 있는 것처럼 보이면 안 된다.
 _C_2DP = ('PER', 'PBR', 'PSR', 'PEG', 'RS4', 'RS13', '시총($B)', '종가')
 
-_POS_RGB, _NEG_RGB = (22, 112, 74), (163, 44, 44)
-_ALPHA_MAX = 0.42          # 배경 최대 진하기. 이보다 진하면 글자가 안 읽힌다.
+# 색을 칠하지 않는 열 — 순번·식별자·날짜. 크다고 진할 이유가 없다.
+_NO_SHADE = {'회차', '신호회차', '올해', '주차', '코드', '종목', '연도', '달', '연월',
+             '그 해 회차', '52주고', '신호', '표본'}
+
+_GREEN = (22, 112, 74)     # 단일 색조
+_ALPHA_MAX = 0.40          # 이보다 진하면 글자가 배경에 먹힌다
 
 
-def _shade(v, lo, hi, invert=False):
-    """값을 lo~hi 안에서 정규화해 옅은 배경으로. 범위 밖은 상·하한에서 멈춘다."""
-    if v is None or v != v:
+def _shade(v, lo, hi):
+    """그 열의 lo~hi 안에서 값이 클수록 진한 초록."""
+    if v is None or v != v or hi <= lo:
         return ''
-    t = (float(v) - lo) / (hi - lo) if hi != lo else 0.5
+    t = (float(v) - lo) / (hi - lo)
     t = max(0.0, min(1.0, t))
-    if invert:
-        t = 1.0 - t
-    # 0.5(중립)에서 멀어질수록 진해진다.
-    a = abs(t - 0.5) * 2 * _ALPHA_MAX
-    if a < 0.03:
-        return ''
-    r, g, b = _POS_RGB if t >= 0.5 else _NEG_RGB
+    a = 0.04 + t * (_ALPHA_MAX - 0.04)      # 최솟값도 아주 연하게는 보이도록
+    r, g, b = _GREEN
     return f'background-color: rgba({r},{g},{b},{a:.3f})'
 
 
-def _ink(v, good_high=True):
-    """배경 대신 글자색만. 재료 열은 이쪽을 쓴다."""
-    if v is None or v != v:
-        return ''
-    x = float(v)
-    if abs(x) < 1e-9:
-        return ''
-    good = (x > 0) if good_high else (x < 0)
-    return f'color: rgb{_POS_RGB}; font-weight:600' if good else f'color: rgb{_NEG_RGB}'
-
-
 def color_table(df: pd.DataFrame):
-    """숫자 강도를 색으로 보여주는 Styler. st.dataframe 에 그대로 넘긴다.
+    """열마다 그 열의 분포로 강도를 칠한 Styler. st.dataframe 에 그대로 넘긴다.
 
     빈 칸은 'None' 이 아니라 '-' 로 낸다 — 없는 데이터를 있는 척하지 않되,
     파이썬 내부 표현을 화면에 흘리지도 않는다."""
-    for c in list(_C_LOW) + list(_C_HIGH) + list(_C_FWD):
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors='coerce')
     st_ = df.style
-
-    # ① 0 을 기준으로 갈리는 열 — 이후 수익률
-    for c in _C_FWD:
-        if c in df.columns and df[c].notna().any():
-            st_ = st_.map(lambda v, c=c: _shade(v, -50, 100), subset=[c])
-
-    # ② 높을수록 좋은 열 — 성장·마진·모멘텀
-    for c, (lo, hi) in _C_HIGH.items():
-        if c in df.columns and df[c].notna().any():
-            st_ = st_.map(lambda v, lo=lo, hi=hi: _shade(v, lo, hi), subset=[c])
-
-    # ③ 낮을수록 좋은 열 — 밸류에이션·회차. 방향을 뒤집는다.
-    for c, (lo, hi) in _C_LOW.items():
-        if c in df.columns and df[c].notna().any():
-            st_ = st_.map(lambda v, lo=lo, hi=hi: _shade(v, lo, hi, invert=True),
-                          subset=[c])
-
-    # ④ 위에 없는 나머지 숫자 열 — 그 표 안의 분포로 정한다.
-    #    상·하한을 모르는 열(YTD·저점대비·시총 등)도 강약이 보여야 한다.
-    _done = set(_C_FWD) | set(_C_HIGH) | set(_C_LOW)
     for c in df.columns:
-        if c in _done or not pd.api.types.is_numeric_dtype(df[c]):
+        if c in _NO_SHADE:
             continue
-        v = pd.to_numeric(df[c], errors='coerce').dropna()
-        if len(v) < 3 or v.nunique() < 2:
+        v = pd.to_numeric(df[c], errors='coerce')
+        if v.notna().sum() < 2 or v.nunique() < 2:
             continue
         lo, hi = float(v.quantile(.05)), float(v.quantile(.95))
+        if hi <= lo:                     # 분위가 겹치면 전체 범위로
+            lo, hi = float(v.min()), float(v.max())
         if hi <= lo:
             continue
         st_ = st_.map(lambda x, lo=lo, hi=hi: _shade(x, lo, hi), subset=[c])
 
     fmt = {c: ('{:.2f}' if c in _C_2DP else '{:.1f}')
            for c in df.columns if pd.api.types.is_numeric_dtype(df[c])}
-    for c in ('회차', '신호회차'):
+    for c in ('회차', '신호회차', '올해', '신호', '표본'):
         if c in fmt:
             fmt[c] = '{:.0f}'
     return st_.format(fmt, na_rep='-')
@@ -1050,24 +1008,18 @@ with t_lead, guard('주도주'):
                     for m in _cd])), use_container_width=True, hide_index=True,
                     row_height=25, height=_dfh(len(_cd)))
                 st.caption(
-                    "**색은 아껴 씁니다** — 배경을 칠하는 건 두 종류뿐입니다. "
-                    "**매출가속·이익가속**(이 규칙이 신호를 켜는 조건)과 **이후 수익률**(결과). "
-                    "나머지 재료 열은 글자색만 바뀐다(양수 초록·음수 빨강). "
-                    ""
-                    "**PEG 는 PER ÷ 순이익 YoY 다** — 이 DB 에 EPS 시계열이 없어 순이익으로 대신하므로 "
+                    "**색은 그 열 안에서 값이 클수록 진해집니다.** 열마다 담는 것이 달라 "
+                    "(YTD 는 수백 %, RS 는 1 근처) 기준도 열별로 따로 잡습니다. "
+                    "좋고 나쁨이 아니라 **크기**를 나타냅니다. "
+                    "**PEG 는 PER ÷ 순이익 YoY 입니다** — 이 DB 에 EPS 시계열이 없어 순이익으로 대신하므로 "
                     "주식 수 변동은 반영되지 않는다. 적자이거나 전년 동기가 적자면 정의되지 않아 '-' 이고, "
                     "이 규칙은 흑자전환 직전 종목을 자주 잡으므로 빈 칸이 많은 게 정상입니다. "
                     "**PBR 은 없다** — 자기자본 시계열이 한국 835종뿐이고 이 화면은 미국 전용입니다.")
-                _hi = [m['sym'] for m in _cd if (m.get('n') or 0) > 10]
-                if _hi:
-                    st.warning(
-                        f"**회차 10 초과: {', '.join(_hi)}** — 실측상 10회부터 시장대비 "
-                        f"초과수익이 꺾이고(1~3회 +14% → 10-19회 +5.0% → 20회+ −4.7%) "
-                        f"20회를 넘으면 마이너스다. 추가 매수 전에 아래 회차별 표를 볼 것.")
                 st.caption(
-                    "**신호회차** = 이 종목이 이 규칙에서 몇 번째 신호인가. **매출가속·이익가속**은 "
-                    "성장률의 전분기 대비 변화(%p)이고 둘 다 양수여야 신호가 켜집니다. 이후 "
-                    "수익률은 이번 주 신호라 아직 비어 있는 게 정상입니다.")
+                    "**회차**는 이 종목이 올해 몇 번째로 낸 신호인지입니다. 해가 바뀌면 "
+                    "1로 돌아갑니다. **매출가속·이익가속**은 성장률의 전분기 대비 변화(%p)이고 "
+                    "둘 다 양수여야 신호가 켜집니다. 이후 수익률은 이번 주 신호라 아직 "
+                    "비어 있는 게 정상입니다.")
             else:
                 st.info("이번 주 조건 충족 종목 없음")
             # 신호 회차별 성적 — 그 해 안에서 센 회차 기준.
@@ -1141,10 +1093,12 @@ with t_lead, guard('주도주'):
                         x=_apx.index, y=_apx.values, mode='lines', name='주봉 종가',
                         line=dict(color='#12161b', width=1.4),
                         hovertemplate='%{x|%Y-%m-%d}<br>$%{y:,.2f}<extra></extra>'))
-                    # 회차 10 초과는 색을 달리한다 — 실측상 초과수익이 꺾이는 구간이다
-                    for _lo, _hi, _cl, _lb in [(1, 10, '#1f6b45', '회차 1-10'),
-                                               (11, 10**9, '#a03028', '회차 11+')]:
-                        _pts = [r for r in _ar if _lo <= (r['n'] or 0) <= _hi
+                    # 올해 회차로 색을 나눈다 — 같은 해에 반복될수록 성적이 좋다
+                    # 그 해 몇 번째인지로 나눈다. 반복될수록 진하게 — 색은 크기다.
+                    for _lo, _hi, _cl, _lb in [(1, 2, '#8FC4AC', '올해 1-2회'),
+                                               (3, 5, '#3E8F6B', '올해 3-5회'),
+                                               (6, 10**9, '#125C3D', '올해 6회+')]:
+                        _pts = [r for r in _ar if _lo <= (r.get('n_y') or 0) <= _hi
                                 and r['close'] is not None]
                         if not _pts:
                             continue
@@ -1153,7 +1107,7 @@ with t_lead, guard('주도주'):
                             y=[r['close'] for r in _pts], mode='markers+text',
                             marker=dict(symbol='triangle-up', size=12, color=_cl,
                                         line=dict(color='white', width=1)),
-                            text=[str(r['n']) for r in _pts],
+                            text=[str(r.get('n_y') or '') for r in _pts],
                             textposition='bottom center',
                             textfont=dict(size=9, color=_cl), name=_lb,
                             customdata=[[r['up'], r['oia'], r['rva'],
@@ -1172,10 +1126,12 @@ with t_lead, guard('주도주'):
                                     xanchor='right', x=1))
                     st.plotly_chart(_f, use_container_width=True)
                     st.caption(
-                        "로그 축입니다 — 기울기가 같으면 상승률이 같습니다. **▲ 숫자는 신호 회차**이고 "
-                        "붉은 ▲는 회차 11 이상, 즉 실측상 시장대비 초과수익이 꺾이는 구간입니다. "
+                        "로그 축입니다 — 기울기가 같으면 상승률이 같습니다. "
+                        "**▲ 숫자는 그 해 몇 번째 신호인지**이고, 반복될수록 진한 초록입니다. "
+                        "같은 해에 신호가 쌓인 구간일수록 성적이 좋았습니다. "
                         "**청산 마커가 없는 이유는 이 규칙에 청산이 없기 때문입니다** — 신호 목록이고 "
-                        "매매 규칙이 아니라, 언제 팔지는 사용자가 정합니다. 곡선은 첫 신호 26주 전부터 그린다.")
+                        "매매 규칙이 아니라, 언제 팔지는 사용자가 정합니다. "
+                        "곡선은 첫 신호 26주 전부터 그립니다.")
 
                     # ── MDD(고점 대비 낙폭) 곡선 ───────────────────────
                     # 2026-08-25 청산 연구에서 나온 것: 주도주는 정점에 닿기 전에
