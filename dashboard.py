@@ -41,8 +41,8 @@ def guard(section: str):
 _C_2DP = ('PER', 'PBR', 'PSR', 'PEG', 'RS4', 'RS13', '시총($B)', '종가')
 
 # 색을 칠하지 않는 열 — 순번·식별자·날짜. 크다고 진할 이유가 없다.
-_NO_SHADE = {'회차', '신호회차', '올해', '주차', '코드', '종목', '연도', '달', '연월',
-             '그 해 회차', '52주고', '신호', '표본'}
+_NO_SHADE = {'회차', '주차', '코드', '종목', '연도', '달', '연월',
+             '그 해 회차', '신호', '표본', '신호 수', '첫 신호', '마지막 신호'}
 
 _GREEN = (22, 112, 74)     # 단일 색조
 _ALPHA_MAX = 0.40          # 이보다 진하면 글자가 배경에 먹힌다
@@ -57,6 +57,62 @@ def _shade(v, lo, hi):
     a = 0.04 + t * (_ALPHA_MAX - 0.04)      # 최솟값도 아주 연하게는 보이도록
     r, g, b = _GREEN
     return f'background-color: rgba({r},{g},{b},{a:.3f})'
+
+
+# ── 열 설명 — 표 머리에 마우스를 올리면 계산식이 뜬다 ─────────────────
+# 화면에 약어가 많은데 어디에도 정의가 없었다. 표 밖 캡션에 길게 쓰는 대신
+# 그 열 자리에 붙인다.
+_COL_HELP = {
+    '회차': '이 종목이 **올해** 몇 번째로 낸 신호인지. 해가 바뀌면 1로 돌아갑니다.',
+    '그주상승': '신호가 난 그 주의 종가 상승률(%). 이 규칙은 +10% 이상일 때만 신호를 냅니다.',
+    '시총($B)': '신호 시점의 시가총액(십억 달러). 주식수 × 그 주 종가.',
+    '종가': '신호가 난 주의 종가(달러).',
+    '고점대비': '(종가 ÷ 52주 최고가 − 1) × 100. 0%면 신고가, 음수면 그만큼 내려와 있습니다.',
+    'YTD': '연초 첫 거래일 종가 대비 수익률(%). 신호 시점 기준입니다.',
+    '52주고': '최근 52주 중 가장 높았던 **주봉 종가**. 장중 고가가 아닙니다.',
+    '52주저': '최근 52주 중 가장 낮았던 **주봉 종가**.',
+    '저점대비': '(종가 ÷ 52주 최저가 − 1) × 100. 바닥에서 얼마나 올라왔는지입니다.',
+    '매출가속': '매출 성장률의 **전분기 대비 변화**(%p). '
+              '이번 분기 YoY − 직전 분기 YoY. 양수여야 신호가 켜집니다.',
+    '이익가속': '영업이익 성장률의 전분기 대비 변화(%p). '
+              '성장률 = (영업익 − 4분기 전 영업익) ÷ |매출|. '
+              '적자에서도 정의되도록 매출로 나눕니다. 양수여야 신호가 켜집니다.',
+    '매출YoY': '매출의 전년 동기 대비 성장률(%).',
+    'GPM': '매출총이익률 = 매출총이익 ÷ 매출 × 100.',
+    'ΔGPM': 'GPM 의 전분기 대비 변화(%p).',
+    'OPM': '영업이익률 = 영업이익 ÷ 매출 × 100.',
+    'ΔOPM': 'OPM 의 전분기 대비 변화(%p).',
+    '영업익($M)': '그 분기 영업이익(백만 달러).',
+    'RS4': '최근 4주 상대강도 = 종목 수익률 ÷ SPY 수익률. 1보다 크면 시장을 이깁니다.',
+    'RS13': '최근 13주 상대강도. 같은 방식입니다.',
+    'PER': '주가수익비율 = 시가총액 ÷ 최근 4분기 순이익. '
+           '**적자면 계산되지 않아 빈칸입니다.**',
+    'PSR': '주가매출비율 = 시가총액 ÷ 최근 4분기 매출.',
+    'PEG': 'PER ÷ 순이익 YoY 성장률(%). '
+           '**빈칸이 많은 게 정상입니다** — 적자이거나 전년 대비 역성장이면 정의되지 않습니다. '
+           '이 규칙은 흑자전환 직전 종목을 자주 잡습니다. '
+           '⚠️ 정식 PEG 는 EPS 성장률을 쓰지만 이 DB 에 EPS 시계열이 없어 순이익으로 대신합니다.',
+    '이후1주': '신호 주 종가 대비 1주 뒤 수익률(%).',
+    '이후4주': '신호 주 종가 대비 4주 뒤 수익률(%).',
+    '이후13주': '신호 주 종가 대비 13주 뒤 수익률(%).',
+    '이후26주': '신호 주 종가 대비 26주 뒤 수익률(%).',
+    '이후52주': '신호 주 종가 대비 52주 뒤 수익률(%). 아직 1년이 안 지났으면 빈칸입니다.',
+    '이후104주': '신호 주 종가 대비 2년 뒤 수익률(%).',
+    '첫 신호': '그 종목이 처음으로 이 규칙의 신호를 낸 주.',
+    '마지막 신호': '가장 최근에 신호를 낸 주.',
+    '신호 수': '그 종목이 전 기간에 낸 신호 횟수.',
+    '진입가': '첫 신호 주의 종가(달러).',
+    '현재가': '가장 최근 주의 종가(달러).',
+    '수익률': '(현재가 ÷ 진입가 − 1) × 100. 첫 신호에 사서 지금까지 들고 있었을 때입니다.',
+    '최고': '첫 신호 이후 최대 상승폭(%). 주봉 종가 기준입니다.',
+    '최저': '첫 신호 이후 최대 하락폭(%). 들고 있었다면 견뎌야 했던 폭입니다.',
+    '주차': '신호가 난 주의 월요일 날짜.',
+}
+
+
+def col_help() -> dict:
+    """st.dataframe 의 column_config. 표에 없는 열은 Streamlit 이 알아서 무시한다."""
+    return {c: st.column_config.Column(help=h) for c, h in _COL_HELP.items()}
 
 
 def color_table(df: pd.DataFrame):
@@ -80,7 +136,7 @@ def color_table(df: pd.DataFrame):
 
     fmt = {c: ('{:.2f}' if c in _C_2DP else '{:.1f}')
            for c in df.columns if pd.api.types.is_numeric_dtype(df[c])}
-    for c in ('회차', '신호회차', '올해', '신호', '표본'):
+    for c in ('회차', '신호', '표본', '신호 수'):
         if c in fmt:
             fmt[c] = '{:.0f}'
     return st_.format(fmt, na_rep='-')
@@ -997,15 +1053,17 @@ with t_lead, guard('주도주'):
             st.markdown(f"**이번 주 신호 {len(_cd)}종** — 칸 수 제한 없이 전부 보여줍니다")
             if _cd:
                 st.dataframe(color_table(pd.DataFrame([{
-                    '코드': m['sym'], '종목': m['name'], '신호회차': m['n'], '올해': m.get('n_y'),
+                    '코드': m['sym'], '종목': m['name'], '회차': m['n'],
                     '그주상승': m['up'], '시총($B)': m['mc'], '종가': m['close'],
-                    '고점대비': m['dd'], 'YTD': m.get('ytd'), '52주고': ('🔺' if m.get('hi52') else ''), '저점대비': m.get('lo_d'), '매출가속': m['rva'], '이익가속': m['oia'],
+                    '고점대비': m['dd'], 'YTD': m.get('ytd'),
+                    '52주고': m.get('hi52'), '52주저': m.get('lo52'),
+                    '저점대비': m.get('lo_d'), '매출가속': m['rva'], '이익가속': m['oia'],
                     '매출YoY': m['revy'], 'GPM': m['gpm'], 'ΔGPM': m['dgpm'],
                     'OPM': m['opm'], 'ΔOPM': m['dopm'], '영업익($M)': m['oi'],
                     'RS4': m['rs4'], 'RS13': m['rs13'],
                     'PER': m.get('per'), 'PSR': m.get('psr'), 'PEG': m.get('peg'),
                     '이후1주': m.get('f1'), '이후4주': m.get('f4'), '이후13주': m.get('f13')}
-                    for m in _cd])), use_container_width=True, hide_index=True,
+                    for m in _cd])), use_container_width=True, column_config=col_help(), hide_index=True,
                     row_height=25, height=_dfh(len(_cd)))
                 st.caption(
                     "**색은 그 열 안에서 값이 클수록 진해집니다.** 열마다 담는 것이 달라 "
@@ -1015,11 +1073,6 @@ with t_lead, guard('주도주'):
                     "주식 수 변동은 반영되지 않는다. 적자이거나 전년 동기가 적자면 정의되지 않아 '-' 이고, "
                     "이 규칙은 흑자전환 직전 종목을 자주 잡으므로 빈 칸이 많은 게 정상입니다. "
                     "**PBR 은 없다** — 자기자본 시계열이 한국 835종뿐이고 이 화면은 미국 전용입니다.")
-                st.caption(
-                    "**회차**는 이 종목이 올해 몇 번째로 낸 신호인지입니다. 해가 바뀌면 "
-                    "1로 돌아갑니다. **매출가속·이익가속**은 성장률의 전분기 대비 변화(%p)이고 "
-                    "둘 다 양수여야 신호가 켜집니다. 이후 수익률은 이번 주 신호라 아직 "
-                    "비어 있는 게 정상입니다.")
             else:
                 st.info("이번 주 조건 충족 종목 없음")
             # 신호 회차별 성적 — 그 해 안에서 센 회차 기준.
@@ -1202,9 +1255,9 @@ with t_lead, guard('주도주'):
                         "견뎠던 낙폭의 중앙값입니다. "
                         "⚠️ 주봉 종가 기준이라 장중 낙폭은 이보다 깊다.")
                 st.dataframe(color_table(pd.DataFrame([{
-                    '주차': r['d'], '회차': r['n'], '올해': r.get('n_y'), '그주상승': r['up'],
+                    '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
                     '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
-                    'YTD': r.get('ytd'), '52주고': ('🔺' if r.get('hi52') else ''), '저점대비': r.get('lo_d'),
+                    'YTD': r.get('ytd'), '52주고': r.get('hi52'), '52주저': r.get('lo52'), '저점대비': r.get('lo_d'),
                     '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
                     'GPM': r['gpm'], 'ΔGPM': r['dgpm'], 'OPM': r['opm'], 'ΔOPM': r['dopm'],
                     'RS13': r['rs13'], 'PER': r.get('per'),
@@ -1212,7 +1265,7 @@ with t_lead, guard('주도주'):
                     '이후1주': r.get('f1'), '이후4주': r.get('f4'), '이후13주': r.get('f13'),
                     '이후26주': r.get('f26'), '이후52주': r.get('f52'),
                     '이후104주': r.get('f104')} for r in _ar])),
-                    use_container_width=True, hide_index=True, row_height=25,
+                    use_container_width=True, column_config=col_help(), hide_index=True, row_height=25,
                     height=_dfh(len(_ar)))
                 st.caption(
                     "회차는 이 종목이 이익 가속 신호를 몇 번째로 낸 것인지다. "
@@ -1257,15 +1310,15 @@ with t_lead, guard('주도주'):
                         "몇 종목이 전체를 끌고 가고 나머지는 시장에 집니다. 등가중으로 담으면 "
                         "받는 것은 평균이지만, 그 평균은 소수 종목이 만듭니다.")
                 st.dataframe(color_table(pd.DataFrame([{
-                    '코드': r['sym'], '종목': r['name'], '회차': r['n'], '올해': r.get('n_y'),
+                    '코드': r['sym'], '종목': r['name'], '회차': r['n'],
                     '그주상승': r['up'], '시총($B)': r['mc'], '고점대비': r['dd'],
-                    'YTD': r.get('ytd'), '52주고': ('🔺' if r.get('hi52') else ''), '저점대비': r.get('lo_d'),
+                    'YTD': r.get('ytd'), '52주고': r.get('hi52'), '52주저': r.get('lo52'), '저점대비': r.get('lo_d'),
                     '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
                     'GPM': r['gpm'], 'OPM': r['opm'], 'RS13': r['rs13'],
                     'PER': r.get('per'), 'PSR': r.get('psr'), 'PEG': r.get('peg'),
                     '이후13주': r.get('f13'), '이후52주': r.get('f52'),
                     '이후104주': r.get('f104')} for r in _wr])),
-                    use_container_width=True, hide_index=True, row_height=25,
+                    use_container_width=True, column_config=col_help(), hide_index=True, row_height=25,
                     height=_dfh(len(_wr)))
                 st.caption(
                     "그 주에 함께 걸린 종목 전부다. **한 종목이 걸렸다는 사실만으로는 "
@@ -1305,6 +1358,70 @@ with t_lead, guard('주도주'):
                             row_height=25, height=_dfh(20))
                         st.caption("한 달 표본은 평균 60건 안팎입니다. "
                                    "한두 종목이 평균을 흔듭니다.")
+
+            # ── 기간별 신호 경과 ─────────────────────────────────
+            # "이번 달·분기에 걸린 종목이 지금 어떻게 됐나" 를 종목 한 줄로 답한다.
+            if _ac.get('roster'):
+                st.markdown("#### 📆 기간별 신호 경과 — 그때 걸린 종목이 지금 어떻게 됐나")
+                _rc1, _rc2 = st.columns([2, 3])
+                _span = _rc1.selectbox(
+                    "기간", ["이번 달", "최근 3개월", "상반기", "하반기", "올해", "직전 연도"],
+                    key="roster_span")
+                _sw = _rc2.selectbox("정렬", ["수익률 높은 순", "수익률 낮은 순",
+                                            "신호 많은 순", "최근 신호 순"], key="roster_sort")
+                _today = pd.Timestamp(_ac.get('signal_week') or pd.Timestamp.today())
+                _y = _today.year
+                if _span == "이번 달":
+                    _lo, _hi = _today.replace(day=1), _today
+                elif _span == "최근 3개월":
+                    _lo, _hi = _today - pd.Timedelta(days=92), _today
+                elif _span == "상반기":
+                    _lo, _hi = pd.Timestamp(_y, 1, 1), pd.Timestamp(_y, 6, 30)
+                elif _span == "하반기":
+                    _lo, _hi = pd.Timestamp(_y, 7, 1), pd.Timestamp(_y, 12, 31)
+                elif _span == "올해":
+                    _lo, _hi = pd.Timestamp(_y, 1, 1), _today
+                else:
+                    _lo, _hi = pd.Timestamp(_y - 1, 1, 1), pd.Timestamp(_y - 1, 12, 31)
+
+                _rs = [x for x in _ac['roster']
+                       if x.get('first') and _lo <= pd.Timestamp(x['first']) <= _hi]
+                _key = {'수익률 높은 순': lambda x: -(x.get('ret') if x.get('ret') is not None else -1e9),
+                        '수익률 낮은 순': lambda x: (x.get('ret') if x.get('ret') is not None else 1e9),
+                        '신호 많은 순': lambda x: -x.get('n', 0),
+                        '최근 신호 순': lambda x: x.get('last') or ''}[_sw]
+                _rs = sorted(_rs, key=_key, reverse=(_sw == '최근 신호 순'))
+
+                if not _rs:
+                    st.info(f"{_span}에 신호가 난 종목이 없습니다.")
+                else:
+                    _win = [x for x in _rs if (x.get('ret') or 0) > 0]
+                    _k = st.columns(4)
+                    _k[0].metric("종목 수", f"{len(_rs)}종")
+                    _rets = [x['ret'] for x in _rs if x.get('ret') is not None]
+                    _k[1].metric("첫 신호 이후 평균",
+                                 f"{sum(_rets)/len(_rets):+.1f}%" if _rets else "—")
+                    _k[2].metric("플러스 종목",
+                                 f"{len(_win)/len(_rs)*100:.0f}%" if _rs else "—",
+                                 help="첫 신호 시점 종가와 최신 종가를 비교한 값입니다.")
+                    _k[3].metric("2배 이상",
+                                 f"{sum(1 for x in _rs if (x.get('ret') or 0) >= 100)}종")
+                    st.dataframe(color_table(pd.DataFrame([{
+                        '코드': x['sym'], '종목': x['name'],
+                        '첫 신호': x['first'], '마지막 신호': x['last'],
+                        '신호 수': x['n'], '진입가': x.get('first_px'),
+                        '현재가': x.get('cur'), '수익률': x.get('ret'),
+                        '최고': x.get('best'), '최저': x.get('worst')}
+                        for x in _rs])),
+                        use_container_width=True, hide_index=True, row_height=25,
+                        height=_dfh(min(len(_rs), 18)), column_config=col_help())
+                    st.caption(
+                        "**수익률**은 그 종목의 **첫 신호 주 종가**와 최신 종가를 비교한 값입니다. "
+                        "**최고·최저**는 그 사이에 겪었을 최대 상승과 최대 하락으로, "
+                        "들고 있었다면 견뎌야 했던 폭입니다. "
+                        "신호가 여러 번 난 종목은 나중 신호에서 샀다면 결과가 다릅니다.")
+                st.divider()
+
 
             st.divider()
 

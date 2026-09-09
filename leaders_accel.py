@@ -212,6 +212,11 @@ def build():
     M = matrices(d, COLS)
     px = M["close"]
     g = gate_of(M)
+    # 52주 고가·저가 — 주봉 종가 기준 롤링. 화면의 고점대비·저점대비와 같은 잣대다.
+    # ⚠️ 장중 고저가 아니다. 증권사 앱의 '52주 최고'와는 조금 다를 수 있다.
+    hi52p = px.rolling(52, min_periods=13).max()
+    lo52p = px.rolling(52, min_periods=13).min()
+
     ordn = g.cumsum().where(g)                    # 종목별 신호 회차 (전 구간 누적)
     # 연도 안에서 다시 세는 회차 (2026-09-10 형 요청)
     #   전 구간 누적은 2020년 신호까지 끌고 와서 센다. SMCI 25회차 같은 숫자는
@@ -319,13 +324,15 @@ def build():
         rows = []
         for s in syms:
             rows.append(dict(
-                sym=s, name=(nm.get(s) or s)[:24], n=int(ordn.loc[tt].get(s) or 0),
-                n_y=int(ordy.loc[tt].get(s) or 0),      # 그 해 몇 번째 신호인가
+                sym=s, name=(nm.get(s) or s)[:24],
+                n=int(ordy.loc[tt].get(s) or 0),        # 그 해 몇 번째 신호인가
+                n_all=int(ordn.loc[tt].get(s) or 0),    # 전 구간 누적(화면엔 안 쓴다)
                 close=_r(px.loc[tt].get(s)), up=_r(M["ret_1w"].loc[tt].get(s), 1),
                 mc=_r((M["marcap"].loc[tt].get(s) or np.nan) / 1e9, 2),
                 dd=_r(M["dist_52w"].loc[tt].get(s), 1),
                 ytd=_r(M["ret_ytd"].loc[tt].get(s), 1),
-                hi52=int(M["hi_52w"].loc[tt].get(s) or 0),
+                hi52=_r(hi52p.loc[tt].get(s)),          # 52주 최고가 (주봉 종가)
+                lo52=_r(lo52p.loc[tt].get(s)),          # 52주 최저가
                 lo_d=_r(M["low_52w_dist"].loc[tt].get(s), 1),
                 hi_ago=_r(M["days_since_hi52"].loc[tt].get(s), 0),
                 rva=_r(M["rv_a"].loc[tt].get(s), 1),
@@ -355,6 +362,35 @@ def build():
             lo, hi = spans.get(s, (10**9, -1))
             spans[s] = (min(lo, dt_ix[tt]), max(hi, dt_ix[tt]))
 
+    # ── 종목별 요약 (기간별 조회용) ──────────────────────────────
+    # "이번 달·분기에 신호 난 종목이 지금 어떻게 됐나"를 한 줄로 답한다.
+    # 신호 시점 가격과 **최신 종가**를 같이 실어 화면에서 경과를 바로 계산한다.
+    last_px = px.loc[last]
+    roster = {}
+    for tt in g.index:
+        hit = g.loc[tt]
+        for sym in hit[hit].index:
+            e = roster.setdefault(sym, dict(
+                sym=sym, name=(nm.get(sym) or sym)[:24], first=None, last=None,
+                n=0, n_y=0, first_px=None, best=None, worst=None))
+            e["n"] += 1
+            if e["first"] is None:
+                e["first"] = str(tt.date())
+                e["first_px"] = _r(px.loc[tt].get(sym))
+            e["last"] = str(tt.date())
+            e["last_n_y"] = int(ordy.loc[tt].get(sym) or 0)
+    for sym, e in roster.items():
+        e["cur"] = _r(last_px.get(sym))
+        # 첫 신호 이후 지금까지 — 최고·최저를 같이 준다(들고 있었다면 겪었을 폭)
+        try:
+            ser = px[sym].loc[e["first"]:].dropna()
+            if len(ser):
+                e["best"] = _r((ser.max() / ser.iloc[0] - 1) * 100, 1)
+                e["worst"] = _r((ser.min() / ser.iloc[0] - 1) * 100, 1)
+                e["ret"] = _r((ser.iloc[-1] / ser.iloc[0] - 1) * 100, 1)
+        except Exception:
+            pass
+
     cands = weeks.get(str(last.date()), [])
     out = dict(generated=str(pd.Timestamp.today().date()),
                signal_week=str(last.date()),
@@ -365,6 +401,7 @@ def build():
                dates=[str(t.date()) for t in px.index], spans=spans,
                perf=perf, by_year=by_year, by_month=by_month, by_moy=by_moy,
                by_step=by_step, by_step_y=by_step_y,
+               roster=list(roster.values()),
                candidates=cands, weeks=weeks)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
