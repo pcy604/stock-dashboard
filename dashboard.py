@@ -1151,7 +1151,7 @@ with t_lead, guard('주도주'):
                     for _lo, _hi, _cl, _lb in [(1, 2, '#8FC4AC', '올해 1-2회'),
                                                (3, 5, '#3E8F6B', '올해 3-5회'),
                                                (6, 10**9, '#125C3D', '올해 6회+')]:
-                        _pts = [r for r in _ar if _lo <= (r.get('n_y') or 0) <= _hi
+                        _pts = [r for r in _ar if _lo <= (r.get('n') or 0) <= _hi
                                 and r['close'] is not None]
                         if not _pts:
                             continue
@@ -1160,7 +1160,7 @@ with t_lead, guard('주도주'):
                             y=[r['close'] for r in _pts], mode='markers+text',
                             marker=dict(symbol='triangle-up', size=12, color=_cl,
                                         line=dict(color='white', width=1)),
-                            text=[str(r.get('n_y') or '') for r in _pts],
+                            text=[str(r.get('n') or '') for r in _pts],
                             textposition='bottom center',
                             textfont=dict(size=9, color=_cl), name=_lb,
                             customdata=[[r['up'], r['oia'], r['rva'],
