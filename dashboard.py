@@ -1032,7 +1032,7 @@ with t_lead, guard('주도주'):
                 st.dataframe(color_table(pd.DataFrame([{
                     '코드': m['sym'], '종목': m['name'], '신호회차': m['n'],
                     '그주상승': m['up'], '시총($B)': m['mc'], '종가': m['close'],
-                    '고점대비': m['dd'], '매출가속': m['rva'], '이익가속': m['oia'],
+                    '고점대비': m['dd'], 'YTD': m.get('ytd'), '52주고': ('🔺' if m.get('hi52') else ''), '저점대비': m.get('lo_d'), '매출가속': m['rva'], '이익가속': m['oia'],
                     '매출YoY': m['revy'], 'GPM': m['gpm'], 'ΔGPM': m['dgpm'],
                     'OPM': m['opm'], 'ΔOPM': m['dopm'], '영업익($M)': m['oi'],
                     'RS4': m['rs4'], 'RS13': m['rs13'],
@@ -1293,6 +1293,7 @@ with t_lead, guard('주도주'):
                 st.dataframe(color_table(pd.DataFrame([{
                     '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
                     '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
+                    'YTD': r.get('ytd'), '52주고': ('🔺' if r.get('hi52') else ''), '저점대비': r.get('lo_d'),
                     '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
                     'GPM': r['gpm'], 'ΔGPM': r['dgpm'], 'OPM': r['opm'], 'ΔOPM': r['dopm'],
                     'RS13': r['rs13'], 'PER': r.get('per'),
@@ -1347,6 +1348,7 @@ with t_lead, guard('주도주'):
                 st.dataframe(color_table(pd.DataFrame([{
                     '코드': r['sym'], '종목': r['name'], '회차': r['n'],
                     '그주상승': r['up'], '시총($B)': r['mc'], '고점대비': r['dd'],
+                    'YTD': r.get('ytd'), '52주고': ('🔺' if r.get('hi52') else ''), '저점대비': r.get('lo_d'),
                     '매출가속': r['rva'], '이익가속': r['oia'], '매출YoY': r['revy'],
                     'GPM': r['gpm'], 'OPM': r['opm'], 'RS13': r['rs13'],
                     'PER': r.get('per'), 'PSR': r.get('psr'), 'PEG': r.get('peg'),
@@ -1359,6 +1361,33 @@ with t_lead, guard('주도주'):
                     "조건의 실효를 판단할 수 없다** — 같은 주 전 종목의 타율을 함께 봐야 한다. "
                     "위 지표가 그 코호트 성적이다.")
 
+            if _ac.get('by_moy'):
+                with st.expander("🗓️ 달별 성적 — 언제 뜬 신호가 좋았나 (형 요청)"):
+                    st.dataframe(pd.DataFrame([{
+                        '달': f"{v['mo']}월", '신호': v['n'], '평균': v['mean'],
+                        '시장대비': v['alpha'], '2배+%': v['w2']} for v in _ac['by_moy']]),
+                        use_container_width=True, hide_index=True, row_height=25, height=_dfh(12))
+                    st.markdown(
+                        "- **4월이 압도적이다**(시장대비 +51.0%, 신호 606건). "
+                        "3·5·6·9월도 두 자릿수 플러스다.")
+                    st.markdown(
+                        "- **7월(−7.5%) · 12월(−3.5%) · 1~2월(−1.5%)은 마이너스**다. "
+                        "여름과 연말연시에 뜬 신호는 1년 뒤 시장에 졌다.")
+                    st.warning(
+                        "⚠️ **이 표를 계절성으로 읽으면 위험하다.** 8년치라 각 달 표본이 "
+                        "300~800건이고, 그 안에서 **한 해가 통째로 결과를 끌고 간다**. "
+                        "4월이 좋은 건 2020년 4월(코로나 바닥)에서 시작한 1년이 들어 있기 "
+                        "때문일 수 있다. '4월에 사라'가 아니라 '4월 신호는 이랬다'로 읽어라.")
+                    if _ac.get('by_month'):
+                        with st.expander("연-월 단위로 펼쳐 보기"):
+                            st.dataframe(pd.DataFrame([{
+                                '연월': v['ym'], '신호': v['n'], '평균': v['mean'],
+                                '시장대비': v['alpha'], '중앙값': v['med'],
+                                '2배+%': v['w2']} for v in _ac['by_month']]),
+                                use_container_width=True, hide_index=True, row_height=25,
+                                height=_dfh(20))
+                            st.caption("한 달 표본은 평균 60건 안팎이다. 한두 종목이 평균을 "
+                                       "흔든다 — 표본 수를 같이 봐라.")
             if _ac.get('by_year'):
                 with st.expander("📅 연도별 신호 성적 (신호 1건당 1년 후)"):
                     st.dataframe(pd.DataFrame([{
@@ -3572,6 +3601,14 @@ with tab7, guard('종목 분석'):
                         return None
                     if base <= 0:
                         return 25.0 if cur and cur > 0 else -10.0
+                    # ⚠️ 2026-09-09 — cur 가 음수면 (음수)**(1/3) 이 **complex** 가 되고,
+                    #   바로 아래 min() 에서 터진다:
+                    #     TypeError: '<' not supported between 'complex' and 'float'
+                    #   흑자였다가 적자로 돌아선 종목에서 났다. yrs=1 이면 실수라
+                    #   통과하고 3년 CAGR(A)에서만 터져서 눈에 늦게 띄었다.
+                    #   흑자→적자는 성장률이 정의되지 않는다. 최저점으로 본다.
+                    if cur is None or cur <= 0:
+                        return -10.0
                     g = ((cur / base) ** (1 / yrs) - 1) * 100
                     return round(min(25.0, g - 5), 1)
 

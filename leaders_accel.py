@@ -135,6 +135,8 @@ MAX_OIA = 10.0        # 이익가속 절대값 상한. 매출이 사업 규모�
 def load():
     c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
     d = pd.read_sql(f"""SELECT as_of,sym,name,close,marcap,adv_20d,ret_1w,dist_52w,
+                               ret_ytd,hi_52w,low_52w_dist,days_since_hi52,
+                               ret_ytd,hi_52w,low_52w_dist,days_since_hi52,
                                mdd_52w,rs_4w,rs_13w,vol_x_20w,per,psr,net_income,
                                period_end,
                                revenue,op_income,gross_profit,rev_yoy,gpm,opm,opm_qoq
@@ -204,13 +206,30 @@ def _peg(M, tt, s):
 def build():
     d = load()
     COLS = ["close", "marcap", "adv_20d", "ret_1w", "dist_52w", "mdd_52w", "rs_4w",
+            "ret_ytd", "hi_52w", "low_52w_dist", "days_since_hi52",
+            "ret_ytd", "hi_52w", "low_52w_dist", "days_since_hi52",
             "rs_13w", "vol_x_20w", "per", "psr", "ni_yoy",
             "revenue", "op_income", "rev_yoy",
             "gpm", "opm", "oi_a", "rv_a", "dgpm", "dopm", "ACC"]
     M = matrices(d, COLS)
     px = M["close"]
     g = gate_of(M)
-    ordn = g.cumsum().where(g)                    # 종목별 신호 회차
+    ordn = g.cumsum().where(g)                    # 종목별 신호 회차 (전 구간 누적)
+    # 연도 안에서 다시 세는 회차 (2026-09-10)
+    #   전 구간 누적은 2020년 신호까지 끌고 와 센다. SMCI 25회차 같은 숫자는
+    #   '6년치 합계'라 지금 판단에는 무디다. 실측하니 결론이 뒤집혔다 —
+    #   연도 안에서 세면 회차가 오를수록 알파가 **좋아진다**(1회 +6.5% → 6-9회 +42.6%).
+    #   ⚠️ 12월과 1월에 연달아 뜬 신호는 끊겨 1회차로 리셋된다. 그래서 누적(n)도 남긴다.
+    _yr = pd.Series(g.index.year, index=g.index)
+    ordy = g.groupby(_yr).cumsum().where(g) (전 구간 누적)
+    # 연도 안에서 다시 세는 회차 (2026-09-10 형 요청)
+    #   전 구간 누적은 2020년 신호까지 끌고 와서 센다. SMCI 25회차 같은 숫자는
+    #   "6년치 합계"라 지금 판단에 쓰기엔 무디다. 같은 해 안에서 몇 번째인지가
+    #   불타기 판단에는 더 가깝다.
+    #   ⚠️ 대신 12월 신호와 1월 신호가 끊긴다 — 연말연시에 연속 진입한 건이
+    #   1회차로 리셋된다. 그래서 누적(n)을 없애지 않고 **둘 다** 싣는다.
+    _yr = pd.Series(g.index.year, index=g.index)
+    ordy = g.groupby(_yr).cumsum().where(g)
     fwd = {h: (px.shift(-h) / px - 1) for h in (1, 4, 13, 26, 52, 104)}
 
     spy_p = os.path.join(BASE, "data", "leaders_cache", "px_SPY.csv")
@@ -243,11 +262,54 @@ def build():
                                w2=_r((gg.f >= 1).mean() * 100, 1),
                                w4=_r((gg.f >= 3).mean() * 100, 1))
 
+    # ── 월별 성적 (2026-09-10 형 요청) ────────────────────────────
+    # 연 단위는 12개월을 하나로 뭉개서, 그 해 안에서 언제가 좋았는지가 안 보인다.
+    # ⚠️ 한 달치 표본은 얇다(평균 60건 안팎). 한두 종목이 평균을 흔든다 —
+    #    표본 수를 반드시 같이 본다.
+    by_month = []
+    tm = t.copy()
+    tm["ym"] = tm["as_of"].dt.strftime("%Y-%m")
+    for ym, gg in tm.groupby("ym"):
+        by_month.append(dict(ym=ym, n=len(gg), mean=_r(gg.f.mean() * 100, 1),
+                             alpha=_r(gg.a.mean() * 100, 1),
+                             med=_r(gg.f.median() * 100, 1),
+                             w2=_r((gg.f >= 1).mean() * 100, 1)))
+
+    # 달(1~12) 자체의 계절성 — 연도를 섞어 같은 달끼리 모은다
+    by_moy = []
+    tm["moy"] = tm["as_of"].dt.month
+    for mo, gg in tm.groupby("moy"):
+        by_moy.append(dict(mo=int(mo), n=len(gg), mean=_r(gg.f.mean() * 100, 1),
+                           alpha=_r(gg.a.mean() * 100, 1),
+                           w2=_r((gg.f >= 1).mean() * 100, 1)))
+
+    # ── 월별 성적 (2026-09-10) ───────────────────────────────────
+    # 연 단위는 12개월을 뭉개서 그 해 안에서 언제가 좋았는지가 안 보인다.
+    # ⚠️ 한 달 표본은 평균 60건 안팎이다. 한두 종목이 평균을 흔든다.
+    by_month, by_moy = [], []
+    tm = t.copy()
+    tm["ym"] = tm["as_of"].dt.strftime("%Y-%m")
+    for ym, gg in tm.groupby("ym"):
+        by_month.append(dict(ym=ym, n=len(gg), mean=_r(gg.f.mean() * 100, 1),
+                             alpha=_r(gg.a.mean() * 100, 1),
+                             med=_r(gg.f.median() * 100, 1),
+                             w2=_r((gg.f >= 1).mean() * 100, 1)))
+    tm["moy"] = tm["as_of"].dt.month
+    for mo, gg in tm.groupby("moy"):
+        by_moy.append(dict(mo=int(mo), n=len(gg), mean=_r(gg.f.mean() * 100, 1),
+                           alpha=_r(gg.a.mean() * 100, 1),
+                           w2=_r((gg.f >= 1).mean() * 100, 1)))
+
     # ── 신호 회차별 성과 (불타기 판단 근거) ──────────────────────
     # ⚠️ 이 표가 말하는 건 "회차가 늘수록 좋다"가 **아니다**. 평균 알파는 오히려
     #    떨어진다. 올라가는 건 10배 확률뿐이고, 그 확률의 표본은 한 자릿수 건수다.
     st = pd.DataFrame({"k": ordn.stack(), "f": fwd[52].where(g).stack(),
                        "a": (fwd[52].where(g).sub(sfw[52], axis=0)).stack()}).dropna()
+    # 연도 안에서 다시 센 회차로도 같은 표를 만든다(형 요청) — 두 관점을 비교한다
+    sty = pd.DataFrame({"k": ordy.stack(), "f": fwd[52].where(g).stack(),
+                        "a": (fwd[52].where(g).sub(sfw[52], axis=0)).stack()}).dropna()
+    sty = pd.DataFrame({"k": ordy.stack(), "f": fwd[52].where(g).stack(),
+                        "a": (fwd[52].where(g).sub(sfw[52], axis=0)).stack()}).dropna()
     by_step = []
     for lo, hi, lbl in [(1, 1, "1회"), (2, 2, "2회"), (3, 3, "3회"), (4, 5, "4-5회"),
                         (6, 9, "6-9회"), (10, 19, "10-19회"), (20, 999, "20회+")]:
@@ -255,6 +317,33 @@ def build():
         if len(x) < 30:
             continue
         by_step.append(dict(
+            lbl=lbl, n=len(x), mean=_r(x.f.mean() * 100, 1),
+            alpha=_r(x.a.mean() * 100, 1), median=_r(x.f.median() * 100, 1),
+            w2=_r((x.f >= 1).mean() * 100, 1), w4=_r((x.f >= 3).mean() * 100, 1),
+            w10=_r((x.f >= 9).mean() * 100, 2),
+            n10=int((x.f >= 9).sum()), n4=int((x.f >= 3).sum())))
+
+    # 같은 표를 '연도 안에서 다시 센 회차'로 한 번 더
+    by_step_y = []
+    for lo, hi, lbl in [(1, 1, "1회"), (2, 2, "2회"), (3, 3, "3회"), (4, 5, "4-5회"),
+                        (6, 9, "6-9회"), (10, 999, "10회+")]:
+        x = sty[(sty.k >= lo) & (sty.k <= hi)]
+        if len(x) < 30:
+            continue
+        by_step_y.append(dict(
+            lbl=lbl, n=len(x), mean=_r(x.f.mean() * 100, 1),
+            alpha=_r(x.a.mean() * 100, 1), median=_r(x.f.median() * 100, 1),
+            w2=_r((x.f >= 1).mean() * 100, 1), w4=_r((x.f >= 3).mean() * 100, 1),
+            w10=_r((x.f >= 9).mean() * 100, 2),
+            n10=int((x.f >= 9).sum()), n4=int((x.f >= 3).sum())))
+
+    by_step_y = []
+    for lo, hi, lbl in [(1, 1, "1회"), (2, 2, "2회"), (3, 3, "3회"), (4, 5, "4-5회"),
+                        (6, 9, "6-9회"), (10, 999, "10회+")]:
+        x = sty[(sty.k >= lo) & (sty.k <= hi)]
+        if len(x) < 30:
+            continue
+        by_step_y.append(dict(
             lbl=lbl, n=len(x), mean=_r(x.f.mean() * 100, 1),
             alpha=_r(x.a.mean() * 100, 1), median=_r(x.f.median() * 100, 1),
             w2=_r((x.f >= 1).mean() * 100, 1), w4=_r((x.f >= 3).mean() * 100, 1),
@@ -272,9 +361,20 @@ def build():
         for s in syms:
             rows.append(dict(
                 sym=s, name=(nm.get(s) or s)[:24], n=int(ordn.loc[tt].get(s) or 0),
+                n_y=int(ordy.loc[tt].get(s) or 0),      # 그 해 몇 번째 신호인가
+                n_y=int(ordy.loc[tt].get(s) or 0),      # 그 해 몇 번째 신호인가
                 close=_r(px.loc[tt].get(s)), up=_r(M["ret_1w"].loc[tt].get(s), 1),
                 mc=_r((M["marcap"].loc[tt].get(s) or np.nan) / 1e9, 2),
                 dd=_r(M["dist_52w"].loc[tt].get(s), 1),
+                ytd=_r(M["ret_ytd"].loc[tt].get(s), 1),
+                hi52=int(M["hi_52w"].loc[tt].get(s) or 0),
+                lo_d=_r(M["low_52w_dist"].loc[tt].get(s), 1),
+                hi_ago=_r(M["days_since_hi52"].loc[tt].get(s), 0),
+                # 2026-09-09 추가 — 신호 시점의 위치 감각(형 요청)
+                ytd=_r(M["ret_ytd"].loc[tt].get(s), 1),          # 연초 대비 %
+                hi52=int(M["hi_52w"].loc[tt].get(s) or 0),       # 52주 신고가 여부
+                lo_d=_r(M["low_52w_dist"].loc[tt].get(s), 1),    # 52주 저점 대비 %
+                hi_ago=_r(M["days_since_hi52"].loc[tt].get(s), 0),  # 신고가 후 경과일
                 rva=_r(M["rv_a"].loc[tt].get(s), 1),
                 oia=_r((M["oi_a"].loc[tt].get(s) or np.nan) * 100, 2),
                 revy=_r(M["rev_yoy"].loc[tt].get(s), 1),
@@ -310,7 +410,8 @@ def build():
                          text=f"매출·영업이익 성장률이 **동시에 빨라진** 분기 · "
                               f"그 주 종가 +{SURGE:g}%↑ · 거래대금 $5M+ · 시총 $0.3B+"),
                dates=[str(t.date()) for t in px.index], spans=spans,
-               perf=perf, by_year=by_year, by_step=by_step,
+               perf=perf, by_year=by_year, by_month=by_month, by_moy=by_moy,
+               by_step=by_step, by_step_y=by_step_y,
                candidates=cands, weeks=weeks)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:

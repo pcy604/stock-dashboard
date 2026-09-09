@@ -10,6 +10,17 @@ set DIR=C:\Users\lg\Desktop\stock_screener
 set SH=%DIR%/leaders_weekly.sh
 
 cd /d "%DIR%"
+rem ── 문지기 (2026-09-09) ───────────────────────────────────────────────
+rem 스케줄러를 주 1회(토) → **매일**로 바꿨다. 토요일에 PC 가 꺼져 있으면
+rem Windows 는 놓친 주간 작업을 다음 주까지 다시 잡지 않는다 — 실제로 09-05 를
+rem 통째로 걸러서 주차별 조회가 08-24 에 멈춰 있었다(마지막 08-29 → 다음 09-12).
+rem 매일 돌되, 이미 최신이면 여기서 즉시 빠져나온다.
+"%DIR%\..\..\AppData\Local\Python\bin\python.exe" "%DIR%\tools\weekly_due.py" --why
+if errorlevel 1 (
+    echo [SKIP] 이번 주 신호가 이미 최신입니다 - 사이클을 건너뜁니다.
+    exit /b 0
+)
+
 
 if not exist "%BASH%" (
     echo [ERROR] Git Bash를 찾을 수 없습니다: %BASH%

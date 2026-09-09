@@ -120,7 +120,51 @@ jobs:
           git add data/us_marketcap.csv || true
           git add data/portfolio.json 2>/dev/null || true
           # 구루 워크플로가 실행 중(수십 분) 푸시할 수 있으므로 rebase 후 푸시 (레이스 방지)
-          git diff --staged --quiet || { git commit -m "auto: 데이터 갱신 $(date -u +%Y-%m-%d)"; git pull --rebase origin main; git push; }
+          # ── 푸시는 실패해도 재시도한다 ────────────────────────────────
+          # 2026-09-06 실측: 1시간 47분 돌려 산출물을 다 만들어놓고 마지막 push 가
+          # rejected 되어 **통째로 버렸다**. pull --rebase 를 넣어도 pull 과 push
+          # 사이 몇 초의 경주 구간은 남는다 — 좁아질 뿐 닫히지 않는다.
+          # 그리고 push 종료코드만 믿지 않고 origin 이 실제로 따라왔는지 확인한다.
+          #
+          # ⚠️ 잡이 빨간불이 되는 것만으로는 부족하다. 실제로 이때 잡은 실패했지만
+          #    아무도 GitHub 메일을 안 읽어서, 화면에는 "KR 원장 17일 정지" 로만
+          #    보였다. 읽는 채널(텔레그램)로 보내야 조치가 일어난다.
+          push_with_retry () {
+            for i in 1 2 3; do
+              if git pull --rebase origin main && git push; then
+                git fetch -q origin main
+                if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
+                  echo "  푸시 반영 확인"
+                  return 0
+                fi
+                echo "  push 는 성공했다는데 origin 이 안 따라왔다 — 재시도 $i/3"
+              else
+                echo "  푸시 거부 — rebase 후 재시도 $i/3"
+              fi
+              git rebase --abort 2>/dev/null || true
+              sleep $((i * 5))
+            done
+            echo "::error::푸시 3회 재시도 실패 — 이번 실행 산출물이 통째로 버려졌다"
+            python - <<'PY' || true
+          import os
+          try:
+              import config
+              from telegram_notifier import send_message
+              if config.TELEGRAM_ENABLED:
+                  send_message(config.TELEGRAM_TOKEN, config.TELEGRAM_CHAT_ID,
+                               "🚨 [screener] %s 푸시 3회 실패 — 이번 실행 산출물이 버려졌다\n"
+                               "작업은 다 끝났는데 origin 에 반영을 못 했다. "
+                               "다음 실행까지 화면 데이터가 그대로 멈춘다."
+                               % os.environ.get("GITHUB_WORKFLOW", "workflow"))
+          except Exception as e:
+              print("텔레그램 발송 실패:", e)
+          PY
+            return 1
+          }
+          git diff --staged --quiet || {
+            git commit -m "auto: 데이터 갱신 $(date -u +%Y-%m-%d)"
+            push_with_retry
+          }
 
       # 2026-09-07 신설 — 위 단계는 전부 continue-on-error 라 하나가 죽어도 초록불로
       # 끝난다. 실제로 미국 시총이 08-18 부터 19일간 멈췄는데 아무도 몰랐다.

@@ -582,6 +582,25 @@ def cmd_build(net_price=False):
     m.insert(0, "Rank", m.index + 1)
     m = m[["Rank", "Name", "Symbol", "marketcap", "price (USD)", "country",
            "shares", "px_date", "as_of"]]
+    # ⚠️ 2026-09-09 — 부실한 결과가 멀쩡한 파일을 덮는 사고가 났다.
+    #   MAX_FETCH(하루 600종) 를 넣은 뒤, 가격 캐시가 없는 러너에서 이 스크립트가
+    #   **470종짜리** us_marketcap.csv 를 만들어 커밋했다. 그게 로컬의 3,095종을
+    #   덮었고 연쇄로 무너졌다:
+    #     시총 470종 → 수집 유니버스 319종 → factor_weekly 259행 → **신호 0종**
+    #   화면은 "8/31 기준"이라 표시하면서 실제로는 259종만 본 결과를 보여줬다.
+    #   에러가 아니라 조용한 오염이라 로그만 봐서는 안 보인다.
+    #   종목 수가 직전 파일의 70% 아래로 떨어지면 쓰지 않는다.
+    if os.path.exists(OUT_MC):
+        try:
+            prev = len(pd.read_csv(OUT_MC))
+            if prev >= 100 and len(m) < prev * 0.7:
+                print(f"[중단] 종목이 {prev:,} → {len(m):,}종으로 급감했다. "
+                      f"기존 파일을 지키고 쓰지 않는다.", flush=True)
+                print(f"        가격을 못 얻은 종목이 많다는 뜻이다 — 캐시(data/leaders_cache)가 "
+                      f"비어 있거나 MAX_FETCH({MAX_FETCH})에 걸렸을 수 있다.", flush=True)
+                return
+        except Exception as e:
+            print(f"[WARN] 직전 파일을 못 읽어 급감 검사를 건너뛴다: {e}", flush=True)
     m.to_csv(OUT_MC, index=False)
     print(f"→ {OUT_MC}  ({len(m):,}종)", flush=True)
     for lo, lab in [(2e9, "$2B+"), (1e9, "$1B+"), (3e8, "$300M+"), (1.5e8, "$150M+")]:
