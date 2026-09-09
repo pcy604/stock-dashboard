@@ -1,0 +1,274 @@
+<title>데이터 지도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#FBFBFC; --panel:#FFFFFF; --ink:#15171D; --ink-2:#4A4F5C; --ink-3:#7C828F;
+  --rule:#E1E3E9; --rule-2:#EFF0F4;
+  --accent:#1F4E79; --accent-soft:#EAF0F7;
+  --warn:#8A5D0F; --warn-soft:#FBF3E2;
+  --neg:#A32C2C; --neg-soft:#FBECEC;
+  --pos:#16704A;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1116; --panel:#161921; --ink:#E7E9EF; --ink-2:#A8AEBC; --ink-3:#767C86;
+    --rule:#272B36; --rule-2:#1E222B;
+    --accent:#7FA7D4; --accent-soft:#1A2432;
+    --warn:#D6AA5C; --warn-soft:#2A2317;
+    --neg:#E08282; --neg-soft:#2B1A1A;
+    --pos:#5FBF93;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F1116; --panel:#161921; --ink:#E7E9EF; --ink-2:#A8AEBC; --ink-3:#767C86;
+  --rule:#272B36; --rule-2:#1E222B;
+  --accent:#7FA7D4; --accent-soft:#1A2432;
+  --warn:#D6AA5C; --warn-soft:#2A2317;
+  --neg:#E08282; --neg-soft:#2B1A1A;
+  --pos:#5FBF93;
+}
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink);
+  font-family:'IBM Plex Sans KR','Malgun Gothic',system-ui,sans-serif;
+  font-size:15px; line-height:1.7; font-weight:300; margin:0}
+.wrap{max-width:920px; margin:0 auto; padding:56px 24px 100px}
+@media(max-width:640px){.wrap{padding:36px 16px 70px}}
+
+h1{font-size:clamp(26px,4.5vw,34px); font-weight:600; letter-spacing:-.02em;
+   margin:0 0 10px; text-wrap:balance}
+.sub{color:var(--ink-2); margin:0 0 8px; max-width:62ch}
+.meta{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-3);
+      border-bottom:1px solid var(--rule); padding-bottom:20px; margin-bottom:36px}
+h2{font-size:19px; font-weight:600; letter-spacing:-.015em; margin:44px 0 6px}
+h3{font-size:15.5px; font-weight:600; margin:26px 0 6px}
+p{margin:0 0 16px; max-width:66ch}
+strong{font-weight:600}
+code{font-family:'IBM Plex Mono',monospace; font-size:.9em;
+     background:var(--rule-2); padding:1px 5px; border-radius:3px}
+
+figure{margin:22px 0 10px; border:1px solid var(--rule); border-radius:7px;
+       background:var(--panel); padding:20px 18px 12px; overflow-x:auto}
+figure svg{display:block; width:100%; min-width:640px; height:auto; color:var(--ink)}
+figcaption{font-size:12.5px; color:var(--ink-3); margin-top:12px; line-height:1.6}
+
+.tw{overflow-x:auto; margin:14px 0 8px; border:1px solid var(--rule);
+    border-radius:6px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:13px; min-width:520px}
+th{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:500;
+   letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3);
+   background:var(--rule-2); text-align:right; padding:11px 13px;
+   border-bottom:1px solid var(--rule); white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td{padding:9px 13px; border-bottom:1px solid var(--rule-2); text-align:right;
+   font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-2);
+   font-variant-numeric:tabular-nums; white-space:nowrap}
+td:first-child{font-family:'IBM Plex Sans KR',sans-serif; color:var(--ink); font-weight:500}
+tbody tr:last-child td{border-bottom:none}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .dim{color:var(--ink-3)}
+
+.note{border-left:3px solid var(--accent); background:var(--accent-soft);
+      padding:14px 18px; border-radius:0 6px 6px 0; margin:0 0 18px; font-size:14px}
+.note.warn{border-color:var(--warn); background:var(--warn-soft)}
+.note.neg{border-color:var(--neg); background:var(--neg-soft)}
+.note p:last-child{margin-bottom:0}
+.note .lab{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; display:block; margin-bottom:6px; color:var(--accent); font-weight:500}
+.note.warn .lab{color:var(--warn)} .note.neg .lab{color:var(--neg)}
+ul{margin:0 0 16px; padding-left:20px; max-width:66ch}
+li{margin-bottom:7px}
+</style>
+
+<div class="wrap">
+
+<h1>데이터 지도 — 무엇이 어디서 와서 어디로 가나</h1>
+<p class="sub">화면에 뜨는 숫자가 어느 파일에서 왔고, 그 파일을 누가 언제 만드는지.
+그리고 <strong>왜 자꾸 조용히 깨지는지</strong>.</p>
+<p class="meta">조사 2026-09-10 · market.db 578MB · 캐시 997MB · 결과 JSON 18개</p>
+
+<h2>전체 흐름</h2>
+
+<figure>
+<svg viewBox="0 0 860 400" role="img" xmlns="http://www.w3.org/2000/svg"
+     aria-label="원천에서 market.db와 캐시를 거쳐 결과 JSON으로, 다시 대시보드로 흐르는 데이터 경로. git 경계선 왼쪽은 저장소에 없어 CI 러너에 존재하지 않는다.">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+    </marker>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#A32C2C"/>
+    </marker>
+  </defs>
+
+  <!-- git 경계 -->
+  <line x1="392" y1="18" x2="392" y2="352" stroke="#A32C2C" stroke-width="1.5" stroke-dasharray="7 5"/>
+  <text x="384" y="32" text-anchor="end" font-size="11.5" fill="#A32C2C" font-weight="600">git 경계</text>
+  <text x="384" y="47" text-anchor="end" font-size="10.5" fill="#A32C2C">왼쪽은 저장소에 없다</text>
+  <text x="400" y="32" font-size="10.5" fill="currentColor" opacity=".6">오른쪽만 CI·클라우드로 간다</text>
+
+  <!-- 원천 -->
+  <text x="16" y="76" font-size="11" fill="currentColor" opacity=".55" font-weight="600">원천</text>
+  <rect x="16" y="86" width="112" height="26" rx="4" fill="none" stroke="currentColor" opacity=".45"/>
+  <text x="72" y="103" text-anchor="middle" font-size="11.5">DART · EDGAR</text>
+  <rect x="16" y="120" width="112" height="26" rx="4" fill="none" stroke="currentColor" opacity=".45"/>
+  <text x="72" y="137" text-anchor="middle" font-size="11.5">FDR · KRX</text>
+  <rect x="16" y="154" width="112" height="26" rx="4" fill="none" stroke="currentColor" opacity=".45"/>
+  <text x="72" y="171" text-anchor="middle" font-size="11.5">yfinance · FRED</text>
+
+  <!-- 저장소(로컬 전용) -->
+  <text x="164" y="76" font-size="11" fill="currentColor" opacity=".55" font-weight="600">로컬 전용 저장소</text>
+  <rect x="164" y="86" width="200" height="60" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="264" y="106" text-anchor="middle" font-size="12.5" font-weight="600">market.db</text>
+  <text x="264" y="122" text-anchor="middle" font-size="10.5" opacity=".7">factor_weekly 105.9만행</text>
+  <text x="264" y="137" text-anchor="middle" font-size="10.5" opacity=".7">578MB</text>
+
+  <rect x="164" y="158" width="200" height="52" rx="5" fill="none" stroke="currentColor" opacity=".6"/>
+  <text x="264" y="176" text-anchor="middle" font-size="11.5">가격·재무 캐시 3종</text>
+  <text x="264" y="192" text-anchor="middle" font-size="10.5" opacity=".7">leaders_cache 851MB · longcache 139MB</text>
+
+  <line x1="128" y1="99" x2="160" y2="112" stroke="currentColor" marker-end="url(#ar)" opacity=".55"/>
+  <line x1="128" y1="133" x2="160" y2="120" stroke="currentColor" marker-end="url(#ar)" opacity=".55"/>
+  <line x1="128" y1="167" x2="160" y2="180" stroke="currentColor" marker-end="url(#ar)" opacity=".55"/>
+
+  <!-- 발행 -->
+  <text x="424" y="76" font-size="11" fill="currentColor" opacity=".55" font-weight="600">발행 스크립트</text>
+  <rect x="424" y="86" width="176" height="34" rx="4" fill="none" stroke="currentColor" opacity=".55"/>
+  <text x="512" y="101" text-anchor="middle" font-size="11.5">주간 (토 08:00)</text>
+  <text x="512" y="114" text-anchor="middle" font-size="10" opacity=".65">leaders_accel · curves_build</text>
+  <rect x="424" y="128" width="176" height="34" rx="4" fill="none" stroke="currentColor" opacity=".55"/>
+  <text x="512" y="143" text-anchor="middle" font-size="11.5">매일 06:00 (평일)</text>
+  <text x="512" y="156" text-anchor="middle" font-size="10" opacity=".65">weekly_run · perf_run · canslim</text>
+  <rect x="424" y="170" width="176" height="34" rx="4" fill="none" stroke="currentColor" opacity=".55"/>
+  <text x="512" y="185" text-anchor="middle" font-size="11.5">주 1회 (일 22:00 UTC)</text>
+  <text x="512" y="198" text-anchor="middle" font-size="10" opacity=".65">screen_precompute · marketcap</text>
+
+  <line x1="364" y1="116" x2="420" y2="103" stroke="currentColor" marker-end="url(#ar)"/>
+  <line x1="364" y1="140" x2="420" y2="145" stroke="currentColor" marker-end="url(#ar)"/>
+  <line x1="364" y1="184" x2="420" y2="187" stroke="currentColor" marker-end="url(#ar)"/>
+
+  <!-- 결과 -->
+  <text x="644" y="76" font-size="11" fill="currentColor" opacity=".55" font-weight="600">결과 (커밋된다)</text>
+  <rect x="644" y="86" width="200" height="60" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="744" y="106" text-anchor="middle" font-size="12.5" font-weight="600">results/*.json</text>
+  <text x="744" y="122" text-anchor="middle" font-size="10.5" opacity=".7">화면용 14개 + 계산 입력 4개</text>
+  <text x="744" y="137" text-anchor="middle" font-size="10.5" opacity=".7">합계 8.2MB</text>
+
+  <rect x="644" y="164" width="200" height="46" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="744" y="182" text-anchor="middle" font-size="12.5" font-weight="600">dashboard.py</text>
+  <text x="744" y="197" text-anchor="middle" font-size="10.5" opacity=".7">JSON만 읽는다 · DB 접근 0</text>
+
+  <line x1="600" y1="103" x2="640" y2="110" stroke="currentColor" marker-end="url(#ar)"/>
+  <line x1="600" y1="145" x2="640" y2="120" stroke="currentColor" marker-end="url(#ar)"/>
+  <line x1="600" y1="187" x2="640" y2="130" stroke="currentColor" marker-end="url(#ar)"/>
+  <line x1="744" y1="146" x2="744" y2="160" stroke="currentColor" marker-end="url(#ar)"/>
+  <text x="752" y="157" font-size="10" opacity=".65">읽기 543ms</text>
+
+  <!-- CI 경로 -->
+  <rect x="424" y="240" width="420" height="58" rx="5" fill="none" stroke="#A32C2C" stroke-width="1.4"/>
+  <text x="634" y="260" text-anchor="middle" font-size="12" font-weight="600" fill="#A32C2C">GitHub Actions — 여기엔 DB도 캐시도 없다</text>
+  <text x="634" y="277" text-anchor="middle" font-size="10.5" fill="#A32C2C" opacity=".85">같은 스크립트가 저장소에 있는 것만으로 돌아야 한다</text>
+  <text x="634" y="291" text-anchor="middle" font-size="10.5" fill="#A32C2C" opacity=".85">→ 폴백 경로가 필요하고, 그게 여러 번 조용히 끊겼다</text>
+
+  <path d="M264 210 L264 269 L420 269" fill="none" stroke="#A32C2C" stroke-width="1.4"
+        stroke-dasharray="6 4" marker-end="url(#arw)"/>
+  <text x="276" y="240" font-size="10.5" fill="#A32C2C">건너오지 못한다</text>
+
+  <!-- 사고 -->
+  <text x="16" y="330" font-size="11" fill="currentColor" opacity=".55" font-weight="600">이 경계에서 난 사고</text>
+  <text x="16" y="349" font-size="11" opacity=".8">· leaders_cache 없음 → universe_syms 가 FileNotFoundError → 미국 시총 19일 정지</text>
+  <text x="16" y="366" font-size="11" opacity=".8">· shares_cache 없음 → 캐시 판정이 늘 미스 → 매주 SEC 3,095종 재수집(1시간 47분)</text>
+  <text x="16" y="383" font-size="11" opacity=".8">· 빈 market.db 가 생성됨 → parquet 폴백이 안 걸림 → KR-U6 11일 · 원장 18일 정지</text>
+</svg>
+<figcaption><strong>붉은 점선이 git 경계다.</strong> 왼쪽(market.db 578MB · 캐시 997MB)은 저장소에 없어
+GitHub Actions 러너에 존재하지 않는다. 같은 스크립트가 로컬에서는 DB를 읽고 CI에서는 커밋된 파일로
+폴백해야 하는데, 그 폴백이 끊길 때마다 <strong>에러 없이 데이터만 낡았다</strong>.</figcaption>
+</figure>
+
+<h2>형 질문: 같은 데이터를 여러 곳에서 가져와 느려지지 않나</h2>
+
+<div class="note">
+  <span class="lab">답 — 중복은 있지만 병목은 아니다</span>
+  <p>대시보드가 읽는 <code>results/*.json</code> 18개를 <strong>전부 파싱해도 543ms</strong>다.
+  대시보드는 <code>market.db</code>를 아예 열지 않는다(DB 접근 0회). 무거운 건 발행 쪽이고,
+  화면 쪽은 이미 가볍다.</p>
+</div>
+
+<h3>실제로 중복된 것</h3>
+<div class="tw">
+<table>
+  <thead><tr><th>파일</th><th>종목</th><th>중복 필드</th><th>크기</th></tr></thead>
+  <tbody>
+    <tr><td>mdd.json</td><td>2,084</td><td class="dim">sym·name·market·marcap</td><td>0.14MB</td></tr>
+    <tr><td>returns.json</td><td>2,098</td><td class="dim">같음</td><td>0.14MB</td></tr>
+    <tr><td>seasonality.json</td><td>2,049</td><td class="dim">같음</td><td>0.47MB</td></tr>
+    <tr><td>perf_latest.json</td><td>812</td><td class="dim">같음</td><td>0.52MB</td></tr>
+    <tr><td>screener_latest.json</td><td>98</td><td class="dim">같음</td><td>0.05MB</td></tr>
+  </tbody>
+</table>
+</div>
+<p>종목 메타데이터 4개 필드가 <strong>5벌</strong> 있다. 합쳐 약 300KB — 전체의 4%다.
+앞의 셋은 <code>screen_precompute.py</code>가 한 번에 만드는데도 파일이 셋으로 갈려 있다.
+합치면 관리가 단순해지지만 <strong>체감 속도는 안 바뀐다</strong>. 우선순위가 낮다.</p>
+
+<h3>진짜 비용이 드는 곳</h3>
+<div class="tw">
+<table>
+  <thead><tr><th>작업</th><th>시간</th><th>어디서</th></tr></thead>
+  <tbody>
+    <tr><td>결과 JSON 18개 파싱</td><td class="pos">543ms</td><td>화면 (매 로드)</td></tr>
+    <tr><td>브라우저 렌더</td><td class="pos">397ms</td><td>화면</td></tr>
+    <tr><td>factor_weekly 전량 조회</td><td class="neg">39,899ms</td><td>발행 (주 1회)</td></tr>
+    <tr><td>주봉 가격 캐시 갱신</td><td class="neg">약 5분</td><td>발행 (주 1회)</td></tr>
+    <tr><td>SEC 주식수 수집</td><td class="neg">4분 → 1시간 47분</td><td>CI (캐시 없을 때)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>화면과 발행이 <strong>두 자릿수 배로 다르다</strong>. 최적화할 게 있다면 발행 쪽이고,
+그중에서도 <strong>CI에 캐시가 없어 매번 처음부터 받는 경로</strong>가 압도적이다.
+2026-09-07에 <code>actions/cache</code>를 붙여 그 부분은 막았다.</p>
+
+<h2>저장소에 무엇이 커밋되나</h2>
+<div class="tw">
+<table>
+  <thead><tr><th>산출물</th><th>크기</th><th>주기</th><th>쓰임</th></tr></thead>
+  <tbody>
+    <tr><td>data/us_shares.csv</td><td>15.69MB</td><td>주 1회</td><td class="dim">계산 입력</td></tr>
+    <tr><td>results/price_curves.json</td><td>3.22MB</td><td>주 1회</td><td>화면</td></tr>
+    <tr><td>results/leaders_accel.json</td><td>2.72MB</td><td>주 1회</td><td>화면</td></tr>
+    <tr><td>data/kr_fundamentals_q.parquet</td><td>0.71MB</td><td>분기 1회</td><td class="dim">계산 입력</td></tr>
+    <tr><td>results/perf_latest.json</td><td>0.52MB</td><td>매일</td><td>화면</td></tr>
+    <tr><td class="dim">나머지 13개</td><td class="dim">합 1.1MB</td><td class="dim">일·주</td><td class="dim">화면 10 · 입력 2</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note warn">
+  <span class="lab">us_shares.csv 가 매주 통째로 바뀐다</span>
+  <p>299,001행짜리 CSV인데 <code>as_of</code> 컬럼이 모든 행에 있어 갱신 때마다 전체가 diff로 잡힌다.
+  주당 15MB가 히스토리에 쌓인다. <code>.git</code>이 1GB까지 불었던 원인 중 하나다
+  (지금은 정리 후 338MB).</p>
+</div>
+
+<h2>그래서 무엇을 할까</h2>
+<ul>
+  <li><strong>안 한다 — 결과 JSON 통합.</strong> 300KB 아끼자고 파일 구조를 흔들 이유가 없다.
+      화면 로딩은 이미 543ms다.</li>
+  <li><strong>이미 했다 — CI 캐시.</strong> <code>shares_cache</code>·<code>leaders_cache</code>를
+      <code>actions/cache</code>로 붙였다. 1시간 47분짜리 재수집이 사라진다.</li>
+  <li><strong>이미 했다 — 폴백 판정.</strong> 파일 존재가 아니라 <strong>테이블 존재</strong>로 본다.
+      빈 DB가 폴백을 막던 문제.</li>
+  <li><strong>남았다 — <code>us_shares.csv</code>의 매주 전량 diff.</strong>
+      <code>as_of</code>를 행마다 넣지 않으면 대부분의 행이 안 바뀐다. 다만 point-in-time 조회에
+      쓰이므로 스키마를 건드려야 한다 — <strong>지금 급하지 않다.</strong></li>
+</ul>
+
+<div class="note neg">
+  <span class="lab">이 지도가 말하는 진짜 교훈</span>
+  <p>느린 게 문제가 아니었다. <strong>같은 코드가 로컬(DB 있음)과 CI(DB 없음)에서 다른 경로를
+  타는데, 그 갈림길이 조용히 끊긴다</strong>는 게 문제였다. 세 번의 사고가 전부 같은 자리에서 났다.
+  새 스크립트를 쓸 때마다 <strong>"이게 CI에서도 도는가"</strong>를 먼저 물어야 한다.</p>
+</div>
+
+</div>
