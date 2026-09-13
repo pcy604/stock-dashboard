@@ -121,7 +121,9 @@ import pandas as pd
 BASE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE, "data", "market.db")
 OUT = os.path.join(BASE, "results", "leaders_accel.json")
-VER = "v1"
+# ⚠️ 2026-09-14 — 백테스트용 장기판(v13y, 2014~)을 나란히 쌓았다.
+#    운영 화면은 v1 그대로, 연구는 FACTOR_VER=v13y 로 돌린다.
+VER = os.environ.get("FACTOR_VER", "v1")
 SURGE = 10.0          # 주간 상승률 문턱 (%)
 MIN_ADV = 5e6         # 일평균 거래대금 $5M
 MIN_MC = 3e8          # 시총 $0.3B

@@ -57,14 +57,21 @@ def _r(v, n=2):
 
 def run(px, g, spy, *, mode, step_thr=None, trim_at=None, stop=None,
         max_pos=25, cap_full=False, ladder=None, regime=None,
-        regime_exit=False):
+        regime_exit=False, min_hold=0):
     """계좌 하나를 주 단위로 굴린다.
 
     mode      'equal'  = 신호마다 같은 비중(1/max_pos)
               'ladder' = 피라미딩 사다리(LADDER)
     step_thr  사다리 승급 문턱(%). 진입가 대비 이만큼 오를 때마다 한 칸 위로
     trim_at   부분매도 문턱(%). 도달 시 보유 수량의 절반을 판다(한 번만)
-    stop      손절(%). 진입가 대비 이만큼 빠지면 전량 청산
+    stop      손절(%). **보유 중 고점 대비** 이만큼 빠지면 전량 청산.
+              ⚠️ 2026-09-13 수정 — 그 전까지 **진입가 대비**로 짜여 있었다. 틀렸다.
+                 규칙은 처음부터 고점 대비였다. 진입가 기준이면 오른 뒤 되돌림에
+                 아무 방어가 없고, 반대로 산 직후 출렁임에 털린다.
+    min_hold  트레일을 켜기까지 기다리는 주수. 0 이면 처음부터 켠다.
+              ⚠️ 이 프로젝트의 기존 측정 — 이긴 종목에 트레일을 걸면 폭에 상관없이
+                 안 파는 것보다 나빴고, 좁을수록 더 나빴다. 단 **최소보유 바닥**을
+                 깔면 구제된다. 그래서 고점 대비 손절은 반드시 이 인자와 같이 잰다.
     cap_full  현금이 없을 때 최하위 수익 종목을 팔아 자리를 만드는가
     regime    시장 필터 — True 인 주에만 **신규 진입**한다.
     regime_exit 필터가 꺼지면 **보유도 전량 정리**한다(Faber 원문 방식).
@@ -114,8 +121,13 @@ def run(px, g, spy, *, mode, step_thr=None, trim_at=None, stop=None,
             if c is None:
                 continue
             e = pos[s]
+            if c > e["peak"]:
+                e["peak"] = c
+            e["wk"] += 1
             ret = (c / e["entry"] - 1) * 100
-            if stop is not None and ret <= -stop:
+            # 손절·트레일은 **고점 대비**로 잰다(진입가 대비가 아니다).
+            dd = (c / e["peak"] - 1) * 100
+            if stop is not None and e["wk"] > min_hold and dd <= -stop:
                 cash += e["sh"] * c * (1 - COST)
                 del pos[s]
                 continue
@@ -177,7 +189,7 @@ def run(px, g, spy, *, mode, step_thr=None, trim_at=None, stop=None,
                 break
             c = float(p.get(s))
             pos[s] = dict(sh=amt / c * (1 - COST), entry=c, lvl=0,
-                          trimmed=False, last=c)
+                          trimmed=False, last=c, peak=c, wk=0)
             cash -= amt
 
         eq = cash + sum(pos[s]["sh"] * (_q(p, s) or 0.0) for s in pos)
@@ -394,42 +406,49 @@ def build():
     STOP = 20
 
     # ① 기준선 — 손절만 있는 등가중
-    scen.append(("등가중25 손절20", dict(mode="equal", max_pos=25, stop=STOP)))
-    scen.append(("등가중12 손절20", dict(mode="equal", max_pos=12, stop=STOP)))
+    scen.append(("등가중25 고점-20", dict(mode="equal", max_pos=25, stop=STOP)))
+    scen.append(("등가중12 고점-20", dict(mode="equal", max_pos=12, stop=STOP)))
     scen.append(("등가중25 손절없음(비교)", dict(mode="equal", max_pos=25)))
 
     # ② 사다리 승급 문턱 — 한 값만 보지 않는다. 뭉쳐 있으면 구조의 힘이다.
     for thr in (5, 10, 15, 25):
-        scen.append((f"사다리{thr}% 손절20",
+        scen.append((f"사다리{thr}% 고점-20",
                      dict(mode="ladder", step_thr=thr, max_pos=25, stop=STOP)))
     scen.append(("사다리10% 손절없음(비교)",
                  dict(mode="ladder", step_thr=10, max_pos=25)))
 
     # ③ 사다리 상한을 낮추면 — MDD 주범이 최상단 20% 인지 본다
-    scen.append(("사다리10 상한10% 손절20",
+    scen.append(("사다리10 상한10% 고점-20",
                  dict(mode="ladder", step_thr=10, max_pos=25, stop=STOP,
                       ladder=[1.0, 3.0, 6.0, 10.0])))
-    scen.append(("사다리10 상한12% 손절20",
+    scen.append(("사다리10 상한12% 고점-20",
                  dict(mode="ladder", step_thr=10, max_pos=25, stop=STOP,
                       ladder=[1.0, 4.0, 8.0, 12.0])))
 
     # ④ 분할매도 — 낙폭을 사는 대신 수익을 얼마나 내주나
-    scen.append(("사다리10+분할50 손절20",
+    scen.append(("사다리10+분할50 고점-20",
                  dict(mode="ladder", step_thr=10, max_pos=25, stop=STOP, trim_at=50)))
-    scen.append(("등가중25+분할50 손절20",
+    scen.append(("등가중25+분할50 고점-20",
                  dict(mode="equal", max_pos=25, stop=STOP, trim_at=50)))
 
     # ⑤ 자리 교체 — 돈이 없을 때 최하위를 파는가
-    scen.append(("등가중25 손절20(자리교체)",
+    scen.append(("등가중25 고점-20(자리교체)",
                  dict(mode="equal", max_pos=25, stop=STOP, cap_full=True)))
-    scen.append(("사다리10 손절20(자리교체)",
+    scen.append(("사다리10 고점-20(자리교체)",
                  dict(mode="ladder", step_thr=10, max_pos=25, stop=STOP, cap_full=True)))
 
     # ⑥ 손절 폭 자체 — 20 이 특별한 값인지 확인
     for st in (10, 15, 30):
-        scen.append((f"사다리10 손절{st}",
+        scen.append((f"사다리10 고점-{st}%",
                      dict(mode="ladder", step_thr=10, max_pos=25, stop=st)))
 
+
+    # ⑥-b 최소보유 바닥 — 고점 대비 트레일은 바닥 없이 쓰면 이긴 종목을 죽인다
+    #     (이 프로젝트의 기존 청산 측정 결론). 바닥 폭을 훑어 확인한다.
+    for mh in (0, 4, 8, 13, 26):
+        scen.append((f"사다리10 고점-20 바닥{mh}주",
+                     dict(mode="ladder", step_thr=10, max_pos=25, stop=STOP,
+                          min_hold=mh)))
 
     # ⑦ 시장 필터 — **전부** 돌린다. 1등만 보지 않기 위해서다.
     REG = regimes(spy, spyv)
@@ -453,7 +472,17 @@ def build():
                          dict(mode="equal", max_pos=25, stop=STOP,
                               regime=REG[rk], regime_exit=True)))
 
-    # ⑧ 결선 — 민감도를 통과한 것만 조합한다 (2026-09-13 측정)
+    # ⑧ 결선  ⚠️ 2026-09-14 — 아래 ⑦·⑧ 의 결론은 **전부 뒤집혔다.** 원인 두 가지.
+    #    (1) 손절이 진입가 대비로 잘못 짜여 있었다(규칙은 처음부터 고점 대비였다).
+    #    (2) 시계열이 2018~ 8.7년이었다. 2014~ 12.5년으로 늘리자 필터가 전멸했다.
+    #        2014~2017 은 하락장 없이 이평이 여러 번 휩소한 구간이라, 짧은 표본에서는
+    #        보이지 않던 '필터가 상승장에서 까먹는 비용'이 드러났다.
+    #    결과: ma40 17.2%→6.3% / y10 28.3%→9.3% / ma52+y10 23.2%→8.9%.
+    #        **시장 필터 25종이 전부 SPY(13.9%)에 졌다.**
+    #    이유는 명확하다 — 고점 대비 손절이 이미 하락장을 처리한다. 2022년 전략 −13.5%
+    #        vs SPY −16.6%. 필터는 그 위에 현금 비용만 더한다. 필터 사냥 자체가
+    #        **망가진 손절 규칙을 보상하려던 헛수고**였다.
+    # ⑧ 결선(구) — 민감도를 통과한 것만 조합한다 (2026-09-13 측정)
     #
     #   민감도 검사 = 문턱을 양옆으로 흔든다. **고원이면 구조, 스파이크면 운.**
     #   후보 25종 중 1등을 그냥 고르면 그 1등은 다중비교로 우연히도 나온다.

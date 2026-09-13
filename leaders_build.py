@@ -18,8 +18,14 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
 CACHE = os.path.join(DATA, "leaders_cache")
 os.makedirs(CACHE, exist_ok=True)
-DB = os.path.join(DATA, "market.db")
-VER = "v1"
+# ⚠️ 장기 재구축을 샤드로 병렬화하기 위해 DB 경로도 환경변수로 뺐다(2026-09-13).
+#    주차별 파이썬 루프라 단일 프로세스로는 2,700종 × 654주 = 19시간이 걸린다.
+#    샤드마다 제 DB 에 쓰고 나중에 ATTACH 로 합친다(SQLite 동시쓰기 회피).
+DB = os.environ.get("MARKET_DB", os.path.join(DATA, "market.db"))
+# ⚠️ 백테스트용 장기 재구축을 위해 환경변수로 갈아끼울 수 있게 했다(2026-09-13).
+#    운영(대시보드)은 v1 을 그대로 쓰고, 장기판은 다른 버전으로 **나란히** 쌓는다.
+#    같은 테이블을 지우고 다시 쓰면 재구축 몇 시간 동안 화면이 죽는다.
+VER = os.environ.get("FACTOR_VER", "v1")
 
 YUA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                      '(KHTML, like Gecko) Chrome/124.0 Safari/537.36'}
@@ -370,6 +376,12 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
             import shutil; shutil.copy2(DB, bak)
         con.execute("DELETE FROM factor_weekly WHERE factor_ver=?", (VER,))
     cols = None
+    # 샤드 — SHARD/NSHARD 가 있으면 자기 몫만 계산한다
+    _ns = int(os.environ.get("NSHARD", "1")); _sh = int(os.environ.get("SHARD", "0"))
+    if _ns > 1:
+        u = u[[i % _ns == _sh for i in range(len(u))]].reset_index(drop=True)
+        print(f"샤드 {_sh}/{_ns} — 담당 {len(u)}종", flush=True)
+
     total = 0
     for _, row in u.iterrows():
         s = row.sym
