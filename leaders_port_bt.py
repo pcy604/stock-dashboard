@@ -24,7 +24,22 @@
   거래비용 왕복 0.3% 를 뺀다(수수료+슬리피지).
 
 ⚠️ 한계
-  · 상장폐지 종목이 유니버스에 없다. 모든 결과가 낙관 쪽이다.
+  · 상장폐지 종목이 유니버스에 없다 — **크기를 쟀다**(2026-09-14).
+      보유 종목이 매주 확률 p 로 회수 없이 0 이 되게 하고(손절도 못 피하는 갭),
+      연 환산 부도율을 올려가며 우위가 사라지는 지점을 찾았다. 시드 7개 중앙값:
+        연 0.5% → CAGR 19.1% | 1% → 15.6% | 2% → 14.6% | 3% → 14.7%
+        연 5%   → CAGR 13.9% = SPY 와 같아진다 ← **손익분기점**
+        연 8%   → 8.9%
+      실제 미국 상장사의 파산·청산 폐지율은 평시 연 0.3~0.5%, 2001·2008 최악기에도
+      1~1.5% 수준이다. 이 유니버스는 신호 시점에 시총 $0.3B·거래대금 $5M 이상으로
+      걸러진다. **손익분기점이 최악기의 3~5배, 평시의 10배**라 생존편향만으로는
+      이 우위를 설명하지 못한다.
+      · 이 테스트는 실제보다 **가혹하다** — 진짜 폐지는 대개 미리 흘러내리므로
+        고점 대비 -20% 트레일이 먼저 잡는다. 여기서는 예고 없이 0 으로 보냈다.
+      · 남는 진짜 한계는 폐지가 **무작위가 아니라는 것**이다. 부도는 하락장에
+        몰린다. 완전한 해결은 점별 시점(point-in-time) 유니버스가 있어야 하고,
+        그건 유료 데이터(Sharadar·Norgate·CRSP)를 사야 한다. 무료로는
+        EDGAR 가 폐지사의 티커를 지우고, 야후는 주가를 안 준다(검증 완료).
   · 주봉 종가에만 체결된다. 장중 손절·급등은 반영되지 않는다.
   · 배당·분할은 가격 시계열에 이미 반영돼 있다고 가정한다.
   · 세금은 계산하지 않는다.
@@ -57,7 +72,7 @@ def _r(v, n=2):
 
 def run(px, g, spy, *, mode, step_thr=None, trim_at=None, stop=None,
         max_pos=25, cap_full=False, ladder=None, regime=None,
-        regime_exit=False, min_hold=0):
+        regime_exit=False, min_hold=0, shock=0.0, seed=0):
     """계좌 하나를 주 단위로 굴린다.
 
     mode      'equal'  = 신호마다 같은 비중(1/max_pos)
@@ -81,6 +96,10 @@ def run(px, g, spy, *, mode, step_thr=None, trim_at=None, stop=None,
                  피라미딩으로 20% 까지 키운 자리가 반토막 나면 계좌가 10% 빠진다.
     """
     LAD = ladder or LADDER
+    # 생존편향 충격 — 유니버스에 상장폐지 종목이 없다. 그 크기를 '재기' 위해
+    # 보유 종목이 매주 확률 shock 으로 **0 이 되게** 한다(손절도 못 피하는 갭).
+    # 연 환산 부도율 = shock * 52. 우위가 사라지는 지점을 찾는 것이 목적이다.
+    rng = np.random.default_rng(seed)
     dates = px.index
     cash = CASH0
     pos = {}          # sym -> dict(sh, entry, lvl, trimmed, last)
@@ -114,6 +133,12 @@ def run(px, g, spy, *, mode, step_thr=None, trim_at=None, stop=None,
                 if c is not None:
                     cash += pos[s_]["sh"] * c * (1 - COST)
                 del pos[s_]
+
+        # ── 0-b) 상장폐지 충격 ───────────────────────
+        if shock > 0 and pos:
+            for s_ in list(pos):
+                if rng.random() < shock:
+                    del pos[s_]          # 회수 없음 = 100% 손실
 
         # ── 1) 청산 검사 ─────────────────────────────
         for s in list(pos):
