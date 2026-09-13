@@ -1,0 +1,140 @@
+.github/workflows/weekly-accel.yml
+
+# -*- coding: utf-8 -*-
+"""
+주간 편입 후보 산출 — 편입만 다룬다. 청산은 leaders_accel_take.py 소관.
+
+  exports/accel_picks.csv              최신 주차 후보 (시총 오름차순)
+  exports/accel_picks_YYYY-MM-DD.csv   주차별 보관본
+  results/accel_picks_status.json      신선도·건수 (헬스체크용)
+
+왜 파일을 따로 두는가 (2026-09-13)
+  next_week_picks.csv 는 weekly_run.py → signals.run_all_signals 가 만드는
+  CANSLIM 계열 산출물이라 이익 가속 규칙과 종목이 다르다. 08-22 판에는
+  DELL($84B)·HPE($22.6B)·NTAP($21B) 가 들어 있었다 — 소형주 우선과 정반대다.
+  한 폴더에 두 규칙의 후보가 섞여 있으면 잘못 산다.
+
+편입 규칙 (leaders_accel.py 게이트 그대로)
+  ACC=1 & 주간 +10%↑ & adv_20d $5M↑ & 시총 $0.3B↑ & 분기매출 $10M↑
+  선별: 시가총액 오름차순
+  제외: exclude.txt 의 이해관계 종목
+
+청산은 여기서 다루지 않는다 (2026-09-13 확정 규칙)
+  손절 = 고점 대비 −20%. **진입가 대비가 아니다** — CLAUDE.md 가 세 번 틀렸다고
+  경고하는 지점이다. 익절 = 52주 최소보유 후 진입 후 최고가 33주 미갱신 시 매도.
+
+신선도 검사
+  DB 최신 주차가 STALE_DAYS 를 넘으면 경고하고 exit 2 로 끝낸다.
+  08-24 에 멈춘 걸 2주 뒤에야 알아챈 일이 있었다(토요일 PC off → 스케줄러 미실행).
+  조용히 낡는 것이 가장 위험하다 — 산출물이 아니라 이 검사가 본체다.
+
+CLI
+  python leaders_accel_export.py
+  python leaders_accel_export.py --week 2026-09-07
+  python leaders_accel_export.py --top 10
+"""
+import argparse
+import json
+import os
+import sys
+
+import pandas as pd
+
+import leaders_accel as A
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+EXPORTS = os.path.join(BASE, "exports")
+RESULTS = os.path.join(BASE, "results")
+EXCLUDE = os.path.join(BASE, "exclude.txt")
+STALE_DAYS = 12          # 주봉 + 8일 지연 + 여유 이틀
+
+
+def load_exclude():
+    """이해관계 종목. 파일이 없으면 빈 집합 — 없다고 멈추지는 않는다."""
+    if not os.path.exists(EXCLUDE):
+        return set()
+    out = set()
+    with open(EXCLUDE, encoding="utf-8") as f:
+        for line in f:
+            t = line.split("#")[0].strip().upper()
+            if t:
+                out.add(t)
+    return out
+
+
+def build(week=None, top=None):
+    d = A.load()
+    d["as_of"] = pd.to_datetime(d["as_of"])
+
+    gate = (
+        (d.ACC == 1)
+        & (d.ret_1w >= A.SURGE)
+        & (d.adv_20d >= A.MIN_ADV)
+        & (d.marcap >= A.MIN_MC)
+    )
+    sig = d[gate].copy()
+
+    last = d.as_of.max()
+    wk = pd.Timestamp(week) if week else last
+    age = (pd.Timestamp.utcnow().tz_localize(None) - last).days
+
+    ex = load_exclude()
+    s = sig[sig.as_of == wk].copy()
+    s["excluded"] = s.sym.isin(ex)
+    picks = s[~s.excluded].sort_values("marcap")
+
+    cols = [c for c in ["sym", "name", "close", "marcap", "adv_20d", "ret_1w",
+                        "dist_52w", "op_income", "rev_yoy", "oi_a", "rv_a"]
+            if c in picks.columns]
+    out = picks[cols].copy()
+    out.insert(0, "rank", range(1, len(out) + 1))
+    out.insert(1, "as_of", wk.date())
+    if top:
+        out = out.head(top)
+
+    os.makedirs(EXPORTS, exist_ok=True)
+    os.makedirs(RESULTS, exist_ok=True)
+    out.to_csv(os.path.join(EXPORTS, "accel_picks.csv"),
+               index=False, encoding="utf-8-sig")
+    out.to_csv(os.path.join(EXPORTS, f"accel_picks_{wk.date()}.csv"),
+               index=False, encoding="utf-8-sig")
+
+    status = {
+        "factor_ver": A.VER,
+        "db_latest_week": str(last.date()),
+        "exported_week": str(wk.date()),
+        "age_days": age,
+        "stale": age > STALE_DAYS,
+        "signals": int(len(s)),
+        "excluded": int(s.excluded.sum()),
+        "picks": int(len(out)),
+        "generated_at": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+    }
+    with open(os.path.join(RESULTS, "accel_picks_status.json"), "w",
+              encoding="utf-8") as f:
+        json.dump(status, f, ensure_ascii=False, indent=2)
+
+    print(f"FACTOR_VER={A.VER} · DB 최신 주차 {last.date()} (경과 {age}일)")
+    print(f"{wk.date()} 주차 신호 {len(s)}종 · 제외 {int(s.excluded.sum())}종 "
+          f"· 후보 {len(out)}종")
+    if len(out):
+        v = out.copy()
+        v["marcap"] = (v.marcap / 1e6).round(0)
+        v["adv_20d"] = (v.adv_20d / 1e6).round(1)
+        if "op_income" in v:
+            v["op_income"] = (v.op_income / 1e6).round(1)
+        print()
+        print(v.head(12).to_string(index=False))
+    if status["stale"]:
+        print(f"\n[STALE] DB가 {age}일 낡았습니다 (기준 {STALE_DAYS}일). "
+              f"run_leaders_weekly.bat 이 완주했는지 확인하십시오.", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--week", default=None, help="YYYY-MM-DD (기본: DB 최신 주차)")
+    p.add_argument("--top", type=int, default=None, help="상위 N종만")
+    a = p.parse_args()
+    sys.exit(build(a.week, a.top))
