@@ -1263,6 +1263,57 @@ with t_lead, guard('주도주'):
                         "붉은 점선은 같은 축의 기준값으로, 주도주 1,843개가 정점에 닿기까지 "
                         "견뎠던 낙폭의 중앙값입니다. "
                         "⚠️ 주봉 종가 기준이라 장중 낙폭은 이보다 깊다.")
+
+                    # ── 익절 판정 (2026-09-13 확정) ─────────────────────
+                    # 규칙: 52주 최소보유 + 진입 후 최고가 33주 미갱신 → 매도.
+                    # 낙폭이 아니라 **시간 정체**를 본다. 주도주는 정점 전에 중앙 -23% 를
+                    # 견디며 오르므로(08-25 해부) 낙폭으로 재면 살아있는 종목을 자른다.
+                    # 반면 2배 이상 간 트레이드는 최고가까지 중앙 73주 — 큰 놈은 계속
+                    # 신고가를 갱신하며 간다. 그래서 '신고가 없는 기간'이 전진 정지의 신호다.
+                    # 근거: leaders_accel_take.py (알파 15.0% vs 무매도 10.6%, 워크포워드 통과)
+                    TAKE_FLOOR, TAKE_DRY = 52, 33
+                    st.markdown("##### ✂️ 익절 판정 — 1년 버티고, 최고가 33주 미갱신이면 매도")
+                    _eo = [r['d'] for r in _ar if r.get('close')]
+                    if _eo:
+                        _ent = st.selectbox(
+                            "진입 주차 — 어느 신호에서 샀다고 볼지", _eo,
+                            index=len(_eo) - 1, key=f"take_ent_{_ap}")
+                        _seg = _apx[_apx.index >= pd.Timestamp(_ent)].dropna()
+                        if len(_seg) >= 2:
+                            _pk_d = _seg.idxmax()
+                            _pk_v = float(_seg.loc[_pk_d])
+                            _held = len(_seg) - 1
+                            _dry = len(_seg) - 1 - _seg.index.get_loc(_pk_d)
+                            _now = float(_seg.iloc[-1])
+                            _k = st.columns(4)
+                            _k[0].metric("보유 경과", f"{_held}주",
+                                         f"{_held * 12 / 52:.1f}개월", delta_color="off")
+                            _k[1].metric("진입 후 최고가", f"${_pk_v:,.2f}",
+                                         f"{_pk_d:%Y-%m-%d}", delta_color="off")
+                            _k[2].metric("최고가 미갱신", f"{_dry}주",
+                                         f"문턱 {TAKE_DRY}주", delta_color="off")
+                            _k[3].metric("최고가 대비 현재", f"{_now / _pk_v - 1:+.0%}",
+                                         f"${_now:,.2f}", delta_color="off")
+                            if _held < TAKE_FLOOR:
+                                st.info(f"**보유** — 최소 보유 {TAKE_FLOOR}주에 "
+                                        f"{TAKE_FLOOR - _held}주 모자란다({_held}주). "
+                                        "이 구간에서는 익절 판정을 켜지 않는다 — "
+                                        "1년 안에 파는 규칙은 전부 알파를 깎았다.")
+                            elif _dry >= TAKE_DRY:
+                                st.error(f"**매도 신호** — 보유 {_held}주, 최고가 미갱신 "
+                                         f"{_dry}주로 문턱 {TAKE_DRY}주를 넘었다. "
+                                         "전진이 멈췄다는 뜻이다.")
+                            else:
+                                st.success(f"**보유** — 최고가 미갱신 {_dry}주로 문턱 "
+                                           f"{TAKE_DRY}주 미만. 앞으로 {TAKE_DRY - _dry}주 "
+                                           "안에 신고가를 다시 내면 계속 간다.")
+                        st.caption(
+                            "⚠️ **여기서 '현재'는 이 곡선의 마지막 주차다.** 가격 곡선은 "
+                            "(첫 신호 −26주) ~ (마지막 신호 +104주) 창으로만 저장되므로, "
+                            "오래전에만 신호가 났던 종목은 곡선이 이미 끊겨 있어 실제 오늘이 아니다. "
+                            "⚠️ 이 규칙은 **트레이드 단위 백테스트**(알파 15.0% · 무매도 10.6% · "
+                            "앞뒤 두 구간 모두 통과)에서 나왔고, 자본 제약(칸 수)은 넣지 않았다. "
+                            "5칸에 52주 최소보유면 연 5종밖에 못 산다.")
                 st.dataframe(color_table(pd.DataFrame([{
                     '주차': r['d'], '회차': r['n'], '그주상승': r['up'],
                     '시총($B)': r['mc'], '종가': r['close'], '고점대비': r['dd'],
