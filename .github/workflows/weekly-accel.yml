@@ -1,0 +1,226 @@
+# 주도주(이익 가속) 주간 편입 후보 — PC 불필요
+#
+# 왜 신설했나 (2026-09-14)
+#   이 규칙만 Actions 밖에 있었다. leaders_weekly.sh 가 PC의 작업 스케줄러로만
+#   돌았고, 09-05 토요일에 PC가 꺼져 있어 Windows 가 주간 작업을 건너뛰었다.
+#   Windows 는 놓친 주간 작업을 다음 주까지 다시 잡지 않는다 — DB가 08-24 에
+#   2주간 멈춰 있었고 아무도 몰랐다. PC 의존을 끊는 것이 목적이다.
+#
+#   market.db(gitignore)는 러너에 없지만 .gitignore 가 "재생성 가능"이라 적어 둔
+#   그대로다 — leaders_build.py update 가 data/leaders_cache 로부터 증분 적재한다.
+#
+# 산출물 스크립트를 파일로 안 쪼갠 이유
+#   파일 두 개를 웹에서 각각 올리다 두 번 어긋났다(260914 사고). 한 파일로 둔다.
+#
+# 필요 시크릿: 없다. leaders_build.py 는 Yahoo(주가)·SEC EDGAR(재무)만 쓴다.
+#
+# 편입 규칙 — leaders_accel.py 게이트 그대로, 시가총액 오름차순
+# 청산은 여기서 다루지 않는다. 2026-09-13 확정 규칙은
+#   손절 = 고점 대비 −20%(진입가 대비가 아니다), 익절 = 52주 최소보유 후
+#   진입 후 최고가 33주 미갱신 시 매도. leaders_accel_take.py 소관.
+name: weekly-accel
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 미국 마감 16:00 ET = 20:00 UTC(서머타임) / 21:00 UTC(표준시).
+    # 22:17 UTC 면 연중 한 시각으로 양쪽을 덮는다. 토 07:17 KST.
+    # :00 을 피한 이유 — Actions 예약은 정시에 몰려 수십 분씩 밀린다.
+    - cron: '17 22 * * 5'
+    # 예비. 금요일 실행이 밀렸을 때만 일한다. 토 15:17 KST.
+    - cron: '17 6 * * 6'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leaders-cache
+  cancel-in-progress: false
+
+jobs:
+  accel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - run: pip install -r requirements.txt
+
+      # daily-refresh 와 같은 prefix. fq_(분기재무)·ek_(실적일)가 살아 있어야
+      # 5분이 30분이 되지 않는다.
+      - name: 주봉 가격·재무 캐시 복원/저장
+        uses: actions/cache@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-${{ github.run_id }}
+          restore-keys: |
+            leaders-cache-
+
+      - name: market.db 복원/저장
+        uses: actions/cache@v4
+        with:
+          path: data/market.db
+          key: marketdb-${{ github.run_id }}
+          restore-keys: |
+            marketdb-
+
+      # 금요일 실행이 성공했으면 토요일 예비 실행은 여기서 끝낸다.
+      - name: 이번 주 이미 처리됐는지 확인
+        id: due
+        run: |
+          FRI=$(python -c "import datetime as dt; t=dt.datetime.utcnow().date(); print(t - dt.timedelta(days=(t.weekday()-4)%7))")
+          DONE=$(python -c "import json,os; p='results/accel_picks_status.json'; print(json.load(open(p)).get('exported_week','') if os.path.exists(p) else '')")
+          echo "직전 금요일 $FRI / 마지막 산출 ${DONE:-없음}"
+          if [ -n "$DONE" ] && [ ! "$DONE" \< "$FRI" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "[SKIP] 이번 주차는 이미 산출됐다 - 예비 실행을 건너뛴다."
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 캐시 상태 확인
+        if: steps.due.outputs.skip != 'true'
+        run: |
+          echo "leaders_cache: $(ls data/leaders_cache 2>/dev/null | wc -l) 파일"
+          if [ -f data/market.db ]; then
+            echo "market.db: $(du -h data/market.db | cut -f1)"
+            python -c "import sqlite3;c=sqlite3.connect('data/market.db');print('factor_weekly max as_of =',c.execute('select max(as_of) from factor_weekly').fetchone()[0])"
+          else
+            echo "market.db 없음 - 이번 실행에서 새로 쌓는다 (첫 회는 느리다)"
+          fi
+
+      # continue-on-error 를 안 붙인다. 붙이면 낡은 DB 로 후보를 뽑고 성공한 척
+      # 끝난다 — 이번에 고치려는 고장이 정확히 그 모양이었다.
+      # 주가는 매주 새로 받는다. 수정주가가 소급 변경되므로 증분은 과거를 어긋낸다.
+      - name: 가격 캐시 갱신
+        if: steps.due.outputs.skip != 'true'
+        run: |
+          rm -f data/leaders_cache/px_*.csv data/leaders_cache/dy_*.csv
+          python leaders_build.py fetch 2900
+
+      - name: factor_weekly 증분 적재
+        if: steps.due.outputs.skip != 'true'
+        run: python leaders_build.py update
+
+      - name: 이익 가속 신호 발행
+        if: steps.due.outputs.skip != 'true'
+        run: python leaders_accel.py
+
+      # 편입 후보를 CSV 로 떨군다. DB가 12일 넘게 낡으면 exit 2 로 죽는다 —
+      # 죽어야 알아챈다. exclude.txt 가 있으면 그 티커는 건너뛴다(없어도 된다).
+      - name: 편입 후보 산출
+        if: steps.due.outputs.skip != 'true'
+        run: |
+          cat > _accel_export.py <<'PYEOF'
+          import json, os, sys
+          import pandas as pd
+          import leaders_accel as A
+
+          STALE_DAYS = 12
+          BASE = os.path.dirname(os.path.abspath(__file__))
+
+          def load_exclude():
+              p = os.path.join(BASE, "exclude.txt")
+              if not os.path.exists(p):
+                  return set()
+              out = set()
+              for line in open(p, encoding="utf-8"):
+                  t = line.split("#")[0].strip().upper()
+                  if t:
+                      out.add(t)
+              return out
+
+          d = A.load()
+          d["as_of"] = pd.to_datetime(d["as_of"])
+          gate = ((d.ACC == 1) & (d.ret_1w >= A.SURGE)
+                  & (d.adv_20d >= A.MIN_ADV) & (d.marcap >= A.MIN_MC))
+          sig = d[gate].copy()
+
+          last = d.as_of.max()
+          age = (pd.Timestamp.utcnow().tz_localize(None) - last).days
+          ex = load_exclude()
+
+          s = sig[sig.as_of == last].copy()
+          s["excluded"] = s.sym.isin(ex)
+          picks = s[~s.excluded].sort_values("marcap")
+
+          cols = [c for c in ["sym", "name", "close", "marcap", "adv_20d", "ret_1w",
+                              "dist_52w", "op_income", "rev_yoy", "oi_a", "rv_a"]
+                  if c in picks.columns]
+          out = picks[cols].copy()
+          out.insert(0, "rank", range(1, len(out) + 1))
+          out.insert(1, "as_of", last.date())
+
+          os.makedirs("exports", exist_ok=True)
+          os.makedirs("results", exist_ok=True)
+          out.to_csv("exports/accel_picks.csv", index=False, encoding="utf-8-sig")
+          out.to_csv(f"exports/accel_picks_{last.date()}.csv",
+                     index=False, encoding="utf-8-sig")
+
+          status = {
+              "factor_ver": A.VER,
+              "db_latest_week": str(last.date()),
+              "exported_week": str(last.date()),
+              "age_days": age,
+              "stale": age > STALE_DAYS,
+              "signals": int(len(s)),
+              "excluded": int(s.excluded.sum()),
+              "picks": int(len(out)),
+              "generated_at": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+          }
+          json.dump(status, open("results/accel_picks_status.json", "w",
+                                 encoding="utf-8"), ensure_ascii=False, indent=2)
+
+          print(f"FACTOR_VER={A.VER} / DB 최신 주차 {last.date()} (경과 {age}일)")
+          print(f"신호 {len(s)}종 / 제외 {int(s.excluded.sum())}종 / 후보 {len(out)}종")
+          if len(out):
+              v = out.copy()
+              v["marcap"] = (v.marcap / 1e6).round(0)
+              v["adv_20d"] = (v.adv_20d / 1e6).round(1)
+              if "op_income" in v:
+                  v["op_income"] = (v.op_income / 1e6).round(1)
+              print()
+              print(v.head(12).to_string(index=False))
+          if status["stale"]:
+              print(f"[STALE] DB가 {age}일 낡았습니다 (기준 {STALE_DAYS}일).",
+                    file=sys.stderr)
+              sys.exit(2)
+          PYEOF
+          python _accel_export.py
+          rm -f _accel_export.py
+
+      - name: 결과 커밋 & 푸시
+        if: steps.due.outputs.skip != 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase --autostash origin main || true
+          for f in exports/accel_picks.csv results/accel_picks_status.json results/leaders_accel.json; do
+            [ -f "$f" ] && git add -f "$f"
+          done
+          git add -f exports/accel_picks_*.csv 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "auto: 주도주 편입 후보 $(date -u +%Y-%m-%d)"
+            git push origin main
+          fi
+
+      - name: 산출물 요약
+        if: always()
+        run: |
+          if [ -f results/accel_picks_status.json ]; then
+            cat results/accel_picks_status.json
+          fi
+          if [ -f exports/accel_picks.csv ]; then
+            echo "--- 편입 후보 (상위 10) ---"
+            head -11 exports/accel_picks.csv
+          fi
