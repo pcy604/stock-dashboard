@@ -1,4 +1,4 @@
-<title>주도주 탈출 타이밍</title>
+<title>주도주 청산 규칙</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -132,364 +132,194 @@ footer{margin-top:84px; padding-top:20px; border-top:1px solid var(--rule); font
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">stock_screener · 청산 연구 · 2026-08-25</div>
-  <h1>주도주 탈출<br>타이밍</h1>
-  <p class="lede col">현행 진입 규칙(<b>이익 가속</b>)이 낸 신호 <b>7,551건</b>을 전부 따라가며
-  청산 규칙 18종을 겨뤘다. 결론부터 — 이 규칙에서는 <b>어떤 청산도 그냥 들고 있는 것을 못 이긴다.</b>
-  그리고 자본에 제약을 거는 순간 그 결론이 다시 뒤집힌다.</p>
-  <div class="errata" style="margin-top:26px">
-    <b>정정.</b> 이 문서의 첫 판은 구 규칙 <code>L/S</code> 위에서 쓰였다. L/S는
-    <code>leaders_accel.py</code> 문서가 적어놓은 대로 <b>TSLA 0회·NVDA 0회·WDC 0회</b>로
-    시대의 주도주를 못 잡는 규칙이다. 못 잡는 규칙 위에서 탈출을 연구한 셈이라 전부 다시 쟀고,
-    <b>상당 부분이 뒤집혔다.</b> L/S 결과는 03·07절에 <em>대조군</em>으로만 남긴다 —
-    그 대조가 이 연구의 제일 큰 결론을 만들었다.
-  </div>
+  <div class="eyebrow">stock_screener · Equity Research Note · 2026-09-13</div>
+  <h1>주도주 청산 규칙</h1>
+  <p class="lede col"><b>결론 — 52주 최소보유 후 진입 후 최고가 33주 미갱신 시 전량 매도.</b>
+  낙폭 기준 트레일은 폭과 무관하게 전부 기각. 초과수익 15.0%(무매도 10.6%), 10배 도달률
+  0.52%(0.46%), 평균 보유 61주(83주). 앞·뒤 두 구간 동시 통과.</p>
   <div class="meta">
-    <span>신호 7,551건 · 377주</span>
-    <span>청산 18종 · 최대 104주 추적</span>
-    <span>런 해부 1,843개</span>
-    <span>주봉 종가 · 수수료 0.1%</span>
+    <span>대상 이익 가속 규칙 · 신호 7,568건</span>
+    <span>기간 2018-06~2026-08 · 주봉</span>
+    <span>추적 상한 104주 · 수수료 0.1%</span>
+    <span>벤치마크 SPY</span>
   </div>
 </header>
 
 <section>
-  <div class="shead"><span class="snum">요약</span><h2>세 줄</h2></div>
-  <div class="verdicts">
-    <div class="v stop">
-      <span class="lab">기각</span>
-      <span class="big">고점 대비 트레일</span>
-      <span class="sub">이 규칙은 <b>낙폭 한가운데서 산다</b>(신고가 대비 중앙 −10.8%). 고점 기준 트레일은 정상 노이즈에 걸리고 <b>10배 확률을 7배 죽인다.</b></span>
-    </div>
-    <div class="v go">
-      <span class="lab">정정 2026-08-25</span>
-      <span class="big">이긴 건 안 판다</span>
-      <span class="sub">이미 +50% 오른 신호만 놓고 재면 트레일은 <b>폭에 상관없이 전부 손해</b>다
-      (고점 −25% 알파 −15.5%p). '진입가 −25%' 가 좋아 보였던 건 <b>거의 발동하지 않아서</b>였다.</span>
-    </div>
-    <div class="v hold">
-      <span class="lab">뒤집힘</span>
-      <span class="big">슬롯 회수</span>
-      <span class="sub">자본이 무한하면 안 파는 게 최선인데, <b>5칸</b>을 걸면 빨리 파는 규칙이 이긴다(4.31배 vs 2.05배). 청산의 1차 기능은 리스크가 아니다.</span>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">01</span><h2>트럭은 가는 동안 몇 번 흔들리나</h2></div>
+  <div class="shead"><span class="snum">SUMMARY</span><h2>Key Takeaways</h2></div>
   <div class="col stack">
-    <p>이 절만 진입 규칙과 무관하다. 직전 104주 저점 대비 <b>+150% 이상</b> 오른 뒤 ±26주 구간의
-    최대값을 찍은 주차를 '정점'으로 보고, 저점→정점을 하나의 <b>런</b>으로 정의했다.
-    <b>1,843개 런</b>(정점 시점 시총 $2B·거래대금 $5M 이상은 1,108개)이 나왔다.</p>
-    <p class="claim">주도주의 절반은 정점에 닿기 전에 이미 −25%를 한 번 겪는다.</p>
-  </div>
-
-  <figure>
-    <svg viewBox="0 0 660 262" role="img" aria-label="낙폭 깊이별로 그 낙폭을 최소 한 번 겪는 런의 비율">
-      <line x1="46" y1="30" x2="648" y2="30" stroke="var(--rule)" stroke-width="1"/>
-      <text x="46" y="22" class="axlab">해수면 = 진행 최고가</text>
-      <line x1="46" y1="30" x2="46" y2="240" stroke="var(--rule)" stroke-width="1"/>
-      <rect x="46" y="38" width="480" height="26" fill="var(--shoal)" opacity=".55"/>
-      <text x="536" y="56" class="val">84%</text>
-      <text x="54" y="55" class="axis" fill="var(--ink)">−15%</text>
-      <rect x="46" y="72" width="383" height="26" fill="var(--sea)" opacity=".6"/>
-      <text x="439" y="90" class="val">67%</text>
-      <text x="54" y="89" class="onbar">−20%</text>
-      <rect x="46" y="106" width="291" height="26" fill="var(--sea)" opacity=".78"/>
-      <text x="347" y="124" class="val">51%</text>
-      <text x="54" y="123" class="onbar">−25%</text>
-      <rect x="46" y="140" width="211" height="26" fill="var(--deep)" opacity=".85"/>
-      <text x="267" y="158" class="val">37%</text>
-      <text x="54" y="157" class="onbar">−30%</text>
-      <rect x="46" y="174" width="103" height="26" fill="var(--deep)"/>
-      <text x="159" y="192" class="val">18%</text>
-      <text x="54" y="191" class="onbar">−40%</text>
-      <rect x="46" y="208" width="49" height="26" fill="var(--deep)"/>
-      <text x="105" y="226" class="val">8.5%</text>
-      <text x="54" y="225" class="onbar">−50%</text>
-    </svg>
-    <figcaption class="cap">막대 길이 = 그 깊이의 낙폭을 <b>정점에 닿기 전에</b> 최소 한 번 겪은 런의 비율(n=1,843).
-    상승 중 −20% 낙폭은 중앙 1회(0회인 런 38%), −30%는 중앙 0회(0회인 런 70%).
-    견뎌야 했던 최대 낙폭은 중앙 <b>−23%</b>, 하위 25%는 <b>−32%</b>. 정점 이후엔 중앙 <b>−45%</b>까지 빠진다.</figcaption>
-  </figure>
-
-  <div class="aside">위기의 횟수는 생각보다 적고 깊이는 생각보다 깊다. 주도주를 놓치는 건
-  "여러 번 흔들려서"가 아니라 <b>한 번 크게 흔들릴 때</b>다.</div>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">02</span><h2>이 규칙은 어디서 사는가 — 트레일의 전제가 깨진다</h2></div>
-  <div class="col stack">
-    <p>이익 가속 규칙의 진입 시점을 재보면 <b>52주 신고가 대비 중앙 −10.8%</b>이고,
-    <b>38%는 신고가에서 −20% 넘게 떨어진 자리</b>에서 산다. 설계 문서가 적어놓은 그대로다 —
-    NVDA는 고점 대비 −65.9%, TSLA는 −38.3%에서 신호가 났다.</p>
-    <p class="claim">고점 기준 트레일은 "고점 근처에서 샀다"를 전제한다.<br>이 규칙은 그 전제를 안 만족한다.</p>
-    <p>낙폭 한가운데서 산 종목의 '진입 후 고점'은 대개 잠깐의 반등 꼭지다. 거기서 −30%를 재면
-    바닥권의 정상 진동에 그대로 걸린다. 구 규칙 L/S는 <b>+20% 급등 직후 신고가 근처</b>에서 사기 때문에
-    같은 트레일이 전혀 다르게 작동했다.</p>
-  </div>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">03</span><h2>낙폭 깊이에는 정보가 없다</h2></div>
-  <div class="col stack">
-    <p>진입 후 고점 대비 −X%를 처음 깬 주차를 '판단의 순간'으로 잡고, 그 뒤 52주를 따라갔다.
-    구 규칙 L/S와 나란히 그리면 두 규칙이 완전히 다른 그림을 낸다.</p>
-  </div>
-
-  <figure>
-    <svg viewBox="0 0 660 268" role="img" aria-label="낙폭 문턱별 이후 52주 수익 중앙값 — 이익 가속과 구 규칙 L/S 비교">
-      <line x1="60" y1="140" x2="620" y2="140" stroke="var(--faint)" stroke-dasharray="3 3"/>
-      <text x="628" y="144" class="axlab">0%</text>
-      <line x1="60" y1="40" x2="60" y2="215" stroke="var(--rule)"/>
-      <g class="axis">
-        <text x="52" y="44" text-anchor="end">+20%</text>
-        <text x="52" y="94" text-anchor="end">+10%</text>
-        <text x="52" y="194" text-anchor="end">−10%</text>
-      </g>
-      <path d="M90,111 L170,118 L250,120 L330,115 L410,104 L490,110 L570,95"
-            fill="none" stroke="var(--sea)" stroke-width="2.6" stroke-linejoin="round"/>
-      <g fill="var(--sea)">
-        <circle cx="90" cy="111" r="4"/><circle cx="170" cy="118" r="4"/><circle cx="250" cy="120" r="4"/>
-        <circle cx="330" cy="115" r="4"/><circle cx="410" cy="104" r="4"/><circle cx="490" cy="110" r="4"/>
-        <circle cx="570" cy="95" r="4"/>
-      </g>
-      <text x="578" y="86" class="val" fill="var(--sea)">이익 가속</text>
-      <path d="M90,50 L170,118 L250,151 L330,172 L410,170 L490,203"
-            fill="none" stroke="var(--rust)" stroke-width="2.2" stroke-dasharray="6 4" stroke-linejoin="round"/>
-      <g fill="var(--rust)">
-        <circle cx="90" cy="50" r="3.5"/><circle cx="170" cy="118" r="3.5"/><circle cx="250" cy="151" r="3.5"/>
-        <circle cx="330" cy="172" r="3.5"/><circle cx="410" cy="170" r="3.5"/><circle cx="490" cy="203" r="3.5"/>
-      </g>
-      <text x="90" y="42" class="val" fill="var(--rust)">구 규칙 L/S</text>
-      <text x="498" y="218" class="axlab" fill="var(--rust)">−12.6%</text>
-      <g class="axis">
-        <text x="90" y="240" text-anchor="middle">−10</text>
-        <text x="170" y="240" text-anchor="middle">−15</text>
-        <text x="250" y="240" text-anchor="middle">−20</text>
-        <text x="330" y="240" text-anchor="middle">−25</text>
-        <text x="410" y="240" text-anchor="middle">−30</text>
-        <text x="490" y="240" text-anchor="middle">−40</text>
-        <text x="570" y="240" text-anchor="middle">−50</text>
-      </g>
-      <text x="340" y="260" text-anchor="middle" class="axlab">진입 후 고점 대비 낙폭 문턱 (%)</text>
-    </svg>
-    <figcaption class="cap">세로축 = 그 문턱을 처음 깬 시점부터 이후 52주 수익 <b>중앙값</b>.
-    가속 규칙은 −10%든 −50%든 +4~9%로 평평하다 — <b>낙폭이 깊어져도 미래가 나빠지지 않는다.</b>
-    L/S는 +18.0% → −12.6%로 단조 악화한다. 첫 판에서 "손절선은 −15~20% 사이"라고 쓴 근거가 저 붉은 선이었고,
-    <b>그건 L/S 고유 현상이었다.</b></figcaption>
-  </figure>
-
-  <div class="col stack">
-    <p>U턴의 지문도 흐려진다. 판단 시점 특징 19개를 5분위로 갈랐을 때 최대 스프레드가
-    L/S는 <b>57%</b>였는데 가속 규칙은 <b>28%</b>다. 살아남는 건 시장 레짐 하나뿐 —
-    SPY가 조정 중일 때의 낙폭은 이후 <b>+20%</b>, SPY가 신고가 부근인데 혼자 빠지면 <b>−8%</b>다.
-    두 규칙에서 방향이 같은 유일한 신호다.</p>
-  </div>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">04</span><h2>어떤 청산도 그냥 들고 있는 것을 못 이긴다</h2></div>
-  <div class="col stack">
-    <p>이 규칙은 6칸 포트폴리오가 아니라 <b>신호 목록</b>이다(설계 문서: 평균 74종, "신호 목록이지
-    포트폴리오 규칙이 아니다"). 그래서 슬롯 경쟁 없이 <b>모든 신호를 한 건씩</b> 채점했다.
-    지표는 <code>leaders_accel.py</code>가 쓰는 것과 같다 — 평균·알파평균·2배+·10배+.
-    <b>중앙값으로 판정하지 않는다</b>(그 문서의 경고: 분포가 U자다).</p>
-  </div>
-  <div class="scroll">
-    <table>
-      <thead><tr><th>청산 규칙</th><th>평균</th><th>알파 평균</th><th>2배+</th><th>4배+</th><th>10배+</th><th>평균 보유</th></tr></thead>
-      <tbody>
-        <tr class="hi"><td>고정 104주 보유 <span class="key">기준선</span></td><td class="pos">39.4%</td><td class="pos">12.1%</td><td>15.6%</td><td>3.39%</td><td class="pos">0.46%</td><td>82주</td></tr>
-        <tr><td>진입가 대비 −30% 손절</td><td>29.1%</td><td class="pos">11.4%</td><td>12.9%</td><td>2.83%</td><td>0.40%</td><td>55주</td></tr>
-        <tr class="hi"><td>진입가 대비 −25% 손절 <span class="key">채택</span></td><td>27.0%</td><td class="pos">10.9%</td><td>12.1%</td><td>2.69%</td><td>0.36%</td><td>50주</td></tr>
-        <tr><td>트레일 −50%</td><td>30.2%</td><td>10.1%</td><td>13.0%</td><td>2.54%</td><td>0.38%</td><td>62주</td></tr>
-        <tr><td>진입가 대비 −20% 손절</td><td>24.0%</td><td>9.8%</td><td>11.1%</td><td>2.46%</td><td>0.33%</td><td>44주</td></tr>
-        <tr><td>고정 52주 보유</td><td>28.5%</td><td>11.2%</td><td>11.7%</td><td>1.62%</td><td>0.19%</td><td>45주</td></tr>
-        <tr><td>트레일 −40%</td><td>25.6%</td><td>8.7%</td><td>11.5%</td><td>2.21%</td><td>0.28%</td><td>52주</td></tr>
-        <tr class="dim"><td>트레일 −30%</td><td>17.4%</td><td class="neg">4.5%</td><td>9.0%</td><td>1.18%</td><td class="neg">0.07%</td><td>38주</td></tr>
-        <tr class="dim"><td>트레일 −20%</td><td>11.4%</td><td class="neg">2.9%</td><td>5.5%</td><td>0.54%</td><td class="neg">0.00%</td><td>23주</td></tr>
-        <tr class="dim"><td>20주선 이탈 2주</td><td>8.1%</td><td class="neg">2.8%</td><td>3.5%</td><td>0.50%</td><td>0.11%</td><td>15주</td></tr>
-        <tr class="dim"><td>가속 꺼짐 (ACC=0)</td><td class="neg">6.9%</td><td class="neg">1.8%</td><td>2.3%</td><td>0.08%</td><td class="neg">0.00%</td><td>12주</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="cap">신호 7,551건 · 최대 104주 추적 · 수수료 0.1% · 알파 = 같은 기간 SPY 차감.</p>
-
-  <figure>
-    <svg viewBox="0 0 660 176" role="img" aria-label="청산 규칙별 10배 이상 트레이드 비율">
-      <text x="0" y="14" class="axlab">10배+ 트레이드 비율 — 청산이 꼬리를 어떻게 죽이는가</text>
-      <g>
-        <rect x="180" y="28" width="440" height="18" fill="var(--sea)"/>
-        <text x="628" y="42" class="val">0.46%</text>
-        <text x="172" y="42" text-anchor="end" class="axis" fill="var(--ink)">고정 104주 보유</text>
-
-        <rect x="180" y="52" width="382" height="18" fill="var(--sea)" opacity=".8"/>
-        <text x="570" y="66" class="val">0.40%</text>
-        <text x="172" y="66" text-anchor="end" class="axis">진입가 −30%</text>
-
-        <rect x="180" y="76" width="344" height="18" fill="var(--sea)" opacity=".8"/>
-        <text x="532" y="90" class="val">0.36%</text>
-        <text x="172" y="90" text-anchor="end" class="axis">진입가 −25%</text>
-
-        <rect x="180" y="100" width="268" height="18" fill="var(--shoal)"/>
-        <text x="456" y="114" class="val">0.28%</text>
-        <text x="172" y="114" text-anchor="end" class="axis">트레일 −40%</text>
-
-        <rect x="180" y="124" width="67" height="18" fill="var(--rust)"/>
-        <text x="255" y="138" class="val" fill="var(--rust)">0.07%</text>
-        <text x="172" y="138" text-anchor="end" class="axis">트레일 −30%</text>
-
-        <rect x="180" y="148" width="2" height="18" fill="var(--rust)"/>
-        <text x="190" y="162" class="val" fill="var(--rust)">0.00%</text>
-        <text x="172" y="162" text-anchor="end" class="axis">가속 꺼짐</text>
-      </g>
-    </svg>
-    <figcaption class="cap">이 규칙의 가치는 전부 꼬리에 있다(설계 문서: 분포가 U자다).
-    트레일 −30%는 평균을 39.4% → 17.4%로 깎는 데 그치지 않고 <b>10배 확률을 7배 줄인다.</b></figcaption>
-  </figure>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">05</span><h2>진입가 기준이 이긴 줄 알았다 — 착시였다</h2></div>
-  <div class="col stack">
-    <p><b>처음 쓴 결론:</b> "같은 −25%인데 어디서부터 재느냐가 결과를 가른다. 진입가 대비 −25%는 알파 10.9%,
-    고점 대비 −25%는 4.2%다." 사용자가 정확한 반론을 냈다 — <b>시장은 내 매수가를 모른다.</b>
-    매수가 기준 손절은 시장 구조와 아무 관계가 없는 임의의 선이다.</p>
-    <p>두 가지가 잘못돼 있었다. ① <b>기준점과 폭을 동시에 바꿔놓고</b> 기준점의 승리라고 했다.
-    ② <b>'초기 손절'과 '추세 종료'를 한 숫자로 뭉갰다</b> — 진입가 기준 손절은 포지션이 이익 구간에
-    들어가면 사실상 발동하지 않는다. 즉 그 규칙의 실체는 "<b>지면 자르고 이기면 안 판다</b>"다.</p>
-    <p>그래서 질문을 바꿔 다시 쟀다 — <b>이미 오른 종목만</b> 놓고 무엇이 최선인가.</p>
-  </div>
-  <div class="scroll">
-    <table>
-      <thead><tr><th>청산 규칙</th><th>알파 평균</th><th>10배+</th><th>평균 보유</th><th>안 판 것 대비</th></tr></thead>
-      <tbody>
-        <tr class="hi"><td>안 판다 (104주)</td><td class="pos">+70.8%</td><td>0.97%</td><td>90주</td><td>—</td></tr>
-        <tr><td>진입가 −25% <span class="key">구 채택</span></td><td>+69.3%</td><td>0.97%</td><td>84주</td><td>−1.5%p</td></tr>
-        <tr><td>고점 대비 −50%</td><td>+64.5%</td><td>0.86%</td><td>78주</td><td>−6.4%p</td></tr>
-        <tr><td>고점 대비 −40%</td><td>+62.1%</td><td>0.61%</td><td>72주</td><td>−8.7%p</td></tr>
-        <tr><td>고점 대비 −30%</td><td>+56.0%</td><td>0.19%</td><td>63주</td><td class="neg">−14.8%p</td></tr>
-        <tr><td>고점 대비 −25%</td><td>+55.3%</td><td>0.19%</td><td>59주</td><td class="neg">−15.5%p</td></tr>
-        <tr class="dim"><td>20주선 이탈 2주</td><td>+54.2%</td><td>0.31%</td><td>51주</td><td class="neg">−16.6%p</td></tr>
-        <tr class="dim"><td>고점 대비 −20%</td><td>+52.2%</td><td class="neg">0.00%</td><td>53주</td><td class="neg">−18.6%p</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="cap">진입 후 <b>+50% 이상 도달한 신호 3,590건</b>만. 그 시점부터의 청산만 비교해 초기 손절 구간을 제외했다.
-  +30%·+100% 문턱에서도 순서가 그대로다.</p>
-  <div class="col stack">
-    <p class="claim">이긴 종목을 파는 어떤 규칙도 안 파는 것보다 나빴다.<br>그리고 좁을수록 더 나빴다.</p>
-    <p>'진입가 −25%'가 안 파는 것과 성적이 같은 이유가 여기서 드러난다 — <b>이미 오른 종목에서는
-    거의 발동하지 않기 때문</b>이다. 그 규칙의 좋은 성적은 기준점의 공이 아니라 <b>'안 판다'의 성적</b>이었다.</p>
-    <div class="aside warn"><b>그래서 지금 정직한 상태는 이렇다.</b> 손절(틀렸을 때의 한도)과
-    익절(이긴 것을 파는 것)은 다른 문제이고, <b>이 연구는 후자에 아직 답이 없다.</b>
-    측정한 건 "트레일은 전부 손해"까지이고, 구조 기준(직전 저점 이탈·베이스 붕괴 등)은
-    <b>아직 재보지 않았다.</b> 사용자 지적의 핵심 — 기준점은 시장이 아는 가격이어야 한다 — 은 유효하고,
-    그걸 만족하는 후보는 아직 측정되지 않았다.</div>
-  </div>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">06</span><h2>내가 낸 가설이 기각됐다</h2></div>
-  <div class="col stack">
-    <p>이 규칙에는 구조적으로 맞아 보이는 청산이 하나 있었다. <b>진입 논리가 '가속'이면
-    청산 논리는 '감속'이다</b> — 매출·이익 성장률이 더 이상 빨라지지 않는 분기가 공시되면 나간다.
-    격자에서 주운 게 아니라 진입 가설의 부정이라, 채택 기준을 통과할 자격이 있다고 봤다.</p>
-    <p><b>트레이드 층위에서 18종 중 꼴찌였다.</b> 평균 6.9%, 알파 1.8%, 10배+ <b>0.00%</b>.</p>
-    <p>이유는 단순하다. <code>ACC</code> 플래그는 분기마다 깜빡여서 <b>평균 보유가 12주</b>다.
-    "감속하면 나가라"가 실제로는 "<b>석 달 뒤 매도</b>"로 작동한다. 게다가 판단의 순간에
-    가속이 이미 꺼져 있던 쪽이 이후 52주 중앙 <b>+6.2%</b>로, 여전히 가속 중이던 쪽(<b>+0.9%</b>)보다
-    오히려 나았다. 가설이 예측한 방향과 반대다.</p>
-    <div class="aside warn"><b>설명력이 있는 것과 규칙으로 돈이 되는 것은 다르다.</b>
-    이익 가속은 <em>진입</em> 신호로는 대조군을 전 항목에서 이겼지만, 그 신호의 소멸은
-    <em>청산</em> 신호가 아니었다.</div>
-  </div>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">07</span><h2>자본에 제약을 걸면 결론이 뒤집힌다</h2></div>
-  <div class="col stack">
-    <p>04절은 자본이 무한하다고 가정한 계산이다. 신호 7,551건을 전부 사서 2년씩 들고 있을 수는 없다.
-    설계도의 실제 규칙은 <b>종목당 최대 20%, 최대 5종목</b>이다. 5칸으로 다시 돌렸다.</p>
-  </div>
-  <div class="scroll">
-    <table>
-      <thead><tr><th>청산 규칙</th><th>앞 2019~21</th><th>뒤 2022~26</th><th>전체 2019~</th><th>MDD</th><th>거래 수</th></tr></thead>
-      <tbody>
-        <tr class="hi"><td>가속 꺼짐 (ACC=0)</td><td>1.79배</td><td class="pos">2.97배</td><td class="pos">4.31배 +21%</td><td>−42%</td><td>162</td></tr>
-        <tr><td>트레일 −50%</td><td>1.94배</td><td class="neg">0.88배</td><td>4.75배 +23%</td><td>−56%</td><td>26</td></tr>
-        <tr><td>진입가 −25% + 트레일 −50%</td><td>2.08배</td><td>1.23배</td><td>4.65배 +22%</td><td>−59%</td><td>24</td></tr>
-        <tr><td>104주 시간청산</td><td>1.71배</td><td>1.50배</td><td>2.87배 +15%</td><td>−68%</td><td>20</td></tr>
-        <tr class="dim"><td>무매도 (안 판다)</td><td>2.51배</td><td>1.61배</td><td class="neg">2.05배 +10%</td><td class="neg">−75%</td><td class="neg">5</td></tr>
-        <tr class="dim"><td>진입가 −25% 손절</td><td>2.16배</td><td>1.46배</td><td class="neg">0.93배 −1%</td><td>−66%</td><td>15</td></tr>
-        <tr class="dim"><td>트레일 −30%</td><td class="neg">0.92배</td><td>1.10배</td><td class="neg">0.60배 −6%</td><td>−67%</td><td>65</td></tr>
-        <tr><td class="key">SPY</td><td>1.93배</td><td>1.75배</td><td class="key">3.31배 +17%</td><td>−32%</td><td>—</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="col stack">
-    <p class="claim">04절의 꼴찌가 여기서는 1위다.</p>
-    <p>이유는 성과가 아니라 <b>회전</b>이다. 무매도는 8년간 거래가 <b>5건</b>이다 — 2019년에 5칸을 채우고
-    끝난다. 가속 꺼짐 청산은 평균 12주 만에 칸을 비워 <b>162건</b>을 돌린다. 구 규칙 L/S에서도 똑같았다:
-    무매도가 구간별로는 좋았는데 전 구간으로는 1.24배로 최악이었다.</p>
-    <div class="aside"><b>청산의 1차 기능은 리스크 관리가 아니라 슬롯 회수다.</b>
-    "언제 팔아야 하나"는 사실 "<b>이 칸을 다음 후보에게 언제 넘겨야 하나</b>"였다.
-    그래서 같은 청산 규칙이 자본 제약 유무에 따라 1위와 꼴찌를 오간다.</div>
-    <p>다만 5칸 표는 <b>전부 신뢰구간 밖</b>이라고 봐야 한다. 앞/뒤 구간이 서로 안 맞고
-    (트레일 −50%는 앞 1.94 → 뒤 0.88), 거래가 20~30건이라 순위가 열몇 번의 판단으로 뒤집힌다.
-    <b>여기서 규칙을 고르지 않는다.</b> 반면 04절 표는 7,551건이라 앞/뒤 순위가 그대로 유지된다.</p>
-  </div>
-</section>
-
-<section>
-  <div class="shead"><span class="snum">08</span><h2>그래서 무엇을 쓰나</h2></div>
-  <div class="col stack">
-    <p><b>이긴 종목 —</b> <span class="key">1년은 안 판다. 그 뒤 진입 후 최고가를 33주 동안
-    못 넘으면 판다.</span> 낙폭이 아니라 <b>시간 정체</b>를 본다 — 주도주는 크게 흔들리며 오르므로
-    낙폭으로 재면 살아있는 종목을 자르지만, 8개월째 신고가가 없다는 건 전진이 멈췄다는 뜻이다.
-    알파 <b>15.0%</b>(무매도 10.6%) · 10배+ <b>0.52%</b>(무매도 0.46%) · 보유 61주(무매도 83주).
-    <b>앞·뒤 두 구간 모두에서</b> 무매도를 이겼고, 20~52주가 전부 12.6~15.0%인 <b>고원</b>이라
-    단일 봉우리 과적합이 아니다. 트레일(뒤 구간 6.2%)과 베이스 붕괴(7.0%)는 무매도(7.0%)를
-    못 이겨 탈락했다. (2026-09-13, <code>leaders_accel_take.py</code>)</p>
-    <p><b>진 종목 —</b> 손실 한도는 필요하다. 다만 <b>그 선을 어디서 재느냐는 미해결</b>이다.
-    진입가 기준은 시장이 모르는 가격이고, 고점 대비는 이 규칙의 진입 성격과 안 맞는다.
-    <b>구조 기준(직전 저점·베이스 붕괴)은 아직 안 쟀다</b> — 다음 과제다.
-    확실한 것 하나: <b>−8% 같은 좁은 손절은 금지</b>다(견딤 낙폭 중앙 −23%).</p>
-    <p><b>쓰지 않는 것 —</b> 고점 대비 트레일(이 규칙에는 전제가 안 맞는다), 20주선 이탈,
-    가속 소멸 청산. 그리고 <b>−8% 손절은 여기에 적용 금지</b> — 견뎌야 하는 낙폭의 중앙이 −23%다.</p>
-    <p><b>칸 단위 —</b> 5칸을 다 채운 뒤 새 신호가 오면, 그때 <b>가장 오래 묵고 가속이 꺼진 칸</b>을
-    비운다. 07절이 말하는 건 이거다 — 팔 이유가 있어서 파는 게 아니라 <b>더 나은 후보가 있어서</b> 파는 것.
-    단 07절 표 자체는 표본이 얇으니 규칙이 아니라 <b>운용 원칙</b>으로만 쓴다.</p>
-    <p><b>다음에 할 것 —</b> 순서대로.</p>
     <ul>
-      <li><b>유니버스의 생존편향 제거.</b> 상장폐지 종목이 0건이라 "안 돌아온 종목"이 통째로 빠져 있다.
-      탈출 연구에서 이건 급소다 — <b>손절의 가치가 구조적으로 과소평가된다.</b> 다른 어떤 개선보다 먼저다.</li>
-      <li><b>칸 배정 규칙의 명시적 측정.</b> 07절이 "회전이 성과를 만든다"고 말했으니,
-      다음 질문은 청산이 아니라 <b>교체</b>다 — 새 신호 vs 보유 종목을 무엇으로 비교할 것인가.</li>
-      <li><b>일봉 가격 복구.</b> <code>prices</code> 테이블이 비어 있어 장중 낙폭을 못 본다.
-      진입가 −25% 손절은 장중에 걸리는 규칙이라 주봉 종가 기준과 실제가 다르다.</li>
+      <li><b>진입 특성상 고점 기준 트레일은 전제 불성립.</b> 본 규칙의 매수 시점은 52주
+      신고가 대비 중앙 −10.8%. 38%는 −20% 밖에서 체결. 트레일은 '고점 근처 매수'를 가정함.</li>
+      <li><b>낙폭 깊이는 정보를 갖지 않음.</b> 진입 후 고점 대비 −10%~−50% 문턱별 이후 52주
+      수익 중앙값이 +3.9%~+9.0%로 평탄. 구 규칙(L/S)의 단조 악화는 해당 규칙 고유 현상.</li>
+      <li><b>익절 기준은 가격이 아니라 시간.</b> 정점 전 견딤 낙폭 중앙 −23%, 2배 이상
+      종목의 최고가 도달 소요 중앙 73주. 낙폭으로 재면 생존 종목을 절단, 시간으로 재면 보존.</li>
+      <li><b>최소보유 52주는 필수 조건.</b> 고정보유 알파 4주 0.6% → 26주 4.2% → 52주 11.2%
+      → 78주 12.6%. 1년 미만 청산 규칙은 예외 없이 알파 훼손.</li>
+      <li><b>채택안은 꼬리를 훼손하지 않음.</b> 10배 도달률 0.52%로 무매도(0.46%) 상회.
+      정체 후 하락분 회피 효과로 추정.</li>
     </ul>
   </div>
 </section>
 
 <section>
-  <div class="shead"><span class="snum">09</span><h2>이 연구가 못 하는 것</h2></div>
-  <ul>
-    <li><b>생존편향.</b> 유니버스에 상장폐지 종목이 0건이다. "안 파는 게 낫다"는 04절의 결론이
-    가장 크게 부풀려지는 지점이다 — 안 돌아온 종목이 데이터에 없으니까.
-    <b>진짜 답은 여기 숫자보다 손절 쪽에 가깝다.</b></li>
-    <li><b>주봉 종가만 있다.</b> 장중·일봉 낙폭을 못 본다. 실제 MDD는 여기보다 깊고,
-    손절 발동 시점도 다르다.</li>
-    <li><b>104주 상한.</b> "고정보유"가 사실은 "2년 보유"다. 더 들고 있는 게 나은지는 이 데이터로 모른다.</li>
-    <li><b>7절은 표본이 얇다.</b> 5칸 전략의 8년 거래가 20~30건이다. 앞/뒤 구간이 안 맞는 것도 그래서다.</li>
-    <li><b>2020년 의존.</b> 앞구간 성과 대부분이 2020~2021 유동성 장세다.</li>
-  </ul>
+  <div class="shead"><span class="snum">I</span><h2>진입 특성 — 왜 트레일이 부적합한가</h2></div>
+  <div class="col stack">
+    <p>이익 가속 규칙은 매출·영업이익 성장률이 동시에 가속된 분기에 주간 +10% 이상 상승한
+    종목을 포착. 신고가 돌파가 아니라 <b>낙폭 구간에서의 반등</b>을 잡는 구조.</p>
+    <p>주요 사례 진입 시점 고점 대비 위치 — NVDA −65.9%, TSLA −38.3%, PLTR −13.4%.
+    전체 신호 중앙 −10.8%, 하위 38%는 −20% 밖.</p>
+    <p><b>함의.</b> '진입 후 고점'이 대개 일시적 반등 꼭지이므로, 그로부터 −25~30%를 재면
+    기저 구간의 정상 변동에 편입됨. 트레일 폭을 넓혀도 기준점 자체가 잘못 설정된 문제는
+    해소되지 않음.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">II</span><h2>낙폭 기반 청산 — 전 구간 기각</h2></div>
+  <div class="col stack">
+    <p>진입 후 +50% 이상 도달한 신호 3,590건 대상. 해당 시점 이후의 청산만 비교하여
+    초기 손절 구간을 표본에서 제외.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>청산 기준</th><th>알파 평균</th><th>10배+</th><th>평균 보유</th><th>vs 무매도</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td>무매도 (104주)</td><td class="pos">68.5%</td><td>0.97%</td><td>91주</td><td>—</td></tr>
+        <tr><td>고점 대비 −50%</td><td>64.5%</td><td>0.86%</td><td>78주</td><td class="neg">−6.4%p</td></tr>
+        <tr><td>고점 대비 −40%</td><td>62.1%</td><td>0.61%</td><td>72주</td><td class="neg">−8.7%p</td></tr>
+        <tr><td>고점 대비 −30%</td><td>56.0%</td><td>0.19%</td><td>63주</td><td class="neg">−14.8%p</td></tr>
+        <tr><td>고점 대비 −25%</td><td>55.3%</td><td>0.19%</td><td>59주</td><td class="neg">−15.5%p</td></tr>
+        <tr class="dim"><td>20주선 이탈 2주</td><td>54.2%</td><td>0.31%</td><td>51주</td><td class="neg">−16.6%p</td></tr>
+        <tr class="dim"><td>고점 대비 −20%</td><td>52.2%</td><td class="neg">0.00%</td><td>53주</td><td class="neg">−18.6%p</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">+30%·+100% 문턱에서도 서열 동일. <b>폭이 좁을수록 훼손 확대.</b></p>
+  <div class="col stack">
+    <div class="aside"><b>기준점 논점.</b> 진입가 기준 −25%는 알파 69.3%로 무매도에 근접하나,
+    이는 기준점 우위가 아님 — 상승 구간 진입 후 사실상 미발동하므로 무매도와 동일 성과.
+    또한 진입가는 시장이 인지하지 않는 가격이므로 기준점으로 부적합.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">III</span><h2>보유기간 — 최소 1년</h2></div>
+  <div class="col stack">
+    <p>+150% 런 1,108건(투자가능 기준)의 저점→정점 소요 중앙 <b>85주(19.6개월)</b>.
+    6개월 내 정점 형성 3%, 1년 내 12%.</p>
+    <p>신호 진입→최고가 소요 중앙 36주. 단 <b>2배 이상 상승 트레이드 2,091건만 보면 중앙
+    73주(16.8개월)</b>, 6개월 내 종료 11%. 대형 상승일수록 소요 기간 장기화.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>고정보유 기간</th><th>알파 평균</th><th>10배+</th><th>평균 보유</th></tr></thead>
+      <tbody>
+        <tr class="dim"><td>4주</td><td class="neg">0.6%</td><td>0.00%</td><td>4주</td></tr>
+        <tr class="dim"><td>13주</td><td class="neg">2.0%</td><td>0.00%</td><td>13주</td></tr>
+        <tr><td>26주</td><td>4.2%</td><td>0.09%</td><td>24주</td></tr>
+        <tr><td>52주</td><td>11.2%</td><td>0.19%</td><td>45주</td></tr>
+        <tr class="hi"><td>78주</td><td class="pos">12.6%</td><td>0.32%</td><td>65주</td></tr>
+        <tr><td>104주</td><td>12.1%</td><td>0.46%</td><td>82주</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cap">1년 미만 청산은 예외 없이 알파 훼손. 52주를 최소보유 하한으로 설정.</p>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">IV</span><h2>채택안 — 신고가 33주 미갱신</h2></div>
+  <div class="col stack">
+    <p>가격 대신 <b>정체 기간</b>을 기준으로 하는 후보를 검정. 전 후보에 52주 최소보유 적용.
+    표본 7,568건 전수.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>청산 기준</th><th>앞 2018~21</th><th>뒤 2022~</th><th>전체 알파</th><th>평균 보유</th></tr></thead>
+      <tbody>
+        <tr class="dim"><td>무매도</td><td>16.7%</td><td>7.0%</td><td>10.6%</td><td>83주</td></tr>
+        <tr><td>신고가 13주 미갱신</td><td>19.9%</td><td class="neg">7.1%</td><td>11.8%</td><td>51주</td></tr>
+        <tr><td>신고가 20주 미갱신</td><td>22.2%</td><td class="neg">7.0%</td><td>12.6%</td><td>55주</td></tr>
+        <tr><td>신고가 26주 미갱신</td><td>21.0%</td><td>8.6%</td><td>13.1%</td><td>58주</td></tr>
+        <tr class="hi"><td>신고가 33주 미갱신 <span class="key">채택</span></td><td class="pos">22.2%</td><td class="pos">10.8%</td><td class="pos">15.0%</td><td>61주</td></tr>
+        <tr><td>신고가 39주 미갱신</td><td>22.7%</td><td>10.3%</td><td>14.8%</td><td>63주</td></tr>
+        <tr><td>신고가 52주 미갱신</td><td>19.1%</td><td>10.0%</td><td>13.3%</td><td>69주</td></tr>
+        <tr class="dim"><td>고점 대비 −30%</td><td>19.8%</td><td class="neg">6.2%</td><td>11.2%</td><td>60주</td></tr>
+        <tr class="dim"><td>베이스(20주 저점) 붕괴</td><td>16.8%</td><td class="neg">7.0%</td><td>10.6%</td><td>59주</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col stack">
+    <p><b>검정 결과 3점.</b></p>
+    <ul>
+      <li><b>워크포워드 통과.</b> 정체 계열은 앞·뒤 두 구간 모두에서 무매도 상회. 트레일과
+      베이스 붕괴는 뒤 구간에서 무매도 이하(6.2%, 7.0% vs 7.0%)로 기각.</li>
+      <li><b>파라미터 고원 확인.</b> 20~52주 전체 알파 12.6~15.0%로 완만. 단일 봉우리
+      과적합 아님. 고원 중앙값인 33주 채택.</li>
+      <li><b>하한 존재.</b> 13주는 뒤 구간 7.1%로 무매도와 동률. 정체 판정 기간이 짧으면
+      우위 소멸.</li>
+    </ul>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>채택안 상세</th><th>평균</th><th>알파</th><th>2배+</th><th>10배+</th><th>보유</th></tr></thead>
+      <tbody>
+        <tr><td>무매도 (전체 신호)</td><td>38.0%</td><td>10.6%</td><td>15.3%</td><td>0.46%</td><td>83주</td></tr>
+        <tr class="hi"><td>33주 정체 + 52주 바닥</td><td>36.7%</td><td class="pos">15.0%</td><td>14.2%</td><td class="pos">0.52%</td><td>61주</td></tr>
+        <tr><td>무매도 (+50% 도달분)</td><td>102.1%</td><td>68.5%</td><td>32.2%</td><td>0.97%</td><td>91주</td></tr>
+        <tr class="hi"><td>33주 정체 (+50% 도달분)</td><td>98.3%</td><td>67.5%</td><td>29.8%</td><td class="pos">1.08%</td><td>75주</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col stack">
+    <div class="aside"><b>작동 논리.</b> 주도주는 정점 도달 전 중앙 −23%의 낙폭을 수반하며
+    상승하므로 가격 기준 청산은 생존 종목을 절단. 반면 대형 상승 종목은 신고가를 반복
+    갱신하며 진행(2배+ 종목 최고가 도달 중앙 73주). 따라서 <b>신고가 부재 기간은 추세
+    정지의 직접 증거</b>이며, 기준점인 '진입 후 최고가'는 시장이 인지하는 가격.</div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">V</span><h2>기각 가설</h2></div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>가설</th><th>결과</th><th>기각 사유</th></tr></thead>
+      <tbody>
+        <tr><td>고점 대비 트레일 (−20~50%)</td><td class="neg">뒤 구간 6.2%</td><td>진입 특성상 기준점 부적합. 폭 무관 전부 무매도 이하</td></tr>
+        <tr><td>베이스(20주 저점) 붕괴</td><td class="neg">뒤 구간 7.0%</td><td>무매도와 동률. 우위 없음</td></tr>
+        <tr><td>8주 스윙저점 이탈</td><td class="neg">전체 4.2%</td><td>조기 이탈. 평균 보유 14주</td></tr>
+        <tr><td>20주 이평 이탈</td><td class="neg">정점 −72주</td><td>정점 대비 중앙 72주 조기 청산. 실현 중앙 +17% vs 트레일 +127%</td></tr>
+        <tr><td>이익 가속 소멸 시 매도</td><td class="neg">18종 중 18위</td><td>분기 플래그 특성상 평균 보유 12주. 10배 도달 0건</td></tr>
+        <tr><td>진입가 기준 −25%</td><td>알파 69.3%</td><td>상승 구간 미발동으로 무매도와 동일. 기준점이 시장 미인지 가격</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">VI</span><h2>Risk Factors</h2></div>
+  <div class="col stack">
+    <ul>
+      <li><b>생존 편향.</b> 유니버스에 상장폐지 종목 부재. 보유 지속 결론이 구조적으로 과대
+      평가됨. 실제 최적해는 본 결과보다 조기 청산 쪽일 가능성.</li>
+      <li><b>관측 상한.</b> 추적 104주 제한. 최근 신호일수록 33주 정체 규칙의 발동 기회가
+      축소되어 효과 추정에 편의 발생.</li>
+      <li><b>레짐 의존.</b> 뒤 구간 알파 10.8%는 앞 구간 22.2%의 절반. 2020~21 유동성
+      국면 의존도 높음. 무매도 대비 상대 우위는 두 구간 모두 유지.</li>
+      <li><b>자본 제약 미반영.</b> 트레이드 단위 측정. 5종목 한도에 52주 최소보유 적용 시
+      연간 신규 편입 5종으로 제한.</li>
+      <li><b>데이터 해상도.</b> 주봉 종가 기준. 장중 변동 미반영으로 실제 낙폭은 본 수치 대비 심화.</li>
+      <li><b>다중 검정.</b> 후보 9종 × 문턱 7종 격자 탐색. 고원 구조로 단일 봉우리 과적합
+      가능성은 낮으나 완전 배제 불가.</li>
+    </ul>
+  </div>
 </section>
 
 <footer>
-  코드 <code>leaders_accel_exit.py · leaders_accel_exit2.py · leaders_uturn.py · leaders_exit.py</code> · 커밋 <code>900752a</code><br>
-  데이터 <code>data/market.db</code> factor_weekly(v1) · 미국 2,702종 · 2018-06 ~ 2026-08 주봉 종가 · 수수료 0.1%<br>
-  모든 수치는 백테스트이며 실현 수익이 아니다. 생존편향·주봉 해상도 한계는 09절에.
+  Source: leaders_accel_take.py · leaders_accel_hold.py · leaders_uturn.py · 커밋 15d94fd<br>
+  Data: data/market.db factor_weekly(v1) · 미국 2,702종 · 2018-06~2026-08 주봉 종가 · 수수료 0.1%<br>
+  본 자료는 백테스트 결과이며 실현 수익이 아님. 투자 자문이 아니며 매수·매도 권유가 아님.
 </footer>
 
 </div>
