@@ -35642,6 +35642,11 @@
           "date": "2026-08-26",
           "px": NaN,
           "ret": NaN
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": NaN,
+          "ret": NaN
         }
       }
     },
@@ -35672,6 +35677,11 @@
           "date": "2026-08-26",
           "px": 18.22,
           "ret": -1.17
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 17.17,
+          "ret": -6.88
         }
       }
     },
@@ -35701,6 +35711,11 @@
           "date": "2026-08-26",
           "px": 33000.0,
           "ret": -1.89
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 36300.0,
+          "ret": 7.96
         }
       }
     },
@@ -35730,6 +35745,11 @@
           "date": "2026-08-26",
           "px": 67300.0,
           "ret": -10.06
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 55200.0,
+          "ret": -26.31
         }
       }
     },
@@ -35759,6 +35779,11 @@
           "date": "2026-08-26",
           "px": 102500.0,
           "ret": 4.84
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 98400.0,
+          "ret": 0.63
         }
       }
     },
@@ -35788,6 +35813,11 @@
           "date": "2026-08-26",
           "px": 27800.0,
           "ret": -0.22
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 26300.0,
+          "ret": -5.63
         }
       }
     },
@@ -35817,6 +35847,11 @@
           "date": "2026-08-26",
           "px": 9900.0,
           "ret": 1.14
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 9480.0,
+          "ret": -3.17
         }
       }
     },
@@ -35846,6 +35881,11 @@
           "date": "2026-08-26",
           "px": 42050.0,
           "ret": 1.05
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 51800.0,
+          "ret": 24.57
         }
       }
     },
@@ -35875,6 +35915,11 @@
           "date": "2026-08-26",
           "px": 158.19,
           "ret": -4.24
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 169.32,
+          "ret": 2.51
         }
       }
     },
@@ -35904,6 +35949,11 @@
           "date": "2026-08-26",
           "px": 25.87,
           "ret": 2.74
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 26.72,
+          "ret": 6.12
         }
       }
     },
@@ -35933,6 +35983,11 @@
           "date": "2026-08-26",
           "px": 28.3,
           "ret": -0.04
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 27.55,
+          "ret": -2.69
         }
       }
     },
@@ -35962,6 +36017,11 @@
           "date": "2026-08-26",
           "px": 130.61,
           "ret": -0.23
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 141.22,
+          "ret": 7.9
         }
       }
     },
@@ -35991,6 +36051,11 @@
           "date": "2026-08-26",
           "px": 181.38,
           "ret": -1.23
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 193.4,
+          "ret": 5.33
         }
       }
     },
@@ -36020,6 +36085,11 @@
           "date": "2026-08-26",
           "px": 345.88,
           "ret": -4.83
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 329.27,
+          "ret": -9.41
         }
       }
     },
@@ -36049,6 +36119,11 @@
           "date": "2026-08-26",
           "px": 161.92,
           "ret": 2.73
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 156.9,
+          "ret": -0.47
         }
       }
     },
@@ -36078,6 +36153,11 @@
           "date": "2026-08-26",
           "px": 144.84,
           "ret": -3.35
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 153.74,
+          "ret": 2.6
         }
       }
     },
@@ -36107,6 +36187,11 @@
           "date": "2026-08-26",
           "px": 131.42,
           "ret": -3.7
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 135.35,
+          "ret": -0.82
         }
       }
     },
@@ -36136,6 +36221,11 @@
           "date": "2026-08-26",
           "px": 62.0,
           "ret": -4.1
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 56.72,
+          "ret": -12.28
         }
       }
     },
@@ -36165,6 +36255,11 @@
           "date": "2026-08-26",
           "px": 199.84,
           "ret": -4.43
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 211.525,
+          "ret": 1.18
         }
       }
     },
@@ -36194,6 +36289,11 @@
           "date": "2026-08-26",
           "px": 68.54,
           "ret": 0.96
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 65.66,
+          "ret": -3.29
         }
       }
     },
@@ -36223,6 +36323,11 @@
           "date": "2026-08-26",
           "px": 75.7,
           "ret": -1.96
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 74.97,
+          "ret": -2.91
         }
       }
     },
@@ -36252,6 +36357,11 @@
           "date": "2026-08-26",
           "px": 79.26,
           "ret": 2.55
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 75.49,
+          "ret": -2.34
         }
       }
     },
@@ -36281,6 +36391,11 @@
           "date": "2026-08-26",
           "px": 62.23,
           "ret": 2.8
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 60.34,
+          "ret": -0.33
         }
       }
     },
@@ -36310,6 +36425,11 @@
           "date": "2026-08-26",
           "px": 62.09,
           "ret": 1.65
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 63.28,
+          "ret": 3.61
         }
       }
     },
@@ -36339,6 +36459,11 @@
           "date": "2026-08-26",
           "px": 22.75,
           "ret": -1.42
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 24.49,
+          "ret": 6.14
         }
       }
     },
@@ -36368,6 +36493,11 @@
           "date": "2026-08-26",
           "px": 137.43,
           "ret": -6.32
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 129.24,
+          "ret": -11.92
         }
       }
     },
@@ -36397,6 +36527,11 @@
           "date": "2026-08-26",
           "px": 64.52,
           "ret": -1.84
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 66.97,
+          "ret": 1.9
         }
       }
     },
@@ -36426,6 +36561,11 @@
           "date": "2026-08-26",
           "px": 48.99,
           "ret": -1.08
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 41.42,
+          "ret": -16.4
         }
       }
     },
@@ -36455,6 +36595,11 @@
           "date": "2026-08-26",
           "px": 47.18,
           "ret": -1.09
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 41.69,
+          "ret": -12.63
         }
       }
     },
@@ -36484,6 +36629,11 @@
           "date": "2026-08-26",
           "px": 257.35,
           "ret": 6.06
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 236.07,
+          "ret": -2.73
         }
       }
     },
@@ -36513,6 +36663,11 @@
           "date": "2026-08-26",
           "px": 323.05,
           "ret": -1.41
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 318.43,
+          "ret": -2.82
         }
       }
     },
@@ -36542,6 +36697,11 @@
           "date": "2026-08-26",
           "px": 180.63,
           "ret": -1.27
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 172.75,
+          "ret": -5.59
         }
       }
     },
@@ -36571,6 +36731,11 @@
           "date": "2026-08-26",
           "px": 377.37,
           "ret": -2.53
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 312.9,
+          "ret": -19.23
         }
       }
     },
@@ -36600,6 +36765,11 @@
           "date": "2026-08-26",
           "px": 41.55,
           "ret": 2.8
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 41.9,
+          "ret": 3.67
         }
       }
     },
@@ -36629,6 +36799,11 @@
           "date": "2026-08-26",
           "px": 74.24,
           "ret": -6.08
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 80.06,
+          "ret": 1.3
         }
       }
     },
@@ -36658,6 +36833,11 @@
           "date": "2026-08-26",
           "px": 140.14,
           "ret": -5.45
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 157.0,
+          "ret": 5.95
         }
       }
     },
@@ -36687,6 +36867,11 @@
           "date": "2026-08-26",
           "px": 30.71,
           "ret": -1.5
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 27.99,
+          "ret": -10.25
         }
       }
     },
@@ -36716,6 +36901,11 @@
           "date": "2026-08-26",
           "px": 36.88,
           "ret": 1.07
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 35.86,
+          "ret": -1.73
         }
       }
     },
@@ -36745,6 +36935,11 @@
           "date": "2026-08-26",
           "px": 66.44,
           "ret": -10.14
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 69.85,
+          "ret": -5.51
         }
       }
     },
@@ -36774,6 +36969,11 @@
           "date": "2026-08-26",
           "px": 36.06,
           "ret": 0.42
+        },
+        "4w": {
+          "date": "2026-09-16",
+          "px": 35.39,
+          "ret": -1.45
         }
       }
     },
@@ -52581,6 +52781,894 @@
       "market": "KR",
       "log_date": "2026-09-15",
       "entry_px": 18690.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "031980_2026-09-16",
+      "sym": "031980",
+      "name": "피에스케이홀딩스",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 167000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "034950_2026-09-16",
+      "sym": "034950",
+      "name": "한국기업평가",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 103500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "080580_2026-09-16",
+      "sym": "080580",
+      "name": "오킨스전자",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 21550.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "306200_2026-09-16",
+      "sym": "306200",
+      "name": "세아제강",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 145900.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "000430_2026-09-16",
+      "sym": "000430",
+      "name": "대원강업",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 4845.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ALDS_2026-09-16",
+      "sym": "ALDS",
+      "name": "ALDS",
+      "market": "US",
+      "log_date": "2026-09-16",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AFCG_2026-09-16",
+      "sym": "AFCG",
+      "name": "AFC Gamma",
+      "market": "US",
+      "log_date": "2026-09-16",
+      "entry_px": 3.52,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AURX_2026-09-16",
+      "sym": "AURX",
+      "name": "AURX",
+      "market": "US",
+      "log_date": "2026-09-16",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "028050_2026-09-16",
+      "sym": "028050",
+      "name": "삼성E&A",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 51100.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "000880_2026-09-16",
+      "sym": "000880",
+      "name": "한화",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 138400.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "377300_2026-09-16",
+      "sym": "377300",
+      "name": "카카오페이",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 45800.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "052690_2026-09-16",
+      "sym": "052690",
+      "name": "한전기술",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 148200.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "108490_2026-09-16",
+      "sym": "108490",
+      "name": "로보티즈",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 329500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "004020_2026-09-16",
+      "sym": "004020",
+      "name": "현대제철",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 35550.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "375500_2026-09-16",
+      "sym": "375500",
+      "name": "DL이앤씨",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 88500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "036460_2026-09-16",
+      "sym": "036460",
+      "name": "한국가스공사",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 36600.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "012750_2026-09-16",
+      "sym": "012750",
+      "name": "에스원",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 83200.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "005440_2026-09-16",
+      "sym": "005440",
+      "name": "현대지에프홀딩스",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 13620.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "058610_2026-09-16",
+      "sym": "058610",
+      "name": "에스피지",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 106500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "140410_2026-09-16",
+      "sym": "140410",
+      "name": "메지온",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 73100.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "112610_2026-09-16",
+      "sym": "112610",
+      "name": "씨에스윈드",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 53000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "083650_2026-09-16",
+      "sym": "083650",
+      "name": "비에이치아이",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 65800.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "041510_2026-09-16",
+      "sym": "041510",
+      "name": "에스엠",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 87700.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "030530_2026-09-16",
+      "sym": "030530",
+      "name": "원익홀딩스",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 25950.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "023590_2026-09-16",
+      "sym": "023590",
+      "name": "다우기술",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 40250.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "060370_2026-09-16",
+      "sym": "060370",
+      "name": "LS마린솔루션",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 32500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "012630_2026-09-16",
+      "sym": "012630",
+      "name": "HDC",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 27650.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "001120_2026-09-16",
+      "sym": "001120",
+      "name": "LX인터내셔널",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 39700.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "001820_2026-09-16",
+      "sym": "001820",
+      "name": "삼화콘덴서",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 144000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "036540_2026-09-16",
+      "sym": "036540",
+      "name": "SFA반도체",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 8650.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "003380_2026-09-16",
+      "sym": "003380",
+      "name": "하림지주",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 11270.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "000210_2026-09-16",
+      "sym": "000210",
+      "name": "DL",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 53200.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "293490_2026-09-16",
+      "sym": "293490",
+      "name": "카카오게임즈",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 9880.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "056190_2026-09-16",
+      "sym": "056190",
+      "name": "SFA",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 28800.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "285130_2026-09-16",
+      "sym": "285130",
+      "name": "SK케미칼",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 54100.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "003160_2026-09-16",
+      "sym": "003160",
+      "name": "디아이",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 30250.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "327260_2026-09-16",
+      "sym": "327260",
+      "name": "RF머트리얼즈",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 45850.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "032190_2026-09-16",
+      "sym": "032190",
+      "name": "다우데이타",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 20150.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "044490_2026-09-16",
+      "sym": "044490",
+      "name": "태웅",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 39000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "006730_2026-09-16",
+      "sym": "006730",
+      "name": "서부T&D",
+      "market": "KR",
+      "log_date": "2026-09-16",
+      "entry_px": 11230.0,
       "flags": {
         "sig_52w": false,
         "sig_vol": false,

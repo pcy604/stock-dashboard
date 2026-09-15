@@ -1,79 +1,13 @@
 {
-  "date": "2026-09-15",
-  "total": 71,
+  "date": "2026-09-16",
+  "total": 69,
   "stocks": [
-    {
-      "market": "KR",
-      "sym": "012450",
-      "name": "한화에어로스페이스",
-      "marcap": 58627586937000,
-      "pct_change": 9.05,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -31.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "055550",
-      "name": "신한지주",
-      "marcap": 53798997389400,
-      "pct_change": 0.97,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -1.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "267250",
-      "name": "HD현대",
-      "marcap": 19471795452500,
-      "pct_change": -0.21,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -27.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
     {
       "market": "KR",
       "sym": "028050",
       "name": "삼성E&A",
       "marcap": 9956800000000,
-      "pct_change": 4.58,
+      "pct_change": 3.97,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -86,7 +20,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -25.4,
+      "dist_52w": -24.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -94,8 +28,8 @@
       "market": "KR",
       "sym": "000880",
       "name": "한화",
-      "marcap": 7663362498900,
-      "pct_change": 1.65,
+      "marcap": 7311391778700,
+      "pct_change": 0.07,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -108,7 +42,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -29.3,
+      "dist_52w": -30.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -116,8 +50,8 @@
       "market": "KR",
       "sym": "377300",
       "name": "카카오페이",
-      "marcap": 6345599171800,
-      "pct_change": 0.11,
+      "marcap": 6190003456500,
+      "pct_change": -1.51,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -130,7 +64,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -58.9,
+      "dist_52w": -59.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "052690",
+      "name": "한전기술",
+      "marcap": 5496036000000,
+      "pct_change": 3.93,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -25.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -139,7 +95,7 @@
       "sym": "108490",
       "name": "로보티즈",
       "marcap": 4759450586000,
-      "pct_change": 5.31,
+      "pct_change": 16.02,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -152,16 +108,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -31.6,
+      "dist_52w": -29.0,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "036460",
-      "name": "한국가스공사",
-      "marcap": 3397118400000,
-      "pct_change": 4.56,
+      "sym": "004020",
+      "name": "현대제철",
+      "marcap": 4690619342750,
+      "pct_change": 8.22,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -174,7 +130,30 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -43.1,
+      "dist_52w": -29.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "031980",
+      "name": "피에스케이홀딩스",
+      "marcap": 3598763725500,
+      "pct_change": 13.99,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -3.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -182,8 +161,8 @@
       "market": "KR",
       "sym": "375500",
       "name": "DL이앤씨",
-      "marcap": 3316043491100,
-      "pct_change": 7.31,
+      "marcap": 3459209896200,
+      "pct_change": 12.6,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -196,7 +175,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.5,
+      "dist_52w": -17.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "036460",
+      "name": "한국가스공사",
+      "marcap": 3406349700000,
+      "pct_change": 3.39,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -43.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -204,8 +205,8 @@
       "market": "KR",
       "sym": "012750",
       "name": "에스원",
-      "marcap": 3252729636800,
-      "pct_change": 7.84,
+      "marcap": 3199530787600,
+      "pct_change": 5.05,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -218,29 +219,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -17.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "139130",
-      "name": "iM금융지주",
-      "marcap": 2969313900000,
-      "pct_change": 0.75,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -14.6,
+      "dist_52w": -19.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -248,8 +227,8 @@
       "market": "KR",
       "sym": "005440",
       "name": "현대지에프홀딩스",
-      "marcap": 2545553122120,
-      "pct_change": 14.79,
+      "marcap": 2486866018440,
+      "pct_change": 7.75,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -262,16 +241,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -30.6,
+      "dist_52w": -31.2,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "112610",
-      "name": "씨에스윈드",
-      "marcap": 2218215797800,
-      "pct_change": 4.49,
+      "sym": "058610",
+      "name": "에스피지",
+      "marcap": 2279832608000,
+      "pct_change": 16.65,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -284,7 +263,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -42.7,
+      "dist_52w": -35.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -292,8 +271,8 @@
       "market": "KR",
       "sym": "140410",
       "name": "메지온",
-      "marcap": 2115957673400,
-      "pct_change": 4.38,
+      "marcap": 2238444369400,
+      "pct_change": 5.94,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -306,7 +285,51 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -61.6,
+      "dist_52w": -59.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "112610",
+      "name": "씨에스윈드",
+      "marcap": 2235084359000,
+      "pct_change": 9.62,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -40.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "083650",
+      "name": "비에이치아이",
+      "marcap": 2017573250000,
+      "pct_change": 0.0,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -42.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -314,8 +337,8 @@
       "market": "KR",
       "sym": "041510",
       "name": "에스엠",
-      "marcap": 2014732720000,
-      "pct_change": 8.39,
+      "marcap": 2003285375000,
+      "pct_change": 6.05,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -328,7 +351,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -46.3,
+      "dist_52w": -45.6,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "030530",
+      "name": "원익홀딩스",
+      "marcap": 1934811424050,
+      "pct_change": 15.08,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -48.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -336,96 +381,8 @@
       "market": "KR",
       "sym": "023590",
       "name": "다우기술",
-      "marcap": 1781272888800,
-      "pct_change": 7.25,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -34.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "012630",
-      "name": "HDC",
-      "marcap": 1684716532200,
-      "pct_change": 21.09,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -9.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "001120",
-      "name": "LX인터내셔널",
-      "marcap": 1575594000000,
-      "pct_change": 1.5,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -29.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "001820",
-      "name": "삼화콘덴서",
-      "marcap": 1446984000000,
-      "pct_change": 17.91,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -30.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "007310",
-      "name": "오뚜기",
-      "marcap": 1328595645000,
-      "pct_change": -0.15,
+      "marcap": 1737985576800,
+      "pct_change": 4.41,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -444,10 +401,10 @@
     },
     {
       "market": "KR",
-      "sym": "003380",
-      "name": "하림지주",
-      "marcap": 1280224248030,
-      "pct_change": 1.34,
+      "sym": "060370",
+      "name": "LS마린솔루션",
+      "marcap": 1695150812300,
+      "pct_change": 5.35,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -460,7 +417,73 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -42.0,
+      "dist_52w": -37.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "012630",
+      "name": "HDC",
+      "marcap": 1669781101950,
+      "pct_change": 18.42,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -9.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "001120",
+      "name": "LX인터내셔널",
+      "marcap": 1542648000000,
+      "pct_change": -0.5,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -31.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "001820",
+      "name": "삼화콘덴서",
+      "marcap": 1481287500000,
+      "pct_change": 28.92,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -26.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -468,8 +491,8 @@
       "market": "KR",
       "sym": "036540",
       "name": "SFA반도체",
-      "marcap": 1238386081590,
-      "pct_change": 24.13,
+      "marcap": 1414358605800,
+      "pct_change": 43.21,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -482,16 +505,104 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -35.9,
+      "dist_52w": -25.7,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "300720",
-      "name": "한일시멘트",
-      "marcap": 1228940442390,
-      "pct_change": -0.95,
+      "sym": "003380",
+      "name": "하림지주",
+      "marcap": 1258943180040,
+      "pct_change": -0.88,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -42.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "000210",
+      "name": "DL",
+      "marcap": 1121139794000,
+      "pct_change": -1.3,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -31.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "293490",
+      "name": "카카오게임즈",
+      "marcap": 1054643218200,
+      "pct_change": 10.51,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -84.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "056190",
+      "name": "SFA",
+      "marcap": 1034172288000,
+      "pct_change": 20.5,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -34.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "285130",
+      "name": "SK케미칼",
+      "marcap": 937593117200,
+      "pct_change": 0.56,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -504,16 +615,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -24.2,
+      "dist_52w": -58.4,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "000210",
-      "name": "DL",
-      "marcap": 1127426559200,
-      "pct_change": -2.04,
+      "sym": "003160",
+      "name": "디아이",
+      "marcap": 840510000000,
+      "pct_change": 0.17,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -526,51 +637,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -32.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "014620",
-      "name": "성광벤드",
-      "marcap": 926852003600,
-      "pct_change": 9.9,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -35.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "000670",
-      "name": "영풍",
-      "marcap": 919613615850,
-      "pct_change": 26.62,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -41.3,
+      "dist_52w": -27.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -578,8 +645,8 @@
       "market": "KR",
       "sym": "327260",
       "name": "RF머트리얼즈",
-      "marcap": 804101103300,
-      "pct_change": 30.67,
+      "marcap": 813994964750,
+      "pct_change": 32.9,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -589,183 +656,6 @@
       "sig_52w": false,
       "sig_vol": false,
       "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -30.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "032190",
-      "name": "다우데이타",
-      "marcap": 787065000000,
-      "pct_change": 0.25,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -63.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "006730",
-      "name": "서부T&D",
-      "marcap": 734685229890,
-      "pct_change": 2.53,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -44.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "053800",
-      "name": "안랩",
-      "marcap": 679829516600,
-      "pct_change": 7.36,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -52.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "005880",
-      "name": "대한해운",
-      "marcap": 674541940600,
-      "pct_change": -1.18,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -38.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "001680",
-      "name": "대상",
-      "marcap": 644799745250,
-      "pct_change": -0.69,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -39.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "00088K",
-      "name": "한화3우B",
-      "marcap": 626691375100,
-      "pct_change": 1.32,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -28.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "017900",
-      "name": "광전자",
-      "marcap": 595082446010,
-      "pct_change": 44.85,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -54.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "058650",
-      "name": "세아홀딩스",
-      "marcap": 567186953200,
-      "pct_change": 2.22,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
@@ -775,10 +665,10 @@
     },
     {
       "market": "KR",
-      "sym": "005810",
-      "name": "풍산홀딩스",
-      "marcap": 539927585400,
-      "pct_change": -0.8,
+      "sym": "032190",
+      "name": "다우데이타",
+      "marcap": 773660000000,
+      "pct_change": 1.56,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -791,7 +681,161 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -38.6,
+      "dist_52w": -63.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "044490",
+      "name": "태웅",
+      "marcap": 767283061350,
+      "pct_change": 11.91,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -36.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "006730",
+      "name": "서부T&D",
+      "marcap": 720544306830,
+      "pct_change": 1.72,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -45.1,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "053800",
+      "name": "안랩",
+      "marcap": 707645781600,
+      "pct_change": 11.64,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -50.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "171090",
+      "name": "선익시스템",
+      "marcap": 677538179400,
+      "pct_change": 4.46,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -51.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "001680",
+      "name": "대상",
+      "marcap": 634058857500,
+      "pct_change": -2.75,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -40.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "00088K",
+      "name": "한화3우B",
+      "marcap": 601741133000,
+      "pct_change": -0.96,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -30.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "058650",
+      "name": "세아홀딩스",
+      "marcap": 559550928400,
+      "pct_change": -0.15,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -28.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -799,8 +843,8 @@
       "market": "KR",
       "sym": "284740",
       "name": "쿠쿠홈시스",
-      "marcap": 523911655500,
-      "pct_change": -0.85,
+      "marcap": 526155388500,
+      "pct_change": -0.42,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -813,60 +857,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -33.6,
+      "dist_52w": -33.3,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "145990",
-      "name": "삼양사",
-      "marcap": 496076896900,
-      "pct_change": 2.34,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -25.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "004690",
-      "name": "삼천리",
-      "marcap": 491428283500,
-      "pct_change": 0.97,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -74.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "069540",
-      "name": "빛과전자",
-      "marcap": 487392454525,
-      "pct_change": 55.54,
+      "sym": "460860",
+      "name": "동국제강",
+      "marcap": 512946895780,
+      "pct_change": 1.17,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -879,7 +879,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -46.2,
+      "dist_52w": null,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "145990",
+      "name": "삼양사",
+      "marcap": 489888827500,
+      "pct_change": -0.73,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -26.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -888,7 +910,7 @@
       "sym": "034950",
       "name": "한국기업평가",
       "marcap": 469943199000,
-      "pct_change": 0.39,
+      "pct_change": 0.58,
       "signals": [
         "컵위드핸들",
         "이평선수렴",
@@ -902,7 +924,7 @@
       "sig_cup": true,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -9.9,
+      "dist_52w": -10.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -910,8 +932,8 @@
       "market": "KR",
       "sym": "080580",
       "name": "오킨스전자",
-      "marcap": 456619175750,
-      "pct_change": 7.44,
+      "marcap": 454510080250,
+      "pct_change": 10.63,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -925,7 +947,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.3,
+      "dist_52w": -21.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -933,8 +955,8 @@
       "market": "KR",
       "sym": "002030",
       "name": "아세아",
-      "marcap": 447800310000,
-      "pct_change": 5.06,
+      "marcap": 437506050000,
+      "pct_change": 1.67,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -947,29 +969,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -45.8,
+      "dist_52w": -47.1,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "101730",
-      "name": "위메이드맥스",
-      "marcap": 435777087200,
-      "pct_change": 28.24,
+      "sym": "029460",
+      "name": "케이씨",
+      "marcap": 427045731250,
+      "pct_change": 2.89,
       "signals": [
-        "이평선수렴",
-        "RSI/MACD"
+        "5일선라이딩",
+        "이평선수렴"
       ],
       "total_signals": 2,
       "high_type": "",
       "sig_52w": false,
       "sig_vol": false,
-      "sig_ma5": false,
+      "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -81.0,
+      "sig_rsimacd": false,
+      "dist_52w": -8.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -977,8 +999,8 @@
       "market": "KR",
       "sym": "306200",
       "name": "세아제강",
-      "marcap": 429415820000,
-      "pct_change": 3.1,
+      "marcap": 416652470000,
+      "pct_change": -0.95,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -992,7 +1014,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -31.3,
+      "dist_52w": -32.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1000,8 +1022,8 @@
       "market": "KR",
       "sym": "344820",
       "name": "KCC글라스",
-      "marcap": 394471646400,
-      "pct_change": -2.0,
+      "marcap": 392076069600,
+      "pct_change": -1.21,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1014,16 +1036,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -61.5,
+      "dist_52w": -61.6,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "089590",
-      "name": "제주항공",
-      "marcap": 390705572325,
-      "pct_change": 4.43,
+      "sym": "332570",
+      "name": "PS일렉트로닉스",
+      "marcap": 385901065200,
+      "pct_change": 14.93,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1036,7 +1058,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -76.5,
+      "dist_52w": -42.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "126560",
+      "name": "현대퓨처넷",
+      "marcap": 366915494400,
+      "pct_change": -0.15,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -32.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1044,8 +1088,8 @@
       "market": "KR",
       "sym": "036800",
       "name": "나이스정보통신",
-      "marcap": 370825000000,
-      "pct_change": 12.93,
+      "marcap": 361725000000,
+      "pct_change": 7.98,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -1058,51 +1102,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": 1.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "126560",
-      "name": "현대퓨처넷",
-      "marcap": 365823484000,
-      "pct_change": -1.18,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -32.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "003800",
-      "name": "에이스침대",
-      "marcap": 359316000000,
-      "pct_change": 0.0,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -23.7,
+      "dist_52w": -1.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1110,8 +1110,8 @@
       "market": "KR",
       "sym": "011760",
       "name": "현대코퍼레이션",
-      "marcap": 358504978600,
-      "pct_change": 3.85,
+      "marcap": 354536288800,
+      "pct_change": 4.08,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1124,7 +1124,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -18.0,
+      "dist_52w": -18.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1132,8 +1132,8 @@
       "market": "KR",
       "sym": "096760",
       "name": "JW홀딩스",
-      "marcap": 315659502340,
-      "pct_change": 2.15,
+      "marcap": 316398751760,
+      "pct_change": 1.79,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -1146,7 +1146,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -9.5,
+      "dist_52w": -9.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1154,8 +1154,8 @@
       "market": "KR",
       "sym": "452430",
       "name": "사피엔반도체",
-      "marcap": 307101661200,
-      "pct_change": 12.58,
+      "marcap": 302973950700,
+      "pct_change": 16.59,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1176,8 +1176,8 @@
       "market": "KR",
       "sym": "000430",
       "name": "대원강업",
-      "marcap": 302250000000,
-      "pct_change": 7.57,
+      "marcap": 300390000000,
+      "pct_change": 6.25,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -1191,7 +1191,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -41.4,
+      "dist_52w": -42.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1200,7 +1200,7 @@
       "sym": "ACN",
       "name": "ACN",
       "marcap": 113207624157,
-      "pct_change": 4.43,
+      "pct_change": 8.03,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1213,7 +1213,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -51.0,
+      "dist_52w": -51.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1222,7 +1222,7 @@
       "sym": "AMT",
       "name": "AMT",
       "marcap": 82870810993,
-      "pct_change": 0.62,
+      "pct_change": 1.13,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -1235,7 +1235,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -37.4,
+      "dist_52w": -37.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1244,7 +1244,7 @@
       "sym": "AWK",
       "name": "AWK",
       "marcap": 26987240478,
-      "pct_change": -1.27,
+      "pct_change": -1.68,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -1257,7 +1257,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -14.6,
+      "dist_52w": -15.1,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "AR",
+      "name": "AR",
+      "marcap": 11864839864,
+      "pct_change": -0.64,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -20.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1266,7 +1288,7 @@
       "sym": "AES",
       "name": "AES",
       "marcap": 10547602548,
-      "pct_change": 0.07,
+      "pct_change": -0.2,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -1285,46 +1307,23 @@
     },
     {
       "market": "US",
-      "sym": "ALTB",
-      "name": "ALTB",
-      "marcap": 4455000000,
-      "pct_change": 0.0,
+      "sym": "AVTR",
+      "name": "AVTR",
+      "marcap": 10016874704,
+      "pct_change": 1.25,
       "signals": [
         "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
+        "이평선수렴"
       ],
-      "total_signals": 3,
+      "total_signals": 2,
       "high_type": "",
       "sig_52w": false,
       "sig_vol": false,
       "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -37.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "ASO",
-      "name": "ASO",
-      "marcap": 3409007443,
-      "pct_change": 20.72,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -28.4,
+      "sig_rsimacd": false,
+      "dist_52w": -55.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1333,7 +1332,7 @@
       "sym": "AVAH",
       "name": "AVAH",
       "marcap": 3071593195,
-      "pct_change": 5.89,
+      "pct_change": 4.76,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -1346,7 +1345,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -1.1,
+      "dist_52w": -1.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1369,28 +1368,6 @@
       "sig_maconv": false,
       "sig_rsimacd": false,
       "dist_52w": -1.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "AI",
-      "name": "C3 AI",
-      "marcap": 1633689454,
-      "pct_change": 6.79,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -77.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1422,7 +1399,7 @@
       "sym": "ATLO",
       "name": "ATLO",
       "marcap": 287771092,
-      "pct_change": 0.03,
+      "pct_change": 1.61,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -1435,7 +1412,29 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -0.5,
+      "dist_52w": 0.6,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "AMPY",
+      "name": "Amplify Energy",
+      "marcap": 203555941,
+      "pct_change": -0.2,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -52.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1444,7 +1443,7 @@
       "sym": "ANNA",
       "name": "ANNA",
       "marcap": 143155313,
-      "pct_change": 13.0,
+      "pct_change": 7.28,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1463,54 +1462,10 @@
     },
     {
       "market": "US",
-      "sym": "AAWH",
-      "name": "Ascend Wellness (AWH)",
-      "marcap": 105361669,
-      "pct_change": 17.02,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -84.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "AEYE",
-      "name": "AEYE",
-      "marcap": 99677512,
-      "pct_change": 5.52,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -77.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "AFCG",
       "name": "AFC Gamma",
       "marcap": 80485311,
-      "pct_change": -1.96,
+      "pct_change": 0.28,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -1524,7 +1479,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -73.1,
+      "dist_52w": -72.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1533,16 +1488,17 @@
       "sym": "AURX",
       "name": "AURX",
       "marcap": 60523155,
-      "pct_change": 12.61,
+      "pct_change": 3.31,
       "signals": [
+        "5일선라이딩",
         "이평선수렴",
         "RSI/MACD"
       ],
-      "total_signals": 2,
+      "total_signals": 3,
       "high_type": "",
       "sig_52w": false,
       "sig_vol": false,
-      "sig_ma5": false,
+      "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
@@ -1552,10 +1508,10 @@
     },
     {
       "market": "US",
-      "sym": "AIFA",
-      "name": "AIFA",
-      "marcap": 19902978,
-      "pct_change": -0.95,
+      "sym": "AHRO",
+      "name": "AHRO",
+      "marcap": 1167750,
+      "pct_change": 20.0,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1568,13 +1524,13 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -86.2,
+      "dist_52w": -88.0,
       "vol_ratio": null,
       "sector": "기타"
     }
   ],
   "fetch_fail_pct": {
     "KR": 0.4,
-    "US": 2.1
+    "US": 1.5
   }
 }
