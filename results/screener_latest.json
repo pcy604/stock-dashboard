@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-06",
+  "date": "2026-10-07",
   "total": 17,
   "stocks": [
     {
@@ -357,10 +357,10 @@
     },
     {
       "market": "US",
-      "sym": "AIBT",
-      "name": "AIBT",
-      "marcap": 1870363,
-      "pct_change": 120.0,
+      "sym": "AOXY",
+      "name": "AOXY",
+      "marcap": 288791,
+      "pct_change": 15.39,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -373,13 +373,13 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -99.9,
+      "dist_52w": -87.1,
       "vol_ratio": null,
       "sector": "기타"
     }
   ],
   "fetch_fail_pct": {
     "KR": 0.0,
-    "US": 0.9
+    "US": 0.7
   }
 }

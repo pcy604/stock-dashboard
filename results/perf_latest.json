@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-06",
+  "date": "2026-10-07",
   "total": 128,
   "stocks": [
     {
@@ -35,7 +35,6 @@
       "curr_price": 142.31,
       "sigs_past": [],
       "sigs_now": [
-        "이평수렴",
         "RSI/MACD"
       ],
       "past_sig_52w": false,
@@ -48,7 +47,7 @@
       "now_sig_vol": false,
       "now_sig_ma5": false,
       "now_sig_cup": false,
-      "now_sig_maconv": true,
+      "now_sig_maconv": false,
       "now_sig_rsimacd": true
     },
     {
@@ -260,7 +259,6 @@
         "이평수렴"
       ],
       "sigs_now": [
-        "이평수렴",
         "RSI/MACD"
       ],
       "past_sig_52w": false,
@@ -273,7 +271,7 @@
       "now_sig_vol": false,
       "now_sig_ma5": false,
       "now_sig_cup": false,
-      "now_sig_maconv": true,
+      "now_sig_maconv": false,
       "now_sig_rsimacd": true
     },
     {
@@ -284,29 +282,6 @@
       "ret_4w": 7.4,
       "ret_1w": 0.44,
       "curr_price": 40.66,
-      "sigs_past": [],
-      "sigs_now": [],
-      "past_sig_52w": false,
-      "past_sig_vol": false,
-      "past_sig_ma5": false,
-      "past_sig_cup": false,
-      "past_sig_maconv": false,
-      "past_sig_rsimacd": false,
-      "now_sig_52w": false,
-      "now_sig_vol": false,
-      "now_sig_ma5": false,
-      "now_sig_cup": false,
-      "now_sig_maconv": false,
-      "now_sig_rsimacd": false
-    },
-    {
-      "market": "US",
-      "sym": "AMG",
-      "name": "Affiliated Managers Group",
-      "marcap": 9605154724,
-      "ret_4w": 7.06,
-      "ret_1w": 2.5,
-      "curr_price": 380.7,
       "sigs_past": [],
       "sigs_now": [],
       "past_sig_52w": false,
@@ -355,6 +330,29 @@
       "ret_4w": 6.79,
       "ret_1w": -0.01,
       "curr_price": 402.98,
+      "sigs_past": [],
+      "sigs_now": [],
+      "past_sig_52w": false,
+      "past_sig_vol": false,
+      "past_sig_ma5": false,
+      "past_sig_cup": false,
+      "past_sig_maconv": false,
+      "past_sig_rsimacd": false,
+      "now_sig_52w": false,
+      "now_sig_vol": false,
+      "now_sig_ma5": false,
+      "now_sig_cup": false,
+      "now_sig_maconv": false,
+      "now_sig_rsimacd": false
+    },
+    {
+      "market": "US",
+      "sym": "AMG",
+      "name": "Affiliated Managers Group",
+      "marcap": 9605154724,
+      "ret_4w": 6.78,
+      "ret_1w": 2.23,
+      "curr_price": 379.72,
       "sigs_past": [],
       "sigs_now": [],
       "past_sig_52w": false,
@@ -526,9 +524,7 @@
       "ret_1w": -0.67,
       "curr_price": 16.4,
       "sigs_past": [],
-      "sigs_now": [
-        "이평수렴"
-      ],
+      "sigs_now": [],
       "past_sig_52w": false,
       "past_sig_vol": false,
       "past_sig_ma5": false,
@@ -539,7 +535,7 @@
       "now_sig_vol": false,
       "now_sig_ma5": false,
       "now_sig_cup": false,
-      "now_sig_maconv": true,
+      "now_sig_maconv": false,
       "now_sig_rsimacd": false
     },
     {
@@ -1175,6 +1171,33 @@
     },
     {
       "market": "US",
+      "sym": "AFG",
+      "name": "American Financial Group",
+      "marcap": 11534376426,
+      "ret_4w": -1.33,
+      "ret_1w": 0.7,
+      "curr_price": 140.07,
+      "sigs_past": [
+        "컵위드핸들"
+      ],
+      "sigs_now": [
+        "컵위드핸들"
+      ],
+      "past_sig_52w": false,
+      "past_sig_vol": false,
+      "past_sig_ma5": false,
+      "past_sig_cup": true,
+      "past_sig_maconv": false,
+      "past_sig_rsimacd": false,
+      "now_sig_52w": false,
+      "now_sig_vol": false,
+      "now_sig_ma5": false,
+      "now_sig_cup": true,
+      "now_sig_maconv": false,
+      "now_sig_rsimacd": false
+    },
+    {
+      "market": "US",
       "sym": "AAL",
       "name": "American Airlines",
       "marcap": 8565890888,
@@ -1262,33 +1285,6 @@
       "now_sig_vol": false,
       "now_sig_ma5": false,
       "now_sig_cup": false,
-      "now_sig_maconv": false,
-      "now_sig_rsimacd": false
-    },
-    {
-      "market": "US",
-      "sym": "AFG",
-      "name": "American Financial Group",
-      "marcap": 11534376426,
-      "ret_4w": -1.85,
-      "ret_1w": 0.17,
-      "curr_price": 139.33,
-      "sigs_past": [
-        "컵위드핸들"
-      ],
-      "sigs_now": [
-        "컵위드핸들"
-      ],
-      "past_sig_52w": false,
-      "past_sig_vol": false,
-      "past_sig_ma5": false,
-      "past_sig_cup": true,
-      "past_sig_maconv": false,
-      "past_sig_rsimacd": false,
-      "now_sig_52w": false,
-      "now_sig_vol": false,
-      "now_sig_ma5": false,
-      "now_sig_cup": true,
       "now_sig_maconv": false,
       "now_sig_rsimacd": false
     },
@@ -3061,9 +3057,10 @@
       "name": "ATVK",
       "marcap": 3949180569,
       "ret_4w": -37.48,
-      "ret_1w": -37.48,
+      "ret_1w": 0.0,
       "curr_price": 6.44,
       "sigs_past": [
+        "이평수렴",
         "RSI/MACD"
       ],
       "sigs_now": [
@@ -3073,7 +3070,7 @@
       "past_sig_vol": false,
       "past_sig_ma5": false,
       "past_sig_cup": false,
-      "past_sig_maconv": false,
+      "past_sig_maconv": true,
       "past_sig_rsimacd": true,
       "now_sig_52w": false,
       "now_sig_vol": false,
