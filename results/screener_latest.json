@@ -1,13 +1,13 @@
 {
-  "date": "2026-10-07",
-  "total": 17,
+  "date": "2026-10-08",
+  "total": 19,
   "stocks": [
     {
       "market": "US",
       "sym": "AMD",
       "name": "AMD",
       "marcap": 1034842210033,
-      "pct_change": 3.93,
+      "pct_change": 6.89,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -20,7 +20,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -2.1,
+      "dist_52w": 0.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -29,7 +29,7 @@
       "sym": "AMAT",
       "name": "Applied Materials",
       "marcap": 428574345680,
-      "pct_change": 11.41,
+      "pct_change": 3.57,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -42,7 +42,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -26.7,
+      "dist_52w": -28.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -51,7 +51,7 @@
       "sym": "ADI",
       "name": "Analog Devices",
       "marcap": 202136480767,
-      "pct_change": 5.99,
+      "pct_change": 5.61,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -64,7 +64,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -6.0,
+      "dist_52w": -5.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -73,7 +73,7 @@
       "sym": "APH",
       "name": "APH",
       "marcap": 107220240291,
-      "pct_change": 3.13,
+      "pct_change": 5.07,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -86,38 +86,16 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -2.2,
+      "dist_52w": -0.7,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "US",
-      "sym": "AIT",
-      "name": "Applied Industrial Technologies",
-      "marcap": 12604222541,
-      "pct_change": 2.48,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -7.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "ARW",
-      "name": "ARW",
-      "marcap": 12319621140,
-      "pct_change": 4.24,
+      "sym": "AME",
+      "name": "Ametek",
+      "marcap": 57757783521,
+      "pct_change": 1.17,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -136,10 +114,98 @@
     },
     {
       "market": "US",
+      "sym": "AIT",
+      "name": "Applied Industrial Technologies",
+      "marcap": 12604222541,
+      "pct_change": 2.63,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -8.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "ARW",
+      "name": "ARW",
+      "marcap": 12319621140,
+      "pct_change": 4.42,
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": -2.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "AAOI",
+      "name": "AAOI",
+      "marcap": 9775357795,
+      "pct_change": 29.29,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -44.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "AM",
+      "name": "Antero Midstream",
+      "marcap": 9664362929,
+      "pct_change": 4.4,
+      "signals": [
+        "컵위드핸들",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": true,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": -11.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "AVT",
       "name": "AVT",
       "marcap": 8776884574,
-      "pct_change": 4.67,
+      "pct_change": 3.78,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -153,7 +219,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -2.2,
+      "dist_52w": -2.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -162,7 +228,7 @@
       "sym": "ACLS",
       "name": "Axcelis Technologies",
       "marcap": 4563357761,
-      "pct_change": 14.76,
+      "pct_change": 9.68,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -175,7 +241,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -29.2,
+      "dist_52w": -29.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -184,7 +250,7 @@
       "sym": "APLE",
       "name": "APLE",
       "marcap": 3897725398,
-      "pct_change": 0.31,
+      "pct_change": 0.37,
       "signals": [
         "컵위드핸들",
         "이평선수렴"
@@ -197,29 +263,7 @@
       "sig_cup": true,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -10.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "AEHR",
-      "name": "Aehr Test Systems",
-      "marcap": 3497238414,
-      "pct_change": 6.0,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -29.2,
+      "dist_52w": -10.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -228,7 +272,7 @@
       "sym": "ASO",
       "name": "ASO",
       "marcap": 3094701733,
-      "pct_change": 6.93,
+      "pct_change": 9.23,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -241,29 +285,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -31.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "ALNT",
-      "name": "Allient",
-      "marcap": 2011397103,
-      "pct_change": 3.69,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -2.3,
+      "dist_52w": -30.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -272,7 +294,7 @@
       "sym": "ASYS",
       "name": "ASYS",
       "marcap": 315320903,
-      "pct_change": 12.49,
+      "pct_change": 6.92,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -285,7 +307,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -30.6,
+      "dist_52w": -30.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "ALTG",
+      "name": "Alta Equipment Group",
+      "marcap": 211681331,
+      "pct_change": 13.66,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -67.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -294,7 +338,7 @@
       "sym": "AP",
       "name": "AP",
       "marcap": 200388619,
-      "pct_change": 8.67,
+      "pct_change": 4.67,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -307,7 +351,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -24.7,
+      "dist_52w": -26.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -315,21 +359,22 @@
       "market": "US",
       "sym": "APT",
       "name": "APT",
-      "marcap": 58685753,
-      "pct_change": 14.09,
+      "marcap": 61135243,
+      "pct_change": 14.75,
       "signals": [
+        "거래량폭발",
         "이평선수렴",
         "RSI/MACD"
       ],
-      "total_signals": 2,
+      "total_signals": 3,
       "high_type": "",
       "sig_52w": false,
-      "sig_vol": false,
+      "sig_vol": true,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -23.3,
+      "dist_52w": -20.1,
       "vol_ratio": null,
       "sector": "기타"
     },
