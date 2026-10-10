@@ -66,7 +66,15 @@ jobs:
       #    주식수(us_shares.csv)는 커밋돼 있고 분기에만 바뀌므로, 매일은 주가만
       #    다시 곱하면 된다. 주식수 자체 갱신은 weekly-profile 에서 한다.
       - name: 미국 시총 갱신 (주식수 × 당일 종가)
-        run: python marketcap_refresh.py build --net-price
+        # 2026-10-10 --all-tickers 추가. 이게 없으면 universe_syms() 가 '가격 캐시에
+        # 있는 종목'을 대상 목록으로 삼는다 → 캐시에 있는 것만 시총이 계산되고,
+        # 그 시총으로 수집 유니버스가 정해지고, 그래서 캐시가 그대로인 **순환**에
+        # 갇힌다. 실측으로 us_marketcap 이 3,095 → 448종, universe 295종까지
+        # 쪼그라든 채 스스로 복구하지 못했다(급감 가드는 급락만 막고 복구는 못 한다).
+        # --all-tickers 면 대상이 edgar_cik 전체(10,413종)가 되고, MAX_FETCH(600종/일)
+        # 만큼 매일 새로 받아 채운다. quote() 는 range=10d 라 전수 이력 수집과 달리
+        # 가볍다.
+        run: python marketcap_refresh.py build --net-price --all-tickers
         continue-on-error: true
 
       - name: 섹터 맵 갱신
