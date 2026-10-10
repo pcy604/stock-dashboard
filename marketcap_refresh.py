@@ -655,6 +655,21 @@ def universe_syms(all_tickers=False):
     """
     if all_tickers:
         return sorted(cikmap())
+    # ⚠️ 2026-10-10 — SEC float 유니버스를 1순위로 둔다.
+    #   아래 '가격 캐시를 대상 목록으로 쓰는' 경로가 순환의 원인이었다:
+    #   캐시에 있는 것만 시총이 계산되고 → 그 시총으로 수집 대상이 정해지고
+    #   → 캐시가 그대로인 고리. 실측으로 universe 가 2,429 → 242종까지
+    #   무너진 채 스스로 복구하지 못했다.
+    #   sec_float 는 SEC frames 로 분기당 1콜씩 8콜(6.3초)에 전체를 받아
+    #   $150M+ 2,888종을 준다. 가격 캐시와 무관한 **독립 원천**이라 고리가 끊긴다.
+    try:
+        import sec_float
+        _fs = sec_float.load()
+        if len(_fs) >= 500:
+            print(f"[유니버스] SEC public float 기준 {len(_fs):,}종", flush=True)
+            return _fs
+    except Exception as _e:
+        print(f"[WARN] sec_float 로드 실패 — 캐시 기반으로 폴백: {str(_e)[:80]}", flush=True)
     if os.path.isdir(CACHE):
         syms = sorted({f[3:-4] for f in os.listdir(CACHE) if f.startswith("px_")})
         if syms:
