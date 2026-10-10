@@ -117,6 +117,16 @@ jobs:
         run: python pipeline_health.py
         continue-on-error: true
 
+      # 2026-10-10 신설 — pipeline_health 는 '파일 안의 날짜'만 본다. 그래서
+      # 매일 갱신되지만 **내용이 무너진** 고장은 원리적으로 못 본다. 실제로
+      # 이익가속 universe 가 2,429 → 242종으로 무너진 채 한 달을 '정상 3일'로
+      # 보고했다. 여기서는 내용의 수치를 보고 하한·급감·정체로 판정한다.
+      # 정상일 때도 한 줄을 보낸다 — 침묵을 '정상'으로 읽으면 감시가 죽은 날을
+      # 구분할 수 없다(실제로 17일을 그렇게 보냈다).
+      - name: 내용 지표 검사 (파일은 신선한데 내용이 죽은 고장)
+        run: python health_metrics.py
+        continue-on-error: true
+
       - name: 변경분 커밋 & 푸시
         run: |
           git config user.name  "github-actions"
