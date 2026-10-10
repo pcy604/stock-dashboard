@@ -138,9 +138,11 @@ def fetch_px(sym, last=None, force_full=False):
     ⚠️ 수정주가 소급 변경 문제는 증분으로 바꾼다고 사라지지 않는다. 분할 난 종목은
        반드시 force_full 로 불러야 한다(호출자 책임 · data/us_splits.csv 로 추적).
     """
-    pd_, pw = os.path.join(CACHE, f"dy_{sym}.csv"), os.path.join(CACHE, f"px_{sym}.csv")
-    if last is None and not force_full and os.path.exists(pw) and os.path.exists(pd_):
-        return True
+    pd_ = os.path.join(CACHE, f"dy_{sym}.csv")
+    # last 는 호출자가 prices 에서 조회해 넘긴다. None 이면 아직 없는 종목이므로
+    # 전수로 받는다 — 여기서 CSV 존재로 판단하던 것이 순환의 한 축이었다.
+    if last is not None and not force_full and os.path.exists(pd_):
+        pass
     # 미완성 주와 경계 어긋남을 피해 2주 겹쳐 받는다(INSERT OR REPLACE 라 겹쳐도 안전)
     if last and not force_full:
         p1 = int((pd.Timestamp(last) - pd.Timedelta(days=14)).timestamp())
@@ -184,14 +186,16 @@ def fetch_px(sym, last=None, force_full=False):
         # ★ 진행 중인 주(미완성 봉) 제거 — 금요일까지 데이터가 없으면 그 주는 버린다
         if len(w) and (d.index[-1] - w.index[-1]).days < 4:
             w = w.iloc[:-1]
-        w.to_csv(pw)
-        # 단일 보관소(market.db · prices)에도 기록한다. CSV 는 읽는 쪽을 다 옮긴
-        # 뒤에 지운다 — 먼저 지우면 조용히 깨진다.
+        # 2026-10-10: px_*.csv 쓰기를 없앴다. 읽는 쪽(update · marketcap_refresh)을
+        #   전부 prices 로 옮겼으므로 같은 내용을 두 군데 두지 않는다.
+        #   dy_(일봉)만 남긴다 — 실적 발표일 전후 3일로 earn_react_* 를 만드는 데
+        #   쓰이고, 그건 아직 대체 경로가 없다.
         try:
             import price_store
             price_store.put(sym, w, 'US')
         except Exception as _e:
             print(f"  [warn] {sym} prices 적재 실패: {str(_e)[:80]}", flush=True)
+            return False
         return True
     except Exception:
         return False
@@ -354,10 +358,15 @@ def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (�
 
 # ───────────────────── 3) 팩터 계산 → DB ─────────────────────
 def bench():
-    p = os.path.join(CACHE, "px_SPY.csv")
-    if not os.path.exists(p):
+    """SPY 주봉 종가. 2026-10-10: px_SPY.csv → prices 테이블."""
+    import price_store
+    d = price_store.get("SPY", "US")
+    if d is None or not len(d):
         fetch_px("SPY")
-    return pd.read_csv(p, index_col=0, parse_dates=True)["Close"]
+        d = price_store.get("SPY", "US")
+    if d is None:
+        raise RuntimeError("SPY 주봉을 얻지 못했다 — 벤치마크 없이는 알파를 못 낸다")
+    return d["Close"]
 
 
 _SHARES = {}
@@ -451,15 +460,22 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         u = u[[i % _ns == _sh for i in range(len(u))]].reset_index(drop=True)
         print(f"샤드 {_sh}/{_ns} — 담당 {len(u)}종", flush=True)
 
+    try:
+        import price_store as _PS
+        _PSC = _PS._conn()
+    except Exception as _e:
+        print(f"[WARN] price_store 사용 불가: {str(_e)[:80]}", flush=True)
+        _PS, _PSC = None, None
+
     total = 0
     for _, row in u.iterrows():
         s = row.sym
-        pp = os.path.join(CACHE, f"px_{s}.csv")
         fp = os.path.join(CACHE, f"fq_{s}.csv")
-        if not (os.path.exists(pp) and os.path.exists(fp)):
+        if not os.path.exists(fp):
             continue
-        w = pd.read_csv(pp, index_col=0, parse_dates=True).sort_index()
-        if len(w) < 80:
+        # 2026-10-10: px_*.csv → market.db(prices). 가격의 보관소가 하나가 됐다.
+        w = _PS.get(s, 'US', conn=_PSC) if _PS else None
+        if w is None or len(w) < 80:
             continue
         # ★ 계산할 새 주차가 없으면 일봉·재무 로드 전에 바로 스킵
         if w.index[-1] < pd.Timestamp(start):

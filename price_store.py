@@ -118,3 +118,21 @@ def stats(db=None):
     finally:
         c.close()
     return dict(rows=n or 0, syms=s or 0, first=lo, last=hi)
+
+
+def last_close_map(market='US', db=None):
+    """{sym: (마지막 종가, 그 날짜)} — 한 번의 쿼리로.
+
+    marketcap_refresh 가 종목마다 px_*.csv 를 열던 자리를 대신한다. 3,500종을
+    파일로 열면 디스크 I/O 가 3,500번이지만 여기선 쿼리 1번이다.
+    """
+    c = _conn(db)
+    try:
+        rows = c.execute("""
+            SELECT p.sym, p.close, p.date FROM prices p
+            JOIN (SELECT sym, MAX(date) d FROM prices WHERE market=? GROUP BY sym) m
+              ON p.sym = m.sym AND p.date = m.d
+            WHERE p.market=?""", (market, market)).fetchall()
+    finally:
+        c.close()
+    return {s: (cl, d) for s, cl, d in rows if cl}

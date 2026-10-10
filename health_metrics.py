@@ -80,14 +80,41 @@ def _prices_last():
         return None
 
 
+def _collect_rate():
+    """수집 대상(시총 $150M+) 중 가격 이력을 실제로 가진 비율 %.
+
+    ⚠️ 2026-10-10 — 이 지표가 없어서 화면이 오해를 만들었다. '시총 3,566종'과
+       'prices 2,247종'을 나란히 놓으니 둘이 안 맞는 것처럼 보였는데, 사실
+       둘은 다른 것을 센다:
+         · 시총      = 주식수 × **오늘 종가 1개**        → 가볍다, 많이 나온다
+         · 가격 이력 = **13년 주봉 전체**                 → 무겁다, 적다
+         · 게다가 시총 $150M 미만 1,217종은 일부러 안 받는다
+       비교해야 하는 건 둘의 차이가 아니라 **수집 대상 대비 달성률**이다.
+       대상인데 못 받은 게 있으면 그건 진짜 결손이다.
+    """
+    try:
+        import leaders_build as B
+        import sqlite3
+        want = set(B.universe(2900).sym.astype(str))
+        if not want:
+            return None
+        c = sqlite3.connect('data/market.db')
+        have = {r[0] for r in c.execute("SELECT DISTINCT sym FROM prices WHERE market='US'")}
+        c.close()
+        return round(len(want & have) / len(want) * 100, 1)
+    except Exception:
+        return None
+
+
 # (키, 라벨, 값 함수, 하한, 정체를 고장으로 볼 것인가)
 #   stall=False 는 '안 변해도 정상'인 지표다. 분기재무처럼 원래 가끔 변하는 것.
 METRICS = [
-    ('marketcap_syms', '미국 시총 종목 수', lambda: _csv_rows('data/us_marketcap.csv'), 1500, False),
+    ('collect_rate',   '수집 달성률 %(대상 대비)', _collect_rate, 90, False),
+    ('marketcap_syms', '시총 산출 종목(종가1개면 됨)', lambda: _csv_rows('data/us_marketcap.csv'), 1500, False),
     ('shares_rows',    'SEC 주식수 행수',   lambda: _csv_rows('data/us_shares.csv'), 100000, False),
     ('accel_universe', '이익가속 유니버스', _accel_universe, 1000, False),
     ('accel_last_week', '이익가속 최신 주차', _accel_last_week, None, True),
-    ('prices_syms',    'prices 종목 수',    _prices_syms, 1000, False),
+    ('prices_syms',    '가격 이력 보유(13년 주봉)', _prices_syms, 1000, False),
     ('prices_last',    'prices 최신 주차',  _prices_last, None, True),
     ('screener_total', '주봉 신호 종목 수', lambda: _json('results/screener_latest.json', 'total'), None, True),
 ]

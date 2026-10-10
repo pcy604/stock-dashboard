@@ -415,12 +415,15 @@ def split_factors():
 
 
 def last_price(sym):
-    p = os.path.join(CACHE, f"px_{sym}.csv")
-    if not os.path.exists(p):
-        return None, None
+    """마지막 종가. 2026-10-10: px_*.csv → market.db(prices).
+
+    대량 조회는 price_store.last_close_map() 을 쓴다 — 종목마다 이 함수를 부르면
+    쿼리가 종목 수만큼 나간다. 여기는 단건 조회용으로만 남긴다.
+    """
     try:
-        d = pd.read_csv(p, index_col=0, parse_dates=True)
-        if not len(d) or "Close" not in d.columns:
+        import price_store
+        d = price_store.get(sym, "US")
+        if d is None or not len(d):
             return None, None
         return float(d.Close.iloc[-1]), str(d.index[-1].date())
     except Exception:
@@ -524,6 +527,15 @@ def cmd_build(net_price=False):
     #   조금씩 채워지고, 다 채워지면 이 구간은 그냥 비어서 즉시 지나간다.
     #   깨지는 지점: 새로 편입된 종목은 시총이 채워지기까지 며칠 걸린다. 그동안
     #   그 종목은 유니버스 선정에서 빠진다 — 조용히 늦게 들어온다.
+    # 2026-10-10: 종목마다 px_*.csv 를 열던 last_price() 를 쿼리 1번으로 대체.
+    #   3,500종이면 파일 I/O 3,500번이었다. 실측 2,247종 0.20초.
+    try:
+        import price_store
+        _LC = price_store.last_close_map('US')
+    except Exception as _e:
+        print(f"[WARN] prices 조회 실패 — 파일 폴백: {str(_e)[:80]}", flush=True)
+        _LC = {}
+
     prices = {}
     if net_price:
         # ⚠️ 2026-10-10 — 여기가 유니버스가 스스로 복구하지 못한 이유다.
@@ -552,7 +564,9 @@ def cmd_build(net_price=False):
                 print(f"[WARN] 직전 시총을 못 읽어 이어받기를 건너뛴다: {_e}", flush=True)
         prices.update(carry)
 
-        need = [s for s in sh if not os.path.exists(os.path.join(CACHE, f"px_{s}.csv"))]
+        # 2026-10-10: px_*.csv 존재 검사 → prices 테이블 조회. 가격의 단일
+        #   보관소가 DB 가 됐으므로 '갖고 있나'는 DB 에 물어야 한다.
+        need = [s for s in sh if s not in _LC]
         if len(need) > MAX_FETCH:
             unknown = [x for x in need if x not in carry]
             known = [x for x in need if x in carry]
@@ -579,7 +593,7 @@ def cmd_build(net_price=False):
 
     mc_rows, ts_rows = [], []
     for sym, d in sh.items():
-        px, pxd = last_price(sym)
+        px, pxd = _LC.get(sym, (None, None))
         if px is None:
             px, pxd = prices.get(sym, (None, None))
         latest = float(d.shares.iloc[-1])
@@ -674,10 +688,16 @@ def universe_syms(all_tickers=False):
             return _fs
     except Exception as _e:
         print(f"[WARN] sec_float 로드 실패 — 캐시 기반으로 폴백: {str(_e)[:80]}", flush=True)
-    if os.path.isdir(CACHE):
-        syms = sorted({f[3:-4] for f in os.listdir(CACHE) if f.startswith("px_")})
+    # 2026-10-10: px_ 디렉터리 스캔 → prices 테이블. 이 경로 자체가 순환의
+    #   한 축이었으므로(가진 것이 곧 대상이 된다) 위의 sec_float 가 1순위다.
+    #   여기는 sec_float 가 없을 때의 폴백으로만 남는다.
+    try:
+        import price_store
+        syms = sorted(price_store.last_date('US'))
         if syms:
             return syms
+    except Exception:
+        pass
     for path, col in ((OUT_SH, "Symbol"), (OUT_MC, "Symbol")):
         if os.path.exists(path):
             try:
