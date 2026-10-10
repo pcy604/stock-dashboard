@@ -522,13 +522,43 @@ def cmd_build(net_price=False):
     #   그 종목은 유니버스 선정에서 빠진다 — 조용히 늦게 들어온다.
     prices = {}
     if net_price:
+        # ⚠️ 2026-10-10 — 여기가 유니버스가 스스로 복구하지 못한 이유다.
+        #   quote() 는 **캐시 파일을 만들지 않는다**. 그래서 need(=px_ 캐시가 없는
+        #   종목)가 실행을 거듭해도 줄지 않고, need[:MAX_FETCH] 는 **매번 같은 앞
+        #   600종**이었다. 실측: 4회 연속 "5,956종 중 600종"이 찍히고 결과는
+        #   682종에서 꼼짝하지 않았다. 위 주석의 "매일 조금씩 채워지고 다 채워지면
+        #   이 구간은 그냥 비어서 지나간다"는 **실제로 일어나지 않았다**.
+        #   둘로 고친다.
+        #     ① 이어받기 — 지난 결과의 가격을 기본값으로 깐다. 그래야 이번에 안
+        #        받은 종목이 결과에서 사라지지 않고 **누적**된다.
+        #     ② 로테이션 — 한 번도 못 받아본 종목을 먼저 주고, 나머지는 날짜로
+        #        돌린다. 5,956 / 600 ≈ 10일이면 한 바퀴다.
+        #   깨지는 지점: 이어받은 가격은 최대 10일쯤 낡는다. 시총이 그만큼 틀리지만
+        #   이 파일의 용도는 **유니버스 선정**(하한 $150M)이라 그 오차는 감당된다.
+        #   px_date 에 실제 기준일이 남으므로 낡음은 추적 가능하다.
+        carry = {}
+        if os.path.exists(OUT_MC):
+            try:
+                _pm = pd.read_csv(OUT_MC)
+                for _, _r in _pm.iterrows():
+                    _px = _r.get("price (USD)")
+                    if _px and float(_px) > 0:
+                        carry[str(_r["Symbol"])] = (float(_px), str(_r.get("px_date") or ""))
+            except Exception as _e:
+                print(f"[WARN] 직전 시총을 못 읽어 이어받기를 건너뛴다: {_e}", flush=True)
+        prices.update(carry)
+
         need = [s for s in sh if not os.path.exists(os.path.join(CACHE, f"px_{s}.csv"))]
         if len(need) > MAX_FETCH:
-            print(f"가격 캐시 없는 {len(need):,}종 중 {MAX_FETCH}종만 받는다 "
-                  f"(시간 초과 방지 · 나머지는 다음 실행에서)", flush=True)
-            need = need[:MAX_FETCH]
+            unknown = [x for x in need if x not in carry]
+            known = [x for x in need if x in carry]
+            off = (pd.Timestamp.today().dayofyear * MAX_FETCH) % max(len(known), 1)
+            need = (unknown + known[off:] + known[:off])[:MAX_FETCH]
+            print(f"가격 캐시 없는 {len(unknown) + len(known):,}종 중 {len(need)}종을 받는다 "
+                  f"(신규 {min(len(unknown), MAX_FETCH)}종 우선 · 이어받기 {len(carry):,}종)",
+                  flush=True)
         else:
-            print(f"가격 캐시 없는 {len(need)}종 시세 조회", flush=True)
+            print(f"가격 캐시 없는 {len(need)}종 시세 조회 (이어받기 {len(carry):,}종)", flush=True)
         n = {"i": 0}
 
         def w(s):

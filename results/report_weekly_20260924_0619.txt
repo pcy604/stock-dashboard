@@ -1,0 +1,1130 @@
+📌 주봉 신호 종목 현황 (2026-09-24 기준)
+시총 높은 순 | 총 77개 종목
+
+🇰🇷 한국 (69개)
+       시총  [주간%]  종목명
+ 34.0조    [+5.5%]  LG전자  ← 이평선수렴, RSI/MACD
+ 24.5조    [+9.5%]  두산  ← 이평선수렴, RSI/MACD
+ 11.6조    [+7.7%]  대한항공(52주)  ← 52주신고가, 이평선수렴
+ 10.7조    [+2.3%]  HD현대마린솔루션  ← 이평선수렴, RSI/MACD
+  8.7조   [+10.9%]  이수페타시스  ← 이평선수렴, RSI/MACD
+  6.7조    [+3.6%]  한미약품  ← 이평선수렴, RSI/MACD
+  5.9조    [+2.5%]  이오테크닉스  ← 이평선수렴, RSI/MACD
+  5.8조   [+15.6%]  심텍  ← 이평선수렴, RSI/MACD
+  5.7조    [+4.4%]  DB하이텍  ← 이평선수렴, RSI/MACD
+  4.5조   [+11.8%]  ISC  ← 이평선수렴, RSI/MACD
+  4.1조   [+37.3%]  파두  ← 이평선수렴, RSI/MACD
+  3.9조   [+16.4%]  일진전기  ← 이평선수렴, RSI/MACD
+  3.7조   [+16.9%]  유진테크  ← 이평선수렴, RSI/MACD
+  3.5조    [-2.2%]  피에스케이홀딩스  ← 5일선라이딩, 이평선수렴
+  3.2조    [+5.2%]  티씨케이  ← 5일선라이딩, 이평선수렴
+  3.2조    [-1.3%]  에스원  ← 5일선라이딩, 이평선수렴
+  3.1조   [+30.0%]  하나마이크론  ← 이평선수렴, RSI/MACD
+  2.9조   [+10.5%]  솔브레인  ← 이평선수렴, RSI/MACD
+  2.8조    [+9.2%]  대한광통신  ← 이평선수렴, RSI/MACD
+  2.4조    [-2.8%]  롯데지주  ← 이평선수렴, RSI/MACD
+  2.2조    [+3.5%]  에스피지  ← 이평선수렴, RSI/MACD
+  2.0조   [+41.7%]  성호전자  ← 이평선수렴, RSI/MACD
+  2.0조   [+15.7%]  LS에코에너지  ← 이평선수렴, RSI/MACD
+  1.7조   [+18.5%]  SFA반도체  ← 이평선수렴, RSI/MACD
+  1.7조    [-1.1%]  다우기술  ← 이평선수렴, RSI/MACD
+  1.6조   [+13.3%]  코미코  ← 이평선수렴, RSI/MACD
+  1.6조    [-1.7%]  LX인터내셔널  ← 이평선수렴, RSI/MACD
+  1.5조    [+2.9%]  삼화콘덴서  ← 이평선수렴, RSI/MACD
+  1.1조    [+9.2%]  샘씨엔에스(52주)  ← 52주신고가, RSI/MACD
+  1.1조   [+18.1%]  티엘비  ← 이평선수렴, RSI/MACD
+  1.0조    [-0.2%]  SFA  ← 이평선수렴, RSI/MACD
+9,076억    [+6.2%]  GST  ← 이평선수렴, RSI/MACD
+8,497억    [+0.9%]  CJ ENM  ← 이평선수렴, RSI/MACD
+7,939억   [+14.9%]  티에프이  ← 5일선라이딩, 이평선수렴
+7,535억   [+14.9%]  미코  ← 이평선수렴, RSI/MACD
+7,100억    [+9.3%]  인텍플러스(52주)  ← 52주신고가, 이평선수렴
+6,928억   [+11.8%]  예스티  ← 이평선수렴, RSI/MACD
+6,840억   [+21.8%]  프로텍  ← 이평선수렴, RSI/MACD
+6,772억    [+3.3%]  신한알파리츠  ← 이평선수렴, RSI/MACD
+6,754억   [+18.8%]  에프에스티  ← 이평선수렴, RSI/MACD
+6,622억    [-0.6%]  TKG휴켐스  ← 이평선수렴, RSI/MACD
+6,364억   [+14.3%]  네패스  ← 이평선수렴, RSI/MACD
+6,201억    [+0.6%]  LX홀딩스  ← 이평선수렴, RSI/MACD
+5,970억   [+24.2%]  덕산하이메탈  ← 이평선수렴, RSI/MACD
+5,626억   [+10.5%]  한양이엔지  ← 이평선수렴, RSI/MACD
+5,605억   [+35.3%]  엑시콘(52주)  ← 52주신고가, 이평선수렴
+5,588억   [+37.9%]  뉴파워프라즈마  ← 이평선수렴, RSI/MACD
+5,384억    [+1.3%]  쿠쿠홈시스  ← 5일선라이딩, 이평선수렴
+5,298억    [-0.7%]  풍산홀딩스  ← 이평선수렴, RSI/MACD
+5,251억    [+9.2%]  한솔테크닉스  ← 이평선수렴, RSI/MACD
+5,241억   [+13.9%]  오킨스전자  ← 5일선라이딩, 이평선수렴
+5,101억    [+2.5%]  월덱스  ← 이평선수렴, RSI/MACD
+4,821억   [+13.5%]  마이크로컨텍솔(52주)  ← 52주신고가, 5일선라이딩
+4,777억   [+11.1%]  케이씨(52주)  ← 52주신고가, 5일선라이딩
+4,722억    [+0.1%]  한국기업평가  ← 컵위드핸들, 이평선수렴
+4,460억   [+30.2%]  디케이티  ← 이평선수렴, RSI/MACD
+4,436억   [+11.0%]  하이록코리아  ← 이평선수렴, RSI/MACD
+4,215억   [+52.3%]  한양디지텍  ← 이평선수렴, RSI/MACD
+4,156억   [+19.4%]  한솔아이원스  ← 이평선수렴, RSI/MACD
+3,985억   [+28.4%]  제우스  ← 이평선수렴, RSI/MACD
+3,919억   [+18.3%]  저스템  ← 이평선수렴, RSI/MACD
+3,576억   [+32.9%]  에이팩트  ← 이평선수렴, RSI/MACD
+3,534억   [+20.7%]  아모텍  ← 이평선수렴, RSI/MACD
+3,509억   [+12.1%]  오이솔루션  ← 이평선수렴, RSI/MACD
+3,403억    [+5.1%]  DB  ← 이평선수렴, RSI/MACD
+3,197억    [+1.0%]  JW홀딩스  ← 5일선라이딩, 이평선수렴
+3,182억    [+0.8%]  광동제약  ← 이평선수렴, RSI/MACD
+3,169억   [+21.9%]  메가터치  ← 이평선수렴, RSI/MACD
+3,007억    [+2.0%]  대원강업  ← 5일선라이딩, 이평선수렴
+
+🇺🇸 미국 (8개)
+       시총  [주간%]  종목명
+$  4.9T    [+1.4%]  Apple(52주)  ← 52주신고가, 5일선라이딩
+$   914B   [+19.9%]  AMD(역사적)  ← 52주신고가, 이평선수렴
+$    11B    [+0.1%]  AES  ← 5일선라이딩, 이평선수렴
+$     8B    [+9.2%]  AVT(52주)  ← 52주신고가, RSI/MACD
+$     3B    [+6.6%]  ATRC(52주)  ← 52주신고가, 5일선라이딩
+$     2B   [+33.3%]  ALDS  ← 5일선라이딩, 이평선수렴
+$     0B   [+10.3%]  Ascend Wellness (AWH)  ← 이평선수렴, RSI/MACD
+$     0B    [+3.2%]  AURX  ← 5일선라이딩, 이평선수렴
+
+==================================================
+개별 종목 상세
+==================================================
+
+──────────────────────────────────────────────────
+✅ LG전자(+5.46%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 34.0조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=066570
+
+──────────────────────────────────────────────────
+✅ 두산(+9.47%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 24.5조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=000150
+
+──────────────────────────────────────────────────
+✅ 대한항공(+7.69%)
+
+❗ 52주신고가 | 이평선수렴
+📌 52주신고가
+
+시가총액 : 11.6조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=003490
+
+──────────────────────────────────────────────────
+✅ HD현대마린솔루션(+2.35%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 10.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=443060
+
+──────────────────────────────────────────────────
+✅ 이수페타시스(+10.88%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 8.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=007660
+
+──────────────────────────────────────────────────
+✅ 한미약품(+3.59%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=128940
+
+──────────────────────────────────────────────────
+✅ 이오테크닉스(+2.46%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5.9조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=039030
+
+──────────────────────────────────────────────────
+✅ 심텍(+15.63%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5.8조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=222800
+
+──────────────────────────────────────────────────
+✅ DB하이텍(+4.36%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=000990
+
+──────────────────────────────────────────────────
+✅ ISC(+11.84%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 4.5조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=095340
+
+──────────────────────────────────────────────────
+✅ 파두(+37.27%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 4.1조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=440110
+
+──────────────────────────────────────────────────
+✅ 일진전기(+16.36%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3.9조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=103590
+
+──────────────────────────────────────────────────
+✅ 유진테크(+16.91%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=084370
+
+──────────────────────────────────────────────────
+✅ 피에스케이홀딩스(-2.16%)
+
+❗ 5일선라이딩 | 이평선수렴 | RSI/MACD
+
+시가총액 : 3.5조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=031980
+
+──────────────────────────────────────────────────
+✅ 티씨케이(+5.20%)
+
+❗ 5일선라이딩 | 이평선수렴 | RSI/MACD
+
+시가총액 : 3.2조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=064760
+
+──────────────────────────────────────────────────
+✅ 에스원(-1.32%)
+
+❗ 5일선라이딩 | 이평선수렴
+
+시가총액 : 3.2조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=012750
+
+──────────────────────────────────────────────────
+✅ 하나마이크론(+29.96%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3.1조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=067310
+
+──────────────────────────────────────────────────
+✅ 솔브레인(+10.51%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 2.9조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=357780
+
+──────────────────────────────────────────────────
+✅ 대한광통신(+9.18%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 2.8조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=010170
+
+──────────────────────────────────────────────────
+✅ 롯데지주(-2.79%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 2.4조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=004990
+
+──────────────────────────────────────────────────
+✅ 에스피지(+3.49%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 2.2조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=058610
+
+──────────────────────────────────────────────────
+✅ 성호전자(+41.68%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 2.0조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=043260
+
+──────────────────────────────────────────────────
+✅ LS에코에너지(+15.73%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 2.0조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=229640
+
+──────────────────────────────────────────────────
+✅ SFA반도체(+18.50%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=036540
+
+──────────────────────────────────────────────────
+✅ 다우기술(-1.14%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.7조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=023590
+
+──────────────────────────────────────────────────
+✅ 코미코(+13.31%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.6조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=183300
+
+──────────────────────────────────────────────────
+✅ LX인터내셔널(-1.71%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.6조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=001120
+
+──────────────────────────────────────────────────
+✅ 삼화콘덴서(+2.94%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.5조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=001820
+
+──────────────────────────────────────────────────
+✅ 샘씨엔에스(+9.16%)
+
+❗ 52주신고가 | RSI/MACD
+📌 52주신고가
+
+시가총액 : 1.1조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=252990
+
+──────────────────────────────────────────────────
+✅ 티엘비(+18.07%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.1조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=356860
+
+──────────────────────────────────────────────────
+✅ SFA(-0.18%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 1.0조
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=056190
+
+──────────────────────────────────────────────────
+✅ GST(+6.25%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 9,076억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=083450
+
+──────────────────────────────────────────────────
+✅ CJ ENM(+0.91%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 8,497억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=035760
+
+──────────────────────────────────────────────────
+✅ 티에프이(+14.89%)
+
+❗ 5일선라이딩 | 이평선수렴
+
+시가총액 : 7,939억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=425420
+
+──────────────────────────────────────────────────
+✅ 미코(+14.88%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 7,535억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=059090
+
+──────────────────────────────────────────────────
+✅ 인텍플러스(+9.34%)
+
+❗ 52주신고가 | 이평선수렴 | RSI/MACD
+📌 52주신고가
+
+시가총액 : 7,100억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=064290
+
+──────────────────────────────────────────────────
+✅ 예스티(+11.81%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,928억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=122640
+
+──────────────────────────────────────────────────
+✅ 프로텍(+21.76%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,840억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=053610
+
+──────────────────────────────────────────────────
+✅ 신한알파리츠(+3.32%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,772억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=293940
+
+──────────────────────────────────────────────────
+✅ 에프에스티(+18.82%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,754억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=036810
+
+──────────────────────────────────────────────────
+✅ TKG휴켐스(-0.55%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,622억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=069260
+
+──────────────────────────────────────────────────
+✅ 네패스(+14.29%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,364억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=033640
+
+──────────────────────────────────────────────────
+✅ LX홀딩스(+0.62%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 6,201억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=383800
+
+──────────────────────────────────────────────────
+✅ 덕산하이메탈(+24.18%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5,970억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=077360
+
+──────────────────────────────────────────────────
+✅ 한양이엔지(+10.48%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5,626억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=045100
+
+──────────────────────────────────────────────────
+✅ 엑시콘(+35.31%)
+
+❗ 52주신고가 | 이평선수렴
+📌 52주신고가
+
+시가총액 : 5,605억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=092870
+
+──────────────────────────────────────────────────
+✅ 뉴파워프라즈마(+37.86%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5,588억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=144960
+
+──────────────────────────────────────────────────
+✅ 쿠쿠홈시스(+1.28%)
+
+❗ 5일선라이딩 | 이평선수렴
+
+시가총액 : 5,384억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=284740
+
+──────────────────────────────────────────────────
+✅ 풍산홀딩스(-0.67%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5,298억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=005810
+
+──────────────────────────────────────────────────
+✅ 한솔테크닉스(+9.24%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5,251억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=004710
+
+──────────────────────────────────────────────────
+✅ 오킨스전자(+13.86%)
+
+❗ 5일선라이딩 | 이평선수렴
+
+시가총액 : 5,241억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=080580
+
+──────────────────────────────────────────────────
+✅ 월덱스(+2.49%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 5,101억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=101160
+
+──────────────────────────────────────────────────
+✅ 마이크로컨텍솔(+13.54%)
+
+❗ 52주신고가 | 5일선라이딩 | 이평선수렴
+📌 52주신고가
+
+시가총액 : 4,821억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=098120
+
+──────────────────────────────────────────────────
+✅ 케이씨(+11.11%)
+
+❗ 52주신고가 | 5일선라이딩 | 이평선수렴
+📌 52주신고가
+
+시가총액 : 4,777억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=029460
+
+──────────────────────────────────────────────────
+✅ 한국기업평가(+0.10%)
+
+❗ 컵위드핸들 | 이평선수렴
+
+시가총액 : 4,722억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=034950
+
+──────────────────────────────────────────────────
+✅ 디케이티(+30.17%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 4,460억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=290550
+
+──────────────────────────────────────────────────
+✅ 하이록코리아(+11.03%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 4,436억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=013030
+
+──────────────────────────────────────────────────
+✅ 한양디지텍(+52.26%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 4,215억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=078350
+
+──────────────────────────────────────────────────
+✅ 한솔아이원스(+19.43%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 4,156억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=114810
+
+──────────────────────────────────────────────────
+✅ 제우스(+28.44%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,985억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=079370
+
+──────────────────────────────────────────────────
+✅ 저스템(+18.26%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,919억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=417840
+
+──────────────────────────────────────────────────
+✅ 에이팩트(+32.90%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,576억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=200470
+
+──────────────────────────────────────────────────
+✅ 아모텍(+20.69%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,534억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=052710
+
+──────────────────────────────────────────────────
+✅ 오이솔루션(+12.11%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,509억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=138080
+
+──────────────────────────────────────────────────
+✅ DB(+5.14%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,403억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=012030
+
+──────────────────────────────────────────────────
+✅ JW홀딩스(+1.05%)
+
+❗ 5일선라이딩 | 이평선수렴
+
+시가총액 : 3,197억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=096760
+
+──────────────────────────────────────────────────
+✅ 광동제약(+0.79%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,182억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=009290
+
+──────────────────────────────────────────────────
+✅ 메가터치(+21.95%)
+
+❗ 이평선수렴 | RSI/MACD
+
+시가총액 : 3,169억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=446540
+
+──────────────────────────────────────────────────
+✅ 대원강업(+2.01%)
+
+❗ 5일선라이딩 | 이평선수렴
+
+시가총액 : 3,007억
+현재가   : N/A
+(네이버금융 기준)
+
+* 주요지표
+PER : None배  /  PBR : None배
+ROE : N/A  /  EPS : N/A
+
+📎 https://finance.naver.com/item/main.naver?code=000430
