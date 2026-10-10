@@ -790,8 +790,12 @@ with st.expander("📖 처음이신가요? — 30초 사용설명 (화면 안내
 #      채점했다. 정작 주력인 주도주 L/S 는 채점 대상이 아니었다 — 안 쓰는 신호의 채점기였다.
 # 목표는 주당 주식 공부 2시간, 시대의 주도주를 진득하게. 이 탭은 그 반대로 작동했다.
 # 복원이 필요하면 커밋 이력에 그대로 남아 있다.
-tab_screen, tab7, tab4 = st.tabs([
-    "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로"])
+# 2026-10-10 — 🛡️ 포트폴리오 탭 복원. 08-22 에 '입력이 없어 빈 화면'이라는
+#   이유로 지웠는데, 입력이 없던 진짜 원인은 **보유 종목을 넣을 화면 자체가
+#   없었기 때문**이다(data/portfolio.json 은 git 이력에 한 번도 존재한 적이 없다).
+#   엔진(guardrail.evaluate)과 헬퍼(_fetch_pf_price·_pf_trail)는 내내 살아 있었다.
+tab_screen, tab7, tab4, tab_pf = st.tabs([
+    "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오"])
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 # 순서 주의: 서브탭 핸들(t_gain…)은 아래 6개 블록이 전부 의존하므로 **무조건 먼저** 만든다.
@@ -4272,6 +4276,161 @@ def _marcap_join() -> dict:
     return m
 
 # ── 화면 하단 설정 (사이드바 제거 → 페이지 맨 아래) ───────────────────
+
+# ════════════════════════════════════════════════════════════════════
+# 🛡️ 내 포트폴리오 — 원칙 가드레일  (2026-10-10 복원)
+# ────────────────────────────────────────────────────────────────────
+# 왜 비어 있었나: 08-22 에 "입력이 없어 처음부터 빈 화면"이라며 탭을 지웠다.
+# 그런데 입력이 없던 이유는 **보유 종목을 넣을 화면이 아예 없었기** 때문이다.
+# data/portfolio.json 은 git 전체 이력에 한 번도 존재한 적이 없다. 엔진
+# (guardrail.evaluate)과 헬퍼(_fetch_pf_price · _pf_trail)는 내내 살아 있었다.
+# 그래서 이번엔 **입력부터** 만든다.
+#
+# ⚠️ Streamlit Cloud 는 파일시스템이 임시다. 저장해도 재배포하면 사라지므로
+#    세션 상태를 1순위로 쓰고 파일 저장은 되면 하는 보너스로 둔다. 영구 보관이
+#    필요하면 맨 아래 '복사용 JSON' 을 repo 의 data/portfolio.json 에 넣는다.
+# ════════════════════════════════════════════════════════════════════
+with tab_pf, guard('포트폴리오 가드레일'):
+    import guardrail as _gr
+
+    _PF_PATH = Path('data/portfolio.json')
+    _PF_COLS = ['sym', 'name', 'market', 'qty', 'avg_cost', 'buy_date']
+
+    def _pf_load():
+        if 'pf_rows' in st.session_state:
+            return st.session_state['pf_rows']
+        try:
+            return json.loads(_PF_PATH.read_text(encoding='utf-8')).get('positions') or []
+        except Exception:
+            return []
+
+    st.markdown("### 🛡️ 원칙 가드레일")
+    st.caption("**2026-06-23 정립한 원칙을 코드가 강제합니다.** "
+               "종목당 매입 20% 상한 · 평가 40% 초과 시 30%로 트림 · "
+               "청산은 **고점 대비 −20%**(진입가 대비 아님) · "
+               "3주간 52주 신고가 미갱신 시 30% 축소 · 레버리지 ETF 합계 10% 이내.")
+
+    _rows = _pf_load()
+    if not _rows:
+        _rows = [{'sym': '', 'name': '', 'market': 'KR', 'qty': 0,
+                  'avg_cost': 0.0, 'buy_date': ''}]
+    _df_in = pd.DataFrame(_rows)
+    for _c in _PF_COLS:
+        if _c not in _df_in.columns:
+            _df_in[_c] = '' if _c in ('sym', 'name', 'market', 'buy_date') else 0
+    _df_in = _df_in[_PF_COLS]
+
+    _cap_col, _btn_col = st.columns([2, 1])
+    _total_cap = _cap_col.number_input(
+        "총자본 (현금 포함, 원)", min_value=0,
+        value=int(st.session_state.get('pf_cap', 0)), step=1_000_000, format="%d",
+        help="현금 비중까지 점검하려면 넣으세요. 0이면 보유분만 봅니다.")
+
+    st.markdown("**보유 종목** — 행 추가·삭제 가능. "
+                "`종목코드`는 KR이면 6자리(005930), US면 티커(AAPL).")
+    _edited = st.data_editor(
+        _df_in, num_rows='dynamic', use_container_width=True, hide_index=True,
+        key='pf_editor',
+        column_config={
+            'sym': st.column_config.TextColumn('종목코드', width='small'),
+            'name': st.column_config.TextColumn('이름', width='medium'),
+            'market': st.column_config.SelectboxColumn('시장', options=['KR', 'US'], width='small'),
+            'qty': st.column_config.NumberColumn('수량', min_value=0, step=1),
+            'avg_cost': st.column_config.NumberColumn('평균단가', min_value=0.0, format='%.2f'),
+            'buy_date': st.column_config.TextColumn('매수일 YYYY-MM-DD', width='small'),
+        })
+
+    if _btn_col.button('💾 저장 & 평가', use_container_width=True, type='primary'):
+        _keep = [r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
+        st.session_state['pf_rows'] = _keep
+        st.session_state['pf_cap'] = _total_cap
+        try:
+            _PF_PATH.parent.mkdir(parents=True, exist_ok=True)
+            _PF_PATH.write_text(json.dumps({'positions': _keep, 'total_capital': _total_cap},
+                                           ensure_ascii=False, indent=2), encoding='utf-8')
+            st.success(f'{len(_keep)}종목 저장됨 (data/portfolio.json)')
+        except Exception as _e:
+            st.info(f'세션에만 저장됐습니다 (파일 쓰기 불가: {str(_e)[:60]}).')
+        st.rerun()
+
+    _live = st.session_state.get('pf_rows') or [
+        r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
+
+    if not _live:
+        st.info('보유 종목을 입력하고 **저장 & 평가**를 누르세요. '
+                '현재가 · 매수 후 최고가 · 신고가 경과주는 자동으로 채웁니다.')
+    else:
+        _pos, _miss = [], []
+        for _r in _live:
+            _sym = str(_r['sym']).strip()
+            _mk = (_r.get('market') or 'KR').upper()
+            _qty = float(_r.get('qty') or 0)
+            _avg = float(_r.get('avg_cost') or 0)
+            _cur = _fetch_pf_price(_sym, _mk)
+            if _cur is None or _qty <= 0:
+                _miss.append(_sym)
+                continue
+            _peak, _wk = None, None
+            try:
+                _peak, _wk = _pf_trail(_sym, _mk, str(_r.get('buy_date') or '') or None)
+            except Exception:
+                pass
+            _pos.append({
+                'sym': _sym, 'name': _r.get('name') or _sym, 'market': _mk,
+                'qty': _qty, 'cur_price': _cur,
+                'value': _qty * _cur, 'cost': (_qty * _avg) if _avg else None,
+                'pnl_pct': ((_cur / _avg - 1) * 100) if _avg else None,
+                'peak_price': _peak, 'weeks_since_high': _wk})
+        if _miss:
+            st.warning('현재가를 못 가져온 종목: ' + ', '.join(_miss))
+
+        if _pos:
+            _res = _gr.evaluate(_pos, total_capital=(_total_cap or None))
+            _vi = _res.get('violations') or []
+            _m1, _m2, _m3 = st.columns(3)
+            _m1.metric('원칙 준수 등급', _res.get('grade', '—'))
+            _m2.metric('보유 종목', f"{len(_pos)}종")
+            _m3.metric('위반', f"{len(_vi)}건")
+
+            if _vi:
+                st.markdown('#### 조치가 필요한 항목')
+                for _v in _vi:
+                    (st.error if _v.get('sev') == '🔴' else st.warning)(
+                        f"**{_v.get('rule')}** — {_v.get('msg')}")
+            else:
+                st.success('원칙 위반 없음. 지금 손댈 것이 없습니다.')
+
+            _hd = _res.get('holdings') or []
+            if _hd:
+                st.markdown('#### 보유 현황')
+                st.dataframe(pd.DataFrame([{
+                    '종목': h.get('name') or h['sym'],
+                    '평가비중%': round(h.get('weight') or 0, 1),
+                    '매입비중%': round(h.get('cost_weight') or 0, 1),
+                    '분할': h.get('tranche'),
+                    '현재가': h.get('cur_price'),
+                    '수익률%': (round(h['pnl_pct'], 1) if h.get('pnl_pct') is not None else None),
+                    '보유중최고': h.get('peak_price'),
+                    '고점대비%': (round((h['cur_price'] / h['peak_price'] - 1) * 100, 1)
+                                  if h.get('peak_price') and h.get('cur_price') else None),
+                    '신고가경과주': h.get('weeks_since_high'),
+                    '레버리지': '⚠️' if h.get('lev') else '',
+                } for h in _hd]), use_container_width=True, hide_index=True, row_height=25)
+
+            # 준수 이력 — 이게 있어야 '얼마나 지켰나'를 나중에 실측할 수 있다
+            try:
+                _gr.append_snapshot(_res)
+                _stat = _gr.compliance_stats(_gr.load_history())
+                if _stat:
+                    st.caption(f"최근 30일 준수율 {_stat.get('green_pct', 0):.0f}% · "
+                               f"현재 연속 무위반 {_stat.get('cur_streak_green', 0)}일")
+            except Exception:
+                pass
+
+        with st.expander('📋 복사용 JSON — repo 의 data/portfolio.json 에 넣으면 영구 보관됩니다'):
+            st.code(json.dumps({'positions': _live, 'total_capital': _total_cap},
+                               ensure_ascii=False, indent=2), language='json')
+
 st.divider()
 with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", expanded=False):
     _KEY_FILE = Path('data/.finnhub_key')
