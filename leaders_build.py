@@ -9,6 +9,9 @@
   python leaders_build.py build          # 팩터 계산 → DB
 """
 import json, os, sqlite3, sys, time, random, urllib.request, urllib.error
+# 2026-10-10: 로컬(Windows cp949)에서 print 의 em-dash 하나로 update 가 통째로
+# 죽었다. 다른 스크립트는 전부 이 줄을 갖고 있는데 여기만 없었다.
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
