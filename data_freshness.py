@@ -162,6 +162,12 @@ SOURCES = [
          cycle='주 1회', max_age=9, producer='leaders_kr_paper.py update',
          job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 (포워드 검증)',
          getter=_key('updated')),
+    # 2026-10-10 추가 — 소비자가 없어 레지스트리에도 없었다. 화면을 붙였으니
+    #   같이 감시한다. 09-16 자 종목 0개인 채로 아무도 모르고 있었다.
+    dict(path='results/turnaround_latest.json', label='흑자전환 (턴어라운드)',
+         cycle='주 1회', max_age=9, producer='turnaround_run.py',
+         job='수동 (python turnaround_run.py)', used_by='🔎 종목 발굴 → 🔄 흑자전환',
+         getter=_key('date')),
     # 검증 루프의 심장 — 이게 멈추면 '못 하는 신호를 자동 감액'이 조용히 멈춘다
     dict(path='results/signal_live_weights.json', label='실전 신뢰계수 (신호별 가중)',
          cycle='주 1회 (weekly_run 동시)', max_age=9, producer='paper_trade.py',
@@ -286,6 +292,7 @@ DEPS = {
     'results/leaders_kr.json':           ['src:fdr', 'src:dart'],
     'results/leaders_kr_paper.json':     ['results/leaders_kr6.json', 'results/leaders_kr.json'],
     'results/signal_live_weights.json':  ['results/screener_latest.json'],
+    'results/turnaround_latest.json':    ['src:fdr', 'src:dart'],
 }
 
 

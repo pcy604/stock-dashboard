@@ -813,8 +813,10 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     #   · 🧮 사이징 계산기 → 💼포트폴리오로 이동(발굴이 아니라 집행 단계의 도구다)
     st.caption("🚀주도주 = 8년 백테스트와 청산 연구까지 마친 규칙 · 🏆CANSLIM = 기준을 직접 바꾸는 탐색 "
                "· 🔥상승상위·💎가치 = 후보 탐색용 — 시장 필터는 위 하나로 전 서브탭 공통")
-    t_lead, tab3, t_gain, t_value = st.tabs([
-        "🚀 주도주", "🏆 CANSLIM", "🔥 상승 상위", "💎 가치 발굴 (KR)"])
+    # 2026-10-10 — 🔄 흑자전환 복원. turnaround_run.py 는 내내 결과를 만들고
+    #   있었는데 읽는 화면이 없었다(results/turnaround_latest.json 소비자 0).
+    t_lead, tab3, t_gain, t_value, t_turn = st.tabs([
+        "🚀 주도주", "🏆 CANSLIM", "🔥 상승 상위", "💎 가치 발굴 (KR)", "🔄 흑자전환"])
 
 # 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
 try:
@@ -4430,6 +4432,68 @@ with tab_pf, guard('포트폴리오 가드레일'):
         with st.expander('📋 복사용 JSON — repo 의 data/portfolio.json 에 넣으면 영구 보관됩니다'):
             st.code(json.dumps({'positions': _live, 'total_capital': _total_cap},
                                ensure_ascii=False, indent=2), language='json')
+
+
+# ════════════════════════════════════════════════════════════════════
+# 🔄 흑자전환 (턴어라운드)  — 2026-10-10 복원
+# ────────────────────────────────────────────────────────────────────
+# "테슬라 2019 Q3 같은 종목 발굴"이 목적이다. 엔진(turnaround_run.py)은 계속
+# 결과를 만들고 있었는데 **읽는 화면이 없었다** — results/turnaround_latest.json
+# 의 소비자가 0이었고, 그래서 아무도 멈춘 걸 몰랐다(09-16 자 · 종목 0개).
+# 지금은 어느 워크플로도 이걸 돌리지 않는다. 화면을 붙이면서 레지스트리에도
+# 올려 정지하면 보이게 한다.
+# ════════════════════════════════════════════════════════════════════
+with t_turn, guard('흑자전환'):
+    _ta = load_json(Path('results/turnaround_latest.json')) or {}
+    _tas = _ta.get('stocks') or []
+    st.markdown("#### 🔄 흑자전환 — 적자에서 돌아서는 구간을 찾는다")
+    st.caption("**흑자전환완료** 최근 1~2분기 흑자 + 직전 연속 적자 · "
+               "**흑자전환임박** 적자지만 YoY 50%+ 개선 · "
+               "**적자개선중** YoY 25~50% 개선. "
+               "분기 순이익 추이(q0가 최신)와 매출 성장·마진 개선을 같이 봅니다.")
+
+    if not _tas:
+        st.info(f"데이터가 비어 있습니다 (파일 기준일 {_ta.get('date', '-')}). "
+                "`python turnaround_run.py` 로 생성합니다.")
+    else:
+        _c1, _c2, _c3 = st.columns(3)
+        _c1.metric("총 종목", f"{_ta.get('total', len(_tas))}종")
+        _c2.metric("KR", f"{_ta.get('kr', 0)}종")
+        _c3.metric("US", f"{_ta.get('us', 0)}종")
+
+        _mk = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="turn_mk")
+        _sts = sorted({r.get('status') for r in _tas if r.get('status')})
+        _pick = st.multiselect("구분", _sts, default=_sts, key="turn_st")
+
+        _rows = [r for r in _tas
+                 if (_mk == "전체" or r.get('market') == _mk)
+                 and (not _pick or r.get('status') in _pick)]
+        st.caption(f"{len(_rows)}종")
+
+        if _rows:
+            st.dataframe(pd.DataFrame([{
+                '시장': r.get('market'),
+                '종목': r.get('name') or r.get('sym'),
+                '코드': r.get('sym'),
+                '구분': r.get('status'),
+                '점수': r.get('score'),
+                '시총': r.get('marcap'),
+                '최근분기순익': r.get('q0_ni'),
+                '1분기전': r.get('q1_ni'),
+                '2분기전': r.get('q2_ni'),
+                '3분기전': r.get('q3_ni'),
+                'TTM순익': r.get('ttm_ni'),
+                '전년TTM': r.get('ttm_1y_ni'),
+                'YoY개선%': r.get('yoy_imp_pct'),
+                '매출성장%': r.get('rev_growth'),
+                '마진개선': '✅' if r.get('gm_improving') else '',
+                '기준분기': r.get('q0_date'),
+            } for r in _rows]), use_container_width=True, hide_index=True,
+                row_height=25, height=_dfh(len(_rows)),
+                column_config={'시총': st.column_config.NumberColumn('시총', format='%d')})
+        st.caption("⚠️ 흑자전환은 **되돌아가는 경우가 많습니다.** 한 분기 흑자를 "
+                   "추세로 읽지 마세요 — 매출 성장과 마진 개선이 함께 가는지, "
+                   "그리고 🚀 주도주의 이익 가속 신호와 겹치는지 같이 보는 것이 안전합니다.")
 
 st.divider()
 with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", expanded=False):
