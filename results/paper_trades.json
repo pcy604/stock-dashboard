@@ -59694,6 +59694,892 @@
       ],
       "status": "open",
       "realized": {}
+    },
+    {
+      "id": "031980_2026-09-24",
+      "sym": "031980",
+      "name": "피에스케이홀딩스",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 163200.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "064760_2026-09-24",
+      "sym": "064760",
+      "name": "티씨케이",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 283000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "064290_2026-09-24",
+      "sym": "064290",
+      "name": "인텍플러스",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 55000.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "098120_2026-09-24",
+      "sym": "098120",
+      "name": "마이크로컨텍솔",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 58700.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "029460_2026-09-24",
+      "sym": "029460",
+      "name": "케이씨",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 43500.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AAPL_2026-09-24",
+      "sym": "AAPL",
+      "name": "Apple",
+      "market": "US",
+      "log_date": "2026-09-24",
+      "entry_px": 337.02,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "066570_2026-09-24",
+      "sym": "066570",
+      "name": "LG전자",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 210500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "000150_2026-09-24",
+      "sym": "000150",
+      "name": "두산",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 1515000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "003490_2026-09-24",
+      "sym": "003490",
+      "name": "대한항공",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 31500.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "443060_2026-09-24",
+      "sym": "443060",
+      "name": "HD현대마린솔루션",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 240000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "007660_2026-09-24",
+      "sym": "007660",
+      "name": "이수페타시스",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 119200.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "128940_2026-09-24",
+      "sym": "128940",
+      "name": "한미약품",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 519000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "039030_2026-09-24",
+      "sym": "039030",
+      "name": "이오테크닉스",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 479500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "222800_2026-09-24",
+      "sym": "222800",
+      "name": "심텍",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 149400.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "000990_2026-09-24",
+      "sym": "000990",
+      "name": "DB하이텍",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 131700.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "095340_2026-09-24",
+      "sym": "095340",
+      "name": "ISC",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 212500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "440110_2026-09-24",
+      "sym": "440110",
+      "name": "파두",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 81400.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "103590_2026-09-24",
+      "sym": "103590",
+      "name": "일진전기",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 81800.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "084370_2026-09-24",
+      "sym": "084370",
+      "name": "유진테크",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 161800.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "012750_2026-09-24",
+      "sym": "012750",
+      "name": "에스원",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 82400.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "067310_2026-09-24",
+      "sym": "067310",
+      "name": "하나마이크론",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 46200.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "357780_2026-09-24",
+      "sym": "357780",
+      "name": "솔브레인",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 368000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "010170_2026-09-24",
+      "sym": "010170",
+      "name": "대한광통신",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 17720.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "004990_2026-09-24",
+      "sym": "004990",
+      "name": "롯데지주",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 24400.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "058610_2026-09-24",
+      "sym": "058610",
+      "name": "에스피지",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 100900.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "043260_2026-09-24",
+      "sym": "043260",
+      "name": "성호전자",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 26750.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "229640_2026-09-24",
+      "sym": "229640",
+      "name": "LS에코에너지",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 64000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "036540_2026-09-24",
+      "sym": "036540",
+      "name": "SFA반도체",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 10570.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "023590_2026-09-24",
+      "sym": "023590",
+      "name": "다우기술",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 39150.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "183300_2026-09-24",
+      "sym": "183300",
+      "name": "코미코",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 31500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "001120_2026-09-24",
+      "sym": "001120",
+      "name": "LX인터내셔널",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 40350.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "001820_2026-09-24",
+      "sym": "001820",
+      "name": "삼화콘덴서",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 146900.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "252990_2026-09-24",
+      "sym": "252990",
+      "name": "샘씨엔에스",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 18110.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "356860_2026-09-24",
+      "sym": "356860",
+      "name": "티엘비",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 44750.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "056190_2026-09-24",
+      "sym": "056190",
+      "name": "SFA",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 28150.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "083450_2026-09-24",
+      "sym": "083450",
+      "name": "GST",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 49300.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "035760_2026-09-24",
+      "sym": "035760",
+      "name": "CJ ENM",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 38900.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "425420_2026-09-24",
+      "sym": "425420",
+      "name": "티에프이",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 64800.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "059090_2026-09-24",
+      "sym": "059090",
+      "name": "미코",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 22550.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "122640_2026-09-24",
+      "sym": "122640",
+      "name": "예스티",
+      "market": "KR",
+      "log_date": "2026-09-24",
+      "entry_px": 32200.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
     }
   ]
 }
