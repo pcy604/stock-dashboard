@@ -512,7 +512,10 @@ def _data_status():
     """산출물별 실제 데이터 날짜·주기·상태 (data_freshness 레지스트리 단일 원천)."""
     try:
         import data_freshness
-        return data_freshness.statuses()
+        # 2026-10-10: statuses() → ranked(). 중요도(이게 멈추면 같이 멈추는
+        # 산출물 수)로 정렬되고 deps·upstream_bad 가 붙는다. 평면 목록이던
+        # 화면이 "뭔 말인지 모르겠다"가 된 이유가 순서와 연결이 없어서였다.
+        return data_freshness.ranked()
     except Exception:
         return []
 
@@ -4309,9 +4312,30 @@ with guard('데이터 신선도'):
     _hdr = (f"📅 데이터 신선도 — 전 항목 정상 (가장 오래된 것 {_oldest}일 전)" if not _n_stale
             else f"🔴 데이터 신선도 — **{_n_stale}개 항목이 갱신 정지** (클릭해서 확인)")
     with st.expander(_hdr, expanded=bool(_n_stale)):
+      _ft1, _ft2 = st.tabs(['🗺️ 흐름도 — 무엇이 무엇에서 나오나', '📋 목록 (중요도순)'])
+      with _ft1:
+        try:
+            import data_freshness as _dfm
+            st.graphviz_chart(_dfm.dot(_DS), use_container_width=True)
+            st.caption(
+                "왼쪽이 **원천**(회색 타원 = 외부 소스, 파란 원통 = 저장소), "
+                "오른쪽으로 갈수록 그것에서 **계산된 결과**입니다. "
+                "`▼N` 은 **그게 멈추면 같이 멈추는 산출물 수**이고, 이 수치가 "
+                "곧 고치는 순서입니다 — 사람이 매긴 등급이 아니라 연결에서 자동으로 셉니다.")
+            _top = [r for r in _DS if r.get('upstream_bad')]
+            if _top:
+                st.warning("**상류가 죽은 채 '정상'으로 보이는 항목** — 파일 날짜만 "
+                           "신선하고 재료가 낡았다는 뜻입니다:\n" +
+                           "\n".join(f"· {r['label']} ← {', '.join(_dfm.node_label(d) for d in r['upstream_bad'])}"
+                                      for r in _top))
+        except Exception as _e:
+            st.caption(f"흐름도를 그리지 못했습니다: {_e}")
+      with _ft2:
         st.dataframe(pd.DataFrame([{
             '상태': {'ok': '🟢 정상', 'stale': '🔴 정지', 'missing': '⚫ 없음',
                     'nodate': '⚠️ 날짜없음', 'error': '⚠️ 오류'}[r['state']],
+            # 중요도 = 이게 멈추면 같이 멈추는 산출물 수. 고치는 순서가 된다.
+            '중요도': r.get('impact', 0),
             '데이터': r['label'],
             '마지막 갱신': r['date'] or '-',
             '경과': (f"{max(r['age'], 0)}일" if r['age'] is not None else '-'),
@@ -4325,6 +4349,8 @@ with guard('데이터 신선도'):
             '만드는 것': f"{r['producer']} ({r['job']})",
         } for r in _DS]), use_container_width=True, hide_index=True,
             row_height=25, height=_dfh(len(_DS)))
+        st.caption("**중요도**는 그 데이터가 멈추면 **같이 멈추는 산출물 수**입니다. "
+                   "큰 것부터 고치면 됩니다.")
         st.caption("‘마지막 갱신’은 **파일 안에 기록된 데이터 날짜**입니다(배포 시각이 아님). "
                    "정지 항목은 매일 06:00 `pipeline_health.py`가 텔레그램으로도 알립니다.")
         st.caption("**쓰임** — `화면`은 대시보드가 직접 읽는 파일, `입력`은 화면이 아니라 "

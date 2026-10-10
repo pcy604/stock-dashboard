@@ -235,3 +235,147 @@ if __name__ == '__main__':
         print(f"{r['label']:<26} {str(r['date'] or '-'):<12} "
               f"{(str(r['age']) + '일') if r['age'] is not None else '-':<6} "
               f"{r['cycle']:<22} {mark} {r['note']}")
+
+
+# ═══════════════════════════════════════════════════════════════════
+# 의존 그래프 · 중요도 — 2026-10-10 신설
+# ═══════════════════════════════════════════════════════════════════
+# 왜 만들었나: SOURCES 는 '이 파일이 신선한가'만 알았다. 그래서 화면은 17줄짜리
+# 평면 표였고, 무엇이 무엇에서 나오는지·무엇부터 고쳐야 하는지가 없었다.
+# 실제로 이 표를 보고 "뭔 말인지 하나도 모르겠다"는 말이 나왔다 — 표가 아니라
+# 구조가 안 보인 것이다.
+#
+# ORIGINS : 파일이 아닌 외부 원천과 중간 저장소. 모든 사슬의 시작점이다.
+# DEPS    : path → 그것이 **직접** 의존하는 것 (ORIGINS 키 또는 다른 path)
+#
+# ⚠️ 중요도는 손으로 매기지 않는다. '이게 죽으면 같이 멈추는 산출물 수'를 세서
+#    자동으로 정한다. 손으로 매긴 등급은 구조가 바뀌는 순간 거짓말이 된다 —
+#    이 프로젝트가 '초록불인데 실은 죽어 있는' 사고를 세 번 겪은 이유가 그것이다.
+
+ORIGINS = {
+    'src:yahoo': dict(label='Yahoo Finance\n(일봉)', kind='외부'),
+    'src:edgar': dict(label='SEC EDGAR\n(US 공시)', kind='외부'),
+    'src:dart':  dict(label='DART\n(KR 공시)', kind='외부'),
+    'src:fdr':   dict(label='FinanceDataReader\n(KR·US 가격)', kind='외부'),
+    'store:cache': dict(label='가격 캐시\ndata/leaders_cache', kind='저장소'),
+    'store:db':    dict(label='market.db\nfactor_weekly', kind='저장소'),
+}
+
+# 저장소 자체도 무엇에서 채워지는지 기록한다(사슬의 허리가 비면 안 보인다)
+STORE_DEPS = {
+    'store:cache': ['src:yahoo'],
+    'store:db':    ['store:cache', 'src:edgar'],
+}
+
+DEPS = {
+    'data/us_shares.csv':                ['src:edgar'],
+    'data/us_marketcap.csv':             ['data/us_shares.csv', 'store:cache'],
+    'results/screener_latest.json':      ['src:fdr', 'data/us_marketcap.csv'],
+    'results/perf_latest.json':          ['src:fdr'],
+    'results/canslim_latest.json':       ['src:fdr', 'src:dart'],
+    'results/canslim_us_latest.json':    ['src:fdr', 'data/us_marketcap.csv'],
+    'results/value_kr.json':             ['src:dart'],
+    'results/returns.json':              ['store:cache'],
+    'results/seasonality.json':          ['store:cache'],
+    'results/mdd.json':                  ['store:cache'],
+    'results/price_curves.json':         ['store:cache'],
+    'results/leaders_accel.json':        ['store:db'],
+    'results/leaders_accel_wf.json':     ['results/leaders_accel.json'],
+    'data/kr_fundamentals_q.parquet':    ['src:dart'],
+    'results/leaders_kr6.json':          ['data/kr_fundamentals_q.parquet', 'src:fdr'],
+    'results/leaders_kr.json':           ['src:fdr', 'src:dart'],
+    'results/leaders_kr_paper.json':     ['results/leaders_kr6.json', 'results/leaders_kr.json'],
+    'results/signal_live_weights.json':  ['results/screener_latest.json'],
+}
+
+
+def _children():
+    """node → 그 노드에 직접 의존하는 것들."""
+    out = {}
+    for path, deps in list(DEPS.items()) + list(STORE_DEPS.items()):
+        for d in deps:
+            out.setdefault(d, []).append(path)
+    return out
+
+
+def impact(node, _kids=None):
+    """이 노드가 멈추면 같이 멈추는 **하위 산출물 수**(자기 제외, 중복 제외).
+
+    중요도를 이것으로 정한다. 사람이 '중요해 보이는 순서'로 적으면 구조가
+    바뀔 때마다 어긋나지만, 이 수치는 DEPS 만 맞으면 늘 따라온다.
+    """
+    kids = _kids if _kids is not None else _children()
+    seen, stack = set(), list(kids.get(node, []))
+    while stack:
+        n = stack.pop()
+        if n in seen:
+            continue
+        seen.add(n)
+        stack.extend(kids.get(n, []))
+    return len(seen)
+
+
+def ranked(today=None):
+    """중요도(impact) 내림차순 산출물 목록. statuses() 결과에 그래프 정보를 붙인다."""
+    kids = _children()
+    rows = statuses(today)
+    by_path = {r['path']: r for r in rows}
+    for r in rows:
+        r['impact'] = impact(r['path'], kids)
+        r['deps'] = DEPS.get(r['path'], [])
+        # 상류가 이미 죽어 있으면 이 항목의 '정상'은 신뢰할 수 없다
+        r['upstream_bad'] = [d for d in r['deps']
+                             if d in by_path and by_path[d].get('state') != 'ok']
+    rows.sort(key=lambda r: (-r['impact'], r['path']))
+    return rows
+
+
+def node_label(n):
+    if n in ORIGINS:
+        return ORIGINS[n]['label']
+    for s in SOURCES:
+        if s['path'] == n:
+            return s['label']
+    return n
+
+
+_SHAPE = {'외부': ('ellipse', '#f1f5f9', '#64748b'),
+          '저장소': ('cylinder', '#dbeafe', '#2563eb')}
+_STATE_COLOR = {'ok': ('#dcfce7', '#16a34a'), 'stale': ('#fee2e2', '#dc2626'),
+                'missing': ('#f3f4f6', '#6b7280'), 'nodate': ('#fef9c3', '#ca8a04'),
+                'error': ('#fef9c3', '#ca8a04')}
+
+
+def dot(rows=None):
+    """의존 그래프를 Graphviz DOT 문자열로. st.graphviz_chart 가 그대로 받는다.
+
+    graphviz 파이썬 패키지는 쓰지 않는다 — Streamlit 프론트엔드가 DOT 를 직접
+    렌더하므로 의존성을 늘릴 이유가 없다.
+    """
+    rows = rows if rows is not None else ranked()
+    st_of = {r['path']: r for r in rows}
+    kids = _children()
+    L = ['digraph G {', '  rankdir=LR;', '  bgcolor="transparent";',
+         '  node [fontname="Malgun Gothic,sans-serif" fontsize=10 style="filled,rounded"];',
+         '  edge [color="#94a3b8" arrowsize=0.7];']
+
+    for n, meta in ORIGINS.items():
+        shape, fill, line = _SHAPE[meta['kind']]
+        imp = impact(n, kids)
+        L.append(f'  "{n}" [label="{meta["label"]}\n▼{imp}개가 여기 의존" '
+                 f'shape={shape} fillcolor="{fill}" color="{line}" penwidth=1.6];')
+
+    for path, r in st_of.items():
+        fill, line = _STATE_COLOR.get(r['state'], ('#f3f4f6', '#6b7280'))
+        imp = r.get('impact', 0)
+        age = f"{max(r['age'], 0)}일 전" if r.get('age') is not None else '날짜없음'
+        tail = f'\n▼{imp}' if imp else ''
+        L.append(f'  "{path}" [label="{r["label"]}\n{age}{tail}" shape=box '
+                 f'fillcolor="{fill}" color="{line}" penwidth=1.4];')
+
+    for path, deps in list(DEPS.items()) + list(STORE_DEPS.items()):
+        for d in deps:
+            if (d in ORIGINS or d in st_of) and (path in ORIGINS or path in st_of):
+                L.append(f'  "{d}" -> "{path}";')
+    L.append('}')
+    return '\n'.join(L)
