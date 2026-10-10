@@ -68,7 +68,11 @@ YUA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
                      "(KHTML, like Gecko) Chrome/122.0 Safari/537.36"}
 STALE_DAYS = 20          # 주식수는 분기 공시라 20일이면 충분하다
 WORKERS = 8
-MAX_FETCH = 600       # --net-price 로 하루에 새로 받을 시세 상한 (2026-09-07)
+# --net-price 로 한 번에 새로 받을 시세 상한 (2026-09-07).
+# 2026-10-10: 환경변수로 뺀다. CI 는 시간 제한이 있어 600 이 맞지만, 로컬에서
+#   밀린 유니버스를 한 번에 복구할 때는 이 값이 오히려 발목을 잡았다
+#   (상한 2,460종인데 1,781종에서 멈춰 있었다).
+MAX_FETCH = int(os.environ.get("MAX_FETCH", 600))
 
 # dei 가 없는 종목(외국계·구형 제출인)을 위한 대체 태그. 앞에서부터 먼저 잡히는 걸 쓴다.
 FALLBACK = ["CommonStockSharesOutstanding", "CommonStockSharesIssued"]
