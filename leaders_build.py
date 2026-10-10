@@ -118,14 +118,33 @@ def _clean_tickers(d):
 
 
 # ───────────────────────── 1) 가격 ─────────────────────────
-def fetch_px(sym):
+def fetch_px(sym, last=None, force_full=False):
     """일봉을 받아 월요일 기준 주봉으로 직접 리샘플.
-       ※ Yahoo의 interval=1wk는 period1 앵커 요일로 묶여(목~수) 실적주 정렬이 틀어짐."""
+       ※ Yahoo의 interval=1wk는 period1 앵커 요일로 묶여(목~수) 실적주 정렬이 틀어짐.
+
+    2026-10-10 증분화:
+      last       — 이미 갖고 있는 마지막 주차(YYYY-MM-DD). 주면 그 2주 전부터만 받는다.
+      force_full — 분할 등으로 과거가 소급 변경된 종목. 2013년부터 전수 재수집.
+
+    왜 바꿨나: 워크플로가 매주 캐시를 통째로 지우고 2,900종을 다시 받았다.
+    Yahoo 가 그걸 못 버텨 실측 ~300종에서 끊겼고, universe 가 2,429 → 242종으로
+    무너져 이익 가속 신호가 한 달간 0종이었다. 파일이 DB 밖에 있으면 '어디까지
+    받았나'를 물어볼 곳이 없어 전체 재수집 외에 길이 없었다 — 그래서 보관소를
+    market.db(prices)로 옮기고 여기서 그 날짜를 받아 쓴다.
+
+    ⚠️ 수정주가 소급 변경 문제는 증분으로 바꾼다고 사라지지 않는다. 분할 난 종목은
+       반드시 force_full 로 불러야 한다(호출자 책임 · data/us_splits.csv 로 추적).
+    """
     pd_, pw = os.path.join(CACHE, f"dy_{sym}.csv"), os.path.join(CACHE, f"px_{sym}.csv")
-    if os.path.exists(pw) and os.path.exists(pd_):
+    if last is None and not force_full and os.path.exists(pw) and os.path.exists(pd_):
         return True
+    # 미완성 주와 경계 어긋남을 피해 2주 겹쳐 받는다(INSERT OR REPLACE 라 겹쳐도 안전)
+    if last and not force_full:
+        p1 = int((pd.Timestamp(last) - pd.Timedelta(days=14)).timestamp())
+    else:
+        p1 = 1356998400
     raw = get(f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
-              f"?period1=1356998400&period2=1893456000&interval=1d", YUA)
+              f"?period1={p1}&period2=1893456000&interval=1d", YUA)
     if not raw:
         return False
     try:
@@ -137,13 +156,24 @@ def fetch_px(sym):
                           'Adj': adj if adj else q['close']},
                          index=pd.to_datetime(r['timestamp'], unit='s')).dropna(subset=['Close'])
         d.index = d.index.tz_localize(None).normalize()
-        if len(d) < 300:
+        # 전수 수집일 때만 '너무 짧으면 버린다'. 증분은 며칠치가 정상이다.
+        if (last is None or force_full) and len(d) < 300:
+            return False
+        if not len(d):
             return False
         ratio = d['Adj'] / d['Close']
         for c in ('Open', 'High', 'Low'):
             d[c] = d[c] * ratio
         d['Close'] = d['Adj']
         d = d[['Open', 'High', 'Low', 'Close', 'Volume']]
+        # 증분이면 기존 일봉에 이어 붙인다(겹친 날짜는 새 값 채택 — 소급 조정 반영)
+        if last and not force_full and os.path.exists(pd_):
+            try:
+                old = pd.read_csv(pd_, index_col=0, parse_dates=True)
+                d = pd.concat([old, d])
+                d = d[~d.index.duplicated(keep='last')].sort_index()
+            except Exception:
+                pass
         d.to_csv(pd_)
         # 월요일 라벨 주봉 (W-MON: 그 주 월요일이 인덱스)
         w = d.resample('W-MON', label='left', closed='left').agg(
@@ -152,6 +182,13 @@ def fetch_px(sym):
         if len(w) and (d.index[-1] - w.index[-1]).days < 4:
             w = w.iloc[:-1]
         w.to_csv(pw)
+        # 단일 보관소(market.db · prices)에도 기록한다. CSV 는 읽는 쪽을 다 옮긴
+        # 뒤에 지운다 — 먼저 지우면 조용히 깨진다.
+        try:
+            import price_store
+            price_store.put(sym, w, 'US')
+        except Exception as _e:
+            print(f"  [warn] {sym} prices 적재 실패: {str(_e)[:80]}", flush=True)
         return True
     except Exception:
         return False
@@ -260,14 +297,43 @@ def fetch_8k(sym, cik):
         return False
 
 
-def cmd_fetch(n, lo=1.5e8, hi=None):   # 2026-08-14: 5e8 -> 1.5e8 (대시세는 소형에서 시작한다)
+def recent_split_syms(days=400):
+    """최근 `days` 일 안에 분할이 있었던 종목. 이들은 과거 전체가 소급 변경되므로
+    증분으로 이어 붙이면 과거가 어긋난다 — 반드시 전수 재수집한다."""
+    pth = os.path.join(DATA, "us_splits.csv")
+    if not os.path.exists(pth):
+        return set()
+    try:
+        d = pd.read_csv(pth)
+        cut = pd.Timestamp.today() - pd.Timedelta(days=days)
+        return set(d[pd.to_datetime(d.date, errors="coerce") >= cut].sym.astype(str))
+    except Exception:
+        return set()
+
+
+def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (대시세는 소형에서 시작한다)
     u = universe(n, lo, hi)
     cm = cikmap()
     print(f"유니버스 {len(u)}종 (시총 {lo/1e9:.0f}B~{(hi/1e9 if hi else 999):.0f}B)", flush=True)
     syms = u.sym.tolist()
 
+    # 2026-10-10 — 증분 수집. 전에는 워크플로가 캐시를 통째로 지우고 2,900종을
+    # 매주 다시 받았고, Yahoo 가 ~300종에서 끊어 universe 가 242종으로 무너졌다.
+    # 이제 market.db(prices) 에 '어디까지 받았나'를 물어, 없는 구간만 받는다.
+    try:
+        import price_store
+        have = price_store.last_date('US')
+    except Exception as _e:
+        print(f"  [warn] prices 조회 실패 — 전수 수집으로 진행: {str(_e)[:80]}", flush=True)
+        have = {}
+    splits = recent_split_syms()
+    n_inc = sum(1 for s in syms if s in have and s not in splits and not full)
+    print(f"  증분 {n_inc}종 · 전수 {len(syms) - n_inc}종"
+          f"{' (--full)' if full else ''}  분할 재수집 {len(splits & set(syms))}종", flush=True)
+
     def job(s):
-        ok_px = fetch_px(s)
+        _full = full or s in splits
+        ok_px = fetch_px(s, last=(None if _full else have.get(s)), force_full=_full)
         cik = cm.get(s.upper())
         ok_f = fetch_fund(s, cik) if cik else False
         ok_e = fetch_8k(s, cik) if cik else False
@@ -546,7 +612,9 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "fetch"
     if cmd == "fetch":
-        cmd_fetch(int(sys.argv[2]) if len(sys.argv) > 2 else 250)
+        _args = [a for a in sys.argv[2:] if not a.startswith('--')]
+        # --full: 분할 소급조정을 전부 반영하는 전수 재수집(분기 1회면 충분하다)
+        cmd_fetch(int(_args[0]) if _args else 250, full='--full' in sys.argv)
     elif cmd == "update":
         build(incremental=True)
     elif cmd == "newsyms":

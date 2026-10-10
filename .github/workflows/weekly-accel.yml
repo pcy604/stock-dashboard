@@ -99,12 +99,28 @@ jobs:
 
       # continue-on-error 를 안 붙인다. 붙이면 낡은 DB 로 후보를 뽑고 성공한 척
       # 끝난다 — 이번에 고치려는 고장이 정확히 그 모양이었다.
-      # 주가는 매주 새로 받는다. 수정주가가 소급 변경되므로 증분은 과거를 어긋낸다.
-      - name: 가격 캐시 갱신
+      #
+      # ⚠️ 2026-10-10 — 여기에 `rm -f px_*.csv dy_*.csv` 가 있었다. 매주 캐시를
+      #   통째로 지우고 2,900종을 Yahoo 에서 다시 받았다. 이유("수정주가가 소급
+      #   변경되므로 증분은 과거를 어긋낸다")는 옳았지만 Yahoo 가 그걸 못 버텼다:
+      #   실측 ~300종에서 끊겨 universe 가 2,429 → 242종으로 무너졌고, 이익 가속
+      #   신호가 09-14 이후 0종이 됐다. 화면은 한 달째 09-07 에 멈춰 있었다.
+      #   **신호가 없었던 게 아니라 볼 종목이 없었다.**
+      #
+      #   이제 market.db(prices)에 종목별 마지막 주차를 물어 없는 구간만 받는다.
+      #   소급 변경은 두 겹으로 막는다:
+      #     · 분할 종목 — leaders_build.recent_split_syms() 가 잡아 전수 재수집
+      #     · 배당 소급분 — 실측 0.15%/회라 주 단위에선 무시 가능. 다만 누적되므로
+      #       분기 첫 주에 --full 로 전체를 다시 받아 기준을 맞춘다.
+      - name: 가격 캐시 갱신 (증분 · 분기 첫 주는 전수)
         if: steps.due.outputs.skip != 'true'
         run: |
-          rm -f data/leaders_cache/px_*.csv data/leaders_cache/dy_*.csv
-          python leaders_build.py fetch 2900
+          M=$(date -u +%-m); D=$(date -u +%-d); FULL=""
+          if [ "$D" -le 7 ] && { [ "$M" = 1 ] || [ "$M" = 4 ] || [ "$M" = 7 ] || [ "$M" = 10 ]; }; then
+            FULL="--full"
+            echo "분기 첫 주 — 전수 재수집(--full)"
+          fi
+          python leaders_build.py fetch 2900 $FULL
 
       - name: factor_weekly 증분 적재
         if: steps.due.outputs.skip != 'true'
