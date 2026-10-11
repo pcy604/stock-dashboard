@@ -13,7 +13,6 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')   # 2026-10-10: print
 
 import json, time, socket, warnings, os
 import pandas as pd
-import yfinance as yf
 import FinanceDataReader as fdr
 from pathlib import Path
 from datetime import date, datetime
@@ -71,31 +70,86 @@ def get_us_tickers():
 
 
 # ── 재무 데이터 fetch + 캐시 ─────────────────────────────────────────
-def _cache_path(sym_yf: str) -> Path:
-    return CACHE_DIR / f"{sym_yf.replace('.', '_')}_fin.parquet"
+# ══════════════════════════════════════════════════════════════════
+# 재무 소스: yfinance → DART(KR) · SEC EDGAR(US)   [2026-10-12 교체]
+# ──────────────────────────────────────────────────────────────────
+# 왜 바꿨나: yfinance 의 quarterly_financials 가 **전 종목 빈 값**을 준다.
+#   실측 005930.KS / 000660.KS / AAPL 모두 shape=(0,0). 그래서 1,395종을
+#   전부 훑고 0종이 나왔고, 파일 날짜만 신선한 채 한 달을 갔다.
+#   우리 코드 문제가 아니라 외부 API 가 죽은 것이라 소스를 갈아끼운다.
+#
+# 아래 두 함수는 yfinance 와 **같은 모양**을 돌려준다
+#   (index = 계정명, columns = 기간, 최신이 앞). 그래야 분류 로직을
+#   손대지 않는다 — 검증된 판정식을 건드리는 게 가장 위험하다.
+#
+# ⚠️ KR 은 DART 가 1~3Q 를 당분기(3개월)로, 4Q 를 사업보고서(누적 FY)로 준다.
+#    ingest_dart_quarterly.quarterly() 가 Q4 = FY − (Q1+Q2+Q3) 로 차분해 주므로
+#    그걸 쓴다. 직접 pivot 하면 4분기가 연간값으로 섞여 흑자전환 판정이 통째로
+#    틀어진다.
+# ⚠️ DART 주요계정 API 에는 **매출총이익이 없다.** 그래서 KR 은 gm_improving
+#    보너스(+1)가 항상 False 다. US(EDGAR)는 gross 가 있어 정상 동작한다.
+#    점수가 시장 간 1점 차이로 비교되지 않게 화면 캡션에 적는다.
+_KRQ = {}
+
+
+def _kr_quarterly_all():
+    """{sym: DataFrame} — DART 분기 손익. 한 번만 만들어 캐시한다."""
+    global _KRQ
+    if _KRQ:
+        return _KRQ
+    try:
+        import ingest_dart_quarterly as Q
+        d = Q.quarterly()
+        if d is None or d.empty:
+            print('  [KR] DART 분기재무가 비어 있다')
+            return {}
+        d = d.dropna(subset=['net_income'])
+        d['_end'] = pd.to_datetime(
+            d.year.astype(int).astype(str) + '-' + (d.q.astype(int) * 3).astype(str) + '-01')
+        for sym, g in d.groupby('sym'):
+            _KRQ[str(sym)] = g.sort_values('_end', ascending=False)
+        print(f'  [KR] DART 분기재무 {len(_KRQ):,}종 적재')
+    except Exception as e:
+        print(f'  [KR] DART 적재 실패: {str(e)[:100]}')
+    return _KRQ
+
 
 def fetch_quarterly_fin(sym_yf: str):
-    cp = _cache_path(sym_yf)
-    if cp.exists():
-        age = (datetime.now() - datetime.fromtimestamp(cp.stat().st_mtime)).days
-        if age < CACHE_TTL_DAYS:
-            try:
-                return pd.read_parquet(cp)
-            except Exception:
-                pass
+    """yfinance 형식(index=계정명, columns=기간 최신순)으로 분기 손익을 돌려준다.
+
+    소스만 DART/EDGAR 로 바뀌었고 반환 모양은 그대로다.
+    """
     try:
-        time.sleep(0.12)
-        t   = yf.Ticker(sym_yf)
-        qf  = t.quarterly_financials
-        if qf is None or qf.empty:
+        if sym_yf.endswith('.KS') or sym_yf.endswith('.KQ'):
+            sym = sym_yf.split('.')[0]
+            g = _kr_quarterly_all().get(sym)
+            if g is None or g.empty:
+                return None
+            cols = list(g['_end'])
+            data = {
+                'Net Income':    [None if pd.isna(v) else float(v) for v in g['net_income']],
+                'Total Revenue': [None if pd.isna(v) else float(v) for v in g['revenue']],
+            }
+            return pd.DataFrame(data, index=cols).T
+        # ── US: EDGAR 분기재무 캐시 (leaders_build.fetch_fund 가 만든다) ──
+        fp = os.path.join('data', 'leaders_cache', f'fq_{sym_yf}.csv')
+        if not os.path.exists(fp):
             return None
-        qf.to_parquet(cp)
-        return qf
+        d = pd.read_csv(fp)
+        if d.empty or 'netinc' not in d.columns:
+            return None
+        d['period_end'] = pd.to_datetime(d.period_end, errors='coerce')
+        d = d.dropna(subset=['period_end']).sort_values('period_end', ascending=False)
+        cols = list(d.period_end)
+        data = {'Net Income': [None if pd.isna(v) else float(v) for v in d.netinc],
+                'Total Revenue': [None if pd.isna(v) else float(v) for v in d.revenue]}
+        if 'gross' in d.columns:
+            data['Gross Profit'] = [None if pd.isna(v) else float(v) for v in d.gross]
+        return pd.DataFrame(data, index=cols).T
     except Exception:
         return None
 
 
-# ── 흑자전환 분석 ────────────────────────────────────────────────────
 def analyze(sym: str, name: str, marcap: int, market: str):
     sym_yf = f"{sym}.KS" if market == 'KR' else sym
     qf = fetch_quarterly_fin(sym_yf)

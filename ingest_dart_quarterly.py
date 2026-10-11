@@ -49,6 +49,21 @@ WORKERS = 6                        # 실측: 6워커에서 5.5배 (그 이상은
 REPRTS = [('11013', 1, 3), ('11012', 2, 6), ('11014', 3, 9), ('11011', 4, 12)]
 WANT = {'매출액': 'revenue', '영업이익': 'op_income', '당기순이익': 'net_income'}
 
+
+def _want(nm):
+    """계정명 → 내부 필드. DART 는 **괄호를 붙여** 보낸다.
+
+    ⚠️ 2026-10-12 — 여기서 42,751행의 net_income 이 전부 비었다. DART 가 주는
+       이름은 '당기순이익(손실)' 인데 WANT 에는 '당기순이익' 으로 있었고,
+       dict 정확일치 조회라 한 번도 안 걸렸다. 매출액·영업이익은 이름이
+       정확히 같아서 멀쩡했기 때문에 '일부만 비는' 모양으로도 안 보였다.
+       괄호 앞부분으로도 맞춰 같은 사고를 막는다.
+    """
+    nm = (nm or '').strip()
+    if not nm:
+        return None
+    return WANT.get(nm) or WANT.get(nm.split('(')[0].strip())
+
 DDL = """
 CREATE TABLE IF NOT EXISTS fundamentals_q (
   sym TEXT, year INTEGER, q INTEGER,
@@ -88,7 +103,7 @@ def fetch_batch(codes: list[str], year: int, reprt: str) -> dict:
         sym = (row.get('stock_code') or '').strip()
         if not sym or len(sym) != 6:
             continue
-        acc = WANT.get((row.get('account_nm') or '').strip())
+        acc = _want(row.get('account_nm'))
         if not acc or (row.get('sj_div') or '') != 'IS':      # 손익계산서만
             continue
         fs = row.get('fs_div') or 'OFS'
