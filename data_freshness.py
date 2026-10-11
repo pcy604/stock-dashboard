@@ -262,29 +262,38 @@ ORIGINS = {
     'src:yahoo': dict(label='Yahoo Finance\n(일봉)', kind='외부'),
     'src:edgar': dict(label='SEC EDGAR\n(US 공시)', kind='외부'),
     'src:dart':  dict(label='DART\n(KR 공시)', kind='외부'),
+    'src:yf':    dict(label='yfinance\n(분기재무)', kind='외부'),
     'src:fdr':   dict(label='FinanceDataReader\n(KR·US 가격)', kind='외부'),
-    'store:cache': dict(label='가격 캐시\ndata/leaders_cache', kind='저장소'),
-    'store:db':    dict(label='market.db\nfactor_weekly', kind='저장소'),
+    'store:cache': dict(label='일봉 캐시\n(실적반응 전용)', kind='저장소'),
+    'store:db':    dict(label='market.db\nprices · factor_weekly', kind='저장소'),
 }
 
 # 저장소 자체도 무엇에서 채워지는지 기록한다(사슬의 허리가 비면 안 보인다)
+# 2026-10-10: 주봉이 market.db(prices)로 들어오면서 방향이 바뀌었다.
+#   전: Yahoo → 가격캐시(CSV) → market.db
+#   후: Yahoo → market.db(prices) → factor_weekly.  캐시에는 일봉만 남고,
+#       그건 실적반응 2개 열을 만드는 데만 쓰이므로 market.db 의 입력이다.
 STORE_DEPS = {
     'store:cache': ['src:yahoo'],
-    'store:db':    ['store:cache', 'src:edgar'],
+    # 일봉 캐시는 **선택적** 입력이라 의존으로 걸지 않는다. 없으면
+    #   earn_react_gap · earn_react_d2 두 열만 비고(코드에 None 가드가 있다)
+    #   factor_weekly 자체는 그대로 만들어진다. 여기에 걸면 '일봉이 멈추면
+    #   11개가 멈춘다'는 과장이 되고, 고치는 순서를 틀리게 만든다.
+    'store:db':    ['src:yahoo', 'src:edgar'],
 }
 
 DEPS = {
     'data/us_shares.csv':                ['src:edgar'],
-    'data/us_marketcap.csv':             ['data/us_shares.csv', 'store:cache'],
+    'data/us_marketcap.csv':             ['data/us_shares.csv', 'store:db'],
     'results/screener_latest.json':      ['src:fdr', 'data/us_marketcap.csv'],
     'results/perf_latest.json':          ['src:fdr'],
     'results/canslim_latest.json':       ['src:fdr', 'src:dart'],
     'results/canslim_us_latest.json':    ['src:fdr', 'data/us_marketcap.csv'],
     'results/value_kr.json':             ['src:dart'],
-    'results/returns.json':              ['store:cache'],
-    'results/seasonality.json':          ['store:cache'],
-    'results/mdd.json':                  ['store:cache'],
-    'results/price_curves.json':         ['store:cache'],
+    'results/returns.json':              ['store:db'],
+    'results/seasonality.json':          ['store:db'],
+    'results/mdd.json':                  ['store:db'],
+    'results/price_curves.json':         ['store:db'],
     'results/leaders_accel.json':        ['store:db'],
     'results/leaders_accel_wf.json':     ['results/leaders_accel.json'],
     'data/kr_fundamentals_q.parquet':    ['src:dart'],
@@ -292,7 +301,7 @@ DEPS = {
     'results/leaders_kr.json':           ['src:fdr', 'src:dart'],
     'results/leaders_kr_paper.json':     ['results/leaders_kr6.json', 'results/leaders_kr.json'],
     'results/signal_live_weights.json':  ['results/screener_latest.json'],
-    'results/turnaround_latest.json':    ['src:fdr', 'src:dart'],
+    'results/turnaround_latest.json':    ['src:yf', 'src:fdr'],
 }
 
 

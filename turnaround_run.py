@@ -8,6 +8,9 @@ turnaround_run.py  —  흑자전환 스크리너
 실행: python turnaround_run.py
 결과: results/turnaround_latest.json
 """
+import sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')   # 2026-10-10: print 의 ✅ 하나로 죽었다
+
 import json, time, socket, warnings, os
 import pandas as pd
 import yfinance as yf
