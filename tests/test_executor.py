@@ -1,5 +1,10 @@
 """executor — 원칙 v1 규칙이 코드로 그대로 옮겨졌는지."""
-import copy, json, os
+import copy, json, os, sys
+from pathlib import Path
+
+# CI 는 `pytest tests/` 로 돈다 — 그때 sys.path 에 레포 루트가 없다(test_smoke 와 같은 처리).
+# 2026-10-14: `python -m pytest` 로만 확인해 통과로 봤다가 CI 수집 단계에서 전체가 멈췄다.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pytest
 from executor.ledger import Ledger, Position
 from executor import planner, broker_paper
