@@ -41,7 +41,8 @@ def _enrich_maps():
                 pass
     try:
         import FinanceDataReader as fdr
-        krx = fdr.StockListing('KRX')
+        import krx_listing
+        krx = krx_listing.stock_listing('KRX')
         for _, r in krx.iterrows():
             code = str(r.get('Code', '')).zfill(6) if r.get('Code') else ''
             if code:

@@ -71,7 +71,8 @@ def check_market(verbose=True):
 def get_universe():
     print("  유니버스 로딩...", end=' ', flush=True)
     try:
-        krx = fdr.StockListing('KRX')
+        import krx_listing
+        krx = krx_listing.stock_listing('KRX')
         f = krx[krx['Marcap'] >= MIN_MARCAP].sort_values('Marcap', ascending=False)
         pairs = list(zip(
             f['Code'].astype(str).str.zfill(6),

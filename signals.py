@@ -21,11 +21,36 @@ def _add_indicators(df):
     return df
 
 
+def _bars_per_year(df):
+    """주기 판별 — 이 모듈의 함수는 일봉 기준(252)으로 짜였는데 호출처(perf_run·weekly_run)는
+    전부 **주봉**을 넘긴다. 2026-10-14 까지 52주 신고가는 perf_run 에서 항상 False
+    (주봉 125개 < 200개 하한), weekly_run 에서는 252주(≈4.4년) 신고가로 판정됐다."""
+    try:
+        gap = pd.Series(df.index).diff().dt.days.median()
+        if gap >= 5:
+            return 52
+    except Exception:
+        pass
+    return 252
+
+
+def _partial_scale(df):
+    """마지막 봉이 진행 중인 주(거래일이 평소보다 적음)면 거래량 환산 배수. 'Days' 열이 있을 때만."""
+    if 'Days' not in df.columns or len(df) < 5:
+        return 1.0
+    full = df['Days'].iloc[-13:-1].median()
+    last = df['Days'].iloc[-1]
+    if last and full and last < full:
+        return float(full) / float(last)
+    return 1.0
+
+
 def sig_52w_high(df):
-    """52주 신고가 근접 또는 돌파"""
-    if len(df) < 200:
+    """52주 신고가 근접 또는 돌파 — 직전 1년 고가 대비 -3% 이내"""
+    bpy = _bars_per_year(df)
+    if len(df) < int(bpy * 0.8):
         return False, {}
-    high_52w = df['High'].iloc[-252:-1].max() if len(df) >= 252 else df['High'].iloc[:-1].max()
+    high_52w = df['High'].iloc[-(bpy + 1):-1].max()
     curr = df['Close'].iloc[-1]
     dist = (curr / high_52w - 1) * 100
     ok = dist >= -3.0  # 신고가 3% 이내 또는 돌파
@@ -175,10 +200,13 @@ def sig_volume_explosion(df, ratio=2.5):
     """거래량 폭발 + 강한 양봉 (상승 초기 한정)"""
     if len(df) < 20:
         return False, {}
-    avg_vol = df['Volume'].iloc[-60:-1].mean()
+    # 창 길이는 일봉 60일 기준 — 주봉이면 12주로 환산(2026-10-14, 전에는 60주를 봤다)
+    win = max(8, round(60 * _bars_per_year(df) / 252))
+    avg_vol = df['Volume'].iloc[-(win + 1):-1].mean()
     if avg_vol == 0:
         return False, {}
-    today_vol = df['Volume'].iloc[-1]
+    # 진행 중인 주는 하루치 거래량을 한 주 평균과 비교하게 된다 → 거래일 수로 환산
+    today_vol = df['Volume'].iloc[-1] * _partial_scale(df)
     vol_ratio = today_vol / avg_vol
 
     candle_range = df['High'].iloc[-1] - df['Low'].iloc[-1]
@@ -190,7 +218,7 @@ def sig_volume_explosion(df, ratio=2.5):
     is_bull = df['Close'].iloc[-1] > df['Open'].iloc[-1]
 
     # 박병창 원칙: 이미 +50% 이상 상승 후 거래량 급증 = 상투 신호 → 매수 신호 제외
-    lookback = min(60, len(df) - 1)
+    lookback = min(max(8, round(60 * _bars_per_year(df) / 252)), len(df) - 1)
     low_recent = df['Low'].iloc[-lookback:].min()
     curr_close = df['Close'].iloc[-1]
     already_up_pct = (curr_close / low_recent - 1) * 100 if low_recent > 0 else 0

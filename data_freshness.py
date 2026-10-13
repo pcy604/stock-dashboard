@@ -135,7 +135,7 @@ SOURCES = [
          getter=_key('generated')),
     dict(path='results/price_curves.json', label='가격 곡선 (L/S·가속 공용)',
          cycle='주 1회 (토 08:00)', max_age=9, producer='curves_build.py',
-         job='leaders_weekly (로컬 스케줄러)',
+         job='weekly-accel + leaders_weekly(로컬)',
          used_by='🚀 주도주 → 심층조회 차트 (L/S·이익가속 양쪽)',
          getter=_key('generated')),
     # 종료된 규칙이지만 화면에 기록으로 남아 있어 계속 감시한다.
@@ -166,7 +166,7 @@ SOURCES = [
     #   같이 감시한다. 09-16 자 종목 0개인 채로 아무도 모르고 있었다.
     dict(path='results/turnaround_latest.json', label='흑자전환 (턴어라운드)',
          cycle='주 1회', max_age=9, producer='turnaround_run.py',
-         job='수동 (python turnaround_run.py)', used_by='🔎 종목 발굴 → 🔄 흑자전환',
+         job='weekly-accel (금 22:17 UTC)', used_by='🔎 종목 발굴 → 🔄 흑자전환',
          getter=_key('date')),
     # 검증 루프의 심장 — 이게 멈추면 '못 하는 신호를 자동 감액'이 조용히 멈춘다
     dict(path='results/signal_live_weights.json', label='실전 신뢰계수 (신호별 가중)',

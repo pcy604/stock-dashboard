@@ -241,9 +241,34 @@ def qseries(facts, tags):
     return m
 
 
+def _cache_due(p, col, gap_days, min_age_days=7):
+    """캐시 파일을 다시 받을 때가 됐나.
+
+    2026-10-14 — fq_(EDGAR 분기재무)·ek_(실적 발표일)는 **파일이 있으면 영원히
+    다시 받지 않았다.** 갱신은 leaders_weekly.sh 의 REFRESH_FUND=1 을 사람이 분기마다
+    켜야 했고, CI(weekly-accel)는 그 경로가 아예 없었다. 실측(10-13 PC):
+    fq_ 2,799종 전부 08-02 에 받은 그대로 — 851종이 2026Q1 에 멈춰 있었다.
+    이익 가속 신호(분기 매출·영업익 가속)와 🔄흑자전환이 둘 다 이 파일을 읽는다.
+
+    규칙: 파일의 최신 기간(col)이 gap_days 보다 오래됐으면 새 분기가 나왔을 때다.
+          그래도 min_age_days 안에 받은 파일은 건드리지 않는다(매주 SEC 를 두드리지 않게).
+    """
+    if not os.path.exists(p):
+        return True
+    try:
+        if (time.time() - os.path.getmtime(p)) / 86400 < min_age_days:
+            return False
+        last = pd.to_datetime(pd.read_csv(p, usecols=[col])[col], errors="coerce").max()
+        return pd.isna(last) or (pd.Timestamp.today() - last).days > gap_days
+    except Exception:
+        return True
+
+
 def fetch_fund(sym, cik):
     p = os.path.join(CACHE, f"fq_{sym}.csv")
-    if os.path.exists(p):
+    # 최신 분기 말 + 다음 분기(91일) + 대부분의 10-Q 제출(~30일) ≈ 120일.
+    #   그 전에 다시 받아도 같은 내용이라 SEC 요청만 낭비한다.
+    if not _cache_due(p, "period_end", gap_days=120):
         return True
     raw = get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json", SUA)
     if not raw:
@@ -268,7 +293,8 @@ def fetch_fund(sym, cik):
 def fetch_8k(sym, cik):
     """8-K item 2.02 = 실적 발표. acceptanceDateTime으로 BMO/AMC 판정"""
     p = os.path.join(CACHE, f"ek_{sym}.csv")
-    if os.path.exists(p):
+    # 실적 발표는 대략 91일 간격 → 마지막 발표가 80일 넘었으면 다음 발표를 확인
+    if not _cache_due(p, "earn_date", gap_days=80):
         return True
     raw = get(f"https://data.sec.gov/submissions/CIK{cik}.json", SUA)
     if not raw:
@@ -338,6 +364,28 @@ def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (�
     print(f"  증분 {n_inc}종 · 전수 {len(syms) - n_inc}종"
           f"{' (--full)' if full else ''}  분할 재수집 {len(splits & set(syms))}종", flush=True)
 
+    # 2026-10-14 — 실패 기억. 처음부터 받아야 하는(전수) 종목 중 상장폐지·ETF·ADR 처럼
+    #   Yahoo 가 안 주는 것이 매번 같은 자리에서 실패하며 요청 한도를 먹었다(10-10 실측:
+    #   10회 돌려 1,068종 증가에 그침). 전수 수집이 3회 연속 실패한 종목은 28일간 건너뛰고,
+    #   이전에 실패했던 종목은 순서를 뒤로 보낸다 — 받을 수 있는 종목이 먼저 받게.
+    fail_p = os.path.join(CACHE, "_fetch_fail.json")
+    try:
+        fail = json.load(open(fail_p, encoding="utf-8"))
+    except Exception:
+        fail = {}
+    today = pd.Timestamp.today().normalize()
+
+    def _blocked(s):
+        f = fail.get(s)
+        return bool(f) and f[0] >= 3 and (today - pd.Timestamp(f[1])).days < 28
+
+    is_full = lambda s: full or s in splits or s not in have
+    skipped = [s for s in syms if is_full(s) and _blocked(s)]
+    syms = [s for s in syms if s not in set(skipped)]
+    syms.sort(key=lambda s: (s in fail, 0))          # 실패 이력 없는 것 먼저(안정 정렬)
+    if skipped:
+        print(f"  실패 기억으로 건너뜀 {len(skipped)}종 (3회 연속 실패 · 28일)", flush=True)
+
     def job(s):
         _full = full or s in splits
         ok_px = fetch_px(s, last=(None if _full else have.get(s)), force_full=_full)
@@ -349,10 +397,19 @@ def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (�
     with ThreadPoolExecutor(max_workers=4) as ex:
         for i, (s, a, b, c) in enumerate(ex.map(job, syms), 1):
             done[0] += a; done[1] += b; done[2] += c
+            if a:
+                fail.pop(s, None)
+            elif is_full(s):
+                fail[s] = [(fail.get(s) or [0])[0] + 1, today.strftime("%Y-%m-%d")]
             if i % 25 == 0:
                 print(f"  {i}/{len(syms)}  가격{done[0]} 재무{done[1]} 8K{done[2]}  "
                       f"{time.time()-t0:.0f}s", flush=True)
     u.to_csv(os.path.join(CACHE, "_universe.csv"), index=False)
+    try:
+        json.dump(fail, open(fail_p, "w", encoding="utf-8"))
+        print(f"  실패 기록 {len(fail)}종 (그중 차단 {sum(1 for k in fail if _blocked(k))}종)", flush=True)
+    except Exception as _e:
+        print(f"  [warn] 실패 기록 저장 실패: {_e}", flush=True)
     print(f"완료 {time.time()-t0:.0f}s  가격{done[0]} 재무{done[1]} 8K{done[2]}")
 
 

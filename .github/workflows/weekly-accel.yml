@@ -44,6 +44,9 @@ jobs:
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: '1'
+      # 2026-10-14 — 실패를 알리려고 추가(아래 '유니버스 붕괴 차단'·'실패 시 텔레그램')
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -129,6 +132,44 @@ jobs:
       - name: 이익 가속 신호 발행
         if: steps.due.outputs.skip != 'true'
         run: python leaders_accel.py
+
+      # 2026-10-14 신설 — 09-26·10-03 실행은 universe **2종**, 10-10 새벽은 242종으로
+      #   leaders_accel.json 을 덮어썼다(정상 945종). 낡은 DB 로 '성공'하고 화면을
+      #   망가뜨린 것이다. 직전 커밋본보다 30% 넘게 줄었거나 1,000종 미만이면
+      #   새 결과를 버리고 이전 것을 되살린 뒤 **잡을 실패시킨다** — 뒤 단계
+      #   (후보 산출·커밋)는 전부 건너뛴다. 아래 실패 알림이 텔레그램으로 간다.
+      - name: 유니버스 붕괴 차단
+        if: steps.due.outputs.skip != 'true'
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          new = json.load(open("results/leaders_accel.json", encoding="utf-8")).get("universe") or 0
+          try:
+              old = json.loads(subprocess.check_output(
+                  ["git", "show", "HEAD:results/leaders_accel.json"])).get("universe") or 0
+          except Exception:
+              old = 0
+          print(f"universe 직전 {old:,} → 이번 {new:,}")
+          if new < 1000 and (old == 0 or new < old * 0.7):
+              subprocess.call(["git", "checkout", "HEAD", "--", "results/leaders_accel.json"])
+              print(f"::error::이익가속 유니버스 붕괴({old:,}→{new:,}) — 발행을 취소하고 이전 결과를 유지한다")
+              sys.exit(1)
+          PY
+
+      # 2026-10-14 — price_curves.json 은 PC 스케줄러(leaders_weekly.sh)에서만 만들어져
+      #   PC 가 꺼진 주마다 멈췄다(10-13 기준 13일 정지). spans 를 읽으므로 발행 뒤에 둔다.
+      - name: 가격 곡선 발행
+        if: steps.due.outputs.skip != 'true'
+        run: python curves_build.py
+        continue-on-error: true
+
+      # 2026-10-14 — 🔄흑자전환은 PC 수동 실행(run_update.bat)뿐이었다. US 는 이 잡이
+      #   방금 갱신한 fq_(EDGAR 분기재무)를, KR 은 레포의 kr_fundamentals_q.parquet 를
+      #   읽으므로 러너에서 그대로 돈다.
+      - name: 흑자전환 스크리너
+        if: steps.due.outputs.skip != 'true'
+        run: python turnaround_run.py
+        continue-on-error: true
 
       # 편입 후보를 CSV 로 떨군다. DB가 12일 넘게 낡으면 exit 2 로 죽는다 —
       # 죽어야 알아챈다. exclude.txt 가 있으면 그 티커는 건너뛴다(없어도 된다).
@@ -219,7 +260,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git pull --rebase --autostash origin main || true
-          for f in exports/accel_picks.csv results/accel_picks_status.json results/leaders_accel.json; do
+          for f in exports/accel_picks.csv results/accel_picks_status.json results/leaders_accel.json results/price_curves.json results/turnaround_latest.json; do
             [ -f "$f" ] && git add -f "$f"
           done
           git add -f exports/accel_picks_*.csv 2>/dev/null || true
@@ -229,6 +270,11 @@ jobs:
             git commit -m "auto: 주도주 편입 후보 $(date -u +%Y-%m-%d)"
             git push origin main
           fi
+
+      - name: 실패 시 텔레그램
+        if: failure()
+        run: python tools/notify_ci_failure.py
+        continue-on-error: true
 
       - name: 산출물 요약
         if: always()

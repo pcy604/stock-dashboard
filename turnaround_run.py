@@ -36,7 +36,8 @@ CACHE_TTL_DAYS  = 7                 # 재무 캐시 유효기간
 def get_kr_tickers():
     """weekly_run.py와 동일: fdr.StockListing('KRX') 사용"""
     try:
-        krx = fdr.StockListing('KRX')
+        import krx_listing
+        krx = krx_listing.stock_listing('KRX')
         filtered = krx[krx['Marcap'] >= MIN_MARCAP_KR].sort_values('Marcap', ascending=False)
         return list(zip(
             filtered['Code'].astype(str).str.zfill(6),
@@ -150,6 +151,10 @@ def fetch_quarterly_fin(sym_yf: str):
         return None
 
 
+from collections import Counter
+_SKIP = Counter()
+
+
 def analyze(sym: str, name: str, marcap: int, market: str):
     sym_yf = f"{sym}.KS" if market == 'KR' else sym
     qf = fetch_quarterly_fin(sym_yf)
@@ -165,8 +170,20 @@ def analyze(sym: str, name: str, marcap: int, market: str):
                 break
         if ni_row is None:
             return None
-        ni = ni_row.sort_index(ascending=False).dropna()
+        ni_all = ni_row.sort_index(ascending=False)
+        ni = ni_all.dropna()
         if len(ni) < 5:
+            return None
+        # 2026-10-14 — 낡은 분기로 '흑자전환완료'를 내던 고장 차단.
+        #   ① 최신 분기의 순이익이 비어 있으면(태그 변경 등) dropna 가 몇 년 전 분기를
+        #      '최신'으로 끌어올렸다 — PNW 2011, MS 2018 이 그렇게 상위에 떴다.
+        #   ② 재무 캐시가 갱신 안 되면 한 분기 늦은 판정이 된다(fq_ 08-02 정지).
+        #   둘 다 판정하지 않고 _SKIP 에 이유를 남긴다. 없는 데이터를 있는 척하지 않는다.
+        if pd.Timestamp(ni.index[0]) < pd.Timestamp(ni_all.index[0]):
+            _SKIP['최신분기_순이익_공란'] += 1
+            return None
+        if (pd.Timestamp(DATE_STR) - pd.Timestamp(ni.index[0])).days > 200:
+            _SKIP['최신분기_200일초과'] += 1
             return None
         niv = [float(v) for v in ni.values]
         q0, q1, q2, q3 = niv[0], niv[1], niv[2], niv[3]
@@ -301,6 +318,7 @@ def main():
         'total':  len(results),
         'kr':     kr_cnt,
         'us':     us_cnt,
+        'skipped': dict(_SKIP),          # 판정 보류 사유별 종목 수 (2026-10-14)
         'stocks': results,
     }
     with open(RESULT_PATH, 'w', encoding='utf-8') as f:

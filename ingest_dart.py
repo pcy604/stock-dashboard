@@ -20,7 +20,8 @@ import dart_client
 def kr_by_marcap():
     """FDR로 KR 상장목록 + 시총 → 시총 큰 순 [(code, name, marcap)]"""
     import FinanceDataReader as fdr
-    lst = fdr.StockListing('KRX')
+    import krx_listing
+    lst = krx_listing.stock_listing('KRX')
     rows = []
     for _, r in lst.iterrows():
         code = str(r.get('Code', '')).zfill(6)

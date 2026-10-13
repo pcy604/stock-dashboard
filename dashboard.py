@@ -1914,7 +1914,16 @@ with tab3, guard('CANSLIM'):
             req_S = st.checkbox("S 통과 필수", value=False, key="req_S")
             req_C = st.checkbox("C 통과 필수", value=False, key="req_C")
             req_A = st.checkbox("A 통과 필수", value=False, key="req_A")
-            req_I = st.checkbox("I 통과 필수", value=False, key="req_I")
+            # 2026-10-14 — I(수급) 소스 pykrx 가 KRX 로그인을 요구하면서 KR·US 전 종목이 공란이다.
+            #   공란인데 7점 만점으로 세면 '최고 6점'이 '7점 중 6점'처럼 보이고, I 필수를 켜면
+            #   결과가 0개가 된다. 데이터가 없으면 I 를 점수와 필터에서 뺀다(있는 척하지 않는다).
+            _i_live = any(_s.get('i_inst_pct') is not None for _s in canslim.get('stocks', []))
+            req_I = st.checkbox("I 통과 필수", value=False, key="req_I", disabled=not _i_live,
+                                help=None if _i_live else "I(기관·외인 수급) 데이터 소스가 중단돼 지금은 쓸 수 없습니다")
+            _SC3 = '점수/7' if _i_live else '점수/6'
+            if not _i_live:
+                req_I = False
+                st.caption("⚠️ I(수급) 데이터 없음 — 점수는 6점 만점")
 
         def _tag3(v, th, fmt='{:.1f}'):
             if v is None: return '?'
@@ -1950,7 +1959,7 @@ with tab3, guard('CANSLIM'):
             if req_A and not a_ok:   continue
             if req_I and not i_ok:   continue
 
-            score = sum([bool(m_ok), n_ok, l_ok, s_ok, c_ok, a_ok, i_ok])
+            score = sum([bool(m_ok), n_ok, l_ok, s_ok, c_ok, a_ok] + ([i_ok] if _i_live else []))
 
             # 시총은 숫자로 저장 (표시 포맷은 column_config가 담당) — 문자열로 저장하면
             # 표 헤더 클릭 정렬이 사전순("$9B">"$87B")으로 깨짐 (#4 실측 확인)
@@ -1968,7 +1977,7 @@ with tab3, guard('CANSLIM'):
                 '종목명':  s['name'],
                 '코드':    s['sym'],
                 '시총':    _cap_num,
-                '점수/7':  score,
+                _SC3:  score,
                 'RS':      _tag3(rs,     th_L,  '{:.0f}p'),
                 'N 거리%': _tag3(n_dist, th_N,  '{:+.1f}%'),
                 'S 배수':  _tag3(vol,    th_S,  '{:.1f}x'),
@@ -2005,7 +2014,7 @@ with tab3, guard('CANSLIM'):
                 return 'color:#8b949e'
 
             # 컬럼을 CANSLIM 글자 순서(C→A→N→S→L→I)로 (#3)
-            disp3 = ['종목명','코드','시총','점수/7','C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수',
+            disp3 = ['종목명','코드','시총',_SC3,'C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수',
                      '고점대비%','궤적','매력도']
             df3 = df3.rename(columns={'RS': 'RS (L)'})
             sig3c = ['C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수']
@@ -2013,7 +2022,7 @@ with tab3, guard('CANSLIM'):
             st.subheader(f"총 {len(df3)}개 종목 | N✅ L✅ 필수, C/A/S/I는 슬라이더 기준으로 색상 표시")
             st.dataframe(
                 df3[disp3].style
-                    .map(color_score3, subset=['점수/7'])
+                    .map(color_score3, subset=[_SC3])
                     .map(color_cell3,  subset=sig3c),
                 use_container_width=True,
                 row_height=25, height=_dfh(len(df3), cap=760),
@@ -2936,7 +2945,8 @@ def fetch_stock_data(sym: str, days: int):
         info = {}
         if is_kr:
             try:
-                krx = fdr.StockListing('KRX')
+                import krx_listing
+                krx = krx_listing.stock_listing('KRX', verbose=False)
                 row = krx[krx['Code'] == code]
                 if not row.empty:
                     r = row.iloc[0]

@@ -64,6 +64,7 @@ def _process_one(sym, market, name, marcap, fail_counter=None):
         wdf = df.resample('W').agg(
             {'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last', 'Volume': 'sum'}
         ).dropna(subset=['Close'])
+        wdf['Days'] = df['Close'].resample('W').count().reindex(wdf.index)   # 진행 중 주 판별용
     except:
         wdf = df
     if len(wdf) < 20:

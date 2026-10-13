@@ -12,7 +12,8 @@ def get_kr_universe(min_marcap: int = 300_000_000_000) -> list[tuple[str, str, i
     """KRX 전종목 중 시총 min_marcap(원) 이상 반환 → (code, name, marcap)"""
     print(f"  KRX 종목 로딩...", end=' ', flush=True)
     try:
-        krx = fdr.StockListing('KRX')
+        import krx_listing
+        krx = krx_listing.stock_listing('KRX')
         filtered = krx[krx['Marcap'] >= min_marcap].sort_values('Marcap', ascending=False)
         pairs = list(zip(
             filtered['Code'].astype(str).str.zfill(6),

@@ -117,7 +117,28 @@ METRICS = [
     ('prices_syms',    '가격 이력 보유(13년 주봉)', _prices_syms, 1000, False),
     ('prices_last',    'prices 최신 주차',  _prices_last, None, True),
     ('screener_total', '주봉 신호 종목 수', lambda: _json('results/screener_latest.json', 'total'), None, True),
+    # 2026-10-14 — KR 이 통째로 빠져도 위 지표는 전부 미국 기준이라 아무것도 안 울렸다.
+    #   fdr.StockListing('KRX') 고장으로 perf_latest 의 KR 이 692→0, sectors.json 의
+    #   KR 섹터가 0 이었는데 '지표 정상'이 발송됐다. 시장별로 따로 센다.
+    ('perf_kr',        '월간성과 KR 종목 수', lambda: _count_market('results/perf_latest.json', 'KR'), 300, False),
+    ('perf_us',        '월간성과 US 종목 수', lambda: _count_market('results/perf_latest.json', 'US'), 300, False),
+    ('sectors_kr',     'KR 섹터 맵 종목 수', lambda: _count_digit_keys('data/sectors.json'), 1000, False),
+    ('canslim_kr_date', 'CANSLIM KR 날짜', lambda: _json('results/canslim_latest.json', 'date'), None, True),
 ]
+
+
+def _count_market(path, mkt):
+    st = _json(path, 'stocks', default=None)
+    if st is None:
+        return None
+    return sum(1 for s in st if s.get('market') == mkt)
+
+
+def _count_digit_keys(path):
+    d = _json(path, default=None)
+    if not isinstance(d, dict):
+        return None
+    return sum(1 for k in d if str(k).isdigit())
 
 
 def collect():

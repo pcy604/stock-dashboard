@@ -17,11 +17,19 @@ def build():
     m = {}
     # ── KR ──
     try:
-        krx = fdr.StockListing('KRX-DESC')
+        import krx_listing
+        krx = krx_listing.desc_listing()
         for _, r in krx.iterrows():
             code = str(r.get('Code', '')).zfill(6) if r.get('Code') else ''
-            sec = r.get('Sector') or r.get('Industry')
-            if code and sec and str(sec) != 'nan':
+            # 2026-10-14 — KRX-DESC 의 'Sector' 는 업종이 아니라 **코스닥 소속부**(벤처기업부·
+            #   우량기업부…)이고 코스피는 비어 있다. 그래서 KR 섹터는 원래부터 코스닥 소속부만
+            #   담겼고 삼성전자·하이닉스 같은 코스피 종목은 통째로 빠져 있었다.
+            #   (NaN 은 truthy 라 `Sector or Industry` 가 Industry 로 넘어가지도 않았다.)
+            #   실제 업종(KSIC)이 든 'Industry' 를 쓴다.
+            sec = r.get('Industry')
+            if not (isinstance(sec, str) and sec.strip()):
+                sec = None
+            if code and sec:
                 m[code] = str(sec)
         print(f"  KR 섹터: {sum(1 for k in m if k.isdigit())}개")
     except Exception as e:

@@ -48,6 +48,25 @@ jobs:
           restore-keys: |
             shares-cache-
 
+      # 2026-10-14 — market.db(1.4GB) 캐시는 주 1회 weekly-accel 만 썼다. 그런데 이
+      #   워크플로가 매일 843MB 짜리 leaders-cache 를 새 키로 저장해 저장소 한도
+      #   (10GB)를 채우면, GitHub 은 **가장 오래 안 쓴 것**부터 지운다 → market.db 가
+      #   먼저 밀려난다. 그 주 weekly-accel 은 빈 DB 로 2,900종을 Yahoo 에서 처음부터
+      #   받다 ~300종에서 끊겨 universe 2·242종을 발행했다(09-26·10-03·10-10).
+      #   여기서 매일 한 번 '복원'해 마지막 사용 시각을 갱신한다. 저장은 안 한다.
+      - name: market.db 캐시 유지 (축출 방지용 읽기)
+        uses: actions/cache/restore@v4
+        with:
+          path: data/market.db
+          key: marketdb-keepalive
+          restore-keys: |
+            marketdb-
+        continue-on-error: true
+
+      # 위는 '건드리기'만이 목적이다. 이 워크플로의 동작을 바꾸지 않도록 바로 치운다.
+      - name: market.db 치우기
+        run: rm -f data/market.db
+
       # 843MB 라 복원이 가볍진 않지만, 3,095종을 네트워크로 다시 받는 것보다 빠르다.
       # 이게 채워져 있으면 marketcap_refresh 의 MAX_FETCH(하루 600종) 구간이 비어서
       # 그냥 지나간다.
@@ -165,6 +184,9 @@ jobs:
           git add data/us_shares.csv 2>/dev/null || true
           git add data/us_splits.csv 2>/dev/null || true
           git add data/us_domicile.csv 2>/dev/null || true
+          # 2026-10-14 — KRX 종목목록 마지막 정상본(krx_listing.py 폴백 3단계)
+          git add data/krx_listing_last.csv 2>/dev/null || true
+          git add data/krx_listing_last.csv.asof 2>/dev/null || true
           # 구루 워크플로가 실행 중(수십 분) 푸시할 수 있으므로 rebase 후 푸시 (레이스 방지)
           # ── 푸시는 실패해도 재시도한다 ────────────────────────────────
           # 2026-09-06 실측: 1시간 47분 돌려 산출물을 다 만들어놓고 마지막 push 가

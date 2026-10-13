@@ -29,7 +29,8 @@ OUT = Path('results/value_kr.json')
 def _live_marcap_map():
     """오늘 종가 기준 KRX 전종목 시총 (KRX 로그인 불필요, fdr가 매번 새로 가져옴)."""
     import FinanceDataReader as fdr
-    krx = fdr.StockListing('KRX')
+    import krx_listing
+    krx = krx_listing.stock_listing('KRX')
     return {str(r['Code']): {'marcap': int(r['Marcap']), 'name': r['Name']}
             for _, r in krx.iterrows() if r.get('Marcap')}
 

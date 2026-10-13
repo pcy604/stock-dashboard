@@ -50,6 +50,7 @@ def to_weekly(daily_df):
         wdf = daily_df.resample('W-SUN').agg(
             {'Open':'first','High':'max','Low':'min','Close':'last','Volume':'sum'}
         ).dropna(subset=['Close'])
+        wdf['Days'] = daily_df['Close'].resample('W-SUN').count().reindex(wdf.index)   # 진행 중 주 판별용
         return wdf if len(wdf) >= MIN_WEEKS else None
     except:
         return None
@@ -134,7 +135,8 @@ def analyze_one(sym, name, marcap, market):
 
 def get_kr_universe():
     print("  KR 유니버스...", end=' ', flush=True)
-    krx = fdr.StockListing('KRX')
+    import krx_listing
+    krx = krx_listing.stock_listing('KRX')
     f = krx[krx['Marcap'] >= 300_000_000_000].sort_values('Marcap', ascending=False)
     pairs = list(zip(
         f['Code'].astype(str).str.zfill(6),
