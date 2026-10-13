@@ -192,7 +192,18 @@ def c_us_marketcap():
             chk(_age(pxd) <= 5, BLOCK, f"가격일 {pxd} 5일 초과")]
 
 
+def c_report():
+    d = _j("results/market_report.json")
+    ld = d.get("latest_daily") or {}
+    idx = [x for x in (ld.get("facts") or {}).get("indices", []) if "close" in x]
+    return [chk(_age(ld.get("date")) <= 4, BLOCK, f"일간 리포트 {ld.get('date')} 4일 초과"),
+            chk(len(idx) >= 4, BLOCK, f"지수 {len(idx)}개만 수집 — Yahoo 실패"),
+            chk(len(ld.get("markdown") or "") >= 300, BLOCK, "리포트 본문이 비었다"),
+            chk(str(ld.get("engine", "")).startswith("gemini"), WARN, f"AI 대신 숫자 템플릿({ld.get('engine')}) — 키·한도 확인")]
+
+
 CONTRACTS = {
+    "results/market_report.json": c_report,
     "results/perf_latest.json": c_perf,
     "results/screener_latest.json": c_screener,
     "results/canslim_latest.json": c_canslim_kr,

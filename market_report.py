@@ -1,0 +1,249 @@
+# -*- coding: utf-8 -*-
+"""시황 리포트 — 매일(전일 시장)·매주(지난주) 발행. results/market_report.json
+
+2026-10-14 신설 (사용자 요청: "사이트 내 챗봇 — 어제 시장·주간 시황 리포트 발행 용도")
+
+구조
+  1) facts()   — 숫자만 모은다. 지수(Yahoo) · 레포 산출물(perf_latest·CANSLIM·이익가속·흑자전환)
+  2) render()  — Gemini 가 **facts 안의 숫자만으로** 한국어 리포트를 쓴다.
+                 키가 없거나 한도(무료 하루 20건/모델)에 걸리면 숫자 템플릿으로 대체한다 —
+                 리포트는 어떤 경우에도 발행된다. 어떤 방식으로 썼는지 'engine' 에 남긴다.
+  3) 저장       — latest_daily / latest_weekly + history(최근 60건)
+  대시보드 📰 시황 리포트 탭과 챗봇이 이 파일을 근거로 쓴다.
+
+  python market_report.py daily [--telegram]
+  python market_report.py weekly [--telegram]
+"""
+import json
+import os
+import sys
+from datetime import datetime, date
+
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+BASE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(BASE, "results", "market_report.json")
+INDICES = [("^KS11", "코스피"), ("^KQ11", "코스닥"), ("^GSPC", "S&P500"), ("^IXIC", "나스닥"),
+           ("^SOX", "필라델피아 반도체"), ("^VIX", "VIX"), ("KRW=X", "원/달러"), ("^TNX", "미국 10년물(%)")]
+MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
+
+
+def _j(p):
+    try:
+        return json.load(open(os.path.join(BASE, p), encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _r(v, n=2):
+    return None if v is None or v != v else round(float(v), n)
+
+
+_FDR = {"^KS11": "KS11", "^KQ11": "KQ11"}   # Yahoo 가 막히면 한국 지수는 FDR 로
+
+
+def _series(sym, df):
+    s = None
+    try:
+        if df is not None and sym in df:
+            s = df[sym].dropna()
+    except Exception:
+        s = None
+    if (s is None or len(s) < 30) and sym in _FDR:
+        try:
+            import FinanceDataReader as fdr
+            from datetime import timedelta
+            s = fdr.DataReader(_FDR[sym], (date.today() - timedelta(days=400)).isoformat())["Close"].dropna()
+        except Exception:
+            s = None
+    return s
+
+
+def index_facts():
+    out = []
+    df = None
+    try:
+        import yfinance as yf
+        df = yf.download([s for s, _ in INDICES], period="1y", interval="1d", progress=False,
+                         auto_adjust=False, threads=True)["Close"]
+    except Exception:
+        df = None
+    for sym, name in INDICES:
+        try:
+            s = _series(sym, df)
+            if s is None or len(s) < 30:
+                raise ValueError("시세 없음")
+            c = s.iloc[-1]
+            out.append(dict(name=name, sym=sym, date=str(s.index[-1].date()), close=_r(c),
+                            d1=_r((c / s.iloc[-2] - 1) * 100), d5=_r((c / s.iloc[-6] - 1) * 100),
+                            m1=_r((c / s.iloc[-22] - 1) * 100), from_52w_high=_r((c / s.max() - 1) * 100),
+                            above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None))
+        except Exception as e:
+            out.append(dict(name=name, sym=sym, error=str(e)[:60]))
+    return out
+
+
+def stock_facts(kind):
+    p = _j("results/perf_latest.json")
+    st = p.get("stocks", [])
+    key = "ret_1w" if kind == "daily" else "ret_4w"
+    res = {"perf_date": p.get("date")}
+    for m, cap in (("KR", 1e12), ("US", 1e10)):
+        big = [s for s in st if s.get("market") == m and (s.get("marcap") or 0) >= cap and s.get(key) is not None]
+        big.sort(key=lambda s: s[key])
+        row = lambda s: dict(name=s.get("name"), sym=s["sym"], ret=_r(s[key], 1))
+        res[m] = dict(universe=len(big), basis=key, top=[row(s) for s in big[::-1][:6]],
+                      bottom=[row(s) for s in big[:6]],
+                      near_52w=sum(1 for s in st if s.get("market") == m and s.get("now_sig_52w")),
+                      new_high=sum(1 for s in st if s.get("market") == m and s.get("new_high")),
+                      breadth_up=round(sum(1 for s in big if s[key] > 0) / len(big) * 100) if big else None)
+        hi = [s for s in st if s.get("market") == m and s.get("now_sig_52w")]
+        hi.sort(key=lambda s: -(s.get("marcap") or 0))
+        res[m]["52w_leaders"] = [dict(name=s.get("name"), sym=s["sym"]) for s in hi[:8]]
+    return res
+
+
+def signal_facts():
+    ck, cu = _j("results/canslim_latest.json"), _j("results/canslim_us_latest.json")
+    acc = _j("results/leaders_accel.json")
+    ta = _j("results/turnaround_latest.json")
+    return dict(
+        market_direction={"KR": ck.get("market_dir"), "US": cu.get("market_dir")},
+        canslim_candidates={"KR": len(ck.get("stocks", [])), "US": len(cu.get("stocks", []))},
+        accel_week=acc.get("signal_week"),
+        accel_new=[dict(sym=c.get("sym"), name=c.get("name"), up=c.get("up"), mc_b=c.get("mc"))
+                   for c in (acc.get("candidates") or [])[:10]],
+        turnaround={"KR": ta.get("kr"), "US": ta.get("us"), "date": ta.get("date")})
+
+
+def facts(kind):
+    return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"),
+                indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
+
+
+PROMPT = """너는 개인투자자용 시황 리포트를 쓰는 애널리스트다. 아래 JSON 은 {span} 시장 데이터다.
+규칙:
+- **JSON 에 있는 숫자와 이름만 쓴다.** 뉴스·이벤트·원인·전망을 지어내지 않는다. 원인을 모르면 '데이터상 원인 불명'.
+- 한국어, 마크다운. 숫자는 소수 1자리 %.
+- 형식:
+  ## 한 줄 요약
+  ## 지수 (한국·미국·변동성·환율·금리를 표 하나로)
+  ## 강세·약세 종목 (KR/US 각각, 대형주 기준)
+  ## 신고가와 시장 폭 (52주 신고가 근접 수, 상승 종목 비율)
+  ## 우리 신호 (CANSLIM 시장방향 · 이익가속 신규 · 흑자전환)
+  ## 체크포인트 (데이터에서 보이는 것 3가지 — 예측 금지, '확인할 것'만)
+- 마지막 줄: "※ 자동 생성 · 투자 권유 아님 · 데이터 기준 {asof}"
+JSON:
+{facts}"""
+
+
+def _gemini_key():
+    k = os.environ.get("GEMINI_KEY", "")
+    if not k:
+        try:
+            import config
+            k = getattr(config, "GEMINI_KEY", "") or ""
+        except Exception:
+            k = ""
+    return k
+
+
+def ask_gemini(prompt, models=MODELS, key=None):
+    key = key or _gemini_key()
+    if not key:
+        raise RuntimeError("GEMINI_KEY 없음")
+    from google import genai
+    cl = genai.Client(api_key=key)
+    last = None
+    for m in models:                      # 무료 한도는 모델별로 따로다 — 막히면 다음 모델
+        try:
+            r = cl.models.generate_content(model=m, contents=prompt)
+            if (r.text or "").strip():
+                return r.text.strip(), m
+        except Exception as e:
+            last = e
+    raise RuntimeError(f"Gemini 실패: {str(last)[:120]}")
+
+
+def template(f):
+    """AI 없이도 발행되는 숫자 리포트."""
+    L = [f"## {'일간' if f['kind']=='daily' else '주간'} 시황 — 숫자 요약", "", "| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |", "|---|---|---|---|---|---|"]
+    for x in f["indices"]:
+        if "close" in x:
+            L.append(f"| {x['name']} | {x['close']:,} | {x['d1']:+.1f}% | {x['d5']:+.1f}% | {x['m1']:+.1f}% | {x['from_52w_high']:+.1f}% |")
+    for m in ("KR", "US"):
+        s = f["stocks"].get(m) or {}
+        if not s:
+            continue
+        L += ["", f"**{m}** ({'1주' if s['basis']=='ret_1w' else '4주'} 수익률, 대형주 {s['universe']}종 · 상승 비율 {s['breadth_up']}%)",
+              "강세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["top"]),
+              "약세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["bottom"]),
+              f"52주 신고가 근접 {s['near_52w']}종 · 이번 주 경신 {s['new_high']}종"]
+    sg = f["signals"]
+    L += ["", f"CANSLIM 시장방향 KR {sg['market_direction']['KR']} · US {sg['market_direction']['US']}",
+          f"이익가속 신규({sg['accel_week']}): " + (", ".join(c['sym'] for c in sg['accel_new']) or "없음"),
+          "", f"※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · {f['generated']}"]
+    return "\n".join(L)
+
+
+def render(f):
+    asof = next((x.get("date") for x in f["indices"] if x.get("date")), f["generated"][:10])
+    span = "전일(최근 거래일)" if f["kind"] == "daily" else "지난 1주"
+    try:
+        txt, model = ask_gemini(PROMPT.format(span=span, asof=asof,
+                                              facts=json.dumps(f, ensure_ascii=False)))
+        return txt, f"gemini:{model}"
+    except Exception as e:
+        print("  Gemini 생략 →", str(e)[:120])
+        return template(f), "template"
+
+
+def main(kind, telegram=False):
+    f = facts(kind)
+    md, engine = render(f)
+    rec = dict(kind=kind, date=date.today().isoformat(), generated=f["generated"], engine=engine,
+               markdown=md, facts=f)
+    db = _j("results/market_report.json") or {}
+    db[f"latest_{kind}"] = rec
+    hist = [h for h in db.get("history", []) if not (h["kind"] == kind and h["date"] == rec["date"])]
+    db["history"] = ([dict(kind=kind, date=rec["date"], engine=engine, markdown=md)] + hist)[:60]
+    json.dump(db, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print(f"✅ {kind} 리포트 ({engine}) → {OUT}\n")
+    print(md[:1500])
+    if telegram:
+        try:
+            import config
+            from telegram_notifier import send_message
+            if config.TELEGRAM_ENABLED:
+                send_message(config.TELEGRAM_TOKEN, config.TELEGRAM_CHAT_ID,
+                             f"📰 {'일간' if kind=='daily' else '주간'} 시황 ({rec['date']})\n\n" + md[:3800])
+        except Exception as e:
+            print("텔레그램 실패:", e)
+
+
+if __name__ == "__main__":
+    a = sys.argv[1:]
+    main("weekly" if "weekly" in a else "daily", telegram="--telegram" in a)
+
+
+CHAT_PROMPT = """너는 이 대시보드의 시황 도우미다. 아래 [자료]만 근거로 한국어로 짧고 정확하게 답한다.
+- 자료에 없는 숫자·뉴스·전망은 지어내지 않는다. 없으면 "자료에 없습니다"라고 말하고 어느 탭에서 볼 수 있는지 안내한다.
+- 매수·매도 추천을 하지 않는다. 판단 근거(숫자)만 정리한다.
+- 숫자를 인용할 때는 기준일을 같이 적는다.
+[자료]
+{ctx}
+[질문]
+{q}"""
+
+
+def chat_context(extra_rows=None, max_chars=12000):
+    db = _j("results/market_report.json") or {}
+    ctx = {k: {"date": v.get("date"), "facts": v.get("facts")} for k, v in db.items()
+           if k.startswith("latest_") and isinstance(v, dict)}
+    if extra_rows:
+        ctx["관련 종목"] = extra_rows
+    t = json.dumps(ctx, ensure_ascii=False)
+    return t[:max_chars]
+
+
+def answer(q, key=None, extra_rows=None):
+    return ask_gemini(CHAT_PROMPT.format(ctx=chat_context(extra_rows), q=q), key=key)

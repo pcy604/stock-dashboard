@@ -167,6 +167,14 @@ jobs:
       # 2026-10-14 — 원천 대조. 계약 검사는 '비었나·낡았나'만 본다. 숫자가 **틀린** 것
       #   (52주 신고가 0/1,065 처럼)은 앱과 독립된 원천(FinanceData/marcap 일괄 데이터)으로
       #   다시 계산해 봐야 보인다. 불일치면 텔레그램. 산출물을 막지는 않는다(원천도 틀릴 수 있다).
+      # 2026-10-14 — 일간 시황 리포트(📰 탭·챗봇 근거). 지수는 Yahoo, 나머지는 위 산출물.
+      #   GEMINI_KEY 가 없거나 한도면 숫자 템플릿으로 발행된다(계약 검사가 WARN 으로 알린다).
+      - name: 일간 시황 리포트
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: python market_report.py daily --telegram
+        continue-on-error: true
+
       - name: KR 원천 대조 (marcap 데이터셋으로 재계산)
         run: python tools/reconcile_kr.py
         continue-on-error: true

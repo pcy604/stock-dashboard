@@ -2,6 +2,7 @@
 실행: python -m streamlit run dashboard.py
 """
 import json
+import os
 import requests
 from collections import defaultdict
 import pandas as pd
@@ -794,8 +795,8 @@ with st.expander("📖 처음이신가요? — 30초 사용설명 (화면 안내
 #   이유로 지웠는데, 입력이 없던 진짜 원인은 **보유 종목을 넣을 화면 자체가
 #   없었기 때문**이다(data/portfolio.json 은 git 이력에 한 번도 존재한 적이 없다).
 #   엔진(guardrail.evaluate)과 헬퍼(_fetch_pf_price·_pf_trail)는 내내 살아 있었다.
-tab_screen, tab7, tab4, tab_pf = st.tabs([
-    "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오"])
+tab_screen, tab7, tab4, tab_pf, tab_rep = st.tabs([
+    "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오", "📰 시황 리포트"])
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 # 순서 주의: 서브탭 핸들(t_gain…)은 아래 6개 블록이 전부 의존하므로 **무조건 먼저** 만든다.
@@ -815,8 +816,9 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
                "· 🔥상승상위·💎가치 = 후보 탐색용 — 시장 필터는 위 하나로 전 서브탭 공통")
     # 2026-10-10 — 🔄 흑자전환 복원. turnaround_run.py 는 내내 결과를 만들고
     #   있었는데 읽는 화면이 없었다(results/turnaround_latest.json 소비자 0).
-    t_lead, tab3, t_gain, t_value, t_turn = st.tabs([
-        "🚀 주도주", "🏆 CANSLIM", "🔥 상승 상위", "💎 가치 발굴 (KR)", "🔄 흑자전환"])
+    # 2026-10-14 — 📈 52주 신고가 신설(사용자 요청). 상승 상위의 신호 열 하나였던 것을 독립 화면으로.
+    t_lead, tab3, t_gain, t_52, t_value, t_turn = st.tabs([
+        "🚀 주도주", "🏆 CANSLIM", "🔥 상승 상위", "📈 52주 신고가", "💎 가치 발굴 (KR)", "🔄 흑자전환"])
 
 # 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
 try:
@@ -1771,6 +1773,83 @@ if _LEAD_KR:
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
+# ── 📈 52주 신고가 (2026-10-14) ──────────────────────────────────────
+with t_52, guard('52주 신고가'):
+    st.caption("주봉 기준 — 이번 주 종가가 **직전 52주 고가의 -3% 이내**인 종목. "
+               "'경신'은 이번 주 고가가 직전 52주 고가를 넘은 것. 장중 실시간이 아니라 매일 06시(KST) 갱신.")
+    _p52 = load_json(PERF_JSON) or {}
+    _s52 = _p52.get('stocks') or []
+    _has_d = any(x.get('dist52') is not None for x in _s52)
+    _mk52 = _GMKT
+    _cs52 = {}
+    for _f in (CANSLIM_JSON, Path('results/canslim_us_latest.json')):
+        for _x in (load_json(_f) or {}).get('stocks', []):
+            _cs52[_x['sym']] = _x
+    _c1, _c2, _c3, _c4 = st.columns([1.3, 1.3, 1.2, 1.2])
+    _rng = _c1.slider("고점 대비 범위 (%)", -15.0, 0.0, -3.0, 0.5, key="h52_rng",
+                      help="0 = 신고가, -3 = 고점에서 3% 이내", disabled=not _has_d)
+    _only_new = _c2.checkbox("이번 주 신고가 경신만", value=False, key="h52_new", disabled=not _has_d)
+    _min_cap = _c3.selectbox("최소 시총", ["전체", "1천억/1B$+", "1조/10B$+"], key="h52_cap")
+    _sort52 = _c4.selectbox("정렬", ["고점 근접순", "시총순", "4주 상승률", "12주 상승률"], key="h52_sort")
+    _rows52 = []
+    for x in _s52:
+        if _mk52 != "전체" and x.get('market') != _mk52:
+            continue
+        d = x.get('dist52')
+        if _has_d:
+            if d is None or d < _rng:
+                continue
+            if _only_new and not x.get('new_high'):
+                continue
+        elif not x.get('now_sig_52w'):
+            continue
+        cap = x.get('marcap') or 0
+        kr = x.get('market') == 'KR'
+        if _min_cap.startswith("1천억") and cap < (1e11 if kr else 1e9):
+            continue
+        if _min_cap.startswith("1조") and cap < (1e12 if kr else 1e10):
+            continue
+        cs = _cs52.get(x['sym']) or {}
+        cg = cs.get('c_growth_pct')
+        _rows52.append({
+            '종목': x.get('name'), '코드': x.get('sym'), '시장': x.get('market'),
+            '시총': fmt_cap(cap, x.get('market')), '_cap': cap,
+            '현재가': x.get('curr_price'), '52주고': x.get('hi52'),
+            '고점대비%': d, '경신': '🔺' if x.get('new_high') else '',
+            '고점후(주)': x.get('wk_since_hi'),
+            '1주%': x.get('ret_1w'), '4주%': x.get('ret_4w'), '12주%': x.get('ret_12w'),
+            '분기실적(C)': (cg if isinstance(cg, str) else (f"{cg:+.0f}%" if cg is not None else '-')),
+            '함께 뜬 신호': ', '.join(l for l in (x.get('sigs_now') or []) if '52주' not in str(l)) or '-',
+        })
+    _key = {"고점 근접순": lambda r: -(r['고점대비%'] if r['고점대비%'] is not None else -99),
+            "시총순": lambda r: -r['_cap'], "4주 상승률": lambda r: -(r['4주%'] or -999),
+            "12주 상승률": lambda r: -(r['12주%'] or -999)}[_sort52]
+    _rows52.sort(key=_key)
+    _n_kr = sum(1 for r in _rows52 if r['시장'] == 'KR'); _n_us = len(_rows52) - _n_kr
+    _m1, _m2, _m3, _m4 = st.columns(4)
+    _m1.metric("해당 종목", f"{len(_rows52)}개")
+    _m2.metric("KR / US", f"{_n_kr} / {_n_us}")
+    _m3.metric("이번 주 경신", f"{sum(1 for r in _rows52 if r['경신'])}개")
+    _m4.metric("기준일", _p52.get('date', '-'))
+    if not _has_d:
+        st.info("고점 대비 거리·경신 여부는 다음 자동 갱신부터 채워집니다. 지금은 '신고가 -3% 이내' 신호만 보여줍니다.")
+    if _rows52:
+        _df52 = pd.DataFrame(_rows52).drop(columns=['_cap'])
+        if not _has_d:
+            _df52 = _df52.drop(columns=['52주고', '고점대비%', '경신', '고점후(주)', '12주%'])
+        st.dataframe(_df52, use_container_width=True, hide_index=True,
+                     height=_dfh(len(_df52), cap=760),
+                     column_config={'고점대비%': st.column_config.NumberColumn(format="%.1f%%"),
+                                    '1주%': st.column_config.NumberColumn(format="%+.1f%%"),
+                                    '4주%': st.column_config.NumberColumn(format="%+.1f%%"),
+                                    '12주%': st.column_config.NumberColumn(format="%+.1f%%")})
+    else:
+        st.write("조건에 맞는 종목이 없습니다.")
+    st.caption("⚠️ 신고가는 **탐색 출발점**이지 매수 신호가 아닙니다. 상장폐지 종목까지 넣은 12.5년 검증에서 "
+               "한국 52주 신고가 돌파 포트폴리오는 KOSPI에 못 미쳤습니다(CAGR 4.3% vs 9.3%). "
+               "실적(C)이 받쳐주는 종목을 🏆 CANSLIM·🔍 종목 분석으로 이어서 보세요.")
+
+
 with t_value, guard('가치 발굴'):
     st.caption(data_stamp('results/value_kr.json'))
     st.caption("💎 공식 지표(KRX)로 '싸고(저PER·저PBR) 돈 잘 버는(ROE·성장·배당)' 종목 발굴 — 가격이 아니라 가치 기준.")
@@ -3337,20 +3416,90 @@ def ai_business_summary(name, text, src='공식 사업설명'):
         return f"(AI 요약 실패: {str(e)[:80]})"
 
 
+@st.cache_data(ttl=3600 * 6, show_spinner=False)
+def _name_index():
+    """종목명 → 코드 검색용 목록. 레포에 커밋된 파일만 읽는다(사이트에서 외부 접속 없음).
+    KR: data/krx_listing_last.csv (krx_listing.py 가 매일 갱신) · US: data/us_marketcap.csv
+    2026-10-14 신설 — 한국 종목을 코드로만 찾을 수 있었다."""
+    rows = []
+    try:
+        k = pd.read_csv('data/krx_listing_last.csv', dtype={'Code': str})
+        mk = k.get('Marcap', pd.Series([0] * len(k)))
+        for c, n, m in zip(k['Code'].str.zfill(6), k['Name'].astype(str), mk):
+            rows.append((c, n, 'KR', float(m or 0)))
+    except Exception:
+        pass
+    try:
+        u = pd.read_csv('data/us_marketcap.csv')
+        for c, n, m in zip(u['Symbol'].astype(str), u['Name'].astype(str), u['marketcap']):
+            rows.append((c, n, 'US', float(m or 0) * 1400))   # 시총 정렬용 대략 원화 환산
+    except Exception:
+        pass
+    return rows
+
+
+def _resolve_symbol(q: str):
+    """입력 → (확정 코드 or None, 후보 목록[(코드, 표시명)]). 코드·티커는 그대로 통과."""
+    q = (q or '').strip()
+    if not q:
+        return None, []
+    up = q.upper()
+    base = up.replace('.KS', '').replace('.KQ', '')
+    if (len(base) == 6 and base[:5].isdigit()) or (up.isascii() and up.replace('.', '').replace('-', '').isalnum()
+                                                    and len(up) <= 6 and not any('가' <= ch <= '힣' for ch in q)):
+        # 영문 6자 이하는 티커로 본다 — 단, 그런 티커가 없고 이름으로 맞는 게 있으면 아래로
+        idx = _name_index()
+        if any(c == base for c, _, _, _ in idx) or (len(base) == 6 and base[:5].isdigit()):
+            return base if len(base) == 6 and base[:5].isdigit() else up, []
+    key = q.replace(' ', '').casefold()
+    exact, part = [], []
+    for c, n, m, cap in _name_index():
+        nk = n.replace(' ', '').casefold()
+        if nk == key:
+            exact.append((c, n, m, cap))
+        elif key in nk:
+            part.append((c, n, m, cap))
+    if len(exact) == 1:
+        return exact[0][0], []
+    if not exact and len(part) == 1:          # 후보가 하나뿐이면 바로 연다 ('하이닉스' → SK하이닉스)
+        return part[0][0], []
+    cands = sorted(exact + part, key=lambda r: -r[3])[:15]
+    if not cands and up.isascii():
+        return up, []                    # 목록에 없는 티커 — 그대로 시도한다
+    return None, [(c, f"{n} ({c} · {m})") for c, n, m, _ in cands]
+
+
 with tab7, guard('종목 분석'):
     st.header("🔍 종목 분석")
-    st.caption("US: TSLA · AAPL · NVDA  |  KR: 005930 또는 005930.KS")
+    st.caption("종목명 또는 코드 — KR: 삼성전자 · 005930  |  US: TSLA · Tesla")
 
     c_in, c_btn, _csp = st.columns([2.2, 0.9, 4.9])   # 필요한 만큼만 좁게 (#3)
     with c_in:
-        sym8 = st.text_input("종목코드", placeholder="TSLA / 005930",
+        sym8 = st.text_input("종목명 또는 코드", placeholder="삼성전자 / 005930 / TSLA",
                              label_visibility="collapsed", key="sym8")
     with c_btn:
         go8 = st.button("분석", use_container_width=True, key="go8")
 
     # 분석 종목을 세션에 고정 — 라디오/슬라이더 조작(rerun)에도 분석 화면 유지 (#7)
     if sym8 and go8:
-        st.session_state['analyze_sym'] = sym8.strip().upper()
+        _code, _cands = _resolve_symbol(sym8)
+        if _code:
+            st.session_state['analyze_sym'] = _code
+            st.session_state.pop('sym8_cands', None)
+        else:
+            st.session_state['sym8_cands'] = _cands
+    _cands = st.session_state.get('sym8_cands')
+    if _cands is not None:
+        if not _cands:
+            st.warning(f"'{sym8}' 와 맞는 종목이 없습니다. 이름 일부나 종목코드로 다시 찾아보세요.")
+        else:
+            _cc1, _cc2, _ = st.columns([3.1, 0.9, 4.0])
+            _pick = _cc1.selectbox(f"후보 {len(_cands)}개 (시총 큰 순)", _cands,
+                                   format_func=lambda x: x[1], key="sym8_pick")
+            if _cc2.button("이 종목", key="sym8_go", use_container_width=True):
+                st.session_state['analyze_sym'] = _pick[0]
+                st.session_state.pop('sym8_cands', None)
+                st.rerun()
     _asym = st.session_state.get('analyze_sym')
 
     if _asym:
@@ -4598,3 +4747,79 @@ with guard('데이터 신선도'):
                    "필터링되고 있었습니다. 그래서 화면에 안 보여도 같이 감시합니다.")
 st.caption("출처: DART·SEC EDGAR(공식 재무) · FinanceDataReader/KRX(가격) · "
            "FRED(매크로) · 네이버금융·yfinance(컨센서스, 참고)")
+
+
+# ── 📰 시황 리포트 + 챗봇 (2026-10-14) ─────────────────────────────────
+def _gemini_key_site():
+    try:
+        import config
+        k = getattr(config, 'GEMINI_KEY', '') or ''
+    except Exception:
+        k = ''
+    if not k:
+        try:
+            k = st.secrets.get('GEMINI_KEY', '')
+        except Exception:
+            k = ''
+    return k or os.environ.get('GEMINI_KEY', '')
+
+
+def _related_rows(q):
+    """질문에 종목명·코드가 있으면 그 종목의 숫자를 챗봇 자료에 붙인다."""
+    qn = q.replace(' ', '').casefold()
+    out = []
+    for f in ('results/perf_latest.json', 'results/canslim_latest.json', 'results/canslim_us_latest.json'):
+        for x in (load_json(Path(f)) or {}).get('stocks', []):
+            n = str(x.get('name') or '').replace(' ', '').casefold()
+            sym = str(x.get('sym') or '')
+            if (len(n) >= 2 and n in qn) or (len(sym) >= 2 and sym.casefold() in qn.split() + [qn]):
+                out.append({k: v for k, v in x.items() if not isinstance(v, (list, dict))} | {'_src': f})
+    return out[:6]
+
+
+with tab_rep, guard('시황 리포트'):
+    _rep = load_json(Path('results/market_report.json')) or {}
+    st.caption("매일 06시(KST) 일간 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
+               "뉴스·전망을 지어내지 않도록 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
+    _hist = _rep.get('history') or []
+    if not _hist:
+        st.info("아직 발행된 리포트가 없습니다. 다음 자동 갱신(매일 06시)부터 쌓입니다.")
+    else:
+        _opts = [f"{h['date']} · {'일간' if h['kind']=='daily' else '주간'}" for h in _hist]
+        _i = st.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick")
+        _h = _hist[_i]
+        st.caption(f"작성: {'AI(' + _h['engine'].split(':')[-1] + ')' if _h['engine'].startswith('gemini') else '숫자 템플릿'}")
+        st.markdown(_h['markdown'])
+        _lf = (_rep.get(f"latest_{_h['kind']}") or {})
+        if _lf.get('date') == _h['date']:
+            with st.expander("근거 숫자 보기 (리포트가 쓴 원자료)"):
+                st.json(_lf.get('facts') or {}, expanded=False)
+
+    st.divider()
+    st.markdown("#### 💬 시황 챗봇")
+    st.caption("최신 리포트의 원자료와 질문에 나온 종목의 숫자만 근거로 답합니다. 매수·매도 추천은 하지 않습니다. "
+               "AI 무료 한도가 있어 세션당 10회로 제한합니다.")
+    st.session_state.setdefault('chat_log', [])
+    for _role, _msg in st.session_state['chat_log'][-12:]:
+        with st.chat_message(_role):
+            st.markdown(_msg)
+    _qc1, _qc2 = st.columns([5, 1])
+    _q = _qc1.text_input("질문", placeholder="예: 어제 코스피 왜 빠졌어? / 이번 주 미국 강세 종목은? / 티에스이 신호 어때?",
+                         label_visibility="collapsed", key="chat_q")
+    if _qc2.button("묻기", key="chat_go", use_container_width=True) and _q.strip():
+        if sum(1 for r, _ in st.session_state['chat_log'] if r == 'user') >= 10:
+            st.warning("이번 세션 질문 한도(10회)를 다 썼습니다. 새로고침하면 초기화됩니다.")
+        else:
+            _key = _gemini_key_site()
+            if not _key:
+                _ans = "AI 키가 설정되지 않았습니다 — Streamlit Secrets 에 GEMINI_KEY 가 필요합니다."
+            else:
+                with st.spinner("답변 작성 중…"):
+                    try:
+                        import market_report as _MR
+                        _ans, _m = _MR.answer(_q.strip(), key=_key, extra_rows=_related_rows(_q))
+                        _ans += f"\n\n_※ AI({_m}) 생성 · 사실 확인 필요 · 투자 권유 아님_"
+                    except Exception as _e:
+                        _ans = f"답변 실패 — AI 한도 초과 또는 일시 오류일 수 있습니다. ({str(_e)[:80]})"
+            st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
+            st.rerun()

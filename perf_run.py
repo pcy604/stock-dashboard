@@ -112,6 +112,20 @@ def analyze_one(sym, name, marcap, market):
         # 현재 신호
         sigs_now  = calc_signals(wdf)
 
+        # 52주 신고가 상세 — 📈 52주 신고가 탭용 (2026-10-14)
+        #   고점은 직전 52주 '주봉 고가'(장중 고가 포함), 거리는 이번 주 종가 기준.
+        #   이번 주 고가가 직전 52주 고가를 넘었으면 '신고가 경신'.
+        try:
+            _hi = float(wdf['High'].iloc[-53:-1].max())
+            _dist = (curr / _hi - 1) * 100 if _hi > 0 else None
+            _new = bool(float(wdf['High'].iloc[-1]) > _hi) if _hi > 0 else False
+            _wk_since = None
+            _hh = wdf['High'].iloc[-53:]
+            if len(_hh):
+                _wk_since = int(len(_hh) - 1 - int(_hh.values.argmax()))   # 52주 최고가를 찍은 뒤 지난 주 수
+        except Exception:
+            _hi, _dist, _new, _wk_since = None, None, False, None
+
         return {
             'market':      market,
             'sym':         sym,
@@ -120,6 +134,11 @@ def analyze_one(sym, name, marcap, market):
             'ret_4w':      round(ret4w, 2),
             'ret_1w':      round(ret1w, 2),
             'curr_price':  round(curr, 2),
+            'hi52':        round(_hi, 2) if _hi else None,
+            'dist52':      round(_dist, 2) if _dist is not None else None,
+            'new_high':    _new,
+            'wk_since_hi': _wk_since,
+            'ret_12w':     round((curr / float(wdf['Close'].iloc[-13]) - 1) * 100, 2) if len(wdf) >= 13 else None,
             # 신호 레이블
             'sigs_past':   sig_labels(sigs_past),
             'sigs_now':    sig_labels(sigs_now),
