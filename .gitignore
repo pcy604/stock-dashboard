@@ -86,3 +86,5 @@ exports/earnings_event.csv.gz
 # 구루 미니차트 — 생성 후 텔레그램으로 보내고 끝나는 1회용 이미지다. 다시 읽는 코드가
 # 없는데도 매 실행 커밋돼 히스토리에 338회 37MB 를 남겼다(2026-09-04 실측).
 results/guru_chart_latest.png
+.contract_violations.json
+data/_fundq_ci.db

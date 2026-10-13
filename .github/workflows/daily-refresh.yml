@@ -160,6 +160,21 @@ jobs:
         run: python health_metrics.py
         continue-on-error: true
 
+      # 2026-10-14 — 산출물 계약(output_contracts.py). 내용이 무너진 산출물은 커밋하지 않고
+      #   직전 정상본으로 되돌린다. 날짜만 신선하고 내용이 죽은 고장(KR 0종·universe 2종·
+      #   순이익 공란 parquet)을 화면에 내보내지 않기 위해서다. 여기서는 실패시키지 않는다 —
+      #   정상인 나머지 산출물은 커밋돼야 하므로. 실패 처리는 커밋 뒤 단계에서 한다.
+      # 2026-10-14 — 원천 대조. 계약 검사는 '비었나·낡았나'만 본다. 숫자가 **틀린** 것
+      #   (52주 신고가 0/1,065 처럼)은 앱과 독립된 원천(FinanceData/marcap 일괄 데이터)으로
+      #   다시 계산해 봐야 보인다. 불일치면 텔레그램. 산출물을 막지는 않는다(원천도 틀릴 수 있다).
+      - name: KR 원천 대조 (marcap 데이터셋으로 재계산)
+        run: python tools/reconcile_kr.py
+        continue-on-error: true
+
+      - name: 산출물 계약 검사 (위반분 되돌림)
+        run: python output_contracts.py --guard
+        continue-on-error: true
+
       - name: 변경분 커밋 & 푸시
         run: |
           git config user.name  "github-actions"
@@ -252,6 +267,9 @@ jobs:
       # 2026-09-07 신설 — 위 단계는 전부 continue-on-error 라 하나가 죽어도 초록불로
       # 끝난다. 실제로 미국 시총이 08-18 부터 19일간 멈췄는데 아무도 몰랐다.
       # 여기서 산출물의 실제 날짜를 검사해 낡았으면 실패시킨다. 실패하면 메일이 온다.
+      - name: 산출물 계약 위반 보고 (위반 시 실패)
+        run: python output_contracts.py --fail-if-violated
+
       - name: 산출물 신선도 검증 (조용한 고장 차단)
         run: python tools/check_freshness_ci.py
 

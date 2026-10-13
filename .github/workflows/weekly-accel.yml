@@ -254,6 +254,15 @@ jobs:
           python _accel_export.py
           rm -f _accel_export.py
 
+      # 2026-10-14 — 산출물 계약(output_contracts.py). 내용이 무너진 산출물은 커밋하지 않고
+      #   직전 정상본으로 되돌린다. 날짜만 신선하고 내용이 죽은 고장(KR 0종·universe 2종·
+      #   순이익 공란 parquet)을 화면에 내보내지 않기 위해서다. 여기서는 실패시키지 않는다 —
+      #   정상인 나머지 산출물은 커밋돼야 하므로. 실패 처리는 커밋 뒤 단계에서 한다.
+      - name: 산출물 계약 검사 (위반분 되돌림)
+        if: steps.due.outputs.skip != 'true'
+        run: python output_contracts.py --guard
+        continue-on-error: true
+
       - name: 결과 커밋 & 푸시
         if: steps.due.outputs.skip != 'true'
         run: |
@@ -270,6 +279,10 @@ jobs:
             git commit -m "auto: 주도주 편입 후보 $(date -u +%Y-%m-%d)"
             git push origin main
           fi
+
+      - name: 산출물 계약 위반 보고 (위반 시 실패)
+        if: steps.due.outputs.skip != 'true'
+        run: python output_contracts.py --fail-if-violated
 
       - name: 실패 시 텔레그램
         if: failure()

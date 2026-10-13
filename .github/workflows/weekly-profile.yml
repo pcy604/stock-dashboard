@@ -74,6 +74,16 @@ jobs:
       # 한 벌 더 굴려야 한다.
       # market.db(574MB, gitignore)는 러너에 없다 — 분기재무·universe 는
       # export_kr_fundq.py 가 만든 커밋된 parquet(0.71MB + 79KB)로 폴백한다.
+      # 2026-10-14 — KR 분기재무를 러너가 직접 갱신한다(전에는 PC 수동 export 뿐이었다).
+      #   10-12 PC DB 에서 고친 순이익이 레포 parquet 에는 08-15 판(전 행 공란)으로 남아
+      #   KR-U6 가 틀린 재무로 돌았다. 아래 KR 신호 갱신이 이 파일을 읽으므로 그 앞에 둔다.
+      #   실패해도 기존 parquet 는 그대로다(스크립트가 나빠진 결과는 쓰지 않는다).
+      - name: KR 분기재무 갱신 (DART → kr_fundamentals_q.parquet)
+        env:
+          DART_KEY: ${{ secrets.DART_KEY }}
+        run: python tools/refresh_kr_fundq.py
+        continue-on-error: true
+
       - name: 주도주 KR 신호 갱신 (KR-P1 · KR-U6 · 포워드 원장)
         run: |
           # ⚠️ 예전엔 세 줄을 그냥 이어 썼다. bash -e 라 앞이 죽으면 뒤는 **실행조차
@@ -101,6 +111,14 @@ jobs:
           run_step leaders_kr_paper update
         continue-on-error: true
 
+      # 2026-10-14 — 산출물 계약(output_contracts.py). 내용이 무너진 산출물은 커밋하지 않고
+      #   직전 정상본으로 되돌린다. 날짜만 신선하고 내용이 죽은 고장(KR 0종·universe 2종·
+      #   순이익 공란 parquet)을 화면에 내보내지 않기 위해서다. 여기서는 실패시키지 않는다 —
+      #   정상인 나머지 산출물은 커밋돼야 하므로. 실패 처리는 커밋 뒤 단계에서 한다.
+      - name: 산출물 계약 검사 (위반분 되돌림)
+        run: python output_contracts.py --guard
+        continue-on-error: true
+
       - name: 결과 커밋 & 푸시
         run: |
           git config user.name  "github-actions"
@@ -111,7 +129,8 @@ jobs:
           git add data/us_shares.csv data/us_marketcap.csv data/us_splits.csv 2>/dev/null || true
           # ⚠️ 경로를 한 줄에 여러 개 넘기면 하나만 없어도 git add 가 fatal 로 죽으면서
           #    *아무것도* 스테이징하지 않는다. 하나씩 넘긴다.
-          for f in results/leaders_kr.json results/leaders_kr6.json \
+          for f in data/kr_fundamentals_q.parquet data/kr_universe.parquet \
+                   results/leaders_kr.json results/leaders_kr6.json \
                    results/leaders_kr_paper.json results/kr_step_errors.txt; do
             [ -f "$f" ] && git add "$f"
           done
@@ -170,6 +189,12 @@ jobs:
 
       # continue-on-error 로 스텝이 죽어도 초록불이라 그대로 묻힌다.
       # 커밋 뒤 신선도를 직접 확인해, 정지면 텔레그램 경보 + 잡을 실패로 표시한다.
+      - name: 산출물 계약 위반 보고 (위반 시 실패)
+        env:
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python output_contracts.py --fail-if-violated
+
       - name: 신선도 검증 (정지면 실패 처리)
         env:
           TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}

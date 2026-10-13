@@ -40,6 +40,25 @@ def _paper_max_log(d):
                default=None)
 
 
+def _fundq_quarter(p):
+    """KR 분기재무 parquet 의 '내용 날짜' — 대다수 종목(80% 분위)의 최신 분기 말일.
+
+    2026-10-14 — 이 파일은 _mtime 으로 판정됐다. 그래서 08-15 에 만든 내용(순이익 전 행
+    공란·2026Q1)이 10-13 에 '수정 0일 · 정상'으로 보였다. 파일을 언제 건드렸는지가
+    아니라 **안에 든 데이터가 언제 것인지**를 본다. 분기 말에서 150일(다음 분기 실적
+    공시 마감 + 여유)이 지나도 새 분기가 없으면 낡은 것이다."""
+    try:
+        import pandas as pd
+        r = pd.read_parquet(p, columns=['sym', 'year', 'q'])
+        last = (r.year * 10 + r.q).groupby(r.sym).max().quantile(0.8)
+        y, q = int(last // 10), int(last % 10)
+        m = q * 3
+        import calendar
+        return f"{y}-{m:02d}-{calendar.monthrange(y, m)[1]:02d}"
+    except Exception:
+        return None
+
+
 def _mtime(p):
     """내용에 날짜 컬럼이 없는 산출물(parquet 등)용 — 파일 수정시각을 신선도로 쓴다.
     raw=True 와 함께 쓴다. 내용 기반 날짜가 있으면 그쪽이 항상 낫다(파일을 건드리기만
@@ -147,9 +166,9 @@ SOURCES = [
     # 실패가 그것이었다). 그래서 leaders_ab.py 가 발행물에 기준일(vol_asof)을 실어
     # 보내고, 여기서는 그 값을 본다 — 배포된 화면에서도 보인다.
         dict(path='data/kr_fundamentals_q.parquet', label='KR 분기재무 (KR-U6 입력)',
-         cycle='분기 1회', max_age=100, producer='export_kr_fundq.py export',
-         job='수동 (로컬 · market.db 필요)', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',
-         getter=_mtime, raw=True),
+         cycle='분기 1회', max_age=150, producer='export_kr_fundq.py export',
+         job='weekly-profile (tools/refresh_kr_fundq.py)', used_by='🚀 주도주 → 🇰🇷 · 🔄 흑자전환(KR)',
+         getter=_fundq_quarter, raw=True),
     dict(path='results/leaders_kr6.json', label='주도주 KR (KR-U6·규칙⑥ 이식)',
          cycle='주 1회', max_age=9, producer='leaders_kr6.py publish',
          job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',
