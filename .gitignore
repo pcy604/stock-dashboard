@@ -88,3 +88,4 @@ exports/earnings_event.csv.gz
 results/guru_chart_latest.png
 .contract_violations.json
 data/_fundq_ci.db
+executor/ledger.json.tmp

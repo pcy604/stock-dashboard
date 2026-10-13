@@ -1,0 +1,20 @@
+import pandas as pd, numpy as np, sys, os
+sys.path.insert(0, os.path.expanduser('~/ss_remote'))
+wc=pd.read_parquet('kr_wc.parquet'); wadv=pd.read_parquet('kr_wadv.parquet'); wb=pd.read_parquet('kr_wb.parquet').astype(bool); wm=pd.read_parquet('kr_wm.parquet')
+base=wb & (wadv>=10e8) & (wc>=1000)
+# 이익 변곡 (공시 시차 반영)
+import ingest_dart_quarterly as IQ
+_cwd=os.getcwd(); os.chdir(os.path.expanduser('~/ss_remote')); q=IQ.quarterly(); os.chdir(_cwd); q['sym']=q.sym.astype(str).str.zfill(6)
+qend={1:'-03-31',2:'-06-30',3:'-09-30',4:'-12-31'}
+q['avail']=pd.to_datetime(q.year.astype(str)+q.q.map(qend))+pd.to_timedelta([90 if x==4 else 50 for x in q.q],unit='D')
+q['flag']=((q.op_turn==1)|(q.op_yoy>=100)).astype(float)
+q=q.sort_values('avail').drop_duplicates(['sym','avail'],keep='last')
+F=q.pivot(index='avail',columns='sym',values='flag')
+F=F.reindex(F.index.union(wc.index)).ffill().reindex(wc.index).reindex(columns=wc.columns)
+has_fund=F.notna()
+earn=base & (F==1)
+print('주간',wc.shape,'가격신호',int(base.sum().sum()),'실적신호',int(earn.sum().sum()),'재무 보유 종목',int(has_fund.any().sum()))
+# 재무가 없는 종목 중 상장폐지 비율 (생존편향 점검)
+meta=pd.read_parquet('kr_meta.parquet'); dl=set(meta[meta['last']<'2026-09-01'].index)
+nf=set(wc.columns[~has_fund.any()]); print('재무 없는 종목',len(nf),'그중 상폐',len(nf&dl),'/ 전체 상폐',len(dl))
+base.to_parquet('sig_price.parquet'); earn.to_parquet('sig_earn.parquet')
