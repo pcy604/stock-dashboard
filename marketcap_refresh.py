@@ -512,6 +512,15 @@ def cmd_build(net_price=False):
     if os.path.exists(OUT_MC):
         old = pd.read_csv(OUT_MC)
         name = dict(zip(old.Symbol.astype(str), old.Name.astype(str)))
+    # 2026-10-14 — 이름이 비었거나 티커와 같으면 SEC 공식 회사명으로 채운다(96% 가 티커였다).
+    try:
+        import edgar_client
+        sec_names = edgar_client.name_map(refresh=True)
+        for k, v in sec_names.items():
+            if v and (name.get(k) in (None, "", "nan", k)):
+                name[k] = v
+    except Exception as _e:
+        print(f"  [warn] SEC 회사명 조회 실패 — 기존 이름 유지: {str(_e)[:80]}", flush=True)
 
     # 캐시에 가격이 없는 종목은 (CI 등에서) 시세를 받아 온다. 로컬은 거의 안 탄다.
     #

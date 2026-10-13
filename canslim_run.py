@@ -72,7 +72,7 @@ def get_universe():
     print("  유니버스 로딩...", end=' ', flush=True)
     try:
         import krx_listing
-        krx = krx_listing.stock_listing('KRX')
+        krx = krx_listing.stock_listing('KRX', tradable=True)
         f = krx[krx['Marcap'] >= MIN_MARCAP].sort_values('Marcap', ascending=False)
         pairs = list(zip(
             f['Code'].astype(str).str.zfill(6),
@@ -274,6 +274,8 @@ def check_c(sym):
         if year_ago < 0:
             ok = latest > 0
             return ok, {'growth': '흑자전환' if ok else None, 'quarter': q_label}
+        if latest < 0:                       # 2026-10-14 흑자→적자는 성장률이 아니라 '적자전환'
+            return False, {'growth': '적자전환', 'quarter': q_label}
         growth = (latest - year_ago) / abs(year_ago) * 100
         ok = growth >= C_MIN_GROWTH
         return ok, {'growth': round(growth, 1), 'quarter': q_label}

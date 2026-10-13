@@ -30,13 +30,48 @@ def _live_marcap_map():
     """오늘 종가 기준 KRX 전종목 시총 (KRX 로그인 불필요, fdr가 매번 새로 가져옴)."""
     import FinanceDataReader as fdr
     import krx_listing
-    krx = krx_listing.stock_listing('KRX')
+    krx = krx_listing.stock_listing('KRX', tradable=True)
     return {str(r['Code']): {'marcap': int(r['Marcap']), 'name': r['Name']}
             for _, r in krx.iterrows() if r.get('Marcap')}
 
 
+def _ttm_map():
+    """{sym: (TTM 순이익, '2026Q2')} — 최근 4개 분기 합. 4분기가 연속으로 다 있고
+    최신 분기 말이 200일 이내일 때만. (2026-10-14 신설)
+
+    왜: PER 을 '최근 연간(FY2025)' 순이익으로 나눴다. 10월이면 2026년 상반기 실적이
+    이미 나와 있는데 9개월 전 숫자를 썼다 — 이익이 급증하는 종목(삼성전자 PER 33.9,
+    하이닉스 28.6)은 실제보다 비싸 보이고, 이익이 꺾이는 종목은 싸 보인다.
+    가치 발굴에서 정확히 반대로 틀리는 방향이다."""
+    try:
+        import pandas as pd
+        from datetime import date
+        import ingest_dart_quarterly as Q
+        q = Q.quarterly()
+        if q is None or q.empty:
+            return {}
+        q = q.dropna(subset=['net_income']).sort_values(['sym', 'year', 'q'])
+        out = {}
+        for sym, g in q.groupby('sym'):
+            g = g.tail(4)
+            if len(g) < 4:
+                continue
+            idx = [int(y) * 4 + int(qq) for y, qq in zip(g.year, g.q)]
+            if idx != list(range(idx[0], idx[0] + 4)):          # 연속 4분기가 아니면 버린다
+                continue
+            ly, lq = int(g.year.iloc[-1]), int(g.q.iloc[-1])
+            if (date.today() - date(ly, lq * 3, 28)).days > 200:
+                continue
+            out[str(sym).zfill(6)] = (float(g.net_income.sum()), f"{ly}Q{lq}")
+        return out
+    except Exception as e:
+        print(f"  [warn] TTM 계산 실패 — 연간 PER 로 대체: {str(e)[:80]}")
+        return {}
+
+
 def run():
     con = db.get_conn()
+    ttm = _ttm_map()
     retmap = {s['sym']: s for s in json.loads(RETURNS.read_text(encoding='utf-8')).get('stocks', [])
               if s.get('market') == 'KR'}
     live = _live_marcap_map()
@@ -70,7 +105,11 @@ def run():
         rows.append({
             'sym': sym, 'name': name, 'marcap': live_row['marcap'],
             'period': cur['period'],
-            'per': round(mc / ni, 1) if ni and ni > 0 else None,
+            # PER: 최근 4분기(TTM) 우선, 없으면 최근 연간. 근거를 per_basis 에 남긴다.
+            'per': (round(mc / ttm[sym][0], 1) if ttm[sym][0] > 0 else None) if sym in ttm
+                   else (round(mc / ni, 1) if ni and ni > 0 else None),
+            'per_basis': f"TTM {ttm[sym][1]}" if sym in ttm else f"FY{cur['period']}",
+            'per_fy': round(mc / ni, 1) if ni and ni > 0 else None,
             'pbr': round(mc / eq, 2) if eq and eq > 0 else None,
             'psr': round(mc / rv, 2) if rv and rv > 0 else None,
             'roe': cur.get('roe'),

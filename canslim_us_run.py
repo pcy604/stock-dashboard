@@ -69,6 +69,10 @@ def _earnings(sym):
             return '흑자전환' if cur > 0 else None
         if prev == 0:
             return None
+        # 2026-10-14 — 흑자→적자를 숫자로 내면 LITE 처럼 -26,876% 가 나온다(FY26 일회성
+        #   부채소멸손실 78억$). 계산은 맞지만 표에서 '성장률'로 읽히면 안 되는 값이다.
+        if cur < 0:
+            return '적자전환'
         return round((cur / prev - 1) * 100, 1)
 
     c_g, c_q = None, ''

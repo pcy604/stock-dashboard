@@ -1832,7 +1832,7 @@ with t_value, guard('가치 발굴'):
                                '컨센리비전': ({'up': '📈 상향', 'down': '📉 하향', 'flat': '➖ 유지'}
                                           .get((_REVM.get(s['sym']) or {}).get('dir'), '-')),
                                '고점대비%': _mdd_col(s['sym'], _MDDM),
-                               '기준': s.get('period')})
+                               '기준': s.get('per_basis') or s.get('period')})   # 'TTM 2026Q2' 또는 'FY2025'
             # 정렬 축을 '싼 순'에만 묶어두면 저PER 함정이 늘 맨 위로 온다.
             # 위닝점수(셋업의 질)는 이미 전 표에 계산돼 있으니 정렬 축으로도 쓴다.
             if st.session_state.get('val_sort', '저PER순') == '위닝점수순':
@@ -1927,7 +1927,8 @@ with tab3, guard('CANSLIM'):
 
         def _tag3(v, th, fmt='{:.1f}'):
             if v is None: return '?'
-            if isinstance(v, str): return f"✅ {v}"   # '흑자전환' 등 텍스트 = 통과
+            if isinstance(v, str):                    # '흑자전환' = 통과, '적자전환' = 탈락
+                return f"{'✅' if v == '흑자전환' else '❌'} {v}"
             return f"{'✅' if v >= th else '❌'} {fmt.format(v)}"
 
         rows3 = []
@@ -4470,6 +4471,11 @@ with t_turn, guard('흑자전환'):
         _c1.metric("총 종목", f"{_ta.get('total', len(_tas))}종")
         _c2.metric("KR", f"{_ta.get('kr', 0)}종")
         _c3.metric("US", f"{_ta.get('us', 0)}종")
+        # 2026-10-14 — 데이터가 불완전해 판정하지 않은 종목을 숨기지 않는다
+        _skp = _ta.get('skipped') or {}
+        if _skp:
+            st.caption("⏸️ 판정 보류: " + " · ".join(f"{k.replace('_', ' ')} {v}종" for k, v in _skp.items())
+                       + " — 재무 데이터가 비었거나 분기가 빠져 있으면 틀린 판정을 내지 않고 뺍니다.")
 
         _mk = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="turn_mk")
         _sts = sorted({r.get('status') for r in _tas if r.get('status')})

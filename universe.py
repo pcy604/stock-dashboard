@@ -13,7 +13,7 @@ def get_kr_universe(min_marcap: int = 300_000_000_000) -> list[tuple[str, str, i
     print(f"  KRX 종목 로딩...", end=' ', flush=True)
     try:
         import krx_listing
-        krx = krx_listing.stock_listing('KRX')
+        krx = krx_listing.stock_listing('KRX', tradable=True)
         filtered = krx[krx['Marcap'] >= min_marcap].sort_values('Marcap', ascending=False)
         pairs = list(zip(
             filtered['Code'].astype(str).str.zfill(6),

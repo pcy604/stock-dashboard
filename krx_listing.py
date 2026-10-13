@@ -80,8 +80,24 @@ def _filter(df, market):
     return df
 
 
-def stock_listing(market: str = "KRX", verbose: bool = True) -> pd.DataFrame:
-    """fdr.StockListing('KRX'|'KOSPI'|'KOSDAQ'|'KONEX') 대체. 실패하면 예외."""
+def _tradable(df):
+    """스크리너 유니버스용 — 코넥스와 그날 거래가 없던 종목(거래정지 등)을 뺀다.
+
+    2026-10-14 — CANSLIM KR 후보에 '본시스템즈'(코넥스, 고가 0원·거래 0)가 끼어 있었다.
+    가격이 없는 종목은 52주 고가·RS 계산이 무의미하고, 코넥스는 개인 매매 제약이 있다."""
+    if "MarketId" in df:
+        df = df[df["MarketId"].astype(str) != "KNX"]
+    if "Volume" in df:
+        v = pd.to_numeric(df["Volume"], errors="coerce")
+        df = df[v.fillna(0) > 0]
+    return df.reset_index(drop=True)
+
+
+def stock_listing(market: str = "KRX", verbose: bool = True, tradable: bool = False) -> pd.DataFrame:
+    """fdr.StockListing('KRX'|'KOSPI'|'KOSDAQ'|'KONEX') 대체. 실패하면 예외.
+    tradable=True 면 코넥스·당일 거래 없는 종목을 뺀다(스크리너 유니버스용)."""
+    if tradable:
+        return _tradable(stock_listing(market, verbose=verbose))
     if market not in _MKT:
         raise ValueError(f"market={market} 는 지원하지 않는다 (KRX/KOSPI/KOSDAQ/KONEX)")
     if "ALL" in _memo:
@@ -118,7 +134,7 @@ def stock_listing(market: str = "KRX", verbose: bool = True) -> pd.DataFrame:
     if src != "snapshot":
         try:
             keep = [c for c in ("Code", "Name", "Market", "MarketId", "Close", "Marcap",
-                                "Stocks", "Amount") if c in df]
+                                "Stocks", "Amount", "Volume") if c in df]
             df[keep].to_csv(SNAP, index=False, encoding="utf-8")
             with open(SNAP + ".asof", "w") as f:
                 f.write(asof or "")

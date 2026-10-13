@@ -65,6 +65,26 @@ def cik_map(refresh=False):
     return m
 
 
+_NAME_CACHE = _CIK_CACHE.with_name('edgar_names.json')
+
+
+def name_map(refresh=False):
+    """{TICKER: 회사명}. company_tickers.json 의 title.
+
+    2026-10-14 — us_marketcap.csv 의 Name 이 96% 티커였다('DELL', 'P'…). 그래서 CANSLIM
+    US·흑자전환 표에 회사명 대신 티커만 떴고, 사명이 바뀐 종목(P = 구 Pure Storage,
+    현 Everpure)은 무엇인지 알아볼 수 없었다. cik_map 과 같은 파일에 이름이 이미 있다."""
+    if not refresh and _NAME_CACHE.exists():
+        try:
+            return json.loads(_NAME_CACHE.read_text(encoding='utf-8'))
+        except Exception:
+            pass
+    j = _get("https://www.sec.gov/files/company_tickers.json").json()
+    m = {v['ticker'].upper(): str(v.get('title') or '').strip() for v in j.values()}
+    _NAME_CACHE.write_text(json.dumps(m, ensure_ascii=False), encoding='utf-8')
+    return m
+
+
 def _annual_series(facts, concept):
     """us-gaap 개념의 연간(10-K, FY) 값 {fiscal_year: val}."""
     node = facts.get('us-gaap', {}).get(concept)

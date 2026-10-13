@@ -37,7 +37,7 @@ def get_kr_tickers():
     """weekly_run.py와 동일: fdr.StockListing('KRX') 사용"""
     try:
         import krx_listing
-        krx = krx_listing.stock_listing('KRX')
+        krx = krx_listing.stock_listing('KRX', tradable=True)
         filtered = krx[krx['Marcap'] >= MIN_MARCAP_KR].sort_values('Marcap', ascending=False)
         return list(zip(
             filtered['Code'].astype(str).str.zfill(6),
@@ -184,6 +184,14 @@ def analyze(sym: str, name: str, marcap: int, market: str):
             return None
         if (pd.Timestamp(DATE_STR) - pd.Timestamp(ni.index[0])).days > 200:
             _SKIP['최신분기_200일초과'] += 1
+            return None
+        # 2026-10-14 — 분기 누락 차단. 아래 계산은 '최근 8개 값 = 연속 8분기'를 가정한다.
+        #   KR 분기재무에 2025Q3·Q4 가 통째로 빠져 있어(적재 버그) 2026Q2·Q1·2025Q2·Q1 을
+        #   '최근 4분기'로, 2024Q4 를 '전년 동기'로 계산하고 있었다. 기간 간격으로 검사한다.
+        _p = [pd.Timestamp(x) for x in ni.index[:min(len(ni), 8)]]
+        _gaps = [(a - b).days for a, b in zip(_p, _p[1:])]
+        if any(g > 100 for g in _gaps):
+            _SKIP['분기_누락'] += 1
             return None
         niv = [float(v) for v in ni.values]
         q0, q1, q2, q3 = niv[0], niv[1], niv[2], niv[3]

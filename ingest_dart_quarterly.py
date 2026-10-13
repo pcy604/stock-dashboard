@@ -135,7 +135,11 @@ def ingest(y0: int, y1: int, syms: list[str] | None = None):
     # 병렬 6워커로 5.5배 — 실측 202초 → 36.5초.
     from concurrent.futures import ThreadPoolExecutor
     # frmtrm(전년 동기)이 함께 오므로 격년만 호출해도 전 구간이 덮인다
-    call_years = sorted({y for y in range(y1, y0 - 1, -2)} | {y1})
+    # ⚠️ 2026-10-14 — '격년 호출'은 **완결된 해**에만 성립한다. 올해 3·4분기 보고서는 아직
+    #   없으니 그 '전년 동기'(작년 3·4분기)도 영영 안 받았다. 실측: 2025Q3 7종 · 2025Q4 24종
+    #   (정상 1,400+). '최근 4분기'를 쓰는 흑자전환·TTM PER 이 통째로 어긋났다.
+    #   작년은 언제나 직접 호출한다.
+    call_years = sorted({y for y in range(y1, y0 - 1, -2)} | {y1} | ({y1 - 1} if y1 - 1 >= y0 else set()))
     print(f'호출 연도 {call_years} (각 호출이 전년도까지 커버) · 워커 {WORKERS}', flush=True)
 
     con = sqlite3.connect(DB)

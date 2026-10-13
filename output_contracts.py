@@ -111,8 +111,12 @@ def c_value():
 def c_turnaround():
     d = _j("results/turnaround_latest.json"); st = d.get("stocks", [])
     old = sum(1 for s in st if _age(s.get("q0_date")) > 200)
+    gap = (d.get("skipped") or {}).get("분기_누락", 0)
+    # 분기 누락으로 '판정 보류'된 것이면 틀린 결과를 되살리는 것보다 비어 있는 게 낫다 → 경고만
+    kr_sev = WARN if gap >= 100 else BLOCK
     return [chk(_age(d.get("date")) <= 9, BLOCK, f"date {d.get('date')} 9일 초과"),
-            chk(d.get("kr", 0) >= 100, BLOCK, f"KR {d.get('kr')}종 (<100) — KR 분기재무 확인"),
+            chk(d.get("kr", 0) >= 100, kr_sev, f"KR {d.get('kr')}종 (<100)"
+                + (f" — 분기 누락 {gap}종 판정 보류(KR 분기재무 재적재 필요)" if gap else " — KR 분기재무 확인")),
             chk(d.get("us", 0) >= 50, BLOCK, f"US {d.get('us')}종 (<50) — fq_ 캐시 확인"),
             chk(old <= max(3, len(st) * 0.02), BLOCK, f"최신 분기가 200일 넘은 종목 {old}개 — 낡은 재무로 판정 중")]
 
@@ -171,7 +175,12 @@ def c_kr_fundq():
     ly, lq = int(last // 10), int(last % 10)
     q_end = date(ly, lq * 3, 1)
     fill = r.net_income.notna().mean()
-    return [chk((TODAY - q_end).days <= 200, BLOCK, f"대다수 종목 최신 분기 {ly}Q{lq} — 200일 초과(export 안 됨)"),
+    # 분기 누락 — 작년 각 분기를 가진 종목 수가 가장 많은 분기의 80% 미만이면 구멍이다
+    #   (2026-10-14 실측: 2025Q3 7종·Q4 24종 vs Q1 1,442종 — 적재 코드의 격년 호출 버그)
+    py = TODAY.year - 1
+    cnt = r[r.year == py].groupby("q").sym.nunique().reindex([1, 2, 3, 4]).fillna(0)
+    holes = [f"{py}Q{q}" for q, n in cnt.items() if cnt.max() and n < cnt.max() * 0.8]
+    return [chk(not holes, BLOCK, f"분기 누락 {holes} — 최근 4분기 계산이 어긋난다"),chk((TODAY - q_end).days <= 200, BLOCK, f"대다수 종목 최신 분기 {ly}Q{lq} — 200일 초과(export 안 됨)"),
             chk(fill >= 0.8, BLOCK, f"순이익 채움률 {fill:.0%} (<80%)")]
 
 

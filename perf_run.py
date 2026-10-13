@@ -136,7 +136,7 @@ def analyze_one(sym, name, marcap, market):
 def get_kr_universe():
     print("  KR 유니버스...", end=' ', flush=True)
     import krx_listing
-    krx = krx_listing.stock_listing('KRX')
+    krx = krx_listing.stock_listing('KRX', tradable=True)
     f = krx[krx['Marcap'] >= 300_000_000_000].sort_values('Marcap', ascending=False)
     pairs = list(zip(
         f['Code'].astype(str).str.zfill(6),
