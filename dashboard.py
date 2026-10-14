@@ -4364,6 +4364,26 @@ with tab7, guard('종목 분석'):
 # 탭: 포트폴리오 관리 + 🛡️ 원칙 가드레일
 # (2026-07-02 탭 재편 때 대시보드에서 12일간 빠져 있었음 — 2026-07-14 복원 + 준수이력 추가)
 # ════════════════════════════════════════════════════════════════════
+@st.cache_data(ttl=3600)
+def _usdkrw() -> float:
+    """원/달러 — 포트폴리오에서 KR·US 를 같은 통화로 더하기 위해. 실패 시 1400 가정."""
+    try:
+        import FinanceDataReader as fdr
+        v = fdr.DataReader('USD/KRW', (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d'))['Close'].dropna()
+        if len(v):
+            return float(v.iloc[-1])
+    except Exception:
+        pass
+    try:
+        import yfinance as yf
+        v = yf.Ticker('KRW=X').history(period='10d')['Close'].dropna()
+        if len(v):
+            return float(v.iloc[-1])
+    except Exception:
+        pass
+    return 1400.0
+
+
 @st.cache_data(ttl=300)
 def _fetch_pf_price(sym: str, market: str):
     try:
@@ -4472,6 +4492,67 @@ with tab_pf, guard('포트폴리오 가드레일'):
                "청산은 **고점 대비 −20%**(진입가 대비 아님) · "
                "3주간 52주 신고가 미갱신 시 30% 축소 · 레버리지 ETF 합계 10% 이내.")
 
+    # ── 🔐 토스 계좌 자동 연동 (2026-10-14) ─────────────────────────────
+    # 토스 Open API 는 허용 IP(고정)에서만 응답한다 → 이 사이트(유동 IP)는 직접 못 부른다.
+    # 노트북(tools/toss_sync.py)이 매일 받아 **암호화**해 올리고, 여기서는 비밀번호로만 푼다.
+    # 저장소·사이트가 공개라 평문 잔고는 어디에도 두지 않는다. 키도 이 사이트엔 없다.
+    import pf_vault as _pv
+    _tz_head = _pv.peek()
+    if _tz_head:
+        with st.container(border=True):
+            _tz_c1, _tz_c2 = st.columns([3, 1])
+            _tz_c1.markdown(f"**🔐 토스 계좌 연동** · 자료 기준 {_tz_head.get('asof') or '-'} "
+                            "(노트북이 매일 06:40 KST 갱신)")
+            if st.session_state.get('pf_toss'):
+                if _tz_c2.button('🔒 잠그기', key='pf_toss_lock', use_container_width=True):
+                    for _k in ('pf_toss', 'pf_rows', 'pf_cap', 'pf_src'):
+                        st.session_state.pop(_k, None)
+                    st.rerun()
+            else:
+                _tz_pw = _tz_c1.text_input('포트폴리오 비밀번호', type='password', key='pf_toss_pw',
+                                           label_visibility='collapsed', placeholder='포트폴리오 비밀번호')
+                if _tz_c2.button('🔓 불러오기', key='pf_toss_go', use_container_width=True) and _tz_pw:
+                    try:
+                        _snap = _pv.unseal(_tz_pw)
+                        st.session_state['pf_toss'] = _snap
+                        _rows_t, _cash_krw, _cash_usd = [], 0.0, 0.0
+                        for _a in _snap.get('accounts') or []:
+                            _cash_krw += float((_a.get('cash') or {}).get('KRW') or 0)
+                            _cash_usd += float((_a.get('cash') or {}).get('USD') or 0)
+                            for _h in _a.get('holdings') or []:
+                                if not _h.get('sym') or not _h.get('qty'):
+                                    continue
+                                _rows_t.append({'sym': _h['sym'], 'name': _h.get('name') or _h['sym'],
+                                                'market': 'KR' if _h.get('market') == 'KR' else 'US',
+                                                'qty': float(_h['qty']),
+                                                'avg_cost': float(_h.get('avg_cost') or 0), 'buy_date': ''})
+                        _hold_krw = sum(float(_h.get('value') or 0) * (_usdkrw() if _h.get('currency') == 'USD' else 1)
+                                        for _a in _snap.get('accounts') or [] for _h in _a.get('holdings') or [])
+                        st.session_state['pf_rows'] = _rows_t
+                        st.session_state['pf_cap'] = int(_hold_krw + _cash_krw + _cash_usd * _usdkrw())
+                        st.session_state['pf_src'] = 'toss'
+                        st.session_state.pop('pf_toss_pw', None)
+                        st.rerun()
+                    except ValueError as _e:
+                        st.error(str(_e))
+                    except Exception as _e:
+                        st.error(f'불러오기 실패: {str(_e)[:120]}')
+            _snap = st.session_state.get('pf_toss')
+            if _snap:
+                _ck = sum(float((_a.get('cash') or {}).get('KRW') or 0) for _a in _snap['accounts'])
+                _cu = sum(float((_a.get('cash') or {}).get('USD') or 0) for _a in _snap['accounts'])
+                _nh = sum(len(_a.get('holdings') or []) for _a in _snap['accounts'])
+                _t1, _t2, _t3, _t4 = st.columns(4)
+                _t1.metric('총자산(원 환산)', f"{st.session_state.get('pf_cap', 0):,.0f}")
+                _t2.metric('보유 종목', f"{_nh}종")
+                _t3.metric('원화 현금', f"{_ck:,.0f}")
+                _t4.metric('달러 현금', f"${_cu:,.2f}")
+                st.caption(f"환율 {_usdkrw():,.1f}원/$ · 계좌 "
+                           + ', '.join(f"{_a.get('no_masked')}" for _a in _snap['accounts'])
+                           + " · 아래 표에 자동 반영됐습니다. 이 화면을 닫거나 '잠그기'를 누르면 지워집니다.")
+    else:
+        st.caption("🔐 토스 계좌 자동 연동: 노트북에서 `python tools/toss_sync.py --setup` 을 한 번 실행하면 켜집니다.")
+
     _rows = _pf_load()
     if not _rows:
         _rows = [{'sym': '', 'name': '', 'market': 'KR', 'qty': 0,
@@ -4506,6 +4587,8 @@ with tab_pf, guard('포트폴리오 가드레일'):
         _keep = [r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
         st.session_state['pf_rows'] = _keep
         st.session_state['pf_cap'] = _total_cap
+        if st.session_state.get('pf_src') == 'toss':      # 계좌 자료는 평문 파일로 남기지 않는다
+            st.rerun()
         try:
             _PF_PATH.parent.mkdir(parents=True, exist_ok=True)
             _PF_PATH.write_text(json.dumps({'positions': _keep, 'total_capital': _total_cap},
@@ -4537,10 +4620,12 @@ with tab_pf, guard('포트폴리오 가드레일'):
                 _peak, _wk = _pf_trail(_sym, _mk, str(_r.get('buy_date') or '') or None)
             except Exception:
                 pass
+            # 2026-10-14: US 를 달러 그대로 더하면 KR(원)과 섞여 비중이 엉터리였다 → 원화 환산
+            _fxm = _usdkrw() if _mk == 'US' else 1.0
             _pos.append({
                 'sym': _sym, 'name': _r.get('name') or _sym, 'market': _mk,
                 'qty': _qty, 'cur_price': _cur,
-                'value': _qty * _cur, 'cost': (_qty * _avg) if _avg else None,
+                'value': _qty * _cur * _fxm, 'cost': (_qty * _avg * _fxm) if _avg else None,
                 'pnl_pct': ((_cur / _avg - 1) * 100) if _avg else None,
                 'peak_price': _peak, 'weeks_since_high': _wk})
         if _miss:
@@ -4589,8 +4674,9 @@ with tab_pf, guard('포트폴리오 가드레일'):
             except Exception:
                 pass
 
-        with st.expander('📋 복사용 JSON — repo 의 data/portfolio.json 에 넣으면 영구 보관됩니다'):
-            st.code(json.dumps({'positions': _live, 'total_capital': _total_cap},
+        if st.session_state.get('pf_src') != 'toss':
+          with st.expander('📋 복사용 JSON — repo 의 data/portfolio.json 에 넣으면 영구 보관됩니다'):
+              st.code(json.dumps({'positions': _live, 'total_capital': _total_cap},
                                ensure_ascii=False, indent=2), language='json')
 
 

@@ -42,12 +42,16 @@ echo [3/4] CANSLIM...
 echo [4/4] 흑자전환...
 %PYTHON% turnaround_run.py
 
+echo [+] 토스 계좌 동기화 (키 없으면 건너뜀, 실패해도 계속)...
+%PYTHON% tools\toss_sync.py
+
 echo [5/5] 신선도 검사 + 결과 동기화(푸시)...
 %PYTHON% pipeline_health.py
 rem 경로 분리 필수: git add는 pathspec 하나라도 없으면 전체 실패 (portfolio.json 부재 함정)
 git add results/*.json 2>nul
 git add data/sectors.json 2>nul
 git add data/portfolio.json 2>nul
+git add data/portfolio_toss.enc 2>nul
 rem [0/5]에서 이미 원격과 맞춰뒀으므로 여기서는 rebase 없이 바로 푸시한다.
 rem 푸시가 거절되면(그 사이 원격이 움직인 경우) 다음 실행의 [0/5]이 알아서 정리한다.
 git diff --staged --quiet || (
