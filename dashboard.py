@@ -4578,7 +4578,7 @@ with tab_pf, guard('포트폴리오 가드레일'):
             'sym': st.column_config.TextColumn('종목코드', width='small'),
             'name': st.column_config.TextColumn('이름', width='medium'),
             'market': st.column_config.SelectboxColumn('시장', options=['KR', 'US'], width='small'),
-            'qty': st.column_config.NumberColumn('수량', min_value=0, step=1),
+            'qty': st.column_config.NumberColumn('수량', min_value=0.0, step=0.000001, format='%g'),  # 소수점 주식(토스) 대응
             'avg_cost': st.column_config.NumberColumn('평균단가', min_value=0.0, format='%.2f'),
             'buy_date': st.column_config.TextColumn('매수일 YYYY-MM-DD', width='small'),
         })

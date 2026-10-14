@@ -59,7 +59,7 @@ def _summary(snap):
         lines.append(f"· 계좌 {a['no_masked']} ({a['type']}) 보유 {len(hs)}종 · 현금 KRW {a['cash'].get('KRW')} / USD {a['cash'].get('USD')}")
         for h in sorted(hs, key=lambda h: -(h.get('value') or 0))[:15]:
             pnl = f"{h['pnl_pct']:+.1f}%" if h.get("pnl_pct") is not None else "-"
-            lines.append(f"    {h['market']} {h['sym']:<7} {h['name'][:14]:<14} {h['qty']:>10,.2f}주  {pnl}")
+            lines.append(f"    {h['market']} {h['sym']:<7} {h['name'][:14]:<14} {h['qty']:>12,.6g}주  {pnl}")
     return "\n".join(lines)
 
 
