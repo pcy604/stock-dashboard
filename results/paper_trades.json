@@ -65135,6 +65135,888 @@
       ],
       "status": "open",
       "realized": {}
+    },
+    {
+      "id": "DDOG_2026-10-14",
+      "sym": "DDOG",
+      "name": "DDOG",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "LSAK_2026-10-14",
+      "sym": "LSAK",
+      "name": "LSAK",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "018880_2026-10-14",
+      "sym": "018880",
+      "name": "한온시스템",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 3855.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "383220_2026-10-14",
+      "sym": "383220",
+      "name": "F&F",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 74300.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "003160_2026-10-14",
+      "sym": "003160",
+      "name": "디아이",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 43025.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "417200_2026-10-14",
+      "sym": "417200",
+      "name": "LS머트리얼즈",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 16500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "253590_2026-10-14",
+      "sym": "253590",
+      "name": "네오셈",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 15930.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "005880_2026-10-14",
+      "sym": "005880",
+      "name": "대한해운",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 2130.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "284740_2026-10-14",
+      "sym": "284740",
+      "name": "쿠쿠홈시스",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 24850.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "020000_2026-10-14",
+      "sym": "020000",
+      "name": "한섬",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 21250.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "039440_2026-10-14",
+      "sym": "039440",
+      "name": "에스티아이",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 28500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "015360_2026-10-14",
+      "sym": "015360",
+      "name": "INVENI",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 14370.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "069080_2026-10-14",
+      "sym": "069080",
+      "name": "웹젠",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 12120.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "089590_2026-10-14",
+      "sym": "089590",
+      "name": "제주항공",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 4555.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "006405_2026-10-14",
+      "sym": "006405",
+      "name": "삼성SDI우",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 223500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "005720_2026-10-14",
+      "sym": "005720",
+      "name": "넥센",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 6330.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "036200_2026-10-14",
+      "sym": "036200",
+      "name": "유니셈",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 10570.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "425040_2026-10-14",
+      "sym": "425040",
+      "name": "티이엠씨",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 14920.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "009160_2026-10-14",
+      "sym": "009160",
+      "name": "SIMPAC",
+      "market": "KR",
+      "log_date": "2026-10-14",
+      "entry_px": 4860.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AAPL_2026-10-14",
+      "sym": "AAPL",
+      "name": "Apple",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "GOOG_2026-10-14",
+      "sym": "GOOG",
+      "name": "GOOG",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MSFT_2026-10-14",
+      "sym": "MSFT",
+      "name": "MSFT",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MA_2026-10-14",
+      "sym": "MA",
+      "name": "MA",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "컵위드핸들"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ABBV_2026-10-14",
+      "sym": "ABBV",
+      "name": "AbbVie",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "COST_2026-10-14",
+      "sym": "COST",
+      "name": "COST",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PG_2026-10-14",
+      "sym": "PG",
+      "name": "PG",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PM_2026-10-14",
+      "sym": "PM",
+      "name": "PM",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CCZ_2026-10-14",
+      "sym": "CCZ",
+      "name": "CCZ",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": 64.823,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "컵위드핸들"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PWR_2026-10-14",
+      "sym": "PWR",
+      "name": "PWR",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HCA_2026-10-14",
+      "sym": "HCA",
+      "name": "HCA",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CDNS_2026-10-14",
+      "sym": "CDNS",
+      "name": "CDNS",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MAR_2026-10-14",
+      "sym": "MAR",
+      "name": "MAR",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HLT_2026-10-14",
+      "sym": "HLT",
+      "name": "HLT",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "KMI_2026-10-14",
+      "sym": "KMI",
+      "name": "KMI",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "KEYS_2026-10-14",
+      "sym": "KEYS",
+      "name": "KEYS",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CAH_2026-10-14",
+      "sym": "CAH",
+      "name": "CAH",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "KDP_2026-10-14",
+      "sym": "KDP",
+      "name": "KDP",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "OKTA_2026-10-14",
+      "sym": "OKTA",
+      "name": "OKTA",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CHD_2026-10-14",
+      "sym": "CHD",
+      "name": "CHD",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "NTNX_2026-10-14",
+      "sym": "NTNX",
+      "name": "NTNX",
+      "market": "US",
+      "log_date": "2026-10-14",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
     }
   ]
 }

@@ -1,13 +1,13 @@
 {
   "date": "2026-10-14",
-  "total": 147,
+  "total": 121,
   "stocks": [
     {
       "market": "KR",
       "sym": "006400",
       "name": "삼성SDI",
       "marcap": 45127896800000,
-      "pct_change": 6.81,
+      "pct_change": -1.56,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -20,38 +20,194 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.9,
+      "dist_52w": -21.4,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "011200",
-      "name": "HMM",
-      "marcap": 20798397238500,
-      "pct_change": 2.57,
+      "sym": "018880",
+      "name": "한온시스템",
+      "marcap": 3904886356310,
+      "pct_change": -2.15,
       "signals": [
-        "거래량폭발",
-        "이평선수렴"
+        "이평선수렴",
+        "RSI/MACD"
       ],
       "total_signals": 2,
       "high_type": "",
       "sig_52w": false,
-      "sig_vol": true,
+      "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -12.0,
+      "sig_rsimacd": true,
+      "dist_52w": -35.0,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "031980",
-      "name": "피에스케이홀딩스",
-      "marcap": 4657477320000,
-      "pct_change": 13.64,
+      "sym": "028670",
+      "name": "팬오션",
+      "marcap": 3501430303600,
+      "pct_change": 13.31,
+      "signals": [
+        "52주신고가",
+        "거래량폭발",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": 3.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "383220",
+      "name": "F&F",
+      "marcap": 2807908597500,
+      "pct_change": 3.51,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -17.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "131970",
+      "name": "두산테스나",
+      "marcap": 2570522654000,
+      "pct_change": 7.97,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -33.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "000240",
+      "name": "한국앤컴퍼니",
+      "marcap": 2530024146000,
+      "pct_change": 8.89,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -24.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "457190",
+      "name": "이수스페셜티케미컬",
+      "marcap": 2505144488800,
+      "pct_change": 0.6,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -35.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "078600",
+      "name": "대주전자재료",
+      "marcap": 1708610214400,
+      "pct_change": 2.14,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -37.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "166090",
+      "name": "하나머티리얼즈",
+      "marcap": 1275659973000,
+      "pct_change": -3.35,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -27.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "003160",
+      "name": "디아이",
+      "marcap": 1206995000000,
+      "pct_change": 1.05,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -64,61 +220,16 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": 0.5,
+      "dist_52w": -2.6,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "131290",
-      "name": "티에스이",
-      "marcap": 3644740855500,
-      "pct_change": 14.19,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -0.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "028670",
-      "name": "팬오션",
-      "marcap": 3501430303600,
-      "pct_change": 4.96,
-      "signals": [
-        "52주신고가",
-        "거래량폭발",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": true,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -0.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "131970",
-      "name": "두산테스나",
-      "marcap": 2570522654000,
-      "pct_change": 23.3,
+      "sym": "417200",
+      "name": "LS머트리얼즈",
+      "marcap": 1031703049750,
+      "pct_change": 1.2,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -131,184 +242,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -31.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "098460",
-      "name": "고영",
-      "marcap": 2533786512950,
-      "pct_change": 8.85,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -16.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "000240",
-      "name": "한국앤컴퍼니",
-      "marcap": 2530024146000,
-      "pct_change": 4.52,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -27.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "457190",
-      "name": "이수스페셜티케미컬",
-      "marcap": 2505144488800,
-      "pct_change": 1.83,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -36.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "140860",
-      "name": "파크시스템스",
-      "marcap": 2100740700000,
-      "pct_change": 0.84,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -14.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "089030",
-      "name": "테크윙",
-      "marcap": 2004602194500,
-      "pct_change": -1.62,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -25.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "078600",
-      "name": "대주전자재료",
-      "marcap": 1708610214400,
-      "pct_change": 1.01,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -40.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "166090",
-      "name": "하나머티리얼즈",
-      "marcap": 1275659973000,
-      "pct_change": 2.53,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -26.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "356860",
-      "name": "티엘비",
-      "marcap": 1194543504000,
-      "pct_change": 4.31,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -24.9,
+      "dist_52w": -51.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -317,7 +251,7 @@
       "sym": "251970",
       "name": "펌텍코리아",
       "marcap": 853120000000,
-      "pct_change": 14.78,
+      "pct_change": 9.75,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -330,7 +264,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -0.4,
+      "dist_52w": -0.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -339,7 +273,7 @@
       "sym": "074600",
       "name": "원익QnC",
       "marcap": 846473600000,
-      "pct_change": -0.15,
+      "pct_change": -3.04,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -352,7 +286,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -28.2,
+      "dist_52w": -29.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -361,7 +295,7 @@
       "sym": "059090",
       "name": "미코",
       "marcap": 818711061000,
-      "pct_change": 2.71,
+      "pct_change": 5.01,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -374,7 +308,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -15.9,
+      "dist_52w": -14.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -383,95 +317,7 @@
       "sym": "064290",
       "name": "인텍플러스",
       "marcap": 801999922600,
-      "pct_change": 4.4,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -1.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "000400",
-      "name": "롯데손해보험",
-      "marcap": 780495844800,
-      "pct_change": 14.57,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -22.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "092870",
-      "name": "엑시콘",
-      "marcap": 756946226000,
-      "pct_change": 8.87,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "역사적",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": 5.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "102710",
-      "name": "이엔에프테크놀로지",
-      "marcap": 708676665600,
-      "pct_change": 3.7,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -22.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "253590",
-      "name": "네오셈",
-      "marcap": 689623258080,
-      "pct_change": 1.48,
+      "pct_change": -2.65,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -484,16 +330,39 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -26.1,
+      "dist_52w": -6.1,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "005880",
-      "name": "대한해운",
-      "marcap": 672928203900,
-      "pct_change": -3.48,
+      "sym": "000400",
+      "name": "롯데손해보험",
+      "marcap": 780495844800,
+      "pct_change": 23.85,
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -17.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "102710",
+      "name": "이엔에프테크놀로지",
+      "marcap": 708676665600,
+      "pct_change": -1.59,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -506,7 +375,51 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -38.6,
+      "dist_52w": -23.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "253590",
+      "name": "네오셈",
+      "marcap": 689623258080,
+      "pct_change": -5.07,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -27.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "005880",
+      "name": "대한해운",
+      "marcap": 672928203900,
+      "pct_change": 4.63,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -36.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -515,7 +428,7 @@
       "sym": "080580",
       "name": "오킨스전자",
       "marcap": 623237720250,
-      "pct_change": 2.4,
+      "pct_change": 0.35,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -529,7 +442,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 1.2,
+      "dist_52w": -1.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -538,7 +451,7 @@
       "sym": "284740",
       "name": "쿠쿠홈시스",
       "marcap": 553080184500,
-      "pct_change": -1.01,
+      "pct_change": 1.64,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -551,29 +464,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -10.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "200470",
-      "name": "에이팩트",
-      "marcap": 461462044680,
-      "pct_change": 3.2,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -18.7,
+      "dist_52w": -9.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -582,7 +473,7 @@
       "sym": "020000",
       "name": "한섬",
       "marcap": 459607671600,
-      "pct_change": -3.17,
+      "pct_change": -0.47,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -604,7 +495,7 @@
       "sym": "012030",
       "name": "DB",
       "marcap": 445600261595,
-      "pct_change": 9.16,
+      "pct_change": 8.74,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -618,7 +509,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -13.4,
+      "dist_52w": -12.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -627,7 +518,7 @@
       "sym": "039440",
       "name": "에스티아이",
       "marcap": 424117735450,
-      "pct_change": 5.78,
+      "pct_change": 6.87,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -640,7 +531,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -36.5,
+      "dist_52w": -35.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -649,7 +540,7 @@
       "sym": "015360",
       "name": "INVENI",
       "marcap": 375375000000,
-      "pct_change": -2.79,
+      "pct_change": -2.53,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -662,7 +553,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.4,
+      "dist_52w": -21.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -671,7 +562,7 @@
       "sym": "069080",
       "name": "웹젠",
       "marcap": 375005223250,
-      "pct_change": 4.27,
+      "pct_change": 1.5,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -684,7 +575,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -32.3,
+      "dist_52w": -32.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -693,7 +584,7 @@
       "sym": "089590",
       "name": "제주항공",
       "marcap": 359658793100,
-      "pct_change": 0.11,
+      "pct_change": 0.44,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -715,7 +606,7 @@
       "sym": "006405",
       "name": "삼성SDI우",
       "marcap": 359172912000,
-      "pct_change": 4.96,
+      "pct_change": -0.89,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -728,7 +619,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -40.5,
+      "dist_52w": -40.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "005720",
+      "name": "넥센",
+      "marcap": 329976175560,
+      "pct_change": -1.71,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -21.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -737,7 +650,7 @@
       "sym": "036200",
       "name": "유니셈",
       "marcap": 329027112790,
-      "pct_change": -0.92,
+      "pct_change": -4.43,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -750,7 +663,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -24.9,
+      "dist_52w": -26.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -759,7 +672,7 @@
       "sym": "425040",
       "name": "티이엠씨",
       "marcap": 322047371620,
-      "pct_change": 1.76,
+      "pct_change": -3.17,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -772,7 +685,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -50.4,
+      "dist_52w": -50.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -781,7 +694,7 @@
       "sym": "009160",
       "name": "SIMPAC",
       "marcap": 315741775440,
-      "pct_change": -1.22,
+      "pct_change": -2.51,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -794,7 +707,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -29.4,
+      "dist_52w": -29.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -803,7 +716,7 @@
       "sym": "AAPL",
       "name": "Apple",
       "marcap": 4917961518318,
-      "pct_change": 2.29,
+      "pct_change": 2.43,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -816,7 +729,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -1.2,
+      "dist_52w": -1.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -825,7 +738,7 @@
       "sym": "GOOG",
       "name": "GOOG",
       "marcap": 4254327620849,
-      "pct_change": 1.43,
+      "pct_change": 1.49,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -838,7 +751,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -13.6,
+      "dist_52w": -13.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -847,7 +760,7 @@
       "sym": "MSFT",
       "name": "MSFT",
       "marcap": 3973186680255,
-      "pct_change": 2.67,
+      "pct_change": 3.04,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -860,7 +773,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -1.9,
+      "dist_52w": -2.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -869,21 +782,42 @@
       "sym": "META",
       "name": "META",
       "marcap": 1844107176147,
-      "pct_change": 3.2,
+      "pct_change": 0.14,
       "signals": [
-        "52주신고가",
         "5일선라이딩",
         "이평선수렴"
       ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
       "sig_vol": false,
       "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -2.2,
+      "dist_52w": -4.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "MA",
+      "name": "MA",
+      "marcap": 520210632934,
+      "pct_change": 5.4,
+      "signals": [
+        "52주신고가",
+        "컵위드핸들"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": true,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -1.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -892,7 +826,7 @@
       "sym": "ABBV",
       "name": "AbbVie",
       "marcap": 489628372161,
-      "pct_change": 2.88,
+      "pct_change": 5.78,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -905,7 +839,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -1.2,
+      "dist_52w": 1.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -914,7 +848,7 @@
       "sym": "COST",
       "name": "COST",
       "marcap": 419737433144,
-      "pct_change": 2.03,
+      "pct_change": 3.89,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -927,7 +861,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -12.9,
+      "dist_52w": -12.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -936,7 +870,7 @@
       "sym": "PG",
       "name": "PG",
       "marcap": 351524001732,
-      "pct_change": 3.12,
+      "pct_change": 4.97,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -949,7 +883,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -8.5,
+      "dist_52w": -8.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "PM",
+      "name": "PM",
+      "marcap": 313577441597,
+      "pct_change": 6.58,
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": -2.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -977,32 +933,10 @@
     },
     {
       "market": "US",
-      "sym": "ADI",
-      "name": "Analog Devices",
-      "marcap": 196825647411,
-      "pct_change": -1.39,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -7.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "ISRG",
       "name": "ISRG",
       "marcap": 149775753971,
-      "pct_change": 4.27,
+      "pct_change": 5.21,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -1016,7 +950,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -30.1,
+      "dist_52w": -29.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1025,7 +959,7 @@
       "sym": "FTNT",
       "name": "FTNT",
       "marcap": 142868600000,
-      "pct_change": -0.27,
+      "pct_change": 4.78,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -1039,7 +973,30 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -2.1,
+      "dist_52w": -1.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "DDOG",
+      "name": "DDOG",
+      "marcap": 108806208603,
+      "pct_change": 3.93,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": -2.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1048,7 +1005,7 @@
       "sym": "PWR",
       "name": "PWR",
       "marcap": 106084286032,
-      "pct_change": -4.26,
+      "pct_change": 1.66,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1061,7 +1018,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -12.7,
+      "dist_52w": -11.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1070,7 +1027,7 @@
       "sym": "HCA",
       "name": "HCA",
       "marcap": 97661660842,
-      "pct_change": 6.61,
+      "pct_change": 5.44,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -1083,16 +1040,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -17.2,
+      "dist_52w": -17.6,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "US",
-      "sym": "MAR",
-      "name": "MAR",
-      "marcap": 96775261291,
-      "pct_change": 2.83,
+      "sym": "CDNS",
+      "name": "CDNS",
+      "marcap": 97169665111,
+      "pct_change": -1.43,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1105,29 +1062,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -9.6,
+      "dist_52w": -16.4,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "US",
-      "sym": "JCI",
-      "name": "JCI",
-      "marcap": 95367938515,
-      "pct_change": -1.44,
+      "sym": "MAR",
+      "name": "MAR",
+      "marcap": 96775261291,
+      "pct_change": 3.77,
       "signals": [
-        "52주신고가",
+        "이평선수렴",
         "RSI/MACD"
       ],
       "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
+      "high_type": "",
+      "sig_52w": false,
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
-      "sig_maconv": false,
+      "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -2.5,
+      "dist_52w": -10.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1136,21 +1093,20 @@
       "sym": "ELV",
       "name": "ELV",
       "marcap": 89490343601,
-      "pct_change": 6.29,
+      "pct_change": 6.99,
       "signals": [
-        "52주신고가",
         "이평선수렴",
         "RSI/MACD"
       ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -2.5,
+      "dist_52w": -3.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1159,7 +1115,7 @@
       "sym": "ECL",
       "name": "ECL",
       "marcap": 79005006419,
-      "pct_change": 1.72,
+      "pct_change": 2.61,
       "signals": [
         "컵위드핸들",
         "이평선수렴",
@@ -1173,29 +1129,7 @@
       "sig_cup": true,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -7.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "EOG",
-      "name": "EOG",
-      "marcap": 78376641937,
-      "pct_change": 6.16,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -0.6,
+      "dist_52w": -8.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1204,7 +1138,7 @@
       "sym": "HLT",
       "name": "HLT",
       "marcap": 73703436732,
-      "pct_change": 2.16,
+      "pct_change": 3.61,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1217,7 +1151,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -7.9,
+      "dist_52w": -8.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1226,7 +1160,7 @@
       "sym": "KMI",
       "name": "KMI",
       "marcap": 72348803609,
-      "pct_change": 3.95,
+      "pct_change": 5.32,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1239,7 +1173,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -4.0,
+      "dist_52w": -5.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1248,7 +1182,7 @@
       "sym": "KEYS",
       "name": "KEYS",
       "marcap": 66215750000,
-      "pct_change": -4.59,
+      "pct_change": -1.68,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1261,29 +1195,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -5.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "GWW",
-      "name": "GWW",
-      "marcap": 60878089843,
-      "pct_change": 3.88,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -6.7,
+      "dist_52w": -3.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1292,7 +1204,7 @@
       "sym": "CAH",
       "name": "CAH",
       "marcap": 55253017404,
-      "pct_change": 2.69,
+      "pct_change": 2.13,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1305,29 +1217,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -7.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "EBAY",
-      "name": "EBAY",
-      "marcap": 49924551086,
-      "pct_change": 8.73,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -2.4,
+      "dist_52w": -7.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1336,7 +1226,7 @@
       "sym": "KDP",
       "name": "KDP",
       "marcap": 43218275004,
-      "pct_change": 4.91,
+      "pct_change": 6.02,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1349,7 +1239,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -3.4,
+      "dist_52w": -3.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1358,7 +1248,7 @@
       "sym": "OKTA",
       "name": "OKTA",
       "marcap": 41506701913,
-      "pct_change": 3.59,
+      "pct_change": 4.03,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -1371,30 +1261,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -2.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "CNC",
-      "name": "CNC",
-      "marcap": 32286990621,
-      "pct_change": 6.58,
-      "signals": [
-        "52주신고가",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -1.1,
+      "dist_52w": -2.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1403,7 +1270,7 @@
       "sym": "FFIV",
       "name": "FFIV",
       "marcap": 27266818816,
-      "pct_change": 1.37,
+      "pct_change": 3.26,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -1417,7 +1284,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -1.3,
+      "dist_52w": -1.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1426,7 +1293,7 @@
       "sym": "CHD",
       "name": "CHD",
       "marcap": 23369802145,
-      "pct_change": 3.72,
+      "pct_change": 4.4,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1439,29 +1306,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -5.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "IFF",
-      "name": "IFF",
-      "marcap": 21572930150,
-      "pct_change": 5.1,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -1.3,
+      "dist_52w": -5.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1470,7 +1315,7 @@
       "sym": "NTNX",
       "name": "NTNX",
       "marcap": 20192651715,
-      "pct_change": -0.72,
+      "pct_change": 0.99,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -1483,29 +1328,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -2.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "PR",
-      "name": "PR",
-      "marcap": 19288938952,
-      "pct_change": 8.55,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -1.6,
+      "dist_52w": -0.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1514,7 +1337,7 @@
       "sym": "DT",
       "name": "DT",
       "marcap": 18351635128,
-      "pct_change": 5.6,
+      "pct_change": 8.37,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -1527,29 +1350,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": 1.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "IEX",
-      "name": "IEX",
-      "marcap": 17271833938,
-      "pct_change": 0.39,
-      "signals": [
-        "52주신고가",
-        "컵위드핸들"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": true,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": -2.7,
+      "dist_52w": 2.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1558,7 +1359,7 @@
       "sym": "EXEL",
       "name": "EXEL",
       "marcap": 14898256251,
-      "pct_change": 2.02,
+      "pct_change": 1.65,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -1571,7 +1372,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -2.7,
+      "dist_52w": -2.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1580,7 +1381,7 @@
       "sym": "GME",
       "name": "GME",
       "marcap": 13399546024,
-      "pct_change": 9.94,
+      "pct_change": 7.88,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -1603,6 +1404,28 @@
       "sym": "HAS",
       "name": "HAS",
       "marcap": 13162269617,
+      "pct_change": 2.54,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -11.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "AR",
+      "name": "AR",
+      "marcap": 11083730571,
       "pct_change": 5.39,
       "signals": [
         "이평선수렴",
@@ -1616,95 +1439,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -10.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "PNW",
-      "name": "PNW",
-      "marcap": 11988830165,
-      "pct_change": 3.61,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -8.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "MANH",
-      "name": "MANH",
-      "marcap": 11945101306,
-      "pct_change": 9.8,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -1.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "AFG",
-      "name": "American Financial Group",
-      "marcap": 11697880851,
-      "pct_change": 3.24,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -2.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "AR",
-      "name": "AR",
-      "marcap": 11083730571,
-      "pct_change": 5.1,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -17.9,
+      "dist_52w": -20.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1713,7 +1448,7 @@
       "sym": "AM",
       "name": "Antero Midstream",
       "marcap": 10010516202,
-      "pct_change": -0.28,
+      "pct_change": 2.68,
       "signals": [
         "컵위드핸들",
         "RSI/MACD"
@@ -1726,29 +1461,29 @@
       "sig_cup": true,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -11.6,
+      "dist_52w": -11.4,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "US",
-      "sym": "FCFS",
-      "name": "FCFS",
-      "marcap": 9410493065,
-      "pct_change": 2.74,
+      "sym": "GTLB",
+      "name": "GTLB",
+      "marcap": 9293848295,
+      "pct_change": 8.76,
       "signals": [
-        "이평선수렴",
-        "RSI/MACD"
+        "52주신고가",
+        "이평선수렴"
       ],
       "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
+      "high_type": "52주",
+      "sig_52w": true,
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -8.4,
+      "sig_rsimacd": false,
+      "dist_52w": 0.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1757,7 +1492,7 @@
       "sym": "HNGE",
       "name": "HNGE",
       "marcap": 8584329727,
-      "pct_change": 6.9,
+      "pct_change": 6.58,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -1770,7 +1505,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": 1.8,
+      "dist_52w": 1.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1779,7 +1514,7 @@
       "sym": "ACA",
       "name": "Arcosa",
       "marcap": 7241255639,
-      "pct_change": 0.51,
+      "pct_change": 0.35,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -1798,23 +1533,23 @@
     },
     {
       "market": "US",
-      "sym": "CVI",
-      "name": "CVI",
-      "marcap": 5831010046,
-      "pct_change": 9.93,
+      "sym": "KOD",
+      "name": "KOD",
+      "marcap": 6276775443,
+      "pct_change": 5.81,
       "signals": [
-        "52주신고가",
-        "5일선라이딩"
+        "이평선수렴",
+        "RSI/MACD"
       ],
       "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
+      "high_type": "",
+      "sig_52w": false,
       "sig_vol": false,
-      "sig_ma5": true,
+      "sig_ma5": false,
       "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": 3.3,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -4.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1823,30 +1558,7 @@
       "sym": "BKH",
       "name": "BKH",
       "marcap": 5789688139,
-      "pct_change": 9.19,
-      "signals": [
-        "52주신고가",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -1.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "MUR",
-      "name": "MUR",
-      "marcap": 5545981958,
-      "pct_change": 3.31,
+      "pct_change": 8.29,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1859,7 +1571,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -9.9,
+      "dist_52w": -3.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "MUR",
+      "name": "MUR",
+      "marcap": 5545981958,
+      "pct_change": 2.58,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -9.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1868,21 +1602,20 @@
       "sym": "BCPC",
       "name": "BCPC",
       "marcap": 5363097329,
-      "pct_change": 2.68,
+      "pct_change": 1.29,
       "signals": [
         "컵위드핸들",
-        "이평선수렴",
         "RSI/MACD"
       ],
-      "total_signals": 3,
+      "total_signals": 2,
       "high_type": "",
       "sig_52w": false,
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": true,
-      "sig_maconv": true,
+      "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -7.7,
+      "dist_52w": -8.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1891,7 +1624,7 @@
       "sym": "OLLI",
       "name": "OLLI",
       "marcap": 5139937990,
-      "pct_change": 0.66,
+      "pct_change": -0.47,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -1904,7 +1637,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -33.7,
+      "dist_52w": -35.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1935,7 +1668,7 @@
       "sym": "NSIT",
       "name": "NSIT",
       "marcap": 4828949168,
-      "pct_change": 10.27,
+      "pct_change": 4.21,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -1948,7 +1681,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 4.4,
+      "dist_52w": -1.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1957,43 +1690,22 @@
       "sym": "NWE",
       "name": "NWE",
       "marcap": 4561548671,
-      "pct_change": 9.2,
+      "pct_change": 8.19,
       "signals": [
         "52주신고가",
+        "컵위드핸들",
         "이평선수렴",
         "RSI/MACD"
       ],
-      "total_signals": 3,
+      "total_signals": 4,
       "high_type": "52주",
       "sig_52w": true,
       "sig_vol": false,
       "sig_ma5": false,
-      "sig_cup": false,
+      "sig_cup": true,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -1.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "OPLN",
-      "name": "OPLN",
-      "marcap": 4512783791,
-      "pct_change": 7.15,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -12.7,
+      "dist_52w": -2.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2002,7 +1714,7 @@
       "sym": "HHH",
       "name": "HHH",
       "marcap": 4398515381,
-      "pct_change": -1.08,
+      "pct_change": 0.95,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2015,7 +1727,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -20.4,
+      "dist_52w": -20.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2024,7 +1736,7 @@
       "sym": "ITGR",
       "name": "ITGR",
       "marcap": 4303733218,
-      "pct_change": 0.09,
+      "pct_change": 0.06,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2043,32 +1755,10 @@
     },
     {
       "market": "US",
-      "sym": "CNK",
-      "name": "CNK",
-      "marcap": 4175080175,
-      "pct_change": 7.54,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -2.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "PENG",
       "name": "PENG",
       "marcap": 3908793017,
-      "pct_change": 21.79,
+      "pct_change": 30.38,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2081,7 +1771,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -13.0,
+      "dist_52w": -11.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2090,7 +1780,7 @@
       "sym": "CRVL",
       "name": "CRVL",
       "marcap": 3904009458,
-      "pct_change": 3.93,
+      "pct_change": 2.53,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2103,51 +1793,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -0.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "APLE",
-      "name": "APLE",
-      "marcap": 3850508678,
-      "pct_change": 1.35,
-      "signals": [
-        "컵위드핸들",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": true,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -4.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "PVH",
-      "name": "PVH",
-      "marcap": 3750234929,
-      "pct_change": 5.8,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -17.9,
+      "dist_52w": -1.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2156,7 +1802,7 @@
       "sym": "JOE",
       "name": "JOE",
       "marcap": 3692509086,
-      "pct_change": 0.58,
+      "pct_change": -0.33,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2169,29 +1815,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -9.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "OTTR",
-      "name": "OTTR",
-      "marcap": 3672058788,
-      "pct_change": -0.18,
-      "signals": [
-        "컵위드핸들",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": true,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -6.4,
+      "dist_52w": -10.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2200,7 +1824,7 @@
       "sym": "OGN",
       "name": "OGN",
       "marcap": 3626630400,
-      "pct_change": 0.22,
+      "pct_change": 0.51,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -2222,7 +1846,7 @@
       "sym": "LXP",
       "name": "LXP",
       "marcap": 3596393104,
-      "pct_change": 0.1,
+      "pct_change": 0.21,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2235,7 +1859,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -1.0,
+      "dist_52w": -0.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2244,7 +1868,7 @@
       "sym": "ATKR",
       "name": "ATKR",
       "marcap": 3202988518,
-      "pct_change": 0.17,
+      "pct_change": 0.11,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2266,7 +1890,7 @@
       "sym": "FIGS",
       "name": "FIGS",
       "marcap": 3079303498,
-      "pct_change": 27.66,
+      "pct_change": 30.15,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -2279,7 +1903,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 3.0,
+      "dist_52w": 1.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2288,7 +1912,7 @@
       "sym": "AEO",
       "name": "American Eagle Outfitters",
       "marcap": 3046000642,
-      "pct_change": -0.61,
+      "pct_change": -0.22,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2301,29 +1925,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -37.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "AGYS",
-      "name": "Agilysys",
-      "marcap": 2961379422,
-      "pct_change": 10.6,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -24.8,
+      "dist_52w": -36.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2332,7 +1934,7 @@
       "sym": "NTCT",
       "name": "NTCT",
       "marcap": 2958181210,
-      "pct_change": -2.05,
+      "pct_change": -2.79,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -2345,29 +1947,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -11.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "BWIN",
-      "name": "BWIN",
-      "marcap": 2956293147,
-      "pct_change": 0.13,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": -2.6,
+      "dist_52w": -11.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2376,7 +1956,7 @@
       "sym": "HOG",
       "name": "HOG",
       "marcap": 2920479158,
-      "pct_change": 1.97,
+      "pct_change": 4.51,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2389,7 +1969,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -4.8,
+      "dist_52w": -5.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2398,7 +1978,7 @@
       "sym": "ABM",
       "name": "ABM Industries",
       "marcap": 2909042263,
-      "pct_change": 4.73,
+      "pct_change": 3.46,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -2411,7 +1991,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -1.2,
+      "dist_52w": -2.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2461,32 +2041,10 @@
     },
     {
       "market": "US",
-      "sym": "PAYO",
-      "name": "PAYO",
-      "marcap": 2419394923,
-      "pct_change": 0.0,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -0.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "CNXN",
       "name": "CNXN",
       "marcap": 2351712528,
-      "pct_change": 3.06,
+      "pct_change": 2.39,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2499,7 +2057,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": 1.4,
+      "dist_52w": 0.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2508,7 +2066,7 @@
       "sym": "LIND",
       "name": "LIND",
       "marcap": 2350497239,
-      "pct_change": 0.8,
+      "pct_change": 1.77,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -2521,51 +2079,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": 0.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "RAMP",
-      "name": "RAMP",
-      "marcap": 2322935844,
-      "pct_change": 0.03,
-      "signals": [
-        "52주신고가",
-        "컵위드핸들"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": true,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": -1.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "PEB",
-      "name": "PEB",
-      "marcap": 2157552824,
-      "pct_change": 3.58,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -1.4,
+      "dist_52w": -0.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2574,7 +2088,7 @@
       "sym": "PRDO",
       "name": "PRDO",
       "marcap": 2109472466,
-      "pct_change": 5.3,
+      "pct_change": 6.94,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2587,7 +2101,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -12.3,
+      "dist_52w": -12.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2596,7 +2110,7 @@
       "sym": "DV",
       "name": "DV",
       "marcap": 2090772530,
-      "pct_change": 0.59,
+      "pct_change": 0.6,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2609,51 +2123,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -0.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "MQ",
-      "name": "MQ",
-      "marcap": 1934093735,
-      "pct_change": 12.15,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -16.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "RLJ",
-      "name": "RLJ",
-      "marcap": 1708133530,
-      "pct_change": 3.76,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -10.0,
+      "dist_52w": -1.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2662,7 +2132,7 @@
       "sym": "GIC",
       "name": "GIC",
       "marcap": 1636753275,
-      "pct_change": 1.5,
+      "pct_change": 0.05,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2675,7 +2145,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -0.6,
+      "dist_52w": -1.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2684,7 +2154,7 @@
       "sym": "DSGR",
       "name": "DSGR",
       "marcap": 1620327376,
-      "pct_change": 0.06,
+      "pct_change": 0.11,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2706,7 +2176,7 @@
       "sym": "PCRX",
       "name": "PCRX",
       "marcap": 1447385135,
-      "pct_change": 46.65,
+      "pct_change": 45.11,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -2719,29 +2189,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -0.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "PRSU",
-      "name": "PRSU",
-      "marcap": 1443364328,
-      "pct_change": 2.43,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -4.4,
+      "dist_52w": -0.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2750,7 +2198,7 @@
       "sym": "HLF",
       "name": "HLF",
       "marcap": 1365543972,
-      "pct_change": 12.96,
+      "pct_change": 8.88,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2763,7 +2211,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -30.3,
+      "dist_52w": -33.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2772,7 +2220,7 @@
       "sym": "CRCT",
       "name": "CRCT",
       "marcap": 1337870182,
-      "pct_change": 2.66,
+      "pct_change": 0.15,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -2785,7 +2233,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -1.7,
+      "dist_52w": -2.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2794,21 +2242,20 @@
       "sym": "CBRL",
       "name": "CBRL",
       "marcap": 1284370607,
-      "pct_change": 8.75,
+      "pct_change": 4.3,
       "signals": [
         "52주신고가",
-        "이평선수렴",
-        "RSI/MACD"
+        "이평선수렴"
       ],
-      "total_signals": 3,
+      "total_signals": 2,
       "high_type": "52주",
       "sig_52w": true,
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": 1.6,
+      "sig_rsimacd": false,
+      "dist_52w": -2.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2817,7 +2264,7 @@
       "sym": "EPC",
       "name": "EPC",
       "marcap": 1281060827,
-      "pct_change": 6.18,
+      "pct_change": 5.76,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2830,7 +2277,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -4.7,
+      "dist_52w": -5.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2839,7 +2286,7 @@
       "sym": "PD",
       "name": "PD",
       "marcap": 1270981935,
-      "pct_change": 8.03,
+      "pct_change": 4.17,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -2853,7 +2300,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 1.7,
+      "dist_52w": -1.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2885,7 +2332,7 @@
       "sym": "HPK",
       "name": "HPK",
       "marcap": 1207624302,
-      "pct_change": 22.99,
+      "pct_change": 20.02,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -2898,7 +2345,51 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 4.4,
+      "dist_52w": 0.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "BOW",
+      "name": "BOW",
+      "marcap": 1121050419,
+      "pct_change": 0.65,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -3.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "EGBN",
+      "name": "EGBN",
+      "marcap": 860439321,
+      "pct_change": 0.28,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -3.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2907,7 +2398,7 @@
       "sym": "LOGC",
       "name": "LOGC",
       "marcap": 697138549,
-      "pct_change": 0.46,
+      "pct_change": 0.66,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -2929,7 +2420,7 @@
       "sym": "NGVC",
       "name": "NGVC",
       "marcap": 684000864,
-      "pct_change": 1.41,
+      "pct_change": -0.5,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -2942,29 +2433,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -26.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "CCSI",
-      "name": "CCSI",
-      "marcap": 673442069,
-      "pct_change": 3.22,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -9.4,
+      "dist_52w": -26.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2973,7 +2442,7 @@
       "sym": "PRTH",
       "name": "PRTH",
       "marcap": 643859300,
-      "pct_change": 0.39,
+      "pct_change": 0.13,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -2987,7 +2456,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -0.8,
+      "dist_52w": -1.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2996,7 +2465,7 @@
       "sym": "CLDT",
       "name": "CLDT",
       "marcap": 633757990,
-      "pct_change": 1.53,
+      "pct_change": -0.22,
       "signals": [
         "52주신고가",
         "컵위드핸들"
@@ -3009,7 +2478,7 @@
       "sig_cup": true,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": -0.9,
+      "dist_52w": -2.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3018,7 +2487,7 @@
       "sym": "EGY",
       "name": "EGY",
       "marcap": 632202609,
-      "pct_change": 8.3,
+      "pct_change": 5.35,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -3031,51 +2500,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -6.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "EBF",
-      "name": "EBF",
-      "marcap": 560029447,
-      "pct_change": -1.29,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -2.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LOCO",
-      "name": "LOCO",
-      "marcap": 463189309,
-      "pct_change": 9.94,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -9.1,
+      "dist_52w": -9.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3084,7 +2509,7 @@
       "sym": "GNE",
       "name": "GNE",
       "marcap": 434907738,
-      "pct_change": 2.86,
+      "pct_change": 4.72,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -3098,7 +2523,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 0.1,
+      "dist_52w": 0.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3107,7 +2532,7 @@
       "sym": "NATH",
       "name": "NATH",
       "marcap": 417018946,
-      "pct_change": 0.07,
+      "pct_change": 0.28,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -3120,7 +2545,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -8.5,
+      "dist_52w": -8.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3129,7 +2554,7 @@
       "sym": "ACCO",
       "name": "Acco Brands",
       "marcap": 414426978,
-      "pct_change": 4.58,
+      "pct_change": 4.61,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -3142,7 +2567,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 0.2,
+      "dist_52w": -0.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3151,7 +2576,7 @@
       "sym": "OPRT",
       "name": "OPRT",
       "marcap": 409874297,
-      "pct_change": 10.22,
+      "pct_change": 9.31,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -3164,7 +2589,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": 1.1,
+      "dist_52w": 1.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3173,7 +2598,7 @@
       "sym": "KRP",
       "name": "KRP",
       "marcap": 409033394,
-      "pct_change": 5.42,
+      "pct_change": 4.33,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -3186,7 +2611,30 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -0.3,
+      "dist_52w": -2.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LSAK",
+      "name": "LSAK",
+      "marcap": 401656745,
+      "pct_change": 7.42,
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -11.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3195,7 +2643,7 @@
       "sym": "GCO",
       "name": "GCO",
       "marcap": 398579651,
-      "pct_change": 0.06,
+      "pct_change": 1.35,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -3217,7 +2665,7 @@
       "sym": "NECB",
       "name": "NECB",
       "marcap": 371842677,
-      "pct_change": 3.81,
+      "pct_change": 4.26,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -3230,30 +2678,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -3.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "JILL",
-      "name": "JILL",
-      "marcap": 364291569,
-      "pct_change": -0.77,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -2.2,
+      "dist_52w": -4.5,
       "vol_ratio": null,
       "sector": "기타"
     }
