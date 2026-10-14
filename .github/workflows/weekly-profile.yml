@@ -159,8 +159,17 @@ jobs:
           #    아무도 GitHub 메일을 안 읽어서, 화면에는 "KR 원장 17일 정지" 로만
           #    보였다. 읽는 채널(텔레그램)로 보내야 조치가 일어난다.
           push_with_retry () {
+            # 2026-10-15 — daily-refresh 가 10-03 에 고친 사고가 여기서 그대로 재발했다.
+            #   수동 실행(10-14) 이 42분 돌고 "cannot pull with rebase: You have unstaged
+            #   changes" 로 3회 모두 같은 자리에서 죽어 2025Q3·Q4 재무를 통째로 버렸다.
+            #   커밋 대상이 아닌 변경은 치우고(stash), 무엇이었는지 로그에 남긴다.
+            if ! git diff --quiet; then
+              echo "⚠️ 추적 파일에 미사용 변경이 남아 pull 을 막는다 — 치운다:"
+              git diff --name-only | sed 's/^/     /'
+              git stash push -q -m "ci-residue $(date -u +%F)" || git checkout -- .
+            fi
             for i in 1 2 3; do
-              if git pull --rebase origin main && git push; then
+              if git pull --rebase --autostash origin main && git push; then
                 git fetch -q origin main
                 if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
                   echo "  푸시 반영 확인"
