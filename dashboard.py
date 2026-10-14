@@ -30,7 +30,10 @@ def guard(section: str):
 
 
 # ── 표에 숫자 강도 색 입히기 ─────────────────────────────────────────
-# 규칙은 하나다: **그 열 안에서 값이 클수록 진한 초록.**
+# ⚠️ 2026-10-15 폐기 → table_ui.py (+ 초록 / − 빨강, |값|이 클수록 진하게, 부호 의미 있는 열만).
+#   아래는 08월 규칙의 기록이다 — 초록 단색은 '크기'만 보여 줘서 하락(−)이 연한 초록으로
+#   '조금 좋은 것'처럼 읽혔다. _shade 는 더 이상 호출되지 않는다.
+# (구) 규칙은 하나다: **그 열 안에서 값이 클수록 진한 초록.**
 #   · 색조는 초록 하나만 쓴다. 붉은색은 안 쓴다 — 음수라고 나쁜 게 아니고,
 #     이 색은 좋고 나쁨이 아니라 **크기**를 나타낸다.
 #   · 기준은 열마다 따로 잡는다. 열이 담는 게 서로 다르기 때문이다
@@ -117,30 +120,17 @@ def col_help() -> dict:
 
 
 def color_table(df: pd.DataFrame):
-    """열마다 그 열의 분포로 강도를 칠한 Styler. st.dataframe 에 그대로 넘긴다.
+    """표시 포맷만 입힌 Styler. **색은 table_ui 가 st.dataframe 단계에서 칠한다**
+    (+ 초록 / − 빨강, |값|이 클수록 진하게 — 2026-10-15 사용자 규칙).
 
     빈 칸은 'None' 이 아니라 '-' 로 낸다 — 없는 데이터를 있는 척하지 않되,
     파이썬 내부 표현을 화면에 흘리지도 않는다."""
-    st_ = df.style
-    for c in df.columns:
-        if c in _NO_SHADE:
-            continue
-        v = pd.to_numeric(df[c], errors='coerce')
-        if v.notna().sum() < 2 or v.nunique() < 2:
-            continue
-        lo, hi = float(v.quantile(.05)), float(v.quantile(.95))
-        if hi <= lo:                     # 분위가 겹치면 전체 범위로
-            lo, hi = float(v.min()), float(v.max())
-        if hi <= lo:
-            continue
-        st_ = st_.map(lambda x, lo=lo, hi=hi: _shade(x, lo, hi), subset=[c])
-
     fmt = {c: ('{:.2f}' if c in _C_2DP else '{:.1f}')
            for c in df.columns if pd.api.types.is_numeric_dtype(df[c])}
     for c in ('회차', '신호', '표본', '신호 수'):
         if c in fmt:
             fmt[c] = '{:.0f}'
-    return st_.format(fmt, na_rep='-')
+    return df.style.format(fmt, na_rep='-')
 
 
 def num(d: dict, key: str, fmt: str = '{}', dash: str = '-'):
@@ -337,8 +327,9 @@ def _attract_map(market: str = "전체") -> dict:
 
 
 def _mdd_col(sym: str, mmap: dict):
+    """고점대비 낙폭(%) — **숫자**로 돌려준다(2026-10-15. 문자열이면 정렬·필터·색이 안 된다)."""
     r = mmap.get(sym)
-    return f"{r['cur_dd']:+.1f}%" if r and r.get('cur_dd') is not None else '-'
+    return float(r['cur_dd']) if r and r.get('cur_dd') is not None else None
 
 
 @st.cache_data(ttl=1800)
@@ -433,6 +424,42 @@ def _dfh(n, cap=620):
 
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def _usdkrw() -> float:
+    """원/달러 — 포트폴리오에서 KR·US 를 같은 통화로 더하기 위해. 실패 시 1400 가정."""
+    try:
+        import FinanceDataReader as fdr
+        v = fdr.DataReader('USD/KRW', (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d'))['Close'].dropna()
+        if len(v):
+            return float(v.iloc[-1])
+    except Exception:
+        pass
+    try:
+        import yfinance as yf
+        v = yf.Ticker('KRW=X').history(period='10d')['Close'].dropna()
+        if len(v):
+            return float(v.iloc[-1])
+    except Exception:
+        pass
+    return 1400.0
+
+
+def cap_usd_b(marcap, market):
+    """시총을 $B 로. KR·US 가 한 표에 섞일 때 **같은 단위여야 정렬·필터가 성립한다**
+    (원화 원 단위와 달러를 한 열에 두면 삼성전자가 NVDA 보다 '큰' 숫자가 된다)."""
+    if not marcap:
+        return None
+    try:
+        v = float(marcap)
+    except (TypeError, ValueError):
+        return None
+    return v / 1e9 if market == 'US' else v / _usdkrw() / 1e9
+
+
+def cap_caption() -> str:
+    return f"시총($B) — KR 은 원/달러 {_usdkrw():,.0f} 으로 환산(1시간 캐시)"
+
+
 def fmt_cap(marcap, market):
     if not marcap:
         return 'N/A'
@@ -447,13 +474,13 @@ def tag(v):
     return '✅' if v else '·'
 
 def color_ret(val):
+    """+ 초록 / − 빨강 (2026-10-15 통일 — 구 규칙은 한국식 빨강=상승·파랑=하락이었다)."""
     try:
         v = float(str(val).replace('%','').replace('+',''))
-        if v >= 20:  return 'color:#ff2222;font-weight:bold'
-        if v >= 10:  return 'color:#ff6600;font-weight:bold'
-        if v >= 3:   return 'color:#ffaa00'
-        if v < -10:  return 'color:#4488ff;font-weight:bold'
-        if v < 0:    return 'color:#88aaff'
+        if v >= 10:  return 'color:#15803d;font-weight:bold'
+        if v > 0:    return 'color:#16a34a'
+        if v <= -10: return 'color:#b91c1c;font-weight:bold'
+        if v < 0:    return 'color:#dc2626'
     except:
         pass
     return ''
@@ -485,27 +512,13 @@ def load_json(path):
 #   (pd.get_option('styler.format.precision') == 6). 그래서 옵션 자체를 1로 낮춘다.
 #   호출부에서 .format({...}) 을 명시한 열은 그 포맷이 그대로 우선한다.
 pd.set_option('styler.format.precision', 1)
+pd.set_option('styler.format.na_rep', '-')      # 결측은 '-' (nan/None 을 화면에 흘리지 않는다)
 
-#   Styler 를 안 거치는 순수 DataFrame 은 Streamlit 자체 포맷을 타므로
-#   column_config 로 숫자 열에 %.1f 를 지정한다.
-if not getattr(st, '_df1_patched', False):      # 재실행 때 래퍼가 겹겹이 쌓이지 않게
-    _ST_DATAFRAME = st.dataframe
-
-    def _dataframe1(data=None, *a, **kw):
-        try:
-            if isinstance(data, pd.DataFrame) and 'column_config' not in kw:
-                cfg = {}
-                for c in data.select_dtypes(include='number').columns:
-                    if pd.api.types.is_float_dtype(data[c]):
-                        cfg[c] = st.column_config.NumberColumn(format='%.1f')
-                if cfg:
-                    kw['column_config'] = cfg
-        except Exception:
-            pass                                # 표시 보정 실패가 화면을 죽이면 안 된다
-        return _ST_DATAFRAME(data, *a, **kw)
-
-    st.dataframe = _dataframe1
-    st._df1_patched = True
+#   숫자 열 %.1f 기본 포맷 · 부호 색(+초록/−빨강, 클수록 진하게) · 🔎 필터는 전부
+#   table_ui 한 곳에서 st.dataframe 을 감싸 처리한다(2026-10-15). 표마다 따로 하지 않는다.
+import table_ui as _tui
+_tui.install(st)
+_tui.begin_run(st)
 
 
 @st.cache_data(ttl=600, show_spinner=False)
@@ -944,14 +957,15 @@ with t_gain, guard('상승 상위'):
             _ws_v = wm.get('score')
             _grows.append({
                 '시장': s['market'], '종목': s['name'], '코드': s['sym'],
-                '시총': fmt_cap(s.get('marcap'), s['market']),
+                '시총($B)': cap_usd_b(s.get('marcap'), s['market']),
                 '등급': wm.get('grade', '-'),
                 '위닝점수': _ws_v if _ws_v is not None else None,   # 정렬용 원값
                 '신호': ', '.join(pm.get('sigs', [])[:3]) or '-',
                 # CANSLIM 점수 열은 2026-08-12 제거 — 🏆CANSLIM 서브탭과 같은 판정을 두 곳에서
                 # 다르게 보여주던 중복. 실적 증감(매출·영업익)만 남긴다.
-                '매출%': f"{cm['rev']:+.0f}" if isinstance(cm.get('rev'), (int, float)) else '-',
-                '영업익%': f"{cm['op']:+.0f}" if isinstance(cm.get('op'), (int, float)) else '-',
+                # 숫자는 숫자로 둔다 — 문자열('+12')이면 헤더 정렬이 사전순이 되고 필터 범위도 못 건다
+                '매출%': cm['rev'] if isinstance(cm.get('rev'), (int, float)) else None,
+                '영업익%': cm['op'] if isinstance(cm.get('op'), (int, float)) else None,
                 _retc: ret,
                 '향후2M계절성': _seasmap.get(s['sym']),
                 '고점대비%': _mdd_col(s['sym'], _MDDM),
@@ -961,9 +975,8 @@ with t_gain, guard('상승 상위'):
         else:
             _grows.sort(key=lambda r: -(r[_retc] if r[_retc] is not None else -999))
         _grows = _grows[:_gn]
-        for r in _grows:                                 # 표시용 변환 (None → '-')
-            r['위닝점수'] = f"{r['위닝점수']:.1f}" if r['위닝점수'] is not None else '-'
-            r['향후2M계절성'] = f"{r['향후2M계절성']:+.1f}%" if r['향후2M계절성'] is not None else '-'
+        # (구) 여기서 위닝점수·계절성을 문자열로 바꿨다 → 정렬·필터가 깨져서 2026-10-15 제거.
+        #     표시 포맷은 column_config 가 맡는다.
 
         _slab = "위닝점수순" if _gsort == "위닝점수" else f"{_gper}상승순"
         st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 · {_slab} ({_cmo}·{_nmo}월 계절성 동반)")
@@ -987,9 +1000,17 @@ with t_gain, guard('상승 상위'):
         _gsub = [c for c in [_retc, '향후2M계절성'] if c in _gdf.columns]
         st.dataframe(
             _gdf.style.map(_cg2, subset=_gsub)
-                .map(_cg_grade, subset=['등급']).map(_cg_score, subset=['위닝점수'])
-                .format({_retc: '{:+.1f}%'}, na_rep='-'),
-            use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_gdf)))
+                .map(_cg_grade, subset=['등급']).map(_cg_score, subset=['위닝점수']),
+            use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_gdf)),
+            column_config={
+                '시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
+                '위닝점수': st.column_config.NumberColumn(format='%.1f'),
+                '매출%': st.column_config.NumberColumn(format='%+.0f%%'),
+                '영업익%': st.column_config.NumberColumn(format='%+.0f%%'),
+                _retc: st.column_config.NumberColumn(format='%+.1f%%'),
+                '향후2M계절성': st.column_config.NumberColumn(format='%+.1f%%'),
+                '고점대비%': st.column_config.NumberColumn(format='%+.1f%%')})
+        st.caption(cap_caption())
         _ncov = sum(1 for r in _grows if r['등급'] != '-')
         st.caption(f"ℹ️ 위닝점수·신호·CANSLIM은 **주봉 신호 유니버스(337종목)**에만 계산돼 있어 "
                    f"급등 소형주는 '-'가 많음 (현재 표시 {len(_grows)}개 중 {_ncov}개 커버). "
@@ -1002,18 +1023,18 @@ with t_gain, guard('상승 상위'):
 # ── 주도주 (섹터/전체 상대강도) ──
 # 시장 선택 플래그. 라디오 위젯보다 먼저 읽지만, 첫 렌더에서는 위젯 기본값(미국)과
 # 같은 값이 나오므로 문제되지 않는다. guard() 안에서 정의하면 예외 시 NameError 다.
-_LEAD_KR = st.session_state.get('lead_mkt', '').startswith('🇰🇷')
+# 2026-10-15 — 탭 자체 미국/한국 라디오 폐지 → 상단 공통 시장 필터(전체면 두 시장을 위아래로).
+#   두 규칙은 검증 수준이 달라(미국 8년 백테스트+청산 연구 / 한국 가격 백테스트) 한 표로 섞지 않고 구획을 나눈다.
+_LEAD_US = _GMKT != "KR"
+_LEAD_KR = _GMKT != "US"
 
 with t_lead, guard('주도주'):
-    # 2026-08-15: KR 은 US 와 근거 강도가 달라 화면을 나눈다.
-    # 2026-08-25: 라벨의 '규칙⑥'·'L/S' 는 둘 다 폐기된 이름이다. 미국 규칙은 이익 가속뿐이다.
-    _lead_mkt = st.radio("시장", ["🇺🇸 미국 (이익 가속)", "🇰🇷 한국 (KR-U6 / KR-P1)"],
-                         horizontal=True, key="lead_mkt",
-                         help="두 규칙은 검증 수준이 다릅니다 — 미국은 8년 백테스트와 "
-                              "청산 연구까지, 한국은 가격 백테스트만 거쳤습니다.")
-
-    # 이익 가속은 미국 규칙이다. 한국은 아래 KR-U6/KR-P1 로 따로 간다.
-    if not _LEAD_KR:
+    if _LEAD_US and _LEAD_KR:
+        st.caption("🇺🇸 미국(이익 가속) → 🇰🇷 한국(KR-U6 / KR-P1) 순서로 이어집니다. "
+                   "두 규칙은 검증 수준이 다릅니다 — 미국은 8년 백테스트와 청산 연구까지, 한국은 가격 백테스트만.")
+    if _LEAD_US:
+        st.markdown("## 🇺🇸 미국 — 이익 가속")
+    if _LEAD_US:
         # ── ⚡ 이익 가속 신호 (2026-08-23 신설) ────────────────────────
         # L/S 규칙(+20% 급등·거래량<1.5·재무)은 8년간 TSLA 0회·NVDA 0회·WDC 0회였다.
         # 대박 시작점을 역산하니 시작점은 '급등한 주'가 아니었고(NVDA 그 주 −7.0%),
@@ -1498,6 +1519,9 @@ with t_lead, guard('주도주'):
 
 if _LEAD_KR:
     with t_lead, guard('주도주 KR'):
+        if _LEAD_US:
+            st.divider()
+        st.markdown("## 🇰🇷 한국 — KR-U6 / KR-P1")
         # 2026-08-16: 미국 규칙⑥ 원문을 KR에 이식한 KR-U6 추가. 실측에서 KR-P1보다 우수해
         # 기본값으로 둔다(평균 11.5% vs 9.6% · 손익비 3.53 vs 3.05 · 꼬리의존 36% vs 47%).
         _kr_rule = st.radio(
@@ -1813,7 +1837,8 @@ with t_52, guard('52주 신고가'):
         cg = cs.get('c_growth_pct')
         _rows52.append({
             '종목': x.get('name'), '코드': x.get('sym'), '시장': x.get('market'),
-            '시총': fmt_cap(cap, x.get('market')), '_cap': cap,
+            # (구) '_cap': cap 은 원화 원 단위와 달러를 그대로 섞어 '시총순' 정렬에서 KR 이 늘 위로 갔다
+            '시총($B)': cap_usd_b(cap, x.get('market')), '_cap': cap_usd_b(cap, x.get('market')) or 0,
             '현재가': x.get('curr_price'), '52주고': x.get('hi52'),
             '고점대비%': d, '경신': '🔺' if x.get('new_high') else '',
             '고점후(주)': x.get('wk_since_hi'),
@@ -1839,10 +1864,12 @@ with t_52, guard('52주 신고가'):
             _df52 = _df52.drop(columns=['52주고', '고점대비%', '경신', '고점후(주)', '12주%'])
         st.dataframe(_df52, use_container_width=True, hide_index=True,
                      height=_dfh(len(_df52), cap=760),
-                     column_config={'고점대비%': st.column_config.NumberColumn(format="%.1f%%"),
+                     column_config={'시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
+                                    '고점대비%': st.column_config.NumberColumn(format="%.1f%%"),
                                     '1주%': st.column_config.NumberColumn(format="%+.1f%%"),
                                     '4주%': st.column_config.NumberColumn(format="%+.1f%%"),
                                     '12주%': st.column_config.NumberColumn(format="%+.1f%%")})
+        st.caption(cap_caption())
     else:
         st.write("조건에 맞는 종목이 없습니다.")
     st.caption("⚠️ 신고가는 **탐색 출발점**이지 매수 신호가 아닙니다. 상장폐지 종목까지 넣은 12.5년 검증에서 "
@@ -1853,10 +1880,12 @@ with t_52, guard('52주 신고가'):
 with t_value, guard('가치 발굴'):
     st.caption(data_stamp('results/value_kr.json'))
     st.caption("💎 공식 지표(KRX)로 '싸고(저PER·저PBR) 돈 잘 버는(ROE·성장·배당)' 종목 발굴 — 가격이 아니라 가치 기준.")
-    if _GMKT == "US":
-        st.info("US 가치 스크린은 EDGAR 벌크 적재 후 제공 예정 — 지금은 KR만. "
-                "(US 개별 종목 밸류는 🔍 종목 분석에서 공식 멀티플로 확인)")
-    else:
+    # 2026-10-15 — '전체'면 KR 표를 그대로 보여주되 US 가 비어 있다는 사실을 숨기지 않는다.
+    #   US 를 채우려면 EDGAR 기반 PER·PBR·ROE 벌크 산출(value_export 의 US 판)이 필요하다 — 데이터 과제.
+    if _GMKT != "KR":
+        st.warning("🇺🇸 **US 가치 스크린 데이터가 아직 없습니다** — 아래 표는 KR 만입니다. "
+                   "(US 개별 종목 밸류는 🔍 종목 분석에서 공식 멀티플로 확인)")
+    if _GMKT != "US":
         _vj = load_json(Path('results/value_kr.json'))
         _ATTM = _attract_map("KR")   # 이 탭은 KR 전용 — 전역 _GMKT가 US여도 KR 매력도로 조회
         try:
@@ -1879,8 +1908,8 @@ with t_value, guard('가치 발굴'):
                      help="위닝점수 = 백테스트 샤프 가중 셋업 점수. '싼 순'만 보면 저PER 함정이 늘 위로 온다.")
             def _fmt_growth(v):
                 # 숫자·'흑자전환' 문자열 혼재 컬럼 → 균일 문자열 (Arrow 직렬화 오류 방지)
-                if isinstance(v, str): return v
-                return f"{v:+.0f}" if v is not None else '-'
+                # 2026-10-15 — 숫자로 둔다(정렬·필터·색). 문자열 판정은 매출 성장에 의미가 없어 결측 처리.
+                return float(v) if isinstance(v, (int, float)) else None
             _vrows = []
             for s in _vj['stocks']:
                 _per, _pbr, _roe = s.get('per'), s.get('pbr'), s.get('roe')
@@ -1899,7 +1928,7 @@ with t_value, guard('가치 발굴'):
                 if _vvec == "개선 가속만" and _verd != 'improving':
                     continue
                 _vrows.append({'종목': s['name'], '코드': s['sym'],
-                               '시총': fmt_cap(s.get('marcap'), 'KR'),
+                               '시총($B)': cap_usd_b(s.get('marcap'), 'KR'),
                                'PER': _per, 'PBR': _pbr, 'PSR': s.get('psr'),
                                'ROE%(위치)': _roe,
                                'ΔROE(속도)': _tr.get('d_roe'),
@@ -1935,7 +1964,10 @@ with t_value, guard('가치 발굴'):
                         .map(_c_delta, subset=['ΔROE(속도)', 'ΔOPM(마진속도)', '성장가속'])
                         .format({'PER': '{:.1f}', 'PBR': '{:.2f}', 'PSR': '{:.2f}', 'ROE%(위치)': '{:.1f}',
                                  'ΔROE(속도)': '{:+.1f}', 'ΔOPM(마진속도)': '{:+.1f}', '성장가속': '{:+.1f}'}, na_rep='-'),
-                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(min(len(_vdf9), 20)))
+                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(min(len(_vdf9), 20)),
+                    column_config={'시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
+                                   '매출성장': st.column_config.NumberColumn(format='%+.0f%%'),
+                                   '고점대비%': st.column_config.NumberColumn(format='%+.1f%%')})
                 st.caption(f"커버리지 {_vj.get('coverage')}종목(DART 공식재무 × 실시간 시총). "
                            f"**위치(스칼라) + 속도(Δ, 전년대비) + 가속(Δ²)** = 벡터 — Piotroski F-Score 방식. "
                            f"판정: 📈개선 가속 / ➖정체 / 📉악화(함정). ⚠️ 현재 전체 밸류 유니버스 중 **{_ntrap}종목이 '싸지만 악화 중'**(함정) — "
@@ -1948,31 +1980,34 @@ with t_value, guard('가치 발굴'):
 
 # ════════════════════════════════════════════════════════════════════
 with tab3, guard('CANSLIM'):
-    st.caption(data_stamp('results/canslim_latest.json'))
-    _cs_mkt = st.radio("시장", ["🇰🇷 한국", "🇺🇸 미국"], horizontal=True, key="canslim_mkt")
-    _cs_kr = _cs_mkt.endswith("한국")
-    _CS_JSON = CANSLIM_JSON if _cs_kr else Path('results/canslim_us_latest.json')
-    _ATTM = _attract_map("KR" if _cs_kr else "US")   # 이 탭은 자체 KR/US 토글 — 전역 _GMKT와 별개
+    # 2026-10-15 — 탭 자체 KR/US 라디오 폐지 → 상단 공통 시장 필터. '전체'면 두 시장을 한 표에.
+    #   RS(L) 은 **각 시장 안의 백분위**라서 시장을 섞어도 '그 시장에서 상위 몇 %'로 읽으면 된다.
+    _CS_SETS = [(m, p) for m, p in (('KR', CANSLIM_JSON), ('US', Path('results/canslim_us_latest.json')))
+                if _GMKT in ("전체", m)]
+    _CS = {m: load_json(p) for m, p in _CS_SETS}
+    _ATTM = _attract_map(_GMKT)
     _TRAJM = _traj_map()                             # 궤적(KR만) — US는 '-'
-    st.header(f"🏆 CANSLIM 스크리너 ({'한국' if _cs_kr else '미국'})")
-    update_badge(_CS_JSON)
-    canslim = load_json(_CS_JSON)
-    if not _cs_kr:
-        st.caption("US: C·A=SEC EDGAR 공식 재무 · I(기관 수급)는 무료 일간 소스가 없어 '?'(13F는 분기 지연) — I 필수 체크 비권장")
+    st.header("🏆 CANSLIM 스크리너" + ("" if _GMKT == "전체" else f" ({'한국' if _GMKT == 'KR' else '미국'})"))
+    for _m, _p in _CS_SETS:
+        st.caption(f"{_m} · " + data_stamp(str(_p)))
+    if 'US' in _CS:
+        st.caption("US: C·A=SEC EDGAR 공식 재무 · I(기관 수급)는 무료 일간 소스가 없어 공란(13F는 분기 지연)")
 
-    if canslim is None:
-        st.error(f"데이터 없음 → `python {'canslim_run.py' if _cs_kr else 'canslim_us_run.py'}` 실행 후 새로고침")
-    else:
-        col1, col2, col3 = st.columns(3)
-        col1.metric("기준일", canslim['date'])
-        col2.metric("시장방향(M)", canslim['market_dir'])
-        col3.metric("후보 종목", f"{len(canslim['stocks'])}개 (N+RS 사전필터)")
+    _missing = [m for m, d in _CS.items() if d is None]
+    for _m in _missing:
+        st.error(f"{_m} 데이터 없음 → `python {'canslim_run.py' if _m == 'KR' else 'canslim_us_run.py'}` 실행 후 새로고침")
+    _CS = {m: d for m, d in _CS.items() if d is not None}
+    canslim = {'stocks': [dict(x, _mkt=m) for m, d in _CS.items() for x in d.get('stocks', [])]} if _CS else None
+    if canslim is not None:
+        _mc = st.columns(max(len(_CS), 1) * 2)
+        for _i, (_m, _d) in enumerate(_CS.items()):
+            _mc[_i * 2].metric(f"{_m} 기준일 · 시장방향(M)", f"{_d['date']} · {_d['market_dir']}")
+            _mc[_i * 2 + 1].metric(f"{_m} 후보 (N+RS 사전필터)", f"{len(_d['stocks'])}개")
+            if not _d['market_ok']:
+                st.warning(f"⚠️ {'KOSPI' if _m == 'KR' else 'S&P500'} 하락추세 — {_m} 신규매수 주의")
+        _MOK = {m: bool(d['market_ok']) for m, d in _CS.items()}
 
-        if not canslim['market_ok']:
-            st.warning(f"⚠️ {'KOSPI' if _cs_kr else 'S&P500'} 하락추세 — 신규매수 주의")
-
-        m_ok = canslim['market_ok']
-
+    if canslim is not None:
         with st.expander("⚙️ CANSLIM 기준 조정 (슬라이더로 실시간)", expanded=False):
             th_N    = st.slider("N  52주 신고가 허용거리 (%)", -30, 0, -5, key="th_N",
                                 help="예: -5 = 신고가 대비 5% 이내")
@@ -2004,14 +2039,9 @@ with tab3, guard('CANSLIM'):
                 req_I = False
                 st.caption("⚠️ I(수급) 데이터 없음 — 점수는 6점 만점")
 
-        def _tag3(v, th, fmt='{:.1f}'):
-            if v is None: return '?'
-            if isinstance(v, str):                    # '흑자전환' = 통과, '적자전환' = 탈락
-                return f"{'✅' if v == '흑자전환' else '❌'} {v}"
-            return f"{'✅' if v >= th else '❌'} {fmt.format(v)}"
-
         rows3 = []
         for s in canslim['stocks']:
+            _mk3   = s['_mkt']
             n_dist = s.get('n_dist_pct')
             vol    = s.get('s_vol_ratio')
             body   = s.get('s_body_pct')
@@ -2039,35 +2069,37 @@ with tab3, guard('CANSLIM'):
             if req_A and not a_ok:   continue
             if req_I and not i_ok:   continue
 
-            score = sum([bool(m_ok), n_ok, l_ok, s_ok, c_ok, a_ok] + ([i_ok] if _i_live else []))
+            m_ok = _MOK.get(_mk3, True)
+            score = sum([m_ok, n_ok, l_ok, s_ok, c_ok, a_ok] + ([i_ok] if _i_live else []))
 
-            # 시총은 숫자로 저장 (표시 포맷은 column_config가 담당) — 문자열로 저장하면
-            # 표 헤더 클릭 정렬이 사전순("$9B">"$87B")으로 깨짐 (#4 실측 확인)
-            _cap_num = (s.get('marcap') or 0) / (1e12 if _cs_kr else 1e9)   # KR=조원, US=$B
-            def _gtxt(v):
-                return v if isinstance(v, str) else (f"{v:+.0f}%" if v is not None else '??')
-            if a_y1 is not None and a_y2 is not None:
-                a_tag = f"{'✅' if a_ok else '❌'} {_gtxt(a_y1)}/{_gtxt(a_y2)}"
-            elif a_y1 is not None:
-                a_tag = f"{'✅' if _ge(a_y1, th_A1) else '❌'} {_gtxt(a_y1)}/??"
-            else:
-                a_tag = '?'
-
+            # 2026-10-15 격자 재설계 — (구) 셀 하나에 '✅ +23%' 처럼 판정과 값을 붙여 문자열로 냈다.
+            #   그러면 숫자로 정렬·필터·색이 안 된다. 값은 숫자 열로, 판정은 '통과' 열 하나로 분리한다.
+            def _n(v):
+                return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+            _conv = [f"{lab} {v}" for lab, v in (('C', c_g), ('A최근', a_y1), ('A전년', a_y2))
+                     if isinstance(v, str)]                       # 흑자전환/적자전환 은 숫자가 아니라 사건
+            _pass = [l for l, ok in (('M', m_ok), ('C', c_ok), ('A', a_ok), ('N', n_ok),
+                                     ('S', s_ok), ('L', l_ok), ('I', i_ok and _i_live)) if ok]
             rows3.append({
+                '시장':    _mk3,
                 '종목명':  s['name'],
                 '코드':    s['sym'],
-                '시총':    _cap_num,
-                _SC3:  score,
-                'RS':      _tag3(rs,     th_L,  '{:.0f}p'),
-                'N 거리%': _tag3(n_dist, th_N,  '{:+.1f}%'),
-                'S 배수':  _tag3(vol,    th_S,  '{:.1f}x'),
-                'C 분기%': _tag3(c_g,    th_C,  '{:+.0f}%'),
-                'A 연간%': a_tag,
-                'I 순매수': _tag3(i_inst, th_I,  '{:+.0f}억'),
+                '시총($B)': cap_usd_b(s.get('marcap'), _mk3),
+                _SC3:      score,
+                '통과':    ' '.join(_pass),
+                'C 분기%':  _n(c_g),
+                'A 최근년%': _n(a_y1),
+                'A 전년%':  _n(a_y2),
+                '전환':    ' · '.join(_conv) or '',
+                'N 거리%':  _n(n_dist),
+                'S 배수':   _n(vol),
+                'RS (L)':  _n(rs),
+                'I 순매수(억)': _n(i_inst),
                 '고점대비%': _mdd_col(s['sym'], _MDDM),
-                '궤적': _traj_col(s['sym'], _TRAJM) if _cs_kr else '-',
+                '궤적': _traj_col(s['sym'], _TRAJM) if _mk3 == 'KR' else '-',
                 '매력도': _attract_col(s['sym'], _ATTM),
                 '_score':  score,
+                '_ok': {'C': c_ok, 'A': a_ok, 'S': s_ok, 'I': i_ok},
             })
 
         df3 = pd.DataFrame(rows3) if rows3 else pd.DataFrame()
@@ -2075,7 +2107,7 @@ with tab3, guard('CANSLIM'):
         if df3.empty:
             st.warning("조건을 충족하는 종목이 없습니다. 슬라이더를 완화해보세요.")
         else:
-            df3 = df3.sort_values('_score', ascending=False).reset_index(drop=True)
+            df3 = df3.sort_values(['_score', 'RS (L)'], ascending=False).reset_index(drop=True)
             df3.index += 1
 
             def color_score3(val):
@@ -2083,37 +2115,41 @@ with tab3, guard('CANSLIM'):
                     v = int(val)
                     if v >= 6: return 'background-color:#1a472a;color:white;font-weight:bold'
                     if v >= 5: return 'background-color:#2d6a4f;color:white'
-                    if v >= 4: return 'color:#f0c040'
+                    if v >= 4: return 'color:#b7791f;font-weight:bold'
                 except: pass
                 return ''
 
-            def color_cell3(v):
-                s = str(v)
-                if '✅' in s: return 'color:#2ecc71'
-                if '❌' in s: return 'color:#f78166'
-                return 'color:#8b949e'
-
             # 컬럼을 CANSLIM 글자 순서(C→A→N→S→L→I)로 (#3)
-            disp3 = ['종목명','코드','시총',_SC3,'C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수',
-                     '고점대비%','궤적','매력도']
-            df3 = df3.rename(columns={'RS': 'RS (L)'})
-            sig3c = ['C 분기%','A 연간%','N 거리%','S 배수','RS (L)','I 순매수']
-
-            st.subheader(f"총 {len(df3)}개 종목 | N✅ L✅ 필수, C/A/S/I는 슬라이더 기준으로 색상 표시")
+            disp3 = ['시장', '종목명', '코드', '시총($B)', _SC3, '통과', 'C 분기%', 'A 최근년%', 'A 전년%', '전환',
+                     'N 거리%', 'S 배수', 'RS (L)', 'I 순매수(억)', '고점대비%', '궤적', '매력도']
+            if _GMKT != "전체":
+                disp3.remove('시장')
+            if not _i_live:
+                disp3.remove('I 순매수(억)')
+            _nk = int((df3['시장'] == 'KR').sum()); _nu = len(df3) - _nk
+            st.subheader(f"총 {len(df3)}개 종목 (KR {_nk} · US {_nu}) | N·L 필수 · '통과' = 현재 슬라이더 기준 통과 글자")
             st.dataframe(
-                df3[disp3].style
-                    .map(color_score3, subset=[_SC3])
-                    .map(color_cell3,  subset=sig3c),
+                df3[disp3].style.map(color_score3, subset=[_SC3]),
                 use_container_width=True,
                 row_height=25, height=_dfh(len(df3), cap=760),
-                column_config={'시총': st.column_config.NumberColumn(
-                    '시총', format=('%.1f조' if _cs_kr else '$%.1fB'))},
-            )
+                column_config={
+                    '시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
+                    'C 분기%': st.column_config.NumberColumn(format='%+.0f%%', help='최근 분기 순이익 YoY. 흑자/적자전환은 숫자가 아니라 \'전환\' 열에.'),
+                    'A 최근년%': st.column_config.NumberColumn(format='%+.0f%%'),
+                    'A 전년%': st.column_config.NumberColumn(format='%+.0f%%'),
+                    'N 거리%': st.column_config.NumberColumn(format='%+.1f%%', help='52주 신고가 대비 거리'),
+                    'S 배수': st.column_config.NumberColumn(format='%.1fx', help='거래량 ÷ 60일 평균'),
+                    'RS (L)': st.column_config.NumberColumn(format='%.0fp', help='12개월 수익률의 **그 시장 안** 백분위'),
+                    'I 순매수(억)': st.column_config.NumberColumn(format='%+.0f'),
+                    '고점대비%': st.column_config.NumberColumn(format='%+.1f%%'),
+                    '통과': st.column_config.TextColumn(help='M 시장 · C 분기 · A 연간 · N 신고가 · S 거래량 · L 상대강도 · I 수급 — 현재 슬라이더 기준'),
+                })
+            st.caption(cap_caption() + " · 색 = 값의 부호(+초록/−빨강)와 크기. 기준 통과 여부는 '통과' 열.")
             with st.expander("📖 CANSLIM 각 항목 기준·설명", expanded=False):
                 st.dataframe(pd.DataFrame([
                     {'글자': 'C', '이름': '분기 실적', '컬럼': 'C 분기%',
                      '기준': '최근 분기 순이익 YoY ≥ +20% (흑자전환 포함)', '출처': 'DART 공식(폴백 네이버)'},
-                    {'글자': 'A', '이름': '연간 실적', '컬럼': 'A 연간%',
+                    {'글자': 'A', '이름': '연간 실적', '컬럼': 'A 최근년% · A 전년%',
                      '기준': '연간 순이익 YoY ≥ +20% × 2개년 (최근년/전년)', '출처': 'DART 공식(폴백 네이버)'},
                     {'글자': 'N', '이름': '신고가 근접', '컬럼': 'N 거리%',
                      '기준': '52주 신고가 대비 거리 — 0%에 가까울수록(신고가 부근) 강함', '출처': '주가'},
@@ -2121,7 +2157,7 @@ with tab3, guard('CANSLIM'):
                      '기준': '거래량이 평균 대비 몇 배 터졌나 (≥1.5x + 양봉 몸통)', '출처': '주가·거래량'},
                     {'글자': 'L', '이름': '주도주(상대강도)', '컬럼': 'RS (L)',
                      '기준': 'RS = 최근 수익률의 시장 내 백분위(0~100). 90p = 상위 10% 강자', '출처': '주가(상대비교)'},
-                    {'글자': 'I', '이름': '기관 수급', '컬럼': 'I 순매수',
+                    {'글자': 'I', '이름': '기관 수급', '컬럼': 'I 순매수(억)',
                      '기준': '최근 20거래일 기관+외국인 합산 순매수(억원) > 0 = 매집', '출처': 'KRX(pykrx)'},
                     {'글자': 'M', '이름': '시장 방향', '컬럼': '상단 배지',
                      '기준': '지수가 상승추세인가 — 하락장에선 아무리 좋아도 무리하지 않음', '출처': '지수'},
@@ -2133,10 +2169,10 @@ with tab3, guard('CANSLIM'):
             with st.expander("📊 항목별 통과율 (현재 슬라이더 기준)", expanded=False):
                 total3 = len(rows3)
                 pr_counts = {
-                    'C 분기실적': sum(1 for r in rows3 if '✅' in str(r['C 분기%'])),
-                    'A 연간실적': sum(1 for r in rows3 if '✅' in str(r['A 연간%'])),
-                    'S 거래량':   sum(1 for r in rows3 if '✅' in str(r['S 배수'])),
-                    'I 기관수급': sum(1 for r in rows3 if '✅' in str(r['I 순매수'])),
+                    'C 분기실적': sum(1 for r in rows3 if r['_ok']['C']),
+                    'A 연간실적': sum(1 for r in rows3 if r['_ok']['A']),
+                    'S 거래량':   sum(1 for r in rows3 if r['_ok']['S']),
+                    'I 기관수급': sum(1 for r in rows3 if r['_ok']['I']),
                 }
                 pr_df = pd.DataFrame({
                     '항목': list(pr_counts.keys()),
@@ -4365,25 +4401,6 @@ with tab7, guard('종목 분석'):
 # (2026-07-02 탭 재편 때 대시보드에서 12일간 빠져 있었음 — 2026-07-14 복원 + 준수이력 추가)
 # ════════════════════════════════════════════════════════════════════
 @st.cache_data(ttl=3600)
-def _usdkrw() -> float:
-    """원/달러 — 포트폴리오에서 KR·US 를 같은 통화로 더하기 위해. 실패 시 1400 가정."""
-    try:
-        import FinanceDataReader as fdr
-        v = fdr.DataReader('USD/KRW', (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d'))['Close'].dropna()
-        if len(v):
-            return float(v.iloc[-1])
-    except Exception:
-        pass
-    try:
-        import yfinance as yf
-        v = yf.Ticker('KRW=X').history(period='10d')['Close'].dropna()
-        if len(v):
-            return float(v.iloc[-1])
-    except Exception:
-        pass
-    return 1400.0
-
-
 @st.cache_data(ttl=300)
 def _fetch_pf_price(sym: str, market: str):
     try:
@@ -4712,7 +4729,11 @@ with t_turn, guard('흑자전환'):
             st.caption("⏸️ 판정 보류: " + " · ".join(f"{k.replace('_', ' ')} {v}종" for k, v in _skp.items())
                        + " — 재무 데이터가 비었거나 분기가 빠져 있으면 틀린 판정을 내지 않고 뺍니다.")
 
-        _mk = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="turn_mk")
+        _mk = _GMKT                       # 2026-10-15 — 탭별 시장 라디오 폐지, 상단 공통 필터 하나로
+        if _mk != "US" and not _ta.get('kr'):
+            st.warning("🇰🇷 **KR 흑자전환 결과가 0종입니다** — 시장 필터 문제가 아니라 데이터 공백입니다. "
+                       "판정 보류(분기 누락 등) 종목 대부분이 KR 로 추정되며, KR 분기 재무 적재가 "
+                       "채워지기 전까지 이 화면은 사실상 US 전용입니다.")
         _sts = sorted({r.get('status') for r in _tas if r.get('status')})
         _pick = st.multiselect("구분", _sts, default=_sts, key="turn_st")
 
@@ -4728,7 +4749,7 @@ with t_turn, guard('흑자전환'):
                 '코드': r.get('sym'),
                 '구분': r.get('status'),
                 '점수': r.get('score'),
-                '시총': r.get('marcap'),
+                '시총($B)': cap_usd_b(r.get('marcap'), r.get('market')),
                 '최근분기순익': r.get('q0_ni'),
                 '1분기전': r.get('q1_ni'),
                 '2분기전': r.get('q2_ni'),
@@ -4741,7 +4762,10 @@ with t_turn, guard('흑자전환'):
                 '기준분기': r.get('q0_date'),
             } for r in _rows]), use_container_width=True, hide_index=True,
                 row_height=25, height=_dfh(len(_rows)),
-                column_config={'시총': st.column_config.NumberColumn('시총', format='%d')})
+                column_config={'시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
+                               'YoY개선%': st.column_config.NumberColumn(format='%+.0f%%'),
+                               '매출성장%': st.column_config.NumberColumn(format='%+.1f%%')})
+            st.caption(cap_caption())
         st.caption("⚠️ 흑자전환은 **되돌아가는 경우가 많습니다.** 한 분기 흑자를 "
                    "추세로 읽지 마세요 — 매출 성장과 마진 개선이 함께 가는지, "
                    "그리고 🚀 주도주의 이익 가속 신호와 겹치는지 같이 보는 것이 안전합니다.")
