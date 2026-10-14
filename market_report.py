@@ -89,12 +89,19 @@ def stock_facts(kind):
     res = {"perf_date": p.get("date")}
     for m, cap in (("KR", 1e12), ("US", 1e10)):
         big = [s for s in st if s.get("market") == m and (s.get("marcap") or 0) >= cap and s.get(key) is not None]
+        # 2026-10-15: 주간 리포트 강세 1위가 CFNB +4,465% 였다 — 대형주 4주 수익률로 불가능한 값
+        #   (주식 분할·티커 재사용·시세 오류). 사실만 쓰는 리포트라 오류 숫자가 곧 거짓말이 된다.
+        #   1주 ±60%·4주 ±150% 를 넘으면 데이터 의심으로 순위에서 빼고 개수만 남긴다.
+        lim = 60 if key == "ret_1w" else 150
+        sus = [s for s in big if abs(s[key]) > lim]
+        big = [s for s in big if abs(s[key]) <= lim]
         big.sort(key=lambda s: s[key])
         row = lambda s: dict(name=s.get("name"), sym=s["sym"], ret=_r(s[key], 1))
         res[m] = dict(universe=len(big), basis=key, top=[row(s) for s in big[::-1][:6]],
                       bottom=[row(s) for s in big[:6]],
                       near_52w=sum(1 for s in st if s.get("market") == m and s.get("now_sig_52w")),
                       new_high=sum(1 for s in st if s.get("market") == m and s.get("new_high")),
+                      excluded_suspect=[x["sym"] for x in sus],
                       breadth_up=round(sum(1 for s in big if s[key] > 0) / len(big) * 100) if big else None)
         hi = [s for s in st if s.get("market") == m and s.get("now_sig_52w")]
         hi.sort(key=lambda s: -(s.get("marcap") or 0))

@@ -193,13 +193,19 @@ def c_us_marketcap():
 
 
 def c_report():
+    """2026-10-15: 처음엔 latest_daily 만 봤다. 주간 실행이 지수 8개짜리 정상 리포트를 만들었는데
+    오래된 일간 시드(지수 2개) 때문에 BLOCK → 파일째 되돌려 **정상 주간 리포트를 버렸다.**
+    이제 품질은 '방금 만든(가장 최근 generated) 리포트'로 보고, 일간 신선도는 따로 본다."""
     d = _j("results/market_report.json")
     ld = d.get("latest_daily") or {}
-    idx = [x for x in (ld.get("facts") or {}).get("indices", []) if "close" in x]
-    return [chk(_age(ld.get("date")) <= 4, BLOCK, f"일간 리포트 {ld.get('date')} 4일 초과"),
-            chk(len(idx) >= 4, BLOCK, f"지수 {len(idx)}개만 수집 — Yahoo 실패"),
-            chk(len(ld.get("markdown") or "") >= 300, BLOCK, "리포트 본문이 비었다"),
-            chk(str(ld.get("engine", "")).startswith("gemini"), WARN, f"AI 대신 숫자 템플릿({ld.get('engine')}) — 키·한도 확인")]
+    reps = [r for r in (ld, d.get("latest_weekly") or {}) if r]
+    new = max(reps, key=lambda r: str(r.get("generated") or "")) if reps else {}
+    idx = [x for x in (new.get("facts") or {}).get("indices", []) if "close" in x]
+    k = new.get("kind", "?")
+    return [chk(_age(ld.get("date")) <= 4, WARN, f"일간 리포트 {ld.get('date')} 4일 초과"),
+            chk(len(idx) >= 4, BLOCK, f"{k} 리포트 지수 {len(idx)}개만 수집 — Yahoo 실패"),
+            chk(len(new.get("markdown") or "") >= 300, BLOCK, f"{k} 리포트 본문이 비었다"),
+            chk(str(new.get("engine", "")).startswith("gemini"), WARN, f"AI 대신 숫자 템플릿({new.get('engine')}) — 키·한도 확인")]
 
 
 CONTRACTS = {
