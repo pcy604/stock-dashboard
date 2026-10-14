@@ -18,10 +18,16 @@
   ⑤ 커버리지      perf KR 종목 수     vs 원천 시총 3,000억+    (≥ 80%)
   앱의 기준일은 '현재가가 원천 종가와 일치하는 날'로 역산한다(앱은 날짜를 저장하지 않는다).
 
+  장중 실행(KST 평일 09:00~15:40)이면 ①③은 비교하지 않는다(2026-10-14 첫 실행에서 발견).
+    daily-refresh 는 09:00 KST 전후에 돈다 → 앱 현재가는 장 시작 몇십 분의 값이고, 원천은
+    전일 종가(또는 다른 시각의 장중 스냅샷)다. 둘이 어긋나는 건 오류가 아니라 시각 차이다.
+    그날 ①은 66%, ③은 42% 로 '실패'가 떴고 진짜 고장과 구별할 수 없었다.
+    ②④⑤와 신고가 개수는 하루 움직임에 둔감해 장중에도 그대로 본다.
+
   python tools/reconcile_kr.py            결과 출력 + results/reconcile_kr.json, 미달이면 종료코드 1
 """
 import io, json, os, sys
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -87,6 +93,12 @@ def _asof(d, prices):
     return pd.Series(hits).mode().iloc[0] if hits else d.Date.max()
 
 
+def _intraday(now=None) -> bool:
+    """KR 정규장(+동시호가 여유) 중인가 — KST 평일 09:00~15:40."""
+    k = (now or datetime.now(timezone.utc)) + timedelta(hours=9)
+    return k.weekday() < 5 and (9 * 60) <= k.hour * 60 + k.minute < (15 * 60 + 40)
+
+
 def main():
     d = _src()
     perf = json.load(open("results/perf_latest.json", encoding="utf-8"))
@@ -96,24 +108,26 @@ def main():
     sample = dict(list(prices.items())[:120]) or {s["sym"]: None for s in can}
     asof = _asof(d, {k: v for k, v in sample.items() if v}) if any(sample.values()) else d.Date.max()
     m, big = _metrics(d, asof)
-    res = {"generated": date.today().isoformat(), "asof": str(asof.date()), "checks": {}}
+    intraday = _intraday()
+    res = {"generated": date.today().isoformat(), "asof": str(asof.date()), "intraday": intraday, "checks": {}}
 
-    def put(k, n, ok, th, note):
+    def put(k, n, ok, th, note, skip=False):
         rate = ok / n if n else None
         res["checks"][k] = dict(n=int(n), ok=int(ok), rate=None if rate is None else round(rate, 3),
-                                threshold=th, pass_=bool(n and rate >= th), note=note)
+                                threshold=th, pass_=None if skip else bool(n and rate >= th),
+                                note=note + (" · 장중 실행이라 판정 생략(참고값)" if skip else ""))
 
     # ① 가격
     pr = [(s["sym"], s["curr_price"]) for s in kr if s.get("curr_price") and s["sym"] in m.index]
     # 3%: 앱 시세(네이버)는 넥스트레이드 애프터마켓 가격이 섞여 KRX 종가와 1~2% 어긋난다(10-08 실측
     #     119/684종, 어느 날 종가와도 불일치). 그건 오류가 아니다. 3% 를 넘으면 다른 날 가격이다.
-    put("perf_price", len(pr), sum(abs(m.at[c, "close"] / p - 1) <= 0.03 for c, p in pr), 0.9, "현재가 3% 이내")
+    put("perf_price", len(pr), sum(abs(m.at[c, "close"] / p - 1) <= 0.03 for c, p in pr), 0.9, "현재가 3% 이내", skip=intraday)
     # ② 52주 신호
     sg = [(s["sym"], bool(s.get("now_sig_52w"))) for s in kr if s["sym"] in m.index]
     put("perf_52w", len(sg), sum((m.at[c, "dist"] >= -3) == v for c, v in sg), 0.9, "52주 신고가 -3% 판정 일치")
     # ③④ CANSLIM
     cn = [s for s in can if s["sym"] in big.index and s.get("n_dist_pct") is not None]
-    put("canslim_N", len(cn), sum(abs(big.at[s["sym"], "dist"] - s["n_dist_pct"]) <= 1.5 for s in cn), 0.9, "N 거리 1.5%p 이내")
+    put("canslim_N", len(cn), sum(abs(big.at[s["sym"], "dist"] - s["n_dist_pct"]) <= 1.5 for s in cn), 0.9, "N 거리 1.5%p 이내", skip=intraday)
     put("canslim_RS", len(cn), sum(abs(big.at[s["sym"], "rs"] - (s.get("rs_pct") or 0)) <= 10 for s in cn), 0.85, "RS ±10 이내")
     # ⑤ 커버리지
     cov = len(set(s["sym"] for s in kr) & set(big.index))
@@ -130,12 +144,12 @@ def main():
         res["checks"]["perf_52w_count"] = dict(n=sn, ok=an, rate=round(r, 2), threshold=0.3,
                                               pass_=bool(0.3 <= r <= 3.0),
                                               note="앱/원천 신고가 근접 종목 수 비 (0.3~3배 · 주봉 vs 일봉 차 허용)")
-    bad = [k for k, v in res["checks"].items() if v["n"] and not v["pass_"]]
+    bad = [k for k, v in res["checks"].items() if v["n"] and v["pass_"] is False]
     empty = [k for k, v in res["checks"].items() if not v["n"]]
     res["ok"] = not bad and not empty
     json.dump(res, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o))
     for k, v in res["checks"].items():
-        mark = "✅" if v["pass_"] else ("⚪" if not v["n"] else "❌")
+        mark = "✅" if v["pass_"] else ("⚪" if not v["n"] or v["pass_"] is None else "❌")
         print(f"{mark} {k:11s} {v['ok']}/{v['n']} ({v['rate']}) 기준 {v['threshold']} — {v['note']}")
     print(f"기준일 {res['asof']} · 원천 52주 신고가 근접 {res['source_52w_near']}종 / 앱 {res['app_52w_near']}종")
     if not res["ok"]:
