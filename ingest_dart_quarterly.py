@@ -219,6 +219,27 @@ def quarterly(con=None) -> 'pd.DataFrame':
         d = pd.read_sql('SELECT sym,year,q,revenue,op_income,net_income FROM fundamentals_q', con)
         if close_after:
             con.close()
+            # 2026-10-15 — 노트북 market.db 는 2025Q3·Q4 가 빠진 채(call_years 버그 시절 적재본)
+            #   남아 있고, CI 가 고쳐서 올린 parquet 에는 들어 있다. 노트북이 매일 06:40 에
+            #   흑자전환을 돌리며 **낡은 로컬 DB 를 우선** 써서 KR 0종(판정 보류 1,215종)을
+            #   매일 덮어썼다. 두 원천 중 최신 분기가 더 늦은(같으면 그 분기 종목이 더 많은) 쪽을 쓴다.
+            try:
+                import export_kr_fundq
+                pq = export_kr_fundq.load()
+                if pq is not None and not pq.empty:
+                    _t = pd.Timestamp.today() - pd.DateOffset(months=15)
+                    _floor = _t.year * 10 + (_t.month - 1) // 3 + 1
+
+                    def _cov(x):
+                        # 최근 15개월 분기 행 수 — '최신 분기 하나'로 보면 일부 비12월 결산 종목이
+                        # 만든 미래 분기(2026Q4 등) 몇 개에 판정이 끌려간다.
+                        k = (x.year.astype(int) * 10 + x.q.astype(int))
+                        return int((k >= _floor).sum())
+                    if _cov(pq) > _cov(d):
+                        print(f"[quarterly] parquet 이 로컬 DB 보다 최신 {_cov(pq)} > {_cov(d)} — parquet 사용")
+                        d = pq[['sym', 'year', 'q', 'revenue', 'op_income', 'net_income']]
+            except Exception as _e:
+                print(f"[quarterly] parquet 비교 생략: {str(_e)[:80]}")
     if d.empty:
         return d
     piv = d.pivot_table(index=['sym', 'year'], columns='q',
