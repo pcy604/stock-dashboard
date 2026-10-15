@@ -1,49 +1,50 @@
 {
- "generated": "2026-10-14",
- "asof": "2026-10-12",
+ "generated": "2026-10-15",
+ "asof": "2026-10-14",
+ "intraday": true,
  "checks": {
   "perf_price": {
-   "n": 666,
-   "ok": 443,
-   "rate": 0.665,
+   "n": 664,
+   "ok": 660,
+   "rate": 0.994,
    "threshold": 0.9,
-   "pass_": false,
-   "note": "현재가 3% 이내"
+   "pass_": null,
+   "note": "현재가 3% 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "perf_52w": {
-   "n": 666,
-   "ok": 663,
-   "rate": 0.995,
+   "n": 664,
+   "ok": 662,
+   "rate": 0.997,
    "threshold": 0.9,
    "pass_": true,
    "note": "52주 신고가 -3% 판정 일치"
   },
   "canslim_N": {
-   "n": 85,
-   "ok": 36,
-   "rate": 0.424,
+   "n": 76,
+   "ok": 70,
+   "rate": 0.921,
    "threshold": 0.9,
-   "pass_": false,
-   "note": "N 거리 1.5%p 이내"
+   "pass_": null,
+   "note": "N 거리 1.5%p 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "canslim_RS": {
-   "n": 85,
-   "ok": 79,
-   "rate": 0.929,
+   "n": 76,
+   "ok": 71,
+   "rate": 0.934,
    "threshold": 0.85,
    "pass_": true,
    "note": "RS ±10 이내"
   },
   "coverage": {
-   "n": 671,
-   "ok": 665,
-   "rate": 0.991,
+   "n": 664,
+   "ok": 664,
+   "rate": 1.0,
    "threshold": 0.8,
    "pass_": true,
    "note": "원천 시총 3,000억+ 중 perf 에 있는 비율"
   }
  },
- "source_52w_near": 3,
- "app_52w_near": 6,
- "ok": false
+ "source_52w_near": 2,
+ "app_52w_near": 4,
+ "ok": true
 }

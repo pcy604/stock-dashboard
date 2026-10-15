@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-15",
-  "total": 129,
+  "date": "2026-10-14",
+  "total": 131,
   "stocks": [
     {
       "market": "KR",
@@ -207,7 +207,7 @@
       "sym": "000400",
       "name": "롯데손해보험",
       "marcap": 813081158400,
-      "pct_change": 22.25,
+      "pct_change": 22.02,
       "signals": [
         "거래량폭발",
         "이평선수렴",
@@ -221,7 +221,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -18.8,
+      "dist_52w": -18.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -560,7 +560,7 @@
     {
       "market": "US",
       "sym": "META",
-      "name": "META",
+      "name": "Meta Platforms, Inc.",
       "marcap": 1844107176147,
       "pct_change": 2.25,
       "signals": [
@@ -576,6 +576,28 @@
       "sig_maconv": true,
       "sig_rsimacd": false,
       "dist_52w": -5.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "BRK-A",
+      "name": "BERKSHIRE HATHAWAY INC",
+      "marcap": 743379275385,
+      "pct_change": 3.91,
+      "signals": [
+        "52주신고가",
+        "컵위드핸들"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": true,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -2.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -604,7 +626,7 @@
     {
       "market": "US",
       "sym": "COST",
-      "name": "COST",
+      "name": "COSTCO WHOLESALE CORP /NEW",
       "marcap": 419737433144,
       "pct_change": 4.22,
       "signals": [
@@ -626,7 +648,7 @@
     {
       "market": "US",
       "sym": "PG",
-      "name": "PG",
+      "name": "PROCTER & GAMBLE Co",
       "marcap": 351524001732,
       "pct_change": 5.89,
       "signals": [
@@ -648,8 +670,8 @@
     {
       "market": "US",
       "sym": "PM",
-      "name": "PM",
-      "marcap": 313577441597,
+      "name": "Philip Morris International Inc.",
+      "marcap": 313856403808,
       "pct_change": 6.69,
       "signals": [
         "52주신고가",
@@ -670,7 +692,7 @@
     {
       "market": "US",
       "sym": "CCZ",
-      "name": "CCZ",
+      "name": "COMCAST CORP",
       "marcap": 224553005447,
       "pct_change": 3.06,
       "signals": [
@@ -692,8 +714,8 @@
     {
       "market": "US",
       "sym": "ISRG",
-      "name": "ISRG",
-      "marcap": 149775753971,
+      "name": "INTUITIVE SURGICAL INC",
+      "marcap": 150039440975,
       "pct_change": 1.38,
       "signals": [
         "5일선라이딩",
@@ -715,7 +737,7 @@
     {
       "market": "US",
       "sym": "CB",
-      "name": "CB",
+      "name": "Chubb Ltd",
       "marcap": 131634916600,
       "pct_change": 4.62,
       "signals": [
@@ -737,7 +759,7 @@
     {
       "market": "US",
       "sym": "MO",
-      "name": "MO",
+      "name": "ALTRIA GROUP, INC.",
       "marcap": 119687245125,
       "pct_change": 5.41,
       "signals": [
@@ -759,8 +781,8 @@
     {
       "market": "US",
       "sym": "MDT",
-      "name": "MDT",
-      "marcap": 113178124801,
+      "name": "Medtronic plc",
+      "marcap": 113258550735,
       "pct_change": 10.2,
       "signals": [
         "거래량폭발",
@@ -803,7 +825,7 @@
     {
       "market": "US",
       "sym": "HCA",
-      "name": "HCA",
+      "name": "HCA Healthcare, Inc.",
       "marcap": 97661660842,
       "pct_change": 7.12,
       "signals": [
@@ -825,7 +847,7 @@
     {
       "market": "US",
       "sym": "MAR",
-      "name": "MAR",
+      "name": "MARRIOTT INTERNATIONAL INC /MD/",
       "marcap": 96775261291,
       "pct_change": 4.3,
       "signals": [
@@ -847,7 +869,7 @@
     {
       "market": "US",
       "sym": "ELV",
-      "name": "ELV",
+      "name": "Elevance Health, Inc.",
       "marcap": 89490343601,
       "pct_change": 5.88,
       "signals": [
@@ -870,7 +892,7 @@
     {
       "market": "US",
       "sym": "ECL",
-      "name": "ECL",
+      "name": "ECOLAB INC.",
       "marcap": 79005006419,
       "pct_change": 3.46,
       "signals": [
@@ -893,7 +915,7 @@
     {
       "market": "US",
       "sym": "EOG",
-      "name": "EOG",
+      "name": "EOG RESOURCES INC",
       "marcap": 78376641937,
       "pct_change": 6.92,
       "signals": [
@@ -915,7 +937,7 @@
     {
       "market": "US",
       "sym": "HLT",
-      "name": "HLT",
+      "name": "Hilton Worldwide Holdings Inc.",
       "marcap": 73703436732,
       "pct_change": 2.33,
       "signals": [
@@ -937,7 +959,7 @@
     {
       "market": "US",
       "sym": "KMI",
-      "name": "KMI",
+      "name": "KINDER MORGAN, INC.",
       "marcap": 72348803609,
       "pct_change": 4.81,
       "signals": [
@@ -959,7 +981,7 @@
     {
       "market": "US",
       "sym": "CL",
-      "name": "CL",
+      "name": "COLGATE PALMOLIVE CO",
       "marcap": 70366442939,
       "pct_change": 6.39,
       "signals": [
@@ -981,7 +1003,7 @@
     {
       "market": "US",
       "sym": "COR",
-      "name": "COR",
+      "name": "Cencora, Inc.",
       "marcap": 61799133719,
       "pct_change": 5.96,
       "signals": [
@@ -1003,7 +1025,7 @@
     {
       "market": "US",
       "sym": "GWW",
-      "name": "GWW",
+      "name": "W.W. GRAINGER, INC.",
       "marcap": 60878089843,
       "pct_change": 5.31,
       "signals": [
@@ -1024,8 +1046,30 @@
     },
     {
       "market": "US",
+      "sym": "EBBGF",
+      "name": "ENBRIDGE INC",
+      "marcap": 55344727131,
+      "pct_change": 0.0,
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -1.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "CAH",
-      "name": "CAH",
+      "name": "CARDINAL HEALTH INC",
       "marcap": 55253017404,
       "pct_change": 6.71,
       "signals": [
@@ -1047,7 +1091,7 @@
     {
       "market": "US",
       "sym": "EBAY",
-      "name": "EBAY",
+      "name": "EBAY INC",
       "marcap": 49924551086,
       "pct_change": 8.62,
       "signals": [
@@ -1069,7 +1113,7 @@
     {
       "market": "US",
       "sym": "KDP",
-      "name": "KDP",
+      "name": "Keurig Dr Pepper Inc.",
       "marcap": 43218275004,
       "pct_change": 8.45,
       "signals": [
@@ -1092,8 +1136,8 @@
     {
       "market": "US",
       "sym": "ED",
-      "name": "ED",
-      "marcap": 39101001138,
+      "name": "CONSOLIDATED EDISON INC",
+      "marcap": 38662839443,
       "pct_change": 4.74,
       "signals": [
         "이평선수렴",
@@ -1114,7 +1158,7 @@
     {
       "market": "US",
       "sym": "ACGL",
-      "name": "ACGL",
+      "name": "ARCH CAPITAL GROUP LTD.",
       "marcap": 33334815893,
       "pct_change": 3.47,
       "signals": [
@@ -1136,7 +1180,7 @@
     {
       "market": "US",
       "sym": "CNC",
-      "name": "CNC",
+      "name": "CENTENE CORP",
       "marcap": 32286990621,
       "pct_change": 7.96,
       "signals": [
@@ -1159,8 +1203,8 @@
     {
       "market": "US",
       "sym": "CBOE",
-      "name": "CBOE",
-      "marcap": 31763739121,
+      "name": "Cboe Global Markets, Inc.",
+      "marcap": 31801401429,
       "pct_change": 6.71,
       "signals": [
         "이평선수렴",
@@ -1181,7 +1225,7 @@
     {
       "market": "US",
       "sym": "CHD",
-      "name": "CHD",
+      "name": "CHURCH & DWIGHT CO INC /DE/",
       "marcap": 23369802145,
       "pct_change": 6.08,
       "signals": [
@@ -1204,8 +1248,8 @@
     {
       "market": "US",
       "sym": "DRI",
-      "name": "DRI",
-      "marcap": 22363890070,
+      "name": "DARDEN RESTAURANTS INC",
+      "marcap": 22612304418,
       "pct_change": 3.49,
       "signals": [
         "이평선수렴",
@@ -1226,7 +1270,7 @@
     {
       "market": "US",
       "sym": "IFF",
-      "name": "IFF",
+      "name": "INTERNATIONAL FLAVORS & FRAGRANCES INC",
       "marcap": 21572930150,
       "pct_change": 6.53,
       "signals": [
@@ -1248,8 +1292,8 @@
     {
       "market": "US",
       "sym": "PR",
-      "name": "PR",
-      "marcap": 19288938952,
+      "name": "Permian Resources Corp",
+      "marcap": 19696246877,
       "pct_change": 8.53,
       "signals": [
         "52주신고가",
@@ -1270,8 +1314,8 @@
     {
       "market": "US",
       "sym": "DT",
-      "name": "DT",
-      "marcap": 18351635128,
+      "name": "Dynatrace, Inc.",
+      "marcap": 18437007639,
       "pct_change": 6.3,
       "signals": [
         "52주신고가",
@@ -1292,7 +1336,7 @@
     {
       "market": "US",
       "sym": "IEX",
-      "name": "IEX",
+      "name": "IDEX CORP /DE/",
       "marcap": 17271833938,
       "pct_change": 2.45,
       "signals": [
@@ -1314,7 +1358,7 @@
     {
       "market": "US",
       "sym": "CFNB",
-      "name": "CFNB",
+      "name": "CALIFORNIA FIRST LEASING CORP",
       "marcap": 16248939620,
       "pct_change": 15.13,
       "signals": [
@@ -1336,7 +1380,7 @@
     {
       "market": "US",
       "sym": "EXEL",
-      "name": "EXEL",
+      "name": "EXELIXIS, INC.",
       "marcap": 14898256251,
       "pct_change": 4.36,
       "signals": [
@@ -1358,7 +1402,7 @@
     {
       "market": "US",
       "sym": "GME",
-      "name": "GME",
+      "name": "GameStop Corp.",
       "marcap": 13399546024,
       "pct_change": 10.46,
       "signals": [
@@ -1381,8 +1425,8 @@
     {
       "market": "US",
       "sym": "DOCU",
-      "name": "DOCU",
-      "marcap": 13285026630,
+      "name": "DOCUSIGN, INC.",
+      "marcap": 13375550424,
       "pct_change": 9.19,
       "signals": [
         "52주신고가",
@@ -1403,7 +1447,7 @@
     {
       "market": "US",
       "sym": "HAS",
-      "name": "HAS",
+      "name": "HASBRO, INC.",
       "marcap": 13162269617,
       "pct_change": 5.19,
       "signals": [
@@ -1425,7 +1469,7 @@
     {
       "market": "US",
       "sym": "BJ",
-      "name": "BJ",
+      "name": "BJ's Wholesale Club Holdings, Inc.",
       "marcap": 12465638391,
       "pct_change": 7.81,
       "signals": [
@@ -1447,8 +1491,8 @@
     {
       "market": "US",
       "sym": "PNW",
-      "name": "PNW",
-      "marcap": 11988830165,
+      "name": "PINNACLE WEST CAPITAL CORP",
+      "marcap": 12314946252,
       "pct_change": 4.61,
       "signals": [
         "이평선수렴",
@@ -1491,7 +1535,7 @@
     {
       "market": "US",
       "sym": "AR",
-      "name": "AR",
+      "name": "ANTERO RESOURCES Corp",
       "marcap": 11083730571,
       "pct_change": 2.98,
       "signals": [
@@ -1513,8 +1557,8 @@
     {
       "market": "US",
       "sym": "PAYC",
-      "name": "PAYC",
-      "marcap": 10466531419,
+      "name": "Paycom Software, Inc.",
+      "marcap": 10287346054,
       "pct_change": 6.9,
       "signals": [
         "52주신고가",
@@ -1535,7 +1579,7 @@
     {
       "market": "US",
       "sym": "OGE",
-      "name": "OGE",
+      "name": "OGE ENERGY CORP.",
       "marcap": 9596405926,
       "pct_change": 3.53,
       "signals": [
@@ -1557,7 +1601,7 @@
     {
       "market": "US",
       "sym": "HNGE",
-      "name": "HNGE",
+      "name": "Hinge Health, Inc.",
       "marcap": 8584329727,
       "pct_change": 7.3,
       "signals": [
@@ -1579,8 +1623,8 @@
     {
       "market": "US",
       "sym": "PCTY",
-      "name": "PCTY",
-      "marcap": 8168650379,
+      "name": "Paylocity Holding Corp",
+      "marcap": 8201603517,
       "pct_change": 7.49,
       "signals": [
         "52주신고가",
@@ -1623,7 +1667,7 @@
     {
       "market": "US",
       "sym": "CVI",
-      "name": "CVI",
+      "name": "CVR ENERGY INC",
       "marcap": 5831010046,
       "pct_change": 7.98,
       "signals": [
@@ -1645,7 +1689,7 @@
     {
       "market": "US",
       "sym": "BKH",
-      "name": "BKH",
+      "name": "BLACK HILLS CORP /SD/",
       "marcap": 5789688139,
       "pct_change": 0.78,
       "signals": [
@@ -1668,7 +1712,7 @@
     {
       "market": "US",
       "sym": "MUR",
-      "name": "MUR",
+      "name": "MURPHY OIL CORP",
       "marcap": 5545981958,
       "pct_change": 5.53,
       "signals": [
@@ -1690,7 +1734,7 @@
     {
       "market": "US",
       "sym": "BCPC",
-      "name": "BCPC",
+      "name": "BALCHEM CORP",
       "marcap": 5363097329,
       "pct_change": 2.43,
       "signals": [
@@ -1713,7 +1757,7 @@
     {
       "market": "US",
       "sym": "OLLI",
-      "name": "OLLI",
+      "name": "Ollie's Bargain Outlet Holdings, Inc.",
       "marcap": 5139937990,
       "pct_change": 8.12,
       "signals": [
@@ -1735,7 +1779,7 @@
     {
       "market": "US",
       "sym": "GHC",
-      "name": "GHC",
+      "name": "Graham Holdings Co",
       "marcap": 5055146587,
       "pct_change": 1.43,
       "signals": [
@@ -1757,7 +1801,7 @@
     {
       "market": "US",
       "sym": "NSIT",
-      "name": "NSIT",
+      "name": "INSIGHT ENTERPRISES INC",
       "marcap": 4828949168,
       "pct_change": 3.67,
       "signals": [
@@ -1779,8 +1823,8 @@
     {
       "market": "US",
       "sym": "NWE",
-      "name": "NWE",
-      "marcap": 4561548671,
+      "name": "NorthWestern Energy Group, Inc.",
+      "marcap": 4561233237,
       "pct_change": 0.7,
       "signals": [
         "52주신고가",
@@ -1803,7 +1847,7 @@
     {
       "market": "US",
       "sym": "ITGR",
-      "name": "ITGR",
+      "name": "Integer Holdings Corp",
       "marcap": 4303733218,
       "pct_change": 0.02,
       "signals": [
@@ -1825,7 +1869,7 @@
     {
       "market": "US",
       "sym": "CNK",
-      "name": "CNK",
+      "name": "Cinemark Holdings, Inc.",
       "marcap": 4175080175,
       "pct_change": 4.89,
       "signals": [
@@ -1847,7 +1891,7 @@
     {
       "market": "US",
       "sym": "CRVL",
-      "name": "CRVL",
+      "name": "CORVEL CORP",
       "marcap": 3904009458,
       "pct_change": 5.11,
       "signals": [
@@ -1869,7 +1913,7 @@
     {
       "market": "US",
       "sym": "APLE",
-      "name": "APLE",
+      "name": "Apple Hospitality REIT, Inc.",
       "marcap": 3850508678,
       "pct_change": 2.24,
       "signals": [
@@ -1891,7 +1935,7 @@
     {
       "market": "US",
       "sym": "JOE",
-      "name": "JOE",
+      "name": "ST JOE Co",
       "marcap": 3692509086,
       "pct_change": 1.57,
       "signals": [
@@ -1913,7 +1957,7 @@
     {
       "market": "US",
       "sym": "OTTR",
-      "name": "OTTR",
+      "name": "Otter Tail Corp",
       "marcap": 3672058788,
       "pct_change": 1.49,
       "signals": [
@@ -1935,7 +1979,7 @@
     {
       "market": "US",
       "sym": "OGN",
-      "name": "OGN",
+      "name": "Organon & Co.",
       "marcap": 3626630400,
       "pct_change": -0.36,
       "signals": [
@@ -1957,7 +2001,7 @@
     {
       "market": "US",
       "sym": "LXP",
-      "name": "LXP",
+      "name": "LXP Industrial Trust",
       "marcap": 3596393104,
       "pct_change": 0.11,
       "signals": [
@@ -1979,8 +2023,8 @@
     {
       "market": "US",
       "sym": "PLMR",
-      "name": "PLMR",
-      "marcap": 3441300084,
+      "name": "Palomar Holdings, Inc.",
+      "marcap": 3424209230,
       "pct_change": 7.83,
       "signals": [
         "이평선수렴",
@@ -2001,7 +2045,7 @@
     {
       "market": "US",
       "sym": "ARQT",
-      "name": "ARQT",
+      "name": "Arcutis Biotherapeutics, Inc.",
       "marcap": 3338208770,
       "pct_change": 9.27,
       "signals": [
@@ -2023,7 +2067,7 @@
     {
       "market": "US",
       "sym": "ATKR",
-      "name": "ATKR",
+      "name": "Atkore Inc.",
       "marcap": 3202988518,
       "pct_change": 0.08,
       "signals": [
@@ -2045,7 +2089,7 @@
     {
       "market": "US",
       "sym": "FIGS",
-      "name": "FIGS",
+      "name": "FIGS, Inc.",
       "marcap": 3079303498,
       "pct_change": 32.5,
       "signals": [
@@ -2089,7 +2133,7 @@
     {
       "market": "US",
       "sym": "BWIN",
-      "name": "BWIN",
+      "name": "Baldwin Insurance Group, Inc.",
       "marcap": 2956293147,
       "pct_change": 0.35,
       "signals": [
@@ -2111,7 +2155,7 @@
     {
       "market": "US",
       "sym": "HOG",
-      "name": "HOG",
+      "name": "HARLEY-DAVIDSON, INC.",
       "marcap": 2920479158,
       "pct_change": 0.04,
       "signals": [
@@ -2199,7 +2243,7 @@
     {
       "market": "US",
       "sym": "CNXN",
-      "name": "CNXN",
+      "name": "PC CONNECTION INC",
       "marcap": 2351712528,
       "pct_change": -0.33,
       "signals": [
@@ -2221,7 +2265,7 @@
     {
       "market": "US",
       "sym": "RAMP",
-      "name": "RAMP",
+      "name": "LiveRamp Holdings, Inc.",
       "marcap": 2322935844,
       "pct_change": 0.0,
       "signals": [
@@ -2243,7 +2287,7 @@
     {
       "market": "US",
       "sym": "PRDO",
-      "name": "PRDO",
+      "name": "PERDOCEO EDUCATION Corp",
       "marcap": 2109472466,
       "pct_change": 4.22,
       "signals": [
@@ -2265,8 +2309,8 @@
     {
       "market": "US",
       "sym": "DV",
-      "name": "DV",
-      "marcap": 2090772530,
+      "name": "DoubleVerify Holdings, Inc.",
+      "marcap": 2090073114,
       "pct_change": 0.0,
       "signals": [
         "52주신고가",
@@ -2287,7 +2331,7 @@
     {
       "market": "US",
       "sym": "COKE",
-      "name": "COKE",
+      "name": "Coca-Cola Consolidated, Inc.",
       "marcap": 1847207171,
       "pct_change": 6.35,
       "signals": [
@@ -2309,7 +2353,7 @@
     {
       "market": "US",
       "sym": "GIC",
-      "name": "GIC",
+      "name": "GLOBAL INDUSTRIAL Co",
       "marcap": 1636753275,
       "pct_change": 1.65,
       "signals": [
@@ -2331,8 +2375,8 @@
     {
       "market": "US",
       "sym": "DSGR",
-      "name": "DSGR",
-      "marcap": 1620327376,
+      "name": "Distribution Solutions Group, Inc.",
+      "marcap": 1619728118,
       "pct_change": -0.06,
       "signals": [
         "52주신고가",
@@ -2353,8 +2397,8 @@
     {
       "market": "US",
       "sym": "PCRX",
-      "name": "PCRX",
-      "marcap": 1447385135,
+      "name": "Pacira BioSciences, Inc.",
+      "marcap": 1445947695,
       "pct_change": 44.44,
       "signals": [
         "52주신고가",
@@ -2397,7 +2441,7 @@
     {
       "market": "US",
       "sym": "HLF",
-      "name": "HLF",
+      "name": "HERBALIFE LTD.",
       "marcap": 1365543972,
       "pct_change": 12.17,
       "signals": [
@@ -2419,7 +2463,7 @@
     {
       "market": "US",
       "sym": "CRCT",
-      "name": "CRCT",
+      "name": "Cricut, Inc.",
       "marcap": 1337870182,
       "pct_change": 2.04,
       "signals": [
@@ -2441,7 +2485,7 @@
     {
       "market": "US",
       "sym": "CBRL",
-      "name": "CBRL",
+      "name": "CRACKER BARREL OLD COUNTRY STORE, INC",
       "marcap": 1284370607,
       "pct_change": 11.21,
       "signals": [
@@ -2464,7 +2508,7 @@
     {
       "market": "US",
       "sym": "EPC",
-      "name": "EPC",
+      "name": "EDGEWELL PERSONAL CARE Co",
       "marcap": 1281060827,
       "pct_change": 2.69,
       "signals": [
@@ -2486,8 +2530,8 @@
     {
       "market": "US",
       "sym": "PD",
-      "name": "PD",
-      "marcap": 1270981935,
+      "name": "PagerDuty, Inc.",
+      "marcap": 1278918547,
       "pct_change": 8.26,
       "signals": [
         "52주신고가",
@@ -2509,7 +2553,7 @@
     {
       "market": "US",
       "sym": "CCO",
-      "name": "CCO",
+      "name": "Clear Channel Outdoor Holdings, Inc.",
       "marcap": 1236853023,
       "pct_change": 0.83,
       "signals": [
@@ -2532,7 +2576,7 @@
     {
       "market": "US",
       "sym": "HPK",
-      "name": "HPK",
+      "name": "HighPeak Energy, Inc.",
       "marcap": 1207624302,
       "pct_change": 16.31,
       "signals": [
@@ -2554,7 +2598,7 @@
     {
       "market": "US",
       "sym": "EIG",
-      "name": "EIG",
+      "name": "Employers Holdings, Inc.",
       "marcap": 886942694,
       "pct_change": 1.65,
       "signals": [
@@ -2576,7 +2620,7 @@
     {
       "market": "US",
       "sym": "LOGC",
-      "name": "LOGC",
+      "name": "ContextLogic Holdings Inc.",
       "marcap": 697138549,
       "pct_change": 0.4,
       "signals": [
@@ -2598,7 +2642,7 @@
     {
       "market": "US",
       "sym": "NGVC",
-      "name": "NGVC",
+      "name": "Natural Grocers by Vitamin Cottage, Inc.",
       "marcap": 684000864,
       "pct_change": 2.83,
       "signals": [
@@ -2620,7 +2664,7 @@
     {
       "market": "US",
       "sym": "PRTH",
-      "name": "PRTH",
+      "name": "Priority Technology Holdings, Inc.",
       "marcap": 643859300,
       "pct_change": 0.51,
       "signals": [
@@ -2643,7 +2687,7 @@
     {
       "market": "US",
       "sym": "CLDT",
-      "name": "CLDT",
+      "name": "Chatham Lodging Trust",
       "marcap": 633757990,
       "pct_change": 2.6,
       "signals": [
@@ -2665,7 +2709,7 @@
     {
       "market": "US",
       "sym": "EGY",
-      "name": "EGY",
+      "name": "VAALCO ENERGY INC /DE/",
       "marcap": 632202609,
       "pct_change": 4.66,
       "signals": [
@@ -2687,8 +2731,8 @@
     {
       "market": "US",
       "sym": "EBF",
-      "name": "EBF",
-      "marcap": 560029447,
+      "name": "ENNIS, INC.",
+      "marcap": 560244697,
       "pct_change": -0.62,
       "signals": [
         "52주신고가",
@@ -2709,7 +2753,7 @@
     {
       "market": "US",
       "sym": "LOCO",
-      "name": "LOCO",
+      "name": "El Pollo Loco Holdings, Inc.",
       "marcap": 463189309,
       "pct_change": 7.59,
       "signals": [
@@ -2731,7 +2775,7 @@
     {
       "market": "US",
       "sym": "GNE",
-      "name": "GNE",
+      "name": "Genie Energy Ltd.",
       "marcap": 434907738,
       "pct_change": 1.5,
       "signals": [
@@ -2754,7 +2798,7 @@
     {
       "market": "US",
       "sym": "NATH",
-      "name": "NATH",
+      "name": "NATHANS FAMOUS, INC.",
       "marcap": 417018946,
       "pct_change": 0.15,
       "signals": [
@@ -2798,7 +2842,7 @@
     {
       "market": "US",
       "sym": "KRP",
-      "name": "KRP",
+      "name": "Kimbell Royalty Partners, LP",
       "marcap": 409033394,
       "pct_change": 5.76,
       "signals": [
@@ -2820,7 +2864,7 @@
     {
       "market": "US",
       "sym": "GCO",
-      "name": "GCO",
+      "name": "GENESCO INC",
       "marcap": 398579651,
       "pct_change": -1.43,
       "signals": [
@@ -2842,7 +2886,7 @@
     {
       "market": "US",
       "sym": "NECB",
-      "name": "NECB",
+      "name": "NorthEast Community Bancorp, Inc./MD/",
       "marcap": 371842677,
       "pct_change": 1.17,
       "signals": [

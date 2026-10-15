@@ -8633,9 +8633,9 @@
   },
   {
     "week": "2026-W42",
-    "date": "2026-10-15",
+    "date": "2026-10-14",
     "p10": {
-      "date": "2026-10-15",
+      "date": "2026-10-14",
       "week": "2026-W42",
       "n": 10,
       "market": "전체",
@@ -8643,13 +8643,30 @@
       "deployed_pct": 67.5,
       "positions": [
         {
+          "sym": "000400",
+          "name": "롯데손해보험",
+          "market": "KR",
+          "weight_pct": 6.8,
+          "entry": 2660.0,
+          "total_score": 32.1,
+          "win_score": 20.1,
+          "fund_score": 50.0,
+          "signals": [
+            "거래량폭발",
+            "이평선수렴",
+            "RSI/MACD"
+          ],
+          "stop": 2474.0,
+          "target": 3032.0
+        },
+        {
           "sym": "012030",
           "name": "DB",
           "market": "KR",
           "weight_pct": 6.8,
           "entry": 2350.0,
-          "total_score": 31.2,
-          "win_score": 14.4,
+          "total_score": 31.4,
+          "win_score": 14.6,
           "fund_score": 56.5,
           "signals": [
             "5일선라이딩",
@@ -8660,24 +8677,8 @@
           "target": 2679.0
         },
         {
-          "sym": "015360",
-          "name": "INVENI",
-          "market": "KR",
-          "weight_pct": 6.8,
-          "entry": 14290.0,
-          "total_score": 30.1,
-          "win_score": 10.4,
-          "fund_score": 59.6,
-          "signals": [
-            "이평선수렴",
-            "RSI/MACD"
-          ],
-          "stop": 13290.0,
-          "target": 16291.0
-        },
-        {
           "sym": "CBRL",
-          "name": "CBRL",
+          "name": "CRACKER BARREL OLD COUNTRY STORE, INC",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 62.72,
@@ -8694,7 +8695,7 @@
         },
         {
           "sym": "GME",
-          "name": "GME",
+          "name": "GameStop Corp.",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 27.15,
@@ -8711,7 +8712,7 @@
         },
         {
           "sym": "PD",
-          "name": "PD",
+          "name": "PagerDuty, Inc.",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 16.64,
@@ -8728,7 +8729,7 @@
         },
         {
           "sym": "CNC",
-          "name": "CNC",
+          "name": "CENTENE CORP",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 70.16,
@@ -8745,7 +8746,7 @@
         },
         {
           "sym": "GNE",
-          "name": "GNE",
+          "name": "Genie Energy Ltd.",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 16.93,
@@ -8762,7 +8763,7 @@
         },
         {
           "sym": "FIGS",
-          "name": "FIGS",
+          "name": "FIGS, Inc.",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 18.63,
@@ -8778,7 +8779,7 @@
         },
         {
           "sym": "HPK",
-          "name": "HPK",
+          "name": "HighPeak Energy, Inc.",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 9.91,
@@ -8794,7 +8795,7 @@
         },
         {
           "sym": "DOCU",
-          "name": "DOCU",
+          "name": "DOCUSIGN, INC.",
           "market": "US",
           "weight_pct": 6.8,
           "entry": 75.23,
@@ -8811,21 +8812,38 @@
       ]
     },
     "p20": {
-      "date": "2026-10-15",
+      "date": "2026-10-14",
       "week": "2026-W42",
       "n": 20,
       "market": "전체",
       "cash_pct": 32.0,
-      "deployed_pct": 64.1,
+      "deployed_pct": 67.5,
       "positions": [
+        {
+          "sym": "000400",
+          "name": "롯데손해보험",
+          "market": "KR",
+          "weight_pct": 3.4,
+          "entry": 2660.0,
+          "total_score": 32.1,
+          "win_score": 20.1,
+          "fund_score": 50.0,
+          "signals": [
+            "거래량폭발",
+            "이평선수렴",
+            "RSI/MACD"
+          ],
+          "stop": 2474.0,
+          "target": 3032.0
+        },
         {
           "sym": "012030",
           "name": "DB",
           "market": "KR",
           "weight_pct": 3.4,
           "entry": 2350.0,
-          "total_score": 31.2,
-          "win_score": 14.4,
+          "total_score": 31.4,
+          "win_score": 14.6,
           "fund_score": 56.5,
           "signals": [
             "5일선라이딩",
@@ -8836,24 +8854,8 @@
           "target": 2679.0
         },
         {
-          "sym": "015360",
-          "name": "INVENI",
-          "market": "KR",
-          "weight_pct": 3.4,
-          "entry": 14290.0,
-          "total_score": 30.1,
-          "win_score": 10.4,
-          "fund_score": 59.6,
-          "signals": [
-            "이평선수렴",
-            "RSI/MACD"
-          ],
-          "stop": 13290.0,
-          "target": 16291.0
-        },
-        {
           "sym": "CBRL",
-          "name": "CBRL",
+          "name": "CRACKER BARREL OLD COUNTRY STORE, INC",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 62.72,
@@ -8870,7 +8872,7 @@
         },
         {
           "sym": "GME",
-          "name": "GME",
+          "name": "GameStop Corp.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 27.15,
@@ -8887,7 +8889,7 @@
         },
         {
           "sym": "PD",
-          "name": "PD",
+          "name": "PagerDuty, Inc.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 16.64,
@@ -8904,7 +8906,7 @@
         },
         {
           "sym": "CNC",
-          "name": "CNC",
+          "name": "CENTENE CORP",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 70.16,
@@ -8921,7 +8923,7 @@
         },
         {
           "sym": "GNE",
-          "name": "GNE",
+          "name": "Genie Energy Ltd.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 16.93,
@@ -8938,7 +8940,7 @@
         },
         {
           "sym": "FIGS",
-          "name": "FIGS",
+          "name": "FIGS, Inc.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 18.63,
@@ -8954,7 +8956,7 @@
         },
         {
           "sym": "HPK",
-          "name": "HPK",
+          "name": "HighPeak Energy, Inc.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 9.91,
@@ -8970,7 +8972,7 @@
         },
         {
           "sym": "DOCU",
-          "name": "DOCU",
+          "name": "DOCUSIGN, INC.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 75.23,
@@ -8986,7 +8988,7 @@
         },
         {
           "sym": "NWE",
-          "name": "NWE",
+          "name": "NorthWestern Energy Group, Inc.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 74.49,
@@ -9004,7 +9006,7 @@
         },
         {
           "sym": "CLDT",
-          "name": "CLDT",
+          "name": "Chatham Lodging Trust",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 13.83,
@@ -9020,7 +9022,7 @@
         },
         {
           "sym": "PRTH",
-          "name": "PRTH",
+          "name": "Priority Technology Holdings, Inc.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 7.82,
@@ -9037,7 +9039,7 @@
         },
         {
           "sym": "RAMP",
-          "name": "RAMP",
+          "name": "LiveRamp Holdings, Inc.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 37.61,
@@ -9053,7 +9055,7 @@
         },
         {
           "sym": "CCO",
-          "name": "CCO",
+          "name": "Clear Channel Outdoor Holdings, Inc.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 2.42,
@@ -9070,7 +9072,7 @@
         },
         {
           "sym": "OGN",
-          "name": "OGN",
+          "name": "Organon & Co.",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 13.74,
@@ -9085,8 +9087,24 @@
           "target": 15.66
         },
         {
+          "sym": "BRK-A",
+          "name": "BERKSHIRE HATHAWAY INC",
+          "market": "US",
+          "weight_pct": 3.4,
+          "entry": 789585.0,
+          "total_score": 20.6,
+          "win_score": 20.6,
+          "fund_score": null,
+          "signals": [
+            "52주신고가",
+            "컵위드핸들"
+          ],
+          "stop": 734314.05,
+          "target": 900126.9
+        },
+        {
           "sym": "IEX",
-          "name": "IEX",
+          "name": "IDEX CORP /DE/",
           "market": "US",
           "weight_pct": 3.4,
           "entry": 238.62,
@@ -9099,6 +9117,23 @@
           ],
           "stop": 221.92,
           "target": 272.03
+        },
+        {
+          "sym": "028670",
+          "name": "팬오션",
+          "market": "KR",
+          "weight_pct": 3.4,
+          "entry": 7230.0,
+          "total_score": 20.4,
+          "win_score": 21.1,
+          "fund_score": 19.4,
+          "signals": [
+            "52주신고가",
+            "거래량폭발",
+            "RSI/MACD"
+          ],
+          "stop": 6724.0,
+          "target": 8242.0
         },
         {
           "sym": "ABM",
@@ -9115,28 +9150,11 @@
           ],
           "stop": 47.1,
           "target": 57.73
-        },
-        {
-          "sym": "028670",
-          "name": "팬오션",
-          "market": "KR",
-          "weight_pct": 3.4,
-          "entry": 7230.0,
-          "total_score": 20.3,
-          "win_score": 20.9,
-          "fund_score": 19.4,
-          "signals": [
-            "52주신고가",
-            "거래량폭발",
-            "RSI/MACD"
-          ],
-          "stop": 6724.0,
-          "target": 8242.0
         }
       ]
     },
     "ckr": {
-      "date": "2026-10-15",
+      "date": "2026-10-14",
       "week": "2026-W42",
       "n": 10,
       "market": "KR",
@@ -9149,14 +9167,14 @@
           "name": "한국전력",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 28100.0,
+          "entry": 29150.0,
           "total_score": 10.84,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 2.2",
             "ROE 18%",
-            "낙폭 -59%",
+            "낙폭 -57%",
             "영업익 +61%"
           ],
           "traj": {
@@ -9165,22 +9183,22 @@
             "d_roe": 8.8,
             "d_opm": 4.8
           },
-          "stop": 25290.0,
-          "target": 33720.0
+          "stop": 26235.0,
+          "target": 34980.0
         },
         {
           "sym": "041510",
           "name": "에스엠",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 75200.0,
+          "entry": 78900.0,
           "total_score": 7.18,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 5.0",
             "ROE 26%",
-            "낙폭 -53%",
+            "낙폭 -50%",
             "영업익 +110%"
           ],
           "traj": {
@@ -9189,22 +9207,46 @@
             "d_roe": 26.3,
             "d_opm": 6.8
           },
-          "stop": 67680.0,
-          "target": 90240.0
+          "stop": 71010.0,
+          "target": 94680.0
+        },
+        {
+          "sym": "001450",
+          "name": "현대해상",
+          "market": "KR",
+          "weight_pct": 6.8,
+          "entry": 42450.0,
+          "total_score": 5.65,
+          "win_score": null,
+          "fund_score": null,
+          "signals": [
+            "PER 4.0",
+            "ROE 20%",
+            "낙폭 -21%",
+            "영업익 +1%"
+          ],
+          "traj": {
+            "verdict_label": "➖ 정체",
+            "traj_score": 2,
+            "d_roe": 1.9,
+            "d_opm": null
+          },
+          "stop": 38205.0,
+          "target": 50940.0
         },
         {
           "sym": "267250",
           "name": "HD현대",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 172800.0,
+          "entry": 166300.0,
           "total_score": 4.57,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 3.6",
             "ROE 12%",
-            "낙폭 -44%",
+            "낙폭 -46%",
             "영업익 +104%"
           ],
           "traj": {
@@ -9213,22 +9255,22 @@
             "d_roe": 4.8,
             "d_opm": 4.2
           },
-          "stop": 155520.0,
-          "target": 207360.0
+          "stop": 149670.0,
+          "target": 199560.0
         },
         {
           "sym": "071050",
           "name": "한국금융지주",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 167100.0,
+          "entry": 157400.0,
           "total_score": 4.35,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 4.4",
             "ROE 17%",
-            "낙폭 -43%",
+            "낙폭 -46%",
             "영업익 +96%"
           ],
           "traj": {
@@ -9237,22 +9279,22 @@
             "d_roe": 6.0,
             "d_opm": null
           },
-          "stop": 150390.0,
-          "target": 200520.0
+          "stop": 141660.0,
+          "target": 188880.0
         },
         {
           "sym": "009970",
           "name": "영원무역홀딩스",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 172900.0,
+          "entry": 176900.0,
           "total_score": 4.1,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 3.8",
             "ROE 11%",
-            "낙폭 -31%",
+            "낙폭 -29%",
             "영업익 +42%"
           ],
           "traj": {
@@ -9261,22 +9303,22 @@
             "d_roe": 1.6,
             "d_opm": 3.0
           },
-          "stop": 155610.0,
-          "target": 207480.0
+          "stop": 159210.0,
+          "target": 212280.0
         },
         {
           "sym": "009540",
           "name": "HD한국조선해양",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 283500.0,
+          "entry": 276000.0,
           "total_score": 3.69,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 6.7",
             "ROE 17%",
-            "낙폭 -41%",
+            "낙폭 -42%",
             "영업익 +172%"
           ],
           "traj": {
@@ -9285,15 +9327,15 @@
             "d_roe": 7.0,
             "d_opm": 7.4
           },
-          "stop": 255150.0,
-          "target": 340200.0
+          "stop": 248400.0,
+          "target": 331200.0
         },
         {
           "sym": "006040",
           "name": "동원산업",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 34900.0,
+          "entry": 35350.0,
           "total_score": 3.36,
           "win_score": null,
           "fund_score": null,
@@ -9309,22 +9351,22 @@
             "d_roe": 7.0,
             "d_opm": -0.2
           },
-          "stop": 31410.0,
-          "target": 41880.0
+          "stop": 31815.0,
+          "target": 42420.0
         },
         {
           "sym": "402340",
           "name": "SK스퀘어",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 1008000.0,
+          "entry": 853000.0,
           "total_score": 3.17,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 12.8",
             "ROE 32%",
-            "낙폭 -49%",
+            "낙폭 -57%",
             "영업익 +125%"
           ],
           "traj": {
@@ -9333,22 +9375,22 @@
             "d_roe": 12.9,
             "d_opm": 418.1
           },
-          "stop": 907200.0,
-          "target": 1209600.0
+          "stop": 767700.0,
+          "target": 1023600.0
         },
         {
           "sym": "081660",
           "name": "미스토홀딩스",
           "market": "KR",
           "weight_pct": 6.8,
-          "entry": 38950.0,
+          "entry": 37950.0,
           "total_score": 3.14,
           "win_score": null,
           "fund_score": null,
           "signals": [
             "PER 5.8",
             "ROE 13%",
-            "낙폭 -55%",
+            "낙폭 -56%",
             "영업익 +32%"
           ],
           "traj": {
@@ -9357,32 +9399,8 @@
             "d_roe": 5.8,
             "d_opm": 2.1
           },
-          "stop": 35055.0,
-          "target": 46740.0
-        },
-        {
-          "sym": "086280",
-          "name": "현대글로비스",
-          "market": "KR",
-          "weight_pct": 6.8,
-          "entry": 183600.0,
-          "total_score": 2.91,
-          "win_score": null,
-          "fund_score": null,
-          "signals": [
-            "PER 7.8",
-            "ROE 17%",
-            "낙폭 -37%",
-            "영업익 +18%"
-          ],
-          "traj": {
-            "verdict_label": "📈 개선 가속",
-            "traj_score": 5,
-            "d_roe": 4.2,
-            "d_opm": 0.8
-          },
-          "stop": 165240.0,
-          "target": 220320.0
+          "stop": 34155.0,
+          "target": 45540.0
         }
       ]
     }
