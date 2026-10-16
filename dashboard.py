@@ -1,10 +1,31 @@
 """통합 스크리너 대시보드
 실행: python -m streamlit run dashboard.py
 """
+import io
 import json
 import os
+import socket
+import time
 import requests
 from collections import defaultdict
+
+# 2026-10-17 — 응답 없는 외부 서버 하나가 화면 전체를 세웠다. stooq 를 타임아웃 없는
+#   pd.read_csv(URL) 로 읽다가 Streamlit Cloud 에서 응답이 안 와 'Running _fetch_spx_yoy_cached()'
+#   에서 영원히 멈췄고, 그 아래(종목 발굴 표·종목 분석 검색창)가 아예 그려지지 않았다.
+#   라이브러리(FDR 네이버·야후 등) 내부 호출도 timeout 을 안 주는 곳이 많아 두 겹으로 막는다:
+#   ① 소켓 기본값 — urllib·pd.read_csv(URL) 경로  ② requests 기본값 — timeout 을 안 준 호출만.
+#   read 타임아웃은 '바이트 사이 대기'라 큰 파일을 받는 데는 영향이 없다.
+socket.setdefaulttimeout(20)
+if not getattr(requests.Session.request, '_default_timeout', False):
+    _orig_session_request = requests.Session.request
+
+    def _session_request(self, method, url, *a, **kw):
+        if len(a) <= 6 and kw.get('timeout') is None:     # 7번째 위치 인자가 timeout
+            kw['timeout'] = 20
+        return _orig_session_request(self, method, url, *a, **kw)
+
+    _session_request._default_timeout = True
+    requests.Session.request = _session_request
 import pandas as pd
 import streamlit as st
 import yfinance as yf
@@ -624,28 +645,58 @@ def _fetch_fred_cached(series_id: str, limit: int):
     raise last
 
 
+@st.cache_resource(show_spinner=False)
+def _fail_memo() -> dict:
+    """외부 소스 실패 시각 (프로세스 공용). 실패는 캐시에 안 남기므로(빈 값 박제 방지)
+    그대로 두면 **화면을 다시 그릴 때마다** 죽은 서버를 타임아웃까지 기다린다 — 10분은 건너뛴다."""
+    return {}
+
+
+def _recently_failed(key: str, ttl: int = 600) -> bool:
+    t = _fail_memo().get(key)
+    return t is not None and time.time() - t < ttl
+
+
+def _mark_failed(key: str):
+    _fail_memo()[key] = time.time()
+
+
 def fetch_fred(series_id: str, limit: int = 24):
+    if _recently_failed(f'fred:{series_id}'):
+        return []
     try:
         return _fetch_fred_cached(series_id, limit)
     except Exception:
+        _mark_failed(f'fred:{series_id}')
         return []
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, show_spinner=False)
 def _fetch_spx_yoy_cached():
-    url = 'https://stooq.com/q/d/l/?s=^spx&i=m'
-    df = pd.read_csv(url, parse_dates=['Date'])
-    df = df.sort_values('Date').tail(15)
+    """S&P500 1년 수익률(%). 1순위 FRED SP500(일간·API 키) → 2순위 stooq 월간 CSV(8초 제한).
+    2026-10-17: stooq 를 타임아웃 없이 읽다 화면 전체가 멈춘 사고 이후 순서를 바꿨다."""
+    try:
+        d = _fetch_fred_cached('SP500', 400)                 # 최신 400 거래일 ≈ 1.6년
+        s = pd.Series([v for _, v in d], index=pd.to_datetime([a for a, _ in d])).sort_index()
+        prev = s[s.index <= s.index[-1] - pd.DateOffset(years=1)]
+        if len(prev):
+            return round((float(s.iloc[-1]) / float(prev.iloc[-1]) - 1) * 100, 2)
+    except Exception:
+        pass
+    r = requests.get('https://stooq.com/q/d/l/?s=^spx&i=m', timeout=8)
+    r.raise_for_status()
+    df = pd.read_csv(io.StringIO(r.text), parse_dates=['Date']).sort_values('Date').tail(15)
     if len(df) < 13:
         raise RuntimeError('short')
-    latest = float(df['Close'].iloc[-1])
-    yr_ago = float(df['Close'].iloc[-13])
-    return round((latest / yr_ago - 1) * 100, 2)
+    return round((float(df['Close'].iloc[-1]) / float(df['Close'].iloc[-13]) - 1) * 100, 2)
 
 
 def fetch_spx_yoy():
+    if _recently_failed('spx_yoy'):
+        return None
     try:
         return _fetch_spx_yoy_cached()
     except Exception:
+        _mark_failed('spx_yoy')
         return None
 
 def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
@@ -850,7 +901,9 @@ except Exception:
     _ATTM = {}
 
 # ── 매크로 요약 스트립 (구 '오늘의 종합' 카드 이관) ──
-with _macro_strip, guard('매크로 요약'):
+# 2026-10-17 — 채우기는 스크립트 **맨 끝**에서 한다(_macro_strip 자리는 위에 잡아 둠).
+#   외부 API 3개(FRED×2·S&P)를 기다리는 동안 그 아래 탭 전부가 안 그려지던 구조였다.
+def _fill_macro_strip():
     _s_can_h = load_json(CANSLIM_JSON) or {}
     try:
         _fed_h = fetch_fred('FEDFUNDS', 1); _fed_r = _fed_h[-1][1] if _fed_h else None
@@ -2219,9 +2272,12 @@ def _fetch_index_history_cached(symbol: str, days: int):
 
 
 def fetch_index_history(symbol: str, days: int = 365):
+    if _recently_failed(f'idx:{symbol}'):
+        return pd.DataFrame()
     try:
         return _fetch_index_history_cached(symbol, days)
     except Exception:
+        _mark_failed(f'idx:{symbol}')
         return pd.DataFrame()
 
 def _fred_latest(series_id: str):
@@ -3046,8 +3102,10 @@ def _tf_signal(rsi_val, macd_val, sig_val, price, ma20, ma50):
     label = '🟢 매수적정' if score >= 3 else ('🔴 매도위험' if score <= -2 else '🟡 중립관망')
     return label, score, reasons
 
-@st.cache_data(ttl=1800)
-def fetch_stock_data(sym: str, days: int):
+@st.cache_data(ttl=1800, show_spinner=False)
+def _fetch_stock_data_cached(sym: str, days: int):
+    """실패는 raise → 캐시에 안 남는다. (2026-10-17 전: 실패도 (None, …) 로 30분 캐시돼
+    일시 오류 한 번이면 그 종목이 30분 동안 '데이터 없음'으로 고정됐다.)"""
     import FinanceDataReader as fdr
 
     # 2026-09-10: 우선주 코드는 끝자리가 영문이다(00088K). isdigit() 만 보면
@@ -3121,8 +3179,17 @@ def fetch_stock_data(sym: str, days: int):
             except Exception:
                 pass
 
+        if hist is None or hist.empty:
+            raise RuntimeError(f'no price history: {sym}')
         return hist, info, earn, insid, fin_est
-    except Exception as e:
+    except Exception:
+        raise
+
+
+def fetch_stock_data(sym: str, days: int):
+    try:
+        return _fetch_stock_data_cached(sym, days)
+    except Exception:
         return None, {}, None, None, None
 
 
@@ -4950,3 +5017,8 @@ with tab_rep, guard('시황 리포트'):
                         _ans = f"답변 실패 — AI 한도 초과 또는 일시 오류일 수 있습니다. ({str(_e)[:80]})"
             st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
             st.rerun()
+
+
+# ── 매크로 요약 스트립 채우기 — 맨 마지막(느린 외부 API 가 다른 탭을 붙잡지 않게) ──
+with _macro_strip, guard('매크로 요약'):
+    _fill_macro_strip()
