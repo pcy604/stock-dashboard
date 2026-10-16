@@ -27,15 +27,27 @@ _REV = ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues',
         'SalesRevenueNet', 'RevenueFromContractWithCustomerIncludingAssessedTax']
 
 
-def _get(url, tries=4):
+# 대화형 모드 (2026-10-17, dart_client 와 같은 이유) — 화면에서는 4회×30초를 기다리지 않는다.
+_MODE = {'tries': 4, 'timeout': 30, 'interactive': False}
+
+
+def set_interactive(on=True):
+    _MODE.update({'tries': 2, 'timeout': (5, 20), 'interactive': True} if on
+                 else {'tries': 4, 'timeout': 30, 'interactive': False})
+
+
+def _get(url, tries=None):
+    tries = tries or _MODE['tries']
     last = None
     for i in range(tries):
         try:
-            r = requests.get(url, headers=UA, timeout=30)
+            r = requests.get(url, headers=UA, timeout=_MODE['timeout'])
             r.raise_for_status()
             return r
         except Exception as e:
             last = e
+            if _MODE['interactive'] and isinstance(e, requests.exceptions.Timeout):
+                break
             time.sleep(0.4 * (i + 1))
     raise last
 

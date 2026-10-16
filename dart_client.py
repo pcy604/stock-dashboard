@@ -102,18 +102,52 @@ def _to_num(s):
         return None
 
 
-def _get(url, params, tries=6):
+# ── 대화형 모드 + 회로 차단기 (2026-10-17) ─────────────────────────────
+# 배치(CI)는 6회×20초 재시도로 끈질기게 받는 게 맞다. 그런데 **사람이 기다리는 화면**에서
+# 같은 설정이면, DART 가 응답을 안 할 때 호출 1건이 2분+ 이고 분기표 1장이 10~24건이라
+# '연간/분기' 버튼을 눌러도 몇 분간 아무 변화가 없다(2026-10-17 Streamlit Cloud 실측:
+# _official_cached 2.5분 후 실패 → 공식 재무제표 섹션 자체가 안 뜸).
+#   · set_interactive(True): 2회 × (연결 5초, 읽기 12초). 타임아웃은 재시도하지 않는다.
+#   · 차단기: 대화형에서 연속 2건 실패 → 5분간 네트워크를 건너뛰고 즉시 실패(화면이 매번 기다리지 않게).
+#   · health(): 마지막 실패 사유 — 화면에 '왜 없는지'를 정직하게 적기 위해.
+_MODE = {'tries': 6, 'timeout': 20, 'interactive': False}
+_HEALTH = {'fails': 0, 'open_until': 0.0, 'last_error': None, 'last_ok': None}
+
+
+def set_interactive(on=True):
+    _MODE.update({'tries': 2, 'timeout': (5, 12), 'interactive': True} if on
+                 else {'tries': 6, 'timeout': 20, 'interactive': False})
+
+
+def health():
+    """{'ok': bool, 'blocked_sec': 남은 차단 초, 'last_error': str|None}"""
+    left = max(0.0, _HEALTH['open_until'] - time.time())
+    return {'ok': left == 0 and _HEALTH['fails'] == 0, 'blocked_sec': int(left),
+            'last_error': _HEALTH['last_error']}
+
+
+def _get(url, params, tries=None):
     """전송 재시도(DART가 연속 호출 시 keep-alive 연결을 끊음 → Connection: close + 백오프)."""
+    if time.time() < _HEALTH['open_until']:
+        raise RuntimeError(f"DART 응답 없음 — 잠시 건너뜀(최근 실패: {_HEALTH['last_error']})")
+    tries = tries or _MODE['tries']
     last = None
     for i in range(tries):
         try:
-            r = requests.get(url, params=params, timeout=20,
+            r = requests.get(url, params=params, timeout=_MODE['timeout'],
                              headers={'Connection': 'close'})
             r.raise_for_status()
+            _HEALTH.update(fails=0, last_ok=time.time())
             return r
         except Exception as e:
             last = e
+            if _MODE['interactive'] and isinstance(e, requests.exceptions.Timeout):
+                break                                   # 응답 없는 서버를 두 번 기다리지 않는다
             time.sleep(min(0.6 * (i + 1), 3.0))
+    _HEALTH['fails'] += 1
+    _HEALTH['last_error'] = f'{type(last).__name__}: {str(last)[:120]}'
+    if _MODE['interactive'] and _HEALTH['fails'] >= 2:
+        _HEALTH['open_until'] = time.time() + 300
     raise last
 
 

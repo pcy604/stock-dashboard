@@ -541,6 +541,16 @@ import table_ui as _tui
 _tui.install(st)
 _tui.begin_run(st)
 
+# 화면에서 DART·EDGAR 를 부를 때는 빨리 포기한다 — 응답 없는 서버를 몇 분씩 기다리면
+#   '연간/분기' 같은 버튼이 안 먹는 것처럼 보인다(2026-10-17). 자세한 이유는 dart_client._MODE.
+try:
+    import dart_client as _dc
+    import edgar_client as _ec
+    _dc.set_interactive(True)
+    _ec.set_interactive(True)
+except Exception:
+    _dc = None
+
 
 @st.cache_data(ttl=600, show_spinner=False)
 def _data_status():
@@ -623,6 +633,47 @@ def _get_secret(name, default=''):
     return default
 
 FRED_KEY = _get_secret('FRED_KEY')
+
+
+# ── 🩺 외부 소스 연결 진단 (?diag=net) ─────────────────────────────────
+# 클라우드 서버에서 어떤 소스가 막혔는지 '이 서버 기준'으로 본다(내 PC 에서 되는 것과 다르다).
+# 키는 절대 화면에 내보내지 않는다 — 예외 메시지에 URL(쿼리 포함)이 실리므로 가린다.
+if st.query_params.get('diag') == 'net':
+    import re as _re
+
+    def _redact(m):
+        return _re.sub(r'(crtfc_key|api_key)=[^&\s\'"]+', r'\1=***', str(m))
+
+    def _probe(name, url, **kw):
+        t0 = time.time()
+        try:
+            r = requests.get(url, timeout=(5, 10), **kw)
+            return {'소스': name, '결과': f'HTTP {r.status_code}', '초': round(time.time() - t0, 2),
+                    '응답 앞부분': _redact(r.text[:160].replace('\n', ' '))}
+        except Exception as e:
+            return {'소스': name, '결과': type(e).__name__, '초': round(time.time() - t0, 2),
+                    '응답 앞부분': _redact(e)[:200]}
+    try:
+        _dk = _dc._key() if _dc else ''
+    except Exception:
+        _dk = ''
+    st.subheader('🩺 외부 소스 연결 진단 — 이 서버(Streamlit Cloud) 기준')
+    _rows = [
+        _probe('서버 공인 IP', 'https://api.ipify.org'),
+        _probe('DART API', 'https://opendart.fss.or.kr/api/company.json',
+               params={'crtfc_key': _dk, 'corp_code': '00126380'}),
+        _probe('DART 웹', 'https://dart.fss.or.kr/'),
+        _probe('SEC EDGAR', 'https://data.sec.gov/submissions/CIK0001318605.json',
+               headers={'User-Agent': 'stock-screener research pcy604604@gmail.com'}),
+        _probe('네이버 금융', 'https://finance.naver.com/item/main.naver?code=005930',
+               headers={'User-Agent': 'Mozilla/5.0'}),
+        _probe('FRED', 'https://api.stlouisfed.org/fred/series/observations',
+               params={'series_id': 'SP500', 'api_key': FRED_KEY, 'file_type': 'json', 'limit': 1}),
+        _probe('stooq', 'https://stooq.com/q/d/l/?s=^spx&i=m'),
+    ]
+    st.dataframe(pd.DataFrame(_rows), filters=False, color=False, hide_index=True)
+    st.json({'DART 키 설정됨': bool(_dk), 'dart_client.health()': _dc.health() if _dc else None})
+    st.stop()
 
 @st.cache_data(ttl=3600)
 def _fetch_fred_cached(series_id: str, limit: int):
@@ -3638,8 +3689,13 @@ def _tab_analysis():
                 h1.metric("종목명", info.get('longName', sym8_clean)[:20])
                 h2.metric("현재가", f"${price_now:.2f}" if info.get('currency','') != 'KRW' else f"₩{price_now:,.0f}")
                 h3.metric("일일대비", f"{chg_pct:+.2f}%")
-                mc = info.get('marketCap', 0)
-                h4.metric("시가총액", f"${mc/1e9:.1f}B" if mc >= 1e9 else f"${mc/1e6:.0f}M" if mc else "-")
+                mc = info.get('marketCap', 0) or 0
+                # 2026-10-17 — KR 시총(원)을 달러 기호로 찍고 있었다(삼성전자 '$1403319.4B'). 통화대로 표기.
+                if len(sym8_clean) == 6 and sym8_clean[:5].isdigit():
+                    _mcs = (f"₩{mc/1e12:,.1f}조" if mc >= 1e12 else f"₩{mc/1e8:,.0f}억") if mc else "-"
+                else:
+                    _mcs = (f"${mc/1e9:,.1f}B" if mc >= 1e9 else f"${mc/1e6:,.0f}M") if mc else "-"
+                h4.metric("시가총액", _mcs)
                 h5.metric("섹터", info.get('sector', '-'))
 
                 st.divider()
@@ -3678,11 +3734,12 @@ def _tab_analysis():
                 st.divider()
 
                 # ── 📊 공식 재무제표 통합표 (연도 가로 × 3표 세로 · 연간/분기 토글) ──
-                _off = official_financials(sym8_clean, is_kr_sym)   # 연간(멀티플·스코어카드용)
-                if _off:
+                # 2026-10-17 — (구) `if _off:` 로 감싸서, 연간 요약(_off · DART 8~12건)이 실패하면 통합표가
+                #   이유 표시도 없이 통째로 사라졌다. 통합표는 자기 데이터로 서고, _off 는 아래 스코어카드 직전에 받는다.
+                _mc = info.get('marketCap') or 0
+                if True:
                     _osrc = 'DART 전자공시' if is_kr_sym else 'SEC EDGAR'
                     st.subheader(f"📊 공식 재무제표 ({_osrc})")
-                    _mc = info.get('marketCap') or 0
 
                     def _amt(v):
                         if v is None:
@@ -3815,7 +3872,15 @@ def _tab_analysis():
                                    "컨센서스 커버: KR=매출·영업익·OPM·순익·ROE·부채비율·EPS·PER·PBR(네이버) / "
                                    "US=매출·순익·EPS(yfinance). ⚠️ 현금흐름·자산 추정치는 애널 컨센서스가 배포되지 않아 '-'.")
                     else:
-                        st.caption("통합 재무표 데이터 없음 (해당 기준).")
+                        # 없는 걸 조용히 숨기지 않는다 — 왜 없는지 적는다(데이터 원칙)
+                        _why = ''
+                        if is_kr_sym and _dc is not None:
+                            _h = _dc.health()
+                            if not _h['ok']:
+                                _why = (" — **DART 공시 서버가 이 서버(Streamlit Cloud, 해외)의 요청에 응답하지 않습니다**"
+                                        f" ({_h['last_error'] or '응답 없음'})."
+                                        + (f" {_h['blocked_sec'] // 60 + 1}분 뒤 자동으로 다시 시도합니다." if _h['blocked_sec'] else ''))
+                        st.warning(f"{_freq} 재무표를 가져오지 못했습니다{_why}")
 
                 # ── 🏭 사업부문별 매출 구조 (App Economy Insights 스타일, DART/EDGAR×Gemini) ──
                 st.divider()
@@ -3969,6 +4034,7 @@ def _tab_analysis():
                 st.caption("가치(C·A) × 가격(L·M) × 정성(N·S·I) 종합")
 
                 # ── 🏅 CANSLIM 스코어카드 (체슬라투자자문 방식) ──
+                _off = official_financials(sym8_clean, is_kr_sym)   # 연간 요약(스코어카드·멀티플용)
                 if _off and len(_off) >= 2:
                     _op = [r.get('op_income') for r in _off]
 
