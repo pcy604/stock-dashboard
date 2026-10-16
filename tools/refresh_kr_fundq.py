@@ -38,7 +38,22 @@ import ingest_dart_quarterly as Q
 TMP = ROOT / "data" / "_fundq_ci.db"
 
 
+def _dart_reachable(timeout=6) -> bool:
+    """2026-10-17 — DART 는 해외 서버(GitHub Actions)의 연결을 받지 않는다. fetch_batch 는 호출마다
+    timeout=40 이라 막힌 러너에서 160건 × 40초 = 1시간 47분을 기다리다 잡 전체가 잘린다. 먼저 한 번 두드려 본다."""
+    import requests
+    try:
+        requests.get("https://opendart.fss.or.kr/", timeout=timeout)
+        return True
+    except Exception as e:
+        print(f"DART 연결 불가({type(e).__name__}) — 이 서버에서는 건너뛴다(집 PC run_update.bat 이 월요일에 갱신). "
+              "기존 parquet 는 그대로 둔다.", flush=True)
+        return False
+
+
 def main():
+    if not _dart_reachable():
+        return
     old = pd.read_parquet(E.OUT)
     before_rows, before_fill = len(old), old.net_income.notna().mean()
     print(f"기존 {before_rows:,}행 · 순이익 채움 {before_fill:.0%}", flush=True)
