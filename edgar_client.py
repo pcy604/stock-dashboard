@@ -18,6 +18,8 @@ from pathlib import Path
 
 DATA = Path('data')
 _CIK_CACHE = DATA / 'edgar_cik.json'
+# 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
+API_VERSION = 2
 # SEC는 연락처 포함 User-Agent 요구 (없으면 403)
 UA = {'User-Agent': 'stock-screener research pcy604604@gmail.com',
       'Accept-Encoding': 'gzip, deflate'}
@@ -170,12 +172,14 @@ def _days(a, b):
         return None
 
 
-def _series(node, freq):
+def _series(node, freq, additive=True):
     """concept node → {period_key: val}.
     annual: 10-K 연간. quarter: **모든 분기 완결** —
       · 잔액(instant): 10-Q/10-K 모두 수용 (10-Q 비교표·10-K 연말치)
-      · 흐름(duration): 같은 회계연도 시작(start) 그룹에서 누적 차감 →
-        10-Q 누적 현금흐름도 3개월 환산, Q4(10-Q 미제출)는 연간−9개월로 도출"""
+      · 흐름(duration): ① 공시된 3개월 값 그대로 → ② 빈 분기만 같은 start 그룹에서 누적 차감
+        (10-Q 누적 현금흐름의 3개월 환산, Q4(10-Q 미제출)=연간−9개월).
+      · additive=False(EPS 등 비율): ②를 하지 않는다 — 주식수가 분기마다 달라 FY−9M 이 Q4 EPS 가
+        아니다(2026-10-17: 예전에는 ②가 먼저 돌아 공시된 3개월 EPS 대신 차감값이 들어갔다)."""
     if not node:
         return {}
     if freq == 'annual':
@@ -206,18 +210,23 @@ def _series(node, freq):
     if inst and not flows:
         return inst
     out = {}
-    for start, m in flows.items():              # 같은 start = 같은 누적 묶음
+    for start, m in flows.items():              # ① 공시된 3개월 값(차감 없음)이 우선
+        for e, v in m.items():
+            if 45 <= (_days(start, e) or 0) <= 135:
+                out.setdefault(e[:7], v)
+    if not additive:
+        return out
+    for start, m in flows.items():              # ② 빈 분기만 누적 차감 (같은 start = 같은 누적 묶음)
         prev_v, prev_end = 0.0, None
         for e in sorted(m):
-            seg = (_days(prev_end, e) if prev_end else _days(start, e)) or 0
             v = m[e]
-            try:
-                q = v - prev_v if prev_end else v
-            except Exception:
-                prev_v, prev_end = v, e
-                continue
-            if 45 <= seg <= 135:                # 3개월 구간만 채택
-                out.setdefault(e[:7], q)
+            if prev_end:
+                seg = _days(prev_end, e) or 0
+                try:
+                    if 45 <= seg <= 135:        # 3개월 구간만 채택
+                        out.setdefault(e[:7], v - prev_v)
+                except Exception:
+                    pass
             prev_v, prev_end = v, e
     return out
 
@@ -236,7 +245,7 @@ def statements(ticker, freq='annual', n=6):
     for key, concepts in _CONCEPTS.items():
         d = {}
         for c in concepts:
-            for p, v in _series(ug.get(c), freq).items():
+            for p, v in _series(ug.get(c), freq, additive=(key != 'eps')).items():
                 d.setdefault(p, v)
         ser[key] = d
     keyset = set()
@@ -253,7 +262,8 @@ def statements(ticker, freq='annual', n=6):
                      'op_income': g('op_income'), 'net_income': g('net_income'), 'eps': g('eps'),
                      'assets': g('assets'), 'liabilities': g('liabilities'), 'equity': g('equity'),
                      'op_cf': g('op_cf'), 'inv_cf': g('inv_cf'), 'fin_cf': g('fin_cf'),
-                     'capex': g('capex')})
+                     # Capex 는 유출 → 음수로 통일(EDGAR PaymentsToAcquire… 는 양수, DART 와 부호가 달랐다)
+                     'capex': (-abs(g('capex')) if g('capex') is not None else None)})
     return rows
 
 

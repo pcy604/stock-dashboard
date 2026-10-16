@@ -13,6 +13,7 @@ CLI:
   python dart_client.py fin 005930 2024     # 삼성전자 2024 사업보고서 재무
 """
 import io
+import re
 import time
 import json
 import zipfile
@@ -24,6 +25,8 @@ DATA = Path('data')
 _KEY_F = DATA / '.dart_key'
 _CORP_CACHE = DATA / 'dart_corpmap.json'
 BASE = "https://opendart.fss.or.kr/api"
+# 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
+API_VERSION = 2
 
 # 사업보고서=11011(연간) · 반기=11012 · 1Q=11013 · 3Q=11014
 REPRT = {'annual': '11011', 'half': '11012', 'q1': '11013', 'q3': '11014'}
@@ -141,13 +144,18 @@ def _get(url, params, tries=None):
             return r
         except Exception as e:
             last = e
-            if _MODE['interactive'] and isinstance(e, requests.exceptions.Timeout):
-                break                                   # 응답 없는 서버를 두 번 기다리지 않는다
+            # 응답 없는 서버(타임아웃)는 대화형이면 즉시, 배치면 두 번째에서 포기 — 연결 끊김(reset)만 끈질기게
+            if isinstance(e, requests.exceptions.Timeout) and (_MODE['interactive'] or i >= 1):
+                break
             time.sleep(min(0.6 * (i + 1), 3.0))
     _HEALTH['fails'] += 1
-    _HEALTH['last_error'] = f'{type(last).__name__}: {str(last)[:120]}'
-    if _MODE['interactive'] and _HEALTH['fails'] >= 2:
-        _HEALTH['open_until'] = time.time() + 300
+    # 예외 문구에 요청 URL(쿼리에 crtfc_key)이 실린다 — 화면·로그에 키가 새지 않게 URL 을 지운다
+    _HEALTH['last_error'] = re.sub(r'url: \S+', 'url: (생략)', f'{type(last).__name__}: {last}')[:140]
+    # 차단기: 2026-10-15~ DART 가 해외 서버(Streamlit Cloud·GitHub Actions)의 연결을 받지 않는다
+    #   (ConnectTimeout 실측). 배치에서도 막아야 CI 가 호출마다 2분씩 기다리다 55분 제한에 잘리지 않는다
+    #   (10-16 daily-refresh 취소 — CANSLIM KR 단계 9분 → 48분+). 실패 시 호출부는 네이버 폴백으로 간다.
+    if _HEALTH['fails'] >= (2 if _MODE['interactive'] else 3):
+        _HEALTH['open_until'] = time.time() + (300 if _MODE['interactive'] else 3600)
     raise last
 
 
@@ -329,7 +337,7 @@ def statements(corp_code, freq='annual', n=5):
                 e = _extract_all(j); e['period'] = str(yy)
                 e.pop('net_income_q', None)   # 분기 전용 폴백 키 — 연간 행엔 남기지 않는다
                 rows.append(e)
-        return rows
+        return _capex_out(rows)
 
     for yy in (y, y - 1, y - 2):
         reps = {}
@@ -373,7 +381,16 @@ def statements(corp_code, freq='annual', n=5):
             e.pop('net_income_q', None)
             rows.append(e)
             if len(rows) >= n:
-                return rows
+                return _capex_out(rows)
+    return _capex_out(rows)
+
+
+def _capex_out(rows):
+    """Capex 는 현금 **유출**이므로 음수로 통일(2026-10-17). 제출자·소스마다 부호가 달라
+    (EDGAR PaymentsToAcquire… 는 양수) 같은 표에서 KR 은 빨강·US 는 초록으로 칠해지던 것."""
+    for e in rows:
+        if e.get('capex') is not None:
+            e['capex'] = -abs(e['capex'])
     return rows
 
 

@@ -61,3 +61,9 @@ git diff --staged --quiet || (
 )
 
 echo [%date% %time%] ===== 업데이트 완료 =====
+rem ── 2026-10-17 · 다음 실행이 깨끗한 작업 트리에서 시작하도록 ──────────────────────
+rem 스크립트가 매번 다시 쓰는 추적 캐시(KRX 상장목록)가 커밋되지 않고 남아, 다음날 [0/5]
+rem git pull --rebase 가 'unstaged changes' 로 실패 -> 배치 전체 중단(10-16, 10-17 미실행).
+rem 캐시는 다음 실행에서 다시 만들어지므로 되돌려도 잃는 것이 없다. 사용자 작업 파일은 건드리지 않는다.
+rem (이 줄들은 반드시 파일 끝에 둔다 - 실행 중인 배치가 pull 로 바뀌어도 앞부분 바이트 위치가 그대로여야 한다)
+git checkout -- data/krx_listing_last.csv data/krx_listing_last.csv.asof 2>nul

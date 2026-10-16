@@ -543,15 +543,32 @@ _tui.begin_run(st)
 
 # 화면에서 DART·EDGAR 를 부를 때는 빨리 포기한다 — 응답 없는 서버를 몇 분씩 기다리면
 #   '연간/분기' 같은 버튼이 안 먹는 것처럼 보인다(2026-10-17). 자세한 이유는 dart_client._MODE.
+def _fresh_module(mod):
+    """코드만 바뀐 배포에서 클라우드 프로세스가 **이전 버전 모듈**을 메모리에 들고 있었다
+    (2026-10-17 실측: dart_client 에 새 함수가 없음 → 새 재시도 정책이 적용 안 됨).
+    파일 수정시각이 처음 읽었을 때와 다르면 다시 읽는다(같은 모듈 객체를 갱신 → 함수 안 import 도 새 코드)."""
+    import importlib
+    try:
+        mt = os.path.getmtime(mod.__file__)
+        seen = getattr(mod, '_loaded_mtime', None)
+        if seen is not None and seen != mt:
+            mod = importlib.reload(mod)
+        mod._loaded_mtime = mt
+    except Exception:
+        pass
+    return mod
+
+
 _DC_ERR = None
 try:
     import dart_client as _dc
     import edgar_client as _ec
-    if not (hasattr(_dc, 'set_interactive') and hasattr(_ec, 'set_interactive')):
-        # 코드만 바뀐 배포에서 클라우드 프로세스가 **이전 버전 모듈**을 메모리에 들고 있었다(2026-10-17 실측:
-        #   set_interactive 없음 → 새 재시도 정책이 적용 안 됨). 한 번 다시 읽는다.
-        import importlib
+    _dc = _fresh_module(_dc)
+    _ec = _fresh_module(_ec)
+    import importlib                            # 처음 본 프로세스인데 옛 모듈인 경우(위 시각 비교가 못 잡음)
+    if getattr(_dc, 'API_VERSION', 0) < 2:
         _dc = importlib.reload(_dc)
+    if getattr(_ec, 'API_VERSION', 0) < 2:
         _ec = importlib.reload(_ec)
     _dc.set_interactive(True)
     _ec.set_interactive(True)
@@ -3287,11 +3304,17 @@ def _official_cached(sym, is_kr):
 
 
 def official_financials(sym, is_kr):
-    """공식 재무제표: KR=DART, US=EDGAR. 실패/빈 결과는 캐시 안 됨(다음 조회 때 재시도)."""
+    """공식 재무제표: KR=DART, US=EDGAR. 실패/빈 결과는 캐시 안 됨(다음 조회 때 재시도).
+    KR 은 DART 실시간이 막히면 저장된 DART 연간 손익(매출·영업익·순익)으로 대신한다(자본 등은 None)."""
     try:
         return _official_cached(sym, is_kr)
     except Exception:
-        return []
+        pass
+    if is_kr:
+        rows, _ = kr_stored_statements(sym, 'annual', 5)
+        return [dict(r, equity=None, assets=None, liabilities=None, eps=None, roe=None,
+                     _src='stored') for r in rows]
+    return []
 
 
 def _official_fetch(sym, is_kr):
@@ -3363,6 +3386,51 @@ def unified_statements(sym, is_kr, freq):
         return _unified_cached(sym, is_kr, freq)
     except Exception:
         return []
+
+
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _kr_fund_q():
+    """저장된 DART 분기 손익 (data/kr_fundamentals_q.parquet · CI/PC 가 DART 에서 적재).
+    q=1~3 은 3개월치, q=4 는 **연간 합계**(Q4 = 연간 − 1~3Q)."""
+    return pd.read_parquet('data/kr_fundamentals_q.parquet')
+
+
+def kr_stored_statements(sym, freq, n=5):
+    """DART 실시간이 막힌 서버용 폴백 — 저장된 DART 손익 3항목(매출·영업이익·순이익)으로 표를 세운다.
+    2026-10-17: Streamlit Cloud 에서 DART 가 ConnectTimeout(해외 서버 차단으로 추정) → KR 재무표가 통째로 비었다.
+    이 파일의 숫자는 공시와 대조했다(삼성전자 2Q26 매출 171.5조·영업익 89.5조, SK하이닉스 2Q26 순익 93.9조,
+    에이피알 2Q26 매출 7,675억·영업익 1,906억 — 전부 일치). 반환: (rows 최신순, 갱신일)"""
+    try:
+        d = _kr_fund_q()
+    except Exception:
+        return [], None
+    x = d[d.sym == sym]
+    if x.empty:
+        return [], None
+    upd = str(x['updated'].max())
+    by = {(int(r.year), int(r.q)): r for r in x.itertuples()}
+    cols = ('revenue', 'op_income', 'net_income')
+
+    def _v(v):
+        return None if v is None or pd.isna(v) else float(v)
+
+    out = []
+    for (yy, qq), r in by.items():
+        if freq == 'annual':
+            if qq == 4:
+                out.append(((yy, 4), {'period': str(yy), **{c: _v(getattr(r, c)) for c in cols}}))
+        elif qq in (1, 2, 3):
+            out.append(((yy, qq), {'period': f'{yy}.{qq}Q', **{c: _v(getattr(r, c)) for c in cols}}))
+        else:                                   # 4Q = 연간 − (1~3Q) — 셋 다 있을 때만
+            parts = [by.get((yy, k)) for k in (1, 2, 3)]
+            if all(p is not None for p in parts):
+                row = {'period': f'{yy}.4Q'}
+                for c in cols:
+                    a, ps = _v(getattr(r, c)), [_v(getattr(p, c)) for p in parts]
+                    row[c] = (a - sum(ps)) if (a is not None and all(v is not None for v in ps)) else None
+                out.append(((yy, 4), row))
+    out.sort(key=lambda t: t[0], reverse=True)
+    return [o[1] for o in out[:n]], upd
 
 
 @st.cache_data(ttl=24 * 3600)
@@ -3788,12 +3856,44 @@ def _tab_analysis():
 
                     _freq = st.radio("기준", ["연간", "분기"], horizontal=True, key=f"fin_freq_{sym8_clean}")
                     _stm = unified_statements(sym8_clean, is_kr_sym, 'annual' if _freq == "연간" else 'quarter')
+                    _stored = None                 # 저장본으로 대신 그렸으면 그 갱신일
+                    if not _stm and is_kr_sym:
+                        _stm, _stored = kr_stored_statements(sym8_clean, 'annual' if _freq == "연간" else 'quarter')
+                        if _stm:
+                            st.info(f"DART 실시간 조회가 이 서버(해외)에서 막혀 있어 **저장된 DART 공시 손익**"
+                                    f"(매출·영업이익·순이익, 갱신 {_stored})으로 표시합니다. "
+                                    "대차대조표·현금흐름표는 저장본에 없어 생략합니다.")
                     if _stm:
-                        for _r in _stm:
+                        # 2026-10-17 — 분기 보기에서 PER·PSR·ROE 를 **한 분기 실적**으로 나누고 있었다
+                        #   (삼성전자 2Q26 'PER 17.9x' — 실제 TTM 은 8x대). 분기는 최근 4개 분기 합(TTM)으로,
+                        #   4개 분기가 연속으로 없으면 '-'. 연간 보기는 그 해 실적 그대로.
+                        def _qidx(p):
+                            p = str(p)
+                            try:
+                                if 'Q' in p:                       # KR '2026.2Q'
+                                    return int(p[:4]) * 4 + int(p[5]) - 1
+                                return int(p[:4]) * 4 + (int(p[5:7]) - 1) // 3   # US '2026-06'(회계분기 말월)
+                            except Exception:
+                                return None
+
+                        def _ttm(ix, key):
+                            if ix + 4 > len(_stm):
+                                return None
+                            win = _stm[ix:ix + 4]
+                            qi = [_qidx(r['period']) for r in win]
+                            vals = [r.get(key) for r in win]
+                            if None in qi or any(qi[i] - qi[i + 1] != 1 for i in range(3)) or any(v is None for v in vals):
+                                return None
+                            return float(sum(vals))
+
+                        for _ix, _r in enumerate(_stm):
                             _rv = _r.get('revenue')
                             _r['gpm'] = (_r['gross'] / _rv) if (_r.get('gross') and _rv) else None
                             _r['opm'] = (_r['op_income'] / _rv) if (_r.get('op_income') and _rv) else None
-                            _r['roe'] = (_r['net_income'] / _r['equity']) if (_r.get('net_income') and _r.get('equity')) else None
+                            _ni = _r.get('net_income') if _freq == "연간" else _ttm(_ix, 'net_income')
+                            _r['ni_basis'] = _ni
+                            _r['rev_basis'] = _rv if _freq == "연간" else _ttm(_ix, 'revenue')
+                            _r['roe'] = (_ni / _r['equity']) if (_ni and _r.get('equity')) else None
                             _r['debt_ratio'] = (_r['liabilities'] / _r['equity']) if (_r.get('liabilities') and _r.get('equity')) else None
                         _periods = [r['period'] for r in _stm]
                         _gl = "YoY" if _freq == "연간" else "QoQ"
@@ -3840,9 +3940,11 @@ def _tab_analysis():
                                             _dv = est[f'{_dk}_{_sfx}']
                                             _row[_el] = f"{_dv:.1f}x" if _typ == 'mult' else _fmt_v(_dv, _typ)
                                             continue
-                                        _ev = est.get(f'{_key}_{_sfx}')
+                                        _ek = {'ni_basis': 'net_income', 'rev_basis': 'revenue'}.get(_key, _key)
+                                        _ev = est.get(f'{_ek}_{_sfx}')
                                         if _typ == 'mult':
-                                            _row[_el] = (f"{_mc/_ev:.1f}x" if (_mc and _ev and _ev > 0) else '-')
+                                            # 분기 추정치 1개로 시총을 나누면 4배 부풀려진 배수가 된다 → 분기 E 는 '-'
+                                            _row[_el] = (f"{_mc/_ev:.1f}x" if (_mc and _ev and _ev > 0 and freq == 'annual') else '-')
                                         else:
                                             _row[_el] = _fmt_v(_ev, _typ) if _ev else '-'
                                 for _ix in range(_np):
@@ -3883,25 +3985,29 @@ def _tab_analysis():
                         _est = forward_estimates(sym8_clean, is_kr_sym) or None
                         _est_freq = 'annual' if _freq == "연간" else 'quarter'
                         # 대차 → 손익 → 현금. 멀티플 행: 현재 시총÷각 기간 실적(밴드 감각), E열=Fwd (#4)
-                        _stmt_table("① 대차대조표 (E=컨센서스)", [
-                                                   ('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
-                                                   ('자본', 'equity', 'amt'),
-                                                   ('부채비율', 'debt_ratio', 'pct'),
-                                                   ('PBR (현시총÷자본)', 'equity', 'mult', 'pbr_dir')],
-                                    est=_est, freq=_est_freq)
-                        _stmt_table("② 손익계산서 (E=컨센서스)", [
-                                                   ('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
-                                                   ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
-                                                   ('OPM', 'opm', 'pct'), ('순이익', 'net_income', 'amt'),
-                                                   ('EPS', 'eps', 'eps'),
-                                                   ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct'),
-                                                   ('PER (현시총÷순익)', 'net_income', 'mult', 'per_dir'),
-                                                   ('PSR (현시총÷매출)', 'revenue', 'mult')],
-                                    est=_est, freq=_est_freq)
-                        _stmt_table("③ 현금흐름표", [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
-                                                   ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
+                        _bs_items = [('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
+                                     ('자본', 'equity', 'amt'), ('부채비율', 'debt_ratio', 'pct'),
+                                     ('PBR (현시총÷자본)', 'equity', 'mult', 'pbr_dir')]
+                        _tt = '' if _freq == "연간" else ' TTM'          # 분기 보기 = 최근 4분기 합
+                        _is_items = [('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
+                                     ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
+                                     ('OPM', 'opm', 'pct'), ('순이익', 'net_income', 'amt'),
+                                     ('EPS', 'eps', 'eps'), ('SG&A', 'sga', 'amt'), (f'ROE{_tt}', 'roe', 'pct'),
+                                     (f'PER (현시총÷{_tt.strip()}순익)', 'ni_basis', 'mult', 'per_dir'),
+                                     (f'PSR (현시총÷{_tt.strip()}매출)', 'rev_basis', 'mult')]
+                        _cf_items = [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
+                                     ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')]
+                        if _stored:                # 저장본은 손익 3항목뿐 — 빈 행('-')을 늘어놓지 않는다
+                            _is_items = [it for it in _is_items
+                                         if it[1] in ('revenue', 'op_income', 'opm', 'net_income', 'ni_basis', 'rev_basis')]
+                        else:
+                            _stmt_table("① 대차대조표 (E=컨센서스)", _bs_items, est=_est, freq=_est_freq)
+                        _stmt_table("② 손익계산서 (E=컨센서스)", _is_items, est=_est, freq=_est_freq)
+                        if not _stored:
+                            _stmt_table("③ 현금흐름표 (Capex=유출, 음수)", _cf_items)
                         _qn = "3개월 환산" if _freq == "분기" else "회계연도"
-                        st.caption(f"출처: {_osrc} 공식({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
+                        _src_txt = f"{_osrc} 공식" if not _stored else f"DART 공시 저장본(갱신 {_stored})"
+                        st.caption(f"출처: {_src_txt}({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
                                    "금액 KR=조/억·US=USD. PER/PBR/PSR 행=현재 시총÷각 기간 실적(최신=트레일링, E열=Fwd). "
                                    "컨센서스 커버: KR=매출·영업익·OPM·순익·ROE·부채비율·EPS·PER·PBR(네이버) / "
                                    "US=매출·순익·EPS(yfinance). ⚠️ 현금흐름·자산 추정치는 애널 컨센서스가 배포되지 않아 '-'.")
