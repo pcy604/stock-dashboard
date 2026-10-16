@@ -685,6 +685,30 @@ if st.query_params.get('diag') == 'net':
              'dart_client 로드 오류': _DC_ERR})
     st.stop()
 
+# ── 🧾 재무 원값 확인 (?diag=fin&sym=005930) — 화면 표와 **같은 함수**의 출력을 글자로 ─────
+# 표는 캔버스로 그려져 대조가 어렵다. 공시 원문과 숫자를 맞춰 보기 위한 검증용 출력.
+if st.query_params.get('diag') == 'fin':
+    _sym = (st.query_params.get('sym') or '005930').strip().upper()
+    _kr = len(_sym) == 6 and _sym[:5].isdigit()
+    st.subheader(f'🧾 재무 원값 — {_sym} ({"DART" if _kr else "EDGAR"} · 화면과 같은 함수)')
+    _keys = ['period', 'revenue', 'gross', 'op_income', 'net_income', 'eps', 'sga', 'assets',
+             'liabilities', 'equity', 'op_cf', 'inv_cf', 'fin_cf', 'capex']
+    for _fq in ('annual', 'quarter'):
+        _t0 = time.time()
+        try:
+            if _kr:
+                _cc = _dc.corp_map().get(_sym)
+                _rf = _dc.statements(_cc, _fq, 5) if _cc else []
+            else:
+                _rf = _ec.statements(_sym, _fq, 6)
+            _er = None
+        except Exception as _e:
+            _rf, _er = [], f'{type(_e).__name__}: {_e}'
+        _txt = [' | '.join(_keys)] + [' | '.join(str(r.get(k)) for k in _keys) for r in _rf]
+        st.code(f'[{_fq}] {time.time() - _t0:.1f}s err={_er}\n' + '\n'.join(_txt))
+    st.json({'dart_client.health()': _dc.health() if _dc else None, 'dart_client 로드 오류': _DC_ERR})
+    st.stop()
+
 @st.cache_data(ttl=3600)
 def _fetch_fred_cached(series_id: str, limit: int):
     """실패 시 예외 → 캐시에 실패가 박제되지 않음 (핵심: 빈 결과 1시간 캐싱 버그 방지)."""
