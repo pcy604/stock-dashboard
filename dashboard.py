@@ -683,25 +683,32 @@ if st.query_params.get('diag') == 'net':
     except Exception:
         _dk = ''
     st.subheader('🩺 외부 소스 연결 진단 — 이 서버(Streamlit Cloud) 기준')
-    _rows = [
-        _probe('서버 공인 IP', 'https://api.ipify.org'),
-        _probe('DART API', 'https://opendart.fss.or.kr/api/company.json',
-               params={'crtfc_key': _dk, 'corp_code': '00126380'}),
-        _probe('DART 웹', 'https://dart.fss.or.kr/'),
-        _probe('SEC EDGAR', 'https://data.sec.gov/submissions/CIK0001318605.json',
-               headers={'User-Agent': 'stock-screener research pcy604604@gmail.com'}),
-        _probe('네이버 금융', 'https://finance.naver.com/item/main.naver?code=005930',
-               headers={'User-Agent': 'Mozilla/5.0'}),
-        _probe('FRED', 'https://api.stlouisfed.org/fred/series/observations',
-               params={'series_id': 'SP500', 'api_key': FRED_KEY, 'file_type': 'json', 'limit': 1}),
-        _probe('stooq', 'https://stooq.com/q/d/l/?s=^spx&i=m'),
+    # 병렬 + 전체 마감 20초: DNS·TLS 단계 정지는 requests 타임아웃이 못 잡는다(2026-10-17 진단이 2분+ 멈춤)
+    import concurrent.futures as _cf
+    _UA = {'User-Agent': 'Mozilla/5.0'}
+    _jobs = [   # (이름, URL, requests 인자)
+        ('서버 공인 IP', 'https://api.ipify.org', {}),
+        ('DART API', 'https://opendart.fss.or.kr/api/company.json',
+         {'params': {'crtfc_key': _dk, 'corp_code': '00126380'}}),
+        ('DART 웹', 'https://dart.fss.or.kr/', {}),
+        ('SEC EDGAR', 'https://data.sec.gov/submissions/CIK0001318605.json',
+         {'headers': {'User-Agent': 'stock-screener research pcy604604@gmail.com'}}),
+        ('네이버 금융', 'https://finance.naver.com/item/main.naver?code=005930', {'headers': _UA}),
+        ('FRED', 'https://api.stlouisfed.org/fred/series/observations',
+         {'params': {'series_id': 'SP500', 'api_key': FRED_KEY, 'file_type': 'json', 'limit': 1}}),
+        ('stooq', 'https://stooq.com/q/d/l/?s=^spx&i=m', {}),
         # KR 재무제표 대체 소스 후보(2026-10-17) — DART 가 막힌 해외 서버에서 닿는지
-        _probe('네이버 기업분석', 'https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=005930',
-               headers={'User-Agent': 'Mozilla/5.0'}),
-        _probe('FnGuide', 'https://comp.fnguide.com/SVO2/ASP/SVD_Finance.asp?pGB=1&gicode=A005930',
-               headers={'User-Agent': 'Mozilla/5.0'}),
-        _probe('KRX 정보', 'https://data.krx.co.kr/', headers={'User-Agent': 'Mozilla/5.0'}),
+        ('네이버 기업분석', 'https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=005930', {'headers': _UA}),
+        ('FnGuide', 'https://comp.fnguide.com/SVO2/ASP/SVD_Finance.asp?pGB=1&gicode=A005930', {'headers': _UA}),
+        ('KRX 정보', 'https://data.krx.co.kr/', {'headers': _UA}),
     ]
+    _ex = _cf.ThreadPoolExecutor(max_workers=len(_jobs))
+    _futs = [(n, _ex.submit(_probe, n, u, **kw)) for n, u, kw in _jobs]
+    _done, _ = _cf.wait([f for _, f in _futs], timeout=20)
+    _rows = [f.result() if f in _done else {'소스': n, '결과': 'HANG >20s', '초': 20.0,
+                                            '응답 앞부분': '20초 안에 끝나지 않음(DNS·TLS·응답 단계 정지)'}
+             for n, f in _futs]
+    _ex.shutdown(wait=False)
     st.dataframe(pd.DataFrame(_rows), filters=False, color=False, hide_index=True)
     st.code('\n'.join(f"{r['소스']:<10} | {r['결과']:<22} | {r['초']:>6} | {r['응답 앞부분'][:110]}" for r in _rows))
     st.json({'DART 키 설정됨': bool(_dk), 'dart_client.health()': _dc.health() if _dc else None,
