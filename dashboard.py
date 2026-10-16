@@ -695,6 +695,12 @@ if st.query_params.get('diag') == 'net':
         _probe('FRED', 'https://api.stlouisfed.org/fred/series/observations',
                params={'series_id': 'SP500', 'api_key': FRED_KEY, 'file_type': 'json', 'limit': 1}),
         _probe('stooq', 'https://stooq.com/q/d/l/?s=^spx&i=m'),
+        # KR 재무제표 대체 소스 후보(2026-10-17) — DART 가 막힌 해외 서버에서 닿는지
+        _probe('네이버 기업분석', 'https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=005930',
+               headers={'User-Agent': 'Mozilla/5.0'}),
+        _probe('FnGuide', 'https://comp.fnguide.com/SVO2/ASP/SVD_Finance.asp?pGB=1&gicode=A005930',
+               headers={'User-Agent': 'Mozilla/5.0'}),
+        _probe('KRX 정보', 'https://data.krx.co.kr/', headers={'User-Agent': 'Mozilla/5.0'}),
     ]
     st.dataframe(pd.DataFrame(_rows), filters=False, color=False, hide_index=True)
     st.code('\n'.join(f"{r['소스']:<10} | {r['결과']:<22} | {r['초']:>6} | {r['응답 앞부분'][:110]}" for r in _rows))
