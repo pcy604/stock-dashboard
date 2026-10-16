@@ -26,7 +26,7 @@ _KEY_F = DATA / '.dart_key'
 _CORP_CACHE = DATA / 'dart_corpmap.json'
 BASE = "https://opendart.fss.or.kr/api"
 # 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
-API_VERSION = 2
+API_VERSION = 3
 
 # 사업보고서=11011(연간) · 반기=11012 · 1Q=11013 · 3Q=11014
 REPRT = {'annual': '11011', 'half': '11012', 'q1': '11013', 'q3': '11014'}
@@ -118,7 +118,7 @@ _HEALTH = {'fails': 0, 'open_until': 0.0, 'last_error': None, 'last_ok': None}
 
 
 def set_interactive(on=True):
-    _MODE.update({'tries': 2, 'timeout': (5, 12), 'interactive': True} if on
+    _MODE.update({'tries': 2, 'timeout': (3, 12), 'interactive': True} if on
                  else {'tries': 6, 'timeout': 20, 'interactive': False})
 
 
@@ -155,7 +155,8 @@ def _get(url, params, tries=None):
     #   (ConnectTimeout 실측). 배치에서도 막아야 CI 가 호출마다 2분씩 기다리다 55분 제한에 잘리지 않는다
     #   (10-16 daily-refresh 취소 — CANSLIM KR 단계 9분 → 48분+). 실패 시 호출부는 네이버 폴백으로 간다.
     if _HEALTH['fails'] >= (2 if _MODE['interactive'] else 3):
-        _HEALTH['open_until'] = time.time() + (300 if _MODE['interactive'] else 3600)
+        # 대화형 30분: 클라우드에서는 DART 가 '계속' 막혀 있어 5분마다 다시 두드리면 그때마다 첫 조회가 6초 늦다
+        _HEALTH['open_until'] = time.time() + (1800 if _MODE['interactive'] else 3600)
     raise last
 
 

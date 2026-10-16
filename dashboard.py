@@ -560,13 +560,16 @@ def _fresh_module(mod):
 
 
 _DC_ERR = None
+_kfn = None
 try:
     import dart_client as _dc
     import edgar_client as _ec
     _dc = _fresh_module(_dc)
     _ec = _fresh_module(_ec)
+    import kr_fin_naver as _kfn
+    _kfn = _fresh_module(_kfn)
     import importlib                            # 처음 본 프로세스인데 옛 모듈인 경우(위 시각 비교가 못 잡음)
-    if getattr(_dc, 'API_VERSION', 0) < 2:
+    if getattr(_dc, 'API_VERSION', 0) < 3:
         _dc = importlib.reload(_dc)
     if getattr(_ec, 'API_VERSION', 0) < 2:
         _ec = importlib.reload(_ec)
@@ -726,9 +729,11 @@ if st.query_params.get('diag') == 'fin':
     for _fq in ('annual', 'quarter'):
         _t0 = time.time()
         try:
-            if _kr:
+            if _kr:                               # 화면과 같은 순서: DART → 막혔으면 네이버 기업분석
                 _cc = _dc.corp_map().get(_sym)
                 _rf = _dc.statements(_cc, _fq, 5) if _cc else []
+                if not _rf:
+                    _rf = _kfn.statements(_sym, _fq, 5)
             else:
                 _rf = _ec.statements(_sym, _fq, 6)
             _er = None
@@ -3324,6 +3329,10 @@ def official_financials(sym, is_kr):
     except Exception:
         pass
     if is_kr:
+        nav = unified_statements(sym, True, 'annual')          # DART→네이버 (캐시 공유)
+        if nav:
+            return [dict(r, roe=(round(r['net_income'] / r['equity'] * 100, 1)
+                                 if (r.get('net_income') and r.get('equity')) else None)) for r in nav]
         rows, _ = kr_stored_statements(sym, 'annual', 5)
         return [dict(r, equity=None, assets=None, liabilities=None, eps=None, roe=None,
                      _src='stored') for r in rows]
@@ -3380,11 +3389,19 @@ def kr_insiders(sym):
 
 @st.cache_data(ttl=6 * 3600)
 def _unified_cached(sym, is_kr, freq):
-    """빈 결과는 raise → 캐시 안 됨 (서버 일시 실패가 6시간 눌러붙는 것 방지)."""
+    """빈 결과는 raise → 캐시 안 됨 (서버 일시 실패가 6시간 눌러붙는 것 방지).
+    KR: DART 우선 → 막힌 서버(해외 클라우드)면 네이버 기업분석(FnGuide 집계, kr_fin_naver — 공시 대조 확인)."""
     if is_kr:
-        import dart_client
-        cc = dart_client.corp_map().get(sym)
-        rows = dart_client.statements(cc, freq, 5) if cc else []
+        rows = []
+        try:
+            import dart_client
+            cc = dart_client.corp_map().get(sym)
+            rows = dart_client.statements(cc, freq, 5) if cc else []
+        except Exception:
+            rows = []
+        if not rows:
+            import kr_fin_naver
+            rows = kr_fin_naver.statements(sym, freq, 5)
     else:
         import edgar_client
         rows = edgar_client.statements(sym, freq, 6)
@@ -3854,7 +3871,7 @@ def _tab_analysis():
                 _mc = info.get('marketCap') or 0
                 if True:
                     _osrc = 'DART 전자공시' if is_kr_sym else 'SEC EDGAR'
-                    st.subheader(f"📊 공식 재무제표 ({_osrc})")
+                    st.subheader(f"📊 재무제표 ({'KR 공시' if is_kr_sym else 'SEC EDGAR'})")   # 실제 출처는 표 아래 캡션
 
                     def _amt(v):
                         if v is None:
@@ -3876,6 +3893,27 @@ def _tab_analysis():
                             st.info(f"DART 실시간 조회가 이 서버(해외)에서 막혀 있어 **저장된 DART 공시 손익**"
                                     f"(매출·영업이익·순이익, 갱신 {_stored})으로 표시합니다. "
                                     "대차대조표·현금흐름표는 저장본에 없어 생략합니다.")
+                    _via_naver = bool(_stm) and _stm[0].get('_src') == 'naver'
+                    if _via_naver:
+                        # 같은 숫자를 두 소스로 맞춰 본다 — 저장된 DART(공시 원본)와 겹치는 기간·손익 3항목
+                        _dart_rows, _ = kr_stored_statements(sym8_clean, 'annual' if _freq == "연간" else 'quarter', 8)
+                        _dmap = {r['period']: r for r in _dart_rows}
+                        _n_ok, _bad = 0, []
+                        for _r in _stm:
+                            _d = _dmap.get(_r['period'])
+                            if not _d:
+                                continue
+                            for _k, _kn in (('revenue', '매출'), ('op_income', '영업이익'), ('net_income', '순이익')):
+                                _a, _b = _r.get(_k), _d.get(_k)
+                                if _a is None or _b is None:
+                                    continue
+                                if abs(_a - _b) <= max(abs(_b) * 0.005, 1e8):
+                                    _n_ok += 1
+                                else:
+                                    _bad.append(f"{_r['period']} {_kn} {_a/1e8:,.0f}억 vs DART {_b/1e8:,.0f}억")
+                        st.caption("출처: **네이버 기업분석**(FnGuide 집계 · 영업이익=회사 발표 기준) — DART 가 이 서버(해외)에서 막혀 대신 씁니다. "
+                                   + (f"저장된 DART 공시값과 대조: {_n_ok}건 일치" if _n_ok else "저장된 DART 값과 겹치는 기간 없음")
+                                   + (f" · ⚠️ 불일치 {len(_bad)}건: " + " · ".join(_bad[:4]) if _bad else ""))
                     if _stm:
                         # 2026-10-17 — 분기 보기에서 PER·PSR·ROE 를 **한 분기 실적**으로 나누고 있었다
                         #   (삼성전자 2Q26 'PER 17.9x' — 실제 TTM 은 8x대). 분기는 최근 4개 분기 합(TTM)으로,
@@ -3930,8 +3968,8 @@ def _tab_analysis():
                         def _fmt_v(_v, _typ):
                             if _typ == 'pct':
                                 return _pct(_v)
-                            if _typ == 'eps':
-                                return f"{_v:,.2f}" if isinstance(_v, (int, float)) else '-'
+                            if _typ == 'eps':                      # KR EPS 는 원 단위 정수
+                                return (f"{_v:,.0f}" if is_kr_sym else f"{_v:,.2f}") if isinstance(_v, (int, float)) else '-'
                             return _amt(_v)
 
                         _EST_LABELS = {
@@ -4019,7 +4057,8 @@ def _tab_analysis():
                         if not _stored:
                             _stmt_table("③ 현금흐름표 (Capex=유출, 음수)", _cf_items)
                         _qn = "3개월 환산" if _freq == "분기" else "회계연도"
-                        _src_txt = f"{_osrc} 공식" if not _stored else f"DART 공시 저장본(갱신 {_stored})"
+                        _src_txt = (f"DART 공시 저장본(갱신 {_stored})" if _stored else
+                                    "네이버 기업분석(FnGuide)" if _via_naver else f"{_osrc} 공식")
                         st.caption(f"출처: {_src_txt}({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
                                    "금액 KR=조/억·US=USD. PER/PBR/PSR 행=현재 시총÷각 기간 실적(최신=트레일링, E열=Fwd). "
                                    "컨센서스 커버: KR=매출·영업익·OPM·순익·ROE·부채비율·EPS·PER·PBR(네이버) / "

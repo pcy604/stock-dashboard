@@ -43,5 +43,5 @@ def test_interactive_one_try_and_key_never_in_error(_reset):
             D._get('u', {})
     assert _reset['n'] == 2                          # 대화형: 타임아웃은 재시도 안 함
     h = D.health()
-    assert 0 < h['blocked_sec'] <= 300
+    assert 0 < h["blocked_sec"] <= 1800
     assert 'SECRETKEY123' not in h['last_error'] and 'crtfc_key' not in h['last_error']
