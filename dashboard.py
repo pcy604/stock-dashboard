@@ -543,13 +543,21 @@ _tui.begin_run(st)
 
 # 화면에서 DART·EDGAR 를 부를 때는 빨리 포기한다 — 응답 없는 서버를 몇 분씩 기다리면
 #   '연간/분기' 같은 버튼이 안 먹는 것처럼 보인다(2026-10-17). 자세한 이유는 dart_client._MODE.
+_DC_ERR = None
 try:
     import dart_client as _dc
     import edgar_client as _ec
+    if not (hasattr(_dc, 'set_interactive') and hasattr(_ec, 'set_interactive')):
+        # 코드만 바뀐 배포에서 클라우드 프로세스가 **이전 버전 모듈**을 메모리에 들고 있었다(2026-10-17 실측:
+        #   set_interactive 없음 → 새 재시도 정책이 적용 안 됨). 한 번 다시 읽는다.
+        import importlib
+        _dc = importlib.reload(_dc)
+        _ec = importlib.reload(_ec)
     _dc.set_interactive(True)
     _ec.set_interactive(True)
-except Exception:
+except Exception as _e:
     _dc = None
+    _DC_ERR = f'{type(_e).__name__}: {_e}'
 
 
 @st.cache_data(ttl=600, show_spinner=False)
@@ -672,7 +680,9 @@ if st.query_params.get('diag') == 'net':
         _probe('stooq', 'https://stooq.com/q/d/l/?s=^spx&i=m'),
     ]
     st.dataframe(pd.DataFrame(_rows), filters=False, color=False, hide_index=True)
-    st.json({'DART 키 설정됨': bool(_dk), 'dart_client.health()': _dc.health() if _dc else None})
+    st.code('\n'.join(f"{r['소스']:<10} | {r['결과']:<22} | {r['초']:>6} | {r['응답 앞부분'][:110]}" for r in _rows))
+    st.json({'DART 키 설정됨': bool(_dk), 'dart_client.health()': _dc.health() if _dc else None,
+             'dart_client 로드 오류': _DC_ERR})
     st.stop()
 
 @st.cache_data(ttl=3600)
