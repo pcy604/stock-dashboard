@@ -695,6 +695,12 @@ def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
 #    어긋나기 시작했다(카드에는 7,551건·+12.5%, 실제는 7,559건·+12.8%).
 #    HTML 로 바꾸면 폰에서도 그대로 읽히고 사본도 하나로 준다.
 _first_visit = 'seen_onboard' not in st.session_state
+# 2026-10-15 — 폰에서는 펼친 사용설명이 2~3화면을 차지해 탭(종목 검색)이 한참 아래로 밀렸다.
+try:
+    _UA = st.context.headers.get('User-Agent', '') or ''
+except Exception:
+    _UA = ''
+IS_MOBILE = any(k in _UA for k in ('Mobi', 'Android', 'iPhone', 'iPad'))
 st.session_state['seen_onboard'] = True
 
 _ONBOARD_HTML = """
@@ -780,7 +786,7 @@ _ONBOARD_HTML = """
 </div>
 """
 with st.expander("📖 처음이신가요? — 30초 사용설명 (화면 안내 · 시작 순서 · 전체 설명서)",
-                 expanded=_first_visit):
+                 expanded=_first_visit and not IS_MOBILE):
     st.html(_ONBOARD_HTML)
     # 구 '프로젝트 종합' 탭에 있던 전체 사용설명서 — 탭을 없애면서 여기로 이관
     with st.expander("📚 전체 사용설명서 — 개념 사전 · 데이터 신뢰등급 · 자주 묻는 것"):
@@ -1098,9 +1104,8 @@ with t_lead, guard('주도주'):
                     for m in _cd])), use_container_width=True, column_config=col_help(), hide_index=True,
                     row_height=25, height=_dfh(len(_cd)))
                 st.caption(
-                    "**색은 그 열 안에서 값이 클수록 진해집니다.** 열마다 담는 것이 달라 "
-                    "(YTD 는 수백 %, RS 는 1 근처) 기준도 열별로 따로 잡습니다. "
-                    "좋고 나쁨이 아니라 **크기**를 나타냅니다. "
+                    "**색: + 초록 / − 빨강, 크기가 클수록 진하게.** 부호에 뜻이 있는 열만 칠하고 "
+                    "(시총·가격·PER 같은 수준 열은 칠하지 않음), 진하기 기준은 열마다 따로 잡습니다. "
                     "**PEG 는 PER ÷ 순이익 YoY 입니다** — 이 DB 에 EPS 시계열이 없어 순이익으로 대신하므로 "
                     "주식 수 변동은 반영되지 않는다. 적자이거나 전년 동기가 적자면 정의되지 않아 '-' 이고, "
                     "이 규칙은 흑자전환 직전 종목을 자주 잡으므로 빈 칸이 많은 게 정상입니다. "
@@ -3505,902 +3510,914 @@ def _resolve_symbol(q: str):
     return None, [(c, f"{n} ({c} · {m})") for c, n, m, _ in cands]
 
 
-with tab7, guard('종목 분석'):
-    st.header("🔍 종목 분석")
-    st.caption("종목명 또는 코드 — KR: 삼성전자 · 005930  |  US: TSLA · Tesla")
+@st.fragment
+def _tab_analysis():
+    # 2026-10-15 — 이 탭의 조작(검색·토글·버튼)은 이 탭만 다시 그린다. 예전에는 검색 한 번에
+    #   앱 전체(전 탭·표 수십 개)가 다시 돌아 모바일에서 화면이 한참 회색으로 멈춰 있었다.
+    _tui.begin_run(st)       # 표 필터 키 순번을 프래그먼트 실행마다 0부터 — 키가 바뀌면 필터가 풀린다
+    with guard('종목 분석'):
+        st.header("🔍 종목 분석")
+        st.caption("종목명 또는 코드 — KR: 삼성전자 · 005930  |  US: TSLA · Tesla")
 
-    c_in, c_btn, _csp = st.columns([2.2, 0.9, 4.9])   # 필요한 만큼만 좁게 (#3)
-    with c_in:
-        sym8 = st.text_input("종목명 또는 코드", placeholder="삼성전자 / 005930 / TSLA",
-                             label_visibility="collapsed", key="sym8")
-    with c_btn:
-        go8 = st.button("분석", use_container_width=True, key="go8")
+        # 2026-10-15 — 모바일에서 검색이 안 되던 문제. 키보드의 '이동/검색'(Enter)은 입력칸만
+        #   반영하고 '분석' 버튼은 안 눌린 상태라 아무 일도 없었다. 폼으로 묶어 Enter 도 제출로 친다
+        #   (폼 안에서는 입력 중 재실행이 없어, iOS 에서 첫 탭이 입력칸 반영에 먹히는 일도 없다).
+        with st.form("sym8_form", border=False, enter_to_submit=True):
+            c_in, c_btn, _csp = st.columns([2.2, 0.9, 4.9])   # 필요한 만큼만 좁게 (#3)
+            with c_in:
+                sym8 = st.text_input("종목명 또는 코드", placeholder="삼성전자 / 005930 / TSLA",
+                                     label_visibility="collapsed", key="sym8")
+            with c_btn:
+                go8 = st.form_submit_button("분석", use_container_width=True)
 
-    # 분석 종목을 세션에 고정 — 라디오/슬라이더 조작(rerun)에도 분석 화면 유지 (#7)
-    if sym8 and go8:
-        _code, _cands = _resolve_symbol(sym8)
-        if _code:
-            st.session_state['analyze_sym'] = _code
-            st.session_state.pop('sym8_cands', None)
-        else:
-            st.session_state['sym8_cands'] = _cands
-    _cands = st.session_state.get('sym8_cands')
-    if _cands is not None:
-        if not _cands:
-            st.warning(f"'{sym8}' 와 맞는 종목이 없습니다. 이름 일부나 종목코드로 다시 찾아보세요.")
-        else:
-            _cc1, _cc2, _ = st.columns([3.1, 0.9, 4.0])
-            _pick = _cc1.selectbox(f"후보 {len(_cands)}개 (시총 큰 순)", _cands,
-                                   format_func=lambda x: x[1], key="sym8_pick")
-            if _cc2.button("이 종목", key="sym8_go", use_container_width=True):
-                st.session_state['analyze_sym'] = _pick[0]
+        # 분석 종목을 세션에 고정 — 라디오/슬라이더 조작(rerun)에도 분석 화면 유지 (#7)
+        if sym8 and go8:
+            _code, _cands = _resolve_symbol(sym8)
+            if _code:
+                st.session_state['analyze_sym'] = _code
                 st.session_state.pop('sym8_cands', None)
-                st.rerun()
-    _asym = st.session_state.get('analyze_sym')
-
-    if _asym:
-        sym8_clean = _asym
-        with st.spinner(f"{sym8_clean} 데이터 조회..."):
-            # 최대한 길게 요청 — US(FDR)는 상장일까지 실제로 나옴(AAPL 1980~ 확인).
-            # KR은 무료소스(FDR/pykrx 비로그인) 자체가 최근 ~3000거래일(~12y)로 캡핑돼 있어
-            # 20y를 요청해도 KR은 그 한계까지만 나옴 — 아래 캡션에서 사실대로 안내.
-            hist, info, earn, insid, fin_est = fetch_stock_data(sym8_clean, 365 * 20)
-
-        if hist is None or hist.empty:
-            st.error(f"데이터 없음 ({sym8_clean}). 종목코드 확인 — KR: 005930 · US: TSLA")
-        else:
-            price_now = hist['Close'].iloc[-1]
-            price_prev= hist['Close'].iloc[-2] if len(hist) > 1 else price_now
-            chg_pct   = (price_now / price_prev - 1) * 100
-
-            h1, h2, h3, h4, h5 = st.columns(5)
-            h1.metric("종목명", info.get('longName', sym8_clean)[:20])
-            h2.metric("현재가", f"${price_now:.2f}" if info.get('currency','') != 'KRW' else f"₩{price_now:,.0f}")
-            h3.metric("일일대비", f"{chg_pct:+.2f}%")
-            mc = info.get('marketCap', 0)
-            h4.metric("시가총액", f"${mc/1e9:.1f}B" if mc >= 1e9 else f"${mc/1e6:.0f}M" if mc else "-")
-            h5.metric("섹터", info.get('sector', '-'))
-
-            st.divider()
-
-            # 2026-09-10: 우선주(00088K) 대응 — 앞 5자리로 판정
-            is_kr_sym = len(sym8_clean) == 6 and sym8_clean[:5].isdigit()
-            price_unit = '₩' if is_kr_sym else '$'
-
-            st.divider()
-            st.markdown("## 🟡 ① 가치 — 뭘 살까 (What to buy)")
-            st.caption("기업 개요·경영진·IR · 공식 재무 3표 (DART/EDGAR)")
-
-            # ── 🏢 기업 개요 · IR · 공식 공시 (item 7) ──
-            _prof = company_profile(sym8_clean, is_kr_sym)
-            st.subheader("🏢 기업 개요 · IR")
-            _lnk = []
-            if _prof.get('website'):
-                _lnk.append(f"[🌐 홈페이지/IR]({_prof['website']})")
-            if _prof.get('edgar_url'):
-                _lnk.append(f"[📄 EDGAR 10-K]({_prof['edgar_url']})")
-            if _prof.get('form4_url'):
-                _lnk.append(f"[👤 EDGAR Form4(내부자)]({_prof['form4_url']})")
-            if _prof.get('dart_url'):
-                _lnk.append(f"[📄 DART 공시]({_prof['dart_url']})")
-            if _lnk:
-                st.markdown("**공식 공시·IR**: " + "  ·  ".join(_lnk))
-            if st.button("🤖 AI 사업·비전 요약 (Gemini)", key=f"aisum_{sym8_clean}"):
-                with st.spinner("공식 문서(10-K/사업설명)에서 비전·마스터플랜 요약 중..."):
-                    _btxt = official_business_text(sym8_clean, is_kr_sym)
-                    _bsrc = '10-K 공식 사업보고(Item 1~)' if _btxt else '공식 사업설명(yfinance)'
-                    st.markdown(ai_business_summary(info.get('longName', sym8_clean),
-                                                    _btxt or _prof.get('summary'), _bsrc))
-                    st.caption(f"요약 원천: {_bsrc}")
-            st.caption("AI 요약 원천: US=최신 10-K 본문(공식), KR=공식 사업설명. "
-                       "서버에서 쓰려면 Streamlit Secrets에 GEMINI_KEY 필요.")
-            st.divider()
-
-            # ── 📊 공식 재무제표 통합표 (연도 가로 × 3표 세로 · 연간/분기 토글) ──
-            _off = official_financials(sym8_clean, is_kr_sym)   # 연간(멀티플·스코어카드용)
-            if _off:
-                _osrc = 'DART 전자공시' if is_kr_sym else 'SEC EDGAR'
-                st.subheader(f"📊 공식 재무제표 ({_osrc})")
-                _mc = info.get('marketCap') or 0
-
-                def _amt(v):
-                    if v is None:
-                        return '-'
-                    if is_kr_sym:
-                        return f"{v/1e12:.1f}조" if abs(v) >= 1e12 else f"{v/1e8:,.0f}억"
-                    return f"${v/1e9:.1f}B" if abs(v) >= 1e9 else f"${v/1e6:,.0f}M"
-
-                def _pct(v):
-                    return f"{v*100:.1f}%" if isinstance(v, (int, float)) else '-'
-
-
-                _freq = st.radio("기준", ["연간", "분기"], horizontal=True, key=f"fin_freq_{sym8_clean}")
-                _stm = unified_statements(sym8_clean, is_kr_sym, 'annual' if _freq == "연간" else 'quarter')
-                if _stm:
-                    for _r in _stm:
-                        _rv = _r.get('revenue')
-                        _r['gpm'] = (_r['gross'] / _rv) if (_r.get('gross') and _rv) else None
-                        _r['opm'] = (_r['op_income'] / _rv) if (_r.get('op_income') and _rv) else None
-                        _r['roe'] = (_r['net_income'] / _r['equity']) if (_r.get('net_income') and _r.get('equity')) else None
-                        _r['debt_ratio'] = (_r['liabilities'] / _r['equity']) if (_r.get('liabilities') and _r.get('equity')) else None
-                    _periods = [r['period'] for r in _stm]
-                    _gl = "YoY" if _freq == "연간" else "QoQ"
-                    _np = len(_stm)
-                    # 증감 컬럼 헤더는 전부 'YoY'/'QoQ'로 보이게 (공백 패딩으로 중복 회피)
-                    _dcols = [f'{_gl}{" " * _i}' for _i in range(_np - 1)]
-
-                    def _delta(cur, prev, typ):
-                        if typ == 'pct':
-                            return (f"{(cur-prev)*100:+.1f}%p"
-                                    if (isinstance(cur, (int, float)) and isinstance(prev, (int, float))) else '-')
-                        if cur is not None and prev:
-                            try:
-                                if prev < 0:
-                                    return '흑전' if cur > 0 else '-'
-                                return f"{(cur/prev-1)*100:+.0f}%"
-                            except Exception:
-                                return '-'
-                        return '-'
-
-                    def _fmt_v(_v, _typ):
-                        if _typ == 'pct':
-                            return _pct(_v)
-                        if _typ == 'eps':
-                            return f"{_v:,.2f}" if isinstance(_v, (int, float)) else '-'
-                        return _amt(_v)
-
-                    _EST_LABELS = {
-                        'annual':  (('내년E', '1y'), ('올해E', '0y')),
-                        'quarter': (('다음분기E', '1q'), ('이번분기E', '0q')),
-                    }
-
-                    def _stmt_table(title, items, est=None, freq='annual'):
-                        _est_pairs = _EST_LABELS[freq]
-                        _ecols = [lab for lab, _ in _est_pairs] if est else []   # 미래→과거 방향 통일
-                        _rows = []
-                        for _it in items:
-                            _lab, _key, _typ = _it[0], _it[1], _it[2]
-                            _dk = _it[3] if len(_it) > 3 else None   # 직접 추정키(네이버 PER/PBR E 등)
-                            _row = {'항목': _lab}
-                            if est:                       # 컨센서스(연간=내년/올해, 분기=다음/이번) — mult면 Fwd 멀티플
-                                for _el, _sfx in _est_pairs:
-                                    if _dk and est.get(f'{_dk}_{_sfx}') is not None:
-                                        _dv = est[f'{_dk}_{_sfx}']
-                                        _row[_el] = f"{_dv:.1f}x" if _typ == 'mult' else _fmt_v(_dv, _typ)
-                                        continue
-                                    _ev = est.get(f'{_key}_{_sfx}')
-                                    if _typ == 'mult':
-                                        _row[_el] = (f"{_mc/_ev:.1f}x" if (_mc and _ev and _ev > 0) else '-')
-                                    else:
-                                        _row[_el] = _fmt_v(_ev, _typ) if _ev else '-'
-                            for _ix in range(_np):
-                                _v = _stm[_ix].get(_key)
-                                if _typ == 'mult':        # 현재 시총 ÷ 각 기간 실적 (#4)
-                                    _row[_periods[_ix]] = (f"{_mc/_v:.1f}x" if (_mc and _v and _v > 0) else '-')
-                                    if _ix < _np - 1:
-                                        _row[_dcols[_ix]] = '·'
-                                else:
-                                    _row[_periods[_ix]] = _fmt_v(_v, _typ)
-                                    if _ix < _np - 1:    # 사이사이 증감
-                                        _row[_dcols[_ix]] = _delta(_v, _stm[_ix + 1].get(_key), _typ)
-                            _rows.append(_row)
-                        _df = pd.DataFrame(_rows)
-                        # 컬럼 순서: 항목, [내년E, 올해E,] p0, YoY, p1, YoY, ..., pN
-                        _order = ['항목'] + _ecols
-                        for _ix in range(_np):
-                            _order.append(_periods[_ix])
-                            if _ix < _np - 1:
-                                _order.append(_dcols[_ix])
-                        _df = _df[_order]
-                        def _cgg(v):
-                            try:
-                                _f = float(str(v).replace('%', '').replace('p', '').replace('+', ''))
-                                return 'color:#16a34a' if _f >= 0 else 'color:#dc2626'
-                            except Exception:
-                                return 'color:#16a34a' if str(v) == '흑전' else ''
-                        st.caption(title)
-                        _sty = _df.style.map(_cgg, subset=_dcols)
-                        if _ecols:
-                            _sty = _sty.set_properties(subset=_ecols, color='#79c0ff')
-                        # 행높이·표높이 명시 → 세 표의 행간 완전 동일 + 빈 공간 없음 (#1,#2)
-                        st.dataframe(_sty, use_container_width=True, hide_index=True,
-                                     row_height=25, height=_dfh(len(_df)))
-
-                    # 연간·분기 컨센서스가 같은 소스(yfinance/네이버)의 같은 응답에 함께 들어있어
-                    # freq 무관하게 항상 가져오고, 어느 열을 보여줄지만 freq로 고름 (#1: 분기에서도 컨센서스 표시)
-                    _est = forward_estimates(sym8_clean, is_kr_sym) or None
-                    _est_freq = 'annual' if _freq == "연간" else 'quarter'
-                    # 대차 → 손익 → 현금. 멀티플 행: 현재 시총÷각 기간 실적(밴드 감각), E열=Fwd (#4)
-                    _stmt_table("① 대차대조표 (E=컨센서스)", [
-                                               ('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
-                                               ('자본', 'equity', 'amt'),
-                                               ('부채비율', 'debt_ratio', 'pct'),
-                                               ('PBR (현시총÷자본)', 'equity', 'mult', 'pbr_dir')],
-                                est=_est, freq=_est_freq)
-                    _stmt_table("② 손익계산서 (E=컨센서스)", [
-                                               ('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
-                                               ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
-                                               ('OPM', 'opm', 'pct'), ('순이익', 'net_income', 'amt'),
-                                               ('EPS', 'eps', 'eps'),
-                                               ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct'),
-                                               ('PER (현시총÷순익)', 'net_income', 'mult', 'per_dir'),
-                                               ('PSR (현시총÷매출)', 'revenue', 'mult')],
-                                est=_est, freq=_est_freq)
-                    _stmt_table("③ 현금흐름표", [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
-                                               ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
-                    _qn = "3개월 환산" if _freq == "분기" else "회계연도"
-                    st.caption(f"출처: {_osrc} 공식({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
-                               "금액 KR=조/억·US=USD. PER/PBR/PSR 행=현재 시총÷각 기간 실적(최신=트레일링, E열=Fwd). "
-                               "컨센서스 커버: KR=매출·영업익·OPM·순익·ROE·부채비율·EPS·PER·PBR(네이버) / "
-                               "US=매출·순익·EPS(yfinance). ⚠️ 현금흐름·자산 추정치는 애널 컨센서스가 배포되지 않아 '-'.")
-                else:
-                    st.caption("통합 재무표 데이터 없음 (해당 기준).")
-
-            # ── 🏭 사업부문별 매출 구조 (App Economy Insights 스타일, DART/EDGAR×Gemini) ──
-            st.divider()
-            st.subheader("🏭 사업부문별 매출 구조 — 이 회사는 어디서 돈을 버나")
-            if True:
-                _seg_cached = None
-                try:
-                    import segment_analysis as _sa
-                    _seg_cached = _sa.load_cached(sym8_clean)
-                except Exception:
-                    pass
-                _seg_src = 'DART 사업보고서' if is_kr_sym else 'SEC 10-K'
-                _seg_go = st.button(f"🔍 사업부문 분석 ({_seg_src} · Gemini · ~15초)", key=f"seg_{sym8_clean}") if not _seg_cached else True
-                if _seg_go:
-                    with st.spinner(f"{_seg_src}에서 부문별 매출 추출 중..."):
-                        try:
-                            import segment_analysis as _sa
-                            _seg = _seg_cached or _sa.analyze(sym8_clean, is_kr_sym)
-                        except Exception as _se:
-                            _seg = {'_error': str(_se)[:150]}
-                    if not _seg or _seg.get('_error') or not _seg.get('segments'):
-                        # 2026-09-07: 원인을 구분해서 보여준다. 그전에는 무엇이 문제든
-                        # "파싱 실패"로만 떠서, Gemini 일일 한도(무료 등급 20건) 때문에
-                        # 안 되는 건지 진짜 부문표가 없는 건지 알 수 없었다.
-                        _emsg = str((_seg or {}).get('_error', ''))
-                        if 'RESOURCE_EXHAUSTED' in _emsg or '429' in _emsg:
-                            st.info(
-                                "**오늘의 AI 분석 한도를 다 썼습니다.** Gemini 무료 등급은 "
-                                "모델당 하루 20건이라 몇 종목만 조회해도 소진됩니다. "
-                                "고장이 아니라 한도이고, **날짜가 바뀌면 다시 됩니다.** "
-                                "이미 분석한 종목은 캐시에서 그대로 나옵니다.")
-                        elif 'GEMINI_KEY' in _emsg:
-                            st.info("Gemini API 키가 설정되지 않았습니다 — "
-                                    "`data/.gemini_key` 또는 환경변수 `GEMINI_KEY`.")
-                        else:
-                            st.warning("부문 데이터 추출 실패 — 사업보고서에 부문표가 없거나 "
-                                       f"파싱에 실패했습니다. {_emsg}")
-                    else:
-                        _segs = [s for s in _seg['segments'] if s.get('revenue') or s.get('revenue_pct')]
-                        # 공시된 부문 이익지표 자동 판별 (회사별로 GP/OP/둘다/없음이 다름 — management approach)
-                        _measure = _seg.get('segment_profit_measure')
-                        if _measure not in ('gross', 'operating', 'both'):   # 구버전 캐시 폴백
-                            _measure = 'operating' if any(s.get('op_income') for s in _segs) else \
-                                       ('gross' if any(s.get('gross_profit') for s in _segs) else 'none')
-                        # 표시할 이익 필드·라벨을 회사에 맞게 선택 (both면 OP 우선, GP 병기)
-                        _pf_key = 'op_income' if _measure in ('operating', 'both') else 'gross_profit'
-                        _pf_lab = 'OPM' if _pf_key == 'op_income' else 'GPM'
-                        _mlabel = _seg.get('segment_measure_label') or (f"부문 {_pf_lab}" if _measure != 'none' else "부문 마진 미공시")
-                        _tot_pf = sum((s.get(_pf_key) or 0) for s in _segs) or None
-                        _srows = []
-                        for s in _segs:
-                            _pf = s.get(_pf_key)
-                            _pf_pct = (_pf / _tot_pf * 100) if (_pf and _tot_pf) else None
-                            _seg_margin = (_pf / s['revenue'] * 100) if (_pf and s.get('revenue')) else None
-                            _srows.append({
-                                '사업부문': s['name'],
-                                '주요제품': str(s.get('products', ''))[:26],
-                                '매출': fmt_cap(s.get('revenue'), 'KR' if is_kr_sym else 'US') if s.get('revenue') else '-',
-                                '매출비중%': s.get('revenue_pct'),
-                                f'{_pf_lab}(부문마진)': round(_seg_margin, 1) if _seg_margin is not None else None,
-                                '이익비중%': round(_pf_pct, 1) if _pf_pct is not None else None,
-                            })
-                        _segdf = pd.DataFrame(_srows)
-                        # 매출 비중 vs 이익 비중 나란히 막대 (핵심 통찰: 둘의 괴리)
-                        _fig_seg = go.Figure()
-                        _fig_seg.add_trace(go.Bar(
-                            y=[r['사업부문'] for r in _srows], x=[r.get('매출비중%') or 0 for r in _srows],
-                            name='매출 비중', orientation='h', marker_color='#388bfd',
-                            text=[f"{r.get('매출비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
-                        if _tot_pf:
-                            _fig_seg.add_trace(go.Bar(
-                                y=[r['사업부문'] for r in _srows], x=[r.get('이익비중%') or 0 for r in _srows],
-                                name=f'{_pf_lab} 이익 비중', orientation='h', marker_color='#f0883e',
-                                text=[f"{r.get('이익비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
-                        _fig_seg.update_layout(
-                            barmode='group', height=max(180, 60 * len(_srows)),
-                            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                            font=dict(color='#8b949e', size=11), margin=dict(l=0, r=10, t=10, b=0),
-                            legend=dict(orientation='h', y=1.15, x=0), xaxis_ticksuffix='%')
-                        _fig_seg.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
-                        st.plotly_chart(_fig_seg, use_container_width=True)
-                        st.dataframe(
-                            _segdf, use_container_width=True, hide_index=True, height=_dfh(len(_segdf)),
-                            column_config={'매출비중%': st.column_config.NumberColumn(format='%.1f%%'),
-                                           f'{_pf_lab}(부문마진)': st.column_config.NumberColumn(format='%.1f%%'),
-                                           '이익비중%': st.column_config.NumberColumn(format='%.1f%%')})
-                        _mnote = {
-                            'operating': "이 회사는 부문 **영업이익(OPM)**을 공시 (부문 매출원가 미분리 → GPM 불가)",
-                            'gross':     "이 회사는 부문 **매출총이익(GPM)**을 공시 (부문 판관비 미분리 → OPM 불가)",
-                            'both':      "이 회사는 부문 GPM·OPM 둘 다 공시 (OPM 표시)",
-                            'none':      "⚠️ 이 회사는 부문별 이익을 공시하지 않음 — 매출 비중만 표시",
-                        }.get(_measure, '')
-                        st.caption(f"📄 {_seg.get('source', 'DART')} · {_seg.get('period', '')} · Gemini 추출 "
-                                   f"(원문 대조 권장). {_mnote}. "
-                                   "핵심: **매출 비중 ≠ 이익 비중** — 파란막대보다 주황막대가 큰 부문이 진짜 캐시카우. "
-                                   f"{('· ' + _seg['note']) if _seg.get('note') else ''}")
-                        st.caption("ℹ️ 부문별 공시 이익지표는 회사마다 다름(경영진이 쓰는 지표 공시) — 테슬라類=GPM, 삼성類=OPM. "
-                                   "부문 매출 합이 100% 초과 가능(부문간 내부거래 포함).")
-
-            # ── 💵 손익 흐름(Sankey) + 마진 궤적 (App Economy Insights 스타일) ──
-            st.divider()
-            st.subheader("💵 손익 흐름 — 매출이 순이익까지 어떻게 흐르나")
-            _flowq = unified_statements(sym8_clean, is_kr_sym, 'quarter')      # 분기 시계열
-            if not _flowq or len(_flowq) < 1:
-                _flowq = unified_statements(sym8_clean, is_kr_sym, 'annual')
-            if not _flowq:
-                st.caption("손익 흐름 데이터 없음.")
             else:
-                _uq, _uu = (1e12, '조') if is_kr_sym else (1e9, 'B')
-                _seg_for_flow = None
-                if is_kr_sym:
+                st.session_state['sym8_cands'] = _cands
+        _cands = st.session_state.get('sym8_cands')
+        if _cands is not None:
+            if not _cands:
+                st.warning(f"'{sym8}' 와 맞는 종목이 없습니다. 이름 일부나 종목코드로 다시 찾아보세요.")
+            else:
+                _cc1, _cc2, _ = st.columns([3.1, 0.9, 4.0])
+                _pick = _cc1.selectbox(f"후보 {len(_cands)}개 (시총 큰 순)", _cands,
+                                       format_func=lambda x: x[1], key="sym8_pick")
+                if _cc2.button("이 종목", key="sym8_go", use_container_width=True):
+                    st.session_state['analyze_sym'] = _pick[0]
+                    st.session_state.pop('sym8_cands', None)
+                    st.rerun(scope="fragment")
+        _asym = st.session_state.get('analyze_sym')
+
+        if _asym:
+            sym8_clean = _asym
+            with st.spinner(f"{sym8_clean} 데이터 조회..."):
+                # 최대한 길게 요청 — US(FDR)는 상장일까지 실제로 나옴(AAPL 1980~ 확인).
+                # KR은 무료소스(FDR/pykrx 비로그인) 자체가 최근 ~3000거래일(~12y)로 캡핑돼 있어
+                # 20y를 요청해도 KR은 그 한계까지만 나옴 — 아래 캡션에서 사실대로 안내.
+                hist, info, earn, insid, fin_est = fetch_stock_data(sym8_clean, 365 * 20)
+
+            if hist is None or hist.empty:
+                st.error(f"데이터 없음 ({sym8_clean}). 종목코드 확인 — KR: 005930 · US: TSLA")
+            else:
+                price_now = hist['Close'].iloc[-1]
+                price_prev= hist['Close'].iloc[-2] if len(hist) > 1 else price_now
+                chg_pct   = (price_now / price_prev - 1) * 100
+
+                h1, h2, h3, h4, h5 = st.columns(5)
+                h1.metric("종목명", info.get('longName', sym8_clean)[:20])
+                h2.metric("현재가", f"${price_now:.2f}" if info.get('currency','') != 'KRW' else f"₩{price_now:,.0f}")
+                h3.metric("일일대비", f"{chg_pct:+.2f}%")
+                mc = info.get('marketCap', 0)
+                h4.metric("시가총액", f"${mc/1e9:.1f}B" if mc >= 1e9 else f"${mc/1e6:.0f}M" if mc else "-")
+                h5.metric("섹터", info.get('sector', '-'))
+
+                st.divider()
+
+                # 2026-09-10: 우선주(00088K) 대응 — 앞 5자리로 판정
+                is_kr_sym = len(sym8_clean) == 6 and sym8_clean[:5].isdigit()
+                price_unit = '₩' if is_kr_sym else '$'
+
+                st.divider()
+                st.markdown("## 🟡 ① 가치 — 뭘 살까 (What to buy)")
+                st.caption("기업 개요·경영진·IR · 공식 재무 3표 (DART/EDGAR)")
+
+                # ── 🏢 기업 개요 · IR · 공식 공시 (item 7) ──
+                _prof = company_profile(sym8_clean, is_kr_sym)
+                st.subheader("🏢 기업 개요 · IR")
+                _lnk = []
+                if _prof.get('website'):
+                    _lnk.append(f"[🌐 홈페이지/IR]({_prof['website']})")
+                if _prof.get('edgar_url'):
+                    _lnk.append(f"[📄 EDGAR 10-K]({_prof['edgar_url']})")
+                if _prof.get('form4_url'):
+                    _lnk.append(f"[👤 EDGAR Form4(내부자)]({_prof['form4_url']})")
+                if _prof.get('dart_url'):
+                    _lnk.append(f"[📄 DART 공시]({_prof['dart_url']})")
+                if _lnk:
+                    st.markdown("**공식 공시·IR**: " + "  ·  ".join(_lnk))
+                if st.button("🤖 AI 사업·비전 요약 (Gemini)", key=f"aisum_{sym8_clean}"):
+                    with st.spinner("공식 문서(10-K/사업설명)에서 비전·마스터플랜 요약 중..."):
+                        _btxt = official_business_text(sym8_clean, is_kr_sym)
+                        _bsrc = '10-K 공식 사업보고(Item 1~)' if _btxt else '공식 사업설명(yfinance)'
+                        st.markdown(ai_business_summary(info.get('longName', sym8_clean),
+                                                        _btxt or _prof.get('summary'), _bsrc))
+                        st.caption(f"요약 원천: {_bsrc}")
+                st.caption("AI 요약 원천: US=최신 10-K 본문(공식), KR=공식 사업설명. "
+                           "서버에서 쓰려면 Streamlit Secrets에 GEMINI_KEY 필요.")
+                st.divider()
+
+                # ── 📊 공식 재무제표 통합표 (연도 가로 × 3표 세로 · 연간/분기 토글) ──
+                _off = official_financials(sym8_clean, is_kr_sym)   # 연간(멀티플·스코어카드용)
+                if _off:
+                    _osrc = 'DART 전자공시' if is_kr_sym else 'SEC EDGAR'
+                    st.subheader(f"📊 공식 재무제표 ({_osrc})")
+                    _mc = info.get('marketCap') or 0
+
+                    def _amt(v):
+                        if v is None:
+                            return '-'
+                        if is_kr_sym:
+                            return f"{v/1e12:.1f}조" if abs(v) >= 1e12 else f"{v/1e8:,.0f}억"
+                        return f"${v/1e9:.1f}B" if abs(v) >= 1e9 else f"${v/1e6:,.0f}M"
+
+                    def _pct(v):
+                        return f"{v*100:.1f}%" if isinstance(v, (int, float)) else '-'
+
+
+                    _freq = st.radio("기준", ["연간", "분기"], horizontal=True, key=f"fin_freq_{sym8_clean}")
+                    _stm = unified_statements(sym8_clean, is_kr_sym, 'annual' if _freq == "연간" else 'quarter')
+                    if _stm:
+                        for _r in _stm:
+                            _rv = _r.get('revenue')
+                            _r['gpm'] = (_r['gross'] / _rv) if (_r.get('gross') and _rv) else None
+                            _r['opm'] = (_r['op_income'] / _rv) if (_r.get('op_income') and _rv) else None
+                            _r['roe'] = (_r['net_income'] / _r['equity']) if (_r.get('net_income') and _r.get('equity')) else None
+                            _r['debt_ratio'] = (_r['liabilities'] / _r['equity']) if (_r.get('liabilities') and _r.get('equity')) else None
+                        _periods = [r['period'] for r in _stm]
+                        _gl = "YoY" if _freq == "연간" else "QoQ"
+                        _np = len(_stm)
+                        # 증감 컬럼 헤더는 전부 'YoY'/'QoQ'로 보이게 (공백 패딩으로 중복 회피)
+                        _dcols = [f'{_gl}{" " * _i}' for _i in range(_np - 1)]
+
+                        def _delta(cur, prev, typ):
+                            if typ == 'pct':
+                                return (f"{(cur-prev)*100:+.1f}%p"
+                                        if (isinstance(cur, (int, float)) and isinstance(prev, (int, float))) else '-')
+                            if cur is not None and prev:
+                                try:
+                                    if prev < 0:
+                                        return '흑전' if cur > 0 else '-'
+                                    return f"{(cur/prev-1)*100:+.0f}%"
+                                except Exception:
+                                    return '-'
+                            return '-'
+
+                        def _fmt_v(_v, _typ):
+                            if _typ == 'pct':
+                                return _pct(_v)
+                            if _typ == 'eps':
+                                return f"{_v:,.2f}" if isinstance(_v, (int, float)) else '-'
+                            return _amt(_v)
+
+                        _EST_LABELS = {
+                            'annual':  (('내년E', '1y'), ('올해E', '0y')),
+                            'quarter': (('다음분기E', '1q'), ('이번분기E', '0q')),
+                        }
+
+                        def _stmt_table(title, items, est=None, freq='annual'):
+                            _est_pairs = _EST_LABELS[freq]
+                            _ecols = [lab for lab, _ in _est_pairs] if est else []   # 미래→과거 방향 통일
+                            _rows = []
+                            for _it in items:
+                                _lab, _key, _typ = _it[0], _it[1], _it[2]
+                                _dk = _it[3] if len(_it) > 3 else None   # 직접 추정키(네이버 PER/PBR E 등)
+                                _row = {'항목': _lab}
+                                if est:                       # 컨센서스(연간=내년/올해, 분기=다음/이번) — mult면 Fwd 멀티플
+                                    for _el, _sfx in _est_pairs:
+                                        if _dk and est.get(f'{_dk}_{_sfx}') is not None:
+                                            _dv = est[f'{_dk}_{_sfx}']
+                                            _row[_el] = f"{_dv:.1f}x" if _typ == 'mult' else _fmt_v(_dv, _typ)
+                                            continue
+                                        _ev = est.get(f'{_key}_{_sfx}')
+                                        if _typ == 'mult':
+                                            _row[_el] = (f"{_mc/_ev:.1f}x" if (_mc and _ev and _ev > 0) else '-')
+                                        else:
+                                            _row[_el] = _fmt_v(_ev, _typ) if _ev else '-'
+                                for _ix in range(_np):
+                                    _v = _stm[_ix].get(_key)
+                                    if _typ == 'mult':        # 현재 시총 ÷ 각 기간 실적 (#4)
+                                        _row[_periods[_ix]] = (f"{_mc/_v:.1f}x" if (_mc and _v and _v > 0) else '-')
+                                        if _ix < _np - 1:
+                                            _row[_dcols[_ix]] = '·'
+                                    else:
+                                        _row[_periods[_ix]] = _fmt_v(_v, _typ)
+                                        if _ix < _np - 1:    # 사이사이 증감
+                                            _row[_dcols[_ix]] = _delta(_v, _stm[_ix + 1].get(_key), _typ)
+                                _rows.append(_row)
+                            _df = pd.DataFrame(_rows)
+                            # 컬럼 순서: 항목, [내년E, 올해E,] p0, YoY, p1, YoY, ..., pN
+                            _order = ['항목'] + _ecols
+                            for _ix in range(_np):
+                                _order.append(_periods[_ix])
+                                if _ix < _np - 1:
+                                    _order.append(_dcols[_ix])
+                            _df = _df[_order]
+                            def _cgg(v):
+                                try:
+                                    _f = float(str(v).replace('%', '').replace('p', '').replace('+', ''))
+                                    return 'color:#16a34a' if _f >= 0 else 'color:#dc2626'
+                                except Exception:
+                                    return 'color:#16a34a' if str(v) == '흑전' else ''
+                            st.caption(title)
+                            _sty = _df.style.map(_cgg, subset=_dcols)
+                            if _ecols:
+                                _sty = _sty.set_properties(subset=_ecols, color='#79c0ff')
+                            # 행높이·표높이 명시 → 세 표의 행간 완전 동일 + 빈 공간 없음 (#1,#2)
+                            st.dataframe(_sty, use_container_width=True, hide_index=True,
+                                         row_height=25, height=_dfh(len(_df)))
+
+                        # 연간·분기 컨센서스가 같은 소스(yfinance/네이버)의 같은 응답에 함께 들어있어
+                        # freq 무관하게 항상 가져오고, 어느 열을 보여줄지만 freq로 고름 (#1: 분기에서도 컨센서스 표시)
+                        _est = forward_estimates(sym8_clean, is_kr_sym) or None
+                        _est_freq = 'annual' if _freq == "연간" else 'quarter'
+                        # 대차 → 손익 → 현금. 멀티플 행: 현재 시총÷각 기간 실적(밴드 감각), E열=Fwd (#4)
+                        _stmt_table("① 대차대조표 (E=컨센서스)", [
+                                                   ('자산', 'assets', 'amt'), ('부채', 'liabilities', 'amt'),
+                                                   ('자본', 'equity', 'amt'),
+                                                   ('부채비율', 'debt_ratio', 'pct'),
+                                                   ('PBR (현시총÷자본)', 'equity', 'mult', 'pbr_dir')],
+                                    est=_est, freq=_est_freq)
+                        _stmt_table("② 손익계산서 (E=컨센서스)", [
+                                                   ('매출', 'revenue', 'amt'), ('매출총이익', 'gross', 'amt'),
+                                                   ('GPM', 'gpm', 'pct'), ('영업이익', 'op_income', 'amt'),
+                                                   ('OPM', 'opm', 'pct'), ('순이익', 'net_income', 'amt'),
+                                                   ('EPS', 'eps', 'eps'),
+                                                   ('SG&A', 'sga', 'amt'), ('ROE', 'roe', 'pct'),
+                                                   ('PER (현시총÷순익)', 'net_income', 'mult', 'per_dir'),
+                                                   ('PSR (현시총÷매출)', 'revenue', 'mult')],
+                                    est=_est, freq=_est_freq)
+                        _stmt_table("③ 현금흐름표", [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
+                                                   ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')])
+                        _qn = "3개월 환산" if _freq == "분기" else "회계연도"
+                        st.caption(f"출처: {_osrc} 공식({_qn}). Δ=직전 대비 증감({_gl}, 마진·ROE는 %p, 흑전=흑자전환). "
+                                   "금액 KR=조/억·US=USD. PER/PBR/PSR 행=현재 시총÷각 기간 실적(최신=트레일링, E열=Fwd). "
+                                   "컨센서스 커버: KR=매출·영업익·OPM·순익·ROE·부채비율·EPS·PER·PBR(네이버) / "
+                                   "US=매출·순익·EPS(yfinance). ⚠️ 현금흐름·자산 추정치는 애널 컨센서스가 배포되지 않아 '-'.")
+                    else:
+                        st.caption("통합 재무표 데이터 없음 (해당 기준).")
+
+                # ── 🏭 사업부문별 매출 구조 (App Economy Insights 스타일, DART/EDGAR×Gemini) ──
+                st.divider()
+                st.subheader("🏭 사업부문별 매출 구조 — 이 회사는 어디서 돈을 버나")
+                if True:
+                    _seg_cached = None
                     try:
-                        import segment_analysis as _sa2
-                        _seg_for_flow = _sa2.load_cached(sym8_clean)
+                        import segment_analysis as _sa
+                        _seg_cached = _sa.load_cached(sym8_clean)
                     except Exception:
                         pass
-                _sank = _income_sankey(_flowq[0], _uq, _uu, _seg_for_flow)
-                if _sank:
-                    st.plotly_chart(_sank, use_container_width=True)
-                    st.caption(f"{_flowq[0].get('period','')} 기준 · 초록=이익 흐름 · 빨강=비용 · "
-                               f"{'왼쪽 사업부문은 연간 mix를 기간 매출에 적용(예시)' if _seg_for_flow else '매출→순이익 흐름'}. "
-                               "이건 '위치'(이번 기간 구조) — 아래 마진 궤적이 '벡터'.")
-                # 마진 궤적 스트립
-                _mq = [r for r in _flowq if r.get('revenue')][:8][::-1]     # 오래된→최신
-                if len(_mq) >= 3:
-                    st.markdown("###### 📈 마진 궤적 (GPM·OPM·NPM) — Sankey가 못 보여주는 추이")
-                    _mfig = go.Figure()
-                    _mx = [r.get('period', '') for r in _mq]
-                    for _mk, _mlab, _mc in [('gross', 'GPM', '#79c0ff'), ('op_income', 'OPM', '#f0883e'),
-                                            ('net_income', 'NPM', '#56d364')]:
-                        _my = [round(r[_mk] / r['revenue'] * 100, 1) if r.get(_mk) and r.get('revenue') else None
-                               for r in _mq]
-                        _mfig.add_trace(go.Scatter(x=_mx, y=_my, mode='lines+markers', name=_mlab,
-                                                   line=dict(color=_mc, width=2.5)))
-                    _mfig.update_layout(height=240, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                        font=dict(color='#8b949e', size=11), margin=dict(l=0, r=8, t=34, b=0),
-                                        legend=dict(orientation='h', y=1.15, x=0, yanchor='bottom'),
-                                        yaxis_ticksuffix='%')
-                    _mfig.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
-                    _mfig.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
-                    st.plotly_chart(_mfig, use_container_width=True)
-                    st.caption("절대 매출은 회사 크면 무조건 커짐 — **마진**이 '성장이 이익으로 이어지는가'를 드러냄. "
-                               "마진이 우상향이면 규모의 경제/가격결정력 확보, 우하향이면 경쟁심화/원가압박 신호.")
+                    _seg_src = 'DART 사업보고서' if is_kr_sym else 'SEC 10-K'
+                    _seg_go = st.button(f"🔍 사업부문 분석 ({_seg_src} · Gemini · ~15초)", key=f"seg_{sym8_clean}") if not _seg_cached else True
+                    if _seg_go:
+                        with st.spinner(f"{_seg_src}에서 부문별 매출 추출 중..."):
+                            try:
+                                import segment_analysis as _sa
+                                _seg = _seg_cached or _sa.analyze(sym8_clean, is_kr_sym)
+                            except Exception as _se:
+                                _seg = {'_error': str(_se)[:150]}
+                        if not _seg or _seg.get('_error') or not _seg.get('segments'):
+                            # 2026-09-07: 원인을 구분해서 보여준다. 그전에는 무엇이 문제든
+                            # "파싱 실패"로만 떠서, Gemini 일일 한도(무료 등급 20건) 때문에
+                            # 안 되는 건지 진짜 부문표가 없는 건지 알 수 없었다.
+                            _emsg = str((_seg or {}).get('_error', ''))
+                            if 'RESOURCE_EXHAUSTED' in _emsg or '429' in _emsg:
+                                st.info(
+                                    "**오늘의 AI 분석 한도를 다 썼습니다.** Gemini 무료 등급은 "
+                                    "모델당 하루 20건이라 몇 종목만 조회해도 소진됩니다. "
+                                    "고장이 아니라 한도이고, **날짜가 바뀌면 다시 됩니다.** "
+                                    "이미 분석한 종목은 캐시에서 그대로 나옵니다.")
+                            elif 'GEMINI_KEY' in _emsg:
+                                st.info("Gemini API 키가 설정되지 않았습니다 — "
+                                        "`data/.gemini_key` 또는 환경변수 `GEMINI_KEY`.")
+                            else:
+                                st.warning("부문 데이터 추출 실패 — 사업보고서에 부문표가 없거나 "
+                                           f"파싱에 실패했습니다. {_emsg}")
+                        else:
+                            _segs = [s for s in _seg['segments'] if s.get('revenue') or s.get('revenue_pct')]
+                            # 공시된 부문 이익지표 자동 판별 (회사별로 GP/OP/둘다/없음이 다름 — management approach)
+                            _measure = _seg.get('segment_profit_measure')
+                            if _measure not in ('gross', 'operating', 'both'):   # 구버전 캐시 폴백
+                                _measure = 'operating' if any(s.get('op_income') for s in _segs) else \
+                                           ('gross' if any(s.get('gross_profit') for s in _segs) else 'none')
+                            # 표시할 이익 필드·라벨을 회사에 맞게 선택 (both면 OP 우선, GP 병기)
+                            _pf_key = 'op_income' if _measure in ('operating', 'both') else 'gross_profit'
+                            _pf_lab = 'OPM' if _pf_key == 'op_income' else 'GPM'
+                            _mlabel = _seg.get('segment_measure_label') or (f"부문 {_pf_lab}" if _measure != 'none' else "부문 마진 미공시")
+                            _tot_pf = sum((s.get(_pf_key) or 0) for s in _segs) or None
+                            _srows = []
+                            for s in _segs:
+                                _pf = s.get(_pf_key)
+                                _pf_pct = (_pf / _tot_pf * 100) if (_pf and _tot_pf) else None
+                                _seg_margin = (_pf / s['revenue'] * 100) if (_pf and s.get('revenue')) else None
+                                _srows.append({
+                                    '사업부문': s['name'],
+                                    '주요제품': str(s.get('products', ''))[:26],
+                                    '매출': fmt_cap(s.get('revenue'), 'KR' if is_kr_sym else 'US') if s.get('revenue') else '-',
+                                    '매출비중%': s.get('revenue_pct'),
+                                    f'{_pf_lab}(부문마진)': round(_seg_margin, 1) if _seg_margin is not None else None,
+                                    '이익비중%': round(_pf_pct, 1) if _pf_pct is not None else None,
+                                })
+                            _segdf = pd.DataFrame(_srows)
+                            # 매출 비중 vs 이익 비중 나란히 막대 (핵심 통찰: 둘의 괴리)
+                            _fig_seg = go.Figure()
+                            _fig_seg.add_trace(go.Bar(
+                                y=[r['사업부문'] for r in _srows], x=[r.get('매출비중%') or 0 for r in _srows],
+                                name='매출 비중', orientation='h', marker_color='#388bfd',
+                                text=[f"{r.get('매출비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
+                            if _tot_pf:
+                                _fig_seg.add_trace(go.Bar(
+                                    y=[r['사업부문'] for r in _srows], x=[r.get('이익비중%') or 0 for r in _srows],
+                                    name=f'{_pf_lab} 이익 비중', orientation='h', marker_color='#f0883e',
+                                    text=[f"{r.get('이익비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
+                            _fig_seg.update_layout(
+                                barmode='group', height=max(180, 60 * len(_srows)),
+                                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                font=dict(color='#8b949e', size=11), margin=dict(l=0, r=10, t=10, b=0),
+                                legend=dict(orientation='h', y=1.15, x=0), xaxis_ticksuffix='%')
+                            _fig_seg.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+                            st.plotly_chart(_fig_seg, use_container_width=True)
+                            st.dataframe(
+                                _segdf, use_container_width=True, hide_index=True, height=_dfh(len(_segdf)),
+                                column_config={'매출비중%': st.column_config.NumberColumn(format='%.1f%%'),
+                                               f'{_pf_lab}(부문마진)': st.column_config.NumberColumn(format='%.1f%%'),
+                                               '이익비중%': st.column_config.NumberColumn(format='%.1f%%')})
+                            _mnote = {
+                                'operating': "이 회사는 부문 **영업이익(OPM)**을 공시 (부문 매출원가 미분리 → GPM 불가)",
+                                'gross':     "이 회사는 부문 **매출총이익(GPM)**을 공시 (부문 판관비 미분리 → OPM 불가)",
+                                'both':      "이 회사는 부문 GPM·OPM 둘 다 공시 (OPM 표시)",
+                                'none':      "⚠️ 이 회사는 부문별 이익을 공시하지 않음 — 매출 비중만 표시",
+                            }.get(_measure, '')
+                            st.caption(f"📄 {_seg.get('source', 'DART')} · {_seg.get('period', '')} · Gemini 추출 "
+                                       f"(원문 대조 권장). {_mnote}. "
+                                       "핵심: **매출 비중 ≠ 이익 비중** — 파란막대보다 주황막대가 큰 부문이 진짜 캐시카우. "
+                                       f"{('· ' + _seg['note']) if _seg.get('note') else ''}")
+                            st.caption("ℹ️ 부문별 공시 이익지표는 회사마다 다름(경영진이 쓰는 지표 공시) — 테슬라類=GPM, 삼성類=OPM. "
+                                       "부문 매출 합이 100% 초과 가능(부문간 내부거래 포함).")
 
-            st.divider()
-            st.markdown("## 🏅 CANSLIM 스코어카드 — 종합 판단")
-            ret_1m = (price_now / hist['Close'].iloc[-22] - 1) * 100 if len(hist) > 22 else None
-            ret_3m = (price_now / hist['Close'].iloc[-66] - 1) * 100 if len(hist) > 66 else None
-            ret_6m = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
-            ret_1y = (price_now / hist['Close'].iloc[-252] - 1) * 100 if len(hist) > 252 else None
-            st.caption("가치(C·A) × 가격(L·M) × 정성(N·S·I) 종합")
-
-            # ── 🏅 CANSLIM 스코어카드 (체슬라투자자문 방식) ──
-            if _off and len(_off) >= 2:
-                _op = [r.get('op_income') for r in _off]
-
-                def _grow_score(cur, base, yrs):
-                    """min(25, 성장률% − 5). 체슬리 C·A 방식. base 적자면 흑자전환 처리."""
-                    if cur is None or base is None:
-                        return None
-                    if base <= 0:
-                        return 25.0 if cur and cur > 0 else -10.0
-                    # ⚠️ 2026-09-09 — cur 가 음수면 (음수)**(1/3) 이 **complex** 가 되고,
-                    #   바로 아래 min() 에서 터진다:
-                    #     TypeError: '<' not supported between 'complex' and 'float'
-                    #   흑자였다가 적자로 돌아선 종목에서 났다. yrs=1 이면 실수라
-                    #   통과하고 3년 CAGR(A)에서만 터져서 눈에 늦게 띄었다.
-                    #   흑자→적자는 성장률이 정의되지 않는다. 최저점으로 본다.
-                    if cur is None or cur <= 0:
-                        return -10.0
-                    g = ((cur / base) ** (1 / yrs) - 1) * 100
-                    return round(min(25.0, g - 5), 1)
-
-                _nb = min(3, len(_op) - 1)
-                _A = _grow_score(_op[0], _op[_nb], _nb)          # A: 영업이익 3년 CAGR
-                _C = _grow_score(_op[0], _op[1], 1)              # C: 영업이익 최근 YoY
-
-                # L: 시장대비 6개월 초과수익 (10%p당 +5점)
-                _stk6 = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
-                _mkt6 = None
-                try:
-                    _idf = fetch_index_history('KS11' if is_kr_sym else 'SPY', 200)
-                    if len(_idf) > 127:
-                        _mkt6 = (float(_idf.iloc[-1].values[0]) / float(_idf.iloc[-127].values[0]) - 1) * 100
-                except Exception:
-                    pass
-                _exc = (_stk6 - _mkt6) if (_stk6 is not None and _mkt6 is not None) else None
-                _L = round(max(0.0, min(25.0, _exc * 0.5)), 1) if _exc is not None else None
-
-                # M: 시장국면
-                try:
-                    _fr = fetch_fred('FEDFUNDS', 1); _frr = _fr[-1][1] if _fr else None
-                    _m2m = fetch_fred('M2SL', 14)
-                    _m2yy = round((_m2m[-1][1] / _m2m[-13][1] - 1) * 100, 1) if len(_m2m) >= 13 else None
-                    _Mlabel = compute_macro_signal(_frr, _m2yy, fetch_spx_yoy())[0]
-                except Exception:
-                    _Mlabel = '—'
-
-                # 콤팩트 1행 배치: 총점 | 점수표 | 수익률 | 정성 슬라이더(세로) — #2
-                _cc0, _cc2, _cc3, _cc4 = st.columns([0.7, 1.6, 0.9, 1.3])
-                _N = _cc4.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
-                _S = _cc4.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
-                _I = _cc4.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
-
-                _parts = [('C', _C, '영업익 최근 YoY − 5'), ('A', _A, '영업익 3년 CAGR − 5'),
-                          ('N', float(_N), '신성장·경영진 (입력)'), ('S', float(_S), '자사주·수급 (입력)'),
-                          ('L', _L, (f'시장대비 6M {_exc:+.0f}%p' if _exc is not None else '데이터 없음')),
-                          ('I', float(_I), '기관 보유증가 (입력)')]
-                _total = round(sum(v for _, v, _ in _parts if isinstance(v, (int, float))), 1)
-                _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
-                          else 'C' if _total >= 30 else 'D')
-
-                _cc0.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
-                _cc0.metric("등급", _grade)
-                _cc0.caption(f"M: {_Mlabel}")
-                _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
-                                       '근거': d} for k, v, d in _parts])
-                _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_scdf)))
-                with _cc3:
-                    r_df = pd.DataFrame([
-                        {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
-                        for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]
-                    ])
-                    def _cr(v):
+                # ── 💵 손익 흐름(Sankey) + 마진 궤적 (App Economy Insights 스타일) ──
+                st.divider()
+                st.subheader("💵 손익 흐름 — 매출이 순이익까지 어떻게 흐르나")
+                _flowq = unified_statements(sym8_clean, is_kr_sym, 'quarter')      # 분기 시계열
+                if not _flowq or len(_flowq) < 1:
+                    _flowq = unified_statements(sym8_clean, is_kr_sym, 'annual')
+                if not _flowq:
+                    st.caption("손익 흐름 데이터 없음.")
+                else:
+                    _uq, _uu = (1e12, '조') if is_kr_sym else (1e9, 'B')
+                    _seg_for_flow = None
+                    if is_kr_sym:
                         try:
-                            _f = float(str(v).replace('%', '').replace('+', ''))
-                            return 'color:#56d364' if _f >= 0 else 'color:#f78166'
+                            import segment_analysis as _sa2
+                            _seg_for_flow = _sa2.load_cached(sym8_clean)
+                        except Exception:
+                            pass
+                    _sank = _income_sankey(_flowq[0], _uq, _uu, _seg_for_flow)
+                    if _sank:
+                        st.plotly_chart(_sank, use_container_width=True)
+                        st.caption(f"{_flowq[0].get('period','')} 기준 · 초록=이익 흐름 · 빨강=비용 · "
+                                   f"{'왼쪽 사업부문은 연간 mix를 기간 매출에 적용(예시)' if _seg_for_flow else '매출→순이익 흐름'}. "
+                                   "이건 '위치'(이번 기간 구조) — 아래 마진 궤적이 '벡터'.")
+                    # 마진 궤적 스트립
+                    _mq = [r for r in _flowq if r.get('revenue')][:8][::-1]     # 오래된→최신
+                    if len(_mq) >= 3:
+                        st.markdown("###### 📈 마진 궤적 (GPM·OPM·NPM) — Sankey가 못 보여주는 추이")
+                        _mfig = go.Figure()
+                        _mx = [r.get('period', '') for r in _mq]
+                        for _mk, _mlab, _mc in [('gross', 'GPM', '#79c0ff'), ('op_income', 'OPM', '#f0883e'),
+                                                ('net_income', 'NPM', '#56d364')]:
+                            _my = [round(r[_mk] / r['revenue'] * 100, 1) if r.get(_mk) and r.get('revenue') else None
+                                   for r in _mq]
+                            _mfig.add_trace(go.Scatter(x=_mx, y=_my, mode='lines+markers', name=_mlab,
+                                                       line=dict(color=_mc, width=2.5)))
+                        _mfig.update_layout(height=240, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                            font=dict(color='#8b949e', size=11), margin=dict(l=0, r=8, t=34, b=0),
+                                            legend=dict(orientation='h', y=1.15, x=0, yanchor='bottom'),
+                                            yaxis_ticksuffix='%')
+                        _mfig.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+                        _mfig.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
+                        st.plotly_chart(_mfig, use_container_width=True)
+                        st.caption("절대 매출은 회사 크면 무조건 커짐 — **마진**이 '성장이 이익으로 이어지는가'를 드러냄. "
+                                   "마진이 우상향이면 규모의 경제/가격결정력 확보, 우하향이면 경쟁심화/원가압박 신호.")
+
+                st.divider()
+                st.markdown("## 🏅 CANSLIM 스코어카드 — 종합 판단")
+                ret_1m = (price_now / hist['Close'].iloc[-22] - 1) * 100 if len(hist) > 22 else None
+                ret_3m = (price_now / hist['Close'].iloc[-66] - 1) * 100 if len(hist) > 66 else None
+                ret_6m = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
+                ret_1y = (price_now / hist['Close'].iloc[-252] - 1) * 100 if len(hist) > 252 else None
+                st.caption("가치(C·A) × 가격(L·M) × 정성(N·S·I) 종합")
+
+                # ── 🏅 CANSLIM 스코어카드 (체슬라투자자문 방식) ──
+                if _off and len(_off) >= 2:
+                    _op = [r.get('op_income') for r in _off]
+
+                    def _grow_score(cur, base, yrs):
+                        """min(25, 성장률% − 5). 체슬리 C·A 방식. base 적자면 흑자전환 처리."""
+                        if cur is None or base is None:
+                            return None
+                        if base <= 0:
+                            return 25.0 if cur and cur > 0 else -10.0
+                        # ⚠️ 2026-09-09 — cur 가 음수면 (음수)**(1/3) 이 **complex** 가 되고,
+                        #   바로 아래 min() 에서 터진다:
+                        #     TypeError: '<' not supported between 'complex' and 'float'
+                        #   흑자였다가 적자로 돌아선 종목에서 났다. yrs=1 이면 실수라
+                        #   통과하고 3년 CAGR(A)에서만 터져서 눈에 늦게 띄었다.
+                        #   흑자→적자는 성장률이 정의되지 않는다. 최저점으로 본다.
+                        if cur is None or cur <= 0:
+                            return -10.0
+                        g = ((cur / base) ** (1 / yrs) - 1) * 100
+                        return round(min(25.0, g - 5), 1)
+
+                    _nb = min(3, len(_op) - 1)
+                    _A = _grow_score(_op[0], _op[_nb], _nb)          # A: 영업이익 3년 CAGR
+                    _C = _grow_score(_op[0], _op[1], 1)              # C: 영업이익 최근 YoY
+
+                    # L: 시장대비 6개월 초과수익 (10%p당 +5점)
+                    _stk6 = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
+                    _mkt6 = None
+                    try:
+                        _idf = fetch_index_history('KS11' if is_kr_sym else 'SPY', 200)
+                        if len(_idf) > 127:
+                            _mkt6 = (float(_idf.iloc[-1].values[0]) / float(_idf.iloc[-127].values[0]) - 1) * 100
+                    except Exception:
+                        pass
+                    _exc = (_stk6 - _mkt6) if (_stk6 is not None and _mkt6 is not None) else None
+                    _L = round(max(0.0, min(25.0, _exc * 0.5)), 1) if _exc is not None else None
+
+                    # M: 시장국면
+                    try:
+                        _fr = fetch_fred('FEDFUNDS', 1); _frr = _fr[-1][1] if _fr else None
+                        _m2m = fetch_fred('M2SL', 14)
+                        _m2yy = round((_m2m[-1][1] / _m2m[-13][1] - 1) * 100, 1) if len(_m2m) >= 13 else None
+                        _Mlabel = compute_macro_signal(_frr, _m2yy, fetch_spx_yoy())[0]
+                    except Exception:
+                        _Mlabel = '—'
+
+                    # 콤팩트 1행 배치: 총점 | 점수표 | 수익률 | 정성 슬라이더(세로) — #2
+                    _cc0, _cc2, _cc3, _cc4 = st.columns([0.7, 1.6, 0.9, 1.3])
+                    _N = _cc4.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
+                    _S = _cc4.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
+                    _I = _cc4.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
+
+                    _parts = [('C', _C, '영업익 최근 YoY − 5'), ('A', _A, '영업익 3년 CAGR − 5'),
+                              ('N', float(_N), '신성장·경영진 (입력)'), ('S', float(_S), '자사주·수급 (입력)'),
+                              ('L', _L, (f'시장대비 6M {_exc:+.0f}%p' if _exc is not None else '데이터 없음')),
+                              ('I', float(_I), '기관 보유증가 (입력)')]
+                    _total = round(sum(v for _, v, _ in _parts if isinstance(v, (int, float))), 1)
+                    _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
+                              else 'C' if _total >= 30 else 'D')
+
+                    _cc0.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
+                    _cc0.metric("등급", _grade)
+                    _cc0.caption(f"M: {_Mlabel}")
+                    _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
+                                           '근거': d} for k, v, d in _parts])
+                    _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_scdf)))
+                    with _cc3:
+                        r_df = pd.DataFrame([
+                            {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
+                            for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]
+                        ])
+                        def _cr(v):
+                            try:
+                                _f = float(str(v).replace('%', '').replace('+', ''))
+                                return 'color:#56d364' if _f >= 0 else 'color:#f78166'
+                            except Exception:
+                                return ''
+                        st.dataframe(r_df.style.map(_cr, subset=['수익률']),
+                                     use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(r_df)))
+                    st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
+                               "N·S·I=정성 입력(체슬리 엑셀 방식) · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심.")
+                    st.divider()
+                st.divider()
+                st.markdown("## ⚖️ ② 멀티플 · 컨센서스 — 가격÷가치")
+                st.caption("공식 멀티플(시총÷공식실적) · BEAR/BASE/BULL 목표주가 · 밸류에이션")
+
+
+                yr1  = hist.tail(252)
+                yr_h = yr1['High'].max();   yr_l = yr1['Low'].min()
+                ret_1m  = (price_now / hist['Close'].iloc[-22] - 1)*100  if len(hist) > 22  else None
+                ret_3m  = (price_now / hist['Close'].iloc[-66] - 1)*100  if len(hist) > 66  else None
+                ret_6m  = (price_now / hist['Close'].iloc[-126] - 1)*100 if len(hist) > 126 else None
+                ret_1y  = (price_now / hist['Close'].iloc[-252] - 1)*100 if len(hist) > 252 else None
+                vol_20  = hist['Close'].pct_change().tail(20).std() * (252**0.5) * 100
+
+                _cons = consensus_scenarios(sym8_clean, is_kr_sym)
+                _fest = forward_estimates(sym8_clean, is_kr_sym)
+                if _off:
+                    _lt = _off[0]
+                    def _mult(den):
+                        try:
+                            return f"{_mc/den:.1f}x" if (_mc and den and den > 0) else '-'
+                        except Exception:
+                            return '-'
+                    if _mc:
+                        # 멀티플은 살아있는 수치 — 트레일링(최근 확정실적) + Fwd12M(컨센서스) 병기 (#2)
+                        _fpe_v = _cons.get('fwd_pe')
+                        _per_f = f"{_fpe_v:.1f}x" if _fpe_v else '-'
+                        _psr_f = _mult(_fest.get('revenue_1y')) if _fest.get('revenue_1y') else '-'
+                        st.markdown(
+                            f"⚖️ **멀티플** (실시간 시총 ÷ 실적): "
+                            f"PER **{_mult(_lt.get('net_income'))}** <sub>트레일링</sub> / **{_per_f}** <sub>Fwd12M</sub> · "
+                            f"PBR **{_mult(_lt.get('equity'))}** · "
+                            f"PSR **{_mult(_lt.get('revenue'))}** <sub>트레일링</sub> / **{_psr_f}** <sub>Fwd</sub> "
+                            f"<span style='color:#8b949e;font-size:11px'>· 트레일링={_lt['period']} 확정실적 · Fwd=컨센서스 · "
+                            f"시총·주가는 실시간</span>",
+                            unsafe_allow_html=True)
+                # 🎯 컨센서스 BEAR / BASE / BULL (목표주가)
+                if _cons.get('base'):
+                    _cu = '₩' if is_kr_sym else '$'
+                    def _pr(t):
+                        try:
+                            return f"{_cu}{t:,.0f}" if t else '-'
+                        except Exception:
+                            return '-'
+                    def _up(t):
+                        try:
+                            return f" ({(t/price_now-1)*100:+.0f}%)" if t else ''
                         except Exception:
                             return ''
-                    st.dataframe(r_df.style.map(_cr, subset=['수익률']),
-                                 use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(r_df)))
-                st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
-                           "N·S·I=정성 입력(체슬리 엑셀 방식) · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심.")
-                st.divider()
-            st.divider()
-            st.markdown("## ⚖️ ② 멀티플 · 컨센서스 — 가격÷가치")
-            st.caption("공식 멀티플(시총÷공식실적) · BEAR/BASE/BULL 목표주가 · 밸류에이션")
-
-
-            yr1  = hist.tail(252)
-            yr_h = yr1['High'].max();   yr_l = yr1['Low'].min()
-            ret_1m  = (price_now / hist['Close'].iloc[-22] - 1)*100  if len(hist) > 22  else None
-            ret_3m  = (price_now / hist['Close'].iloc[-66] - 1)*100  if len(hist) > 66  else None
-            ret_6m  = (price_now / hist['Close'].iloc[-126] - 1)*100 if len(hist) > 126 else None
-            ret_1y  = (price_now / hist['Close'].iloc[-252] - 1)*100 if len(hist) > 252 else None
-            vol_20  = hist['Close'].pct_change().tail(20).std() * (252**0.5) * 100
-
-            _cons = consensus_scenarios(sym8_clean, is_kr_sym)
-            _fest = forward_estimates(sym8_clean, is_kr_sym)
-            if _off:
-                _lt = _off[0]
-                def _mult(den):
-                    try:
-                        return f"{_mc/den:.1f}x" if (_mc and den and den > 0) else '-'
-                    except Exception:
-                        return '-'
-                if _mc:
-                    # 멀티플은 살아있는 수치 — 트레일링(최근 확정실적) + Fwd12M(컨센서스) 병기 (#2)
-                    _fpe_v = _cons.get('fwd_pe')
-                    _per_f = f"{_fpe_v:.1f}x" if _fpe_v else '-'
-                    _psr_f = _mult(_fest.get('revenue_1y')) if _fest.get('revenue_1y') else '-'
+                    _fpe = f"{_cons['fwd_pe']:.1f}x" if _cons.get('fwd_pe') else '-'
                     st.markdown(
-                        f"⚖️ **멀티플** (실시간 시총 ÷ 실적): "
-                        f"PER **{_mult(_lt.get('net_income'))}** <sub>트레일링</sub> / **{_per_f}** <sub>Fwd12M</sub> · "
-                        f"PBR **{_mult(_lt.get('equity'))}** · "
-                        f"PSR **{_mult(_lt.get('revenue'))}** <sub>트레일링</sub> / **{_psr_f}** <sub>Fwd</sub> "
-                        f"<span style='color:#8b949e;font-size:11px'>· 트레일링={_lt['period']} 확정실적 · Fwd=컨센서스 · "
-                        f"시총·주가는 실시간</span>",
+                        f"🎯 **컨센서스 목표주가** · 🐻 BEAR {_pr(_cons.get('bear'))}{_up(_cons.get('bear'))} · "
+                        f"⚖️ BASE {_pr(_cons.get('base'))}{_up(_cons.get('base'))} · "
+                        f"🐂 BULL {_pr(_cons.get('bull'))}{_up(_cons.get('bull'))} "
+                        f"<span style='color:#8b949e;font-size:11px'>· 애널 {_cons.get('n') or '?'}명 · 선행PER {_fpe}</span>",
                         unsafe_allow_html=True)
-            # 🎯 컨센서스 BEAR / BASE / BULL (목표주가)
-            if _cons.get('base'):
-                _cu = '₩' if is_kr_sym else '$'
-                def _pr(t):
-                    try:
-                        return f"{_cu}{t:,.0f}" if t else '-'
-                    except Exception:
-                        return '-'
-                def _up(t):
-                    try:
-                        return f" ({(t/price_now-1)*100:+.0f}%)" if t else ''
-                    except Exception:
-                        return ''
-                _fpe = f"{_cons['fwd_pe']:.1f}x" if _cons.get('fwd_pe') else '-'
-                st.markdown(
-                    f"🎯 **컨센서스 목표주가** · 🐻 BEAR {_pr(_cons.get('bear'))}{_up(_cons.get('bear'))} · "
-                    f"⚖️ BASE {_pr(_cons.get('base'))}{_up(_cons.get('base'))} · "
-                    f"🐂 BULL {_pr(_cons.get('bull'))}{_up(_cons.get('bull'))} "
-                    f"<span style='color:#8b949e;font-size:11px'>· 애널 {_cons.get('n') or '?'}명 · 선행PER {_fpe}</span>",
-                    unsafe_allow_html=True)
-            else:
-                st.caption("🎯 컨센서스: 데이터 없음 (yfinance 제한 · KR 소형주 등).")
-            st.divider()
-            st.subheader("💹 밸류에이션 · 재무")
-            yi2 = {}
-            try:
-                t_yf = yf.Ticker(f"{sym8_clean}.KS" if is_kr_sym else sym8_clean)
-                yi2 = t_yf.info or {}
-            except Exception:
+                else:
+                    st.caption("🎯 컨센서스: 데이터 없음 (yfinance 제한 · KR 소형주 등).")
+                st.divider()
+                st.subheader("💹 밸류에이션 · 재무")
                 yi2 = {}
+                try:
+                    t_yf = yf.Ticker(f"{sym8_clean}.KS" if is_kr_sym else sym8_clean)
+                    yi2 = t_yf.info or {}
+                except Exception:
+                    yi2 = {}
 
-            def _pcur(v):   # 통화 포맷
-                if v is None: return '-'
-                return f"{price_unit}{v:,.0f}" if is_kr_sym else f"${v:.2f}"
-            def _fx(v, suffix='', mult=1, dp=1):  # 숫자 포맷 (None 안전)
-                if v is None: return '-'
-                try: return f"{v*mult:.{dp}f}{suffix}"
-                except Exception: return '-'
+                def _pcur(v):   # 통화 포맷
+                    if v is None: return '-'
+                    return f"{price_unit}{v:,.0f}" if is_kr_sym else f"${v:.2f}"
+                def _fx(v, suffix='', mult=1, dp=1):  # 숫자 포맷 (None 안전)
+                    if v is None: return '-'
+                    try: return f"{v*mult:.{dp}f}{suffix}"
+                    except Exception: return '-'
 
-            _tgt = yi2.get('targetMeanPrice')
-            _upside = (_tgt/price_now - 1)*100 if (_tgt and price_now) else None
-            _peg = yi2.get('trailingPegRatio') or yi2.get('pegRatio')
+                _tgt = yi2.get('targetMeanPrice')
+                _upside = (_tgt/price_now - 1)*100 if (_tgt and price_now) else None
+                _peg = yi2.get('trailingPegRatio') or yi2.get('pegRatio')
 
-            # 지표: (라벨, 표시값)  — 없으면 '-'
-            val_rows = [
-                ('52주 고점',   _pcur(yr_h)),
-                ('52주 저점',   _pcur(yr_l)),
-                ('52주 위치',   f"{(price_now-yr_l)/(yr_h-yr_l)*100:.1f}%" if yr_h > yr_l else '-'),
-                ('연간 변동성',  _fx(vol_20, '%')),
-                ('PER (TTM)',   _fx(yi2.get('trailingPE'), 'x')),
-                ('PER (선행)',  _fx(yi2.get('forwardPE'), 'x')),
-                ('PBR',         _fx(yi2.get('priceToBook'), 'x')),
-                ('PSR',         _fx(yi2.get('priceToSalesTrailing12Months'), 'x')),
-                ('PEG',         _fx(_peg, '', dp=2)),
-                ('배당수익률',   _fx(yi2.get('dividendYield'), '%', mult=100, dp=2)),
-                ('EPS (TTM)',   _fx(yi2.get('trailingEps'), '', dp=2)),
-                ('EPS (선행)',  _fx(yi2.get('forwardEps'), '', dp=2)),
-                ('ROE',         _fx(yi2.get('returnOnEquity'), '%', mult=100)),
-                ('ROA',         _fx(yi2.get('returnOnAssets'), '%', mult=100)),
-                ('영업마진',     _fx(yi2.get('operatingMargins'), '%', mult=100)),
-                ('순이익률',     _fx(yi2.get('profitMargins'), '%', mult=100)),
-                ('매출성장(YoY)', _fx(yi2.get('revenueGrowth'), '%', mult=100)),
-                ('부채비율(D/E)', _fx(yi2.get('debtToEquity'), '%')),
-                ('애널 목표가',   _pcur(_tgt)),
-                ('목표가 여력',   _fx(_upside, '%')),
-            ]
-            # 2단 분할 — 세로로 긴 표 대신 컴팩트 배치 (#10)
-            _vhalf = (len(val_rows) + 1) // 2
-            _vc1, _vc2 = st.columns(2)
-            _vc1.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[:_vhalf]]),
-                           use_container_width=True, hide_index=True, row_height=25, height=_dfh(_vhalf))
-            _vc2.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[_vhalf:]]),
-                           use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(val_rows) - _vhalf))
-            st.caption("PER/PBR/PSR·ROE·마진·배당·목표가 = yfinance(무료). KR(.KS)은 일부 항목이 빌 수 있음('-'). "
-                       "PEG<1·PBR낮음·ROE높음·부채비율낮음 = 저평가/우량 신호.")
-
-
-            st.divider()
-            st.markdown("## 🔵 ③ 가격 — 언제 살까 (When to buy)")
-            st.caption("차트·신호 · 계절성(연도×월) · 골든/데드크로스 · 수익률 · 내부자")
-
-            closes = hist['Close']
-            hist['MA20']  = closes.rolling(20).mean()
-            hist['MA50']  = closes.rolling(50).mean()
-            hist['MA200'] = closes.rolling(200).mean()
-            hist['RSI']   = _rsi(closes)
-            hist['MACD'], hist['Signal'], hist['Hist'] = _macd(closes)
-
-            last = hist.iloc[-1]
-            rsi_v  = last['RSI'] if not pd.isna(last['RSI']) else None
-            label, score, reasons = _tf_signal(
-                rsi_v, last['MACD'], last['Signal'], last['Close'],
-                last['MA20'] if not pd.isna(last['MA20']) else None,
-                last['MA50'] if not pd.isna(last['MA50']) else None,
-            )
-            col_sig, col_score = st.columns([2, 3])
-            col_sig.markdown(f"### {label}")
-            col_score.markdown("**신호 근거:** " + " · ".join(reasons))
-
-            window60 = hist.tail(60)
-            fib_high = window60['High'].max()
-            fib_low  = window60['Low'].min()
-            fib_lvls = _fib(fib_high, fib_low)
-
-            fig = make_subplots(
-                rows=5, cols=1, shared_xaxes=True,
-                row_heights=[0.46, 0.135, 0.135, 0.135, 0.135],
-                vertical_spacing=0.02,
-                subplot_titles=('캔들 · 이동평균 · 피보나치', 'RSI (14)', 'MACD (12·26·9)', '거래량',
-                                f'MDD 낙폭 (전고점 대비 %, 조회기간 {(hist.index[-1]-hist.index[0]).days/365.25:.1f}y 기준)'),
-            )
-            disp = hist                                   # 전체 5y — 차트 기간버튼으로 직접 조절 (#2)
+                # 지표: (라벨, 표시값)  — 없으면 '-'
+                val_rows = [
+                    ('52주 고점',   _pcur(yr_h)),
+                    ('52주 저점',   _pcur(yr_l)),
+                    ('52주 위치',   f"{(price_now-yr_l)/(yr_h-yr_l)*100:.1f}%" if yr_h > yr_l else '-'),
+                    ('연간 변동성',  _fx(vol_20, '%')),
+                    ('PER (TTM)',   _fx(yi2.get('trailingPE'), 'x')),
+                    ('PER (선행)',  _fx(yi2.get('forwardPE'), 'x')),
+                    ('PBR',         _fx(yi2.get('priceToBook'), 'x')),
+                    ('PSR',         _fx(yi2.get('priceToSalesTrailing12Months'), 'x')),
+                    ('PEG',         _fx(_peg, '', dp=2)),
+                    ('배당수익률',   _fx(yi2.get('dividendYield'), '%', mult=100, dp=2)),
+                    ('EPS (TTM)',   _fx(yi2.get('trailingEps'), '', dp=2)),
+                    ('EPS (선행)',  _fx(yi2.get('forwardEps'), '', dp=2)),
+                    ('ROE',         _fx(yi2.get('returnOnEquity'), '%', mult=100)),
+                    ('ROA',         _fx(yi2.get('returnOnAssets'), '%', mult=100)),
+                    ('영업마진',     _fx(yi2.get('operatingMargins'), '%', mult=100)),
+                    ('순이익률',     _fx(yi2.get('profitMargins'), '%', mult=100)),
+                    ('매출성장(YoY)', _fx(yi2.get('revenueGrowth'), '%', mult=100)),
+                    ('부채비율(D/E)', _fx(yi2.get('debtToEquity'), '%')),
+                    ('애널 목표가',   _pcur(_tgt)),
+                    ('목표가 여력',   _fx(_upside, '%')),
+                ]
+                # 2단 분할 — 세로로 긴 표 대신 컴팩트 배치 (#10)
+                _vhalf = (len(val_rows) + 1) // 2
+                _vc1, _vc2 = st.columns(2)
+                _vc1.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[:_vhalf]]),
+                               use_container_width=True, hide_index=True, row_height=25, height=_dfh(_vhalf))
+                _vc2.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[_vhalf:]]),
+                               use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(val_rows) - _vhalf))
+                st.caption("PER/PBR/PSR·ROE·마진·배당·목표가 = yfinance(무료). KR(.KS)은 일부 항목이 빌 수 있음('-'). "
+                           "PEG<1·PBR낮음·ROE높음·부채비율낮음 = 저평가/우량 신호.")
 
 
-            fig.add_trace(go.Candlestick(
-                x=disp.index, open=disp['Open'], high=disp['High'],
-                low=disp['Low'], close=disp['Close'],
-                increasing_line_color='#56d364', decreasing_line_color='#f78166',
-                name='캔들', showlegend=False,
-            ), row=1, col=1)
+                st.divider()
+                st.markdown("## 🔵 ③ 가격 — 언제 살까 (When to buy)")
+                st.caption("차트·신호 · 계절성(연도×월) · 골든/데드크로스 · 수익률 · 내부자")
 
-            for col_name, color, lw in [('MA20','#f78166',1),('MA50','#ffa657',1),('MA200','#a371f7',1.5)]:
-                fig.add_trace(go.Scatter(
-                    x=disp.index, y=disp[col_name], mode='lines',
-                    line=dict(color=color, width=lw), name=col_name,
+                closes = hist['Close']
+                hist['MA20']  = closes.rolling(20).mean()
+                hist['MA50']  = closes.rolling(50).mean()
+                hist['MA200'] = closes.rolling(200).mean()
+                hist['RSI']   = _rsi(closes)
+                hist['MACD'], hist['Signal'], hist['Hist'] = _macd(closes)
+
+                last = hist.iloc[-1]
+                rsi_v  = last['RSI'] if not pd.isna(last['RSI']) else None
+                label, score, reasons = _tf_signal(
+                    rsi_v, last['MACD'], last['Signal'], last['Close'],
+                    last['MA20'] if not pd.isna(last['MA20']) else None,
+                    last['MA50'] if not pd.isna(last['MA50']) else None,
+                )
+                col_sig, col_score = st.columns([2, 3])
+                col_sig.markdown(f"### {label}")
+                col_score.markdown("**신호 근거:** " + " · ".join(reasons))
+
+                window60 = hist.tail(60)
+                fib_high = window60['High'].max()
+                fib_low  = window60['Low'].min()
+                fib_lvls = _fib(fib_high, fib_low)
+
+                fig = make_subplots(
+                    rows=5, cols=1, shared_xaxes=True,
+                    row_heights=[0.46, 0.135, 0.135, 0.135, 0.135],
+                    vertical_spacing=0.02,
+                    subplot_titles=('캔들 · 이동평균 · 피보나치', 'RSI (14)', 'MACD (12·26·9)', '거래량',
+                                    f'MDD 낙폭 (전고점 대비 %, 조회기간 {(hist.index[-1]-hist.index[0]).days/365.25:.1f}y 기준)'),
+                )
+                disp = hist                                   # 전체 5y — 차트 기간버튼으로 직접 조절 (#2)
+
+
+                fig.add_trace(go.Candlestick(
+                    x=disp.index, open=disp['Open'], high=disp['High'],
+                    low=disp['Low'], close=disp['Close'],
+                    increasing_line_color='#56d364', decreasing_line_color='#f78166',
+                    name='캔들', showlegend=False,
                 ), row=1, col=1)
 
-            fib_colors = [
-                'rgba(110,118,129,0.5)', 'rgba(88,166,255,0.4)',
-                'rgba(255,166,87,0.4)',  'rgba(255,123,114,0.4)',
-                'rgba(88,166,255,0.4)',  'rgba(255,166,87,0.4)',
-                'rgba(110,118,129,0.5)',
-            ]
-            for (fib_label, fib_price), fc in zip(fib_lvls.items(), fib_colors):
-                fig.add_hline(y=fib_price, line_color=fc, line_dash='dot',
-                              annotation_text=f' {fib_label} {price_unit}{fib_price:,.0f}',
-                              annotation_position='right', row=1, col=1)
+                for col_name, color, lw in [('MA20','#f78166',1),('MA50','#ffa657',1),('MA200','#a371f7',1.5)]:
+                    fig.add_trace(go.Scatter(
+                        x=disp.index, y=disp[col_name], mode='lines',
+                        line=dict(color=color, width=lw), name=col_name,
+                    ), row=1, col=1)
 
-            fig.add_trace(go.Scatter(
-                x=disp.index, y=disp['RSI'], mode='lines',
-                line=dict(color='#79c0ff', width=1.5), name='RSI', showlegend=False,
-            ), row=2, col=1)
-            fig.add_hline(y=70, line_color='rgba(247,129,102,0.4)', line_dash='dot', row=2, col=1)
-            fig.add_hline(y=30, line_color='rgba(86,211,100,0.4)',  line_dash='dot', row=2, col=1)
+                fib_colors = [
+                    'rgba(110,118,129,0.5)', 'rgba(88,166,255,0.4)',
+                    'rgba(255,166,87,0.4)',  'rgba(255,123,114,0.4)',
+                    'rgba(88,166,255,0.4)',  'rgba(255,166,87,0.4)',
+                    'rgba(110,118,129,0.5)',
+                ]
+                for (fib_label, fib_price), fc in zip(fib_lvls.items(), fib_colors):
+                    fig.add_hline(y=fib_price, line_color=fc, line_dash='dot',
+                                  annotation_text=f' {fib_label} {price_unit}{fib_price:,.0f}',
+                                  annotation_position='right', row=1, col=1)
 
-            fig.add_trace(go.Bar(
-                x=disp.index, y=disp['Hist'], name='히스토그램',
-                marker_color=['rgba(86,211,100,0.6)' if v >= 0 else 'rgba(247,129,102,0.6)' for v in disp['Hist']],
-                showlegend=False,
-            ), row=3, col=1)
-            fig.add_trace(go.Scatter(x=disp.index, y=disp['MACD'],   mode='lines',
-                line=dict(color='#79c0ff', width=1.5), name='MACD', showlegend=False), row=3, col=1)
-            fig.add_trace(go.Scatter(x=disp.index, y=disp['Signal'], mode='lines',
-                line=dict(color='#ffa657', width=1), name='Signal', showlegend=False), row=3, col=1)
+                fig.add_trace(go.Scatter(
+                    x=disp.index, y=disp['RSI'], mode='lines',
+                    line=dict(color='#79c0ff', width=1.5), name='RSI', showlegend=False,
+                ), row=2, col=1)
+                fig.add_hline(y=70, line_color='rgba(247,129,102,0.4)', line_dash='dot', row=2, col=1)
+                fig.add_hline(y=30, line_color='rgba(86,211,100,0.4)',  line_dash='dot', row=2, col=1)
 
-            fig.add_trace(go.Bar(
-                x=disp.index, y=disp['Volume'], name='거래량',
-                marker_color='rgba(56,139,253,0.35)', showlegend=False,
-            ), row=4, col=1)
+                fig.add_trace(go.Bar(
+                    x=disp.index, y=disp['Hist'], name='히스토그램',
+                    marker_color=['rgba(86,211,100,0.6)' if v >= 0 else 'rgba(247,129,102,0.6)' for v in disp['Hist']],
+                    showlegend=False,
+                ), row=3, col=1)
+                fig.add_trace(go.Scatter(x=disp.index, y=disp['MACD'],   mode='lines',
+                    line=dict(color='#79c0ff', width=1.5), name='MACD', showlegend=False), row=3, col=1)
+                fig.add_trace(go.Scatter(x=disp.index, y=disp['Signal'], mode='lines',
+                    line=dict(color='#ffa657', width=1), name='Signal', showlegend=False), row=3, col=1)
 
-            # MDD 낙폭(underwater): 전고점(5y 누적 최고 종가) 대비 %
-            _dd = (disp['Close'] / disp['Close'].cummax() - 1) * 100
-            fig.add_trace(go.Scatter(
-                x=disp.index, y=_dd, mode='lines', name='낙폭',
-                line=dict(color='#f78166', width=1.2),
-                fill='tozeroy', fillcolor='rgba(247,129,102,0.25)', showlegend=False,
-                hovertemplate='낙폭: %{y:.1f}%<extra></extra>',
-            ), row=5, col=1)
-            _dd_1y = float(_dd.tail(252).min()) if len(_dd) else 0.0
-            fig.add_hline(y=_dd_1y, line_color='rgba(240,192,64,0.5)', line_dash='dot',
-                          annotation_text=f' 1y MDD {_dd_1y:.0f}%',
-                          annotation_position='right', row=5, col=1)
+                fig.add_trace(go.Bar(
+                    x=disp.index, y=disp['Volume'], name='거래량',
+                    marker_color='rgba(56,139,253,0.35)', showlegend=False,
+                ), row=4, col=1)
 
-            fig.update_layout(
-                height=900, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='#8b949e', size=11),
-                xaxis_rangeslider_visible=False,
-                margin=dict(l=0, r=100, t=30, b=0),
-                legend=dict(orientation='h', y=1.02, x=0),
-            )
-            # 기간 버튼(1m·6m·YTD·1y·3y·전체) — 셀렉트박스 대신 차트에서 직접 조절 (#2)
-            fig.update_layout(xaxis=dict(rangeselector=dict(
-                buttons=[dict(count=1, label='1m', step='month', stepmode='backward'),
-                         dict(count=6, label='6m', step='month', stepmode='backward'),
-                         dict(count=1, label='YTD', step='year', stepmode='todate'),
-                         dict(count=1, label='1y', step='year', stepmode='backward'),
-                         dict(count=3, label='3y', step='year', stepmode='backward'),
-                         dict(step='all', label='전체')],
-                bgcolor='rgba(30,35,42,0.9)', activecolor='rgba(56,139,253,0.6)',
-                font=dict(color='#c9d1d9', size=11), y=1.08)))
-            if len(hist) > 252:                           # 초기 화면은 최근 1년
-                fig.update_xaxes(range=[hist.index[-252], hist.index[-1]], row=1, col=1)
-            for i in range(1, 6):
-                fig.update_xaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
-                fig.update_yaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
-            fig.update_yaxes(title_text='RSI', row=2, col=1, range=[0, 100])
-            fig.update_yaxes(ticksuffix='%', row=5, col=1)
+                # MDD 낙폭(underwater): 전고점(5y 누적 최고 종가) 대비 %
+                _dd = (disp['Close'] / disp['Close'].cummax() - 1) * 100
+                fig.add_trace(go.Scatter(
+                    x=disp.index, y=_dd, mode='lines', name='낙폭',
+                    line=dict(color='#f78166', width=1.2),
+                    fill='tozeroy', fillcolor='rgba(247,129,102,0.25)', showlegend=False,
+                    hovertemplate='낙폭: %{y:.1f}%<extra></extra>',
+                ), row=5, col=1)
+                _dd_1y = float(_dd.tail(252).min()) if len(_dd) else 0.0
+                fig.add_hline(y=_dd_1y, line_color='rgba(240,192,64,0.5)', line_dash='dot',
+                              annotation_text=f' 1y MDD {_dd_1y:.0f}%',
+                              annotation_position='right', row=5, col=1)
 
-            st.plotly_chart(fig, use_container_width=True)
-            _dd_cur = float(_dd.iloc[-1]) if len(_dd) else 0.0
-            _dd_all = float(_dd.min()) if len(_dd) else 0.0
-            _yrs = (hist.index[-1] - hist.index[0]).days / 365.25
-            st.caption(f"📉 MDD: 현재 낙폭 **{_dd_cur:.1f}%** · 1년 최대 {_dd_1y:.1f}% · 조회기간({_yrs:.1f}년) 최대 {_dd_all:.1f}% — "
-                       "역대 낙폭 범위 안에서 현재 위치를 보는 용도 (낙폭 깊다 ≠ 싸다, 추세·펀더멘털과 같이 볼 것).")
-            if sym8_clean.replace('.KS','').replace('.KQ','').isdigit() and _yrs < 15:
-                st.caption("ℹ️ 한국 종목은 무료 데이터소스 한계로 최근 ~12년까지만 조회됨 (실제 상장일과 무관한 소스 제약)")
-
-            # 📐 피보나치 레벨 (expander 제거 — 바로 표시, #4)
-            fib_ext_lvls = _fib_ext(fib_high, fib_low)
-            st.markdown("**📐 피보나치 레벨** (최근 60일 기준)")
-            fc1, fc2 = st.columns(2)
-            def _fmt_p(v): return f"₩{v:,.0f}" if is_kr_sym else f"${v:.2f}"
-            def _fmt_chg(v): return f"{(v/price_now-1)*100:+.1f}%"
-
-            with fc1:
-                st.caption("📉 되돌림(지지선)")
-                ret_df = pd.DataFrame([
-                    {'레벨': k, '가격': _fmt_p(v), '현재 대비': _fmt_chg(v)}
-                    for k, v in fib_lvls.items()
-                ])
-                st.dataframe(ret_df, use_container_width=True, hide_index=True,
-                             row_height=25, height=_dfh(len(ret_df)))
-
-            with fc2:
-                st.caption("📈 연장 (목표가격)")
-                ext_df = pd.DataFrame([
-                    {'레벨': k, '목표가': _fmt_p(v), '현재 대비': _fmt_chg(v)}
-                    for k, v in fib_ext_lvls.items()
-                ])
-                def _color_ext(v):
-                    try:
-                        pct = float(str(v).replace('%','').replace('+',''))
-                        if pct > 0: return 'color:#56d364'
-                    except: pass
-                    return ''
-                st.dataframe(
-                    ext_df.style.map(_color_ext, subset=['현재 대비']),
-                    use_container_width=True, hide_index=True,
-                    row_height=25, height=_dfh(len(ext_df)),
+                fig.update_layout(
+                    height=900, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='#8b949e', size=11),
+                    xaxis_rangeslider_visible=False,
+                    margin=dict(l=0, r=100, t=30, b=0),
+                    legend=dict(orientation='h', y=1.02, x=0),
                 )
+                # 기간 버튼(1m·6m·YTD·1y·3y·전체) — 셀렉트박스 대신 차트에서 직접 조절 (#2)
+                fig.update_layout(xaxis=dict(rangeselector=dict(
+                    buttons=[dict(count=1, label='1m', step='month', stepmode='backward'),
+                             dict(count=6, label='6m', step='month', stepmode='backward'),
+                             dict(count=1, label='YTD', step='year', stepmode='todate'),
+                             dict(count=1, label='1y', step='year', stepmode='backward'),
+                             dict(count=3, label='3y', step='year', stepmode='backward'),
+                             dict(step='all', label='전체')],
+                    bgcolor='rgba(30,35,42,0.9)', activecolor='rgba(56,139,253,0.6)',
+                    font=dict(color='#c9d1d9', size=11), y=1.08)))
+                if len(hist) > 252:                           # 초기 화면은 최근 1년
+                    fig.update_xaxes(range=[hist.index[-252], hist.index[-1]], row=1, col=1)
+                for i in range(1, 6):
+                    fig.update_xaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
+                    fig.update_yaxes(gridcolor='rgba(128,128,128,0.2)', row=i, col=1)
+                fig.update_yaxes(title_text='RSI', row=2, col=1, range=[0, 100])
+                fig.update_yaxes(ticksuffix='%', row=5, col=1)
 
-            st.divider()
+                st.plotly_chart(fig, use_container_width=True)
+                _dd_cur = float(_dd.iloc[-1]) if len(_dd) else 0.0
+                _dd_all = float(_dd.min()) if len(_dd) else 0.0
+                _yrs = (hist.index[-1] - hist.index[0]).days / 365.25
+                st.caption(f"📉 MDD: 현재 낙폭 **{_dd_cur:.1f}%** · 1년 최대 {_dd_1y:.1f}% · 조회기간({_yrs:.1f}년) 최대 {_dd_all:.1f}% — "
+                           "역대 낙폭 범위 안에서 현재 위치를 보는 용도 (낙폭 깊다 ≠ 싸다, 추세·펀더멘털과 같이 볼 것).")
+                if sym8_clean.replace('.KS','').replace('.KQ','').isdigit() and _yrs < 15:
+                    st.caption("ℹ️ 한국 종목은 무료 데이터소스 한계로 최근 ~12년까지만 조회됨 (실제 상장일과 무관한 소스 제약)")
 
-            # ════════════════════════════════════════════════════════════
-            # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
-            # ════════════════════════════════════════════════════════════
-            st.divider()
-            _mstat = st.container()
-            _gcdc = st.container()
+                # 📐 피보나치 레벨 (expander 제거 — 바로 표시, #4)
+                fib_ext_lvls = _fib_ext(fib_high, fib_low)
+                st.markdown("**📐 피보나치 레벨** (최근 60일 기준)")
+                fc1, fc2 = st.columns(2)
+                def _fmt_p(v): return f"₩{v:,.0f}" if is_kr_sym else f"${v:.2f}"
+                def _fmt_chg(v): return f"{(v/price_now-1)*100:+.1f}%"
 
-            with _mstat:
-                st.subheader("📆 월별 상승률 통계 (연도 × 월)")
-                # 차트 기간과 무관하게 전체 상장 히스토리 사용 (엑셀 '주가 추이 분석' 방식)
-                _fullc = full_close_history(sym8_clean, is_kr_sym)
-                _basec = _fullc if (_fullc is not None and len(_fullc) > len(hist)) else hist['Close']
-                _mclose = _basec.resample('ME').last()
-                _mret = (_mclose.pct_change() * 100).dropna()
-                if len(_mret) >= 12:
-                    _md = _mret.to_frame('ret')
-                    _md['y'] = _md.index.year
-                    _md['m'] = _md.index.month
-                    _pv = _md.pivot_table(index='y', columns='m', values='ret', aggfunc='first')
-                    _yret = (_basec.resample('YE').last().pct_change() * 100)
-                    _ymap = {d.year: v for d, v in _yret.items()}
-                    _moncols = [f'{m}월' for m in range(1, 13)] + ['연간']
+                with fc1:
+                    st.caption("📉 되돌림(지지선)")
+                    ret_df = pd.DataFrame([
+                        {'레벨': k, '가격': _fmt_p(v), '현재 대비': _fmt_chg(v)}
+                        for k, v in fib_lvls.items()
+                    ])
+                    st.dataframe(ret_df, use_container_width=True, hide_index=True,
+                                 row_height=25, height=_dfh(len(ret_df)))
 
-                    def _cell(yr, m):
-                        if m in _pv.columns and yr in _pv.index and pd.notna(_pv.loc[yr, m]):
-                            return float(_pv.loc[yr, m])
-                        return None
-                    _rows = []
-                    for _yr in sorted(_pv.index, reverse=True)[:35]:
-                        _row = {'연도': str(int(_yr))}
-                        for _m in range(1, 13):
-                            _row[f'{_m}월'] = _cell(_yr, _m)
-                        _row['연간'] = _ymap.get(_yr)
-                        _rows.append(_row)
-                    # 하단 요약: 월평균 · 승률
-                    _avg = {'연도': '평균'}; _win = {'연도': '승률'}
-                    for _m in range(1, 13):
-                        _col = _pv[_m].dropna() if _m in _pv.columns else pd.Series(dtype=float)
-                        _avg[f'{_m}월'] = float(_col.mean()) if len(_col) else None
-                        _win[f'{_m}월'] = float((_col > 0).mean() * 100) if len(_col) else None
-                    _avg['연간'] = float(_yret.dropna().mean()) if len(_yret.dropna()) else None
-                    _win['연간'] = None
-                    _mm = pd.DataFrame(_rows + [_avg, _win])
-
-                    def _cmat(v):
+                with fc2:
+                    st.caption("📈 연장 (목표가격)")
+                    ext_df = pd.DataFrame([
+                        {'레벨': k, '목표가': _fmt_p(v), '현재 대비': _fmt_chg(v)}
+                        for k, v in fib_ext_lvls.items()
+                    ])
+                    def _color_ext(v):
                         try:
-                            return 'color:#16a34a;font-weight:bold' if float(v) >= 0 else 'color:#dc2626'
-                        except Exception:
-                            return ''
+                            pct = float(str(v).replace('%','').replace('+',''))
+                            if pct > 0: return 'color:#56d364'
+                        except: pass
+                        return ''
                     st.dataframe(
-                        _mm.style.map(_cmat, subset=_moncols)
-                           .format({c: (lambda v: f'{v:+.0f}' if pd.notna(v) else '·') for c in _moncols}),
+                        ext_df.style.map(_color_ext, subset=['현재 대비']),
                         use_container_width=True, hide_index=True,
-                        row_height=25, height=_dfh(len(_mm)))
-                    st.caption("연도×월 수익률(%). 하단 **평균**=월별 계절성, **승률**=상승 빈도(%). "
-                               "엑셀 '주가 추이 분석' 방식. ⚠️ 표본 적으면 우연 — 기간 '5y' 권장.")
-                else:
-                    st.info("월별 통계 표본 부족 — 기간을 '3y'나 '5y'로 늘려주세요.")
+                        row_height=25, height=_dfh(len(ext_df)),
+                    )
 
-            with _gcdc:
-                st.subheader("⚡ 골든/데드크로스 매매 성과")
-                _gpair = st.radio("이평 조합", ["50/200 (정통)", "20/60 (단기)"],
-                                  horizontal=True, key="gcdc_pair")
-                _ff, _ss = (50, 200) if _gpair.startswith("50") else (20, 60)
-                _maf = closes.rolling(_ff).mean()
-                _mas = closes.rolling(_ss).mean()
-                _rel = (_maf > _mas).astype(float)
-                _rel[_maf.isna() | _mas.isna()] = float('nan')
-                _cross = _rel.diff()   # +1 골든크로스, -1 데드크로스
-                _ent = list(hist.index[_cross == 1])
-                _exs = list(hist.index[_cross == -1])
-                _trades = []
-                for _e in _ent:
-                    _later = [x for x in _exs if x > _e]
-                    _xd = _later[0] if _later else hist.index[-1]
-                    _pe = float(closes.loc[_e]); _px = float(closes.loc[_xd])
-                    if _pe > 0:
-                        _trades.append({'ret': (_px / _pe - 1) * 100,
-                                        'days': (_xd - _e).days,
-                                        'open': not _later})
-                if _trades:
-                    _rets = [t['ret'] for t in _trades]
-                    _wins = sum(1 for r in _rets if r > 0)
-                    _bh = (float(closes.iloc[-1]) / float(closes.iloc[0]) - 1) * 100
-                    _srows = [
-                        {'항목': '거래 횟수', '값': f"{len(_trades)}회"},
-                        {'항목': '승률', '값': f"{_wins/len(_trades)*100:.0f}%"},
-                        {'항목': '평균 수익', '값': f"{sum(_rets)/len(_rets):+.1f}%"},
-                        {'항목': '최고 / 최저', '값': f"{max(_rets):+.0f}% / {min(_rets):+.0f}%"},
-                        {'항목': '평균 보유', '값': f"{sum(t['days'] for t in _trades)//len(_trades)}일"},
-                        {'항목': '비교: 매수후보유', '값': f"{_bh:+.1f}%"},
-                    ]
-                    st.table(pd.DataFrame(_srows).style.hide(axis="index"))
-                    _cur_gc = "🟢 골든(정배열)" if (_rel.iloc[-1] == 1) else "🔴 데드(역배열)"
-                    _openmsg = " · 현재 진입 중(미청산)" if _trades[-1]['open'] else ""
-                    st.caption(f"현재 상태: **{_cur_gc}**{_openmsg}. 골든크로스 진입→다음 데드크로스 청산 기준 "
-                               f"(MA{_ff}/MA{_ss}). ⚠️ 후행지표라 횡보장선 잦은 손실(휩쏘). 추세장에서만 유효.")
-                else:
-                    st.info(f"교차 신호 없음 — 기간이 짧거나(현 기간 < MA{_ss}) 교차 미발생. '5y'로 늘려보세요.")
+                st.divider()
 
+                # ════════════════════════════════════════════════════════════
+                # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
+                # ════════════════════════════════════════════════════════════
+                st.divider()
+                _mstat = st.container()
+                _gcdc = st.container()
 
-            if is_kr_sym:
-                _kins = kr_insiders(sym8_clean)
-                if _kins:
-                    st.subheader("👤 내부자 거래 (DART 공식)")
-                    _kidf = pd.DataFrame([{
-                        '일자': x['date'], '보고자': x['name'], '직위': x['position'],
-                        '구분': '🟢매수' if (x['change'] or 0) > 0 else ('🔴매도' if (x['change'] or 0) < 0 else '변동0'),
-                        '증감': f"{x['change']:+,.0f}" if x['change'] is not None else '-',
-                        '보유': f"{x['holdings']:,.0f}" if x['holdings'] is not None else '-'}
-                        for x in _kins])
-                    st.dataframe(_kidf, use_container_width=True, hide_index=True,
-                                 row_height=25, height=_dfh(min(len(_kidf), 8)))
-                    st.caption("출처: DART 임원·주요주주 특정증권 소유상황보고(공식). 증감>0=취득·<0=처분.")
-                else:
-                    st.info("내부자 거래 내역 없음 (DART)")
-            elif insid is not None and not insid.empty:
-                st.subheader("👤 내부자 거래 (SEC Form 4 기반)")
-                _uins = []
-                for _, _ri in insid.head(10).iterrows():
-                    _utxt = str(_ri.get('Text') or '')
-                    if 'Sale' in _utxt:
-                        _ukind = '🔴 매도'
-                    elif 'Purchase' in _utxt or 'Buy' in _utxt:
-                        _ukind = '🟢 매수'
-                    elif 'onversion' in _utxt or 'xercise' in _utxt:
-                        _ukind = '⚙️ 행사/전환'
+                with _mstat:
+                    st.subheader("📆 월별 상승률 통계 (연도 × 월)")
+                    # 차트 기간과 무관하게 전체 상장 히스토리 사용 (엑셀 '주가 추이 분석' 방식)
+                    _fullc = full_close_history(sym8_clean, is_kr_sym)
+                    _basec = _fullc if (_fullc is not None and len(_fullc) > len(hist)) else hist['Close']
+                    _mclose = _basec.resample('ME').last()
+                    _mret = (_mclose.pct_change() * 100).dropna()
+                    if len(_mret) >= 12:
+                        _md = _mret.to_frame('ret')
+                        _md['y'] = _md.index.year
+                        _md['m'] = _md.index.month
+                        _pv = _md.pivot_table(index='y', columns='m', values='ret', aggfunc='first')
+                        _yret = (_basec.resample('YE').last().pct_change() * 100)
+                        _ymap = {d.year: v for d, v in _yret.items()}
+                        _moncols = [f'{m}월' for m in range(1, 13)] + ['연간']
+
+                        def _cell(yr, m):
+                            if m in _pv.columns and yr in _pv.index and pd.notna(_pv.loc[yr, m]):
+                                return float(_pv.loc[yr, m])
+                            return None
+                        _rows = []
+                        for _yr in sorted(_pv.index, reverse=True)[:35]:
+                            _row = {'연도': str(int(_yr))}
+                            for _m in range(1, 13):
+                                _row[f'{_m}월'] = _cell(_yr, _m)
+                            _row['연간'] = _ymap.get(_yr)
+                            _rows.append(_row)
+                        # 하단 요약: 월평균 · 승률
+                        _avg = {'연도': '평균'}; _win = {'연도': '승률'}
+                        for _m in range(1, 13):
+                            _col = _pv[_m].dropna() if _m in _pv.columns else pd.Series(dtype=float)
+                            _avg[f'{_m}월'] = float(_col.mean()) if len(_col) else None
+                            _win[f'{_m}월'] = float((_col > 0).mean() * 100) if len(_col) else None
+                        _avg['연간'] = float(_yret.dropna().mean()) if len(_yret.dropna()) else None
+                        _win['연간'] = None
+                        _mm = pd.DataFrame(_rows + [_avg, _win])
+
+                        def _cmat(v):
+                            try:
+                                return 'color:#16a34a;font-weight:bold' if float(v) >= 0 else 'color:#dc2626'
+                            except Exception:
+                                return ''
+                        st.dataframe(
+                            _mm.style.map(_cmat, subset=_moncols)
+                               .format({c: (lambda v: f'{v:+.0f}' if pd.notna(v) else '·') for c in _moncols}),
+                            use_container_width=True, hide_index=True,
+                            row_height=25, height=_dfh(len(_mm)))
+                        st.caption("연도×월 수익률(%). 하단 **평균**=월별 계절성, **승률**=상승 빈도(%). "
+                                   "엑셀 '주가 추이 분석' 방식. ⚠️ 표본 적으면 우연 — 기간 '5y' 권장.")
                     else:
-                        _ukind = '-'
-                    _ush, _uval = _ri.get('Shares'), _ri.get('Value')
-                    _uins.append({'일자': str(_ri.get('Start Date'))[:10],
-                                  '보고자': _ri.get('Insider'), '직위': _ri.get('Position'),
-                                  '구분': _ukind,
-                                  '주수': f"{_ush:,.0f}" if pd.notna(_ush) else '-',
-                                  '금액': f"${_uval:,.0f}" if pd.notna(_uval) else '-'})
-                _udf = pd.DataFrame(_uins)
-                st.dataframe(_udf, use_container_width=True, hide_index=True,
-                             row_height=25, height=_dfh(len(_udf)))
-                st.caption("출처: yfinance(SEC Form 4 집계). 금액=거래대금(USD). "
-                           "정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
+                        st.info("월별 통계 표본 부족 — 기간을 '3y'나 '5y'로 늘려주세요.")
+
+                with _gcdc:
+                    st.subheader("⚡ 골든/데드크로스 매매 성과")
+                    _gpair = st.radio("이평 조합", ["50/200 (정통)", "20/60 (단기)"],
+                                      horizontal=True, key="gcdc_pair")
+                    _ff, _ss = (50, 200) if _gpair.startswith("50") else (20, 60)
+                    _maf = closes.rolling(_ff).mean()
+                    _mas = closes.rolling(_ss).mean()
+                    _rel = (_maf > _mas).astype(float)
+                    _rel[_maf.isna() | _mas.isna()] = float('nan')
+                    _cross = _rel.diff()   # +1 골든크로스, -1 데드크로스
+                    _ent = list(hist.index[_cross == 1])
+                    _exs = list(hist.index[_cross == -1])
+                    _trades = []
+                    for _e in _ent:
+                        _later = [x for x in _exs if x > _e]
+                        _xd = _later[0] if _later else hist.index[-1]
+                        _pe = float(closes.loc[_e]); _px = float(closes.loc[_xd])
+                        if _pe > 0:
+                            _trades.append({'ret': (_px / _pe - 1) * 100,
+                                            'days': (_xd - _e).days,
+                                            'open': not _later})
+                    if _trades:
+                        _rets = [t['ret'] for t in _trades]
+                        _wins = sum(1 for r in _rets if r > 0)
+                        _bh = (float(closes.iloc[-1]) / float(closes.iloc[0]) - 1) * 100
+                        _srows = [
+                            {'항목': '거래 횟수', '값': f"{len(_trades)}회"},
+                            {'항목': '승률', '값': f"{_wins/len(_trades)*100:.0f}%"},
+                            {'항목': '평균 수익', '값': f"{sum(_rets)/len(_rets):+.1f}%"},
+                            {'항목': '최고 / 최저', '값': f"{max(_rets):+.0f}% / {min(_rets):+.0f}%"},
+                            {'항목': '평균 보유', '값': f"{sum(t['days'] for t in _trades)//len(_trades)}일"},
+                            {'항목': '비교: 매수후보유', '값': f"{_bh:+.1f}%"},
+                        ]
+                        st.table(pd.DataFrame(_srows).style.hide(axis="index"))
+                        _cur_gc = "🟢 골든(정배열)" if (_rel.iloc[-1] == 1) else "🔴 데드(역배열)"
+                        _openmsg = " · 현재 진입 중(미청산)" if _trades[-1]['open'] else ""
+                        st.caption(f"현재 상태: **{_cur_gc}**{_openmsg}. 골든크로스 진입→다음 데드크로스 청산 기준 "
+                                   f"(MA{_ff}/MA{_ss}). ⚠️ 후행지표라 횡보장선 잦은 손실(휩쏘). 추세장에서만 유효.")
+                    else:
+                        st.info(f"교차 신호 없음 — 기간이 짧거나(현 기간 < MA{_ss}) 교차 미발생. '5y'로 늘려보세요.")
+
+
+                if is_kr_sym:
+                    _kins = kr_insiders(sym8_clean)
+                    if _kins:
+                        st.subheader("👤 내부자 거래 (DART 공식)")
+                        _kidf = pd.DataFrame([{
+                            '일자': x['date'], '보고자': x['name'], '직위': x['position'],
+                            '구분': '🟢매수' if (x['change'] or 0) > 0 else ('🔴매도' if (x['change'] or 0) < 0 else '변동0'),
+                            '증감': f"{x['change']:+,.0f}" if x['change'] is not None else '-',
+                            '보유': f"{x['holdings']:,.0f}" if x['holdings'] is not None else '-'}
+                            for x in _kins])
+                        st.dataframe(_kidf, use_container_width=True, hide_index=True,
+                                     row_height=25, height=_dfh(min(len(_kidf), 8)))
+                        st.caption("출처: DART 임원·주요주주 특정증권 소유상황보고(공식). 증감>0=취득·<0=처분.")
+                    else:
+                        st.info("내부자 거래 내역 없음 (DART)")
+                elif insid is not None and not insid.empty:
+                    st.subheader("👤 내부자 거래 (SEC Form 4 기반)")
+                    _uins = []
+                    for _, _ri in insid.head(10).iterrows():
+                        _utxt = str(_ri.get('Text') or '')
+                        if 'Sale' in _utxt:
+                            _ukind = '🔴 매도'
+                        elif 'Purchase' in _utxt or 'Buy' in _utxt:
+                            _ukind = '🟢 매수'
+                        elif 'onversion' in _utxt or 'xercise' in _utxt:
+                            _ukind = '⚙️ 행사/전환'
+                        else:
+                            _ukind = '-'
+                        _ush, _uval = _ri.get('Shares'), _ri.get('Value')
+                        _uins.append({'일자': str(_ri.get('Start Date'))[:10],
+                                      '보고자': _ri.get('Insider'), '직위': _ri.get('Position'),
+                                      '구분': _ukind,
+                                      '주수': f"{_ush:,.0f}" if pd.notna(_ush) else '-',
+                                      '금액': f"${_uval:,.0f}" if pd.notna(_uval) else '-'})
+                    _udf = pd.DataFrame(_uins)
+                    st.dataframe(_udf, use_container_width=True, hide_index=True,
+                                 row_height=25, height=_dfh(len(_udf)))
+                    st.caption("출처: yfinance(SEC Form 4 집계). 금액=거래대금(USD). "
+                               "정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
 
 
 
-    else:
-        st.info("👆 종목코드를 입력하고 분석 버튼을 누르세요\n\n"
-                "**US**: TSLA · AAPL · NVDA · MSFT · QCOM\n\n"
-                "**KR**: 005930.KS (삼성전자) · 000660.KS (SK하이닉스)")
+        else:
+            st.info("👆 종목코드를 입력하고 분석 버튼을 누르세요\n\n"
+                    "**US**: TSLA · AAPL · NVDA · MSFT · QCOM\n\n"
+                    "**KR**: 005930.KS (삼성전자) · 000660.KS (SK하이닉스)")
+
+
+with tab7:
+    _tab_analysis()
 
 
 # ════════════════════════════════════════════════════════════════════
 # 탭: 포트폴리오 관리 + 🛡️ 원칙 가드레일
 # (2026-07-02 탭 재편 때 대시보드에서 12일간 빠져 있었음 — 2026-07-14 복원 + 준수이력 추가)
 # ════════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=3600)
 @st.cache_data(ttl=300)
 def _fetch_pf_price(sym: str, market: str):
     try:
