@@ -68,17 +68,16 @@ def parse(report_json, rpt, freq):
             by_name[nm] = d
     out = {_period(yymm[i], freq): {} for i in idx}
     for key, names in _MAP[rpt].items():
-        for nm in names:
-            d = by_name.get(nm)
-            if d is None:
-                continue
-            vals = [_num(d.get(f'DATA{i + 1}')) for i in idx]
-            if all(v is None for v in vals):
-                continue
-            mult = 1.0 if key in _PER_SHARE else 1e8
-            for i, v in zip(idx, vals):
-                out[_period(yymm[i], freq)][key] = (v * mult) if v is not None else None
-            break
+        mult = 1.0 if key in _PER_SHARE else 1e8
+        series = [[_num(by_name[nm].get(f'DATA{i + 1}')) for i in idx] for nm in names if nm in by_name]
+        series = [s for s in series if any(v is not None for v in s)]
+        if not series:
+            continue
+        for j, i in enumerate(idx):
+            v = series[0][j]
+            if v is None and key in _PER_SHARE:       # EPS: 지배주주 EPS 가 빈 칸이면 같은 기간의 기본 EPS 로
+                v = next((s[j] for s in series[1:] if s[j] is not None), None)   # (삼성 1Q26: 지배 '-', 기본 7,123)
+            out[_period(yymm[i], freq)][key] = (v * mult) if v is not None else None
     return out
 
 

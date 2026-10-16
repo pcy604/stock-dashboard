@@ -74,6 +74,17 @@ def test_reported_operating_income_wins():
     assert q['2025.4Q']['eps'] is None                                     # 비어 있으면 비운다
 
 
+def test_eps_falls_back_per_period_only():
+    j = {'YYMM': Q('2025/12', '2026/03', '2026/06', '2026/09(E)'), 'DATA': [
+        row('*(지배주주지분)주당순이익', 1, None, None, 10849, 13504),
+        row('*주당순이익', 1, None, 7123, 10849, None),
+        row('영업이익(발표기준)', 1, 200737, None, 894924, None),
+        row('영업이익', 1, 200737, 572328, 894924, 1069435)]}
+    q = N.parse(j, 0, 'quarter')
+    assert q['2026.1Q']['eps'] == 7123 and q['2025.4Q']['eps'] is None    # 삼성 1Q26 실제 모양
+    assert q['2026.1Q']['op_income'] is None                               # 영업이익은 정의를 섞지 않는다
+
+
 def test_statements_shape_and_sign(monkeypatch):
     monkeypatch.setattr(N, '_session', lambda code: (None, 'x', 'ref'))
     monkeypatch.setattr(N.time, 'sleep', lambda s: None)
