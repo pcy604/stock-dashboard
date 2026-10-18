@@ -23,16 +23,51 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import os
 
 
+def _reasons(repo, rid, limit=6):
+    """2026-10-19 — '실패했다'만으로는 원인이 안 보여 10-14~10-18 경보가 묻혔다.
+    실패한 스텝 이름과 ::error:: 문구(예: '과거 이력 결손')를 알림에 싣는다. 실패해도 조용히 빈 문자열."""
+    tok = os.environ.get('GITHUB_TOKEN')
+    if not (tok and repo and rid):
+        return ''
+    try:
+        import requests
+        h = {'Authorization': f'Bearer {tok}', 'Accept': 'application/vnd.github+json'}
+        jobs = requests.get(f'https://api.github.com/repos/{repo}/actions/runs/{rid}/jobs',
+                            headers=h, timeout=15).json().get('jobs', [])
+        lines = []
+        for j in jobs:
+            for st in j.get('steps') or []:
+                if st.get('conclusion') == 'failure':
+                    lines.append(f"· 실패 스텝: {st.get('name')}")
+            try:
+                ann = requests.get(f"https://api.github.com/repos/{repo}/check-runs/{j['id']}/annotations",
+                                   headers=h, timeout=15).json()
+                for a in ann if isinstance(ann, list) else []:
+                    if a.get('annotation_level') in ('failure', 'warning') and 'Node.js' not in (a.get('message') or ''):
+                        lines.append(f"· {(a.get('message') or '').strip()[:160]}")
+            except Exception:
+                pass
+        seen, out = set(), []
+        for l in lines:
+            if l not in seen:
+                seen.add(l); out.append(l)
+        return '\n'.join(out[:limit])
+    except Exception as e:
+        print(f'(원인 조회 실패: {e})')
+        return ''
+
+
 def main():
     wf  = os.environ.get('GITHUB_WORKFLOW', 'workflow')
     rid = os.environ.get('GITHUB_RUN_ID', '')
     repo = os.environ.get('GITHUB_REPOSITORY', '')
     url = f"https://github.com/{repo}/actions/runs/{rid}" if repo and rid else '(로그 URL 없음)'
 
+    why = _reasons(repo, rid)
     msg = (f"🚨 [screener] {wf} 실행 실패\n"
-           f"이번 실행 산출물이 origin 에 반영되지 않았다 — "
-           f"다음 성공까지 화면 데이터가 멈춘다.\n\n"
-           f"로그: {url}")
+           + (f"\n원인:\n{why}\n\n" if why else
+              "이번 실행 산출물이 origin 에 반영되지 않았을 수 있다 — 다음 성공까지 화면 데이터가 멈춘다.\n\n")
+           + f"로그: {url}")
     print(msg)
     try:
         import config

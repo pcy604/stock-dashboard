@@ -15,6 +15,8 @@ on:
 
 permissions:
   contents: write
+  actions: read      # 실패 알림이 실패 스텝·원인을 읽는다(2026-10-19)
+  checks: read
 
 jobs:
   refresh:
@@ -292,6 +294,8 @@ jobs:
       #   아니라 "잡이 실패했다"는 사실만 보내 위 세 구먹에 걸리지 않는다.
       - name: 실패 시 텔레그램 (잡이 어떤 스텝에서 죽어도 울린다)
         if: failure()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: python tools/notify_ci_failure.py
         continue-on-error: true
 

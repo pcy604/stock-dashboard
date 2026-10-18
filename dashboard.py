@@ -3528,21 +3528,24 @@ def kr_stored_statements(sym, freq, n=5):
     upd = str(x['updated'].max())
     by = {(int(r.year), int(r.q)): r for r in x.itertuples()}
     cols = ('revenue', 'op_income', 'net_income')
+    # 대차 잔액(2026-10-19~ 네이버로 채움) — 흐름이 아니라 분기말 값이라 4Q 도 차감하지 않는다
+    bal = tuple(c for c in ('assets', 'liabilities', 'equity') if c in x.columns)
 
     def _v(v):
         return None if v is None or pd.isna(v) else float(v)
 
     out = []
     for (yy, qq), r in by.items():
+        _b = {c: _v(getattr(r, c)) for c in bal}
         if freq == 'annual':
             if qq == 4:
-                out.append(((yy, 4), {'period': str(yy), **{c: _v(getattr(r, c)) for c in cols}}))
+                out.append(((yy, 4), {'period': str(yy), **{c: _v(getattr(r, c)) for c in cols}, **_b}))
         elif qq in (1, 2, 3):
-            out.append(((yy, qq), {'period': f'{yy}.{qq}Q', **{c: _v(getattr(r, c)) for c in cols}}))
+            out.append(((yy, qq), {'period': f'{yy}.{qq}Q', **{c: _v(getattr(r, c)) for c in cols}, **_b}))
         else:                                   # 4Q = 연간 − (1~3Q) — 셋 다 있을 때만
             parts = [by.get((yy, k)) for k in (1, 2, 3)]
             if all(p is not None for p in parts):
-                row = {'period': f'{yy}.4Q'}
+                row = {'period': f'{yy}.4Q', **_b}
                 for c in cols:
                     a, ps = _v(getattr(r, c)), [_v(getattr(p, c)) for p in parts]
                     row[c] = (a - sum(ps)) if (a is not None and all(v is not None for v in ps)) else None
@@ -3571,7 +3574,7 @@ def _q_rows_long(sym, is_kr):
     """멀티플 밴드용 긴 분기 시계열. US=EDGAR 32분기 / KR=저장된 DART 손익(자본 없음)."""
     if is_kr:
         rows, _ = kr_stored_statements(sym, 'quarter', n=40)
-        return rows, 'DART 분기 손익(저장본)'
+        return rows, 'DART 분기 손익 + 네이버 대차(저장본)'
     import edgar_client
     return edgar_client.statements(sym, 'quarter', 32), 'SEC EDGAR 분기'
 
@@ -5085,8 +5088,9 @@ def _tab_analysis():
                                            "⚠️ 증자·자사주로 주식수가 크게 변한 종목은 과거 멀티플이 왜곡된다. "
                                            "⚠️ **10분위는 '바닥'이 아니다** — 이익이 꺾이는 구간에서는 분모가 줄어 밴드 하단도 뚫린다. "
                                            "환산주가는 '최근 TTM 이 유지된다면'의 가정이다.")
-                        if is_kr_sym:
-                            st.caption("KR 은 저장된 DART 데이터에 자본 항목이 없어 P/B 밴드를 그리지 않는다.")
+                        if is_kr_sym and not _band.get('pb'):
+                            st.caption("P/B 밴드: KR 자본(잔액) 이력이 아직 짧다. 매주 네이버 기업분석으로 쌓는 중"
+                                       "(2026-10-19 시작) — 과거분은 DART 를 한국 IP 에서 한 번 돌리면 채워진다.")
 
                     # 컨센서스 추세
                     st.markdown("### 🔁 컨센서스 추세 — 숫자보다 방향")

@@ -18,6 +18,8 @@ on:
 
 permissions:
   contents: write
+  actions: read      # 실패 알림이 실패 스텝·원인을 읽는다(2026-10-19)
+  checks: read
 
 jobs:
   profile:
@@ -78,7 +80,10 @@ jobs:
       #   10-12 PC DB 에서 고친 순이익이 레포 parquet 에는 08-15 판(전 행 공란)으로 남아
       #   KR-U6 가 틀린 재무로 돌았다. 아래 KR 신호 갱신이 이 파일을 읽으므로 그 앞에 둔다.
       #   실패해도 기존 parquet 는 그대로다(스크립트가 나빠진 결과는 쓰지 않는다).
-      - name: KR 분기재무 갱신 (DART → kr_fundamentals_q.parquet)
+      # 2026-10-19 — DART 가 안 닿으면(해외 러너) 네이버 기업분석으로 갱신한다.
+      #   실패는 뒤 단계를 막지 않되(continue-on-error), 맨 끝 '분기재무 실패 보고'가 잡을 실패시켜 알림이 간다.
+      - name: KR 분기재무 갱신 (DART, 막히면 네이버 → kr_fundamentals_q.parquet)
+        id: krfq
         env:
           DART_KEY: ${{ secrets.DART_KEY }}
         run: python tools/refresh_kr_fundq.py
@@ -228,6 +233,12 @@ jobs:
           sys.exit(1 if bad else 0)
           PY
 
+      - name: KR 분기재무 실패 보고
+        if: always() && steps.krfq.outcome == 'failure'
+        run: |
+          echo "::error::KR 분기재무 갱신 실패 — 위 'KR 분기재무 갱신' 로그 확인(네이버 구조 변경·차단·DART 대비 불일치)"
+          exit 1
+
       # 2026-10-19 — actions/cache@v4 는 잡이 성공해야만 저장한다. weekly-accel 에서
       #   검사 단계 실패로 market.db 가 5일간 한 번도 저장되지 않아 같은 고장이 반복됐다.
       #   증분 캐시는 실패한 실행이 받아둔 것도 남겨야 다음 실행이 이어 받는다.
@@ -245,4 +256,13 @@ jobs:
         with:
           path: data/shares_cache
           key: shares-cache-${{ github.run_id }}
+        continue-on-error: true
+
+      - name: 실패 시 텔레그램
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python tools/notify_ci_failure.py
         continue-on-error: true

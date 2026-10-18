@@ -15,6 +15,7 @@
   4) universe(상장주식수·시총)는 오늘 KRX 목록으로 갱신
   5) 기존 export() 로 parquet 2개를 다시 쓴다 — 형식이 PC 판과 바이트 단위로 같은 경로
   안전장치: 결과 행 수가 기존의 95% 미만이거나 순이익 채움률이 80% 미만이면 쓰지 않는다.
+  DART 가 안 닿는 서버(해외)에서는 kr_fundq_naver(네이버 기업분석) 경로로 갱신한다(2026-10-19).
   (커밋 전 output_contracts.py 가 한 번 더 검사한다)
 
   python tools/refresh_kr_fundq.py
@@ -53,6 +54,10 @@ def _dart_reachable(timeout=6) -> bool:
 
 def main():
     if not _dart_reachable():
+        # 2026-10-19 — 예전엔 여기서 그냥 끝났다(집 PC 에 맡김). PC 가 안 돌면 몇 주씩 멈췄다.
+        #   이제 해외에서도 닿는 네이버 기업분석으로 새 분기·빈칸·대차 잔액을 채운다(DART 값은 안 덮음).
+        import kr_fundq_naver
+        kr_fundq_naver.main()
         return
     old = pd.read_parquet(E.OUT)
     before_rows, before_fill = len(old), old.net_income.notna().mean()
@@ -88,6 +93,13 @@ def main():
         raise SystemExit("⛔ 결과가 기존보다 나쁘다 — parquet 를 덮어쓰지 않는다")
     E.export()
     TMP.unlink(missing_ok=True)
+    # DART 적재 스키마엔 대차 잔액(자산·부채·자본)이 없다 — 네이버로 채워 둔 열을 되살린다.
+    bal = [c for c in ("assets", "liabilities", "equity") if c in old.columns]
+    if bal:
+        cur = pd.read_parquet(E.OUT)
+        cur = cur.drop(columns=[c for c in bal if c in cur.columns]).merge(
+            old[["sym", "year", "q"] + bal], on=["sym", "year", "q"], how="left")
+        cur.to_parquet(E.OUT, index=False)
 
 
 if __name__ == "__main__":
