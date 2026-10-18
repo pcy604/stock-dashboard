@@ -485,8 +485,22 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
     con = sqlite3.connect(DB)
     con.executescript(open(os.path.join(BASE, "leaders_schema.sql"), encoding="utf-8").read())
     if newsyms:
+        # 2026-10-19 — '있다'의 기준을 **52주 이상 이력**으로 바꿨다.
+        #   Actions 캐시의 market.db 는 10-10 사고 때 243종 이력만 남았고, 그 뒤 증분은
+        #   최신 주만 붙였다. 10-12 주에 1,912종이 '있어서' 신규로 안 잡혔지만 이력이
+        #   1주뿐이라 이익 가속(4분기 전 대비)을 계산할 수 없었다 → 신호 0종.
+        #   이력이 짧은 종목은 지우고 전 기간을 다시 적재한다.
         have = {r[0] for r in con.execute(
-            "SELECT DISTINCT sym FROM factor_weekly WHERE factor_ver=?", (VER,))}
+            "SELECT sym FROM factor_weekly WHERE factor_ver=? GROUP BY sym HAVING COUNT(*) >= 52",
+            (VER,))}
+        thin = [r[0] for r in con.execute(
+            "SELECT sym FROM factor_weekly WHERE factor_ver=? GROUP BY sym HAVING COUNT(*) < 52",
+            (VER,))]
+        if thin:
+            con.executemany("DELETE FROM factor_weekly WHERE factor_ver=? AND sym=?",
+                            [(VER, x) for x in thin])
+            con.commit()
+            print(f"이력 52주 미만 {len(thin):,}종 삭제 후 재적재", flush=True)
         before = len(u)
         u = u[~u.sym.isin(have)]
         print(f"신규 종목 모드 — 기존 {len(have):,}종 건너뜀, "

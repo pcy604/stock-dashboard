@@ -404,7 +404,8 @@ def build():
         funnel[str(tt.date())] = dict(
             universe=int(px.loc[tt].notna().sum()),
             liquid=int(L.sum()),
-            acc_known=int((L & M["ACC"].loc[tt].notna()).sum()),
+            # ACC 는 int 라 결측이 0 으로 숨는다. 실제로 계산 가능했는지는 oi_a·rv_a 로 본다.
+            acc_known=int((L & M["oi_a"].loc[tt].notna() & M["rv_a"].loc[tt].notna()).sum()),
             acc=int((L & (M["ACC"].loc[tt] == 1)).sum()),
             surge=int((L & (M["ret_1w"].loc[tt] >= SURGE)).sum()),
             final=int(g.loc[tt].sum()))

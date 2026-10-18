@@ -22,6 +22,11 @@ name: weekly-accel
 
 on:
   workflow_dispatch:
+    inputs:
+      backfill:
+        description: '이력 결손 종목(52주 미만) 전 기간 재적재 — 수 시간 걸린다'
+        type: boolean
+        default: false
   schedule:
     # 미국 마감 16:00 ET = 20:00 UTC(서머타임) / 21:00 UTC(표준시).
     # 22:17 UTC 면 연중 한 시각으로 양쪽을 덮는다. 토 07:17 KST.
@@ -40,7 +45,8 @@ concurrency:
 jobs:
   accel:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    # backfill 은 1,700종 전 기간 재계산이라 길다(2026-10-19). 평시는 50분.
+    timeout-minutes: ${{ inputs.backfill && 340 || 50 }}
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: '1'
@@ -59,16 +65,20 @@ jobs:
 
       # daily-refresh 와 같은 prefix. fq_(분기재무)·ek_(실적일)가 살아 있어야
       # 5분이 30분이 되지 않는다.
-      - name: 주봉 가격·재무 캐시 복원/저장
-        uses: actions/cache@v4
+      # ⚠️ 2026-10-19 — actions/cache@v4 는 **잡이 성공해야만** 저장한다. 10-14 부터
+      #   산출물 계약 단계가 매번 잡을 실패시켜 market.db 가 한 번도 저장되지 않았다.
+      #   매주 10-10 캐시로 되돌아가 같은 고장을 되풀이했다. 복원/저장을 나누고
+      #   저장은 always() 로 건다(맨 아래 '캐시 저장').
+      - name: 주봉 가격·재무 캐시 복원
+        uses: actions/cache/restore@v4
         with:
           path: data/leaders_cache
           key: leaders-cache-${{ github.run_id }}
           restore-keys: |
             leaders-cache-
 
-      - name: market.db 복원/저장
-        uses: actions/cache@v4
+      - name: market.db 복원
+        uses: actions/cache/restore@v4
         with:
           path: data/market.db
           key: marketdb-${{ github.run_id }}
@@ -82,7 +92,10 @@ jobs:
           FRI=$(python -c "import datetime as dt; t=dt.datetime.utcnow().date(); print(t - dt.timedelta(days=(t.weekday()-4)%7))")
           DONE=$(python -c "import json,os; p='results/accel_picks_status.json'; print(json.load(open(p)).get('exported_week','') if os.path.exists(p) else '')")
           echo "직전 금요일 $FRI / 마지막 산출 ${DONE:-없음}"
-          if [ -n "$DONE" ] && [ ! "$DONE" \< "$FRI" ]; then
+          if [ "${{ inputs.backfill }}" = "true" ]; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "backfill 요청 — 주차 중복 검사를 건너뛴다."
+          elif [ -n "$DONE" ] && [ ! "$DONE" \< "$FRI" ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
             echo "[SKIP] 이번 주차는 이미 산출됐다 - 예비 실행을 건너뛴다."
           else
@@ -129,7 +142,14 @@ jobs:
         if: steps.due.outputs.skip != 'true'
         run: python leaders_build.py update
 
+      # 2026-10-19 — 캐시 market.db 에 243종 이력만 남아 있던 고장의 복구 경로.
+      #   이력 52주 미만 종목을 지우고 2018년부터 다시 계산한다.
+      - name: 이력 결손 재적재 (backfill)
+        if: steps.due.outputs.skip != 'true' && inputs.backfill
+        run: python leaders_build.py newsyms
+
       - name: 이익 가속 신호 발행
+        id: publish
         if: steps.due.outputs.skip != 'true'
         run: python leaders_accel.py
 
@@ -279,6 +299,22 @@ jobs:
             git commit -m "auto: 주도주 편입 후보 $(date -u +%Y-%m-%d)"
             git push origin main
           fi
+
+      # 계약 위반으로 잡이 실패해도 갱신된 DB·캐시는 남긴다(위 ⚠️ 참조).
+      # 단, 이익 가속 신호 발행까지 성공했을 때만 — 반쯤 쓴 DB 를 저장하지 않게.
+      - name: market.db 저장
+        if: always() && steps.due.outputs.skip != 'true' && steps.publish.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: data/market.db
+          key: marketdb-${{ github.run_id }}
+
+      - name: 주봉 가격·재무 캐시 저장
+        if: always() && steps.due.outputs.skip != 'true' && steps.publish.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-${{ github.run_id }}
 
       - name: 산출물 계약 위반 보고 (위반 시 실패)
         if: steps.due.outputs.skip != 'true'

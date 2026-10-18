@@ -138,7 +138,22 @@ def c_accel():
     return [chk(u >= 500, BLOCK, f"universe {u} (<500) — 가격 DB 붕괴"),
             chk(u >= 1000, WARN, f"universe {u} (<1000) — 수집 범위 미달"),
             chk(_age(d.get("signal_week")) <= 16, BLOCK, f"signal_week {d.get('signal_week')} 16일 초과"),
-            chk(_age(wk) <= 16, WARN, f"신호가 있는 마지막 주 {wk}")]
+            chk(_age(wk) <= 16, WARN, f"신호가 있는 마지막 주 {wk}")] + _accel_funnel(d)
+
+
+def _accel_funnel(d):
+    """2026-10-19 — 최신 주 universe 만 보면 '이력이 비어 있는' 고장을 못 잡는다.
+    09-14~09-28 universe 2~3종, 7~9월 243종이었는데 계약은 통과했다.
+    · 최근 26주 중 가장 얇은 주의 universe
+    · 최신 주에 이익가속을 실제로 계산할 수 있었던 비율(재무 확인/유동성 통과)"""
+    fn = d.get("funnel") or {}
+    if not fn:
+        return []
+    thin = min(v["universe"] for v in fn.values())
+    last = fn[max(fn)]
+    cov = last["acc_known"] / last["liquid"] if last.get("liquid") else 0
+    return [chk(thin >= 1000, WARN, f"최근 26주 중 universe 최저 {thin} (<1000) — 과거 이력 결손"),
+            chk(cov >= 0.5, WARN, f"이익가속 계산 가능 {cov:.0%} (<50%) — 재무 이력 결손")]
 
 
 def c_curves():
