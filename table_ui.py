@@ -15,6 +15,14 @@
    · 결측은 칠하지 않는다. 없는 값을 있는 척하지 않는다.
 2) 필터    : 8행 이상 표 위에 🔎 필터 — 검색 · 열 조건(숫자 범위/값 선택/글자 포함) · 열 숨기기.
    호출부에서 st.dataframe(..., filters=False) 로 끌 수 있다.
+3) 표 형식 (2026-10-19 사용자 규칙 — 모든 표 공통)
+   ① 가장 좌측 열은 행번호 'No.' (필터 후 1부터 다시 센다)
+   ② 좌측 열 순서: No. → 종목 → 코드 → 시총 (있는 것만). 종목명/티커/sym 등은 이름을 통일
+   ③ 칸 안의 단위는 지우고 머리행(1행)에 적는다: '+12.3%' → 12.3, 열 이름 '수익률(%)'
+      · 억/조 는 억으로, K/M/B/T 는 B 로 환산해 한 단위로 맞춘다
+      · ✅/❌ 같은 판정 기호가 붙은 열은 바꾸지 않는다 — 숫자만 남기면 판정이 사라진다
+   ④ 모든 표 바로 밑에 '출처 · 마지막 갱신' — src()/st.dataframe(src=, asof=) 로 준다.
+      안 주면 '출처 미지정'으로 그대로 드러낸다(빈칸을 숨기지 않는다)
 """
 from __future__ import annotations
 
@@ -32,7 +40,7 @@ A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배�
 MIN_ROWS_FOR_FILTER = 8
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
-NO_COLOR = {'회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
+NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
             '그 해 회차', '신호', '표본', '신호 수', '첫 신호', '마지막 신호', '기준일', '날짜'}
 # '수준' 열 — 부호가 아니라 크기라서 칠하지 않는다(음수가 있어도: PER<0 은 적자일 뿐)
 _LEVEL = re.compile(r'PER|PBR|PSR|PEG|EV/|시총|가격|현재가|진입가|매수가|평단|종가|52주고|52주저|'
@@ -232,10 +240,196 @@ def _restyle(sty: Styler, keep) -> Styler:
     return new
 
 
+# ── 표 형식 (2026-10-19) ───────────────────────────────────────────
+_ALIAS = {'종목명': '종목', '기업': '종목', '기업명': '종목', 'name': '종목',
+          '티커': '코드', 'Ticker': '코드', 'ticker': '코드', 'sym': '코드',
+          'Symbol': '코드', 'symbol': '코드', '심볼': '코드', '종목코드': '코드'}
+_ROWNO = {'#', 'No', 'No.', 'no', '순번', '번호'}
+_CELL_RE = re.compile(r'^\s*([+\-−]?)\s*([$₩]?)\s*([+\-−]?)(\d[\d,]*(?:\.\d+)?)\s*'
+                      r'(%p|%|bp|p|x|배|억|조|원|B|M|K|T)?\s*$')
+_SCALE = {'억': ('억', 1), '조': ('억', 1e4),
+          'K': ('B', 1e-6), 'M': ('B', 1e-3), 'B': ('B', 1), 'T': ('B', 1e3)}
+_MISSING = {'', '-', '—', '·', 'None', 'nan', 'NaN', 'N/A', 'n/a'}
+
+
+def _unit_convert(col: pd.Series):
+    """칸 단위가 한 가지로 모이는 글자 열이면 (숫자 열, 단위) — 아니면 None."""
+    if col.dtype != object:
+        return None
+    vals = col.dropna().astype(str).str.strip()
+    vals = vals[~vals.isin(_MISSING)]
+    if len(vals) == 0:
+        return None
+    out, units, curs = {}, set(), set()
+    for i, v in vals.items():
+        m = _CELL_RE.match(v)
+        if not m:
+            return None
+        s1, d, s2, n, u = m.groups()
+        x = float(n.replace(',', '')) * (-1 if '-' in (s1 + s2) or '−' in (s1 + s2) else 1)
+        if d:
+            curs.add(d)
+        if u in _SCALE:
+            base, k = _SCALE[u]
+            x *= k
+            u = base
+        if u:
+            units.add(u)
+        out[i] = x
+    if len(units) > 1 or len(curs) > 1 or not (units or curs):
+        return None
+    u = units.pop() if units else ''
+    c = curs.pop() if curs else ''
+    if c == '₩':
+        u = u + '원' if u in ('', '억') else u
+    elif c == '$':
+        u = '$' + u
+    num = pd.Series(float('nan'), index=col.index)
+    for i, x in out.items():
+        num[i] = x
+    return num, u
+
+
+# 숫자 열인데 머리에 단위가 없는 것 — 이름으로 단위를 단다(규칙 ③)
+_HEAD_UNIT = [
+    (re.compile(r'^(평균|중앙값|시장대비|그주상승|고점대비|저점대비|YTD|매출YoY|매출성장|GPM|OPM|NPM|ROE|ROA|'
+                r'이후\d+주|\d+개월상승|향후\dM계절성|수익률|상승률|승률|알파|MDD)$'), '%'),
+    (re.compile(r'^(매출가속|이익가속|ΔGPM|ΔOPM|ΔNPM|ΔROE)$'), '%p'),
+    (re.compile(r'^(RS\d*|PER|PBR|PSR|PEG|손익비)$'), '배'),
+    (re.compile(r'^(신호|신호 수|표본)$'), '건'),
+    (re.compile(r'^(누적|보유|청산|통과수)$'), '종'),
+    (re.compile(r'^(종가|현재가|52주고|52주저|진입가|매수가|평단)$'), '현지통화'),
+]
+
+
+def _head_unit(name: str, col: pd.Series):
+    if '(' in name or '%' in name or col.dtype.kind not in 'fi':
+        return None
+    for rx, u in _HEAD_UNIT:
+        if rx.match(name):
+            return u
+    return None
+
+
+def normalize(df: pd.DataFrame):
+    """(새 df, 이름 변환표 old→new, 단위를 걷어낸 열 집합)."""
+    df = df.copy()
+    if not isinstance(df.index, pd.RangeIndex) and df.index.name not in (None, ''):
+        df = df.reset_index()
+    elif not isinstance(df.index, pd.RangeIndex) and df.index.dtype == object:
+        df = df.reset_index().rename(columns={'index': '항목'})
+    df = df.reset_index(drop=True)
+    ren, conv = {}, set()
+    cols = [str(c) for c in df.columns]
+    for c in df.columns:
+        new = c
+        if c in _ALIAS and _ALIAS[c] not in cols and _ALIAS[c] not in ren.values():
+            new = _ALIAS[c]
+        r = _unit_convert(df[c])
+        if r is not None:
+            num, u = r
+            df[c] = num
+            bare = u.lstrip('$')
+            if u not in str(new) and not (bare and bare in str(new)):
+                new = f'{new}({u})'
+            conv.add(new)
+        else:
+            hu = _head_unit(str(new), df[c])
+            if hu:
+                new = f'{new}({hu})'
+        if new != c:
+            ren[c] = new
+    df = df.rename(columns=ren)
+    n = len(df)
+    for c in list(df.columns):
+        if str(c) in _ROWNO and n and pd.to_numeric(df[c], errors='coerce').tolist() == list(range(1, n + 1)):
+            df = df.drop(columns=[c])
+    df.insert(0, 'No.', range(1, n + 1))
+    cap = next((c for c in df.columns if str(c).startswith('시총') or '시가총액' in str(c)), None)
+    lead = ['No.'] + [c for c in ('종목', '코드', cap) if c is not None and c in df.columns]
+    df = df[lead + [c for c in df.columns if c not in lead]]
+    return df, ren, conv
+
+
+def _remap_subset(sub, ren):
+    if sub is None:
+        return None
+    if isinstance(sub, str):
+        return ren.get(sub, sub)
+    if isinstance(sub, (list, tuple, pd.Index)) and not (isinstance(sub, tuple) and len(sub) == 2
+                                                       and not isinstance(sub[0], str)):
+        return [ren.get(x, x) for x in sub]
+    return sub
+
+
+def _safe(func):
+    def f(*a, **k):
+        try:
+            return func(*a, **k)
+        except Exception:
+            return ''
+    return f
+
+
+def restyle_for(sty: Styler, new_df: pd.DataFrame, ren: dict, conv: set) -> Styler:
+    """호출부 Styler 의 서식·색 함수를 정규화한 표로 옮긴다."""
+    new = new_df.style
+    for fn, args, kw in sty._todo:
+        args = list(args)
+        if args:
+            args[0] = _safe(args[0]) if callable(args[0]) else args[0]
+            args[-1] = _remap_subset(args[-1], ren)
+        new._todo.append((fn, tuple(args), kw))
+    pos = {c: i for i, c in enumerate(new_df.columns)}
+    for (r, c), f in sty._display_funcs.items():
+        old = sty.data.columns[c]
+        nm = ren.get(old, old)
+        if nm in pos and nm not in conv:
+            new._display_funcs[(r, pos[nm])] = f
+    new.format({c: (lambda v: '-' if pd.isna(v) else f'{v:,.0f}') if str(c).endswith('원)')
+                else (lambda v: '-' if pd.isna(v) else f'{v:,.1f}') for c in conv})
+    for a in ('table_styles', 'css', 'table_attributes'):
+        if hasattr(sty, a):
+            setattr(new, a, getattr(sty, a))
+    return new
+
+
+_FMT_SPEC = re.compile(r'%[+\-#0 ]*\d*(?:\.\d+)?[dfeEgGis]')
+
+
+def strip_fmt_units(cfg: dict) -> dict:
+    """column_config 의 표시 포맷이 칸 안에 단위를 다시 붙이지 않게('$%.1fB' → '%.1f')."""
+    for k, v in list(cfg.items()):
+        if not isinstance(v, dict):
+            continue
+        tc = v.get('type_config') or {}
+        f = tc.get('format')
+        if isinstance(f, str) and '%' in f:
+            m = _FMT_SPEC.search(f.replace('%%', ''))
+            if m and m.group(0) != f:
+                v = dict(v)
+                v['type_config'] = dict(tc, format=m.group(0))
+                cfg[k] = v
+    return cfg
+
+
+def src(text: str, asof: str | None = None):
+    """이후 그려지는 표들의 출처·갱신일. 다음 src() 호출 전까지 유지된다."""
+    import streamlit as st
+    st.session_state['_tbl_src'] = (text, asof)
+
+
+def _footer(st, text, asof):
+    if not text:
+        text, asof = st.session_state.get('_tbl_src') or (None, None)
+    st.caption(f"출처: {text or '⚠️ 미지정'} · 마지막 갱신: {asof or '미상'}")
+
+
 # ── 설치 ──────────────────────────────────────────────────────────
 def begin_run(st):
     """스크립트 매 실행 맨 위에서 호출 — 같은 줄의 표가 여러 번 그려질 때 키 순번을 0부터."""
     st.session_state['_tbl_seen'] = {}
+    st.session_state['_tbl_src'] = (None, None)
 
 
 def install(st):
@@ -245,23 +439,42 @@ def install(st):
         return
     orig = st.dataframe
 
-    def dataframe(data=None, *a, filters=None, color=True, **kw):
+    def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, **kw):
+        try:
+            return _dataframe(data, *a, filters=filters, color=color, **kw)
+        finally:
+            _footer(st, src, asof)
+
+    def _dataframe(data=None, *a, filters=None, color=True, **kw):
         try:
             sty = data if isinstance(data, Styler) else None
             df = sty.data if sty is not None else data
             if not isinstance(df, pd.DataFrame):
                 return orig(data, *a, **kw)
 
+            # 표 형식(행번호·좌측 열 순서·단위는 머리행) — 2026-10-19
+            df, ren, conv = normalize(df)
+            if sty is not None:
+                sty = restyle_for(sty, df, ren, conv)
+            data = sty if sty is not None else df
+            kw['hide_index'] = True
+            if isinstance(kw.get('column_config'), dict):
+                kw['column_config'] = strip_fmt_units(
+                    {ren.get(k, k): v for k, v in kw['column_config'].items()})
+                kw['column_config'].setdefault('No.', st.column_config.NumberColumn('No.', format='%d', width='small'))
+            if kw.get('column_order'):
+                kw['column_order'] = ['No.'] + [ren.get(c, c) for c in kw['column_order'] if c != 'No.']
+
             # 표시 소수 1자리(2026-08-17 규칙) — 호출부가 column_config 를 안 줬을 때만
             if 'column_config' not in kw:
                 cfg = {c: st.column_config.NumberColumn(format='%.1f')
                        for c in df.columns if pd.api.types.is_float_dtype(df[c])}
-                if cfg:
-                    kw['column_config'] = cfg
+                cfg['No.'] = st.column_config.NumberColumn('No.', format='%d', width='small')
+                kw['column_config'] = cfg
 
             use_f = filters if filters is not None else len(df) >= MIN_ROWS_FOR_FILTER
             if use_f and not kw.get('on_select'):
-                fr = sys._getframe(1)
+                fr = sys._getframe(2)   # dataframe() → _dataframe() 한 겹 더
                 base = f'tf|{os.path.basename(fr.f_code.co_filename)}:{fr.f_lineno}'
                 seen = st.session_state.setdefault('_tbl_seen', {})
                 seen[base] = seen.get(base, -1) + 1
@@ -270,7 +483,9 @@ def install(st):
                 if not keep.all():
                     if sty is not None:
                         sty = _restyle(sty, keep)
-                    df = df[keep]
+                        sty.data['No.'] = range(1, len(sty.data) + 1)
+                    df = df[keep].copy()
+                    df['No.'] = range(1, len(df) + 1)
                 if hide:
                     order = kw.get('column_order') or list(df.columns)
                     kw['column_order'] = [c for c in order if c not in hide]
