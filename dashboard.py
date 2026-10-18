@@ -1542,14 +1542,32 @@ with t_lead, guard('주도주'):
                     "실측상 11회를 넘어가면 시장 대비 초과수익이 꺾인다.")
 
                 # ── 이익 가속: 주차별 조회 ────────────────────────────
+                # 2026-10-19 — 신호 0종 주차는 목록에서 빠져 '09-07 에서 멈춘' 것처럼 보였다.
+                #   실제 산출은 매주 돌고 있었다. 최근 26주는 0종이어도 싣고,
+                #   그 주 조건별 통과 수(깔때기)를 같이 보여 '진짜 없음'과 '데이터 고장'을 가른다.
                 _wk = _ac.get('weeks') or {}
-                _wks = sorted(_wk, reverse=True)
+                _fn = _ac.get('funnel') or {}
+                _wks = sorted(set(_wk) | set((_ac.get('dates') or [])[-26:]), reverse=True)
                 st.markdown("#### 📅 주차별 조회 — 그 주에 함께 걸렸던 종목 전부")
+                st.caption(f"최신 산출 주차 **{_ac.get('signal_week', '?')}** · "
+                           f"생성 {_ac.get('generated', '?')} · 유니버스 {_ac.get('universe', 0):,}종 "
+                           "— 매주 토요일 새벽(KST) 자동 갱신. 0종인 주도 목록에 나옵니다.")
                 _wpick = st.selectbox(
-                    f"주차 선택 — 신호가 있었던 {len(_wks)}주",
+                    f"주차 선택 — 최근 26주 + 신호가 있었던 주 ({len(_wks)}주)",
                     _wks, index=0, key="accel_wk",
-                    format_func=lambda w: f"{w}  ({len(_wk[w])}종)")
-                _wr = _wk[_wpick]
+                    format_func=lambda w: f"{w}  ({len(_wk.get(w, []))}종)")
+                _wr = _wk.get(_wpick, [])
+                if _wpick in _fn:
+                    _f = _fn[_wpick]
+                    st.dataframe(pd.DataFrame([{
+                        '유니버스': _f['universe'], '유동성 통과': _f['liquid'],
+                        '재무 확인됨': _f['acc_known'], '이익·매출 가속': _f['acc'],
+                        '주간 +10%': _f['surge'], '최종 신호': _f['final']}]),
+                        use_container_width=True, hide_index=True, row_height=25)
+                    if not _wr:
+                        st.info("이 주는 조건을 모두 통과한 종목이 없습니다. "
+                                "'재무 확인됨'이 유동성 통과의 절반 아래면 시장이 아니라 "
+                                "재무 데이터 수집 문제를 의심하십시오.")
                 _wf = [r['f52'] for r in _wr if r.get('f52') is not None]
                 _wc = st.columns(4)
                 _wc[0].metric("그 주 신호", f"{len(_wr)}종")

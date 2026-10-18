@@ -393,8 +393,24 @@ def build():
         except Exception:
             pass
 
+    # ── 주차별 깔때기 (2026-10-19) ─────────────────────────────────
+    # 09-14 이후 신호 0종이 6주 이어졌는데 '진짜 없음'인지 '데이터 고장'인지
+    # 화면에서 가를 수 없었다. 조건을 하나씩 통과한 종목 수를 주차별로 싣는다.
+    # 재무 커버리지(acc_known)가 무너지면 그건 시장이 아니라 파이프라인 문제다.
+    liq = (M["adv_20d"] >= MIN_ADV) & (M["marcap"] >= MIN_MC)
+    funnel = {}
+    for tt in px.index[-26:]:
+        L = liq.loc[tt]
+        funnel[str(tt.date())] = dict(
+            universe=int(px.loc[tt].notna().sum()),
+            liquid=int(L.sum()),
+            acc_known=int((L & M["ACC"].loc[tt].notna()).sum()),
+            acc=int((L & (M["ACC"].loc[tt] == 1)).sum()),
+            surge=int((L & (M["ret_1w"].loc[tt] >= SURGE)).sum()),
+            final=int(g.loc[tt].sum()))
+
     cands = weeks.get(str(last.date()), [])
-    out = dict(generated=str(pd.Timestamp.today().date()),
+    out = dict(funnel=funnel, generated=str(pd.Timestamp.today().date()),
                signal_week=str(last.date()),
                universe=int(px.loc[last].notna().sum()),
                rule=dict(surge=SURGE, min_adv=MIN_ADV, min_mc=MIN_MC,
