@@ -41,7 +41,7 @@ jobs:
       #   universe_syms 는 아예 FileNotFoundError 로 죽었다(19일간 조용히).
       #   캐시가 있으면 증분으로 끝나고, 복원에 실패해도 지금과 똑같이 동작한다.
       - name: SEC 주식수 캐시 복원/저장
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/shares_cache
           key: shares-cache-${{ github.run_id }}
@@ -71,7 +71,7 @@ jobs:
       # 이게 채워져 있으면 marketcap_refresh 의 MAX_FETCH(하루 600종) 구간이 비어서
       # 그냥 지나간다.
       - name: 주봉 가격 캐시 복원/저장
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/leaders_cache
           key: leaders-cache-${{ github.run_id }}
@@ -293,4 +293,23 @@ jobs:
       - name: 실패 시 텔레그램 (잡이 어떤 스텝에서 죽어도 울린다)
         if: failure()
         run: python tools/notify_ci_failure.py
+        continue-on-error: true
+
+      # 2026-10-19 — actions/cache@v4 는 잡이 성공해야만 저장한다. weekly-accel 에서
+      #   검사 단계 실패로 market.db 가 5일간 한 번도 저장되지 않아 같은 고장이 반복됐다.
+      #   증분 캐시는 실패한 실행이 받아둔 것도 남겨야 다음 실행이 이어 받는다.
+      - name: 캐시 저장 — data/shares_cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/shares_cache
+          key: shares-cache-${{ github.run_id }}
+        continue-on-error: true
+
+      - name: 캐시 저장 — data/leaders_cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-${{ github.run_id }}
         continue-on-error: true

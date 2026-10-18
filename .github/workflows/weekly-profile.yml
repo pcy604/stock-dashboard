@@ -34,7 +34,7 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: 장기 종가 캐시 복원/저장 (증분 핵심)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/longcache
           key: longcache-${{ github.run_id }}
@@ -47,7 +47,7 @@ jobs:
       #   STALE_DAYS=20 이 아무 역할도 못 했다. 실측 1시간 이상(원래 4분).
       #   같은 함정을 data/leaders_cache 도 갖고 있었다(그쪽은 아예 죽었다).
       - name: SEC 주식수 캐시 복원/저장 (없으면 매주 3천종을 새로 받는다)
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: data/shares_cache
           key: shares-cache-${{ github.run_id }}
@@ -227,3 +227,22 @@ jobs:
               print(f"::error::{r['label']} — {r['note']} (마지막 {r['date']})")
           sys.exit(1 if bad else 0)
           PY
+
+      # 2026-10-19 — actions/cache@v4 는 잡이 성공해야만 저장한다. weekly-accel 에서
+      #   검사 단계 실패로 market.db 가 5일간 한 번도 저장되지 않아 같은 고장이 반복됐다.
+      #   증분 캐시는 실패한 실행이 받아둔 것도 남겨야 다음 실행이 이어 받는다.
+      - name: 캐시 저장 — data/longcache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/longcache
+          key: longcache-${{ github.run_id }}
+        continue-on-error: true
+
+      - name: 캐시 저장 — data/shares_cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/shares_cache
+          key: shares-cache-${{ github.run_id }}
+        continue-on-error: true
