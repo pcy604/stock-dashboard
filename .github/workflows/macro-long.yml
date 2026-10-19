@@ -1,0 +1,32 @@
+# 매크로 장기 시계열(백테스트용) 수집 — 수동 실행 또는 macro-* 브랜치에서 수집 스크립트가 바뀔 때
+name: macro-long
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['macro-*']
+    paths: ['tools/fetch_macro_long.py', '.github/workflows/macro-long.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FRED_KEY: ${{ secrets.FRED_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas pyarrow requests yfinance
+      - run: python tools/fetch_macro_long.py
+      - name: 결과 커밋
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add -f data/research/macro_long_fred.parquet data/research/macro_long_px.parquet
+          git commit -m "auto: 매크로 장기 시계열 $(date -u +%F)" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"
