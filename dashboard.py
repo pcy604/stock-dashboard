@@ -5083,7 +5083,7 @@ def _tab_analysis():
                                         '현재가대비(%)': round((_b['implied'][_pp] / price_now - 1) * 100, 1)}
                                         for _pp in (10, 25, 50, 75, 90)]), filters=False, color=True,
                                         use_container_width=False)
-                                st.caption(f"{_b['why']}. 월말 시가총액(종가 × **현재** 발행주식수) ÷ 그 시점에 공시돼 있던 TTM "
+                                st.caption(f"표본 {_b['n']}개월{' ⚠️ 2년 미만 — 분위가 불안정하다' if _b['n'] < 24 else ''}. {_b['why']}. 월말 시가총액(종가 × **현재** 발행주식수) ÷ 그 시점에 공시돼 있던 TTM "
                                            f"({'순이익' if _b['kind']=='P/E' else '매출' if _b['kind']=='P/S' else '자본'}, 분기말+45일). "
                                            "⚠️ 증자·자사주로 주식수가 크게 변한 종목은 과거 멀티플이 왜곡된다. "
                                            "⚠️ **10분위는 '바닥'이 아니다** — 이익이 꺾이는 구간에서는 분모가 줄어 밴드 하단도 뚫린다. "
