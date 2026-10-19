@@ -431,6 +431,50 @@ def strip_fmt_units(cfg: dict) -> dict:
     return cfg
 
 
+# ── 종목 클릭 → 종목 분석 (2026-10-19) ────────────────────────────
+NAV = {'fn': None}
+
+
+def set_nav(fn):
+    """dashboard 가 '종목 분석으로 이동' 함수를 꽂는다. 표의 종목·코드 칸 클릭 → fn(코드)."""
+    NAV['fn'] = fn
+
+
+# ── 열 폭을 내용에 맞춘다 (2026-10-19) ────────────────────────────
+#   Streamlit 기본 폭은 내용과 무관하게 넓다(No. 열이 숫자 한 자리에 100px+).
+#   머리글·값 중 가장 긴 것 기준으로 px 를 잡고, 표 전체 폭도 내용만큼만 쓴다.
+import unicodedata as _ud
+
+
+def _dw(s: str) -> int:
+    return sum(2 if _ud.east_asian_width(ch) in ('W', 'F') else 1 for ch in s)
+
+
+def _fmt_len(v) -> int:
+    if v is None or (isinstance(v, float) and math.isnan(v)):
+        return 1
+    if isinstance(v, float):
+        return len(f'{v:,.1f}')
+    return _dw(str(v))
+
+
+def auto_widths(df: pd.DataFrame, cfg: dict) -> dict:
+    cfg = dict(cfg or {})
+    for c in df.columns:
+        col = df[c].head(300)
+        # 머리글(12px)은 값(12.5px 고정폭 숫자)보다 좁게 친다 — 머리글이 열 폭을 지배하지 않게
+        hw = _dw(str(c)) * 6.6 + 30
+        vw = max([_fmt_len(v) for v in col.tolist()] or [1]) * 7.6 + 22
+        px = int(min(max(hw, vw, 44), 340))
+        cur = cfg.get(c)
+        if isinstance(cur, dict):
+            if not cur.get('width'):
+                cur = dict(cur); cur['width'] = px; cfg[c] = cur
+        elif cur is None:
+            cfg[c] = {'width': px}
+    return cfg
+
+
 def src(text: str, asof: str | None = None):
     """이후 그려지는 표들의 출처·갱신일. 다음 src() 호출 전까지 유지된다."""
     import streamlit as st
@@ -479,7 +523,7 @@ def install(st):
             if isinstance(kw.get('column_config'), dict):
                 kw['column_config'] = strip_fmt_units(
                     {ren.get(k, k): v for k, v in kw['column_config'].items()})
-                kw['column_config'].setdefault('No.', st.column_config.NumberColumn('No.', format='%d', width='small'))
+                kw['column_config'].setdefault('No.', st.column_config.NumberColumn('No.', format='%d'))
             if kw.get('column_order'):
                 kw['column_order'] = ['No.'] + [ren.get(c, c) for c in kw['column_order'] if c != 'No.']
 
@@ -487,16 +531,16 @@ def install(st):
             if 'column_config' not in kw:
                 cfg = {c: st.column_config.NumberColumn(format='%.1f')
                        for c in df.columns if pd.api.types.is_float_dtype(df[c])}
-                cfg['No.'] = st.column_config.NumberColumn('No.', format='%d', width='small')
+                cfg['No.'] = st.column_config.NumberColumn('No.', format='%d')
                 kw['column_config'] = cfg
 
+            fr = sys._getframe(2)   # dataframe() → _dataframe() 한 겹 더
+            base = f'tf|{os.path.basename(fr.f_code.co_filename)}:{fr.f_lineno}'
+            seen = st.session_state.setdefault('_tbl_seen', {})
+            seen[base] = seen.get(base, -1) + 1
+            key = f'{base}#{seen[base]}'
             use_f = filters if filters is not None else len(df) >= MIN_ROWS_FOR_FILTER
             if use_f and not kw.get('on_select'):
-                fr = sys._getframe(2)   # dataframe() → _dataframe() 한 겹 더
-                base = f'tf|{os.path.basename(fr.f_code.co_filename)}:{fr.f_lineno}'
-                seen = st.session_state.setdefault('_tbl_seen', {})
-                seen[base] = seen.get(base, -1) + 1
-                key = f'{base}#{seen[base]}'
                 _, hide, keep = _filter_ui(st, df, key)
                 if not keep.all():
                     if sty is not None:
@@ -509,6 +553,29 @@ def install(st):
                     kw['column_order'] = [c for c in order if c not in hide]
                 if 'height' in kw and isinstance(kw['height'], int) and len(df) < len(data.data if isinstance(data, Styler) else data):
                     kw['height'] = min(kw['height'], 35 + 26 * max(len(df), 1) + 4)
+
+            # 열 폭 = 내용 폭, 표 폭 = 열 합 (컨테이너를 억지로 채우지 않는다)
+            kw['column_config'] = auto_widths(df, kw.get('column_config'))
+            kw.pop('use_container_width', None)
+            kw['width'] = 'content'
+
+            # 종목·코드 칸 클릭 → 종목 분석으로 (호출부가 선택을 따로 쓰지 않을 때만)
+            if NAV['fn'] and '코드' in df.columns and not kw.get('on_select') and 'key' not in kw:
+                codes = df['코드'].astype(str).tolist()
+                skey = key + '|sel'
+
+                def _go(skey=skey, codes=codes):
+                    ev = st.session_state.get(skey) or {}
+                    sel = ev.get('selection', {}) if isinstance(ev, dict) else getattr(ev, 'selection', {})
+                    for r, c in (sel.get('cells') or []):
+                        if c in ('종목', '코드') and 0 <= r < len(codes) and codes[r] not in ('', 'nan', 'None'):
+                            NAV['fn'](codes[r])
+                            return
+                kw.update(on_select=_go, selection_mode='single-cell', key=skey)
+                cc = kw['column_config']
+                for c in ('종목', '코드'):
+                    if isinstance(cc.get(c), dict):
+                        cc[c] = dict(cc[c], help='클릭하면 종목 분석으로 이동')
 
             if color:
                 if sty is None:

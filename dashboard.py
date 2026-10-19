@@ -368,8 +368,11 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
   flex-wrap: wrap; }
 .stTabs [data-baseweb="tab"] { border-radius: var(--radius-sm) !important; padding: 10px 14px !important;
   color: var(--ink-3) !important; background: transparent; min-height: 44px; }
-.stTabs [aria-selected="true"] { background: var(--hero) !important; color: #FFFFFF !important; }
-.stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] div { color: #FFFFFF !important; }
+/* 선택된 탭 — 검은 면 대신 연한 파랑 면 + 파랑 글자(2026-10-19 사용자 피드백) */
+.stTabs [aria-selected="true"] { background: var(--accent-2) !important; color: var(--accent) !important;
+  box-shadow: inset 0 0 0 1px rgba(36,83,200,.18); }
+.stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] div { color: var(--accent) !important; font-weight: 700 !important; }
+.stTabs [data-baseweb="tab"]:hover { background: rgba(17,24,39,.04); }
 .stTabs button[data-baseweb="tab"] { border-radius: 10px !important; }
 .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none !important; }
 
@@ -1124,7 +1127,18 @@ with st.expander("📖 처음이신가요? — 30초 사용설명 (화면 안내
 #   이유로 지웠는데, 입력이 없던 진짜 원인은 **보유 종목을 넣을 화면 자체가
 #   없었기 때문**이다(data/portfolio.json 은 git 이력에 한 번도 존재한 적이 없다).
 #   엔진(guardrail.evaluate)과 헬퍼(_fetch_pf_price·_pf_trail)는 내내 살아 있었다.
-tab_screen, tab7, tab4, tab_pf, tab_rep = st.tabs([
+# 2026-10-19 — 표의 종목·코드 칸 클릭 → 종목 분석 탭으로. 탭에 key 를 줘야 코드에서 고를 수 있다.
+_MAIN_TAB_ANALYSIS = "🔍 종목 분석"
+
+
+def _goto_analysis(code):
+    st.session_state['analyze_sym'] = str(code).strip().upper() if not str(code).strip().isdigit() else str(code).strip()
+    st.session_state.pop('sym8_cands', None)
+    st.session_state['main_tab'] = _MAIN_TAB_ANALYSIS
+
+
+_tui.set_nav(_goto_analysis)
+tab_screen, tab7, tab4, tab_pf, tab_rep = st.tabs(key='main_tab', on_change='rerun', tabs=[
     "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오", "📰 시황 리포트"])
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
