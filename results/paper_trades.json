@@ -73473,6 +73473,888 @@
       ],
       "status": "open",
       "realized": {}
+    },
+    {
+      "id": "RAMP_2026-10-19",
+      "sym": "RAMP",
+      "name": "LiveRamp Holdings, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 38.225,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "거래량폭발",
+        "컵위드핸들",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "DOCU_2026-10-19",
+      "sym": "DOCU",
+      "name": "DOCUSIGN, INC.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 76.5375,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MANH_2026-10-19",
+      "sym": "MANH",
+      "name": "MANHATTAN ASSOCIATES INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 225.825,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SCI_2026-10-19",
+      "sym": "SCI",
+      "name": "SERVICE CORP INTERNATIONAL",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 80.98,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AVTR_2026-10-19",
+      "sym": "AVTR",
+      "name": "Avantor, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 16.315,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "GSAT_2026-10-19",
+      "sym": "GSAT",
+      "name": "Globalstar, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 83.305,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AMG_2026-10-19",
+      "sym": "AMG",
+      "name": "Affiliated Managers Group",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 384.145,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PAYC_2026-10-19",
+      "sym": "PAYC",
+      "name": "Paycom Software, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 253.46,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RRC_2026-10-19",
+      "sym": "RRC",
+      "name": "RANGE RESOURCES CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 43.215,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PCTY_2026-10-19",
+      "sym": "PCTY",
+      "name": "Paylocity Holding Corp",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 166.405,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "VNOM_2026-10-19",
+      "sym": "VNOM",
+      "name": "Viper Energy, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 45.58,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HNGE_2026-10-19",
+      "sym": "HNGE",
+      "name": "Hinge Health, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 103.695,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "THG_2026-10-19",
+      "sym": "THG",
+      "name": "HANOVER INSURANCE GROUP, INC.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 230.005,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CHRD_2026-10-19",
+      "sym": "CHRD",
+      "name": "Chord Energy Corp",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 154.94,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RHP_2026-10-19",
+      "sym": "RHP",
+      "name": "Ryman Hospitality Properties, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 126.915,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ACA_2026-10-19",
+      "sym": "ACA",
+      "name": "Arcosa",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 147.27,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MTDR_2026-10-19",
+      "sym": "MTDR",
+      "name": "Matador Resources Co",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 57.64,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "VFC_2026-10-19",
+      "sym": "VFC",
+      "name": "V F CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 17.18,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "LYFT_2026-10-19",
+      "sym": "LYFT",
+      "name": "Lyft, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 17.0425,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "VAL_2026-10-19",
+      "sym": "VAL",
+      "name": "Valaris Ltd",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 89.64,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MUR_2026-10-19",
+      "sym": "MUR",
+      "name": "MURPHY OIL CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 42.6194,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "OLLI_2026-10-19",
+      "sym": "OLLI",
+      "name": "Ollie's Bargain Outlet Holdings, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 93.88,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RXO_2026-10-19",
+      "sym": "RXO",
+      "name": "RXO, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 28.665,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SYNA_2026-10-19",
+      "sym": "SYNA",
+      "name": "SYNAPTICS Inc",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 117.335,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CVSA_2026-10-19",
+      "sym": "CVSA",
+      "name": "Covista Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 129.33,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ITGR_2026-10-19",
+      "sym": "ITGR",
+      "name": "Integer Holdings Corp",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 126.755,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "LXP_2026-10-19",
+      "sym": "LXP",
+      "name": "LXP Industrial Trust",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 61.1,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PLMR_2026-10-19",
+      "sym": "PLMR",
+      "name": "Palomar Holdings, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 137.01,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ARLP_2026-10-19",
+      "sym": "ARLP",
+      "name": "ALLIANCE RESOURCE PARTNERS LP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 25.6922,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CBZ_2026-10-19",
+      "sym": "CBZ",
+      "name": "CBIZ, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 54.835,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ATKR_2026-10-19",
+      "sym": "ATKR",
+      "name": "Atkore Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AGYS_2026-10-19",
+      "sym": "AGYS",
+      "name": "Agilysys",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 112.09,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PK_2026-10-19",
+      "sym": "PK",
+      "name": "Park Hotels & Resorts Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 16.195,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "컵위드핸들"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ABM_2026-10-19",
+      "sym": "ABM",
+      "name": "ABM Industries",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 51.5,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AEO_2026-10-19",
+      "sym": "AEO",
+      "name": "American Eagle Outfitters",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 17.875,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BWIN_2026-10-19",
+      "sym": "BWIN",
+      "name": "Baldwin Insurance Group, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 31.875,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CXT_2026-10-19",
+      "sym": "CXT",
+      "name": "Crane NXT, Co.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 56.95,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BQST_2026-10-19",
+      "sym": "BQST",
+      "name": "BQST",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ALRM_2026-10-19",
+      "sym": "ALRM",
+      "name": "Alarm.com",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 57.59,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SKWD_2026-10-19",
+      "sym": "SKWD",
+      "name": "Skyward Specialty Insurance Group, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 60.535,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
     }
   ]
 }
