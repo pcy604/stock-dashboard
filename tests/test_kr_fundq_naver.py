@@ -61,3 +61,19 @@ def test_merge_keeps_dart_fills_gaps_appends_new():
     assert b.fs_div == 'NAVER' and b.updated == '2026-10-19'
     assert st['new'] == 1 and st['mismatch_syms'] == 1   # 매출 26% 차이 → 불일치로 센다
     assert len(df) == 3
+
+
+def test_foreign_currency_dart_values_replaced_and_old_cleared():
+    # DART 가 USD 로 저장된 외국 기업: 겹치는 분기 매출 비율 ~1,400 → 네이버 원화로 덮고 과거는 비움
+    old = pd.DataFrame([
+        dict(sym='950140', year=2025, q=1, revenue=1.0e7, op_income=1.0e6, net_income=8e5, fs_div='CFS', updated='x'),
+        dict(sym='950140', year=2026, q=1, revenue=1.1e7, op_income=1.2e6, net_income=9e5, fs_div='CFS', updated='x'),
+        dict(sym='950140', year=2026, q=2, revenue=1.2e7, op_income=1.3e6, net_income=1e6, fs_div='CFS', updated='x')])
+    new = [dict(sym='950140', year=2026, q=1, revenue=1.5e10, op_income=1.7e9, net_income=1.3e9),
+           dict(sym='950140', year=2026, q=2, revenue=1.7e10, op_income=1.8e9, net_income=1.4e9)]
+    df, st = K.merge(old, new, '2026-10-19')
+    assert st['fx_syms'] == ['950140'] and st['mismatch_syms'] == 0
+    r = df.set_index(['year', 'q'])
+    assert r.loc[(2026, 1), 'revenue'] == 1.5e10
+    assert pd.isna(r.loc[(2025, 1), 'revenue'])          # 단위 모르는 과거는 비운다
+    assert r.loc[(2026, 2), 'fs_div'].endswith('-NAVERFX')

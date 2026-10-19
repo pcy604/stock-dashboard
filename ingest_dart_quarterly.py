@@ -106,6 +106,10 @@ def fetch_batch(codes: list[str], year: int, reprt: str) -> dict:
         acc = _want(row.get('account_nm'))
         if not acc or (row.get('sj_div') or '') != 'IS':      # 손익계산서만
             continue
+        # 2026-10-19 — 외국 기업(950xxx·900xxx)·두산밥캣 등은 USD·CNY 로 공시한다. 원화로 알고 저장해
+        #   PER 이 1,400배 틀어졌다(네이버 대조로 발견). 원화가 아니면 받지 않는다 → 네이버(원화 환산)가 채운다.
+        if (row.get('currency') or 'KRW').upper() != 'KRW':
+            continue
         fs = row.get('fs_div') or 'OFS'
         for yr, field in ((year, 'thstrm_amount'), (year - 1, 'frmtrm_amount')):
             v = _num(row.get(field))

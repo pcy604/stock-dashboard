@@ -100,6 +100,22 @@ def merge(old: pd.DataFrame, new_rows: list[dict], today: str):
     detail = (bad.assign(ratio=bad.revenue_n / bad.revenue)
                  [['sym', 'year', 'q', 'revenue', 'revenue_n', 'ratio']]
                  .sort_values(['sym', 'year', 'q']))
+    # 2026-10-19 — 통화가 다른 DART 값(USD·CNY 공시를 원화로 저장한 것). 겹치는 분기의 매출 비율이
+    #   전부 50배를 넘으면 단위가 다른 것이다(실측: 잉글우드랩 1,144~1,484 = 원/달러, 오가닉티 ~197 = 원/위안).
+    #   이 종목들은 네이버(원화 환산) 값으로 덮고, 네이버가 없는 과거 칸은 단위를 모르므로 비운다.
+    _r = both.assign(_x=both.revenue_n / both.revenue).groupby('sym')._x.agg(['min', 'count'])
+    fx_syms = set(_r[(_r['min'] > 50) & (_r['count'] >= 2)].index)
+    fx_cells = 0
+    if fx_syms:
+        sel = m.sym.isin(fx_syms)
+        for c in FLOWS:
+            has_n = sel & m[f'{c}_n'].notna()
+            m.loc[has_n, c] = m.loc[has_n, f'{c}_n']
+            no_n = sel & m[f'{c}_n'].isna()
+            fx_cells += int(no_n.sum())
+            m.loc[no_n, c] = float('nan')
+        m.loc[sel, 'fs_div'] = m.loc[sel, 'fs_div'].astype(str).str.replace('-NAVERFX', '') + '-NAVERFX'
+        bad_syms = bad_syms - fx_syms
     filled = 0
     for c in FLOWS + BAL:
         fill = m[c].isna() & m[f'{c}_n'].notna()
@@ -114,7 +130,8 @@ def merge(old: pd.DataFrame, new_rows: list[dict], today: str):
     out = pd.concat([m, add[m.columns.intersection(add.columns)]], ignore_index=True)
     out = out.sort_values(key).reset_index(drop=True)
     return out, dict(new=len(add), filled=filled, overlap_syms=len(ov_syms),
-                     mismatch_syms=len(bad_syms), mismatch=sorted(bad_syms)[:20], detail=detail)
+                     mismatch_syms=len(bad_syms), mismatch=sorted(bad_syms)[:20], detail=detail,
+                     fx_syms=sorted(fx_syms), fx_cleared=fx_cells)
 
 
 def main(limit: int | None = None, workers: int = 4):
@@ -153,7 +170,8 @@ def main(limit: int | None = None, workers: int = 4):
     summary = (f"성공 {ok:,}/{tried:,} ({ok_rate:.0%}) · 비12월 결산 {skip:,} · 실패 {len(fail):,} | "
                f"새 분기 {st['new']:,}행 · 빈칸 채움 {st['filled']:,} · "
                f"매출 불일치 {st['mismatch_syms']:,}/{st['overlap_syms']:,}종 ({mis_rate:.0%}) · "
-               f"자본 채움률 {eq_fill:.0%}")
+               f"자본 채움률 {eq_fill:.0%} | 외화 공시 교정 {len(st.get('fx_syms', [])):,}종"
+               f"(과거 칸 비움 {st.get('fx_cleared', 0):,})")
     print(summary, flush=True)
     print(f"::notice title=KR 분기재무(네이버)::{summary}", flush=True)
     if fail:
