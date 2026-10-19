@@ -90,6 +90,29 @@ def get(sym, market='US', db=None, conn=None):
     return d
 
 
+def gap_syms(market='US', weeks=30, tol=2, db=None, conn=None):
+    """최근 weeks 주 안에서 주봉이 비어 있는 종목(2026-10-19).
+
+    증분 수집은 '마지막 날짜 이후'만 받는다. 그래서 09-14~09-28 처럼 **중간이 빈 종목**은
+    영영 채워지지 않았다(그 3주 universe 1,650 vs 평소 1,886). 기준은 같은 창에서 가장 많은
+    주봉 수 — 그보다 tol 개 넘게 적고, 아직 거래 중(창 끝까지 데이터가 있는) 종목만 고른다.
+    """
+    c = conn or _conn(db)
+    try:
+        cut = (pd.Timestamp.today() - pd.Timedelta(weeks=weeks)).strftime('%Y-%m-%d')
+        rows = c.execute('SELECT sym, COUNT(*), MIN(date), MAX(date) FROM prices '
+                         'WHERE market=? AND date>=? GROUP BY sym', (market, cut)).fetchall()
+    finally:
+        if conn is None:
+            c.close()
+    if not rows:
+        return set()
+    full = max(r[1] for r in rows)
+    newest = max(r[3] for r in rows)
+    recent = (pd.Timestamp(newest) - pd.Timedelta(days=10)).strftime('%Y-%m-%d')
+    return {r[0] for r in rows if r[1] < full - tol and r[3] >= recent}
+
+
 def last_date(market='US', db=None, conn=None):
     """{sym: 마지막 날짜}. **증분 수집의 핵심** — CSV 시절엔 물어볼 곳이 없었다."""
     c = conn or _conn(db)

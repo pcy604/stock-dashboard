@@ -87,7 +87,7 @@ def merge(old: pd.DataFrame, new_rows: list[dict], today: str):
     key = ['sym', 'year', 'q']
     nw = pd.DataFrame(new_rows)
     if nw.empty:
-        return df, dict(new=0, filled=0, overlap_syms=0, mismatch_syms=0, mismatch=[])
+        return df, dict(new=0, filled=0, overlap_syms=0, mismatch_syms=0, mismatch=[], detail=pd.DataFrame())
     for c in FLOWS + BAL:
         if c not in nw:
             nw[c] = float('nan')
@@ -97,6 +97,9 @@ def merge(old: pd.DataFrame, new_rows: list[dict], today: str):
     bad = both[((both.revenue_n - both.revenue).abs() / both.revenue.abs()) > MISMATCH_TOL]
     ov_syms = set(both.sym)
     bad_syms = set(bad.sym)
+    detail = (bad.assign(ratio=bad.revenue_n / bad.revenue)
+                 [['sym', 'year', 'q', 'revenue', 'revenue_n', 'ratio']]
+                 .sort_values(['sym', 'year', 'q']))
     filled = 0
     for c in FLOWS + BAL:
         fill = m[c].isna() & m[f'{c}_n'].notna()
@@ -111,7 +114,7 @@ def merge(old: pd.DataFrame, new_rows: list[dict], today: str):
     out = pd.concat([m, add[m.columns.intersection(add.columns)]], ignore_index=True)
     out = out.sort_values(key).reset_index(drop=True)
     return out, dict(new=len(add), filled=filled, overlap_syms=len(ov_syms),
-                     mismatch_syms=len(bad_syms), mismatch=sorted(bad_syms)[:20])
+                     mismatch_syms=len(bad_syms), mismatch=sorted(bad_syms)[:20], detail=detail)
 
 
 def main(limit: int | None = None, workers: int = 4):
@@ -157,6 +160,22 @@ def main(limit: int | None = None, workers: int = 4):
         print("실패 예:", fail[:5], flush=True)
     if st['mismatch']:
         print("불일치 예:", st['mismatch'], flush=True)
+    # 불일치 상세를 남긴다 — 원인(연결/별도·금융업·결산 차이)을 사람이 분류할 수 있게
+    try:
+        det = st['detail']
+        if len(det):
+            nm = {}
+            try:
+                k = pd.read_csv(ROOT / 'data' / 'krx_listing_last.csv', dtype={'Code': str})
+                nm = dict(zip(k.Code, k.Name))
+            except Exception:
+                pass
+            det = det.assign(name=det.sym.map(nm))
+            (ROOT / 'results').mkdir(exist_ok=True)
+            det.to_csv(ROOT / 'results' / 'kr_fin_mismatch.csv', index=False, encoding='utf-8-sig')
+            print(f"불일치 상세 {len(det):,}칸 → results/kr_fin_mismatch.csv", flush=True)
+    except Exception as e:
+        print(f"[warn] 불일치 상세 저장 실패: {e}", flush=True)
     if ok_rate < MIN_OK_RATE:
         print(f"::error::네이버 수집 성공률 {ok_rate:.0%} (<{MIN_OK_RATE:.0%}) — 페이지 구조 변경·차단 의심. 저장하지 않는다")
         raise SystemExit(1)

@@ -360,6 +360,14 @@ def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (�
         print(f"  [warn] prices 조회 실패 — 전수 수집으로 진행: {str(_e)[:80]}", flush=True)
         have = {}
     splits = recent_split_syms()
+    # 2026-10-19 — 중간이 빈 종목도 전수 재수집 대상(증분은 끝 이후만 받아 중간 구멍을 못 메운다)
+    try:
+        gaps = price_store.gap_syms('US')
+    except Exception:
+        gaps = set()
+    if gaps:
+        print(f"  최근 30주 주봉 결손 {len(gaps)}종 → 전수 재수집", flush=True)
+    splits = set(splits) | gaps
     n_inc = sum(1 for s in syms if s in have and s not in splits and not full)
     print(f"  증분 {n_inc}종 · 전수 {len(syms) - n_inc}종"
           f"{' (--full)' if full else ''}  분할 재수집 {len(splits & set(syms))}종", flush=True)
@@ -496,6 +504,16 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         thin = [r[0] for r in con.execute(
             "SELECT sym FROM factor_weekly WHERE factor_ver=? GROUP BY sym HAVING COUNT(*) < 52",
             (VER,))]
+        # 2026-10-19 — 이력은 길어도 **최근 30주 중간이 빈** 종목(09-14~09-28 결손분)도 다시 적재
+        _cut = (pd.Timestamp.today() - pd.Timedelta(weeks=30)).strftime("%Y-%m-%d")
+        _rc = con.execute("SELECT sym, COUNT(*) FROM factor_weekly WHERE factor_ver=? AND as_of>=? "
+                          "GROUP BY sym", (VER, _cut)).fetchall()
+        if _rc:
+            _mx = max(n for _, n in _rc)
+            _gap = {s_ for s_, n in _rc if n < _mx - 2}
+            print(f"최근 30주 결손 {len(_gap):,}종도 재적재", flush=True)
+            thin = sorted(set(thin) | _gap)
+            have -= _gap
         if thin:
             con.executemany("DELETE FROM factor_weekly WHERE factor_ver=? AND sym=?",
                             [(VER, x) for x in thin])
@@ -539,17 +557,22 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         _PS, _PSC = None, None
 
     total = 0
+    # 2026-10-19 — 유니버스 2,900 중 1,900 만 적재되는 이유를 센다(어디서 빠지나)
+    why = {"재무파일 없음": 0, "주봉 없음/80주 미만": 0, "새 주차 없음": 0, "공시 분기 6개 미만": 0}
     for _, row in u.iterrows():
         s = row.sym
         fp = os.path.join(CACHE, f"fq_{s}.csv")
         if not os.path.exists(fp):
+            why["재무파일 없음"] += 1
             continue
         # 2026-10-10: px_*.csv → market.db(prices). 가격의 보관소가 하나가 됐다.
         w = _PS.get(s, 'US', conn=_PSC) if _PS else None
         if w is None or len(w) < 80:
+            why["주봉 없음/80주 미만"] += 1
             continue
         # ★ 계산할 새 주차가 없으면 일봉·재무 로드 전에 바로 스킵
         if w.index[-1] < pd.Timestamp(start):
+            why["새 주차 없음"] += 1
             continue
         dyp = os.path.join(CACHE, f"dy_{s}.csv")
         dly = (pd.read_csv(dyp, index_col=0, parse_dates=True).sort_index()
@@ -559,6 +582,7 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         f["filed_at"] = pd.to_datetime(f.filed_at, errors="coerce")
         f = f.dropna(subset=["filed_at"]).sort_values("filed_at").reset_index(drop=True)
         if len(f) < 6:
+            why["공시 분기 6개 미만"] += 1
             continue
         f["gpm"] = f.gross / f.revenue * 100
         f["opm"] = f.opinc / f.revenue * 100
@@ -695,6 +719,9 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
             print(f"  {s:6s} {len(df):5d}행  누적 {total:,}", flush=True)
     con.commit()
     print(f"\nfactor_weekly 적재 {total:,}행")
+    _w = " · ".join(f"{k} {v:,}" for k, v in why.items())
+    print(f"유니버스 {len(u):,}종 중 제외 — {_w}", flush=True)
+    print(f"::notice title=factor_weekly 제외 사유::유니버스 {len(u):,}종 · {_w}", flush=True)
     print(con.execute("SELECT COUNT(DISTINCT sym), MIN(as_of), MAX(as_of) FROM factor_weekly").fetchone())
     con.close()
 
