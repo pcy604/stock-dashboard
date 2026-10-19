@@ -393,6 +393,17 @@ def load_shares_series():
                           pd.Timedelta(days=FRAMES_LAG)).dt.strftime("%Y-%m-%d")
             f["src"] = 1
             parts.append(f[["sym", "end", "filed", "shares", "src"]])
+    # ⚠️ 2026-10-19 — 러너의 shares_cache 가 2,376종짜리로 복원된 날, sh 가 그만큼으로
+    #   쪼그라들어 시총 파일 쓰기가 급감 가드에 막혔고(TSLA 복구 실패), us_shares.csv 는
+    #   6,543 → 2,376종으로 **덮였다**. 커밋된 us_shares.csv 를 마지막 순위 출처로 깐다 —
+    #   캐시가 비어도 지난번까지 알던 주식수는 잃지 않는다.
+    if os.path.exists(OUT_SH):
+        try:
+            u = pd.read_csv(OUT_SH, usecols=["sym", "end", "filed", "shares"])
+            u["src"] = 2
+            parts.append(u[["sym", "end", "filed", "shares", "src"]])
+        except Exception as e:
+            print(f"[WARN] us_shares.csv 폴백 실패: {e}", flush=True)
     if not parts:
         return {}
     a = pd.concat(parts, ignore_index=True).dropna(subset=["sym", "end", "filed", "shares"])
@@ -401,7 +412,9 @@ def load_shares_series():
            .sort_values(["sym", "filed", "end"])
            .drop_duplicates(["sym", "filed"], keep="last"))         # 같은 제출일이면 최근 분기
     n_c = int((a.src == 0).sum())
-    print(f"  주식수 출처 — companyconcept {n_c:,}행 · frames {len(a)-n_c:,}행")
+    n_f = int((a.src == 1).sum())
+    print(f"  주식수 출처 — companyconcept {n_c:,}행 · frames {n_f:,}행 · 커밋본 폴백 {len(a)-n_c-n_f:,}행 "
+          f"· {a.sym.nunique():,}종")
     return {s: g.drop(columns="src").reset_index(drop=True)
             for s, g in a.groupby("sym", sort=False)}
 
@@ -670,7 +683,17 @@ def cmd_build(net_price=False):
 
     ts = pd.DataFrame(ts_rows).sort_values(["sym", "filed"])
     ts["as_of"] = str(pd.Timestamp.today().date())   # data_freshness 감시용
-    ts.to_csv(OUT_SH, index=False)
+    # 2026-10-19 — 시총 파일만 급감 가드가 있었고 이 파일은 없었다(6,543 → 2,376종으로 덮임).
+    _prev_n = 0
+    if os.path.exists(OUT_SH):
+        try:
+            _prev_n = pd.read_csv(OUT_SH, usecols=["sym"]).sym.nunique()
+        except Exception:
+            _prev_n = 0
+    if _prev_n >= 100 and ts.sym.nunique() < _prev_n * 0.7:
+        print(f"::error title=us_shares 급감::{_prev_n:,} → {ts.sym.nunique():,}종 — 기존 파일을 지킨다", flush=True)
+    else:
+        ts.to_csv(OUT_SH, index=False)
     print(f"→ {OUT_SH}  ({len(ts_rows):,}행 · {len(sh)}종)", flush=True)
 
     m = pd.DataFrame(mc_rows)
@@ -691,8 +714,7 @@ def cmd_build(net_price=False):
         try:
             prev = len(pd.read_csv(OUT_MC))
             if prev >= 100 and len(m) < prev * 0.7:
-                print(f"[중단] 종목이 {prev:,} → {len(m):,}종으로 급감했다. "
-                      f"기존 파일을 지키고 쓰지 않는다.", flush=True)
+                print(f"::error title=us_marketcap 급감::{prev:,} → {len(m):,}종 — 기존 파일을 지키고 쓰지 않는다.", flush=True)
                 print(f"        가격을 못 얻은 종목이 많다는 뜻이다 — 캐시(data/leaders_cache)가 "
                       f"비어 있거나 MAX_FETCH({MAX_FETCH})에 걸렸을 수 있다.", flush=True)
                 return
