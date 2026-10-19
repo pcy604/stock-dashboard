@@ -415,33 +415,7 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
 .mo-chip .v.na { color: #9CA3AF; font-weight: 400; }
 .mo-chip .v.pos { color: var(--pos); } .mo-chip .v.neg { color: var(--neg); }
 .mo-gh { font-size: 12px; font-weight: 700; color: var(--ink-2); margin: 10px 0 2px; letter-spacing: .02em; }
-.mo-sec { margin: 26px 0 10px; display: flex; flex-direction: column; gap: 2px; }
-.mo-sec b { font-size: 17px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
-.mo-sec span { font-size: 12.5px; color: var(--ink-3); }
-.mo-b { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
-  white-space: nowrap; vertical-align: middle; }
-.mo-kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
-  min-height: 132px; display: flex; flex-direction: column; gap: 6px; }
-.mo-kpi .lab { font-size: 12px; font-weight: 700; color: var(--ink-3); }
-.mo-kpi .val { font-size: 26px; font-weight: 800; line-height: 1.2; letter-spacing: -.02em; }
-.mo-kpi .sub { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
-.mo-tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
-  display: flex; flex-direction: column; gap: 4px; min-height: 118px; }
-.mo-tile .lab { font-size: 11.5px; font-weight: 700; color: var(--ink-3); }
-.mo-tile .val { font-family: var(--mono); font-size: 21px; font-weight: 700; color: var(--ink); }
-.mo-tile .sub { font-size: 11px; color: var(--ink-2); line-height: 1.4; flex: 1; }
-.mo-tile .mo-b { align-self: flex-start; }
-.mo-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 6px; }
-.mo-card .hd { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.mo-card .hd b { font-size: 14px; color: var(--ink); }
-.mo-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line-2); }
-.mo-row:last-child { border-bottom: none; }
-.mo-row .l { flex: 1; min-width: 0; }
-.mo-row .n { font-size: 12.5px; font-weight: 600; color: var(--ink); }
-.mo-row .d { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mo-row .v { font-family: var(--mono); font-size: 13.5px; font-weight: 700; color: var(--ink); text-align: right; }
-@media (max-width: 640px) { .mo-kpi, .mo-tile { min-height: 0; } .mo-kpi .val { font-size: 22px; }
-  .mo-hero { padding: 18px; } .mo-hero .n { font-size: 22px; }
+@media (max-width: 640px) { .mo-hero { padding: 18px; } .mo-hero .n { font-size: 22px; }
   .mo-hero .pv { font-size: 26px; } }
 </style>
 """, unsafe_allow_html=True)
@@ -2891,36 +2865,34 @@ def _world_strength_panel():
     if df.empty:
         st.info("지수 데이터를 받지 못했습니다(FDR·Yahoo 모두 실패).")
         return
-    per = [k for k, _ in _is.PERIODS] + ['고점대비']
-    Z = df[per].astype(float)
-    # 색은 열마다 따로 맞춘다 — 1년 수익률(±40%)과 1주(±3%)를 한 잣대로 칠하면 짧은 기간이 전부 흰색이 된다
-    Zn = Z.apply(lambda c: c / (c.abs().max() or 1))
-    Zn['고점대비'] = Z['고점대비'] / (Z['고점대비'].abs().max() or 1)
-    txt = Z.map(lambda v: '-' if pd.isna(v) else f"{v:+.1f}")
-    ylab = [f"{r['강도순위']}. {r['지수']} <span style='color:#9CA3AF'>{r['지역']}</span>" for _, r in df.iterrows()]
-    fig = go.Figure(go.Heatmap(
-        z=Zn.values, x=[f"{c}(%)" for c in per], y=ylab, text=txt.values, texttemplate='%{text}',
-        textfont=dict(family='JetBrains Mono, monospace', size=12),
-        colorscale=[[0, '#DC2626'], [0.5, '#F9FAFB'], [1, '#15803D']], zmin=-1, zmax=1, showscale=False,
-        xgap=3, ygap=3, customdata=Z.values,
-        hovertemplate='%{y} · %{x}: %{customdata:+.2f}%<extra></extra>'))
-    fig.update_layout(height=34 * len(df) + 70, margin=dict(l=8, r=8, t=36, b=8),
-                      xaxis=dict(side='top', tickfont=dict(size=12, color='#374151'), showgrid=False),
-                      yaxis=dict(autorange='reversed', tickfont=dict(size=12, color='#111827'), showgrid=False),
-                      plot_bgcolor='rgba(0,0,0,0)')
-    cH, cT = st.columns([1.55, 1], gap='medium')
-    with cH:
-        st.plotly_chart(fig, use_container_width=True)
-    with cT:
-        t = pd.DataFrame({
-            '지수': df['지수'],
-            '신고가 후(일)': df['신고가후'], '3개월 신고가(회)': df['신고가3m'],
-            '마지막 신고가': df['신고가일'].map(lambda d: d.strftime('%Y-%m-%d') if d is not None and not pd.isna(d) else '-')})
-        _asof = df['기준일'].max()
-        _tsrc('FinanceDataReader·Yahoo(지수 종가) · ' + ', '.join(sorted(set(src.values()))),
-              asof=_asof.strftime('%Y-%m-%d') if hasattr(_asof, 'strftime') else None)
-        st.dataframe(t, filters=False, color=False)
-    st.caption("순서 = **강도 순위**(고점대비 · 3개월 · 6개월 수익률의 순위 평균). 칸 색은 열마다 따로 맞춘 상대 강도다. "
+    # 2026-10-20 — 히트맵(plotly)을 다른 탭과 같은 표(table_ui)로 바꿨다. 색 규칙도 표 공통 규칙을 따른다.
+    import macro_flow as _mfw
+    _wb = load_json(Path('data/world_mcap.json')) or {}
+    _cm = _mfw.country_mcap(_wb, {n: v for (n, _), v in closes.items()})
+    per = [k for k, _ in _is.PERIODS]
+    t = pd.DataFrame({'지수': df['지수'], '지역': df['지역'],
+                      '국가 시총($T)': df['지수'].map(lambda n: _cm[n][0] if n in _cm else np.nan)})
+    for k in per:
+        t[f'{k}(%)'] = df[k].astype(float)
+    t['고점대비(%)'] = df['고점대비'].astype(float)
+    t['신고가 후(일)'] = df['신고가후']
+    t['3개월 신고가(회)'] = df['신고가3m']
+    t['마지막 신고가'] = df['신고가일'].map(lambda d: d.strftime('%Y-%m-%d') if d is not None and not pd.isna(d) else '-')
+    _asof = df['기준일'].max()
+    _yrs = sorted({v[1] for v in _cm.values()})
+    st.dataframe(t, filters=False,
+                 src='FinanceDataReader·Yahoo(지수 종가: ' + ', '.join(sorted(set(src.values()))) + ') · 세계은행 CM.MKT.LCAP.CD(국가 시총)',
+                 asof=_asof.strftime('%Y-%m-%d') if hasattr(_asof, 'strftime') else None,
+                 column_config={'국가 시총($T)': st.column_config.NumberColumn('국가 시총($T)', format='%.2f'),
+                                **{f'{k}(%)': st.column_config.NumberColumn(f'{k}(%)', format='%+.1f') for k in per},
+                                '고점대비(%)': st.column_config.NumberColumn('고점대비(%)', format='%+.1f'),
+                                '신고가 후(일)': st.column_config.NumberColumn('신고가 후(일)', format='%d'),
+                                '3개월 신고가(회)': st.column_config.NumberColumn('3개월 신고가(회)', format='%d')})
+    st.caption("**국가 시총** = 세계은행 연말 상장기업 시가총액(" + (', '.join(map(str, _yrs)) if _yrs else '자료 없음') +
+               "년 말) × 그 뒤 그 나라 대표 지수 변동률로 낸 **추정치**다(지수는 현지 통화 — 환율 변동 미반영). "
+               "같은 나라 지수는 같은 값(미국 4개는 S&P500, 한국 2개는 코스피 기준). "
+               "'-' = 세계은행 자료가 없거나(대만) 너무 오래돼(영국·유로존) 오늘 값으로 보이면 안 되는 경우.")
+    st.caption("순서 = **강도 순위**(고점대비 · 3개월 · 6개월 수익률의 순위 평균). "
                "**3개월 신고가(회)** = 최근 63거래일 중 52주 신고가를 새로 쓴 날 수 — 많을수록 추세가 살아 있다. "
                "**신고가 후(일)** 가 '-' 면 최근 2년 안에 52주 신고가가 없었다는 뜻. "
                "⚠️ 각국 통화 기준(환율 미반영) · 종가 기준 신고가(장중 아님)."
@@ -3138,7 +3110,7 @@ def macro_triggers(d, px):
     """국면을 넘기는 관측 가능한 방아쇠. (방향, 지표, 현재, 임계, 넘었나, 뜻)"""
     T = []
     def add(side, name, cur, thr, hit, why, fmt='{:+.2f}'):
-        T.append(dict(side=side, name=name,
+        T.append(dict(side=side, name=name, val=cur,
                       cur=('-' if cur is None else fmt.format(cur)),
                       thr=thr, hit=(None if cur is None else hit), why=why))
     hy, sp = d.get('hy'), d.get('spread')
@@ -3176,32 +3148,6 @@ def macro_triggers(d, px):
 #   비중을 바꾸는 확정 규칙은 200일선 하나다. 나머지는 '참고 경고'로만 보이고 비중에 쓰지 않는다.
 # ════════════════════════════════════════════════════════════════════
 import macro_flow as _mf
-
-_MO_TONE = {'pos': ('var(--pos)', 'var(--pos-bg)'), 'neg': ('var(--neg)', 'var(--neg-bg)'),
-            'warn': ('var(--warn)', 'var(--warn-bg)'), 'accent': ('var(--accent)', 'var(--accent-2)'),
-            'muted': ('var(--ink-3)', 'var(--surface-2)')}
-
-
-def _mo_badge(text, tone='muted'):
-    import html as _h
-    fg, bg = _MO_TONE.get(tone, _MO_TONE['muted'])
-    return f"<span class='mo-b' style='color:{fg};background:{bg}'>{_h.escape(str(text))}</span>"
-
-
-def _mo_kpi(label, value, sub, badge=None, tone='muted', vtone=None):
-    import html as _h
-    vc = _MO_TONE[vtone][0] if vtone else 'var(--ink)'
-    return (f"<div class='mo-kpi'><div class='lab'>{_h.escape(label)} {_mo_badge(badge, tone) if badge else ''}</div>"
-            f"<div class='val' style='color:{vc}'>{_h.escape(str(value))}</div>"
-            f"<div class='sub'>{_h.escape(str(sub))}</div></div>")
-
-
-def _mo_tile(label, value, sub, badge=None, tone='muted'):
-    import html as _h
-    return (f"<div class='mo-tile'><div class='lab'>{_h.escape(label)}</div>"
-            f"<div class='val'>{_h.escape(str(value))}</div><div class='sub'>{_h.escape(str(sub))}</div>"
-            f"{_mo_badge(badge, tone) if badge else ''}</div>")
-
 
 @st.cache_data(ttl=3 * 3600, show_spinner=False)
 def _mo_asset_closes_cached():
@@ -3258,34 +3204,34 @@ def _macro_v2_top(_PX, _RG):
     dxy_13 = _mf.ret_pct(dx, 63) if len(dx) > 63 else None
     G = _mf.greed_signals(core_on, c1, _RG.get('phase'), dxy_gap, dxy_13)
 
-    # ── ① 이번 주 판정
-    st.markdown("<div class='mo-sec'><b>이번 주 판정</b><span>매주 월요일 아침에 이 한 줄만 보면 된다</span></div>",
-                unsafe_allow_html=True)
+    # ── ① 이번 주 판정 — 2026-10-20 다른 탭과 같은 st.metric 카드로 통일(사용자 피드백)
+    st.subheader("이번 주 판정")
+    st.caption("매주 월요일 아침에 이 한 줄만 보면 된다. 비중을 바꾸는 확정 규칙은 코어 스위치(200일선) 하나다.")
     nl = _mf.net_liquidity(S['WALCL'], S['WTREGEN'], S['RRPONTSYD'])
     nl13 = (float(nl.iloc[-1]) / float(nl.iloc[-14]) - 1) * 100 if len(nl) > 14 else None
-    k1, k2, k3, k4 = st.columns(4, gap='small')
-    k1.markdown(_mo_kpi('코어 스위치', '판정 불가' if core_on is None else ('ON' if core_on else 'OFF'),
-                        '-' if gap200 is None else f"S&P500(SPY)이 200일선 {'위' if core_on else '아래'} {gap200:+.1f}% · "
-                        + ('코어 보유' if core_on else '코어는 현금으로'),
-                        '확정 규칙', 'pos', vtone=('pos' if core_on else 'neg') if core_on is not None else None),
-                unsafe_allow_html=True)
-    k2.markdown(_mo_kpi('욕심 신호', G['word'],
-                        f"참고 경고 {G['n']} / 3 (신용 스프레드·사이클 역국면·강달러) — 비중에는 200일선만 쓴다",
-                        '검증 결과 반영', 'accent', vtone=G['tone']), unsafe_allow_html=True)
-    k3.markdown(_mo_kpi('돈의 흐름', flow['word'],
-                        f"자산 {flow['n']}개 중 {flow['up']}개 200일선 위 · 순유동성 13주 "
-                        + ('-' if nl13 is None else f"{nl13:+.1f}%"), '축 1', 'accent'), unsafe_allow_html=True)
-    k4.markdown(_mo_kpi('경기', ew, esub, '축 2', 'accent'), unsafe_allow_html=True)
+    _flow_short = {'위험자산으로 유입': '유입', '위험자산에서 이탈': '이탈'}.get(flow['word'], flow['word'])
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric('코어 스위치 · 확정 규칙', '판정 불가' if core_on is None else ('ON' if core_on else 'OFF'),
+              None if gap200 is None else f"200일선 {'위' if core_on else '아래'} {gap200:+.1f}%",
+              delta_color='normal' if core_on is not None else 'off',
+              help='S&P500(SPY) 종가가 200일 이평 위면 코어 보유, 아래면 코어를 현금으로 — 원칙 v1의 유일한 확정 비중 규칙')
+    k2.metric('욕심 신호 · 검증 결과 반영', G['word'], f"참고 경고 {G['n']} / 3", delta_color='off', delta_arrow='off',
+              help='참고 경고 = 신용 스프레드 13주 확대 · 우라가미 역국면 · 강달러. 백테스트에서 비중 규칙으로 살아남지 못해 표시만 한다(아래 욕심 조절 원칙).')
+    k3.metric('돈의 흐름 · 축 1', f"위험자산 {_flow_short}",
+              f"200일선 위 {flow['up']}/{flow['n']} · 순유동성 13주 " + ('-' if nl13 is None else f"{nl13:+.1f}%"),
+              delta_color='off', delta_arrow='off', help='자산 8종 중 200일선 위에 있는 수와, 연준 순유동성 13주 변화')
+    k4.metric('경기 · 축 2', ew, esub, delta_color='off', delta_arrow='off',
+              help='선행 지표 경고 3개 이상이면 꺾일 조짐, 동행 경고 2개 이상이면 둔화')
 
     # ── ② 축 1 · 돈의 흐름
-    st.markdown("<div class='mo-sec'><b>축 1 · 돈의 흐름</b><span>돈이 어느 나라·어느 자산으로 가고 있나, 공급은 늘고 있나</span></div>",
-                unsafe_allow_html=True)
+    st.subheader("축 1 · 돈의 흐름")
+    st.caption("돈이 어느 나라·어느 자산으로 가고 있나, 공급은 늘고 있나")
     _world_strength_panel()
     st.markdown("##### 자산군 흐름 — 돈이 주식 밖으로 빠지나")
     if len(at):
         t = at[['자산', '1주(%)', '1개월(%)', '3개월(%)', '1년(%)', '200일선 이격(%)']]
         _asof = max([d for d in at['asof'] if d is not None], default=None)
-        st.dataframe(t, filters=False, height=25 * len(t) + 48, src='Yahoo Finance (ETF·선물·지수·BTC-USD 종가, 코스피는 원/달러로 나눠 달러 기준)',
+        st.dataframe(t, filters=False, src='Yahoo Finance (ETF·선물·지수·BTC-USD 종가, 코스피는 원/달러로 나눠 달러 기준)',
                      asof=_asof.strftime('%Y-%m-%d') if _asof is not None else None,
                      column_config={c: st.column_config.NumberColumn(c, format='%+.1f') for c in t.columns if c != '자산'})
         st.caption("200일선 이격이 + 면 그 자산으로 돈이 들어오는 중. 위험자산(주식·구리·비트코인)이 함께 +이고 "
@@ -3293,67 +3239,66 @@ def _macro_v2_top(_PX, _RG):
     else:
         st.info("자산 시세를 받지 못했습니다(Yahoo). 잠시 후 새로고침하세요.")
 
-    # 유동성·신용·심리 타일
+    # 유동성·신용·심리 — st.metric (값 · 변화 · 판정은 help)
+    st.markdown("##### 유동성 · 신용 · 심리")
     tiles = []
     if nl13 is not None:
-        tiles.append(('순유동성 13주', f"{nl13:+.1f}%", f"{float(nl.iloc[-1]) / 1000:,.2f}조$ · 연준 자산 − TGA − 역레포",
-                      '공급↑' if nl13 > 0 else '공급↓', 'pos' if nl13 > 0 else 'warn'))
+        tiles.append(('순유동성 13주', f"{nl13:+.1f}%", f"잔액 {float(nl.iloc[-1]) / 1000:,.2f}조$", nl13 > 0,
+                      '연준 총자산 − 재무부 계좌(TGA) − 역레포. 늘면 시장에 돈이 풀리는 중'))
     ri = S['DFII10']
     if len(ri) > 63:
         d = float(ri.iloc[-1] - ri.iloc[-64])
-        tiles.append(('실질금리 10Y', f"{float(ri.iloc[-1]):.2f}%", f"3개월 {d:+.2f}%p · 성장주 할인율",
-                      '완화' if d < 0 else '긴축', 'pos' if d < 0 else 'warn'))
+        tiles.append(('실질금리 10Y', f"{float(ri.iloc[-1]):.2f}%", f"3개월 {d:+.2f}%p", d < 0,
+                      '물가연동국채 10년 금리 — 성장주 할인율. 내리면 완화'))
     if dxy_gap is not None and dxy_gap == dxy_gap:
-        tiles.append(('달러 인덱스', f"{float(dx.iloc[-1]):.1f}", f"200일선 {dxy_gap:+.1f}% · 13주 {dxy_13:+.1f}%",
-                      '강달러' if G['ref'].get('C8') else ('약달러' if dxy_gap < 0 else '보합'),
-                      'warn' if G['ref'].get('C8') else ('pos' if dxy_gap < 0 else 'muted')))
+        tiles.append(('달러 인덱스', f"{float(dx.iloc[-1]):.1f}", f"200일선 {dxy_gap:+.1f}%", not G['ref'].get('C8'),
+                      f"13주 {dxy_13:+.1f}%. 200일선 위 + 13주 상승이면 '강달러' 참고 경고(신흥국·원자재 역풍)"))
     hy = S['BAMLH0A0HYM2']
     if len(hy):
         p = _pctile(list(hy.values), float(hy.iloc[-1]))
-        tiles.append(('하이일드 스프레드', f"{float(hy.iloc[-1]):.2f}%", f"최근 {len(hy) // 250}년 하위 {p}% · FRED가 3년치만 제공",
-                      '신용 평온' if p < 50 else '신용 경계', 'muted' if p < 50 else 'warn'))
+        tiles.append(('하이일드 스프레드', f"{float(hy.iloc[-1]):.2f}%", f"최근 {max(1, len(hy) // 250)}년 하위 {p}%", p < 50,
+                      '낮을수록 신용 평온(=탐욕 쪽). FRED가 ICE 지수를 최근 3년치만 제공한다'))
     vx, v3 = S['VIXCLS'], S['VXVCLS']
     if len(vx) and len(v3):
         r = float(vx.iloc[-1]) / float(v3.iloc[-1])
-        tiles.append(('VIX ÷ VIX3M', f"{r:.2f}", f"VIX {float(vx.iloc[-1]):.1f} · 1 초과면 단기 패닉",
-                      '패닉' if r > 1 else '평시', 'warn' if r > 1 else 'muted'))
+        tiles.append(('VIX ÷ VIX3M', f"{r:.2f}", f"VIX {float(vx.iloc[-1]):.1f}", r <= 1,
+                      '1 초과 = 단기 공포가 3개월 공포보다 큼(패닉). 1 미만 = 평시'))
     bt = _mf._clean(closes.get('BTC-USD')) if closes else pd.Series(dtype=float)
     if len(bt) >= 200:
         g = _mf.ma_gap(bt)
-        tiles.append(('비트코인 200일선', f"{g:+.1f}%", '유동성의 신흥 바로미터', '위험선호' if g > 0 else '위험회피',
-                      'pos' if g > 0 else 'warn'))
+        tiles.append(('비트코인 200일선', f"{g:+.1f}%", '위험선호' if g > 0 else '위험회피', g > 0,
+                      '유동성의 신흥 바로미터 — 유동성 변화에 가장 먼저 반응하는 자산으로 본다'))
     if tiles:
-        cols = st.columns(len(tiles), gap='small')
-        for c, tl in zip(cols, tiles):
-            c.markdown(_mo_tile(*tl), unsafe_allow_html=True)
+        cols = st.columns(len(tiles))
+        for c, (lab, val, dl, good, hp) in zip(cols, tiles):
+            # 좋음/나쁨으로 색을 정한다 — 숫자 부호가 아니라 뜻으로(금리↓ = 좋음)
+            c.metric(lab, val, dl, delta_color=('normal' if good else 'inverse'), delta_arrow='off', help=hp)
         st.caption("출처: FRED (WALCL·WTREGEN·RRPONTSYD·DFII10·BAMLH0A0HYM2·VIXCLS·VXVCLS), Yahoo (DX-Y.NYB·BTC-USD) · "
-                   f"마지막 갱신: {', '.join(sorted({s.index[-1].strftime('%m-%d') for k, s in S.items() if k in ('WALCL', 'DFII10', 'VIXCLS') and len(s)}))} 관측")
+                   f"마지막 갱신: {', '.join(sorted({s.index[-1].strftime('%Y-%m-%d') for k, s in S.items() if k in ('WALCL', 'DFII10', 'VIXCLS') and len(s)}))} 관측 · "
+                   "변화 칸 색 = 초록 좋음 / 빨강 나쁨(뜻 기준)")
 
-    # ── ③ 축 2 · 경제
-    st.markdown("<div class='mo-sec'><b>축 2 · 경제</b><span>선행 → 동행 → 물가·금리 순서로 읽는다. 선행이 먼저 꺾이고 실업률은 가장 늦다</span></div>",
-                unsafe_allow_html=True)
-    import html as _h
-    gc = st.columns(3, gap='small')
-    for col, grp, ttl in zip(gc, ('선행', '동행', '물가·금리'), ('선행 — 3~9개월 앞', '동행 — 지금', '물가 · 금리 — 연준의 손')):
-        sm, tone = _mf.group_summary(rows, grp)
-        items = ''.join(
-            f"<div class='mo-row' title='판정 기준: {_h.escape(r['기준'])} · 관측 {r['관측일']}'>"
-            f"<div class='l'><div class='n'>{_h.escape(r['지표'])}</div><div class='d'>{_h.escape(r['설명'])} · {r['관측일']}</div></div>"
-            f"<div class='v'>{_h.escape(r['값'])}</div>{_mo_badge(r['판정'], r['tone'])}</div>"
-            for r in rows if r['묶음'] == grp)
-        col.markdown(f"<div class='mo-card'><div class='hd'><b>{ttl}</b> {_mo_badge(sm, tone)}</div>{items}</div>",
-                     unsafe_allow_html=True)
-    st.caption("출처: FRED (ICSA·T10Y3M·CFNAI·NEWORDER·XTEXVA01KRM667S·GDPNOW·INDPRO·PAYEMS·UNRATE·PCEPILFE·CPIAUCSL·FEDFUNDS·DGS10) · "
-               "각 행에 관측일 표기 · 월간 지표는 발표까지 1~2개월 걸린다 · 행에 마우스를 올리면 판정 기준이 보인다. "
+    # ── ③ 축 2 · 경제 — 다른 탭과 같은 표(table_ui)
+    st.subheader("축 2 · 경제")
+    st.caption("선행 → 동행 → 물가·금리 순서로 읽는다. 선행이 먼저 꺾이고 실업률은 가장 늦다")
+    _sum = ' · '.join(f"{g} {_mf.group_summary(rows, g)[0]}" for g in ('선행', '동행', '물가·금리'))
+    _ico = {'pos': '🟢', 'muted': '⚪', 'warn': '🟡', 'neg': '🔴'}
+    et = pd.DataFrame([{'구분': r['묶음'], '지표': r['지표'] + (f"({r['unit'].strip()})" if r['unit'].strip() else ''),
+                        '현재': r['num'], '판정': f"{_ico.get(r['tone'], '⚪')} {r['판정']}",
+                        '설명': r['설명'], '판정 기준': r['기준'], '관측일': r['관측일']} for r in rows])
+    st.markdown(f"**요약** — {_sum}")
+    st.dataframe(et, filters=False, color=False,
+                 src='FRED (ICSA·T10Y3M·CFNAI·NEWORDER·XTEXVA01KRM667S·GDPNOW·INDPRO·PAYEMS·UNRATE·PCEPILFE·CPIAUCSL·FEDFUNDS·DGS10)',
+                 asof=max([r['관측일'] for r in rows if r['관측일'] != '-'], default=None),
+                 column_config={'현재': st.column_config.NumberColumn('현재', format='%.2f')})
+    st.caption("단위는 지표 이름 괄호 안. 관측일은 행마다 다르다 — 월간 지표는 발표까지 1~2개월 걸린다. "
                "ISM 제조업지수는 라이선스 문제로 FRED에서 받을 수 없어 CFNAI·신규수주로 대신한다.")
     return dict(core_on=core_on, gap200=gap200, c1=c1, dxy_gap=dxy_gap, dxy_13=dxy_13, G=G)
 
 
 def _macro_rules_section(V, _RG):
     """④ 욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다."""
-    st.markdown("<div class='mo-sec'><b>욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다</b>"
-                "<span>합격 기준(결과 보기 전에 고정): 200일선보다 Calmar +0.05 이상 · MDD 악화 없음 · 세 구간 중 2개 이상 · 주변값 과반</span></div>",
-                unsafe_allow_html=True)
+    st.subheader("욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다")
+    st.caption("합격 기준(결과 보기 전에 고정): 200일선보다 Calmar +0.05 이상 · MDD 악화 없음 · 세 구간 중 2개 이상 · 주변값 과반")
     G = V['G']
     now = {
         'B0': '—',
@@ -3365,7 +3310,7 @@ def _macro_rules_section(V, _RG):
     }
     t = pd.DataFrame([{'신호': n, '지금': now.get(k, '-'), 'CAGR(%)': c, 'MDD(%)': m, 'Calmar': ca, '판정': v, '쓰는 법': u}
                       for k, n, c, m, ca, v, u in _mf.RULES])
-    st.dataframe(t, filters=False, color=False, height=25 * len(t) + 48,
+    st.dataframe(t, filters=False, color=False,
                  src='research/macro_regime_bt.py · S&P500 총수익 주봉 1988-01~2026-09 · 달러 기준 · 1주 지연 · 비용 0.1% · 200일선 위에 덧씌운 결과',
                  asof='2026-10-20 검증',
                  column_config={'CAGR(%)': st.column_config.NumberColumn('CAGR(%)', format='%.2f'),
@@ -3396,9 +3341,8 @@ with tab4, guard('매크로'):
     _MV = _macro_v2_top(_PX, _RG)
 
     # ── 사이클 지도 ─────────────────────────────────────────────
-    st.markdown("<div class='mo-sec'><b>사이클 지도 — 두 축이 만나는 곳</b>"
-                "<span>지도는 '어디쯤인가'를 보여줄 뿐, 비중은 아래 검증된 원칙이 정한다</span></div>",
-                unsafe_allow_html=True)
+    st.subheader("사이클 지도 — 두 축이 만나는 곳")
+    st.caption("지도는 '어디쯤인가'를 보여줄 뿐, 비중은 아래 검증된 원칙이 정한다")
 
     # ── ① 국면 대형 카드 ──────────────────────────────────────────
     _SCOL = {'FIN': '#16a34a', 'EARN': '#ca8a04', 'RFIN': '#ea580c', 'RERN': '#2563eb'}
@@ -3636,8 +3580,11 @@ with tab4, guard('매크로'):
                     '상태': ('❓ 자료없음' if t['hit'] is None else
                             (('🔴 발동' if _bad else '🟢 발동') if t['hit'] else
                              ('🟢 아직' if _bad else '⚪ 아직'))),
-                    '지표': t['name'], '현재': t['cur'], '임계': t['thr']} for t in _rows]),
-                    use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_rows)))
+                    # 숫자는 숫자로, 단위는 지표 이름 괄호에(표 규칙 2026-10-19)
+                    '지표': t['name'] + ('(%p)' if t['thr'].endswith('%p') else ('(%)' if t['thr'].endswith('%') else '')),
+                    '현재': t['val'], '임계': t['thr'].rstrip('%p').rstrip('%')} for t in _rows]),
+                    filters=False, color=False,
+                    column_config={'현재': st.column_config.NumberColumn('현재', format='%+.2f')})
                 for t in _rows:
                     if t['hit']:
                         st.caption(f"{'🔴' if _bad else '🟢'} **{t['name']}** — {t['why']}")
