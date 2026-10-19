@@ -152,6 +152,13 @@ jobs:
         if: steps.due.outputs.skip != 'true' && inputs.backfill
         run: python leaders_build.py newsyms
 
+      # 2026-10-19 — 시총이 빈 행 복구. us_shares.csv 가 쪼그라든 날 쌓인 이력은 marcap 이
+      #   전 기간 NULL 이라 '시총 $0.3B+' 에서 통째로 탈락했다(NVDA·AXTI·PLTR 등 461종).
+      #   빈 행만 채우므로 평시엔 몇 초. 파수꾼(NVDA·AAPL…)이 비면 여기서 실패한다.
+      - name: 시총 결측 복구
+        if: steps.due.outputs.skip != 'true'
+        run: python leaders_build.py fixcap
+
       - name: 이익 가속 신호 발행
         id: publish
         if: steps.due.outputs.skip != 'true'

@@ -726,6 +726,65 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
     con.close()
 
 
+def fixcap(sentinels=("NVDA", "AAPL", "MSFT", "TSLA", "AXTI", "PLTR")):
+    """시총이 빈 행만 다시 채운다 — marcap = 종가 × 그 주차에 알 수 있던 공시 주식수.
+
+    ⚠️ 2026-10-19 사고 — us_shares.csv 가 매일 6,500 ↔ 2,000종을 오갔다(weekly-profile 이
+    전체를 쓰고, daily-refresh 가 덜 복원된 캐시로 덮었다). 이력을 쌓는 날 2,000종판이
+    걸리면 빠진 종목(NVDA·AXTI·PLTR…)의 marcap 이 **2018년부터 전부 NULL** 로 저장됐고,
+    '시총 $0.3B+' 조건에서 통째로 탈락했다. 9월엔 신호가 있던 461종이 0회가 됐다.
+    newsyms 는 '이력이 짧은' 종목만 다시 쌓으므로 이 결손을 못 고친다 → 이 함수가 매주 돈다.
+    PER·PSR 도 같이 채운다(TTM = 최근 4개 분기 합, 분기 5개 이상일 때만 — build 와 같은 규칙).
+    """
+    sh = load_shares()
+    con = sqlite3.connect(DB)
+    d = pd.read_sql("SELECT rowid AS rid, sym, as_of, close, period_end, revenue, net_income "
+                    "FROM factor_weekly WHERE factor_ver=? AND marcap IS NULL AND close IS NOT NULL",
+                    con, params=(VER,))
+    print(f"시총 빈 행 {len(d):,} · {d.sym.nunique():,}종", flush=True)
+    upd = []
+    for s_, g in d.groupby("sym"):
+        if s_ not in sh:
+            continue
+        allq = pd.read_sql("SELECT DISTINCT period_end, revenue, net_income FROM factor_weekly "
+                           "WHERE factor_ver=? AND sym=? AND period_end IS NOT NULL ORDER BY period_end",
+                           con, params=(VER, s_)).drop_duplicates("period_end")
+        allq["rv4"] = allq.revenue.rolling(4, min_periods=4).sum()
+        allq["ni4"] = allq.net_income.rolling(4, min_periods=4).sum()
+        allq["k"] = range(len(allq))
+        qm = allq.set_index("period_end")
+        for r in g.itertuples():
+            n = shares_at(s_, r.as_of)
+            if not n:
+                continue
+            mc = float(r.close) * n
+            psr = per = None
+            if r.period_end in qm.index:
+                q = qm.loc[r.period_end]
+                if q.k >= 4:
+                    psr = mc / q.rv4 if q.rv4 and q.rv4 > 0 else None
+                    per = mc / q.ni4 if q.ni4 and q.ni4 > 0 else None
+            upd.append((mc, psr, per, int(r.rid)))
+    con.executemany("UPDATE factor_weekly SET marcap=?, psr=?, per=? WHERE rowid=?", upd)
+    con.commit()
+    last = con.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver=?", (VER,)).fetchone()[0]
+    left = con.execute("SELECT COUNT(DISTINCT sym) FROM factor_weekly WHERE factor_ver=? AND as_of=? "
+                       "AND marcap IS NULL", (VER, last)).fetchone()[0]
+    tot = con.execute("SELECT COUNT(DISTINCT sym) FROM factor_weekly WHERE factor_ver=? AND as_of=?",
+                      (VER, last)).fetchone()[0]
+    bad = [x for x in sentinels if con.execute(
+        "SELECT marcap IS NULL FROM factor_weekly WHERE factor_ver=? AND as_of=? AND sym=?",
+        (VER, last, x)).fetchone() in ((1,), None)]
+    con.close()
+    print(f"→ {len(upd):,}행 채움 · 최신주({last}) 시총 결측 {left:,}/{tot:,}종", flush=True)
+    if bad:
+        print(f"::error title=시총 결측 파수꾼::{bad} 의 최신주 시총이 비어 있다", flush=True)
+        sys.exit(1)
+    if tot and left / tot > 0.15:
+        print(f"::error title=시총 결측::최신주 {left}/{tot}종({left/tot:.0%}) 시총이 비어 있다", flush=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "fetch"
     if cmd == "fetch":
@@ -736,5 +795,7 @@ if __name__ == "__main__":
         build(incremental=True)
     elif cmd == "newsyms":
         build(newsyms=True)
+    elif cmd == "fixcap":
+        fixcap()
     else:
         build(sys.argv[2] if len(sys.argv) > 2 else "2018-01-01")
