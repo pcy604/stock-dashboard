@@ -142,7 +142,7 @@ jobs:
           git add data/us_shares.csv data/us_marketcap.csv data/us_splits.csv 2>/dev/null || true
           # ⚠️ 경로를 한 줄에 여러 개 넘기면 하나만 없어도 git add 가 fatal 로 죽으면서
           #    *아무것도* 스테이징하지 않는다. 하나씩 넘긴다.
-          for f in data/kr_fundamentals_q.parquet data/kr_universe.parquet results/kr_fin_mismatch.csv results/market_report.json \
+          for f in data/kr_fundamentals_q.parquet data/kr_universe.parquet results/kr_fin_mismatch.json results/market_report.json \
                    results/leaders_kr.json results/leaders_kr6.json \
                    results/leaders_kr_paper.json results/kr_step_errors.txt; do
             [ -f "$f" ] && git add "$f"

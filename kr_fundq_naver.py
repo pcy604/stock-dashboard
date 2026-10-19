@@ -172,8 +172,9 @@ def main(limit: int | None = None, workers: int = 4):
                 pass
             det = det.assign(name=det.sym.map(nm))
             (ROOT / 'results').mkdir(exist_ok=True)
-            det.to_csv(ROOT / 'results' / 'kr_fin_mismatch.csv', index=False, encoding='utf-8-sig')
-            print(f"불일치 상세 {len(det):,}칸 → results/kr_fin_mismatch.csv", flush=True)
+            # .json — results/*.csv 는 .gitignore 라 커밋 단계에서 git add 가 실패한다
+            det.to_json(ROOT / 'results' / 'kr_fin_mismatch.json', orient='records', force_ascii=False, indent=1)
+            print(f"불일치 상세 {len(det):,}칸 → results/kr_fin_mismatch.json", flush=True)
     except Exception as e:
         print(f"[warn] 불일치 상세 저장 실패: {e}", flush=True)
     if ok_rate < MIN_OK_RATE:
