@@ -1,0 +1,58 @@
+{
+ "BRA": {
+  "usd": 871436530000.0,
+  "year": 2025,
+  "name": "Brazil"
+ },
+ "CHN": {
+  "usd": 15508858500000.0,
+  "year": 2025,
+  "name": "China"
+ },
+ "DEU": {
+  "usd": 2898631590000.0,
+  "year": 2025,
+  "name": "Germany"
+ },
+ "EMU": {
+  "usd": 5594569474500.47,
+  "year": 2018,
+  "name": "Euro area"
+ },
+ "GBR": {
+  "usd": 3095983430000.0,
+  "year": 2022,
+  "name": "United Kingdom"
+ },
+ "HKG": {
+  "usd": 6089226700000.0,
+  "year": 2025,
+  "name": "Hong Kong SAR, China"
+ },
+ "IND": {
+  "usd": 10559581760000.0,
+  "year": 2025,
+  "name": "India"
+ },
+ "JPN": {
+  "usd": 7610543670000.0,
+  "year": 2025,
+  "name": "Japan"
+ },
+ "KOR": {
+  "usd": 2756667490000.0,
+  "year": 2025,
+  "name": "Korea, Rep."
+ },
+ "USA": {
+  "usd": 68937866210000.0,
+  "year": 2025,
+  "name": "United States"
+ },
+ "_meta": {
+  "source": "World Bank CM.MKT.LCAP.CD",
+  "missing": [
+   "TWN"
+  ]
+ }
+}
