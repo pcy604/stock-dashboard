@@ -389,6 +389,28 @@ def _safe(func):
     return f
 
 
+_PRINTF = re.compile(r'%([+]?)(,?)\.?(\d*)([dfi])')
+
+
+def _na_dash(sty: Styler, df: pd.DataFrame, cfg: dict) -> Styler:
+    """수치 열의 결측만 '-' 로. 값 표시는 column_config 의 printf 형식(없으면 소수 1자리)을 따른다.
+    호출부가 이미 서식을 단 칸은 건드리지 않는다."""
+    taken = {c for (_, c) in sty._display_funcs} if hasattr(sty, '_display_funcs') else set()
+    fm = {}
+    for i, c in enumerate(df.columns):
+        if c == 'No.' or i in taken or not pd.api.types.is_numeric_dtype(df[c]) or not df[c].isna().any():
+            continue
+        f = (cfg.get(c) or {}).get('type_config', {}).get('format') if isinstance(cfg.get(c), dict) else None
+        m = _PRINTF.search(f or '')
+        plus, dp = (m.group(1), (0 if m.group(4) in 'di' else int(m.group(3) or 0))) if m else ('', 1)
+        if not m and pd.api.types.is_integer_dtype(df[c].dropna()):
+            dp = 0
+        if not m and df[c].dropna().apply(lambda v: float(v).is_integer()).all():
+            dp = 0
+        fm[c] = (lambda v, dp=dp, plus=plus: '-' if pd.isna(v) else f"{v:{plus},.{dp}f}")
+    return sty.format(fm) if fm else sty
+
+
 def restyle_for(sty: Styler, new_df: pd.DataFrame, ren: dict, conv: set) -> Styler:
     """호출부 Styler 의 서식·색 함수를 정규화한 표로 옮긴다."""
     new = new_df.style
@@ -581,6 +603,9 @@ def install(st):
                 if sty is None:
                     sty = df.style
                 sty = apply_colors(sty, df)
+            # 결측은 '-' — Streamlit 은 NaN 을 'None' 으로 그린다(2026-10-19, 데이터 원칙)
+            sty = _na_dash(sty if sty is not None else df.style, df, kw.get('column_config') or {}) \
+                if df.select_dtypes('number').isna().any().any() else sty
             return orig(sty if sty is not None else df, *a, **kw)
         except Exception as e:                      # 표시 보정 실패가 화면을 죽이면 안 된다
             if type(e).__module__.startswith('streamlit'):

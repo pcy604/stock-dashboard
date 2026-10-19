@@ -2622,6 +2622,83 @@ def fetch_index_history(symbol: str, days: int = 365):
         _mark_failed(f'idx:{symbol}')
         return pd.DataFrame()
 
+@st.cache_data(ttl=3 * 3600, show_spinner=False)
+def _world_index_closes():
+    """세계 지수 종가 — FDR 먼저, 안 되면 yfinance. 실패한 지수는 빈칸(None)으로 남긴다."""
+    import index_strength as _is
+    # 3년 — 52주 창(252일) 위에서 '마지막 신고가'를 1년 넘게 거슬러 찾으려면 이만큼 필요하다
+    start = (datetime.now() - timedelta(days=1100)).strftime('%Y-%m-%d')
+    out, src = {}, {}
+    for fsym, ysym, name, region in _is.INDICES:
+        s = None
+        if fsym:
+            try:
+                import FinanceDataReader as fdr
+                d = fdr.DataReader(fsym, start)
+                if d is not None and len(d) > 30:
+                    s = d['Close']; src[name] = 'FDR'
+            except Exception:
+                s = None
+        if s is None:
+            try:
+                d = yf.Ticker(ysym).history(start=start, auto_adjust=False)
+                if d is not None and len(d) > 30:
+                    s = d['Close']; src[name] = 'Yahoo'
+            except Exception:
+                s = None
+        if s is not None:
+            s.index = pd.to_datetime(s.index).tz_localize(None).normalize()
+        out[(name, region)] = s
+    return out, src
+
+
+def _world_strength_panel():
+    """🌍 세계 증시 강도판 — 기간별 수익률 히트맵 + 52주 신고가 갱신 (2026-10-19 사용자 요청)."""
+    import index_strength as _is
+    st.subheader("🌍 세계 증시 강도판 — 지금 어디가 제일 강한가")
+    with st.spinner("세계 지수 로딩..."):
+        closes, src = _world_index_closes()
+    df = _is.table(closes)
+    miss = [n for (n, _), v in closes.items() if v is None]
+    if df.empty:
+        st.info("지수 데이터를 받지 못했습니다(FDR·Yahoo 모두 실패).")
+        return
+    per = [k for k, _ in _is.PERIODS] + ['고점대비']
+    Z = df[per].astype(float)
+    # 색은 열마다 따로 맞춘다 — 1년 수익률(±40%)과 1주(±3%)를 한 잣대로 칠하면 짧은 기간이 전부 흰색이 된다
+    Zn = Z.apply(lambda c: c / (c.abs().max() or 1))
+    Zn['고점대비'] = Z['고점대비'] / (Z['고점대비'].abs().max() or 1)
+    txt = Z.map(lambda v: '-' if pd.isna(v) else f"{v:+.1f}")
+    ylab = [f"{r['강도순위']}. {r['지수']} <span style='color:#9CA3AF'>{r['지역']}</span>" for _, r in df.iterrows()]
+    fig = go.Figure(go.Heatmap(
+        z=Zn.values, x=[f"{c}(%)" for c in per], y=ylab, text=txt.values, texttemplate='%{text}',
+        textfont=dict(family='JetBrains Mono, monospace', size=12),
+        colorscale=[[0, '#DC2626'], [0.5, '#F9FAFB'], [1, '#15803D']], zmin=-1, zmax=1, showscale=False,
+        xgap=3, ygap=3, customdata=Z.values,
+        hovertemplate='%{y} · %{x}: %{customdata:+.2f}%<extra></extra>'))
+    fig.update_layout(height=34 * len(df) + 70, margin=dict(l=8, r=8, t=36, b=8),
+                      xaxis=dict(side='top', tickfont=dict(size=12, color='#374151'), showgrid=False),
+                      yaxis=dict(autorange='reversed', tickfont=dict(size=12, color='#111827'), showgrid=False),
+                      plot_bgcolor='rgba(0,0,0,0)')
+    cH, cT = st.columns([1.55, 1], gap='medium')
+    with cH:
+        st.plotly_chart(fig, use_container_width=True)
+    with cT:
+        t = pd.DataFrame({
+            '지수': df['지수'],
+            '신고가 후(일)': df['신고가후'], '3개월 신고가(회)': df['신고가3m'],
+            '마지막 신고가': df['신고가일'].map(lambda d: d.strftime('%Y-%m-%d') if d is not None and not pd.isna(d) else '-')})
+        _asof = df['기준일'].max()
+        _tsrc('FinanceDataReader·Yahoo(지수 종가) · ' + ', '.join(sorted(set(src.values()))),
+              asof=_asof.strftime('%Y-%m-%d') if hasattr(_asof, 'strftime') else None)
+        st.dataframe(t, filters=False, color=False)
+    st.caption("순서 = **강도 순위**(고점대비 · 3개월 · 6개월 수익률의 순위 평균). 칸 색은 열마다 따로 맞춘 상대 강도다. "
+               "**3개월 신고가(회)** = 최근 63거래일 중 52주 신고가를 새로 쓴 날 수 — 많을수록 추세가 살아 있다. "
+               "**신고가 후(일)** 가 '-' 면 최근 2년 안에 52주 신고가가 없었다는 뜻. "
+               "⚠️ 각국 통화 기준(환율 미반영) · 종가 기준 신고가(장중 아님)."
+               + (f" ⚠️ 못 받은 지수: {', '.join(miss)}." if miss else ""))
+
+
 def _fred_latest(series_id: str):
     d = fetch_fred(series_id, 2)
     return d[-1][1] if d else None
@@ -3005,6 +3082,10 @@ with tab4, guard('매크로'):
                 st.caption("막스: *\"남들이 겁 없이 사는 곳에서 조심하고, "
                            "아무도 안 사는 곳에서 사라.\"*")
 
+    # ── 세계 증시 강도판 (2026-10-19) — 국면 판단 바로 다음, 펼치지 않아도 보이게 ──
+    st.divider()
+    _world_strength_panel()
+
     # ── ③ 사이클 궤적 ────────────────────────────────────────────
     st.divider()
     st.subheader("🌀 사이클 궤적 — 지난 2년 어디서 어디로 왔나")
@@ -3290,19 +3371,7 @@ with tab4, guard('매크로'):
                     '52주위치': f"{(cur-lo52)/(hi52-lo52)*100:.0f}%" if hi52 > lo52 else '-',
                 })
 
-        if idx_rows:
-            idx_df = pd.DataFrame(idx_rows)
-            def _ci_chg(v):
-                try:
-                    return 'color:#15803D' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#DC2626'
-                except: return ''
-            _tsrc('FinanceDataReader(지수 종가)', live=True)
-            st.dataframe(
-                idx_df.style.map(_ci_chg, subset=['전일대비','YoY']),
-                use_container_width=True, hide_index=True,
-                row_height=25, height=_dfh(len(idx_df)),
-            )
-
+        # 2026-10-19 — 5행 지수 표는 위 '세계 증시 강도판'과 겹쳐서 뺐다. 상대 성과 그래프만 남긴다.
         valid_idx = [(df, l, c) for df, l, c in idx_chart_dfs if not df.empty]
         if valid_idx:
             fig_idx = go.Figure()
