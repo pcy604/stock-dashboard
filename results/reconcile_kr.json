@@ -1,43 +1,43 @@
 {
- "generated": "2026-10-18",
- "asof": "2026-10-18",
- "intraday": false,
+ "generated": "2026-10-19",
+ "asof": "2026-10-19",
+ "intraday": true,
  "checks": {
   "perf_price": {
-   "n": 663,
-   "ok": 660,
-   "rate": 0.995,
+   "n": 659,
+   "ok": 634,
+   "rate": 0.962,
    "threshold": 0.9,
-   "pass_": true,
-   "note": "현재가 3% 이내"
+   "pass_": null,
+   "note": "현재가 3% 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "perf_52w": {
-   "n": 663,
-   "ok": 661,
-   "rate": 0.997,
+   "n": 659,
+   "ok": 658,
+   "rate": 0.998,
    "threshold": 0.9,
    "pass_": true,
    "note": "52주 신고가 -3% 판정 일치"
   },
   "canslim_N": {
-   "n": 71,
-   "ok": 59,
-   "rate": 0.831,
+   "n": 72,
+   "ok": 62,
+   "rate": 0.861,
    "threshold": 0.9,
-   "pass_": false,
-   "note": "N 거리 1.5%p 이내"
+   "pass_": null,
+   "note": "N 거리 1.5%p 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "canslim_RS": {
-   "n": 71,
-   "ok": 63,
-   "rate": 0.887,
+   "n": 72,
+   "ok": 64,
+   "rate": 0.889,
    "threshold": 0.85,
    "pass_": true,
    "note": "RS ±10 이내"
   },
   "coverage": {
-   "n": 663,
-   "ok": 663,
+   "n": 659,
+   "ok": 659,
    "rate": 1.0,
    "threshold": 0.8,
    "pass_": true,
@@ -45,6 +45,6 @@
   }
  },
  "source_52w_near": 4,
- "app_52w_near": 6,
- "ok": false
+ "app_52w_near": 5,
+ "ok": true
 }

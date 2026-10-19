@@ -1,13 +1,13 @@
 {
-  "date": "2026-10-18",
+  "date": "2026-10-19",
   "total": 159,
   "stocks": [
     {
       "market": "KR",
-      "sym": "068270",
-      "name": "셀트리온",
-      "marcap": 45127732144000,
-      "pct_change": 8.32,
+      "sym": "006400",
+      "name": "삼성SDI",
+      "marcap": 46256094220000,
+      "pct_change": 4.99,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -20,29 +20,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -19.0,
+      "dist_52w": -18.5,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "011200",
-      "name": "HMM",
-      "marcap": 22166092295000,
-      "pct_change": 13.19,
+      "sym": "068270",
+      "name": "셀트리온",
+      "marcap": 44975723562600,
+      "pct_change": 8.82,
       "signals": [
-        "거래량폭발",
-        "이평선수렴"
+        "이평선수렴",
+        "RSI/MACD"
       ],
       "total_signals": 2,
       "high_type": "",
       "sig_52w": false,
-      "sig_vol": true,
+      "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -5.4,
+      "sig_rsimacd": true,
+      "dist_52w": -18.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -50,21 +50,23 @@
       "market": "KR",
       "sym": "033780",
       "name": "KT&G",
-      "marcap": 19775891868000,
-      "pct_change": 7.95,
+      "marcap": 19993893825600,
+      "pct_change": 7.59,
       "signals": [
         "52주신고가",
-        "이평선수렴"
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
       ],
-      "total_signals": 2,
+      "total_signals": 4,
       "high_type": "52주",
       "sig_52w": true,
       "sig_vol": false,
-      "sig_ma5": false,
+      "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -0.5,
+      "sig_rsimacd": true,
+      "dist_52w": -1.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -72,8 +74,8 @@
       "market": "KR",
       "sym": "032640",
       "name": "LG유플러스",
-      "marcap": 6582874123320,
-      "pct_change": 7.48,
+      "marcap": 6693225333640,
+      "pct_change": 9.68,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -86,7 +88,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -17.5,
+      "dist_52w": -15.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -94,8 +96,8 @@
       "market": "KR",
       "sym": "018880",
       "name": "한온시스템",
-      "marcap": 3935673896570,
-      "pct_change": -4.23,
+      "marcap": 4033167774060,
+      "pct_change": 2.76,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -108,29 +110,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -35.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "457190",
-      "name": "이수스페셜티케미컬",
-      "marcap": 2638107525600,
-      "pct_change": 7.95,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -34.1,
+      "dist_52w": -32.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -139,7 +119,117 @@
       "sym": "000240",
       "name": "한국앤컴퍼니",
       "marcap": 2496796812000,
-      "pct_change": -0.38,
+      "pct_change": -0.19,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -27.6,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "030000",
+      "name": "제일기획",
+      "marcap": 2264011308000,
+      "pct_change": 3.12,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -14.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "328130",
+      "name": "루닛",
+      "marcap": 959021358400,
+      "pct_change": 17.98,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -47.1,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "137310",
+      "name": "에스디바이오센서",
+      "marcap": 831961312780,
+      "pct_change": 6.79,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -32.1,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "122870",
+      "name": "와이지엔터테인먼트",
+      "marcap": 813995183950,
+      "pct_change": 11.28,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -55.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "002960",
+      "name": "한국쉘석유",
+      "marcap": 735800000000,
+      "pct_change": 7.78,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -153,104 +243,38 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -28.4,
+      "dist_52w": -8.4,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "300720",
-      "name": "한일시멘트",
-      "marcap": 1249533100910,
-      "pct_change": 4.95,
-      "signals": [
-        "거래량폭발",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": true,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -18.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "445680",
-      "name": "큐리옥스바이오시스템즈",
-      "marcap": 1171279532000,
-      "pct_change": 28.98,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -54.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "251970",
-      "name": "펌텍코리아",
-      "marcap": 884120000000,
-      "pct_change": 10.94,
+      "sym": "453340",
+      "name": "현대그린푸드",
+      "marcap": 657549636750,
+      "pct_change": 5.32,
       "signals": [
         "52주신고가",
-        "이평선수렴"
+        "5일선라이딩"
       ],
       "total_signals": 2,
       "high_type": "52주",
       "sig_52w": true,
       "sig_vol": false,
-      "sig_ma5": false,
+      "sig_ma5": true,
       "sig_cup": false,
-      "sig_maconv": true,
+      "sig_maconv": false,
       "sig_rsimacd": false,
-      "dist_52w": 4.0,
+      "dist_52w": 1.3,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "006730",
-      "name": "서부T&D",
-      "marcap": 817602460560,
-      "pct_change": 8.12,
-      "signals": [
-        "거래량폭발",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": true,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -37.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "093050",
-      "name": "LF",
-      "marcap": 676906000000,
-      "pct_change": -2.11,
+      "sym": "336370",
+      "name": "솔루스첨단소재",
+      "marcap": 622783083260,
+      "pct_change": 14.78,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -263,29 +287,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -12.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "005880",
-      "name": "대한해운",
-      "marcap": 660018310300,
-      "pct_change": 0.99,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -39.4,
+      "dist_52w": -44.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -293,8 +295,8 @@
       "market": "KR",
       "sym": "039440",
       "name": "에스티아이",
-      "marcap": 477617047600,
-      "pct_change": 19.8,
+      "marcap": 450479715350,
+      "pct_change": 23.55,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -307,7 +309,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -30.0,
+      "dist_52w": -30.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -315,31 +317,8 @@
       "market": "KR",
       "sym": "089590",
       "name": "제주항공",
-      "marcap": 448363876600,
-      "pct_change": 24.38,
-      "signals": [
-        "거래량폭발",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": true,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -18.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "020000",
-      "name": "한섬",
-      "marcap": 446721475200,
-      "pct_change": -2.11,
+      "marcap": 440299778100,
+      "pct_change": 25.9,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -352,16 +331,16 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -27.5,
+      "dist_52w": -17.7,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "003280",
-      "name": "흥아해운",
-      "marcap": 446469037443,
-      "pct_change": 0.76,
+      "sym": "215200",
+      "name": "메가스터디교육",
+      "marcap": 405798206400,
+      "pct_change": 2.07,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -374,29 +353,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -61.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "069080",
-      "name": "웹젠",
-      "marcap": 375934220500,
-      "pct_change": 1.43,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -32.9,
+      "dist_52w": -22.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -404,8 +361,8 @@
       "market": "KR",
       "sym": "015360",
       "name": "INVENI",
-      "marcap": 368550000000,
-      "pct_change": -3.44,
+      "marcap": 370387500000,
+      "pct_change": -2.14,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -418,7 +375,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -22.8,
+      "dist_52w": -22.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "006405",
+      "name": "삼성SDI우",
+      "marcap": 359172912000,
+      "pct_change": 5.32,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -39.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -427,7 +406,7 @@
       "sym": "005720",
       "name": "넥센",
       "marcap": 334705133490,
-      "pct_change": 1.27,
+      "pct_change": 1.11,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -440,16 +419,38 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -21.1,
+      "dist_52w": -21.5,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "009160",
-      "name": "SIMPAC",
-      "marcap": 312473227040,
-      "pct_change": 0.74,
+      "sym": "009290",
+      "name": "광동제약",
+      "marcap": 333160715520,
+      "pct_change": -1.76,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -47.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "452280",
+      "name": "한선엔지니어링",
+      "marcap": 315084357900,
+      "pct_change": 28.94,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -462,7 +463,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -30.5,
+      "dist_52w": -54.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -693,7 +694,7 @@
       "market": "US",
       "sym": "ISRG",
       "name": "INTUITIVE SURGICAL INC",
-      "marcap": 150039440975,
+      "marcap": 149775753971,
       "pct_change": 0.65,
       "signals": [
         "5일선라이딩",
@@ -739,7 +740,7 @@
       "market": "US",
       "sym": "MO",
       "name": "ALTRIA GROUP, INC.",
-      "marcap": 119687245125,
+      "marcap": 119705600509,
       "pct_change": 4.79,
       "signals": [
         "52주신고가",
@@ -1297,7 +1298,7 @@
       "market": "US",
       "sym": "CBOE",
       "name": "Cboe Global Markets, Inc.",
-      "marcap": 31801401429,
+      "marcap": 31763739121,
       "pct_change": 3.56,
       "signals": [
         "이평선수렴",
@@ -1806,7 +1807,7 @@
       "market": "US",
       "sym": "PAYC",
       "name": "Paycom Software, Inc.",
-      "marcap": 10287346054,
+      "marcap": 10466531419,
       "pct_change": 8.36,
       "signals": [
         "52주신고가",
@@ -1850,7 +1851,7 @@
       "market": "US",
       "sym": "PCTY",
       "name": "Paylocity Holding Corp",
-      "marcap": 8201603517,
+      "marcap": 8168650379,
       "pct_change": 8.03,
       "signals": [
         "52주신고가",
@@ -1938,7 +1939,7 @@
       "market": "US",
       "sym": "MTDR",
       "name": "Matador Resources Co",
-      "marcap": 6730627464,
+      "marcap": 6717378693,
       "pct_change": 5.97,
       "signals": [
         "이평선수렴",
@@ -2204,7 +2205,7 @@
       "market": "US",
       "sym": "NWE",
       "name": "NorthWestern Energy Group, Inc.",
-      "marcap": 4561233237,
+      "marcap": 4561548671,
       "pct_change": 0.77,
       "signals": [
         "52주신고가",
@@ -2538,7 +2539,7 @@
       "market": "US",
       "sym": "PK",
       "name": "Park Hotels & Resorts Inc.",
-      "marcap": 3054471247,
+      "marcap": 3054302481,
       "pct_change": 4.88,
       "signals": [
         "52주신고가",
@@ -2648,7 +2649,7 @@
       "market": "US",
       "sym": "CXT",
       "name": "Crane NXT, Co.",
-      "marcap": 2903748625,
+      "marcap": 2903967830,
       "pct_change": 8.46,
       "signals": [
         "이평선수렴",
@@ -2890,7 +2891,7 @@
       "market": "US",
       "sym": "PCRX",
       "name": "Pacira BioSciences, Inc.",
-      "marcap": 1445947695,
+      "marcap": 1447385135,
       "pct_change": 0.08,
       "signals": [
         "52주신고가",
@@ -3181,7 +3182,7 @@
       "market": "US",
       "sym": "MG",
       "name": "Mistras Group, Inc.",
-      "marcap": 661522292,
+      "marcap": 661601633,
       "pct_change": 3.32,
       "signals": [
         "52주신고가",
@@ -3270,7 +3271,7 @@
       "market": "US",
       "sym": "CBNK",
       "name": "Capital Bancorp Inc",
-      "marcap": 627789174,
+      "marcap": 627834189,
       "pct_change": 2.72,
       "signals": [
         "52주신고가",
