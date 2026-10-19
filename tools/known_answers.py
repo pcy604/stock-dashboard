@@ -208,6 +208,11 @@ for _rel, _lab in [('results/returns.json', '기간 수익률'), ('results/mdd.j
     @check(_lab, f'{_lab}: 커버 기준(한국 1,000억+ · 미국 $3억+)의 95% 이상을 담고 있는가')
     def _(_rel=_rel):
         kr, us = _cover_targets()
+        if 'seasonality' in _rel:
+            # 계절성은 월간 수익률 24개(약 2년) 이상이어야 계산된다 — 분모를 이력 2년+ 종목으로(신규 상장 제외)
+            _, md = _stocks('results/mdd.json')
+            old = {k for k, v in md.items() if (v.get('years') or 0) >= 2.1}
+            kr, us = kr & old, us & old
         _, s = _stocks(_rel)
         ck, cu = len(kr & set(s)) / max(len(kr), 1), len(us & set(s)) / max(len(us), 1)
         # 신규 상장·거래정지·시세 실패로 몇 %는 빠질 수 있다 — 95% 아래면 명단 자체가 좁아진 것이다
