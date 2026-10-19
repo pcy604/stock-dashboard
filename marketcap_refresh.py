@@ -75,7 +75,12 @@ WORKERS = 8
 MAX_FETCH = int(os.environ.get("MAX_FETCH", 600))
 
 # dei 가 없는 종목(외국계·구형 제출인)을 위한 대체 태그. 앞에서부터 먼저 잡히는 걸 쓴다.
-FALLBACK = ["CommonStockSharesOutstanding", "CommonStockSharesIssued"]
+FALLBACK = ["CommonStockSharesOutstanding", "CommonStockSharesIssued",
+            # 2026-10-19 — 복수 종류주식 회사는 위 태그들이 전부 '종류별(차원)'로만 공시돼
+            #   companyconcept 가 빈값을 준다. 그래서 CMCSA(~$130B)·STZ·ERIE·FOXA·NWSA·GEF 가
+            #   시총 파일·주도주 유니버스에서 통째로 빠져 있었다(정답 점검으로 발견).
+            #   가중평균 기본주식수는 전 종류 합계로 차원 없이 공시된다 — 기말 주식수와 몇 % 차이(근사).
+            "WeightedAverageNumberOfSharesOutstandingBasic"]
 
 
 class Missing(Exception):
@@ -103,6 +108,27 @@ def get(url, hdr, tries=4):
         except Exception:
             time.sleep(0.8 * (k + 1))
     return None
+
+
+# 같은 CIK 에 티커가 여럿일 때 대표 티커를 고르는 규칙 (2026-10-19)
+#   전에는 '짧은 티커'를 골랐다 → Comcast 는 CCZ(교환사채)가 이겨 CMCSA 가 시총 파일에서 사라지고,
+#   CCZ 가 사채 가격 × 회사 주식수 = $225B 라는 엉뚱한 시총으로 들어가 있었다.
+#   SEC company_tickers 의 **첫 번째 티커가 대표 보통주**다(JPM·BAC·GOOGL·CMCSA·FOXA 모두 확인).
+#   예외: 버크셔는 주식수를 'A주 환산'으로 공시하므로 A주 가격과 곱해야 맞다.
+PRIMARY_OVERRIDE = {"1067983": "BRK-A"}
+
+
+def primary_ticker_rank():
+    """{티커: 같은 CIK 안에서의 순번(0=대표)} — SEC 목록 순서."""
+    raw = json.load(open(os.path.join(DATA, "edgar_cik.json"), encoding="utf-8"))
+    seen, rank = {}, {}
+    for t, c in raw.items():
+        k = str(c).lstrip("0")
+        rank[t.upper()] = seen.get(k, 0)
+        seen[k] = seen.get(k, 0) + 1
+    for k, t in PRIMARY_OVERRIDE.items():
+        rank[t] = -1
+    return rank
 
 
 def cikmap():
@@ -177,9 +203,10 @@ FRAMES_CSV = os.path.join(DATA, "shares_frames.csv")
 def cmd_frames(since=2017):
     cm = cikmap()
     inv = {}
-    for s, c in cm.items():                      # 같은 CIK 에 티커 여럿이면 짧은 쪽
+    rk = primary_ticker_rank()
+    for s, c in cm.items():                      # 같은 CIK 에 티커 여럿이면 대표 티커(SEC 순서)
         k = c.lstrip("0")
-        if k not in inv or len(s) < len(inv[k]):
+        if k not in inv or rk.get(s, 99) < rk.get(inv[k], 99):
             inv[k] = s
     now = pd.Timestamp.today()
     qs = [f"CY{y}Q{q}" for y in range(since, now.year + 1) for q in (1, 2, 3, 4)
@@ -516,10 +543,11 @@ def _drop_untrustworthy(m):
             & ~s.map(lambda x: dom.get(x) == "Foreign")
             & ~s.map(lambda x: sic.get(x, "") in _ETF_SIC))
     m = m[keep].copy()
-    try:                                   # CIK 중복 → 짧은 티커 하나만
+    try:                                   # CIK 중복 → 대표 티커 하나만 (SEC 순서, 2026-10-19)
         cm = json.load(open(os.path.join(DATA, "edgar_cik.json"), encoding="utf-8"))
         cik = m.Symbol.astype(str).str.upper().map({k.upper(): str(v) for k, v in cm.items()})
-        m = (m.assign(_c=cik, _l=m.Symbol.astype(str).str.len())
+        rk = primary_ticker_rank()
+        m = (m.assign(_c=cik, _l=m.Symbol.astype(str).str.upper().map(rk).fillna(99))
               .sort_values(["_c", "_l", "Symbol"])
               .drop_duplicates("_c", keep="first")
               .drop(columns=["_c", "_l"]))

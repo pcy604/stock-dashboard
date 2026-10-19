@@ -29,8 +29,8 @@ OUT = os.path.join(BASE, 'results', 'known_answers.json')
 TODAY = date.today()
 
 # 미국 초대형 파수꾼 — 시총 상위·업종 분산·티커 첫 글자 분산(A~X). 어느 하나라도 빠지면 유니버스 결손이다.
-US_BIG = ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOG', 'META', 'AVGO', 'TSLA', 'JPM', 'V', 'WMT', 'XOM',
-          'MA', 'ORCL', 'COST', 'NFLX', 'AMD', 'PLTR', 'UBER', 'LLY']
+US_BIG = ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META', 'AVGO', 'TSLA', 'JPM', 'V', 'WMT', 'XOM',
+          'MA', 'ORCL', 'COST', 'NFLX', 'AMD', 'PLTR', 'UBER', 'LLY', 'CMCSA']
 # 한국 파수꾼 — 코스피 대형 + 코스닥 대형
 KR_BIG = ['005930', '000660', '373220', '207940', '005380', '035420', '068270', '247540']
 # 주도주 이력 파수꾼 — 2018~ 실제로 이익가속+급등 신호가 있었던 시대의 주도주(2026-09 정상 결과 기준).
@@ -66,7 +66,7 @@ def check(area, question):
 
 
 # ───────────────────────── 미국 유니버스 ─────────────────────────
-@check('미국 유니버스', '초대형주 20종이 시총 파일에 다 있는가')
+@check('미국 유니버스', '초대형주 21종이 시총 파일에 다 있는가')
 def _():
     m = pd.read_csv(os.path.join(BASE, 'data/us_marketcap.csv'))
     lost = [s for s in US_BIG if s not in set(m.Symbol.astype(str))]
@@ -79,6 +79,18 @@ def _():
     v = m.loc[m.Symbol == 'AAPL', 'marketcap']
     x = float(v.iloc[0]) if len(v) else None
     return bool(x and 1e12 <= x <= 1e13), f"AAPL ${x/1e12:.2f}T" if x else 'AAPL 없음'
+
+
+@check('미국 유니버스', '복수 종류주식·복수 티커 회사의 시총이 제 자리에 있는가 (BRK·CMCSA·GOOGL)')
+def _():
+    # 2026-10-19 — 같은 회사 티커 중 '짧은 것'을 고르던 규칙 때문에 Comcast 가 CCZ(교환사채)로 들어가
+    #   $225B 로 잡히고 CMCSA 는 사라졌다. 대표 티커와 그 규모가 맞는지 본다.
+    m = pd.read_csv(os.path.join(BASE, 'data/us_marketcap.csv')).set_index('Symbol').marketcap
+    want = {'BRK-A': (4e11, 2.5e12), 'CMCSA': (4e10, 3e11), 'GOOGL': (1e12, 1e13)}
+    bad = {k: (round(m[k] / 1e9) if k in m else None) for k, (lo, hi) in want.items()
+           if not (k in m and lo <= m[k] <= hi)}
+    stray = [t for t in ('CCZ', 'GOOG', 'BRK-B') if t in m]     # 대표가 아닌 티커가 남아 있으면 이중 계상
+    return not bad and not stray, f"범위 밖 {bad or '없음'} · 대표 아닌 티커 {stray or '없음'}"
 
 
 @check('미국 유니버스', '티커 첫 글자 A~W 가 고르게 있는가 (순서 편향 결손 감지)')

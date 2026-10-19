@@ -32,7 +32,7 @@ def test_detects_missing_megacap(repo):
     p = repo / 'data/us_marketcap.csv'
     m = pd.read_csv(p)
     m[~m.Symbol.astype(str).str[0].isin(list('STUVWXYZ'))].to_csv(p, index=False)   # 10-19 사고 재현
-    ok, detail = _one('초대형주 20종')
+    ok, detail = _one('초대형주 21종')
     assert not ok and 'TSLA' in detail
     ok, detail = _one('첫 글자')
     assert not ok and 'S' in detail
@@ -63,3 +63,19 @@ def test_due_quarter():
     K.TODAY = date(2026, 3, 1)
     assert K._q_due() == (2025, 3)      # 사업보고서(3/31) 전이면 Q4 를 요구하지 않는다
     K.TODAY = date.today()
+
+
+def test_multiclass_shares_fall_back_to_weighted_average(monkeypatch):
+    """dei·CommonStock 태그가 비면(복수 종류주식) 가중평균 기본주식수로 채운다."""
+    import marketcap_refresh as M
+    calls = []
+
+    def fake_get(url, hdr, tries=4):
+        calls.append(url.rsplit('/', 1)[-1])
+        if 'WeightedAverage' in url:
+            return json.dumps({'units': {'shares': [{'end': '2026-06-30', 'filed': '2026-07-30', 'val': 3.7e9}]}})
+        return json.dumps({'units': {}})            # 차원 붙은 사실만 있어 빈 응답
+    monkeypatch.setattr(M, 'get', fake_get)
+    rows = M._pull_shares('CMCSA', '0001166691')
+    assert rows and rows[0]['shares'] == 3.7e9
+    assert calls[0].startswith('EntityCommonStockSharesOutstanding')

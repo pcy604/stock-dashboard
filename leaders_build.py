@@ -346,6 +346,20 @@ def recent_split_syms(days=400):
 
 def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (대시세는 소형에서 시작한다)
     u = universe(n, lo, hi)
+    # 2026-10-19 — 한 번 들어온 종목은 빼지 않는다(생존편향).
+    #   유니버스를 '오늘 시총'으로 고르니, 그 사이 $150M 아래로 쪼그라든 종목(CDLX·HRTX·CHGG…)은
+    #   과거 신호까지 통째로 사라졌다 — 백테스트가 '살아남은 종목'만 보고 낙관적으로 나온다.
+    #   지금은 작아도 과거엔 유니버스였던 종목은 계속 이력을 유지한다. 목록은 커밋된다.
+    ever_p = os.path.join(DATA, "universe_ever.csv")
+    try:
+        ever = pd.read_csv(ever_p).sym.astype(str)
+    except Exception:
+        ever = pd.Series([], dtype=str)
+    extra = sorted(set(ever) - set(u.sym))
+    if extra:
+        u = pd.concat([u, pd.DataFrame({"sym": extra, "name": extra, "marketcap": np.nan})], ignore_index=True)
+        print(f"  과거 유니버스 유지 {len(extra):,}종 (지금은 하한 아래·목록 밖)", flush=True)
+    pd.DataFrame({"sym": sorted(set(ever) | set(u.sym))}).to_csv(ever_p, index=False)
     cm = cikmap()
     print(f"유니버스 {len(u)}종 (시총 {lo/1e9:.0f}B~{(hi/1e9 if hi else 999):.0f}B)", flush=True)
     syms = u.sym.tolist()
