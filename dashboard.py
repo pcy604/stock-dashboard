@@ -314,8 +314,104 @@ div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem 
   .stDataFrame, .stDataFrame td, .stDataFrame th { font-size: 11px !important; }
   [data-testid="stTable"] { overflow-x: auto !important; display: block !important; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   C · 카드 대시보드 테마 (2026-10-19, 사용자 선택 — 디자인 캔버스 시안 C)
+   회색 바탕 위 흰 카드, 큰 숫자, 단일 파랑 강조, 의미색은 수익/손실에만.
+   위 토큰을 덮어쓴다(같은 이름 → 기존 화면 코드는 손대지 않아도 따라온다).
+   ⚠️ 초록 글자는 #15803D — 흰 바탕 4.5:1. 셀 배경 초록(#16A34A)과 다르다.
+   ══════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap');
+:root {
+  --ink:#111827; --ink-2:#374151; --ink-3:#4B5563;
+  --line:#E5E7EB; --line-2:#F3F4F6;
+  --surface:#FFFFFF; --surface-2:#F9FAFB; --page:#EEF0F3;
+  --accent:#2453C8; --accent-2:#EEF3FF;
+  --pos:#15803D; --pos-bg:#DCFCE7; --neg:#DC2626; --neg-bg:#FEE2E2;
+  --warn:#B45309; --warn-bg:#FEF3C7;
+  --hero:#111827; --hero-2:#1F2937;
+  --radius:16px; --radius-sm:10px;
+  --mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#F3F4F6; --ink-2:#D1D5DB; --ink-3:#9CA3AF; --line:#2A303B; --line-2:#1F242D;
+          --surface:#161A21; --surface-2:#1C212A; --page:#0E1116;
+          --accent:#7EA2FF; --accent-2:#1A2340; --pos:#4ADE80; --pos-bg:#123221;
+          --neg:#F87171; --neg-bg:#3A1717; --warn:#FBBF24; --warn-bg:#33270F;
+          --hero:#1C212A; --hero-2:#262C37; }
+}
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { background: var(--page) !important; }
+h1 { font-size: 26px !important; font-weight: 800 !important; letter-spacing: -.025em !important; }
+h2 { font-size: 19px !important; font-weight: 750 !important; }
+h3 { font-size: 16px !important; font-weight: 700 !important; }
+
+/* 지표 = 흰 카드, 큰 고정폭 숫자 */
+[data-testid="stMetric"] { background: var(--surface) !important; border: none !important;
+  border-radius: var(--radius) !important; padding: 16px 18px 14px !important;
+  box-shadow: 0 1px 2px rgba(17,24,39,.05); }
+[data-testid="stMetricValue"] { font-family: var(--mono) !important; font-size: 23px !important;
+  font-weight: 700 !important; letter-spacing: -.01em !important; }
+[data-testid="stMetricLabel"] p, [data-testid="stMetric"] label { font-size: 12.5px !important;
+  color: var(--ink-3) !important; font-weight: 500 !important; }
+
+/* 테두리 컨테이너 = 카드 (선 대신 흰 면) */
+[data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"]) {
+  background: var(--surface); border: none !important; border-radius: var(--radius) !important;
+  box-shadow: 0 1px 2px rgba(17,24,39,.05); }
+
+/* 표 = 둥근 흰 카드 */
+[data-testid="stDataFrame"] { border: none !important; border-radius: 14px !important;
+  background: var(--surface); box-shadow: 0 1px 2px rgba(17,24,39,.05); padding: 4px; }
+
+/* 탭 = 알약형. 선택된 탭은 짙은 면 */
+.stTabs [data-baseweb="tab-list"] { gap: 4px !important; border-bottom: none !important;
+  flex-wrap: wrap; }
+.stTabs [data-baseweb="tab"] { border-radius: var(--radius-sm) !important; padding: 10px 14px !important;
+  color: var(--ink-3) !important; background: transparent; min-height: 44px; }
+.stTabs [aria-selected="true"] { background: var(--hero) !important; color: #FFFFFF !important; }
+.stTabs [aria-selected="true"] p, .stTabs [aria-selected="true"] div { color: #FFFFFF !important; }
+.stTabs button[data-baseweb="tab"] { border-radius: 10px !important; }
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none !important; }
+
+/* 펼침·알림·입력도 같은 곡률 */
+[data-testid="stExpander"] details { background: var(--surface); border: none !important;
+  border-radius: var(--radius) !important; box-shadow: 0 1px 2px rgba(17,24,39,.05); }
+[data-testid="stAlert"] { border-radius: 12px !important; }
+.stButton > button, .stDownloadButton > button, [data-testid="stFormSubmitButton"] > button {
+  border-radius: var(--radius-sm) !important; min-height: 44px; font-weight: 600 !important; }
+[data-baseweb="input"], [data-baseweb="select"] > div { border-radius: var(--radius-sm) !important; }
+
+/* 종목 분석 머리 카드 (stock_hero) */
+.mo-hero { background: var(--hero); color: #F9FAFB; border-radius: 18px; padding: 22px 26px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 18px 36px; margin: 4px 0 10px; }
+.mo-hero .t { flex: 1 1 280px; display: flex; flex-direction: column; gap: 4px; }
+.mo-hero .k { font-family: var(--mono); font-size: 13px; color: #9CA3AF; }
+.mo-hero .n { font-size: 28px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+.mo-hero .p { display: flex; flex-direction: column; gap: 2px; }
+.mo-hero .pv { font-family: var(--mono); font-size: 32px; font-weight: 700; }
+.mo-hero .up { font-family: var(--mono); font-size: 14px; color: #4ADE80; }
+.mo-hero .dn { font-family: var(--mono); font-size: 14px; color: #F87171; }
+.mo-hero .s { display: flex; align-items: center; gap: 10px; background: var(--hero-2);
+  border-radius: 14px; padding: 12px 16px; }
+.mo-hero .dot { width: 10px; height: 10px; border-radius: 50%; }
+.mo-hero .s b { display: block; font-size: 14.5px; }
+.mo-hero .s span { font-size: 12.5px; color: #9CA3AF; }
+@media (max-width: 640px) { .mo-hero { padding: 18px; } .mo-hero .n { font-size: 22px; }
+  .mo-hero .pv { font-size: 26px; } }
 </style>
 """, unsafe_allow_html=True)
+
+# ── Plotly 기본 템플릿 — 카드 테마와 같은 색·글꼴 (2026-10-19) ─────────────
+import plotly.io as _pio
+_pio.templates['market_os'] = go.layout.Template(layout=dict(
+    font=dict(family="Pretendard, 'Malgun Gothic', sans-serif", size=12, color='#374151'),
+    colorway=['#2453C8', '#15803D', '#DC2626', '#B45309', '#111827', '#7C8AA5'],
+    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+    xaxis=dict(gridcolor='#E5E7EB', zeroline=False, linecolor='#E5E7EB'),
+    yaxis=dict(gridcolor='#E5E7EB', zeroline=False, linecolor='#E5E7EB'),
+    hoverlabel=dict(font_family="JetBrains Mono, monospace", bgcolor='#111827', font_color='#F9FAFB'),
+    legend=dict(bgcolor='rgba(0,0,0,0)')))
+_pio.templates.default = 'plotly_white+market_os'
 
 # Streamlit Cloud 컨테이너의 파일시스템은 휘발성이다(슬립·재배포 시 초기화). 여기에
 # 파일로 저장하는 기능 — 보유종목·API키·구루 채널 — 은 "저장됐다"고 표시된 뒤 조용히
@@ -4021,18 +4117,33 @@ def _tab_analysis():
                 price_prev= hist['Close'].iloc[-2] if len(hist) > 1 else price_now
                 chg_pct   = (price_now / price_prev - 1) * 100
 
-                h1, h2, h3, h4, h5 = st.columns(5)
-                h1.metric("종목명", info.get('longName', sym8_clean)[:20])
-                h2.metric("현재가", f"${price_now:.2f}" if info.get('currency','') != 'KRW' else f"₩{price_now:,.0f}")
-                h3.metric("일일대비", f"{chg_pct:+.2f}%")
                 mc = info.get('marketCap', 0) or 0
                 # 2026-10-17 — KR 시총(원)을 달러 기호로 찍고 있었다(삼성전자 '$1403319.4B'). 통화대로 표기.
                 if len(sym8_clean) == 6 and sym8_clean[:5].isdigit():
                     _mcs = (f"₩{mc/1e12:,.1f}조" if mc >= 1e12 else f"₩{mc/1e8:,.0f}억") if mc else "-"
                 else:
                     _mcs = (f"${mc/1e9:,.1f}B" if mc >= 1e9 else f"${mc/1e6:,.0f}M") if mc else "-"
-                h4.metric("시가총액", _mcs)
-                h5.metric("섹터", info.get('sector', '-'))
+                # ── 머리 카드 (2026-10-19 · 디자인 시안 C) — 종목·현재가·신호 상태를 한 장에
+                import html as _h
+                _is_kr0 = len(sym8_clean) == 6 and sym8_clean[:5].isdigit()
+                _px_s = f"₩{price_now:,.0f}" if _is_kr0 else f"${price_now:,.2f}"
+                _ah0 = None if _is_kr0 else _sx.accel_history(sym8_clean)
+                if _is_kr0:
+                    _sig_b, _sig_s, _dot = "이익 가속 신호 · KR 미운영", "미국 종목에만 돌리는 규칙", "#6B7280"
+                elif _ah0 and _ah0['rows']:
+                    _r0 = _ah0['rows'][0]
+                    _recent = (pd.Timestamp.today() - pd.Timestamp(_r0['주차'])).days <= 7 * 52
+                    _sig_b = "이익 가속 신호 · 최근 1년 내" if _recent else "이익 가속 신호 · 1년 넘음"
+                    _sig_s = f"{_r0['주차']} · 그 해 {_r0['회차']}회차"
+                    _dot = "#4ADE80" if _recent else "#9CA3AF"
+                else:
+                    _sig_b, _sig_s, _dot = "이익 가속 신호 없음", "2018년 이후 진입 규칙에 걸린 적 없음", "#6B7280"
+                st.markdown(f"""<div class="mo-hero">
+<div class="t"><span class="k">{_h.escape(' · '.join(x for x in (sym8_clean, str(info.get('sector') or ''), '시총 ' + _mcs) if x and x != '-'))}</span>
+<span class="n">{_h.escape(str(info.get('longName', sym8_clean))[:40])}</span></div>
+<div class="p"><span class="pv">{_px_s}</span><span class="{'up' if chg_pct >= 0 else 'dn'}">{chg_pct:+.2f}% 오늘</span></div>
+<div class="s"><span class="dot" style="background:{_dot}"></span><div><b>{_sig_b}</b><span>{_h.escape(_sig_s)}</span></div></div>
+</div>""", unsafe_allow_html=True)
 
                 st.divider()
 
@@ -5165,9 +5276,8 @@ def _tab_analysis():
                         _s3.metric("이익 가속 신호", "이력 없음")
                     _tt, _gg = locals().get('_total'), locals().get('_grade')
                     _s4.metric("CANSLIM", f"{_tt:.0f}점 · {_gg}" if isinstance(_tt, (int, float)) else "-")
-                    _s5.metric(f"{_bm['kind']} 위치" if _bm else "멀티플 위치",
-                               f"하위 {_bm['rank']:.0f}%" if _bm else "-",
-                               f"{_bm['now']:.1f}배" if _bm else None, delta_color='off')
+                    _s5.metric(f"{_bm['kind']} 위치 (현재 {_bm['now']:.1f}배)" if _bm else "멀티플 위치",
+                               f"하위 {_bm['rank']:.0f}%" if _bm else "-")
                     if _acch and _acch['rows']:
                         with st.expander(f"🚀 이익 가속 신호 이력 — {len(_acch['rows'])}회"):
                             _tsrc('Yahoo Finance(주가)·SEC EDGAR(분기재무) → leaders_accel.json',

@@ -252,9 +252,17 @@ _SCALE = {'억': ('억', 1), '조': ('억', 1e4),
 _MISSING = {'', '-', '—', '·', 'None', 'nan', 'NaN', 'N/A', 'n/a'}
 
 
+_ID_COLS = {'코드', 'sym', '티커', 'Ticker', 'ticker', 'Symbol', 'symbol', '종목코드', '심볼',
+            '주차', '연도', '연월', '월', '달', '기준일', '날짜', '일자', '진입일', '회복일', '고점일', '저점일',
+            '발표일', '기준분기', '분기', 'period', '기간'}
+
+
 def _unit_convert(col: pd.Series):
     """칸 단위가 한 가지로 모이는 글자 열이면 (숫자 열, 단위) — 아니면 None."""
-    if col.dtype != object:
+    if col.dtype != object or str(col.name) in _ID_COLS:
+        return None
+    _sv = col.dropna().astype(str).str.strip()
+    if _sv.str.fullmatch(r'0\d+').any():          # '005930' 같은 코드 — 숫자로 바꾸면 0 이 사라진다
         return None
     vals = col.dropna().astype(str).str.strip()
     vals = vals[~vals.isin(_MISSING)]
@@ -276,7 +284,13 @@ def _unit_convert(col: pd.Series):
         if u:
             units.add(u)
         out[i] = x
-    if len(units) > 1 or len(curs) > 1 or not (units or curs):
+    if not (units or curs):
+        # 단위 없는 숫자 + None 이 섞인 글자 열 → 숫자 열로(화면에 'None' 이 찍히던 문제, 2026-10-19)
+        num = pd.Series(float('nan'), index=col.index)
+        for i, x in out.items():
+            num[i] = x
+        return num, ''
+    if len(units) > 1 or len(curs) > 1:
         return None
     u = units.pop() if units else ''
     c = curs.pop() if curs else ''
@@ -330,8 +344,12 @@ def normalize(df: pd.DataFrame):
             num, u = r
             df[c] = num
             bare = u.lstrip('$')
-            if u not in str(new) and not (bare and bare in str(new)):
+            if u and u not in str(new) and not (bare and bare in str(new)):
                 new = f'{new}({u})'
+            elif not u:
+                hu = _head_unit(str(new), df[c])
+                if hu:
+                    new = f'{new}({hu})'
             conv.add(new)
         else:
             hu = _head_unit(str(new), df[c])
