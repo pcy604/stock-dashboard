@@ -47,6 +47,7 @@ BATCH = 60                         # 배치는 작게, 대신 병렬로
 WORKERS = 6                        # 실측: 6워커에서 5.5배 (그 이상은 DART 부담)
 # 보고서코드 → (분기번호, 누적개월수)
 REPRTS = [('11013', 1, 3), ('11012', 2, 6), ('11014', 3, 9), ('11011', 4, 12)]
+REPORT_MONTH = {r: m for r, _q, m in REPRTS}   # 보고서 → 기간 끝 달력 월
 WANT = {'매출액': 'revenue', '영업이익': 'op_income', '당기순이익': 'net_income'}
 
 
@@ -110,6 +111,13 @@ def fetch_batch(codes: list[str], year: int, reprt: str) -> dict:
         #   PER 이 1,400배 틀어졌다(네이버 대조로 발견). 원화가 아니면 받지 않는다 → 네이버(원화 환산)가 채운다.
         if (row.get('currency') or 'KRW').upper() != 'KRW':
             continue
+        # 2026-10-19 — 12월 결산이 아닌 회사는 '사업연도' 분기다(3월 결산의 1분기 = 4~6월).
+        #   달력 분기로 저장하면 10월에 '2026Q4' 같은 미래 분기가 생긴다. 기간 끝 월이 보고서의
+        #   달력 월(3·6·9·12)과 다르면 받지 않는다.
+        _end = str(row.get('thstrm_dt') or '').replace(' ', '').split('~')[-1]
+        _mm = _end[5:7] if len(_end) >= 7 and _end[4] in '.-' else None
+        if _mm and _mm.isdigit() and int(_mm) != REPORT_MONTH.get(reprt, int(_mm)):
+            continue
         fs = row.get('fs_div') or 'OFS'
         for yr, field in ((year, 'thstrm_amount'), (year - 1, 'frmtrm_amount')):
             v = _num(row.get(field))
@@ -132,7 +140,12 @@ def ingest(y0: int, y1: int, syms: list[str] | None = None):
         import glob, os
         syms = sorted({os.path.basename(f)[:-8] for f in glob.glob('data/longcache/*.parquet')
                        if os.path.basename(f)[:-8].isdigit()})
-    pairs = [(s, cm[s]) for s in syms if s in cm]
+    try:   # 12월 결산 아닌 종목은 건너뛴다(kr_fundq_naver 가 찾아 기록한다, 2026-10-19)
+        import json as _js
+        _nd = set(_js.load(open('data/kr_nondec.json', encoding='utf-8')))
+    except Exception:
+        _nd = set()
+    pairs = [(s, cm[s]) for s in syms if s in cm and s not in _nd]
     print(f'대상 {len(pairs)}종 (corp_code 매칭) · {y0}~{y1}', flush=True)
 
     # DART 는 종목당 ~1.1초로 고정이라 배칭만으로는 못 줄인다(단일 스레드 8시간).

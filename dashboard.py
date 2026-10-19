@@ -5832,6 +5832,30 @@ with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", exp
             st.rerun()
     st.caption("데이터 갱신은 매일 06:00 자동(GitHub Actions). 수동: weekly_run·perf_run·canslim_run·screen_precompute")
 
+# ── 정답 점검 (2026-10-19) ─────────────────────────────────────
+# 날짜가 신선해도 내용에 구멍이 날 수 있다(시총 파일에 S~Z 1,300종 누락, NVDA 시총 NULL).
+# '반드시 참이어야 하는 사실'을 이 서버에서 바로 확인한다 — CI 결과 파일이 아니라 지금 배포된 파일 기준.
+@st.cache_data(ttl=600, show_spinner=False)
+def _known_answers():
+    import importlib, tools.known_answers as _ka
+    importlib.reload(_ka)
+    return _ka.run()
+
+
+with guard('정답 점검'):
+    _KA = _known_answers()
+    _ka_bad = [r for r in _KA if not r['ok']]
+    _ka_hdr = (f"🧪 정답 점검 — 전 항목 통과 ({len(_KA)}/{len(_KA)})" if not _ka_bad
+               else f"🔴 정답 점검 — **{len(_ka_bad)}개 항목이 틀림** ({len(_KA) - len(_ka_bad)}/{len(_KA)} 통과)")
+    with st.expander(_ka_hdr, expanded=bool(_ka_bad)):
+        _tsrc('tools/known_answers.py — 이 서버의 산출물을 직접 검사', live=True)
+        st.dataframe(pd.DataFrame([{'상태': '✅ 통과' if r['ok'] else '❌ 틀림', '분야': r['area'],
+                                    '질문': r['question'], '결과': r['detail']}
+                                   for r in sorted(_KA, key=lambda r: r['ok'])]),
+                     filters=False, color=False)
+        st.caption("행 수·날짜만 보는 감시는 '구멍 난 정상'을 못 잡았다(2026-10-19 S~Z 누락·시총 NULL·컨센서스 정지). "
+                   "그래서 답을 아는 질문으로 내용을 본다. 매일 06시 CI 도 같은 점검을 돌려, 하나라도 틀리면 실패·텔레그램.")
+
 # ── 페이지 최하단: 데이터 신선도 ─────────────────────────────────
 # 예전엔 file_mtime(파일 수정시각)을 '데이터 갱신일'로 표시했다. 클라우드에서 그건
 # 저장소를 내려받은 시각이라, 07-26에 멈춘 데이터가 '어제 갱신'으로 보였다.

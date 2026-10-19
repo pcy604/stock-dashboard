@@ -191,6 +191,12 @@ jobs:
         run: python output_contracts.py --guard
         continue-on-error: true
 
+      # 2026-10-19 — 정답 점검: '반드시 참이어야 하는 사실'(TSLA 가 있다, NVDA 는 신호가 있었다…)로
+      #   산출물 내용을 본다. 여기서는 결과 파일만 쓰고(화면 표시용), 실패 판정은 맨 끝에서 한다.
+      - name: 정답 점검 — 결과 기록
+        run: python tools/known_answers.py
+        continue-on-error: true
+
       - name: 변경분 커밋 & 푸시
         run: |
           git config user.name  "github-actions"
@@ -289,6 +295,10 @@ jobs:
 
       - name: 산출물 신선도 검증 (조용한 고장 차단)
         run: python tools/check_freshness_ci.py
+
+      - name: 정답 점검 — 하나라도 틀리면 실패 (빨간불 + 텔레그램)
+        if: always()
+        run: python tools/known_answers.py --strict --no-write
 
       # 2026-10-03 신설 — 감시견 3개가 전부 않도록 채 17일이 갔다.
       #   · pipeline_health 는 캤밋 **앞**에서 러너 로얼 파일을 본다. 방금 만든

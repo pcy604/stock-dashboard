@@ -46,6 +46,9 @@ def _yq(period: str):
     return int(period[:4]), 4
 
 
+NONDEC: set = set()   # 이번 실행에서 확인된 12월 결산 아닌 종목 (2026-10-19)
+
+
 def fetch_one(code: str) -> list[dict]:
     """한 종목 → parquet 행(dict) 목록. 결산월이 12월이 아니면 [] (호출부가 '건너뜀'으로 센다)."""
     code = str(code).zfill(6)
@@ -59,6 +62,7 @@ def fetch_one(code: str) -> list[dict]:
                 ym = [str(y) for y in js.get('YYMM') or []]
                 ends = {y[5:7] for y in ym if len(y) >= 7 and y[:4].isdigit() and y[4] == '/'}
                 if ends and ends != {'12'}:
+                    NONDEC.add(code)
                     return []                            # 12월 결산 아님
             for p, kv in N.parse(js, rpt, freq).items():
                 got.setdefault((freq, p), {}).update(kv)
@@ -164,6 +168,22 @@ def main(limit: int | None = None, workers: int = 4):
                 print(f"  {i:,}/{len(syms):,} · 성공 {ok:,} · 비12월 {skip:,} · 실패 {len(fail):,}", flush=True)
     tried = len(syms) - skip
     ok_rate = ok / tried if tried else 0
+    # ⚠️ 2026-10-19 — 12월 결산이 아닌 회사(신영증권 3월·현대약품 11월·리츠 다수)는 DART 가 '사업연도'
+    #   기준 분기로 주는데 우리는 달력 분기로 저장했다 → 10월에 '2026Q4'가 존재하는 미래 분기가 생겼다.
+    #   분기 성장률·TTM 이 전부 어긋나므로 이 종목들의 분기재무는 비운다(화면은 '-').
+    #   목록은 data/kr_nondec.json 에 남겨 DART 수집도 건너뛰게 한다.
+    nd = sorted(NONDEC)
+    if nd:
+        before = len(old)
+        old = old[~old.sym.isin(nd)].copy()
+        print(f"12월 결산 아님 {len(nd)}종 — 분기재무 {before - len(old):,}행 제거(사업연도≠달력)", flush=True)
+        import json as _js
+        _p = ROOT / 'data' / 'kr_nondec.json'
+        try:
+            prev = set(_js.load(open(_p, encoding='utf-8')))
+        except Exception:
+            prev = set()
+        _js.dump(sorted(prev | set(nd)), open(_p, 'w', encoding='utf-8'))
     df, st = merge(old, rows, str(date.today()))
     mis_rate = st['mismatch_syms'] / st['overlap_syms'] if st['overlap_syms'] else 0
     eq_fill = df.equity.notna().mean()

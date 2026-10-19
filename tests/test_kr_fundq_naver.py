@@ -77,3 +77,23 @@ def test_foreign_currency_dart_values_replaced_and_old_cleared():
     assert r.loc[(2026, 1), 'revenue'] == 1.5e10
     assert pd.isna(r.loc[(2025, 1), 'revenue'])          # 단위 모르는 과거는 비운다
     assert r.loc[(2026, 2), 'fs_div'].endswith('-NAVERFX')
+
+
+def test_dart_skips_non_calendar_fiscal_periods(monkeypatch):
+    """12월 결산이 아닌 회사의 사업연도 분기는 달력 분기로 저장하지 않는다(2026-10-19)."""
+    import ingest_dart_quarterly as I
+
+    def row(code, dt, amt):
+        return dict(stock_code=code, account_nm='매출액', sj_div='IS', fs_div='CFS', currency='KRW',
+                    thstrm_dt=dt, thstrm_amount=amt, frmtrm_amount=None)
+
+    class R:
+        def json(self):
+            return {'status': '000', 'list': [row('005930', '2026.04.01 ~ 2026.06.30', '100'),
+                                              row('001720', '2026.07.01 ~ 2026.09.30', '50')]}   # 3월 결산의 '반기'
+    monkeypatch.setattr(I.requests, 'get', lambda *a, **k: R())
+    monkeypatch.setattr(I.D, '_key', lambda: 'x')
+    monkeypatch.setattr(I, '_want', lambda nm: 'revenue')
+    out = I.fetch_batch(['a', 'b'], 2026, '11012')
+    assert ('005930', 2026) in out
+    assert ('001720', 2026) not in out
