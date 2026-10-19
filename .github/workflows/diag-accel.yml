@@ -1,0 +1,38 @@
+# 주도주 결손 진단 — 수동 실행 전용(2026-10-19). market.db 캐시를 복원해 읽기만 한다. 아무것도 커밋·저장하지 않는다.
+name: diag-accel
+on:
+  workflow_dispatch:
+    inputs:
+      syms:
+        description: '진단할 종목(공백 구분)'
+        default: 'NVDA PLTR AXTI MU BE MPWR PLUG ENPH TSLA AAPL'
+permissions:
+  contents: read
+concurrency:
+  group: leaders-cache
+  cancel-in-progress: false
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/market.db
+          key: marketdb-none
+          restore-keys: |
+            marketdb-
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-none
+          restore-keys: |
+            leaders-cache-
+      - run: python tools/diag_accel.py ${{ inputs.syms }}
