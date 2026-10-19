@@ -2,175 +2,175 @@
  "latest_daily": {
   "kind": "daily",
   "date": "2026-10-19",
-  "generated": "2026-10-19 05:59",
+  "generated": "2026-10-19 16:59",
   "engine": "template",
-  "markdown": "## 일간 시황 — 숫자 요약\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,704.73 | +0.7% | -10.6% | -14.7% | -37.4% |\n| 코스닥 | 799.55 | +0.6% | -5.8% | -0.9% | -34.8% |\n| S&P500 | 7,659.44 | -1.1% | -1.9% | +0.3% | -2.0% |\n| 나스닥 | 26,140.03 | -2.1% | -4.5% | -1.1% | -5.3% |\n| 필라델피아 반도체 | 11,137.29 | -3.8% | -11.4% | -4.0% | -23.9% |\n| VIX | 19.99 | +21.4% | +34.7% | +29.5% | -35.6% |\n| 원/달러 | 1,329.08 | -0.9% | -0.9% | -3.7% | -14.5% |\n| 미국 10년물(%) | 5.1 | +0.2% | -2.8% | +3.0% | -4.0% |\n\n**KR** (1주 수익률, 대형주 307종 · 상승 비율 65%)\n강세: 롯데에너지머티리얼즈 +17.1%, 삼아알미늄 +14.9%, 에코프로머티 +13.8%, 큐리옥스바이오시스템즈 +13.4%, 삼성SDI +11.3%, 삼성바이오로직스 +10.8%\n약세: LS에코에너지 -8.0%, 케이씨텍 -7.8%, 테크윙 -6.4%, 티에스이 -6.3%, 파두 -6.3%, 피에스케이홀딩스 -6.0%\n52주 신고가 근접 5종 · 이번 주 경신 2종\n\n**US** (1주 수익률, 대형주 697종 · 상승 비율 63%)\n강세: FAIR ISAAC CORP +15.5%, TransUnion +13.1%, COGNIZANT TECHNOLOGY SOLUTIONS CORP +11.5%, EQUIFAX INC +10.6%, BROWN & BROWN, INC. +10.4%, HALOZYME THERAPEUTICS, INC. +10.3%\n약세: SEMTECH CORP -27.0%, DigitalOcean Holdings, Inc. -26.8%, CIENA CORP -26.0%, COHERENT CORP. -25.5%, Rocket Lab Corp -25.5%, Lumentum Holdings Inc. -25.3%\n52주 신고가 근접 106종 · 이번 주 경신 93종\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ · US 상승추세 ✅\n이익가속 신규(2026-10-12): FIGS, BBWI, GRNT, EVH, COTY, IBTA, OPK\n\n※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · 2026-10-19 05:59",
+  "markdown": "## 일간 시황 — 숫자 요약\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,668.05 | +2.0% | -14.5% | -18.0% | -37.8% |\n| 코스닥 | 794.78 | +4.5% | -10.9% | -3.1% | -35.2% |\n| S&P500 | 7,701.08 | +0.5% | -1.4% | +0.7% | -1.5% |\n| 나스닥 | 26,476.32 | +1.3% | -2.8% | -0.2% | -4.1% |\n| 필라델피아 반도체 | 11,406.06 | +2.4% | -6.8% | -4.3% | -22.1% |\n| VIX | 18.05 | -9.7% | +18.7% | +21.9% | -41.9% |\n| 원/달러 | 1,331.56 | -0.7% | -0.7% | -3.5% | -14.3% |\n| 미국 10년물(%) | 5.14 | +0.9% | -1.8% | +2.9% | -3.1% |\n\n**KR** (1주 수익률, 대형주 308종 · 상승 비율 81%)\n강세: 롯데에너지머티리얼즈 +17.8%, 에코프로머티 +14.6%, 태성 +12.6%, 삼아알미늄 +11.8%, 삼성SDI +11.5%, 에코프로 +10.6%\n약세: LS에코에너지 -5.5%, 코스맥스 -3.9%, 코스메카코리아 -3.2%, 한미사이언스 -2.9%, 달바글로벌 -2.5%, F&F -2.3%\n52주 신고가 근접 4종 · 이번 주 경신 2종\n\n**US** (1주 수익률, 대형주 699종 · 상승 비율 37%)\n강세: JFrog Ltd +8.6%, FORMFACTOR INC +7.5%, Marvell Technology, Inc. +6.8%, AST SpaceMobile, Inc. +6.7%, Datadog, Inc. +6.6%, RAMBUS INC +6.6%\n약세: RB GLOBAL INC. -6.5%, ImmunityBio, Inc. -5.5%, QXO, Inc. -5.4%, NRG ENERGY, INC. -4.3%, Ameriprise Financial -3.8%, EVERSOURCE ENERGY -3.4%\n52주 신고가 근접 78종 · 이번 주 경신 21종\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ · US 상승추세 ✅\n이익가속 신규(2026-10-12): FIGS, CBRL, BBWI, BLMN, GRNT, MAX, EVH, COTY, IBTA, OPK\n\n※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · 2026-10-19 16:59",
   "facts": {
    "kind": "daily",
-   "generated": "2026-10-19 05:59",
+   "generated": "2026-10-19 16:59",
    "indices": [
     {
      "name": "코스피",
      "sym": "^KS11",
-     "date": "2026-10-19",
-     "close": 5704.73,
-     "d1": 0.65,
-     "d5": -10.64,
-     "m1": -14.66,
-     "from_52w_high": -37.41,
+     "date": "2026-10-16",
+     "close": 5668.05,
+     "d1": 2.05,
+     "d5": -14.46,
+     "m1": -17.97,
+     "from_52w_high": -37.81,
      "above_200d": false
     },
     {
      "name": "코스닥",
      "sym": "^KQ11",
-     "date": "2026-10-19",
-     "close": 799.55,
-     "d1": 0.6,
-     "d5": -5.85,
-     "m1": -0.9,
-     "from_52w_high": -34.79,
+     "date": "2026-10-16",
+     "close": 794.78,
+     "d1": 4.46,
+     "d5": -10.93,
+     "m1": -3.15,
+     "from_52w_high": -35.18,
      "above_200d": false
     },
     {
      "name": "S&P500",
      "sym": "^GSPC",
-     "date": "2026-10-16",
-     "close": 7659.44,
-     "d1": -1.09,
-     "d5": -1.95,
-     "m1": 0.28,
-     "from_52w_high": -2.04,
+     "date": "2026-10-19",
+     "close": 7701.08,
+     "d1": 0.54,
+     "d5": -1.36,
+     "m1": 0.66,
+     "from_52w_high": -1.51,
      "above_200d": true
     },
     {
      "name": "나스닥",
      "sym": "^IXIC",
-     "date": "2026-10-16",
-     "close": 26140.03,
-     "d1": -2.15,
-     "d5": -4.48,
-     "m1": -1.05,
-     "from_52w_high": -5.29,
+     "date": "2026-10-19",
+     "close": 26476.32,
+     "d1": 1.29,
+     "d5": -2.82,
+     "m1": -0.17,
+     "from_52w_high": -4.07,
      "above_200d": true
     },
     {
      "name": "필라델피아 반도체",
      "sym": "^SOX",
-     "date": "2026-10-16",
-     "close": 11137.29,
-     "d1": -3.83,
-     "d5": -11.41,
-     "m1": -3.98,
-     "from_52w_high": -23.9,
+     "date": "2026-10-19",
+     "close": 11406.06,
+     "d1": 2.41,
+     "d5": -6.79,
+     "m1": -4.33,
+     "from_52w_high": -22.06,
      "above_200d": true
     },
     {
      "name": "VIX",
      "sym": "^VIX",
-     "date": "2026-10-16",
-     "close": 19.99,
-     "d1": 21.45,
-     "d5": 34.7,
-     "m1": 29.47,
-     "from_52w_high": -35.62,
-     "above_200d": true
+     "date": "2026-10-19",
+     "close": 18.05,
+     "d1": -9.7,
+     "d5": 18.67,
+     "m1": 21.88,
+     "from_52w_high": -41.87,
+     "above_200d": false
     },
     {
      "name": "원/달러",
      "sym": "KRW=X",
      "date": "2026-10-19",
-     "close": 1329.08,
-     "d1": -0.89,
-     "d5": -0.88,
-     "m1": -3.66,
-     "from_52w_high": -14.5,
+     "close": 1331.56,
+     "d1": -0.7,
+     "d5": -0.69,
+     "m1": -3.48,
+     "from_52w_high": -14.34,
      "above_200d": false
     },
     {
      "name": "미국 10년물(%)",
      "sym": "^TNX",
-     "date": "2026-10-16",
-     "close": 5.1,
-     "d1": 0.18,
-     "d5": -2.78,
-     "m1": 3.05,
-     "from_52w_high": -4.01,
+     "date": "2026-10-19",
+     "close": 5.14,
+     "d1": 0.9,
+     "d5": -1.83,
+     "m1": 2.92,
+     "from_52w_high": -3.14,
      "above_200d": true
     }
    ],
    "stocks": {
     "perf_date": "2026-10-19",
     "KR": {
-     "universe": 307,
+     "universe": 308,
      "basis": "ret_1w",
      "top": [
       {
        "name": "롯데에너지머티리얼즈",
        "sym": "020150",
-       "ret": 17.1
-      },
-      {
-       "name": "삼아알미늄",
-       "sym": "006110",
-       "ret": 14.9
+       "ret": 17.8
       },
       {
        "name": "에코프로머티",
        "sym": "450080",
-       "ret": 13.8
+       "ret": 14.6
       },
       {
-       "name": "큐리옥스바이오시스템즈",
-       "sym": "445680",
-       "ret": 13.4
+       "name": "태성",
+       "sym": "323280",
+       "ret": 12.6
+      },
+      {
+       "name": "삼아알미늄",
+       "sym": "006110",
+       "ret": 11.8
       },
       {
        "name": "삼성SDI",
        "sym": "006400",
-       "ret": 11.3
+       "ret": 11.5
       },
       {
-       "name": "삼성바이오로직스",
-       "sym": "207940",
-       "ret": 10.8
+       "name": "에코프로",
+       "sym": "086520",
+       "ret": 10.6
       }
      ],
      "bottom": [
       {
        "name": "LS에코에너지",
        "sym": "229640",
-       "ret": -8.0
+       "ret": -5.5
       },
       {
-       "name": "케이씨텍",
-       "sym": "281820",
-       "ret": -7.8
+       "name": "코스맥스",
+       "sym": "192820",
+       "ret": -3.9
       },
       {
-       "name": "테크윙",
-       "sym": "089030",
-       "ret": -6.4
+       "name": "코스메카코리아",
+       "sym": "241710",
+       "ret": -3.2
       },
       {
-       "name": "티에스이",
-       "sym": "131290",
-       "ret": -6.3
+       "name": "한미사이언스",
+       "sym": "008930",
+       "ret": -2.9
       },
       {
-       "name": "파두",
-       "sym": "440110",
-       "ret": -6.3
+       "name": "달바글로벌",
+       "sym": "483650",
+       "ret": -2.5
       },
       {
-       "name": "피에스케이홀딩스",
-       "sym": "031980",
-       "ret": -6.0
+       "name": "F&F",
+       "sym": "383220",
+       "ret": -2.3
       }
      ],
-     "near_52w": 5,
+     "near_52w": 4,
      "new_high": 2,
      "excluded_suspect": [],
-     "breadth_up": 65,
+     "breadth_up": 81,
      "52w_leaders": [
       {
        "name": "SK이노베이션",
@@ -179,10 +179,6 @@
       {
        "name": "KT&G",
        "sym": "033780"
-      },
-      {
-       "name": "코웨이",
-       "sym": "021240"
       },
       {
        "name": "현대그린푸드",
@@ -195,84 +191,80 @@
      ]
     },
     "US": {
-     "universe": 697,
+     "universe": 699,
      "basis": "ret_1w",
      "top": [
       {
-       "name": "FAIR ISAAC CORP",
-       "sym": "FICO",
-       "ret": 15.5
+       "name": "JFrog Ltd",
+       "sym": "FROG",
+       "ret": 8.6
       },
       {
-       "name": "TransUnion",
-       "sym": "TRU",
-       "ret": 13.1
+       "name": "FORMFACTOR INC",
+       "sym": "FORM",
+       "ret": 7.5
       },
       {
-       "name": "COGNIZANT TECHNOLOGY SOLUTIONS CORP",
-       "sym": "CTSH",
-       "ret": 11.5
+       "name": "Marvell Technology, Inc.",
+       "sym": "MRVL",
+       "ret": 6.8
       },
       {
-       "name": "EQUIFAX INC",
-       "sym": "EFX",
-       "ret": 10.6
+       "name": "AST SpaceMobile, Inc.",
+       "sym": "ASTS",
+       "ret": 6.7
       },
       {
-       "name": "BROWN & BROWN, INC.",
-       "sym": "BRO",
-       "ret": 10.4
+       "name": "Datadog, Inc.",
+       "sym": "DDOG",
+       "ret": 6.6
       },
       {
-       "name": "HALOZYME THERAPEUTICS, INC.",
-       "sym": "HALO",
-       "ret": 10.3
+       "name": "RAMBUS INC",
+       "sym": "RMBS",
+       "ret": 6.6
       }
      ],
      "bottom": [
       {
-       "name": "SEMTECH CORP",
-       "sym": "SMTC",
-       "ret": -27.0
+       "name": "RB GLOBAL INC.",
+       "sym": "RBA",
+       "ret": -6.5
       },
       {
-       "name": "DigitalOcean Holdings, Inc.",
-       "sym": "DOCN",
-       "ret": -26.8
+       "name": "ImmunityBio, Inc.",
+       "sym": "IBRX",
+       "ret": -5.5
       },
       {
-       "name": "CIENA CORP",
-       "sym": "CIEN",
-       "ret": -26.0
+       "name": "QXO, Inc.",
+       "sym": "QXO",
+       "ret": -5.4
       },
       {
-       "name": "COHERENT CORP.",
-       "sym": "COHR",
-       "ret": -25.5
+       "name": "NRG ENERGY, INC.",
+       "sym": "NRG",
+       "ret": -4.3
       },
       {
-       "name": "Rocket Lab Corp",
-       "sym": "RKLB",
-       "ret": -25.5
+       "name": "Ameriprise Financial",
+       "sym": "AMP",
+       "ret": -3.8
       },
       {
-       "name": "Lumentum Holdings Inc.",
-       "sym": "LITE",
-       "ret": -25.3
+       "name": "EVERSOURCE ENERGY",
+       "sym": "ES",
+       "ret": -3.4
       }
      ],
-     "near_52w": 106,
-     "new_high": 93,
+     "near_52w": 78,
+     "new_high": 21,
      "excluded_suspect": [],
-     "breadth_up": 63,
+     "breadth_up": 37,
      "52w_leaders": [
       {
        "name": "Apple",
        "sym": "AAPL"
-      },
-      {
-       "name": "ELI LILLY & Co",
-       "sym": "LLY"
       },
       {
        "name": "BERKSHIRE HATHAWAY INC",
@@ -297,6 +289,10 @@
       {
        "name": "COCA COLA CO",
        "sym": "KO"
+      },
+      {
+       "name": "VISA INC.",
+       "sym": "V"
       }
      ]
     }
@@ -307,8 +303,8 @@
      "US": "상승추세 ✅"
     },
     "canslim_candidates": {
-     "KR": 74,
-     "US": 163
+     "KR": 70,
+     "US": 157
     },
     "accel_week": "2026-10-12",
     "accel_new": [
@@ -319,16 +315,34 @@
       "mc_b": 2.96
      },
      {
+      "sym": "CBRL",
+      "name": "CRACKER BARREL OLD COUNT",
+      "up": 20.5,
+      "mc_b": 1.54
+     },
+     {
       "sym": "BBWI",
       "name": "Bath & Body Works, Inc.",
       "up": 16.1,
       "mc_b": 4.06
      },
      {
+      "sym": "BLMN",
+      "name": "Bloomin' Brands, Inc.",
+      "up": 15.7,
+      "mc_b": 0.85
+     },
+     {
       "sym": "GRNT",
       "name": "Granite Ridge Resources,",
       "up": 14.3,
       "mc_b": 0.72
+     },
+     {
+      "sym": "MAX",
+      "name": "MediaAlpha, Inc.",
+      "up": 14.0,
+      "mc_b": 0.71
      },
      {
       "sym": "EVH",
@@ -357,7 +371,7 @@
     ],
     "turnaround": {
      "KR": 408,
-     "US": 151,
+     "US": 189,
      "date": "2026-10-19"
     }
    }
@@ -365,16 +379,16 @@
  },
  "history": [
   {
+   "kind": "daily",
+   "date": "2026-10-19",
+   "engine": "template",
+   "markdown": "## 일간 시황 — 숫자 요약\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,668.05 | +2.0% | -14.5% | -18.0% | -37.8% |\n| 코스닥 | 794.78 | +4.5% | -10.9% | -3.1% | -35.2% |\n| S&P500 | 7,701.08 | +0.5% | -1.4% | +0.7% | -1.5% |\n| 나스닥 | 26,476.32 | +1.3% | -2.8% | -0.2% | -4.1% |\n| 필라델피아 반도체 | 11,406.06 | +2.4% | -6.8% | -4.3% | -22.1% |\n| VIX | 18.05 | -9.7% | +18.7% | +21.9% | -41.9% |\n| 원/달러 | 1,331.56 | -0.7% | -0.7% | -3.5% | -14.3% |\n| 미국 10년물(%) | 5.14 | +0.9% | -1.8% | +2.9% | -3.1% |\n\n**KR** (1주 수익률, 대형주 308종 · 상승 비율 81%)\n강세: 롯데에너지머티리얼즈 +17.8%, 에코프로머티 +14.6%, 태성 +12.6%, 삼아알미늄 +11.8%, 삼성SDI +11.5%, 에코프로 +10.6%\n약세: LS에코에너지 -5.5%, 코스맥스 -3.9%, 코스메카코리아 -3.2%, 한미사이언스 -2.9%, 달바글로벌 -2.5%, F&F -2.3%\n52주 신고가 근접 4종 · 이번 주 경신 2종\n\n**US** (1주 수익률, 대형주 699종 · 상승 비율 37%)\n강세: JFrog Ltd +8.6%, FORMFACTOR INC +7.5%, Marvell Technology, Inc. +6.8%, AST SpaceMobile, Inc. +6.7%, Datadog, Inc. +6.6%, RAMBUS INC +6.6%\n약세: RB GLOBAL INC. -6.5%, ImmunityBio, Inc. -5.5%, QXO, Inc. -5.4%, NRG ENERGY, INC. -4.3%, Ameriprise Financial -3.8%, EVERSOURCE ENERGY -3.4%\n52주 신고가 근접 78종 · 이번 주 경신 21종\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ · US 상승추세 ✅\n이익가속 신규(2026-10-12): FIGS, CBRL, BBWI, BLMN, GRNT, MAX, EVH, COTY, IBTA, OPK\n\n※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · 2026-10-19 16:59"
+  },
+  {
    "kind": "weekly",
    "date": "2026-10-19",
    "engine": "template",
    "markdown": "## 주간 시황 — 숫자 요약\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,668.05 | +2.0% | -14.5% | -18.0% | -37.8% |\n| 코스닥 | 794.78 | +4.5% | -10.9% | -3.1% | -35.2% |\n| S&P500 | 7,708.01 | +0.6% | -1.3% | +0.8% | -1.4% |\n| 나스닥 | 26,528.27 | +1.5% | -2.6% | +0.0% | -3.9% |\n| 필라델피아 반도체 | 11,488.16 | +3.1% | -6.1% | -3.6% | -21.5% |\n| VIX | 17.53 | -12.3% | +15.2% | +18.4% | -43.5% |\n| 원/달러 | 1,331.73 | -0.7% | -0.7% | -3.5% | -14.3% |\n| 미국 10년물(%) | 5.14 | +0.8% | -2.0% | +2.8% | -3.3% |\n\n**KR** (4주 수익률, 대형주 307종 · 상승 비율 32%)\n강세: 큐리옥스바이오시스템즈 +57.4%, 삼아알미늄 +56.6%, 롯데에너지머티리얼즈 +45.6%, 이수스페셜티케미컬 +43.5%, 리브스메드 +43.2%, 엘앤씨바이오 +41.5%\n약세: SK스퀘어 -36.2%, 파두 -34.0%, 효성중공업 -33.8%, SK하이닉스 -33.0%, 펩트론 -31.7%, 두산 -30.6%\n52주 신고가 근접 5종 · 이번 주 경신 2종\n\n**US** (4주 수익률, 대형주 696종 · 상승 비율 56%)\n강세: PTC INC. +42.0%, Moderna, Inc. +41.5%, Accenture plc +26.7%, Talen Energy Corp +21.4%, VEEVA SYSTEMS INC +19.3%, DICK'S SPORTING GOODS, INC. +19.1%\n약세: Hut 8 Corp. -31.4%, AST SpaceMobile, Inc. -30.5%, Sandisk Corp -27.5%, COHERENT CORP. -26.6%, SEMTECH CORP -26.1%, Seagate Technology Holdings plc -25.6%\n52주 신고가 근접 106종 · 이번 주 경신 93종\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ · US 상승추세 ✅\n이익가속 신규(2026-10-12): FIGS, CBRL, BBWI, BLMN, GRNT, MAX, EVH, COTY, IBTA, OPK\n\n※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · 2026-10-19 16:07"
-  },
-  {
-   "kind": "daily",
-   "date": "2026-10-19",
-   "engine": "template",
-   "markdown": "## 일간 시황 — 숫자 요약\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,704.73 | +0.7% | -10.6% | -14.7% | -37.4% |\n| 코스닥 | 799.55 | +0.6% | -5.8% | -0.9% | -34.8% |\n| S&P500 | 7,659.44 | -1.1% | -1.9% | +0.3% | -2.0% |\n| 나스닥 | 26,140.03 | -2.1% | -4.5% | -1.1% | -5.3% |\n| 필라델피아 반도체 | 11,137.29 | -3.8% | -11.4% | -4.0% | -23.9% |\n| VIX | 19.99 | +21.4% | +34.7% | +29.5% | -35.6% |\n| 원/달러 | 1,329.08 | -0.9% | -0.9% | -3.7% | -14.5% |\n| 미국 10년물(%) | 5.1 | +0.2% | -2.8% | +3.0% | -4.0% |\n\n**KR** (1주 수익률, 대형주 307종 · 상승 비율 65%)\n강세: 롯데에너지머티리얼즈 +17.1%, 삼아알미늄 +14.9%, 에코프로머티 +13.8%, 큐리옥스바이오시스템즈 +13.4%, 삼성SDI +11.3%, 삼성바이오로직스 +10.8%\n약세: LS에코에너지 -8.0%, 케이씨텍 -7.8%, 테크윙 -6.4%, 티에스이 -6.3%, 파두 -6.3%, 피에스케이홀딩스 -6.0%\n52주 신고가 근접 5종 · 이번 주 경신 2종\n\n**US** (1주 수익률, 대형주 697종 · 상승 비율 63%)\n강세: FAIR ISAAC CORP +15.5%, TransUnion +13.1%, COGNIZANT TECHNOLOGY SOLUTIONS CORP +11.5%, EQUIFAX INC +10.6%, BROWN & BROWN, INC. +10.4%, HALOZYME THERAPEUTICS, INC. +10.3%\n약세: SEMTECH CORP -27.0%, DigitalOcean Holdings, Inc. -26.8%, CIENA CORP -26.0%, COHERENT CORP. -25.5%, Rocket Lab Corp -25.5%, Lumentum Holdings Inc. -25.3%\n52주 신고가 근접 106종 · 이번 주 경신 93종\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ · US 상승추세 ✅\n이익가속 신규(2026-10-12): FIGS, BBWI, GRNT, EVH, COTY, IBTA, OPK\n\n※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · 2026-10-19 05:59"
   },
   {
    "kind": "daily",

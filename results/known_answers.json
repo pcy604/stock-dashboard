@@ -1,25 +1,25 @@
 {
- "generated": "2026-10-19 16:07",
- "passed": 19,
+ "generated": "2026-10-19 16:59",
+ "passed": 22,
  "total": 26,
  "checks": [
   {
    "area": "미국 유니버스",
    "question": "초대형주 21종이 시총 파일에 다 있는가",
-   "ok": false,
-   "detail": "4,686종 · 누락 ['GOOGL', 'CMCSA']"
+   "ok": true,
+   "detail": "4,673종 · 누락 없음"
   },
   {
    "area": "미국 유니버스",
    "question": "애플 시총이 1조~10조 달러 사이인가 (단위·주식수 오류 감지)",
    "ok": true,
-   "detail": "AAPL $4.92T"
+   "detail": "AAPL $4.99T"
   },
   {
    "area": "미국 유니버스",
    "question": "복수 종류주식·복수 티커 회사의 시총이 제 자리에 있는가 (BRK·CMCSA·GOOGL)",
-   "ok": false,
-   "detail": "범위 밖 {'CMCSA': None, 'GOOGL': None} · 대표 아닌 티커 ['CCZ', 'GOOG']"
+   "ok": true,
+   "detail": "범위 밖 없음 · 대표 아닌 티커 없음"
   },
   {
    "area": "미국 유니버스",
@@ -90,8 +90,8 @@
   {
    "area": "월간 성과",
    "question": "월간 성과: 한·미 대형 파수꾼이 다 있고 양 시장 모두 300종 이상인가",
-   "ok": false,
-   "detail": "US 1,376 · KR 663 · 누락 ['GOOGL']"
+   "ok": true,
+   "detail": "US 1,372 · KR 666 · 누락 없음"
   },
   {
    "area": "고점대비 낙폭",
@@ -115,7 +115,7 @@
    "area": "CANSLIM",
    "question": "미국 50종·한국 20종 이상 채점했는가",
    "ok": true,
-   "detail": "US 163 · KR 74"
+   "detail": "US 157 · KR 70"
   },
   {
    "area": "주도주",
