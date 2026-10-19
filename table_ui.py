@@ -570,11 +570,13 @@ def install(st):
         return
     orig = st.dataframe
 
-    def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, **kw):
+    def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, footer=True, **kw):
+        # footer=False: 바로 아래 이어지는 표(한 묶음)가 출처를 대신 단다 — 같은 줄이 두 번 뜨지 않게
         try:
             return _dataframe(data, *a, filters=filters, color=color, **kw)
         finally:
-            _footer(st, src, asof)
+            if footer:
+                _footer(st, src, asof)
 
     def _dataframe(data=None, *a, filters=None, color=True, **kw):
         try:

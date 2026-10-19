@@ -5227,51 +5227,45 @@ def _tab_analysis():
                         # 차트 기간과 무관하게 전체 상장 히스토리 사용 (엑셀 '주가 추이 분석' 방식)
                         _fullc = full_close_history(sym8_clean, is_kr_sym)
                         _basec = _fullc if (_fullc is not None and len(_fullc) > len(hist)) else hist['Close']
-                        _mclose = _basec.resample('ME').last()
-                        _mret = (_mclose.pct_change() * 100).dropna()
-                        if len(_mret) >= 12:
-                            _md = _mret.to_frame('ret')
-                            _md['y'] = _md.index.year
-                            _md['m'] = _md.index.month
-                            _pv = _md.pivot_table(index='y', columns='m', values='ret', aggfunc='first')
-                            _yret = (_basec.resample('YE').last().pct_change() * 100)
-                            _ymap = {d.year: v for d, v in _yret.items()}
-                            _moncols = [f'{m}월' for m in range(1, 13)] + ['연간']
-
-                            def _cell(yr, m):
-                                if m in _pv.columns and yr in _pv.index and pd.notna(_pv.loc[yr, m]):
-                                    return float(_pv.loc[yr, m])
-                                return None
-                            _rows = []
-                            for _yr in sorted(_pv.index, reverse=True)[:35]:
-                                _row = {'연도': str(int(_yr))}
-                                for _m in range(1, 13):
-                                    _row[f'{_m}월'] = _cell(_yr, _m)
-                                _row['연간'] = _ymap.get(_yr)
-                                _rows.append(_row)
-                            # 하단 요약: 월평균 · 승률
-                            _avg = {'연도': '평균'}; _win = {'연도': '승률'}
-                            for _m in range(1, 13):
-                                _col = _pv[_m].dropna() if _m in _pv.columns else pd.Series(dtype=float)
-                                _avg[f'{_m}월'] = float(_col.mean()) if len(_col) else None
-                                _win[f'{_m}월'] = float((_col > 0).mean() * 100) if len(_col) else None
-                            _avg['연간'] = float(_yret.dropna().mean()) if len(_yret.dropna()) else None
-                            _win['연간'] = None
-                            _mm = pd.DataFrame(_rows + [_avg, _win])
-
-                            def _cmat(v):
-                                try:
-                                    return 'color:#16a34a;font-weight:bold' if float(v) >= 0 else 'color:#dc2626'
-                                except Exception:
-                                    return ''
+                        import monthly_stats as _ms
+                        _mraw, _msum = _ms.build(_basec)
+                        if _mraw is not None:
+                            # 두 표의 열 폭을 같게 고정 — 위아래 칸이 한 줄로 맞아야 RAW 와 요약을 견줘 읽는다
+                            def _mcfg(first):
+                                cfg = {first: st.column_config.TextColumn(first, width=92)}
+                                cfg.update({c: st.column_config.NumberColumn(c, format='%.1f', width=58)
+                                            for c in _ms.MONTHS})
+                                cfg['연간'] = st.column_config.NumberColumn('연간', format='%.1f', width=74)
+                                return cfg
+                            _yb = 'font-weight:800'   # 연간 열 강조(표 격자는 캔버스라 테두리 CSS 는 안 먹는다 — 굵기로)
                             _tsrc('FinanceDataReader(일봉 주가)', live=True)
-                            st.dataframe(
-                                _mm.style.map(_cmat, subset=_moncols)
-                                   .format({c: (lambda v: f'{v:+.0f}' if pd.notna(v) else '·') for c in _moncols}),
-                                use_container_width=True, hide_index=True,
-                                row_height=25, height=_dfh(len(_mm)))
-                            st.caption("연도×월 수익률(%). 하단 **평균**=월별 계절성, **승률**=상승 빈도(%). "
-                                       "엑셀 '주가 추이 분석' 방식. ⚠️ 표본 적으면 우연 — 기간 '5y' 권장.")
+                            st.dataframe(_mraw.style.map(lambda v: _yb, subset=['연간']),
+                                         column_config=_mcfg('연도'), filters=False, footer=False)
+
+                            # 요약(전체·홀수해·짝수해) — 굵게, 승률은 50% 기준으로 색
+                            _msc = _msum[_msum['구분'].str.endswith('평균')][_ms.COLS].abs().stack()
+                            _msc = float(_msc.quantile(.9)) if len(_msc) else 1.0
+
+                            def _mrow(r):
+                                _win = str(r.get('구분', '')).endswith('승률')
+                                out = []
+                                for c in r.index:
+                                    css = 'font-weight:800' if c == '연간' else 'font-weight:700'
+                                    if c == '구분':
+                                        css += ';background-color:rgba(51,65,85,0.08)'   # 요약 라벨 열 — RAW 연도 열과 구분
+                                    v = r[c]
+                                    if c in _ms.COLS and pd.notna(v):
+                                        bg = _tui._bg(float(v) - 50, 40) if _win else _tui._bg(float(v), _msc or 1.0)
+                                        if bg:
+                                            css += ';' + bg
+                                    out.append(css)
+                                return pd.Series(out, index=r.index)
+                            st.dataframe(_msum.style.apply(_mrow, axis=1),
+                                         column_config=_mcfg('구분'), filters=False, color=False)
+                            st.caption("연도×월 수익률(%) — 위는 연도별 RAW(오래된 해→최근 해), 아래는 요약. "
+                                       "**평균**=월별 계절성, **승률**=그 달(연간은 그 해)이 오른 비율(%) · 50% 기준 색. "
+                                       "홀수해/짝수해는 대선·중간선거 주기 같은 격년 패턴 확인용. "
+                                       "연간=전년 말 대비(올해는 연초 대비 YTD). ⚠️ 표본 적으면 우연 — 해가 많을수록 믿을 만.")
                         else:
                             st.info("월별 통계 표본 부족 — 기간을 '3y'나 '5y'로 늘려주세요.")
 
