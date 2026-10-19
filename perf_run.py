@@ -126,6 +126,26 @@ def analyze_one(sym, name, marcap, market):
         except Exception:
             _hi, _dist, _new, _wk_since = None, None, False, None
 
+        # 주차별 신고가 경신 이력 — 최근 52주 (2026-10-19 사용자 요청: 주간 그래프·연속 경신 필터)
+        #   정의는 위와 같다: 그 주 고가 > 직전 52주 고가. 주 이름은 그 주 금요일(W-SUN 일요일 − 2일).
+        #   nh = [[금요일, 그 주 종가], ...] — 그 주 종가를 같이 실어 '그 뒤 얼마나 갔나'를 화면이 계산한다.
+        _nh, _streak, _nh8 = [], 0, 0
+        try:
+            _H = wdf['High'].astype(float)
+            _prev = _H.shift(1).rolling(52, min_periods=52).max()
+            _flag = (_H > _prev) & _prev.notna()
+            _f52 = _flag.iloc[-52:]
+            _c52 = wdf['Close'].iloc[-52:]
+            _nh = [[str((t - pd.Timedelta(days=2)).date()), round(float(c), 2)]
+                   for t, f, c in zip(_f52.index, _f52.values, _c52.values) if f]
+            for f in reversed(_f52.values.tolist()):
+                if not f:
+                    break
+                _streak += 1
+            _nh8 = int(_f52.iloc[-8:].sum())
+        except Exception:
+            pass
+
         return {
             'market':      market,
             'sym':         sym,
@@ -138,6 +158,9 @@ def analyze_one(sym, name, marcap, market):
             'dist52':      round(_dist, 2) if _dist is not None else None,
             'new_high':    _new,
             'wk_since_hi': _wk_since,
+            'nh':          _nh,          # 최근 52주 중 신고가 경신 주 [[금요일, 종가], ...]
+            'nh_streak':   _streak,      # 이번 주까지 연속 경신 주 수
+            'nh_8w':       _nh8,         # 최근 8주 중 경신 주 수
             'ret_12w':     round((curr / float(wdf['Close'].iloc[-13]) - 1) * 100, 2) if len(wdf) >= 13 else None,
             # 신호 레이블
             'sigs_past':   sig_labels(sigs_past),

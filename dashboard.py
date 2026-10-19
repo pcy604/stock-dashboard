@@ -586,7 +586,8 @@ def cap_usd_b(marcap, market):
 
 
 def cap_caption() -> str:
-    return f"시총($B) — KR 은 원/달러 {_usdkrw():,.0f} 으로 환산(1시간 캐시)"
+    return (f"시총 — 한국 종목이 있는 표는 억원(미국 종목은 원/달러 {_usdkrw():,.0f} 으로 환산), "
+            "미국만 있는 표는 $B (1시간 캐시)")
 
 
 def _ni_usd_m(v):
@@ -1166,6 +1167,7 @@ def _goto_analysis(code):
 
 
 _tui.set_nav(_goto_analysis)
+_tui.set_fx(lambda: _usdkrw())   # 한국 종목이 섞인 표의 시총($B) → 억원 (2026-10-19)
 tab_screen, tab7, tab4, tab_pf, tab_rep = st.tabs(key='main_tab', on_change='rerun', tabs=[
     "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오", "📰 시황 리포트"])
 
@@ -2192,24 +2194,195 @@ if _LEAD_KR:
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
-# ── 📈 52주 신고가 (2026-10-14) ──────────────────────────────────────
+# ── 📈 52주 신고가 (2026-10-14 · 2026-10-19 주간 그래프·연속 경신·AI 공통점) ─────────────
+@st.cache_data(ttl=3600 * 6, show_spinner=False)
+def _sector_map():
+    """sym → 업종. KR 표준산업분류(sectors.json) · US SEC SIC 설명(us_domicile.csv)."""
+    out = {}
+    try:
+        out.update(json.load(open('data/sectors.json', encoding='utf-8')))
+    except Exception:
+        pass
+    try:
+        _d = pd.read_csv('data/us_domicile.csv', usecols=['sym', 'sic_desc'])
+        out.update({str(a): b for a, b in zip(_d.sym, _d.sic_desc) if isinstance(b, str)})
+    except Exception:
+        pass
+    return out
+
+
+@st.cache_data(ttl=3600 * 24, show_spinner=False)
+def _h52_ai(week: str, mkt: str, payload: str) -> str:
+    """신고가 종목 묶음의 공통점 — Gemini. 같은 주·같은 종목 묶음이면 하루 캐시(무료 한도 하루 20건)."""
+    key = ''
+    try:
+        import config as _cfg
+        key = getattr(_cfg, 'GEMINI_KEY', '') or ''
+    except Exception:
+        pass
+    if not key:
+        try:
+            key = st.secrets.get('GEMINI_KEY', '')
+        except Exception:
+            key = ''
+    key = key or os.environ.get('GEMINI_KEY', '')
+    if not key:
+        return "(Gemini 키 미설정 — Streamlit Secrets 에 GEMINI_KEY 를 넣어야 AI 요약이 됩니다)"
+    prompt = (
+        f"너는 20년차 한국 증권사 주식 전략가다. 아래는 {week} 주에 52주 신고가를 새로 쓴 "
+        f"{'한국·미국' if mkt == '전체' else mkt} 종목 목록이다(시총 큰 순, 업종·12주 상승률·연속 경신 주수·분기 실적 포함).\n"
+        "펀드매니저 아침 회의용으로 **공통점**을 한국어로 짧게 정리하라.\n\n"
+        "형식:\n"
+        "**한 줄 요약**: 이번 주 신고가의 성격을 한 문장으로.\n"
+        "**테마·업종 묶음** (3~5개 불릿): 어떤 업종·밸류체인이 몰렸는지, 묶음마다 대표 종목명 2~4개를 반드시 괄호로.\n"
+        "**질적 특징** (2~3개 불릿): 대형/중소형, 실적이 받치는지(분기 실적 열), 연속 경신(추세 지속) vs 첫 돌파.\n"
+        "**주의할 점** (1~2개 불릿): 과열·단일 이벤트 의존 등 이 목록에서 보이는 위험.\n\n"
+        "규칙: 목록에 있는 사실만으로 말하라. 목록에 없는 뉴스·원인을 지어내지 마라 — 원인을 추정할 때는 "
+        "'~로 보인다'로 표시. 매수 추천 금지. 일반론 금지. 15줄 이내.\n\n" + payload)
+    try:
+        from google import genai
+        cl = genai.Client(api_key=key)
+        last = None
+        for _m in ('gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'):
+            try:
+                r = cl.models.generate_content(model=_m, contents=prompt)
+                return (r.text or '').strip() or "(요약 생성 실패)"
+            except Exception as _e:
+                last = _e
+                time.sleep(2)
+        return f"(AI 요약 실패 — Gemini 혼잡 또는 하루 한도. 잠시 후 다시. [{str(last)[:60]}])"
+    except Exception as e:
+        return f"(AI 요약 실패: {str(e)[:80]})"
+
+
 with t_52, guard('52주 신고가'):
-    st.caption("주봉 기준 — 이번 주 종가가 **직전 52주 고가의 -3% 이내**인 종목. "
-               "'경신'은 이번 주 고가가 직전 52주 고가를 넘은 것. 장중 실시간이 아니라 매일 06시(KST) 갱신.")
+    st.caption("주봉 기준 — '경신'은 그 주 **고가**가 직전 52주 고가를 넘은 것. 장중 실시간이 아니라 매일 06시(KST) 갱신. "
+               "커버: 한국 시총 1,000억+ · 미국 $3억+.")
     _p52 = load_json(PERF_JSON) or {}
     _s52 = _p52.get('stocks') or []
     _has_d = any(x.get('dist52') is not None for x in _s52)
+    _has_nh = any('nh' in x for x in _s52)
     _mk52 = _GMKT
+    _SEC52 = _sector_map()
     _cs52 = {}
     for _f in (CANSLIM_JSON, Path('results/canslim_us_latest.json')):
         for _x in (load_json(_f) or {}).get('stocks', []):
             _cs52[_x['sym']] = _x
-    _c1, _c2, _c3, _c4 = st.columns([1.3, 1.3, 1.2, 1.2])
+
+    def _cg(sym):
+        cg = (_cs52.get(sym) or {}).get('c_growth_pct')
+        return cg if isinstance(cg, str) else (f"{cg:+.0f}%" if cg is not None else '-')
+
+    # ── ① 주간 신고가 경신 종목 수 ───────────────────────────────
+    st.markdown("##### 📊 주간 52주 신고가 경신 종목 수 — 막대를 누르면 그 주 종목이 아래에 나옵니다")
+    if not _has_nh:
+        st.info("주간 이력은 다음 자동 갱신(매일 06시)부터 채워집니다.")
+    else:
+        _wk = {}
+        for x in _s52:
+            if _mk52 != "전체" and x.get('market') != _mk52:
+                continue
+            for _d, _c in x.get('nh') or []:
+                _wk.setdefault(_d, []).append((x, _c))
+        _last = max(_wk) if _wk else None
+        if _last:
+            _weeks = pd.date_range(end=pd.Timestamp(_last), periods=52, freq='W-FRI')
+            _wl = [str(w.date()) for w in _weeks]
+            _kr_n = [sum(1 for x, _ in _wk.get(w, []) if x.get('market') == 'KR') for w in _wl]
+            _us_n = [sum(1 for x, _ in _wk.get(w, []) if x.get('market') == 'US') for w in _wl]
+            _sel = st.session_state.get('h52_week') or _last
+            if _sel not in _wl:
+                _sel = _last
+            _fw = go.Figure()
+            _op = [1.0 if w == _sel else 0.45 for w in _wl]
+            if _mk52 != "US":
+                _fw.add_trace(go.Bar(x=_weeks, y=_kr_n, name='🇰🇷 한국', marker=dict(color='#2453C8', opacity=_op),
+                                     hovertemplate='%{x|%Y-%m-%d} 주 · 한국 %{y}종<extra></extra>'))
+            if _mk52 != "KR":
+                _fw.add_trace(go.Bar(x=_weeks, y=_us_n, name='🇺🇸 미국', marker=dict(color='#7C8AA5', opacity=_op),
+                                     hovertemplate='%{x|%Y-%m-%d} 주 · 미국 %{y}종<extra></extra>'))
+            _fw.update_layout(barmode='stack', height=240, margin=dict(l=8, r=8, t=8, b=8), bargap=0.25,
+                              legend=dict(orientation='h', y=1.12, x=0, yanchor='bottom'),
+                              yaxis=dict(title=None, gridcolor='#F3F4F6'), xaxis=dict(tickformat='%m/%d'))
+            _ev = st.plotly_chart(_fw, use_container_width=True, on_select='rerun', selection_mode='points',
+                                  key=f"h52_chart_{st.session_state.get('h52_ck', 0)}")
+            try:
+                _pts = (_ev.selection or {}).get('points') if isinstance(_ev.selection, dict) else _ev.selection.points
+                if _pts:
+                    _new_sel = str(pd.Timestamp(_pts[0]['x']).date())
+                    if _new_sel != st.session_state.get('h52_week'):
+                        st.session_state['h52_week'] = _new_sel
+                        st.rerun()
+            except Exception:
+                pass
+            _tot = [a + b for a, b in zip(_kr_n, _us_n)]
+            _avg = sum(_tot[-13:]) / 13
+            st.caption(f"최근 13주 평균 {_avg:.0f}종/주 · 최대 {max(_tot)}종({_wl[_tot.index(max(_tot))]}) · "
+                       f"이번 주({_last}, 진행 중일 수 있음) {_tot[-1]}종. 숫자가 늘면 시장 폭이 넓어지는 것 — "
+                       "지수만 오르고 신고가 종목이 줄면 소수 대형주 장세. ⚠️ 지금 커버 명단 기준이라 그 사이 상장폐지된 종목은 빠져 있다.")
+
+            # ── ② 선택한 주의 신고가 종목 ──────────────────────────
+            _items = sorted(_wk.get(_sel, []), key=lambda t: -(cap_usd_b(t[0].get('marcap'), t[0].get('market')) or 0))
+            _cA, _cB = st.columns([3, 1])
+            _cA.markdown(f"##### 🗓 {_sel} 주 신고가 경신 — {len(_items)}종")
+            if _cB.button("이번 주로", key="h52_reset", disabled=_sel == _last):
+                st.session_state['h52_week'] = _last
+                st.session_state['h52_ck'] = st.session_state.get('h52_ck', 0) + 1   # 그래프 선택도 비운다
+                st.rerun()
+            if _items:
+                _wrows = []
+                for x, c in _items:
+                    cur = x.get('curr_price')
+                    _wrows.append({
+                        '종목': x.get('name'), '코드': x.get('sym'),
+                        '시총($B)': cap_usd_b(x.get('marcap'), x.get('market')),
+                        '업종': _SEC52.get(x.get('sym'), '-'),
+                        '그주종가': c, '현재가': cur,
+                        '이후(%)': round((cur / c - 1) * 100, 1) if (cur and c) else None,
+                        '연속(주)': x.get('nh_streak'), '8주중(회)': x.get('nh_8w'),
+                        '분기실적(C)': _cg(x.get('sym'))})
+                _tsrc('FinanceDataReader(주가) → perf_latest.json(주차별 경신 이력)', path='results/perf_latest.json')
+                st.dataframe(pd.DataFrame(_wrows), filters=len(_wrows) >= 8,
+                             column_config={'업종': st.column_config.TextColumn(width=150),
+                                            '그주종가': st.column_config.NumberColumn(format='localized'),
+                                            '현재가': st.column_config.NumberColumn(format='localized'),
+                                            '이후(%)': st.column_config.NumberColumn(format='%+.1f'),
+                                            '연속(주)': st.column_config.NumberColumn(format='%d', help='이번 주까지 연속 52주 신고가 경신 주 수'),
+                                            '8주중(회)': st.column_config.NumberColumn(format='%d', help='최근 8주 중 52주 신고가 경신 주 수')})
+                # 업종 묶음(숫자) — AI 없이도 보이는 사실
+                _secs = pd.Series([_SEC52.get(x.get('sym'), '기타·미분류') for x, _ in _items]).value_counts()
+                st.caption("업종 상위: " + " · ".join(f"**{k}** {v}" for k, v in _secs.head(6).items()))
+
+                # ── ③ AI 공통점 요약 ─────────────────────────────────
+                if st.button(f"🤖 AI 공통점 요약 — {_sel} 주 {len(_items)}종", key=f"h52_ai_{_sel}_{_mk52}"):
+                    _lines = [f"{r['종목']}({r['코드']}, {'KR' if str(r['코드']).isdigit() else 'US'}) | 업종 {r['업종']} | 시총 ${r['시총($B)'] or 0:.1f}B | "
+                              f"12주 {(next((x.get('ret_12w') for x, _ in _items if x.get('sym') == r['코드']), None) or 0):+.0f}% | "
+                              f"연속경신 {r['연속(주)']}주 | 분기실적 {r['분기실적(C)']}"
+                              for r in _wrows[:80]]
+                    _payload = ("업종 분포: " + ", ".join(f"{k} {v}" for k, v in _secs.head(10).items())
+                                + "\n\n" + "\n".join(_lines))
+                    with st.spinner("AI 가 공통점을 정리하는 중..."):
+                        st.session_state[f"h52_ai_txt_{_sel}_{_mk52}"] = _h52_ai(_sel, _mk52, _payload)
+                _txt = st.session_state.get(f"h52_ai_txt_{_sel}_{_mk52}")
+                if _txt:
+                    with st.container(border=True):
+                        st.markdown(_txt)
+                        st.caption("Gemini 요약 · 위 표의 숫자·업종만 근거로 쓰도록 제한했다. 원인 추정은 '~로 보인다'로 표시된다. "
+                                   "매수 신호가 아니다.")
+
+    st.divider()
+    # ── ④ 지금 고점 근처 종목 (필터) ─────────────────────────────
+    st.markdown("##### 🎯 지금 52주 고점 근처 종목")
+    _c1, _c2, _c3, _c4, _c5 = st.columns([1.3, 1.1, 1.2, 1.1, 1.1])
     _rng = _c1.slider("고점 대비 범위 (%)", -15.0, 0.0, -3.0, 0.5, key="h52_rng",
                       help="0 = 신고가, -3 = 고점에서 3% 이내", disabled=not _has_d)
     _only_new = _c2.checkbox("이번 주 신고가 경신만", value=False, key="h52_new", disabled=not _has_d)
-    _min_cap = _c3.selectbox("최소 시총", ["전체", "1천억/1B$+", "1조/10B$+"], key="h52_cap")
-    _sort52 = _c4.selectbox("정렬", ["고점 근접순", "시총순", "4주 상승률", "12주 상승률"], key="h52_sort")
+    _persist = _c3.selectbox("신고가 지속", ["전체", "연속 2주+", "연속 3주+", "연속 4주+", "최근 8주 중 4회+"],
+                             key="h52_persist", disabled=not _has_nh,
+                             help="연속 n주+ = 이번 주까지 n주 연속으로 52주 신고가를 새로 쓴 종목. "
+                                  "최근 8주 중 4회+ = 끊겼다 이어져도 자주 새로 쓰는 종목.")
+    _min_cap = _c4.selectbox("최소 시총", ["전체", "1천억/1B$+", "1조/10B$+"], key="h52_cap")
+    _sort52 = _c5.selectbox("정렬", ["고점 근접순", "연속 경신순", "시총순", "4주 상승률", "12주 상승률"], key="h52_sort")
     _rows52 = []
     for x in _s52:
         if _mk52 != "전체" and x.get('market') != _mk52:
@@ -2222,26 +2395,30 @@ with t_52, guard('52주 신고가'):
                 continue
         elif not x.get('now_sig_52w'):
             continue
+        if _persist.startswith("연속"):
+            if (x.get('nh_streak') or 0) < int(_persist.split()[1][0]):
+                continue
+        elif _persist.startswith("최근 8주") and (x.get('nh_8w') or 0) < 4:
+            continue
         cap = x.get('marcap') or 0
         kr = x.get('market') == 'KR'
         if _min_cap.startswith("1천억") and cap < (1e11 if kr else 1e9):
             continue
         if _min_cap.startswith("1조") and cap < (1e12 if kr else 1e10):
             continue
-        cs = _cs52.get(x['sym']) or {}
-        cg = cs.get('c_growth_pct')
         _rows52.append({
             '종목': x.get('name'), '코드': x.get('sym'), '시장': x.get('market'),
-            # (구) '_cap': cap 은 원화 원 단위와 달러를 그대로 섞어 '시총순' 정렬에서 KR 이 늘 위로 갔다
             '시총($B)': cap_usd_b(cap, x.get('market')), '_cap': cap_usd_b(cap, x.get('market')) or 0,
+            '업종': _SEC52.get(x.get('sym'), '-'),
             '현재가': x.get('curr_price'), '52주고': x.get('hi52'),
-            '고점대비%': d, '경신': '🔺' if x.get('new_high') else '',
-            '고점후(주)': x.get('wk_since_hi'),
+            '고점대비': d, '경신': '🔺' if x.get('new_high') else '',
+            '연속(주)': x.get('nh_streak'), '8주중(회)': x.get('nh_8w'),
             '1주%': x.get('ret_1w'), '4주%': x.get('ret_4w'), '12주%': x.get('ret_12w'),
-            '분기실적(C)': (cg if isinstance(cg, str) else (f"{cg:+.0f}%" if cg is not None else '-')),
+            '분기실적(C)': _cg(x.get('sym')),
             '함께 뜬 신호': ', '.join(l for l in (x.get('sigs_now') or []) if '52주' not in str(l)) or '-',
         })
-    _key = {"고점 근접순": lambda r: -(r['고점대비%'] if r['고점대비%'] is not None else -99),
+    _key = {"고점 근접순": lambda r: -(r['고점대비'] if r['고점대비'] is not None else -99),
+            "연속 경신순": lambda r: (-(r['연속(주)'] or 0), -(r['8주중(회)'] or 0)),
             "시총순": lambda r: -r['_cap'], "4주 상승률": lambda r: -(r['4주%'] or -999),
             "12주 상승률": lambda r: -(r['12주%'] or -999)}[_sort52]
     _rows52.sort(key=_key)
@@ -2255,16 +2432,26 @@ with t_52, guard('52주 신고가'):
         st.info("고점 대비 거리·경신 여부는 다음 자동 갱신부터 채워집니다. 지금은 '신고가 -3% 이내' 신호만 보여줍니다.")
     if _rows52:
         _df52 = pd.DataFrame(_rows52).drop(columns=['_cap'])
+        _df52 = _df52.drop(columns=['시장'])                 # 코드가 시장을 말해 준다(6자리=한국) — 표 폭 절약
+        if _only_new or _has_nh:
+            # 전부 🔺 이거나(경신만), '연속(주) ≥ 1' 과 같은 뜻이라(같은 정의) 열 하나를 아낀다
+            _df52 = _df52.drop(columns=['경신'])
+        if not _has_nh:
+            _df52 = _df52.drop(columns=['연속(주)', '8주중(회)'])
         if not _has_d:
-            _df52 = _df52.drop(columns=['52주고', '고점대비%', '경신', '고점후(주)', '12주%'])
+            _df52 = _df52.drop(columns=[c for c in ('52주고', '고점대비', '경신', '12주%') if c in _df52])
         _tsrc('FinanceDataReader(주가) → perf_latest.json · CANSLIM 결과', path='results/perf_latest.json')
-        st.dataframe(_df52, use_container_width=True, hide_index=True,
-                     height=_dfh(len(_df52), cap=760),
-                     column_config={'시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
-                                    '고점대비%': st.column_config.NumberColumn(format="%.1f%%"),
-                                    '1주%': st.column_config.NumberColumn(format="%+.1f%%"),
-                                    '4주%': st.column_config.NumberColumn(format="%+.1f%%"),
-                                    '12주%': st.column_config.NumberColumn(format="%+.1f%%")})
+        st.dataframe(_df52, column_config={
+            '업종': st.column_config.TextColumn(width=150),
+            '함께 뜬 신호': st.column_config.TextColumn(width=120),
+            '현재가': st.column_config.NumberColumn(format='localized'),
+            '52주고': st.column_config.NumberColumn(format='localized'),
+            '고점대비': st.column_config.NumberColumn(format="%+.1f"),
+            '연속(주)': st.column_config.NumberColumn(format='%d', help='이번 주까지 연속으로 52주 신고가를 새로 쓴 주 수'),
+            '8주중(회)': st.column_config.NumberColumn(format='%d', help='최근 8주 중 52주 신고가를 새로 쓴 주 수'),
+            '1주%': st.column_config.NumberColumn(format="%+.1f"),
+            '4주%': st.column_config.NumberColumn(format="%+.1f"),
+            '12주%': st.column_config.NumberColumn(format="%+.1f")})
         st.caption(cap_caption())
     else:
         st.write("조건에 맞는 종목이 없습니다.")

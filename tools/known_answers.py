@@ -238,6 +238,18 @@ def _():
     return bool(r is not None and -90 < r < 1000 and same), f"12M {r}% · 시총 일치 {bool(same)}"
 
 
+@check('52주 신고가', '주간 신고가 이력(nh)이 월간 성과 종목의 90% 이상에 실려 있는가')
+def _():
+    # 2026-10-19 — 주간 그래프·연속 경신 필터의 재료. 비면 그래프가 0 으로 '조용히' 보인다.
+    d, _ = _stocks('results/perf_latest.json')
+    st_ = d.get('stocks', [])
+    r = sum(1 for x in st_ if 'nh' in x) / max(len(st_), 1)
+    n_now = sum(1 for x in st_ if x.get('new_high'))
+    n_str = sum(1 for x in st_ if (x.get('nh_streak') or 0) >= 1)
+    # '이번 주 경신'과 '연속 ≥ 1' 은 같은 정의라 수가 같아야 한다
+    return r >= 0.9 and n_now == n_str, f"이력 보유 {r:.0%} · 이번 주 경신 {n_now} · 연속≥1 {n_str}"
+
+
 @check('흑자전환', '한국 100종·미국 50종 이상 판정했는가')
 def _():
     d = _j('results/turnaround_latest.json')

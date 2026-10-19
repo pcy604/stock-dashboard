@@ -312,7 +312,7 @@ _HEAD_UNIT = [
     (re.compile(r'^(RS\d*|PER|PBR|PSR|PEG|손익비)$'), '배'),
     (re.compile(r'^(신호|신호 수|표본)$'), '건'),
     (re.compile(r'^(누적|보유|청산|통과수)$'), '종'),
-    (re.compile(r'^(종가|현재가|52주고|52주저|진입가|매수가|평단)$'), '현지통화'),
+    (re.compile(r'^(종가|현재가|52주고|52주저|진입가|매수가|평단|그주종가)$'), '현지'),
 ]
 
 
@@ -358,6 +358,36 @@ def normalize(df: pd.DataFrame):
         if new != c:
             ren[c] = new
     df = df.rename(columns=ren)
+    # 2026-10-19 사용자 요청 — 한국 종목이 있는 표의 시총은 **억원**. ($B 로 '0.3B' 는 감이 안 온다)
+    #   미국만 있는 표는 $B 그대로. 섞인 표도 억원으로 통일(같은 단위여야 정렬·필터가 성립한다).
+    capb = next((c for c in df.columns if str(c) == '시총($B)'), None)
+    if capb is not None and FX['fn']:
+        kr = _kr_rows(df)
+        if kr is not None and kr.any():
+            try:
+                rate = float(FX['fn']())
+                df[capb] = (pd.to_numeric(df[capb], errors='coerce') * rate * 10).round(0)
+                df = df.rename(columns={capb: '시총(억원)'})
+                src = next((k for k, v in ren.items() if v == capb), capb)
+                ren[src] = '시총(억원)'
+                conv.add('시총(억원)')
+            except Exception:
+                pass
+    # 가격 머리글의 통화 — 전부 한국이면 (원), 전부 미국이면 ($), 섞이면 (현지). 머리글이 짧아야 표가 안 넓어진다.
+    _kr = _kr_rows(df)
+    if _kr is not None and len(df):
+        tag = '원' if _kr.all() else ('$' if not _kr.any() else None)
+        if tag:
+            r2 = {c: str(c).replace('(현지)', f'({tag})') for c in df.columns if str(c).endswith('(현지)')}
+            if r2:
+                df = df.rename(columns=r2)
+                for k, v in list(ren.items()):
+                    if v in r2:
+                        ren[k] = r2[v]
+                for old_c, new_c in r2.items():
+                    if old_c not in ren.values() and old_c not in ren:
+                        ren[old_c] = new_c
+                conv = {r2.get(c, c) for c in conv}
     n = len(df)
     for c in list(df.columns):
         if str(c) in _ROWNO and n and pd.to_numeric(df[c], errors='coerce').tolist() == list(range(1, n + 1)):
@@ -455,6 +485,20 @@ def strip_fmt_units(cfg: dict) -> dict:
 
 # ── 종목 클릭 → 종목 분석 (2026-10-19) ────────────────────────────
 NAV = {'fn': None}
+FX = {'fn': None}      # 원/달러 — 대시보드가 set_fx(_usdkrw) 로 넣는다
+
+
+def set_fx(fn):
+    FX['fn'] = fn
+
+
+def _kr_rows(df):
+    """행마다 한국 종목인가. '시장' 열이 있으면 그걸, 없으면 코드 모양(6자리)으로."""
+    if '시장' in df.columns:
+        return df['시장'].astype(str).str.upper().eq('KR')
+    if '코드' in df.columns:
+        return df['코드'].astype(str).str.fullmatch(r'\d{5}[0-9A-Z]')
+    return None
 
 
 def set_nav(fn):
@@ -485,9 +529,12 @@ def auto_widths(df: pd.DataFrame, cfg: dict) -> dict:
     for c in df.columns:
         col = df[c].head(300)
         # 머리글(12px)은 값(12.5px 고정폭 숫자)보다 좁게 친다 — 머리글이 열 폭을 지배하지 않게
-        hw = _dw(str(c)) * 6.6 + 30
-        vw = max([_fmt_len(v) for v in col.tolist()] or [1]) * 7.6 + 22
-        px = int(min(max(hw, vw, 44), 340))
+        # 2026-10-19 '너무 넉넉하다' — 머리글은 12px 글꼴(한글 ≈ 12px = _dw 2칸), 값은 12.5px 고정폭.
+        hw = _dw(str(c)) * 6.1 + 22
+        vw = max([_fmt_len(v) for v in col.tolist()] or [1]) * 7.3 + 18
+        px = int(min(max(hw, vw, 44), 240))     # 긴 글(회사명·업종)은 잘리고 마우스를 올리면 전체가 보인다
+        if str(c) == '종목':
+            px = min(px, 170)                   # 미국 회사명이 길어 표를 옆으로 밀었다(2026-10-19)
         cur = cfg.get(c)
         if isinstance(cur, dict):
             if not cur.get('width'):
@@ -575,6 +622,18 @@ def install(st):
                     kw['column_order'] = [c for c in order if c not in hide]
                 if 'height' in kw and isinstance(kw['height'], int) and len(df) < len(data.data if isinstance(data, Styler) else data):
                     kw['height'] = min(kw['height'], 35 + 26 * max(len(df), 1) + 4)
+
+            if '시총(억원)' in df.columns:          # 억원은 천 단위 쉼표 정수
+                kw.setdefault('column_config', {})
+                kw['column_config']['시총(억원)'] = st.column_config.NumberColumn('시총(억원)', format='localized')
+
+            # 높이 — 25행 이하는 스크롤 없이 전부 보이게(2026-10-19: 7행 표인데 6행만 보이고 세로 드래그).
+            #   호출부의 _dfh 는 행 25px 를 가정했는데 실제 행은 35px(테마·기본) 이라 늘 한두 행이 잘렸다.
+            _rh = kw.get('row_height') or 35
+            if len(df) <= 25:
+                kw['height'] = (len(df) + 1) * _rh + 3
+            elif not kw.get('height'):
+                kw['height'] = 26 * _rh + 3
 
             # 열 폭 = 내용 폭, 표 폭 = 열 합 (컨테이너를 억지로 채우지 않는다)
             kw['column_config'] = auto_widths(df, kw.get('column_config'))
