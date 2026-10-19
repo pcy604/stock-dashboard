@@ -662,6 +662,9 @@ pd.set_option('styler.format.na_rep', '-')      # 결측은 '-' (nan/None 을 �
 #   숫자 열 %.1f 기본 포맷 · 부호 색(+초록/−빨강, 클수록 진하게) · 🔎 필터는 전부
 #   table_ui 한 곳에서 st.dataframe 을 감싸 처리한다(2026-10-15). 표마다 따로 하지 않는다.
 import table_ui as _tui
+if getattr(_tui, 'API_VERSION', 0) < 2:          # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
+    import importlib as _il
+    _tui = _il.reload(_tui)
 _tui.install(st)
 
 
@@ -4647,7 +4650,7 @@ def _tab_analysis():
                                     _sty = _sty.set_properties(subset=_ecols, color='#2453C8')
                                 # 행높이·표높이 명시 → 세 표의 행간 완전 동일 + 빈 공간 없음 (#1,#2)
                                 _tsrc(('DART 전자공시' if is_kr_sym else 'SEC EDGAR') + ' (분기재무, 표 아래 캡션 참조)', live=True)
-                                st.dataframe(_sty, use_container_width=True, hide_index=True,
+                                st.dataframe(_sty, use_container_width=True, hide_index=True, filters=False,
                                              row_height=25, height=_dfh(len(_df)))
 
                             # 연간·분기 컨센서스가 같은 소스(yfinance/네이버)의 같은 응답에 함께 들어있어

@@ -38,6 +38,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 8
+API_VERSION = 2          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -566,9 +567,12 @@ def begin_run(st):
 def install(st):
     """st.dataframe 을 감싼다. 한 번만 감싸고(재실행·다중 세션에서 겹치지 않게),
     세션별 상태는 session_state 에만 둔다(모듈 전역 금지 — 세션 간 공유된다)."""
-    if getattr(st, '_tbl_patched', False):
+    # 2026-10-20 사고: 클라우드 프로세스가 **옛 래퍼**를 st 에 붙인 채로 새 코드를 돌려
+    #   새 인자(footer)가 Streamlit 원본까지 흘러가 종목분석 섹션이 죽었다. 그래서 버전이 다르면
+    #   다시 감싸고, 원본은 늘 st._main.dataframe(감싸지 않은 진짜)에서 가져온다(겹겹이 감싸지 않게).
+    if getattr(st, '_tbl_ver', None) == API_VERSION:
         return
-    orig = st.dataframe
+    orig = st._main.dataframe
 
     def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, footer=True, **kw):
         # footer=False: 바로 아래 이어지는 표(한 묶음)가 출처를 대신 단다 — 같은 줄이 두 번 뜨지 않게
@@ -633,7 +637,8 @@ def install(st):
             #   호출부의 _dfh 는 행 25px 를 가정했는데 실제 행은 35px(테마·기본) 이라 늘 한두 행이 잘렸다.
             _rh = kw.get('row_height') or 35
             if len(df) <= 25:
-                kw['height'] = (len(df) + 1) * _rh + 3
+                kw['height'] = (len(df) + 1) * _rh + 3 + (12 if len(df) <= 4 else 0)
+                # ↑ 2026-10-20: 2행 표(사업부문)가 가로 스크롤바 높이만큼 잘려 세로 드래그가 생겼다 — 짧은 표에 여유
             elif not kw.get('height'):
                 kw['height'] = 26 * _rh + 3
 
@@ -678,3 +683,4 @@ def install(st):
 
     st.dataframe = dataframe
     st._tbl_patched = True
+    st._tbl_ver = API_VERSION
