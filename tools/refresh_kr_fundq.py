@@ -67,7 +67,10 @@ def main():
         TMP.unlink()
     con = sqlite3.connect(TMP)
     con.executescript(Q.DDL)
-    old.to_sql("fundamentals_q", con, if_exists="append", index=False)
+    # 2026-10-19 — parquet 에 네이버 대차 열(assets·liabilities·equity)이 생겼다. DART 적재 테이블엔
+    #   그 열이 없어 to_sql 이 'no column named assets' 로 죽었다. 테이블 열만 넘긴다(대차는 끝에서 되살린다).
+    _cols = ["sym", "year", "q", "revenue", "op_income", "net_income", "fs_div", "updated"]
+    old[[c for c in _cols if c in old.columns]].to_sql("fundamentals_q", con, if_exists="append", index=False)
 
     import krx_listing
     krx = krx_listing.stock_listing("KRX")
@@ -108,4 +111,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:                       # 원인이 알림에 실리도록 ::error 로 남긴다
+        print(f"::error title=KR 분기재무::{type(e).__name__}: {str(e)[:300]}", flush=True)
+        raise
