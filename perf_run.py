@@ -118,7 +118,8 @@ def analyze_one(sym, name, marcap, market):
         try:
             _hi = float(wdf['High'].iloc[-53:-1].max())
             _dist = (curr / _hi - 1) * 100 if _hi > 0 else None
-            _new = bool(float(wdf['High'].iloc[-1]) > _hi) if _hi > 0 else False
+            # 상장 1년 미만은 '52주' 신고가가 성립하지 않는다(ANDG: 상장 후 최고가를 신고가로 셌다 → 주간 이력과 불일치)
+            _new = bool(float(wdf['High'].iloc[-1]) > _hi) if (_hi > 0 and len(wdf) >= 53) else False
             _wk_since = None
             _hh = wdf['High'].iloc[-53:]
             if len(_hh):

@@ -43,7 +43,13 @@ def fetch_consensus(sym: str) -> dict | None:
     1순위 navercomp.wisereport(해외 러너에서도 닿는다), 실패하면 종목 메인 표(국내에서만 보인다)."""
     try:
         import kr_fin_naver as _kfn
-        c = _kfn.consensus(sym)
+        try:
+            c = _kfn.consensus(sym)
+        except Exception as _e1:                     # 2026-10-19 — 같은 날 여러 번 돌리자 ConnectTimeout 214건. 한 번 쉬고 다시
+            if 'Timeout' not in type(_e1).__name__:
+                raise
+            time.sleep(3)
+            c = _kfn.consensus(sym)
         if c:
             return c
         _why('wisereport 추정 열 없음')
@@ -127,7 +133,7 @@ def run(limit=None):
         if done[0] % 100 == 0:
             print(f"  {done[0]}/{len(syms)}")
         return sym, c
-    with ThreadPoolExecutor(max_workers=6) as ex:
+    with ThreadPoolExecutor(max_workers=3) as ex:   # 6 → 3: 네이버가 몰리는 요청을 끊었다(2026-10-19)
         for sym, c in ex.map(_one, syms):
             if c:
                 results[sym] = c
