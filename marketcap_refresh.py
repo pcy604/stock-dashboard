@@ -547,7 +547,8 @@ def _drop_untrustworthy(m):
         cm = json.load(open(os.path.join(DATA, "edgar_cik.json"), encoding="utf-8"))
         cik = m.Symbol.astype(str).str.upper().map({k.upper(): str(v) for k, v in cm.items()})
         rk = primary_ticker_rank()
-        m = (m.assign(_c=cik, _l=m.Symbol.astype(str).str.upper().map(rk).fillna(99))
+        m = (m.assign(_c=cik, _l=m.Symbol.astype(str).str.upper().map(rk).fillna(0))
+              .query("_l <= 0")                # 대표가 아닌 티커(사채·우선주·다른 종류주)는 대신 서지 못한다
               .sort_values(["_c", "_l", "Symbol"])
               .drop_duplicates("_c", keep="first")
               .drop(columns=["_c", "_l"]))
@@ -648,11 +649,10 @@ def cmd_build(net_price=False):
             #   고친다: ① 실패 기억(quote_fail.json) — 실패 횟수가 적은 종목부터
             #   ② 같은 실패 횟수 안에서는 날짜로 회전 → 어떤 글자도 굶지 않는다.
             fails = _load_fails()
-            n_u = max(len(unknown), 1)
-            off_u = (pd.Timestamp.today().dayofyear * MAX_FETCH) % n_u
-            _pos = {x: i for i, x in enumerate(unknown)}
-            unknown = sorted(unknown, key=lambda x: (min(fails.get(x, [0])[0], 3),
-                                                     (_pos[x] - off_u) % n_u))
+            # 같은 실패 횟수 안에서는 **큰 회사부터**(공시 주식수 많은 순) — 2026-10-19 GOOGL·CMCSA 가
+            #   600종 안에 못 들어 하루 더 빠졌다. 성공한 종목은 이어받기로 빠지므로 굶는 글자는 없다.
+            _sz = {x: float(sh[x].shares.iloc[-1]) if x in sh and len(sh[x]) else 0.0 for x in unknown}
+            unknown = sorted(unknown, key=lambda x: (min(fails.get(x, [0])[0], 3), -_sz[x]))
             need = (unknown + known[off:] + known[:off])[:MAX_FETCH]
             print(f"가격 캐시 없는 {len(unknown) + len(known):,}종 중 {len(need)}종을 받는다 "
                   f"(신규 {min(len(unknown), MAX_FETCH)}종 우선 · 이어받기 {len(carry):,}종)",
