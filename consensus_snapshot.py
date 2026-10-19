@@ -39,7 +39,21 @@ def _why(k):
 
 
 def fetch_consensus(sym: str) -> dict | None:
-    """네이버 (E) 컨센서스 — 올해/내년 EPS·영업이익만 (리비전 추적용 최소셋)."""
+    """네이버 (E) 컨센서스 — 올해/내년 EPS·영업이익만 (리비전 추적용 최소셋).
+    1순위 navercomp.wisereport(해외 러너에서도 닿는다), 실패하면 종목 메인 표(국내에서만 보인다)."""
+    try:
+        import kr_fin_naver as _kfn
+        c = _kfn.consensus(sym)
+        if c:
+            return c
+        _why('wisereport 추정 열 없음')
+    except Exception as e:
+        _why(f'wisereport {type(e).__name__}')
+    return _fetch_consensus_main(sym)
+
+
+def _fetch_consensus_main(sym: str) -> dict | None:
+    """(구) finance.naver.com 종목 메인 '기업실적분석' 표 — 해외 러너에는 표가 빠져 내려온다."""
     try:
         r = requests.get(f'https://finance.naver.com/item/main.naver?code={sym}',
                          headers={'User-Agent': 'Mozilla/5.0'}, timeout=8)

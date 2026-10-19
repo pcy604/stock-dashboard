@@ -93,3 +93,11 @@ def test_statements_shape_and_sign(monkeypatch):
     rows = N.statements('5930', 'annual', 3)
     assert [r['period'] for r in rows] == ['2025', '2024', '2023']
     assert rows[0]['capex'] < 0 and rows[0]['_src'] == 'naver'
+
+
+def test_consensus_from_estimate_columns(monkeypatch):
+    """추정(E) 열에서 올해 EPS·영업이익(억원) — 발표기준이 비면 표준화 영업이익(2026-10-19)."""
+    monkeypatch.setattr(N, '_session', lambda code: (None, 'x', 'ref'))
+    monkeypatch.setattr(N, '_report', lambda *a: SS_IS_Y)
+    c = N.consensus('005930', this_year=2026)
+    assert c == {'eps_0y': 45520.8, 'op_0y': 3716393.4}

@@ -138,3 +138,37 @@ if __name__ == '__main__':
         for r in statements(sys.argv[1] if len(sys.argv) > 1 else '005930', fq):
             print(fq, r['period'], {k: (round(v / 1e8) if isinstance(v, float) and k != 'eps' else v)
                                     for k, v in r.items() if k not in ('period', '_src')})
+
+
+def consensus(code, this_year=None):
+    """연간 손익의 추정(E) 열 → {'eps_0y','op_0y','eps_1y','op_1y'} (EPS 원 · 영업이익 억원).
+
+    2026-10-19 — 컨센서스 스냅샷은 finance.naver.com 종목 메인의 '기업실적분석' 표를 긁었는데,
+    해외 러너에는 같은 주소가 그 표 없이(130KB) 내려와 07-24 이후 석 달간 0종목이었다.
+    이 API(navercomp.wisereport)는 해외 러너에서도 닿고(KR 분기재무가 이미 쓴다) 같은 FnGuide 추정치를 준다.
+    12월 결산이 아닌 회사의 추정 열(예: 2027/03(E))은 연도 대응이 달라 받지 않는다.
+    """
+    this_year = this_year or __import__('datetime').date.today().year
+    s, enc, ref = _session(code)
+    js = _report(s, enc, ref, code, 0, 0)
+    yymm = [re.sub(r'<.*', '', str(y)).strip() for y in js.get('YYMM') or []]
+    est = {i: int(y[:4]) for i, y in enumerate(yymm) if re.fullmatch(r'\d{4}/12\(E\)', y)}
+    if not est:
+        return None
+    by = {}
+    for d in js.get('DATA') or []:
+        nm = str(d.get('ACC_NM') or '').lstrip('.').strip()
+        if nm not in by or (d.get('LVL') or 9) < (by[nm].get('LVL') or 9):
+            by[nm] = d
+    out = {}
+    for i, yr in est.items():
+        lab = '0y' if yr <= this_year else ('1y' if yr == this_year + 1 else None)
+        if not lab:
+            continue
+        for key, names in (('eps', ['*(지배주주지분)주당순이익', '*주당순이익']),
+                           ('op', ['영업이익(발표기준)', '영업이익'])):
+            v = next((_num(by[n].get(f'DATA{i + 1}')) for n in names
+                      if n in by and _num(by[n].get(f'DATA{i + 1}')) is not None), None)
+            if v is not None:
+                out[f'{key}_{lab}'] = v
+    return out or None
