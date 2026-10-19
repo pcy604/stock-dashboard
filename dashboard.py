@@ -4592,8 +4592,8 @@ def _tab_analysis():
                 _chip_h = ''.join(f'<span class="chip {c}">{_h.escape(k)} <b>{_h.escape(v)}</b></span>'
                                   for c, k, v in _chips)
                 _desc = str(info.get('longBusinessSummary') or '').strip()
-                if _desc:
-                    _desc = _desc.split('. ')[0].rstrip('.') + '.'
+                if _desc:   # 첫 문장 — 'Inc.'·'Corp.' 의 마침표에서 자르지 않는다
+                    _desc = re.split(r'(?<!Inc)(?<!Corp)(?<!Co)(?<!Ltd)(?<!Mr)(?<!U\.S)\.\s+(?=[A-Z])', _desc)[0].rstrip('.') + '.'
                     _desc = _desc if len(_desc) <= 170 else _desc[:167] + '…'
                 _ind = str(info.get('industry') or info.get('sector') or '')
                 st.markdown(f"""<div class="mo-hero">
@@ -5012,12 +5012,12 @@ def _tab_analysis():
                             st.markdown("###### 📈 마진 궤적 (GPM·OPM·NPM) — 최근 8분기")
                             _mfig = go.Figure()
                             _mx = [r.get('period', '') for r in _mq]
-                            for _mk, _mlab, _mc in [('gross', 'GPM', '#7C8AA5'), ('op_income', 'OPM', '#2453C8'),
+                            for _mk, _mlab, _mcol in [('gross', 'GPM', '#7C8AA5'), ('op_income', 'OPM', '#2453C8'),
                                                     ('net_income', 'NPM', '#15803D')]:
                                 _my = [round(r[_mk] / r['revenue'] * 100, 1) if r.get(_mk) and r.get('revenue') else None
                                        for r in _mq]
                                 _mfig.add_trace(go.Scatter(x=_mx, y=_my, mode='lines+markers', name=_mlab,
-                                                           line=dict(color=_mc, width=2.5)))
+                                                           line=dict(color=_mcol, width=2.5)))
                             _mfig.update_layout(height=310, margin=dict(l=0, r=8, t=34, b=0), xaxis_type='category',
                                                 legend=dict(orientation='h', y=1.15, x=0, yanchor='bottom'),
                                                 yaxis_ticksuffix='%')
@@ -5151,7 +5151,7 @@ def _tab_analysis():
                             unsafe_allow_html=True)
                     # 🎯 컨센서스 BEAR / BASE / BULL (목표주가)
                     if _cons.get('base'):
-                        _cu = '₩' if is_kr_sym else '$'
+                        _cu = '₩' if is_kr_sym else '\\$'      # markdown 에서 '$…$' 가 수식으로 먹혀 글자가 깨졌다(2026-10-20)
                         def _pr(t):
                             try:
                                 return f"{_cu}{t:,.0f}" if t else '-'
