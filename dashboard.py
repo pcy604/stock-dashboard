@@ -5285,14 +5285,14 @@ def _tab_analysis():
                     if _mo and len(_full):
                         disp = _full[_full.index >= _full.index[-1] - pd.DateOffset(months=_mo)]
                     _cut = lambda x: x.loc[disp.index[0]:] if len(disp) else x
-                    _dc = disp['Close']
+                    _dcl = disp['Close']
                     _rows = ['price', 'vol'] + [x for x in ('RSI', 'MACD', '낙폭(MDD)') if x in _ind]
                     _hts = {'price': 0.55, 'vol': 0.13, 'RSI': 0.14, 'MACD': 0.14, '낙폭(MDD)': 0.14}
                     _tot = sum(_hts[r] for r in _rows)
                     fig = make_subplots(rows=len(_rows), cols=1, shared_xaxes=True, vertical_spacing=0.03,
                                         row_heights=[_hts[r] / _tot for r in _rows])
                     fig.add_trace(go.Candlestick(
-                        x=disp.index, open=disp['Open'], high=disp['High'], low=disp['Low'], close=_dc,
+                        x=disp.index, open=disp['Open'], high=disp['High'], low=disp['Low'], close=_dcl,
                         increasing_line_color='#15803D', decreasing_line_color='#DC2626',
                         increasing_fillcolor='#15803D', decreasing_fillcolor='#DC2626',
                         name=_bar, showlegend=False), row=1, col=1)
@@ -5309,7 +5309,7 @@ def _tab_analysis():
                     _r = 2
                     fig.add_trace(go.Bar(x=disp.index, y=disp['Volume'], showlegend=False, name='거래량',
                                          marker_color=['rgba(21,128,61,.45)' if c >= o else 'rgba(220,38,38,.45)'
-                                                       for o, c in zip(disp['Open'], _dc)]), row=_r, col=1)
+                                                       for o, c in zip(disp['Open'], _dcl)]), row=_r, col=1)
                     if 'RSI' in _ind:
                         _r += 1
                         fig.add_trace(go.Scatter(x=disp.index, y=_cut(_rsi_s), mode='lines', showlegend=False,
