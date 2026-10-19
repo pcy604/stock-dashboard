@@ -7,6 +7,7 @@ import numpy as np
 import os
 import socket
 import time
+import re
 import requests
 from collections import defaultdict
 
@@ -4097,6 +4098,66 @@ def consensus_scenarios(sym, is_kr):
         return {}
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def _seg_ai_get(sym, is_kr):
+    """AI 부문 추출 — 성공본은 디스크(results/segments, 120일), 실패도 1시간은 기억(위젯 누를 때마다 재호출 방지)."""
+    try:
+        import segment_analysis as _sa
+        return _sa.load_cached(sym, max_age_days=120) or _sa.analyze(sym, is_kr)
+    except Exception as e:
+        return {'_error': str(e)[:150]}
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _ai_summary_auto(sym, is_kr, name, fallback_text):
+    """기업 개요 AI 요약 — 검색 즉시. 원천 문서(10-K) 날짜가 같으면 디스크 결과 재사용 → 보고서당 1회만 호출."""
+    import json as _j
+    p = Path('results/ai_summary') / f'{sym}.json'
+    src_key = ''
+    try:
+        if not is_kr:
+            import edgar_client as _E
+            _f = _E.filings(sym, form='10-K', limit=1)
+            src_key = _f[0]['date'] if _f else ''
+        else:
+            src_key = datetime.now().strftime('%Y-%m')
+    except Exception:
+        src_key = ''
+    try:
+        d = _j.loads(p.read_text(encoding='utf-8'))
+        if d.get('src_key') == src_key and d.get('text'):
+            return d
+    except Exception:
+        pass
+    btxt = official_business_text(sym, is_kr)
+    src = '10-K 공식 사업보고(Item 1~)' if btxt else '공식 사업설명(yfinance)'
+    txt = ai_business_summary(name, btxt or fallback_text, src)
+    out = {'text': txt, 'src': src, 'src_key': src_key, 'generated': datetime.now().isoformat(timespec='seconds')}
+    if txt and not txt.startswith('('):          # '(…실패…)' 안내문은 저장하지 않는다
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(_j.dumps(out, ensure_ascii=False), encoding='utf-8')
+        except Exception:
+            pass
+    return out
+
+
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _seg_xbrl_cached(sym):
+    import segment_xbrl
+    r = segment_xbrl.latest(sym)
+    if not r:
+        raise RuntimeError('no segment xbrl')      # 빈 결과는 캐시하지 않는다
+    return r
+
+
+def _seg_xbrl(sym):
+    try:
+        return _seg_xbrl_cached(sym)
+    except Exception:
+        return None
+
+
 def valuation_basis(sym, is_kr, mc, price, fest, info):
     """PER 기준 통일(2026-10-20 사용자 결정: TTM · 12MF 두 개).
     · TTM  = 시총 ÷ **최근 4개 분기 순이익 합**(공시 3개월치, 연속 4분기일 때만). 작년 연간이 아니다.
@@ -4108,14 +4169,16 @@ def valuation_basis(sym, is_kr, mc, price, fest, info):
     q = unified_statements(sym, is_kr, 'quarter') or []
     q4 = q[:4]
 
-    def _ym(p):
+    def _qi(p):                                   # KR '2026.2Q' · US '2026-06'(분기 말월) → 분기 순번
+        p = str(p)
         try:
-            y, m = str(p)[:7].split('-')
-            return int(y) * 12 + int(m)
+            if 'Q' in p:
+                return int(p[:4]) * 4 + int(p[5]) - 1
+            return int(p[:4]) * 4 + (int(p[5:7]) - 1) // 3
         except Exception:
             return None
-    _seq = [_ym(r.get('period')) for r in q4]
-    if len(q4) == 4 and None not in _seq and all(2 <= _seq[i] - _seq[i + 1] <= 4 for i in range(3)):
+    _seq = [_qi(r.get('period')) for r in q4]
+    if len(q4) == 4 and None not in _seq and all(_seq[i] - _seq[i + 1] == 1 for i in range(3)):
         out['ttm_label'] = f"{str(q4[-1]['period'])[:7]}~{str(q4[0]['period'])[:7]}"
         for k in ('net_income', 'revenue'):
             vs = [r.get(k) for r in q4]
@@ -4567,15 +4630,15 @@ def _tab_analysis():
                         _lnk.append(f"[📄 DART 공시]({_prof['dart_url']})")
                     if _lnk:
                         st.markdown("**공식 공시·IR**: " + "  ·  ".join(_lnk))
-                    if st.button("🤖 AI 사업·비전 요약 (Gemini)", key=f"aisum_{sym8_clean}"):
-                        with st.spinner("공식 문서(10-K/사업설명)에서 비전·마스터플랜 요약 중..."):
-                            _btxt = official_business_text(sym8_clean, is_kr_sym)
-                            _bsrc = '10-K 공식 사업보고(Item 1~)' if _btxt else '공식 사업설명(yfinance)'
-                            st.markdown(ai_business_summary(info.get('longName', sym8_clean),
-                                                            _btxt or _prof.get('summary'), _bsrc))
-                            st.caption(f"요약 원천: {_bsrc}")
-                    st.caption("AI 요약 원천: US=최신 10-K 본문(공식), KR=공식 사업설명. "
-                               "서버에서 쓰려면 Streamlit Secrets에 GEMINI_KEY 필요.")
+                    # 2026-10-20: 버튼 없이 검색 즉시. 같은 10-K 면 저장된 요약을 재사용(보고서당 AI 1회).
+                    with st.spinner("공식 문서(10-K/사업설명)에서 사업·비전 요약 중…"):
+                        _ais = _ai_summary_auto(sym8_clean, is_kr_sym, info.get('longName', sym8_clean),
+                                                _prof.get('summary'))
+                    with st.container(border=True):
+                        st.markdown(_ais['text'])
+                    st.caption(f"🤖 AI 요약 · 원천: {_ais['src']}{(' (' + _ais['src_key'] + ' 공시)') if _ais.get('src_key') and not is_kr_sym else ''}"
+                               f" · 생성 {str(_ais.get('generated', ''))[:10]}. 문장은 AI 가 원문에서 요약한 것 — "
+                               "숫자 판단은 위·아래 공시 표(재무제표·부문 XBRL)를 기준으로 할 것.")
                     st.divider()
 
                 with _SEC['fin']:
@@ -4790,104 +4853,130 @@ def _tab_analysis():
                             st.warning(f"{_freq} 재무표를 가져오지 못했습니다{_why}")
 
                 with _SEC['seg']:
-                    # ── 🏭 사업부문별 매출 구조 (App Economy Insights 스타일, DART/EDGAR×Gemini) ──
+                    # ── 🏭 사업부문별 매출 구조 (2026-10-20 개편) ─────────────────────
+                    # 숫자: US = SEC XBRL 원본(최신 10-Q/10-K, AI 관여 없음) · KR = DART 사업보고서 → Gemini 추출(검산 표시)
+                    # 검색하면 바로 그린다(버튼 없음). AI 는 US 에선 '주요제품' 설명만 — 실패해도 숫자는 나온다.
                     st.divider()
                     st.subheader("🏭 사업부문별 매출 구조 — 이 회사는 어디서 돈을 버나")
-                    if True:
-                        _seg_cached = None
+                    _segs, _seg_meta = [], {}
+                    _seg_ai = None
+                    with st.spinner("사업부문 정리 중…"):
+                        _seg_ai = _seg_ai_get(sym8_clean, is_kr_sym)
+                    _ai_ok = bool(_seg_ai) and not _seg_ai.get('_error') and _seg_ai.get('segments')
+                    _norm = lambda t: re.sub(r'[^a-z0-9가-힣]', '', str(t).lower().replace('segment', '').replace('and', ''))
+                    _prod = {_norm(x.get('name')): x.get('products') for x in (_seg_ai or {}).get('segments', [])} if _ai_ok else {}
+                    if not is_kr_sym:
+                        _sx_ = _seg_xbrl(sym8_clean)
+                        if _sx_ and _sx_.get('periods'):
+                            _pl = {'q': '최근 분기(3개월)', 'ytd': '연초 누적', 'fy': '회계연도(연간)'}
+                            _pks = [k for k in ('q', 'ytd', 'fy') if k in _sx_['periods']]
+                            _pk = st.segmented_control("기간", [_pl[k] for k in _pks], default=_pl[_pks[0]],
+                                                       key=f"segp_{sym8_clean}") or _pl[_pks[0]]
+                            _P = _sx_['periods'][[k for k in _pks if _pl[k] == _pk][0]]
+                            for x in _P['segments']:
+                                _pd_ = _prod.get(_norm(x['name'])) or next((v for k, v in _prod.items()
+                                                                           if k and (k in _norm(x['name']) or _norm(x['name']) in k)), None)
+                                _segs.append(dict(x, products=_pd_))
+                            _fl = _sx_['filing']
+                            _chk = _P.get('check_pct')
+                            _seg_meta = {
+                                'src': f"SEC XBRL 원본 — {_fl['form']} ({_fl['date']} 공시) · 기간 {_P['start']} ~ {_P['end']}",
+                                'src_short': f"SEC XBRL({_fl['form']} {_fl['date']})",
+                                'asof': _fl['date'],
+                                'axis': '사업부문' if _P['axis'] == 'StatementBusinessSegmentsAxis' else '제품·서비스(부문 태그 없음)',
+                                'check': (None if _chk is None else
+                                          (f"✅ 검산: 부문 매출 합 = 연결 매출 {fmt_cap(_P['total_revenue'], 'US')} (차이 {_chk:+.1f}%)"
+                                           if abs(_chk) <= 1.0 else
+                                           f"⚠️ 검산: 부문 매출 합이 연결 매출과 {_chk:+.1f}% 다름 — 부문 외 매출·내부거래 조정이 있다는 뜻(공시 원문 확인)")),
+                                'link': _fl['url']}
+                    if not _segs and _ai_ok:                         # KR(또는 XBRL 부문 태그가 없는 US) → AI 추출본
+                        for x in _seg_ai['segments']:
+                            if x.get('revenue') or x.get('revenue_pct'):
+                                _segs.append({'name': x['name'], 'products': x.get('products'), 'revenue': x.get('revenue'),
+                                              'gross_profit': x.get('gross_profit'), 'op_income': x.get('op_income'),
+                                              'revenue_pct': x.get('revenue_pct')})
+                        # 검산: AI 가 뽑은 부문 합 vs 공시 재무제표 연간 매출(같은 해)
+                        _chk_txt = None
                         try:
-                            import segment_analysis as _sa
-                            _seg_cached = _sa.load_cached(sym8_clean)
-                        except Exception:
-                            pass
-                        _seg_src = 'DART 사업보고서' if is_kr_sym else 'SEC 10-K'
-                        _seg_go = st.button(f"🔍 사업부문 분석 ({_seg_src} · Gemini · ~15초)", key=f"seg_{sym8_clean}") if not _seg_cached else True
-                        if _seg_go:
-                            with st.spinner(f"{_seg_src}에서 부문별 매출 추출 중..."):
-                                try:
-                                    import segment_analysis as _sa
-                                    _seg = _seg_cached or _sa.analyze(sym8_clean, is_kr_sym)
-                                except Exception as _se:
-                                    _seg = {'_error': str(_se)[:150]}
-                            if not _seg or _seg.get('_error') or not _seg.get('segments'):
-                                # 2026-09-07: 원인을 구분해서 보여준다. 그전에는 무엇이 문제든
-                                # "파싱 실패"로만 떠서, Gemini 일일 한도(무료 등급 20건) 때문에
-                                # 안 되는 건지 진짜 부문표가 없는 건지 알 수 없었다.
-                                _emsg = str((_seg or {}).get('_error', ''))
-                                if 'RESOURCE_EXHAUSTED' in _emsg or '429' in _emsg:
-                                    st.info(
-                                        "**오늘의 AI 분석 한도를 다 썼습니다.** Gemini 무료 등급은 "
-                                        "모델당 하루 20건이라 몇 종목만 조회해도 소진됩니다. "
-                                        "고장이 아니라 한도이고, **날짜가 바뀌면 다시 됩니다.** "
-                                        "이미 분석한 종목은 캐시에서 그대로 나옵니다.")
-                                elif 'GEMINI_KEY' in _emsg:
-                                    st.info("Gemini API 키가 설정되지 않았습니다 — "
-                                            "`data/.gemini_key` 또는 환경변수 `GEMINI_KEY`.")
-                                else:
-                                    st.warning("부문 데이터 추출 실패 — 사업보고서에 부문표가 없거나 "
-                                               f"파싱에 실패했습니다. {_emsg}")
+                            _yr = str(_seg_ai.get('period', ''))[:4]
+                            _ann = next((r for r in unified_statements(sym8_clean, is_kr_sym, 'annual')
+                                         if str(r.get('period', ''))[:4] == _yr and r.get('revenue')), None)
+                            _ss = sum(x['revenue'] for x in _segs if x.get('revenue'))
+                            if _ann and _ss:
+                                _d_ = (_ss / _ann['revenue'] - 1) * 100
+                                _chk_txt = (f"✅ 검산: AI 추출 부문 합이 공시 매출({_yr})과 {_d_:+.1f}% 차이" if abs(_d_) <= 3 else
+                                            f"⚠️ 검산: AI 추출 부문 합이 공시 매출({_yr})과 {_d_:+.1f}% 다름 — 부문간 내부거래 포함이거나 추출 오류. 원문 확인 필요")
                             else:
-                                _segs = [s for s in _seg['segments'] if s.get('revenue') or s.get('revenue_pct')]
-                                # 공시된 부문 이익지표 자동 판별 (회사별로 GP/OP/둘다/없음이 다름 — management approach)
-                                _measure = _seg.get('segment_profit_measure')
-                                if _measure not in ('gross', 'operating', 'both'):   # 구버전 캐시 폴백
-                                    _measure = 'operating' if any(s.get('op_income') for s in _segs) else \
-                                               ('gross' if any(s.get('gross_profit') for s in _segs) else 'none')
-                                # 표시할 이익 필드·라벨을 회사에 맞게 선택 (both면 OP 우선, GP 병기)
-                                _pf_key = 'op_income' if _measure in ('operating', 'both') else 'gross_profit'
-                                _pf_lab = 'OPM' if _pf_key == 'op_income' else 'GPM'
-                                _mlabel = _seg.get('segment_measure_label') or (f"부문 {_pf_lab}" if _measure != 'none' else "부문 마진 미공시")
-                                _tot_pf = sum((s.get(_pf_key) or 0) for s in _segs) or None
-                                _srows = []
-                                for s in _segs:
-                                    _pf = s.get(_pf_key)
-                                    _pf_pct = (_pf / _tot_pf * 100) if (_pf and _tot_pf) else None
-                                    _seg_margin = (_pf / s['revenue'] * 100) if (_pf and s.get('revenue')) else None
-                                    _srows.append({
-                                        '사업부문': s['name'],
-                                        '주요제품': str(s.get('products', ''))[:26],
-                                        '매출': fmt_cap(s.get('revenue'), 'KR' if is_kr_sym else 'US') if s.get('revenue') else '-',
-                                        '매출비중%': s.get('revenue_pct'),
-                                        f'{_pf_lab} 부문마진(%)': round(_seg_margin, 1) if _seg_margin is not None else None,
-                                        '이익비중%': round(_pf_pct, 1) if _pf_pct is not None else None,
-                                    })
-                                _segdf = pd.DataFrame(_srows)
-                                # 매출 비중 vs 이익 비중 나란히 막대 (핵심 통찰: 둘의 괴리)
-                                _fig_seg = go.Figure()
+                                _chk_txt = "⚠️ 검산 불가 — 같은 해 공시 매출을 못 찾음. AI 추출 숫자이니 원문 대조 필요"
+                        except Exception:
+                            _chk_txt = "⚠️ 검산 불가 — AI 추출 숫자이니 원문 대조 필요"
+                        _seg_meta = {'src': f"{_seg_ai.get('source', 'DART 사업보고서')} · {_seg_ai.get('period', '')} · Gemini 추출",
+                                     'src_short': f"{_seg_ai.get('source', 'DART 사업보고서')}(AI 추출)",
+                                     'asof': str(_seg_ai.get('_generated', ''))[:10], 'axis': '사업부문', 'check': _chk_txt}
+                    if not _segs:
+                        _emsg = str((_seg_ai or {}).get('_error', ''))
+                        if 'RESOURCE_EXHAUSTED' in _emsg or '429' in _emsg:
+                            st.info("부문 데이터: 오늘의 AI 분석 한도(Gemini 무료 등급)를 다 썼습니다 — 날짜가 바뀌면 다시 됩니다.")
+                        elif is_kr_sym:
+                            st.caption("부문 데이터 없음 — DART 사업보고서 원문을 이 서버에서 읽지 못했거나 부문표가 없습니다.")
+                        else:
+                            st.caption("부문 데이터 없음 — 최신 10-Q/10-K XBRL 에 부문 태그가 없습니다(단일 부문 회사일 수 있음).")
+                    else:
+                        _tot_rev = sum(x['revenue'] for x in _segs if x.get('revenue')) or None
+                        for x in _segs:
+                            if x.get('revenue') and _tot_rev:
+                                x['revenue_pct'] = x['revenue'] / _tot_rev * 100
+                        _has_op = any(x.get('op_income') is not None for x in _segs)
+                        _pf_key = 'op_income' if _has_op else ('gross_profit' if any(x.get('gross_profit') is not None for x in _segs) else None)
+                        _pf_lab = {'op_income': 'OPM', 'gross_profit': 'GPM'}.get(_pf_key, '')
+                        _tot_pf = sum((x.get(_pf_key) or 0) for x in _segs) if _pf_key else None
+                        _cu = '조원' if is_kr_sym else '$B'
+                        _dv = 1e12 if is_kr_sym else 1e9
+                        _srows = []
+                        for x in _segs:
+                            _pf = x.get(_pf_key) if _pf_key else None
+                            _srows.append({
+                                '사업부문': x['name'],
+                                '주요제품': (str(x.get('products'))[:40] if x.get('products') else '-'),
+                                f'매출({_cu})': (x['revenue'] / _dv) if x.get('revenue') else None,
+                                '매출비중(%)': x.get('revenue_pct'),
+                                **({f'부문 {_pf_lab}(%)': (_pf / x['revenue'] * 100) if (_pf is not None and x.get('revenue')) else None,
+                                    '이익비중(%)': (_pf / _tot_pf * 100) if (_pf is not None and _tot_pf) else None} if _pf_key else {}),
+                            })
+                        _segdf = pd.DataFrame(_srows)
+                        _sc1, _sc2 = st.columns([1, 1.25], gap='large')
+                        with _sc1:
+                            _fig_seg = go.Figure()
+                            _fig_seg.add_trace(go.Bar(
+                                y=[r['사업부문'] for r in _srows], x=[r['매출비중(%)'] or 0 for r in _srows],
+                                name='매출 비중', orientation='h', marker_color='#93B4F5',
+                                text=[f"{r['매출비중(%)'] or 0:.0f}%" for r in _srows], textposition='auto'))
+                            if _pf_key and _tot_pf:
                                 _fig_seg.add_trace(go.Bar(
-                                    y=[r['사업부문'] for r in _srows], x=[r.get('매출비중%') or 0 for r in _srows],
-                                    name='매출 비중', orientation='h', marker_color='#388bfd',
-                                    text=[f"{r.get('매출비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
-                                if _tot_pf:
-                                    _fig_seg.add_trace(go.Bar(
-                                        y=[r['사업부문'] for r in _srows], x=[r.get('이익비중%') or 0 for r in _srows],
-                                        name=f'{_pf_lab} 이익 비중', orientation='h', marker_color='#2453C8',
-                                        text=[f"{r.get('이익비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
-                                _fig_seg.update_layout(
-                                    barmode='group', height=max(180, 60 * len(_srows)),
-                                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                    font=dict(color='#4B5563', size=11), margin=dict(l=0, r=10, t=10, b=0),
-                                    legend=dict(orientation='h', y=1.15, x=0), xaxis_ticksuffix='%')
-                                _fig_seg.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
-                                st.plotly_chart(_fig_seg, use_container_width=True)
-                                _tsrc('사업보고서 부문정보(DART·SEC EDGAR)', live=True)
-                                st.dataframe(
-                                    _segdf, use_container_width=True, hide_index=True, height=_dfh(len(_segdf)),
-                                    column_config={'매출비중%': st.column_config.NumberColumn(format='%.1f%%'),
-                                                   f'{_pf_lab} 부문마진(%)': st.column_config.NumberColumn(format='%.1f%%'),
-                                                   '이익비중%': st.column_config.NumberColumn(format='%.1f%%')})
-                                _mnote = {
-                                    'operating': "이 회사는 부문 **영업이익(OPM)**을 공시 (부문 매출원가 미분리 → GPM 불가)",
-                                    'gross':     "이 회사는 부문 **매출총이익(GPM)**을 공시 (부문 판관비 미분리 → OPM 불가)",
-                                    'both':      "이 회사는 부문 GPM·OPM 둘 다 공시 (OPM 표시)",
-                                    'none':      "⚠️ 이 회사는 부문별 이익을 공시하지 않음 — 매출 비중만 표시",
-                                }.get(_measure, '')
-                                st.caption(f"📄 {_seg.get('source', 'DART')} · {_seg.get('period', '')} · Gemini 추출 "
-                                           f"(원문 대조 권장). {_mnote}. "
-                                           "핵심: **매출 비중 ≠ 이익 비중** — 파란막대보다 주황막대가 큰 부문이 진짜 캐시카우. "
-                                           f"{('· ' + _seg['note']) if _seg.get('note') else ''}")
-                                st.caption("ℹ️ 부문별 공시 이익지표는 회사마다 다름(경영진이 쓰는 지표 공시) — 테슬라類=GPM, 삼성類=OPM. "
-                                           "부문 매출 합이 100% 초과 가능(부문간 내부거래 포함).")
+                                    y=[r['사업부문'] for r in _srows], x=[r.get('이익비중(%)') or 0 for r in _srows],
+                                    name=f'이익 비중({_pf_lab})', orientation='h', marker_color='#2453C8',
+                                    text=[f"{r.get('이익비중(%)') or 0:.0f}%" for r in _srows], textposition='auto'))
+                            _fig_seg.update_layout(
+                                barmode='group', height=max(170, 56 * len(_srows) + 60),
+                                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                                font=dict(color='#4B5563', size=11), margin=dict(l=0, r=10, t=10, b=0),
+                                legend=dict(orientation='h', y=1.12, x=0), xaxis_ticksuffix='%',
+                                yaxis=dict(autorange='reversed'))
+                            _fig_seg.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
+                            st.plotly_chart(_fig_seg, use_container_width=True)
+                        with _sc2:
+                            st.dataframe(_segdf, filters=False, src=_seg_meta.get('src_short'), asof=_seg_meta.get('asof'),
+                                         column_config={c: st.column_config.NumberColumn(c, format='%.1f')
+                                                        for c in _segdf.columns if c not in ('사업부문', '주요제품')})
+                            if _seg_meta.get('check'):
+                                st.caption(_seg_meta['check'])
+                        _mnote = {'op_income': "부문 **영업이익**을 공시하는 회사 → 부문 OPM",
+                                  'gross_profit': "부문 **매출총이익**만 공시하는 회사 → 부문 GPM(판관비는 부문으로 안 나눔)",
+                                  None: "부문별 이익을 공시하지 않는 회사 → 매출 비중만"}[_pf_key]
+                        st.caption(f"📄 {_seg_meta.get('src', '')} · 구분: {_seg_meta.get('axis', '')}. {_mnote}. "
+                                   "핵심: **매출 비중 ≠ 이익 비중** — 진한 막대(이익)가 연한 막대(매출)보다 긴 부문이 캐시카우. "
+                                   + ("주요제품 설명은 AI 요약(숫자와 무관)." if not is_kr_sym else
+                                      "⚠️ KR 부문 숫자는 AI 가 사업보고서에서 뽑은 값 — 위 검산 결과를 같이 볼 것."))
 
                 with _SEC['flow']:
                     # ── 💵 손익 흐름(Sankey) + 마진 궤적 (App Economy Insights 스타일) ──
