@@ -33,6 +33,8 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 VIOL = os.path.join(BASE, ".contract_violations.json")   # results/*.json 은 통째로 커밋되므로 밖에 둔다
 TODAY = date.today()
 BLOCK, WARN = "BLOCK", "WARN"
+# ALARM — 되돌리지는 않되(복구 중인 파일을 옛것으로 덮지 않게) 잡은 빨간불로 끝낸다. 2026-10-19
+ALARM = "ALARM"
 
 
 # ───────────────────────── 도구 ─────────────────────────
@@ -203,8 +205,18 @@ def c_us_marketcap():
     import pandas as pd
     d = pd.read_csv(os.path.join(BASE, "data/us_marketcap.csv"))
     pxd = d["px_date"].dropna().max() if "px_date" in d else None
+    # 2026-10-19 — 행 수만 봐서는 안 보였다. 3,577행으로 '정상'인데 S~Z 로 시작하는
+    #   종목이 0개였다(TSLA·V·WMT·XOM 부재 → 주도주 유니버스에서 통째로 누락).
+    #   ① 초대형 파수꾼이 다 있는가 ② 첫 글자 26개가 고르게 있는가 — 둘 다 본다.
+    syms = set(d["Symbol"].astype(str))
+    sentinel = ["AAPL", "MSFT", "NVDA", "TSLA", "V", "WMT", "XOM", "UBER", "JPM", "META"]
+    lost = [s for s in sentinel if s not in syms]
+    lead = d["Symbol"].astype(str).str[0].value_counts()
+    empty = [c for c in "ABCDEFGHIJKLMNOPRSTUVW" if lead.get(c, 0) < 5]
     return [chk(len(d) >= 1500, BLOCK, f"{len(d)}행 (<1500)"),
-            chk(_age(pxd) <= 5, BLOCK, f"가격일 {pxd} 5일 초과")]
+            chk(_age(pxd) <= 5, BLOCK, f"가격일 {pxd} 5일 초과"),
+            chk(not lost, ALARM, f"초대형주 누락 {lost} — 유니버스 결손"),
+            chk(not empty, ALARM, f"첫 글자 {''.join(empty)} 로 시작하는 종목이 거의 없다 — 순서 편향 결손")]
 
 
 def c_report():
@@ -282,10 +294,14 @@ def guard():
     ch = _changed()
     targets = set(CONTRACTS) if ch is None else (set(CONTRACTS) & ch)
     res = evaluate(targets)
-    blocked, warns = {}, {}
+    blocked, warns, alarms = {}, {}, {}
     for p, vs in res.items():
         b = [m for s, m in vs if s == BLOCK]
         w = [m for s, m in vs if s == WARN]
+        a = [m for s, m in vs if s == ALARM]
+        if a:
+            alarms[p] = a
+            print(f"🚨 {p}: {' / '.join(a)} (되돌리지 않음 · 잡 실패 처리)")
         if b:
             blocked[p] = b
             r = subprocess.call(["git", "checkout", "HEAD", "--", p], cwd=BASE)
@@ -294,7 +310,7 @@ def guard():
             warns[p] = w
             print(f"⚠️ {p}: {' / '.join(w)}")
     print(f"계약 검사: 대상 {len(targets)}개 · 차단 {len(blocked)} · 경고 {len(warns)}")
-    if blocked or warns:
+    if blocked or warns or alarms:
         prev = {}
         if os.path.exists(VIOL):
             try:
@@ -303,6 +319,7 @@ def guard():
                 prev = {}
         prev.setdefault("blocked", {}).update(blocked)
         prev.setdefault("warn", {}).update(warns)
+        prev.setdefault("alarm", {}).update(alarms)
         prev["at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
         prev["workflow"] = os.environ.get("GITHUB_WORKFLOW", "local")
         json.dump(prev, open(VIOL, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
@@ -316,20 +333,21 @@ def fail_if_violated():
     v = json.load(open(VIOL, encoding="utf-8"))
     os.remove(VIOL)
     lines = [f"⛔ {p}\n   " + "\n   ".join(m) for p, m in v.get("blocked", {}).items()]
+    lines += [f"🚨 {p}\n   " + "\n   ".join(m) for p, m in v.get("alarm", {}).items()]
     lines += [f"⚠️ {p}\n   " + "\n   ".join(m) for p, m in v.get("warn", {}).items()]
     msg = (f"🧾 [screener] 산출물 계약 위반 — {v.get('workflow')}\n"
            + "\n".join(lines)
            + ("\n\n⛔ 항목은 커밋하지 않고 직전 정상본을 유지했다." if v.get("blocked") else ""))
     print(msg)
     _notify(msg)
-    return 1 if v.get("blocked") else 0
+    return 1 if (v.get("blocked") or v.get("alarm")) else 0
 
 
 def report():
     res = evaluate()
     bad = 0
     for p, vs in res.items():
-        tag = "✅" if not vs else ("⛔" if any(s == BLOCK for s, _ in vs) else "⚠️")
+        tag = "✅" if not vs else ("⛔" if any(s in (BLOCK, ALARM) for s, _ in vs) else "⚠️")
         bad += tag == "⛔"
         print(f"{tag} {p}" + ("" if not vs else "\n     " + "\n     ".join(f"[{s}] {m}" for s, m in vs)))
     return 1 if bad else 0

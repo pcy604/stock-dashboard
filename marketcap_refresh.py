@@ -430,6 +430,24 @@ def last_price(sym):
         return None, None
 
 
+FAIL_JSON = os.path.join(DATA, "quote_fail.json")
+
+
+def _load_fails():
+    """{sym: [연속 실패 횟수, 마지막 실패일]} — 죽은 티커가 매일 앞자리를 차지하지 않게."""
+    try:
+        return json.load(open(FAIL_JSON, encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _save_fails(f):
+    try:
+        json.dump(f, open(FAIL_JSON, "w", encoding="utf-8"), separators=(",", ":"), sort_keys=True)
+    except Exception as e:
+        print(f"[WARN] quote_fail.json 저장 실패: {e}", flush=True)
+
+
 def quote(sym):
     """가격 캐시가 없을 때(=GitHub Actions) 최근 종가만 가볍게 받는다.
     data/leaders_cache 는 저장소에 없으므로 CI 에서는 이 경로를 탄다."""
@@ -580,6 +598,20 @@ def cmd_build(net_price=False):
             unknown = [x for x in need if x not in carry]
             known = [x for x in need if x in carry]
             off = (pd.Timestamp.today().dayofyear * MAX_FETCH) % max(len(known), 1)
+            # ⚠️ 2026-10-19 — 세 번째 조용한 고장. unknown(한 번도 못 받은 종목)을
+            #   **알파벳 순서 그대로** 맨 앞에 깔았다. unknown 이 2,966종이고 그중
+            #   상당수는 영영 시세가 안 나오는 죽은 티커라, 매일 **같은 앞 600종**
+            #   (A~R)만 시도하고 실패했다. S~Z 로 시작하는 1,300여 종은 09-07 이후
+            #   한 번도 시도되지 않았다 — TSLA·V·WMT·XOM·UBER 가 시총 파일에서
+            #   사라졌고, 그래서 주도주 유니버스에도 없었다(테슬라 신호 '0회').
+            #   고친다: ① 실패 기억(quote_fail.json) — 실패 횟수가 적은 종목부터
+            #   ② 같은 실패 횟수 안에서는 날짜로 회전 → 어떤 글자도 굶지 않는다.
+            fails = _load_fails()
+            n_u = max(len(unknown), 1)
+            off_u = (pd.Timestamp.today().dayofyear * MAX_FETCH) % n_u
+            _pos = {x: i for i, x in enumerate(unknown)}
+            unknown = sorted(unknown, key=lambda x: (min(fails.get(x, [0])[0], 3),
+                                                     (_pos[x] - off_u) % n_u))
             need = (unknown + known[off:] + known[:off])[:MAX_FETCH]
             print(f"가격 캐시 없는 {len(unknown) + len(known):,}종 중 {len(need)}종을 받는다 "
                   f"(신규 {min(len(unknown), MAX_FETCH)}종 우선 · 이어받기 {len(carry):,}종)",
@@ -595,10 +627,18 @@ def cmd_build(net_price=False):
                 print(f"  {n['i']}/{len(need)}", flush=True)
             return s, r
 
+        fails = _load_fails()
+        today = str(pd.Timestamp.today().date())
         with ThreadPoolExecutor(WORKERS) as ex:
             for s, r in ex.map(w, need):
                 if r[0]:
                     prices[s] = r
+                    fails.pop(s, None)
+                else:
+                    fails[s] = [fails.get(s, [0])[0] + 1, today]
+        _save_fails(fails)
+        got = sum(1 for s in need if s in prices)
+        print(f"  시세 성공 {got}/{len(need)} · 실패 기억 {len(fails):,}종", flush=True)
 
     mc_rows, ts_rows = [], []
     for sym, d in sh.items():

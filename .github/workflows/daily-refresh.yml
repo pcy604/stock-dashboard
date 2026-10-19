@@ -10,6 +10,10 @@ name: daily-refresh
 
 on:
   workflow_dispatch:          # 수동 실행 버튼
+    inputs:
+      max_fetch:
+        description: '미국 시총 — 이번에 새로 받을 시세 상한(평시 600). 유니버스 복구 때 3000'
+        default: '600'
   schedule:
     - cron: '0 21 * * 0-4'    # UTC 21시 = 한국 06시, 월~금(장 마감 후)
 
@@ -21,7 +25,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: ${{ (inputs.max_fetch && inputs.max_fetch != '600') && 100 || 55 }}   # 복구 실행(max_fetch↑)은 시세 조회가 길다
     env:
       FRED_KEY: ${{ secrets.FRED_KEY }}
       DART_KEY: ${{ secrets.DART_KEY }}
@@ -109,6 +113,8 @@ jobs:
         # --all-tickers 면 대상이 edgar_cik 전체(10,413종)가 되고, MAX_FETCH(600종/일)
         # 만큼 매일 새로 받아 채운다. quote() 는 range=10d 라 전수 이력 수집과 달리
         # 가볍다.
+        env:
+          MAX_FETCH: ${{ inputs.max_fetch || '600' }}
         run: python marketcap_refresh.py build --net-price --all-tickers
         continue-on-error: true
 
@@ -199,6 +205,7 @@ jobs:
           git add results/*.jsonl 2>/dev/null || true
           git add data/sectors.json || true
           git add data/us_marketcap.csv || true
+          git add data/quote_fail.json 2>/dev/null || true
           git add data/portfolio.json 2>/dev/null || true
           # 2026-10-03 — 이 세 개가 빠지게 해서 17일간 산출물이 매일 통째로 비렸다.
           #   marketcap_refresh.py 는 us_marketcap.csv 만 쓰는 게 아니다:
