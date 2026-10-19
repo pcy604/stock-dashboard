@@ -2,7 +2,7 @@
 """
 욕심 조절 신호 백테스트 — 매크로 리스크 온/오프 (2026-10-20)
 
-사전 등록: research/macro_regime_prereg_2026-10-20.md (결과 보기 전에 커밋 b410f71)
+사전 등록: research/macro_regime_prereg_2026-10-20.md (결과 보기 전에 커밋 391c6e0 · 리베이스 전 b410f71)
 데이터:    data/research/macro_long_{fred,px}.parquet  (tools/fetch_macro_long.py)
 
 무엇을 재나
