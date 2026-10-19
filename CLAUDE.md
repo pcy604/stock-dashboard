@@ -65,6 +65,11 @@
   DART 가 닿으면 DART, 그 뒤 **항상** `kr_fundq_naver`(네이버 기업분석)로 빈칸·새 분기·대차 잔액(자산·부채·자본) 보충.
   DART 값은 덮지 않는다. 수동 실행은 `kr-fin` 워크플로.
 
+- 확인은 추측 말고 **`?diag=net`**(이 서버 기준 연결 진단). 화면 재무표 원값은 **`?diag=fin&sym=005930`**.
+- 외부 호출은 반드시 타임아웃. 화면에서는 `dart_client/edgar_client.set_interactive(True)`(빨리 포기 + 차단기).
+  실패는 캐시하지 않되 `_fail_memo` 로 10분 기억 — 다시 그릴 때마다 죽은 서버를 기다리지 않게.
+- dart/edgar_client 동작을 바꾸면 `API_VERSION` 을 올린다(클라우드가 옛 모듈을 메모리에 들고 있는 일이 있었다).
+
 ## 데이터 사고 재발 방지 (2026-10-19)
 
 - 증분 파이프라인은 **끝만 붙이고 중간·과거 결손을 영영 못 메운다.** 결손 감지는 `price_store.gap_syms`,
@@ -72,10 +77,6 @@
 - `actions/cache@v4` 는 잡 성공 때만 저장한다 — 쓰지 말 것. `cache/restore` + `cache/save`(always()).
 - 산출물 검사는 **최신 값만이 아니라 과거 구간의 분모(universe)** 도 본다(output_contracts `_accel_funnel`).
 - 신호 0건이면 먼저 분모를 의심한다.
-- 확인은 추측 말고 **`?diag=net`**(이 서버 기준 연결 진단). 화면 재무표 원값은 **`?diag=fin&sym=005930`**.
-- 외부 호출은 반드시 타임아웃. 화면에서는 `dart_client/edgar_client.set_interactive(True)`(빨리 포기 + 차단기).
-  실패는 캐시하지 않되 `_fail_memo` 로 10분 기억 — 다시 그릴 때마다 죽은 서버를 기다리지 않게.
-- dart/edgar_client 동작을 바꾸면 `API_VERSION` 을 올린다(클라우드가 옛 모듈을 메모리에 들고 있는 일이 있었다).
 
 ## 데이터 원칙
 
