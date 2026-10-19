@@ -72581,6 +72581,898 @@
       ],
       "status": "open",
       "realized": {}
+    },
+    {
+      "id": "001250_2026-10-19",
+      "sym": "001250",
+      "name": "GS글로벌",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 3255.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "043370_2026-10-19",
+      "sym": "043370",
+      "name": "피에이치에이",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 11910.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "001780_2026-10-19",
+      "sym": "001780",
+      "name": "알루코",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 1940.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "067990_2026-10-19",
+      "sym": "067990",
+      "name": "도이치모터스",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 3990.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "COKE_2026-10-19",
+      "sym": "COKE",
+      "name": "Coca-Cola Consolidated, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 213.75,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BMBL_2026-10-19",
+      "sym": "BMBL",
+      "name": "Bumble Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 5.945,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SGU_2026-10-19",
+      "sym": "SGU",
+      "name": "STAR GROUP, L.P.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 13.09,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "TCI_2026-10-19",
+      "sym": "TCI",
+      "name": "TRANSCONTINENTAL REALTY INVESTORS INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 48.36,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "KRP_2026-10-19",
+      "sym": "KRP",
+      "name": "Kimbell Royalty Partners, LP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 16.32,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RVRF_2026-10-19",
+      "sym": "RVRF",
+      "name": "River Financial Corp",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": NaN,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BUKS_2026-10-19",
+      "sym": "BUKS",
+      "name": "BUTLER NATIONAL CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 5.18,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "FSBW_2026-10-19",
+      "sym": "FSBW",
+      "name": "FS Bancorp, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 44.685,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "컵위드핸들"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "078520_2026-10-19",
+      "sym": "078520",
+      "name": "에이블씨엔씨",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 11560.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "002320_2026-10-19",
+      "sym": "002320",
+      "name": "한진",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 17000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "005160_2026-10-19",
+      "sym": "005160",
+      "name": "동국산업",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 4675.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "404990_2026-10-19",
+      "sym": "404990",
+      "name": "신한서부티엔디리츠",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 3935.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "134380_2026-10-19",
+      "sym": "134380",
+      "name": "미원화학",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 10720.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "011500_2026-10-19",
+      "sym": "011500",
+      "name": "한농화성",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 14990.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "018310_2026-10-19",
+      "sym": "018310",
+      "name": "삼목에스폼",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 15190.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "009470_2026-10-19",
+      "sym": "009470",
+      "name": "삼화전기",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 31650.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "013580_2026-10-19",
+      "sym": "013580",
+      "name": "계룡건설",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 22500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "036190_2026-10-19",
+      "sym": "036190",
+      "name": "금화피에스시",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 34250.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "119610_2026-10-19",
+      "sym": "119610",
+      "name": "인터로조",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 16250.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "008970_2026-10-19",
+      "sym": "008970",
+      "name": "KBI동양철관",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 1748.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "141000_2026-10-19",
+      "sym": "141000",
+      "name": "비아트론",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 14810.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "069510_2026-10-19",
+      "sym": "069510",
+      "name": "에스텍",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 14470.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "419050_2026-10-19",
+      "sym": "419050",
+      "name": "삼기에너지솔루션즈",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 2645.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "011690_2026-10-19",
+      "sym": "011690",
+      "name": "와이투솔루션",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 4000.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "259630_2026-10-19",
+      "sym": "259630",
+      "name": "엠플러스",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 10130.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "048910_2026-10-19",
+      "sym": "048910",
+      "name": "대원미디어",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 9080.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "235980_2026-10-19",
+      "sym": "235980",
+      "name": "메드팩토",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 3260.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "021820_2026-10-19",
+      "sym": "021820",
+      "name": "세원정공",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 11120.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "033560_2026-10-19",
+      "sym": "033560",
+      "name": "블루콤",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 6030.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "IMO_2026-10-19",
+      "sym": "IMO",
+      "name": "IMPERIAL OIL LTD",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 135.88,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "UTHR_2026-10-19",
+      "sym": "UTHR",
+      "name": "UNITED THERAPEUTICS Corp",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 553.675,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BF-A_2026-10-19",
+      "sym": "BF-A",
+      "name": "BROWN FORMAN CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 29.11,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BJ_2026-10-19",
+      "sym": "BJ",
+      "name": "BJ's Wholesale Club Holdings, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 102.97,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PNW_2026-10-19",
+      "sym": "PNW",
+      "name": "PINNACLE WEST CAPITAL CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 101.69,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AFG_2026-10-19",
+      "sym": "AFG",
+      "name": "American Financial Group",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 148.64,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AR_2026-10-19",
+      "sym": "AR",
+      "name": "ANTERO RESOURCES Corp",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 39.045,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
     }
   ]
 }
