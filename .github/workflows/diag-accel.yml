@@ -36,3 +36,4 @@ jobs:
           restore-keys: |
             leaders-cache-
       - run: python tools/diag_accel.py ${{ inputs.syms }}
+      - run: python tools/diag_fund.py
