@@ -38,7 +38,7 @@ S_VOL_MIN     = 1.5    # 거래량 배수
 S_BODY_MIN    = 0.4    # 캔들 몸통 비율
 L_RS_MIN      = 70     # RS 퍼센타일 하한 (상위 30%)
 I_DAYS        = 20     # 기관 순매수 조회 거래일 수
-MIN_MARCAP    = 300_000_000_000   # 시총 3000억+
+MIN_MARCAP    = 100_000_000_000   # 시총 1,000억+ (2026-10-19 공통 커버 기준, 전 3,000억)
 
 _print_lock = threading.Lock()
 
@@ -79,7 +79,7 @@ def get_universe():
             f['Name'].astype(str),
             f['Marcap'].astype(int),
         ))
-        print(f"{len(pairs)}개 (3,000억+)")
+        print(f"{len(pairs)}개 (1,000억+)")
         return pairs
     except Exception as e:
         print(f"실패: {e}")

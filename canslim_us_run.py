@@ -21,7 +21,7 @@ OUT = Path('results/canslim_us_latest.json')
 
 RS_PREFILTER = 60      # RS 백분위 사전필터 (대시보드 슬라이더로 정밀 조정)
 N_PREFILTER = -20.0    # 신고가 거리 사전필터(%)
-MIN_MARCAP = 2e9       # $2B
+MIN_MARCAP = 3e8       # $3억 (2026-10-19 공통 커버 기준, 전 $2B)
 
 
 def _us_pool():

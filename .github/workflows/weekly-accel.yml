@@ -304,7 +304,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase --autostash origin main || true
+          git pull --rebase --autostash -X theirs origin main || git rebase --abort || true
           for f in exports/accel_picks.csv results/accel_picks_status.json results/leaders_accel.json results/price_curves.json results/turnaround_latest.json results/known_answers.json data/universe_ever.csv; do
             [ -f "$f" ] && git add -f "$f"
           done

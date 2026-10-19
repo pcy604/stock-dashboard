@@ -192,6 +192,28 @@ for _rel, _lab in [('results/returns.json', '기간 수익률'), ('results/mdd.j
         return ok, f"US {mk.get('US', 0):,} · KR {mk.get('KR', 0):,} · 누락 {lost or '없음'}"
 
 
+# ───────────────────────── 커버율 (2026-10-19 사용자 결정: 한국 1,000억+ · 미국 $3억+) ─────────────────────────
+def _cover_targets():
+    """커버 기준 명단 — universe.kr_cover/us_cover 와 같은 규칙을 커밋된 파일로 재현(네트워크 없이)."""
+    k = pd.read_csv(os.path.join(BASE, 'data/krx_listing_last.csv'), dtype={'Code': str})
+    k = k[(k.Marcap >= 1e11) & k.Code.str.fullmatch(r'\d{5}0') & (k.get('Market', '') != 'KONEX')]
+    m = pd.read_csv(os.path.join(BASE, 'data/us_marketcap.csv'))
+    m = m[(m.country == 'United States') & (m.marketcap >= 3e8)]
+    m = m[m.Symbol.astype(str).str.replace('-', '').str.isalpha() & (m.Symbol.astype(str).str.len() <= 5)]
+    return set(k.Code), set(m.Symbol.astype(str))
+
+
+for _rel, _lab in [('results/returns.json', '기간 수익률'), ('results/mdd.json', '고점대비 낙폭'),
+                   ('results/seasonality.json', '계절성'), ('results/perf_latest.json', '월간 성과')]:
+    @check(_lab, f'{_lab}: 커버 기준(한국 1,000억+ · 미국 $3억+)의 95% 이상을 담고 있는가')
+    def _(_rel=_rel):
+        kr, us = _cover_targets()
+        _, s = _stocks(_rel)
+        ck, cu = len(kr & set(s)) / max(len(kr), 1), len(us & set(s)) / max(len(us), 1)
+        # 신규 상장·거래정지·시세 실패로 몇 %는 빠질 수 있다 — 95% 아래면 명단 자체가 좁아진 것이다
+        return ck >= 0.95 and cu >= 0.95, f"한국 {ck:.0%} ({len(kr):,}종 중) · 미국 {cu:.0%} ({len(us):,}종 중)"
+
+
 @check('고점대비 낙폭', '낙폭 값이 전부 0 이하인가 (부호 오류 감지)')
 def _():
     d, _ = _stocks('results/mdd.json')

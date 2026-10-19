@@ -28,7 +28,7 @@ RESULT_PATH.parent.mkdir(exist_ok=True)
 
 DATE_STR        = date.today().isoformat()
 MIN_MARCAP_KR   = 100_000_000_000   # 1000억
-MIN_MARCAP_US   = 3_000_000_000     # $3B
+MIN_MARCAP_US   = 300_000_000       # $3억 (2026-10-19 공통 커버 기준, 전 $3B)
 CACHE_TTL_DAYS  = 7                 # 재무 캐시 유효기간
 
 

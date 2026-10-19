@@ -117,9 +117,18 @@ def _series_for(sym, mkt, init_start):
 
 
 def _universe():
-    """종목 목록: 5년 캐시(있으면) ∪ 커밋된 JSON(perf·screener·canslim·longcache).
-       → Actions(캐시 없음)에서도 JSON으로 동작."""
-    syms = set(f.stem for f in CACHE_DIR.glob('*.parquet') if not f.stem.startswith('_benchmark'))
+    """종목 목록 = **공통 커버 기준**(한국 1,000억+ · 미국 $3억+, universe.py) ∪ 캐시·커밋된 JSON.
+
+    2026-10-19 — 전에는 '캐시에 있거나 다른 결과 파일에 있던 종목'만 모았다. 그래서 커버율이
+    미국 $3억+ 54% · 한국 1,000억+ 53% 였다(정답 점검 · 사용자 지적). 기준 명단을 먼저 깐다."""
+    syms = set()
+    try:
+        import universe as _u
+        syms |= {c for c, _, _ in _u.kr_cover()}
+        syms |= {c for c, _, _ in _u.us_cover()}
+    except Exception as e:
+        print(f"::warning title=커버 기준 명단 실패::{e} — 캐시·JSON 만으로 진행")
+    syms |= set(f.stem for f in CACHE_DIR.glob('*.parquet') if not f.stem.startswith('_benchmark'))
     syms |= set(f.stem for f in LONG_CACHE.glob('*.parquet')) if LONG_CACHE.exists() else set()
     for f in ['perf_latest', 'screener_latest', 'canslim_latest']:
         p = Path(f'results/{f}.json')

@@ -153,29 +153,17 @@ def analyze_one(sym, name, marcap, market):
 # ── 유니버스 ──────────────────────────────────────────────────────
 
 def get_kr_universe():
-    print("  KR 유니버스...", end=' ', flush=True)
-    import krx_listing
-    krx = krx_listing.stock_listing('KRX', tradable=True)
-    f = krx[krx['Marcap'] >= 300_000_000_000].sort_values('Marcap', ascending=False)
-    pairs = list(zip(
-        f['Code'].astype(str).str.zfill(6),
-        f['Name'].astype(str),
-        f['Marcap'].astype(int),
-    ))
-    print(f"{len(pairs)}개")
+    """2026-10-19 — 공통 커버 기준(universe.kr_cover). 전에는 3,000억+ 로 따로 걸려 있었다."""
+    import universe
+    pairs = universe.kr_cover()
+    print(f"  KR 유니버스... {len(pairs)}개")
     return pairs
 
 def get_us_universe():
-    print("  US 유니버스...", end=' ', flush=True)
-    csv = Path(__file__).parent / 'data' / 'us_marketcap.csv'
-    df  = pd.read_csv(csv)
-    df  = df[df['country'] == 'United States'].copy()
-    df['marketcap'] = pd.to_numeric(df['marketcap'], errors='coerce')
-    df  = df[df['marketcap'] >= 3_000_000_000].dropna(subset=['Symbol'])
-    df['Symbol'] = df['Symbol'].astype(str).str.strip()
-    df  = df[df['Symbol'].str.replace('-','').str.isalpha() & (df['Symbol'].str.len() <= 5)]
-    pairs = list(zip(df['Symbol'], df['Name'].astype(str), df['marketcap'].astype(int)))
-    print(f"{len(pairs)}개")
+    """2026-10-19 — 공통 커버 기준(universe.us_cover). 전에는 $3B+ 라 미국 중소형이 통째로 빠졌다."""
+    import universe
+    pairs = universe.us_cover()
+    print(f"  US 유니버스... {len(pairs)}개")
     return pairs
 
 

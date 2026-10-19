@@ -178,7 +178,10 @@ jobs:
               git stash push -q -m "ci-residue $(date -u +%F)" || git checkout -- .
             fi
             for i in 1 2 3; do
-              if git pull --rebase --autostash origin main && git push; then
+              # 2026-10-19 — 같은 산출물을 쓰는 워크플로가 겹치면 rebase 충돌로 3회 모두 실패해
+              #   결과를 통째로 버렸다(컨센서스 첫 성공분 유실). 충돌 칸은 **방금 만든 이번 실행 것**이 이긴다
+              #   (rebase 의 -X theirs = 다시 얹는 쪽 = 이번 실행 커밋).
+              if git pull --rebase --autostash -X theirs origin main && git push; then
                 git fetch -q origin main
                 if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
                   echo "  푸시 반영 확인"

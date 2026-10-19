@@ -7,13 +7,17 @@ USE_US_MARKET = True
 USE_KR_MARKET = True
 
 # 미국 종목 유니버스 ("TOP_N" / "SP500" / "NASDAQ100" / "CUSTOM")
-US_UNIVERSE   = "TOP_N"      # TOP_N: 시총 상위 N개
+# 2026-10-19 사용자 결정 — 커버 기준 하나로 통일: 미국 시총 $3억+ · 한국 시총 1,000억+ (보통주)
+#   전에는 스크립트마다 달랐다(KR 3,000억 / US 상위 2,000 / $2B / $3B) → 화면 중소형 커버율 30~50%.
+#   기준은 universe.py 의 kr_cover()·us_cover() 한 곳에서만 쓴다.
+US_UNIVERSE   = "MARCAP"     # MARCAP: 시총 하한 / TOP_N: 시총 상위 N개
+US_MIN_MARCAP = 300_000_000  # $3억
 US_TOP_N      = 2000         # 상위 몇 개 (TOP_N 모드)
 US_CUSTOM_SYMBOLS = ["TSLA", "NVDA", "SATL", "IONQ", "MSTR", "SMR"]
 
 # 한국 종목 유니버스 ("MARCAP" / "KOSPI200" / "KOSDAQ150" / "CUSTOM")
 KR_UNIVERSE   = "MARCAP"             # MARCAP: 시총 기준 필터
-KR_MIN_MARCAP = 300_000_000_000      # 3000억원
+KR_MIN_MARCAP = 100_000_000_000      # 1,000억원 (2026-10-19, 전 3,000억)
 KR_CUSTOM_SYMBOLS = ["000660", "005930", "373220"]  # SK하이닉스, 삼성전자, LG엔솔
 
 # 타임프레임

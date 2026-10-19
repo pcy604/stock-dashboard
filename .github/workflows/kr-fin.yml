@@ -44,7 +44,7 @@ jobs:
           git add data/kr_nondec.json 2>/dev/null || true
           if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
           git commit -m "auto: KR 분기재무 $(date -u +%Y-%m-%d)"
-          for i in 1 2 3; do git push origin main && exit 0; git pull --rebase origin main; sleep 5; done
+          for i in 1 2 3; do git push origin main && exit 0; git pull --rebase -X theirs origin main || git rebase --abort; sleep 5; done
           echo "::error::push 3회 실패"; exit 1
       - name: 실패 시 텔레그램
         if: failure()
