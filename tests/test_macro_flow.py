@@ -63,3 +63,12 @@ def test_greed_only_core_switch_cuts():
     g = mf.greed_signals(True, 0.5, 'RFIN', 2, 1)
     assert g['n'] == 3 and g['word'] == '평소대로 · 주의'      # 참고 경고만으로는 '줄여라'가 되지 않는다
     assert mf.greed_signals(None, None, None, None, None)['word'] == '판정 불가'
+
+
+def test_country_mcap_scales_by_index_and_drops_stale():
+    s = pd.Series([100.0, 110.0, 121.0], index=pd.to_datetime(['2025-12-31', '2026-06-30', '2026-10-16']))
+    base = {'USA': {'usd': 60e12, 'year': 2025}, 'EMU': {'usd': 5e12, 'year': 2018}}
+    m = mf.country_mcap(base, {'S&P500': s, '유로스톡스50': s})
+    assert abs(m['S&P500'][0] - 72.6) < 1e-6 and m['S&P500'][2] is True
+    assert m['나스닥'][0] == m['S&P500'][0]            # 같은 나라는 같은 값
+    assert '유로스톡스50' not in m                     # 2018년 값은 오늘 값처럼 보이지 않는다

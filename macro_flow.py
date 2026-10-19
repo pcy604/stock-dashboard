@@ -135,7 +135,9 @@ def econ_rows(S: dict) -> list[dict]:
 
     def add(grp, name, val, fmt, desc, verdict, rule, s):
         st_, tone = verdict
-        R.append(dict(묶음=grp, 지표=name, 값=('-' if val is None or (isinstance(val, float) and np.isnan(val)) else fmt.format(val)),
+        unit = fmt.rsplit('}', 1)[-1] if '}' in fmt else ''
+        num = None if val is None or (isinstance(val, float) and np.isnan(val)) else float(val)
+        R.append(dict(num=num, unit=unit, 묶음=grp, 지표=name, 값=('-' if val is None or (isinstance(val, float) and np.isnan(val)) else fmt.format(val)),
                       설명=desc, 판정=st_, tone=tone, 기준=rule,
                       관측일=(s.index[-1].strftime('%Y-%m-%d') if s is not None and len(s) else '-')))
 
@@ -274,3 +276,36 @@ def greed_signals(core_on: bool | None, c1: float | None, phase: str | None, dxy
     else:
         word, tone = '평소대로', 'pos'
     return dict(word=word, tone=tone, ref=ref, n=n)
+
+
+# ── 국가별 주식시장 시총 (세계은행 연말 값 × 그 뒤 대표 지수 변동) ─────────────
+# 지수 이름 → (세계은행 국가코드, 그 나라 대표 지수 이름). 같은 나라 지수는 같은 시총을 보인다.
+INDEX_COUNTRY = {
+    'S&P500': ('USA', 'S&P500'), '나스닥': ('USA', 'S&P500'), '다우': ('USA', 'S&P500'), '러셀2000': ('USA', 'S&P500'),
+    '코스피': ('KOR', '코스피'), '코스닥': ('KOR', '코스피'), '닛케이225': ('JPN', '닛케이225'),
+    '대만 가권': ('TWN', '대만 가권'), '항셍': ('HKG', '항셍'), '상해종합': ('CHN', '상해종합'),
+    '니프티50': ('IND', '니프티50'), 'DAX': ('DEU', 'DAX'), '유로스톡스50': ('EMU', '유로스톡스50'),
+    'FTSE100': ('GBR', 'FTSE100'), '보베스파': ('BRA', '보베스파'),
+}
+
+
+def country_mcap(base: dict, closes_by_name: dict) -> dict:
+    """{지수 이름: (조 달러 추정, 기준 연도, 추정 여부)}.
+    base: data/world_mcap.json. 연말 값에 '연말 → 오늘' 대표 지수 변동률을 곱한다(현지 통화 지수 — 환율 변동은 미반영).
+    연말 종가를 못 찾으면 작년 값까지만 그대로 쓰고, 그보다 오래됐으면 뺀다."""
+    out = {}
+    for name, (cc, ref) in INDEX_COUNTRY.items():
+        b = (base or {}).get(cc)
+        if not b or not b.get('usd'):
+            continue
+        v, y, est = b['usd'] / 1e12, int(b['year']), False
+        s = _clean(closes_by_name.get(ref))
+        if len(s):
+            ye = s[s.index <= pd.Timestamp(y, 12, 31)]
+            if len(ye) and (pd.Timestamp(y, 12, 31) - ye.index[-1]).days <= 10:
+                v = v * float(s.iloc[-1]) / float(ye.iloc[-1])
+                est = True
+        if not est and y < pd.Timestamp.now().year - 1:
+            continue        # 오래된 연말 값을 오늘 값처럼 보이지 않는다(영국 2022·유로존 2018 등) → '-'
+        out[name] = (v, y, est)
+    return out
