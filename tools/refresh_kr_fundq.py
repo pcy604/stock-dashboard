@@ -100,6 +100,11 @@ def main():
         cur = cur.drop(columns=[c for c in bal if c in cur.columns]).merge(
             old[["sym", "year", "q"] + bal], on=["sym", "year", "q"], how="left")
         cur.to_parquet(E.OUT, index=False)
+    # 2026-10-19 — DART 가 닿아도 대차 잔액(자산·부채·자본)은 DART 적재 스키마에 없다.
+    #   네이버로 그 열과 빈칸만 채운다(DART 값은 덮지 않음). 네이버 경로가 매주 실제로 돌아
+    #   DART 가 다시 막혔을 때 처음 써 보는 코드가 되지 않게 하는 효과도 있다.
+    import kr_fundq_naver
+    kr_fundq_naver.main()
 
 
 if __name__ == "__main__":

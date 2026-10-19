@@ -1,0 +1,53 @@
+# KR 분기재무만 따로 갱신 (2026-10-19) — 수동 실행용. 주간 갱신은 weekly-profile 안에서 돈다.
+# DART 가 닿으면 DART → 그 뒤 네이버로 대차 잔액·빈칸 보충. DART 가 막히면 네이버만.
+name: kr-fin
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+  checks: read
+
+concurrency:
+  group: kr-fin
+  cancel-in-progress: false
+
+jobs:
+  krfin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: KR 분기재무 갱신
+        env:
+          DART_KEY: ${{ secrets.DART_KEY }}
+        run: python tools/refresh_kr_fundq.py
+      - name: 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/kr_fundamentals_q.parquet data/kr_universe.parquet 2>/dev/null || true
+          if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
+          git commit -m "auto: KR 분기재무 $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do git push origin main && exit 0; git pull --rebase origin main; sleep 5; done
+          echo "::error::push 3회 실패"; exit 1
+      - name: 실패 시 텔레그램
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python tools/notify_ci_failure.py
+        continue-on-error: true
