@@ -5,8 +5,8 @@
  "checks": {
   "perf_price": {
    "n": 659,
-   "ok": 634,
-   "rate": 0.962,
+   "ok": 621,
+   "rate": 0.942,
    "threshold": 0.9,
    "pass_": null,
    "note": "현재가 3% 이내 · 장중 실행이라 판정 생략(참고값)"
@@ -20,17 +20,17 @@
    "note": "52주 신고가 -3% 판정 일치"
   },
   "canslim_N": {
-   "n": 72,
-   "ok": 62,
-   "rate": 0.861,
+   "n": 74,
+   "ok": 58,
+   "rate": 0.784,
    "threshold": 0.9,
    "pass_": null,
    "note": "N 거리 1.5%p 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "canslim_RS": {
-   "n": 72,
-   "ok": 64,
-   "rate": 0.889,
+   "n": 74,
+   "ok": 65,
+   "rate": 0.878,
    "threshold": 0.85,
    "pass_": true,
    "note": "RS ±10 이내"

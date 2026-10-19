@@ -70802,6 +70802,894 @@
       ],
       "status": "open",
       "realized": {}
+    },
+    {
+      "id": "VTRS_2026-10-19",
+      "sym": "VTRS",
+      "name": "Viatris Inc",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 18.66,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "RSG_2026-10-19",
+      "sym": "RSG",
+      "name": "REPUBLIC SERVICES, INC.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 231.54,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WRB_2026-10-19",
+      "sym": "WRB",
+      "name": "BERKLEY W R CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 75.42,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WST_2026-10-19",
+      "sym": "WST",
+      "name": "WEST PHARMACEUTICAL SERVICES INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 384.02,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "TXNM_2026-10-19",
+      "sym": "TXNM",
+      "name": "TXNM ENERGY INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 58.52,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SHO_2026-10-19",
+      "sym": "SHO",
+      "name": "Sunstone Hotel Investors, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 11.83,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "UTZ_2026-10-19",
+      "sym": "UTZ",
+      "name": "Utz Brands, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 14.29,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "215200_2026-10-19",
+      "sym": "215200",
+      "name": "메가스터디교육",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 39400.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "015360_2026-10-19",
+      "sym": "015360",
+      "name": "INVENI",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 14190.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "006405_2026-10-19",
+      "sym": "006405",
+      "name": "삼성SDI우",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 228500.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "005720_2026-10-19",
+      "sym": "005720",
+      "name": "넥센",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 6380.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "452280_2026-10-19",
+      "sym": "452280",
+      "name": "한선엔지니어링",
+      "market": "KR",
+      "log_date": "2026-10-19",
+      "entry_px": 16850.0,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AAPL_2026-10-19",
+      "sym": "AAPL",
+      "name": "Apple",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 343.46,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "WMT_2026-10-19",
+      "sym": "WMT",
+      "name": "Walmart Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 118.81,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "BRK-A_2026-10-19",
+      "sym": "BRK-A",
+      "name": "BERKSHIRE HATHAWAY INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 798000.0,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "컵위드핸들"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ABBV_2026-10-19",
+      "sym": "ABBV",
+      "name": "AbbVie",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 285.42,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "COST_2026-10-19",
+      "sym": "COST",
+      "name": "COSTCO WHOLESALE CORP /NEW",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 989.11,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "KO_2026-10-19",
+      "sym": "KO",
+      "name": "COCA COLA CO",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 93.9,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PG_2026-10-19",
+      "sym": "PG",
+      "name": "PROCTER & GAMBLE Co",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 159.35,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "PM_2026-10-19",
+      "sym": "PM",
+      "name": "Philip Morris International Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 205.2,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "LIN_2026-10-19",
+      "sym": "LIN",
+      "name": "LINDE PLC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 498.43,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "LMT_2026-10-19",
+      "sym": "LMT",
+      "name": "LOCKHEED MARTIN CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 552.09,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MDT_2026-10-19",
+      "sym": "MDT",
+      "name": "Medtronic plc",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 94.75,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": true,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "거래량폭발",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ADP_2026-10-19",
+      "sym": "ADP",
+      "name": "Automatic Data Processing",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 288.9,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HCA_2026-10-19",
+      "sym": "HCA",
+      "name": "HCA Healthcare, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 458.84,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": true,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MAR_2026-10-19",
+      "sym": "MAR",
+      "name": "MARRIOTT INTERNATIONAL INC /MD/",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 388.05,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CTAS_2026-10-19",
+      "sym": "CTAS",
+      "name": "CINTAS CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 213.69,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "EOG_2026-10-19",
+      "sym": "EOG",
+      "name": "EOG RESOURCES INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 158.01,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MDLZ_2026-10-19",
+      "sym": "MDLZ",
+      "name": "Mondelez International, Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 63.91,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "HLT_2026-10-19",
+      "sym": "HLT",
+      "name": "Hilton Worldwide Holdings Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 345.12,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "CL_2026-10-19",
+      "sym": "CL",
+      "name": "COLGATE PALMOLIVE CO",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 94.11,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "GWW_2026-10-19",
+      "sym": "GWW",
+      "name": "W.W. GRAINGER, INC.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 1330.7,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "MPLX_2026-10-19",
+      "sym": "MPLX",
+      "name": "MPLX LP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 58.16,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "EBBGF_2026-10-19",
+      "sym": "EBBGF",
+      "name": "ENBRIDGE INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 25.4,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "VEEV_2026-10-19",
+      "sym": "VEEV",
+      "name": "VEEVA SYSTEMS INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 310.36,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "52주신고가",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "KDP_2026-10-19",
+      "sym": "KDP",
+      "name": "Keurig Dr Pepper Inc.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 34.62,
+      "flags": {
+        "sig_52w": true,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": false,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "AIG_2026-10-19",
+      "sym": "AIG",
+      "name": "American International Group",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 80.74,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "SYY_2026-10-19",
+      "sym": "SYY",
+      "name": "SYSCO CORP",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 82.22,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": true,
+        "sig_maconv": true,
+        "sig_rsimacd": false
+      },
+      "signals": [
+        "컵위드핸들",
+        "이평선수렴"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ED_2026-10-19",
+      "sym": "ED",
+      "name": "CONSOLIDATED EDISON INC",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 112.26,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
+    },
+    {
+      "id": "ACGL_2026-10-19",
+      "sym": "ACGL",
+      "name": "ARCH CAPITAL GROUP LTD.",
+      "market": "US",
+      "log_date": "2026-10-19",
+      "entry_px": 101.27,
+      "flags": {
+        "sig_52w": false,
+        "sig_vol": false,
+        "sig_ma5": false,
+        "sig_cup": false,
+        "sig_maconv": true,
+        "sig_rsimacd": true
+      },
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "status": "open",
+      "realized": {}
     }
   ]
 }

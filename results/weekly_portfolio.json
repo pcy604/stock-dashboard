@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19 05:15",
+  "updated": "2026-10-19 05:42",
   "p10": {
     "date": "2026-10-19",
     "week": "2026-W43",
@@ -13,16 +13,16 @@
         "name": "셀트리온",
         "market": "KR",
         "weight_pct": 6.8,
-        "entry": 196550.0,
+        "entry": 198000.0,
         "total_score": 46.1,
-        "win_score": 16.0,
+        "win_score": 15.9,
         "fund_score": 91.3,
         "signals": [
           "이평선수렴",
           "RSI/MACD"
         ],
-        "stop": 182792.0,
-        "target": 224067.0
+        "stop": 184140.0,
+        "target": 225720.0
       },
       {
         "sym": "033780",
@@ -31,7 +31,7 @@
         "weight_pct": 6.8,
         "entry": 192700.0,
         "total_score": 30.8,
-        "win_score": 21.9,
+        "win_score": 22.0,
         "fund_score": 44.1,
         "signals": [
           "52주신고가",
@@ -82,16 +82,16 @@
         "name": "현대그린푸드",
         "market": "KR",
         "weight_pct": 6.8,
-        "entry": 20050.0,
-        "total_score": 21.6,
-        "win_score": 13.6,
+        "entry": 20150.0,
+        "total_score": 21.7,
+        "win_score": 13.8,
         "fund_score": 33.5,
         "signals": [
           "52주신고가",
           "5일선라이딩"
         ],
-        "stop": 18646.0,
-        "target": 22857.0
+        "stop": 18740.0,
+        "target": 22971.0
       },
       {
         "sym": "APLE",
@@ -128,6 +128,24 @@
         ],
         "stop": 97.21,
         "target": 119.16
+      },
+      {
+        "sym": "VTRS",
+        "name": "Viatris Inc",
+        "market": "US",
+        "weight_pct": 6.8,
+        "entry": 18.66,
+        "total_score": 21.2,
+        "win_score": 21.2,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 17.35,
+        "target": 21.27
       },
       {
         "sym": "CBRL",
@@ -162,22 +180,6 @@
         ],
         "stop": 111.86,
         "target": 137.12
-      },
-      {
-        "sym": "BRK-A",
-        "name": "BERKSHIRE HATHAWAY INC",
-        "market": "US",
-        "weight_pct": 6.8,
-        "entry": 798000.0,
-        "total_score": 21.1,
-        "win_score": 21.1,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "컵위드핸들"
-        ],
-        "stop": 742140.0,
-        "target": 909720.0
       }
     ]
   },
@@ -194,16 +196,16 @@
         "name": "셀트리온",
         "market": "KR",
         "weight_pct": 3.4,
-        "entry": 196550.0,
+        "entry": 198000.0,
         "total_score": 46.1,
-        "win_score": 16.0,
+        "win_score": 15.9,
         "fund_score": 91.3,
         "signals": [
           "이평선수렴",
           "RSI/MACD"
         ],
-        "stop": 182792.0,
-        "target": 224067.0
+        "stop": 184140.0,
+        "target": 225720.0
       },
       {
         "sym": "033780",
@@ -212,7 +214,7 @@
         "weight_pct": 3.4,
         "entry": 192700.0,
         "total_score": 30.8,
-        "win_score": 21.9,
+        "win_score": 22.0,
         "fund_score": 44.1,
         "signals": [
           "52주신고가",
@@ -263,16 +265,16 @@
         "name": "현대그린푸드",
         "market": "KR",
         "weight_pct": 3.4,
-        "entry": 20050.0,
-        "total_score": 21.6,
-        "win_score": 13.6,
+        "entry": 20150.0,
+        "total_score": 21.7,
+        "win_score": 13.8,
         "fund_score": 33.5,
         "signals": [
           "52주신고가",
           "5일선라이딩"
         ],
-        "stop": 18646.0,
-        "target": 22857.0
+        "stop": 18740.0,
+        "target": 22971.0
       },
       {
         "sym": "APLE",
@@ -309,6 +311,24 @@
         ],
         "stop": 97.21,
         "target": 119.16
+      },
+      {
+        "sym": "VTRS",
+        "name": "Viatris Inc",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 18.66,
+        "total_score": 21.2,
+        "win_score": 21.2,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "5일선라이딩",
+          "이평선수렴",
+          "RSI/MACD"
+        ],
+        "stop": 17.35,
+        "target": 21.27
       },
       {
         "sym": "CBRL",
@@ -459,6 +479,22 @@
         "target": 329.35
       },
       {
+        "sym": "VEEV",
+        "name": "VEEVA SYSTEMS INC",
+        "market": "US",
+        "weight_pct": 3.4,
+        "entry": 310.36,
+        "total_score": 21.0,
+        "win_score": 21.0,
+        "fund_score": null,
+        "signals": [
+          "52주신고가",
+          "이평선수렴"
+        ],
+        "stop": 288.63,
+        "target": 353.81
+      },
+      {
         "sym": "AVTR",
         "name": "Avantor, Inc.",
         "market": "US",
@@ -490,39 +526,6 @@
         ],
         "stop": 24.93,
         "target": 30.56
-      },
-      {
-        "sym": "ABM",
-        "name": "ABM Industries",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 51.15,
-        "total_score": 20.9,
-        "win_score": 20.9,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴"
-        ],
-        "stop": 47.57,
-        "target": 58.31
-      },
-      {
-        "sym": "CNC",
-        "name": "CENTENE CORP",
-        "market": "US",
-        "weight_pct": 3.4,
-        "entry": 69.16,
-        "total_score": 20.8,
-        "win_score": 20.8,
-        "fund_score": null,
-        "signals": [
-          "52주신고가",
-          "이평선수렴",
-          "RSI/MACD"
-        ],
-        "stop": 64.32,
-        "target": 78.84
       }
     ]
   },
@@ -565,11 +568,11 @@
         "market": "KR",
         "weight_pct": 6.8,
         "entry": 154300.0,
-        "total_score": 10.28,
+        "total_score": 9.68,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 1.6",
+          "PER 1.7",
           "ROE 12%",
           "낙폭 -50%",
           "영업익 +104%"
@@ -589,11 +592,11 @@
         "market": "KR",
         "weight_pct": 6.8,
         "entry": 25950.0,
-        "total_score": 8.69,
+        "total_score": 8.84,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 5.6",
+          "PER 5.5",
           "ROE 36%",
           "낙폭 -51%",
           "영업익 +20%"
@@ -613,11 +616,11 @@
         "market": "KR",
         "weight_pct": 6.8,
         "entry": 1217000.0,
-        "total_score": 8.47,
+        "total_score": 8.63,
         "win_score": null,
         "fund_score": null,
         "signals": [
-          "PER 5.7",
+          "PER 5.6",
           "ROE 36%",
           "낙폭 -58%",
           "영업익 +101%"
