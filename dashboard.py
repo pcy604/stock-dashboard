@@ -399,6 +399,13 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
 .mo-hero .dot { width: 10px; height: 10px; border-radius: 50%; }
 .mo-hero .s b { display: block; font-size: 14.5px; }
 .mo-hero .s span { font-size: 12.5px; color: #9CA3AF; }
+.mo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; margin: 4px 0 6px; }
+.mo-chip { background: var(--surface); border-radius: var(--radius-sm); padding: 9px 12px 8px; box-shadow: 0 0 0 1px var(--line) inset; }
+.mo-chip .l { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mo-chip .v { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink); margin-top: 2px; white-space: nowrap; }
+.mo-chip .v.na { color: #9CA3AF; font-weight: 400; }
+.mo-chip .v.pos { color: var(--pos); } .mo-chip .v.neg { color: var(--neg); }
+.mo-gh { font-size: 12px; font-weight: 700; color: var(--ink-2); margin: 10px 0 2px; letter-spacing: .02em; }
 @media (max-width: 640px) { .mo-hero { padding: 18px; } .mo-hero .n { font-size: 22px; }
   .mo-hero .pv { font-size: 26px; } }
 </style>
@@ -461,9 +468,16 @@ def _traj_map() -> dict:
 
 
 def _income_sankey(row, unit_div, unit, seg=None):
-    """손익계산서 1개 기간 → App Economy 스타일 Sankey.
-    매출 → 매출총이익(초록)/매출원가(빨강) → 영업이익/판관비 → 순이익/세금·기타.
-    seg(부문 dict) 있으면 왼쪽에 사업부문 → 매출 흐름 추가(KR)."""
+    """손익계산서 1개 기간 → 폭포(waterfall) 차트.
+
+    2026-10-19 — Sankey 를 버렸다. 이유 둘:
+      ① 매출원가가 매출의 80%+ 인 회사(TSLA 등)는 화면 대부분이 분홍 띠 하나가 되고
+         이익 쪽은 실처럼 가늘어져 읽히지 않는다.
+      ② 순이익 > 영업이익(영업외수익·세금 환급)이면 Sankey 는 '없는 흐름'을 그린다
+         — TSLA 2026-06 은 영업이익 0.4B 에서 순이익 1.1B 가 흘러나오는 그림이었다.
+    폭포는 둘 다 정직하게 보인다: 차감은 내려가는 빨강, 가산은 올라가는 초록.
+    합계 막대(매출총이익·영업이익·순이익)에는 매출 대비 마진(%)을 같이 쓴다.
+    seg 인자는 호환용(쓰지 않음) — 사업부문 구성은 아래 '사업부문' 절이 맡는다."""
     rv = row.get('revenue')
     gross = row.get('gross')
     op = row.get('op_income')
@@ -471,51 +485,45 @@ def _income_sankey(row, unit_div, unit, seg=None):
     if not rv or gross is None or op is None:
         return None
     cogs = rv - gross
-    sga = row.get('sga')
-    sga = sga if (sga is not None) else max(gross - op, 0)
-    other = max(op - ni, 0) if ni is not None else None
-
-    labels, colors, srcs, tgts, vals, lcolors = [], [], [], [], [], []
-    def _node(lbl, color):
-        labels.append(lbl); colors.append(color); return len(labels) - 1
-    def _link(s, t, v, c):
-        if v and v > 0:
-            srcs.append(s); tgts.append(t); vals.append(v / unit_div); lcolors.append(c)
-
-    GRN, RED, GRY = '#2f9e44', '#e04131', '#8a8a8a'
-    GRNL, REDL = 'rgba(47,158,68,0.28)', 'rgba(224,65,49,0.22)'
-
-    n_rev = _node(f"매출 {rv/unit_div:,.1f}{unit}", GRY)
-    # 왼쪽 사업부문 → 매출 (KR seg)
-    if seg and seg.get('segments'):
-        _ss = [s for s in seg['segments'] if s.get('revenue')]
-        _tot = sum(s['revenue'] for s in _ss) or 1
-        for s in _ss[:6]:
-            ni_seg = _node(f"{s['name']} {s['revenue']/unit_div:,.0f}{unit}", GRY)
-            _link(ni_seg, n_rev, s['revenue'] * (rv / _tot), 'rgba(138,138,138,0.22)')
-    n_gross = _node(f"매출총이익 {gross/unit_div:,.1f}{unit}", GRN)
-    n_cogs  = _node(f"매출원가 {cogs/unit_div:,.1f}{unit}", RED)
-    n_op    = _node(f"영업이익 {op/unit_div:,.1f}{unit}", GRN)
-    n_sga   = _node(f"판관비 {sga/unit_div:,.1f}{unit}", RED)
-    n_net   = _node(f"순이익 {ni/unit_div:,.1f}{unit}" if ni is not None else "순이익", GRN)
-    n_oth   = _node(f"세금·기타 {other/unit_div:,.1f}{unit}", RED) if other else None
-
-    _link(n_rev, n_gross, gross, GRNL)
-    _link(n_rev, n_cogs, cogs, REDL)
-    _link(n_gross, n_op, op, GRNL)
-    _link(n_gross, n_sga, sga, REDL)
+    sga = gross - op                         # 판관비·R&D 등 영업비용 합계(잔차라 항상 맞는다)
+    d = unit_div
+    # (이름, 시작, 끝, 종류) — 종류: rev 매출 / cost 차감 / gain 가산 / total 남은 이익
+    steps = [('매출', 0, rv, 'rev'), ('매출원가', rv, gross, 'cost'), ('매출총이익', 0, gross, 'total'),
+             ('판관비·R&D', gross, op, 'cost'), ('영업이익', 0, op, 'total')]
     if ni is not None:
-        _link(n_op, n_net, ni, GRNL)
-    if n_oth is not None:
-        _link(n_op, n_oth, other, REDL)
-
-    fig = go.Figure(go.Sankey(
-        arrangement='snap',
-        node=dict(label=labels, color=colors, pad=18, thickness=16,
-                  line=dict(width=0)),
-        link=dict(source=srcs, target=tgts, value=vals, color=lcolors)))
-    fig.update_layout(height=380, paper_bgcolor='rgba(0,0,0,0)',
-                      font=dict(color='#c9d1d9', size=12), margin=dict(l=0, r=0, t=6, b=6))
+        steps += [('영업외·세금', op, ni, 'gain' if ni >= op else 'cost'), ('순이익', 0, ni, 'total')]
+    COL = {'rev': '#374151', 'cost': '#DC2626', 'gain': '#15803D', 'total': '#2453C8'}
+    xs = [k for k, *_ in steps]
+    fig = go.Figure(go.Bar(
+        x=xs, base=[min(a0, b0) / d for _, a0, b0, _ in steps],
+        y=[max(abs(b0 - a0), rv * 0.002) / d for _, a0, b0, _ in steps],   # 0 에 가까워도 선은 보이게
+        marker=dict(color=[('#B91C1C' if (t == 'total' and b0 < 0) else COL[t]) for _, a0, b0, t in steps],
+                    line=dict(width=0)),   # 적자 합계는 진한 빨강
+        width=0.62,
+        customdata=[(b0 - a0) / d if t in ('cost', 'gain') else b0 / d for _, a0, b0, t in steps],
+        hovertemplate='%{x}: %{customdata:,.2f}' + unit + '<extra></extra>'))
+    for i, (k, a0, b0, t) in enumerate(steps):          # 이음선 — 다음 막대 시작점까지 점선
+        if i + 1 < len(steps):
+            lvl = b0 if t != 'total' else b0
+            fig.add_shape(type='line', x0=i + 0.31, x1=i + 0.69, y0=lvl / d, y1=lvl / d,
+                          line=dict(color='#9CA3AF', width=1, dash='dot'))
+    for i, (k, a0, b0, t) in enumerate(steps):          # 값 라벨 — 항상 막대 윗변 위
+        v = (b0 - a0) if t in ('cost', 'gain') else b0
+        txt = f"<b>{v/d:+,.1f}</b>" if t in ('cost', 'gain') else f"<b>{v/d:,.1f}</b>"
+        if t == 'total':
+            txt += f"  <span style='color:#6B7280'>{b0/rv*100:.1f}%</span>"
+        fig.add_annotation(x=i, y=max(a0, b0, 0) / d, text=txt, showarrow=False, yanchor='bottom',
+                           yshift=4, font=dict(family="JetBrains Mono, monospace", size=12,
+                                               color=('#B91C1C' if (t == 'total' and b0 < 0) else (COL[t] if t != 'rev' else '#111827'))))
+    hi = max(rv, 0) / d
+    lo = min(0, op, ni if ni is not None else 0) / d
+    fig.update_layout(
+        height=320, showlegend=False, bargap=0.3,
+        margin=dict(l=8, r=8, t=16, b=8),
+        yaxis=dict(title=None, ticksuffix=unit, range=[lo * 1.15 if lo < 0 else 0, hi * 1.14],
+                   gridcolor='#F3F4F6', zeroline=True, zerolinecolor='#D1D5DB',
+                   tickfont=dict(size=11, color='#6B7280')),
+        xaxis=dict(tickfont=dict(size=12, color='#374151'), linecolor='rgba(0,0,0,0)'))
     return fig
 
 
@@ -671,6 +679,26 @@ def _asof_of(path: str) -> str | None:
                 v += f" (데이터 주차 {d['signal_week']})"
             return v
     return None
+
+
+def _stat_grid(groups):
+    """키-값 묶음을 칩 격자로 — 2열 세로 표 대신(2026-10-19 '억지로 키운 표' 정리).
+    groups: [(묶음이름, [(라벨, 표시값, 부호색 여부), ...]), ...]. 값 '-' 는 흐리게 그대로 보인다."""
+    import html as _h
+    out = []
+    for g, items in groups:
+        chips = []
+        for it in items:
+            k, v = it[0], it[1]
+            signed = len(it) > 2 and it[2]
+            cls = 'na' if v in (None, '-', '') else ''
+            if signed and not cls:
+                t = str(v).lstrip()
+                cls = 'neg' if t.startswith('-') or t.startswith('−') else ('pos' if t not in ('0', '0.0%') else '')
+            chips.append(f"<div class='mo-chip'><div class='l'>{_h.escape(k)}</div>"
+                         f"<div class='v {cls}'>{_h.escape(str(v if v not in (None, '') else '-'))}</div></div>")
+        out.append((f"<div class='mo-gh'>{_h.escape(g)}</div>" if g else '') + f"<div class='mo-grid'>{''.join(chips)}</div>")
+    st.markdown(''.join(out), unsafe_allow_html=True)
 
 
 def _tsrc(label: str, path: str | None = None, asof: str | None = None, live: bool = False):
@@ -1324,7 +1352,7 @@ with t_gain, guard('상승 상위'):
         def _cg_score(v):
             try:
                 f = float(v)
-                if f >= 80: return 'color:#56d364;font-weight:bold'
+                if f >= 80: return 'color:#15803D;font-weight:bold'
                 if f >= 65: return 'color:#7ee787'
                 if f >= 50: return 'color:#f0c040'
             except: pass
@@ -2617,7 +2645,7 @@ def _plotly_line(dfs, labels, colors, title, yformat='{:.2f}', height=260):
     fig.update_layout(
         title=dict(text=title, font=dict(size=13), x=0, xanchor='left'),
         height=height + 34, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#8b949e', size=10),
+        font=dict(color='#4B5563', size=10),
         margin=dict(l=0, r=0, t=34, b=34),
         legend=dict(orientation='h', y=-0.22, x=0, yanchor='top'),   # 범례를 하단으로 → 제목과 겹침 방지
         hovermode='x unified',
@@ -3170,7 +3198,7 @@ with tab4, guard('매크로'):
                                         marker_color=colors_sp, name='10Y-2Y'))
                 fig_sp.add_hline(y=0, line_color='rgba(110,118,129,0.6)')
                 fig_sp.update_layout(height=220, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                     font=dict(color='#8b949e', size=10),
+                                     font=dict(color='#4B5563', size=10),
                                      margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
                 fig_sp.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
                 fig_sp.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
@@ -3194,7 +3222,7 @@ with tab4, guard('매크로'):
                 fig_cpi.add_hline(y=2, line_color='rgba(86,211,100,0.5)', line_dash='dash',
                                   annotation_text=' 목표 2%')
                 fig_cpi.update_layout(height=220, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                      font=dict(color='#8b949e', size=10),
+                                      font=dict(color='#4B5563', size=10),
                                       margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
                 fig_cpi.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
                 fig_cpi.update_yaxes(gridcolor='rgba(128,128,128,0.2)', ticksuffix='%')
@@ -3266,7 +3294,7 @@ with tab4, guard('매크로'):
             idx_df = pd.DataFrame(idx_rows)
             def _ci_chg(v):
                 try:
-                    return 'color:#56d364' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#f78166'
+                    return 'color:#15803D' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#DC2626'
                 except: return ''
             _tsrc('FinanceDataReader(지수 종가)', live=True)
             st.dataframe(
@@ -3291,7 +3319,7 @@ with tab4, guard('매크로'):
             fig_idx.update_layout(
                 title=dict(text='주요 지수 상대 성과 (1년 전 = 0%)', x=0, xanchor='left'),
                 height=314, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='#8b949e', size=10),
+                font=dict(color='#4B5563', size=10),
                 margin=dict(l=0,r=0,t=34,b=34),
                 legend=dict(orientation='h', y=-0.22, x=0, yanchor='top'),   # 범례 하단 (제목 겹침 방지)
                 hovermode='x unified', yaxis_ticksuffix='%',
@@ -4360,7 +4388,7 @@ def _tab_analysis():
                                 st.caption(title)
                                 _sty = _df.style.map(_cgg, subset=_dcols)
                                 if _ecols:
-                                    _sty = _sty.set_properties(subset=_ecols, color='#79c0ff')
+                                    _sty = _sty.set_properties(subset=_ecols, color='#2453C8')
                                 # 행높이·표높이 명시 → 세 표의 행간 완전 동일 + 빈 공간 없음 (#1,#2)
                                 _tsrc(('DART 전자공시' if is_kr_sym else 'SEC EDGAR') + ' (분기재무, 표 아래 캡션 참조)', live=True)
                                 st.dataframe(_sty, use_container_width=True, hide_index=True,
@@ -4481,12 +4509,12 @@ def _tab_analysis():
                                 if _tot_pf:
                                     _fig_seg.add_trace(go.Bar(
                                         y=[r['사업부문'] for r in _srows], x=[r.get('이익비중%') or 0 for r in _srows],
-                                        name=f'{_pf_lab} 이익 비중', orientation='h', marker_color='#f0883e',
+                                        name=f'{_pf_lab} 이익 비중', orientation='h', marker_color='#2453C8',
                                         text=[f"{r.get('이익비중%') or 0:.0f}%" for r in _srows], textposition='auto'))
                                 _fig_seg.update_layout(
                                     barmode='group', height=max(180, 60 * len(_srows)),
                                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                    font=dict(color='#8b949e', size=11), margin=dict(l=0, r=10, t=10, b=0),
+                                    font=dict(color='#4B5563', size=11), margin=dict(l=0, r=10, t=10, b=0),
                                     legend=dict(orientation='h', y=1.15, x=0), xaxis_ticksuffix='%')
                                 _fig_seg.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
                                 st.plotly_chart(_fig_seg, use_container_width=True)
@@ -4530,27 +4558,25 @@ def _tab_analysis():
                         _sank = _income_sankey(_flowq[0], _uq, _uu, _seg_for_flow)
                         if _sank:
                             st.plotly_chart(_sank, use_container_width=True)
-                            st.caption(f"{_flowq[0].get('period','')} 기준 · 초록=이익 흐름 · 빨강=비용 · "
-                                       f"{'왼쪽 사업부문은 연간 mix를 기간 매출에 적용(예시)' if _seg_for_flow else '매출→순이익 흐름'}. "
-                                       "이건 '위치'(이번 기간 구조) — 아래 마진 궤적이 '벡터'.")
+                            st.caption(f"{_flowq[0].get('period','')} 분기 · 단위 {_uu}{'원' if is_kr_sym else '$'} · "
+                                       "파랑=남은 이익(아래 %는 매출 대비 마진) · 빨강=차감 · 초록=가산(영업외수익 등). "
+                                       "이번 분기의 '구조' — 추이는 아래 마진 궤적.")
                         # 마진 궤적 스트립
                         _mq = [r for r in _flowq if r.get('revenue')][:8][::-1]     # 오래된→최신
                         if len(_mq) >= 3:
                             st.markdown("###### 📈 마진 궤적 (GPM·OPM·NPM) — Sankey가 못 보여주는 추이")
                             _mfig = go.Figure()
                             _mx = [r.get('period', '') for r in _mq]
-                            for _mk, _mlab, _mc in [('gross', 'GPM', '#79c0ff'), ('op_income', 'OPM', '#f0883e'),
-                                                    ('net_income', 'NPM', '#56d364')]:
+                            for _mk, _mlab, _mc in [('gross', 'GPM', '#7C8AA5'), ('op_income', 'OPM', '#2453C8'),
+                                                    ('net_income', 'NPM', '#15803D')]:
                                 _my = [round(r[_mk] / r['revenue'] * 100, 1) if r.get(_mk) and r.get('revenue') else None
                                        for r in _mq]
                                 _mfig.add_trace(go.Scatter(x=_mx, y=_my, mode='lines+markers', name=_mlab,
                                                            line=dict(color=_mc, width=2.5)))
-                            _mfig.update_layout(height=240, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                                font=dict(color='#8b949e', size=11), margin=dict(l=0, r=8, t=34, b=0),
+                            _mfig.update_layout(height=240, margin=dict(l=0, r=8, t=34, b=0),
                                                 legend=dict(orientation='h', y=1.15, x=0, yanchor='bottom'),
                                                 yaxis_ticksuffix='%')
-                            _mfig.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
-                            _mfig.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
+                            _mfig.update_yaxes(gridcolor='#F3F4F6', zeroline=True, zerolinecolor='#D1D5DB')
                             st.plotly_chart(_mfig, use_container_width=True)
                             st.caption("절대 매출은 회사 크면 무조건 커짐 — **마진**이 '성장이 이익으로 이어지는가'를 드러냄. "
                                        "마진이 우상향이면 규모의 경제/가격결정력 확보, 우하향이면 경쟁심화/원가압박 신호.")
@@ -4639,7 +4665,7 @@ def _tab_analysis():
                             def _cr(v):
                                 try:
                                     _f = float(str(v).replace('%', '').replace('+', ''))
-                                    return 'color:#56d364' if _f >= 0 else 'color:#f78166'
+                                    return 'color:#15803D' if _f >= 0 else 'color:#DC2626'
                                 except Exception:
                                     return ''
                             _tsrc('FinanceDataReader·yfinance(주가)·DART·SEC EDGAR(재무) — 조회 시 계산', live=True)
@@ -4681,7 +4707,7 @@ def _tab_analysis():
                                 f"PER **{_mult(_lt.get('net_income'))}** <sub>트레일링</sub> / **{_per_f}** <sub>Fwd12M</sub> · "
                                 f"PBR **{_mult(_lt.get('equity'))}** · "
                                 f"PSR **{_mult(_lt.get('revenue'))}** <sub>트레일링</sub> / **{_psr_f}** <sub>Fwd</sub> "
-                                f"<span style='color:#8b949e;font-size:11px'>· 트레일링={_lt['period']} 확정실적 · Fwd=컨센서스 · "
+                                f"<span style='color:#6B7280;font-size:11px'>· 트레일링={_lt['period']} 확정실적 · Fwd=컨센서스 · "
                                 f"시총·주가는 실시간</span>",
                                 unsafe_allow_html=True)
                     # 🎯 컨센서스 BEAR / BASE / BULL (목표주가)
@@ -4702,7 +4728,7 @@ def _tab_analysis():
                             f"🎯 **컨센서스 목표주가** · 🐻 BEAR {_pr(_cons.get('bear'))}{_up(_cons.get('bear'))} · "
                             f"⚖️ BASE {_pr(_cons.get('base'))}{_up(_cons.get('base'))} · "
                             f"🐂 BULL {_pr(_cons.get('bull'))}{_up(_cons.get('bull'))} "
-                            f"<span style='color:#8b949e;font-size:11px'>· 애널 {_cons.get('n') or '?'}명 · 선행PER {_fpe}</span>",
+                            f"<span style='color:#6B7280;font-size:11px'>· 애널 {_cons.get('n') or '?'}명 · 선행PER {_fpe}</span>",
                             unsafe_allow_html=True)
                     else:
                         st.caption("🎯 컨센서스: 데이터 없음 (yfinance 제한 · KR 소형주 등).")
@@ -4750,13 +4776,15 @@ def _tab_analysis():
                         ('애널 목표가',   _pcur(_tgt)),
                         ('목표가 여력',   _fx(_upside, '%')),
                     ]
-                    # 2단 분할 — 세로로 긴 표 대신 컴팩트 배치 (#10)
-                    _vhalf = (len(val_rows) + 1) // 2
-                    _vc1, _vc2 = st.columns(2)
-                    _vc1.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[:_vhalf]]),
-                                   use_container_width=True, hide_index=True, row_height=25, height=_dfh(_vhalf))
-                    _vc2.dataframe(pd.DataFrame([{'지표': k, '값': v} for k, v in val_rows[_vhalf:]]),
-                                   use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(val_rows) - _vhalf))
+                    # 2026-10-19 — 2열 세로 표(20행) → 묶음별 칩 격자. 세로 길이 ⅓.
+                    _V = dict(val_rows)
+                    _sg = lambda ks, signed=(): [(k, _V[k], k in signed) for k in ks]
+                    _stat_grid([
+                        ('가격', _sg(['52주 고점', '52주 저점', '52주 위치', '연간 변동성', '애널 목표가', '목표가 여력'], ('목표가 여력',))),
+                        ('멀티플', _sg(['PER (TTM)', 'PER (선행)', 'PBR', 'PSR', 'PEG', '배당수익률'])),
+                        ('이익·수익성', _sg(['EPS (TTM)', 'EPS (선행)', 'ROE', 'ROA', '영업마진', '순이익률',
+                                         '매출성장(YoY)', '부채비율(D/E)'], ('ROE', 'ROA', '영업마진', '순이익률', '매출성장(YoY)'))),
+                    ])
                     st.caption("PER/PBR/PSR·ROE·마진·배당·목표가 = yfinance(무료). KR(.KS)은 일부 항목이 빌 수 있음('-'). "
                                "PEG<1·PBR낮음·ROE높음·부채비율낮음 = 저평가/우량 신호.")
 
@@ -4802,7 +4830,7 @@ def _tab_analysis():
                     fig.add_trace(go.Candlestick(
                         x=disp.index, open=disp['Open'], high=disp['High'],
                         low=disp['Low'], close=disp['Close'],
-                        increasing_line_color='#56d364', decreasing_line_color='#f78166',
+                        increasing_line_color='#15803D', decreasing_line_color='#DC2626',
                         name='캔들', showlegend=False,
                     ), row=1, col=1)
 
@@ -4825,7 +4853,7 @@ def _tab_analysis():
 
                     fig.add_trace(go.Scatter(
                         x=disp.index, y=disp['RSI'], mode='lines',
-                        line=dict(color='#79c0ff', width=1.5), name='RSI', showlegend=False,
+                        line=dict(color='#2453C8', width=1.5), name='RSI', showlegend=False,
                     ), row=2, col=1)
                     fig.add_hline(y=70, line_color='rgba(247,129,102,0.4)', line_dash='dot', row=2, col=1)
                     fig.add_hline(y=30, line_color='rgba(86,211,100,0.4)',  line_dash='dot', row=2, col=1)
@@ -4836,7 +4864,7 @@ def _tab_analysis():
                         showlegend=False,
                     ), row=3, col=1)
                     fig.add_trace(go.Scatter(x=disp.index, y=disp['MACD'],   mode='lines',
-                        line=dict(color='#79c0ff', width=1.5), name='MACD', showlegend=False), row=3, col=1)
+                        line=dict(color='#2453C8', width=1.5), name='MACD', showlegend=False), row=3, col=1)
                     fig.add_trace(go.Scatter(x=disp.index, y=disp['Signal'], mode='lines',
                         line=dict(color='#ffa657', width=1), name='Signal', showlegend=False), row=3, col=1)
 
@@ -4860,7 +4888,7 @@ def _tab_analysis():
 
                     fig.update_layout(
                         height=900, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='#8b949e', size=11),
+                        font=dict(color='#4B5563', size=11),
                         xaxis_rangeslider_visible=False,
                         margin=dict(l=0, r=100, t=30, b=0),
                         legend=dict(orientation='h', y=1.02, x=0),
@@ -4874,7 +4902,7 @@ def _tab_analysis():
                                  dict(count=3, label='3y', step='year', stepmode='backward'),
                                  dict(step='all', label='전체')],
                         bgcolor='rgba(30,35,42,0.9)', activecolor='rgba(56,139,253,0.6)',
-                        font=dict(color='#c9d1d9', size=11), y=1.08)))
+                        font=dict(color='#374151', size=11), y=1.08)))
                     if len(hist) > 252:                           # 초기 화면은 최근 1년
                         fig.update_xaxes(range=[hist.index[-252], hist.index[-1]], row=1, col=1)
                     for i in range(1, 6):
@@ -4918,7 +4946,7 @@ def _tab_analysis():
                         def _color_ext(v):
                             try:
                                 pct = float(str(v).replace('%','').replace('+',''))
-                                if pct > 0: return 'color:#56d364'
+                                if pct > 0: return 'color:#15803D'
                             except: pass
                             return ''
                         _tsrc('FinanceDataReader(일봉 주가)', live=True)
@@ -5016,19 +5044,17 @@ def _tab_analysis():
                             _rets = [t['ret'] for t in _trades]
                             _wins = sum(1 for r in _rets if r > 0)
                             _bh = (float(closes.iloc[-1]) / float(closes.iloc[0]) - 1) * 100
-                            _srows = [
-                                {'항목': '거래 횟수(회)', '값': len(_trades)},
-                                {'항목': '승률(%)', '값': round(_wins/len(_trades)*100, 1)},
-                                {'항목': '평균 수익(%)', '값': round(sum(_rets)/len(_rets), 1)},
-                                {'항목': '최고 수익(%)', '값': round(max(_rets), 1)},
-                                {'항목': '최저 수익(%)', '값': round(min(_rets), 1)},
-                                {'항목': '평균 보유(일)', '값': sum(t['days'] for t in _trades)//len(_trades)},
-                                {'항목': '비교: 매수후보유(%)', '값': round(_bh, 1)},
-                            ]
-                            # 행마다 단위가 달라 단위는 '항목'(머리) 쪽에 둔다 — 2026-10-19 표 규칙
-                            _tsrc('FinanceDataReader(일봉 주가)', live=True)
-                            st.dataframe(pd.DataFrame(_srows), filters=False, color=False,
-                                         use_container_width=False)
+                            # 2026-10-19 — 7행 세로 표 → 한 줄 칩. 세로로 긴 '항목/값' 표는 억지로 키운 느낌이라.
+                            _avg = sum(_rets) / len(_rets)
+                            _stat_grid([('', [
+                                ('거래 횟수', f"{len(_trades)}회"),
+                                ('승률', f"{_wins/len(_trades)*100:.0f}%"),
+                                ('평균 수익', f"{_avg:+.1f}%", True),
+                                ('최고 수익', f"{max(_rets):+.1f}%", True),
+                                ('최저 수익', f"{min(_rets):+.1f}%", True),
+                                ('평균 보유', f"{sum(t['days'] for t in _trades)//len(_trades)}일"),
+                                ('매수 후 보유', f"{_bh:+.1f}%", True)])])
+                            st.caption("출처: FinanceDataReader(일봉 주가) · 마지막 갱신: 실시간 조회")
                             _cur_gc = "🟢 골든(정배열)" if (_rel.iloc[-1] == 1) else "🔴 데드(역배열)"
                             _openmsg = " · 현재 진입 중(미청산)" if _trades[-1]['open'] else ""
                             st.caption(f"현재 상태: **{_cur_gc}**{_openmsg}. 골든크로스 진입→다음 데드크로스 청산 기준 "
@@ -5196,18 +5222,20 @@ def _tab_analysis():
                                 _fb.update_layout(height=300, margin=dict(l=8, r=90, t=10, b=8),
                                                   yaxis_title=f"{_b['kind']}(배)", showlegend=False)
                                 st.plotly_chart(_fb, use_container_width=True)
-                                _bm1, _bm2, _bm3 = st.columns(3)
-                                _bm1.metric(f"현재 {_b['kind']}", f"{_b['now']:.1f}배")
-                                _bm2.metric("과거 분포 내 위치", f"하위 {_b['rank']:.0f}%")
-                                _bm3.metric("10분위 아래였던 기간", f"{_b['below10']:.0f}%")
-                                if _b['implied']:
-                                    _tsrc(f"{_qsrc} TTM · 종가×현재 주식수", live=True)
-                                    st.dataframe(pd.DataFrame([{
-                                        '분위': f"{_pp}분위", f"{_b['kind']}(배)": round(_b['pct'][_pp], 1),
-                                        f"환산주가({_cur_u})": round(_b['implied'][_pp], 2 if not is_kr_sym else 0),
-                                        '현재가대비(%)': round((_b['implied'][_pp] / price_now - 1) * 100, 1)}
-                                        for _pp in (10, 25, 50, 75, 90)]), filters=False, color=True,
-                                        use_container_width=False)
+                                # 2026-10-19 — 지표 3개 줄 + 그 아래 좁은 표 → 한 줄에 나란히(왼쪽 지표 · 오른쪽 분위표)
+                                _bL, _bR = st.columns([1, 2.2], gap='medium')
+                                with _bL:
+                                    _stat_grid([('', [(f"현재 {_b['kind']}", f"{_b['now']:.1f}배"),
+                                                      ("과거 분포 내 위치", f"하위 {_b['rank']:.0f}%"),
+                                                      ("10분위 아래였던 기간", f"{_b['below10']:.0f}%")])])
+                                with _bR:
+                                    if _b['implied']:
+                                        _tsrc(f"{_qsrc} TTM · 종가×현재 주식수", live=True)
+                                        st.dataframe(pd.DataFrame([{
+                                            '분위': f"{_pp}분위", f"{_b['kind']}(배)": round(_b['pct'][_pp], 1),
+                                            f"환산주가({_cur_u})": round(_b['implied'][_pp], 2 if not is_kr_sym else 0),
+                                            '현재가대비(%)': round((_b['implied'][_pp] / price_now - 1) * 100, 1)}
+                                            for _pp in (10, 25, 50, 75, 90)]), filters=False, color=True)
                                 st.caption(f"표본 {_b['n']}개월{' ⚠️ 2년 미만 — 분위가 불안정하다' if _b['n'] < 24 else ''}. {_b['why']}. 월말 시가총액(종가 × **현재** 발행주식수) ÷ 그 시점에 공시돼 있던 TTM "
                                            f"({'순이익' if _b['kind']=='P/E' else '매출' if _b['kind']=='P/S' else '자본'}, 분기말+45일). "
                                            "⚠️ 증자·자사주로 주식수가 크게 변한 종목은 과거 멀티플이 왜곡된다. "
@@ -5244,14 +5272,29 @@ def _tab_analysis():
                         _kh = pd.DataFrame(_kr_cons_hist(sym8_clean))
                         _kh['date'] = pd.to_datetime(_kh['date'])
                         _kh = _kh.sort_values('date')
+                        # 2026-10-19 — EPS(원)와 영업이익(억)은 단위가 수천 배 달라 한 축에 그리면
+                        #   EPS 가 바닥에 붙는다. 왼쪽 축 EPS · 오른쪽 축 영업이익.
                         _fk = go.Figure()
-                        for _k, _nm in (('eps_0y', '올해 EPS 컨센서스'), ('op_0y', '올해 영업이익 컨센서스(억)')):
-                            if _k in _kh:
-                                _fk.add_trace(go.Scatter(x=pd.DatetimeIndex(_kh['date']), y=_kh[_k], mode='lines+markers', name=_nm))
-                        _fk.update_layout(height=240, margin=dict(l=8, r=8, t=10, b=8))
+                        _xd = pd.DatetimeIndex(_kh['date'])
+                        if 'eps_0y' in _kh:
+                            _fk.add_trace(go.Scatter(x=_xd, y=_kh['eps_0y'], mode='lines+markers',
+                                                     name='올해 EPS(원) · 왼쪽', line=dict(color='#2453C8', width=2.5)))
+                        if 'op_0y' in _kh:
+                            _fk.add_trace(go.Scatter(x=_xd, y=_kh['op_0y'], mode='lines+markers', yaxis='y2',
+                                                     name='올해 영업이익(억원) · 오른쪽',
+                                                     line=dict(color='#7C8AA5', width=2, dash='dot')))
+                        _fk.update_layout(height=240, margin=dict(l=8, r=8, t=30, b=8),
+                                          legend=dict(orientation='h', y=1.12, x=0, yanchor='bottom'),
+                                          xaxis=dict(tickformat='%Y-%m-%d', dtick=7 * 86400000 if len(_kh) > 1 else None),
+                                          yaxis=dict(tickformat=',.0f'),
+                                          yaxis2=dict(overlaying='y', side='right', showgrid=False, tickformat=',.0f'))
                         st.plotly_chart(_fk, use_container_width=True)
+                        _klast = _kh['date'].max().date()
+                        _kage = (pd.Timestamp.today().normalize() - pd.Timestamp(_klast)).days
                         st.caption(f"출처: 네이버금융 컨센서스 주간 스냅샷(results/consensus_history.jsonl) · "
-                                   f"마지막 갱신: {_kh['date'].max().date()}")
+                                   f"마지막 갱신: {_klast} · 스냅샷 {len(_kh)}개"
+                                   + (f" · ⚠️ {_kage}일째 갱신 안 됨 — 추세로 읽지 말 것" if _kage > 10 else "")
+                                   + (" · 4주 이상 쌓여야 방향을 말할 수 있다" if len(_kh) < 4 else ""))
                     else:
                         st.info("컨센서스 추세 데이터 없음 (yfinance 미제공 · KR 스냅샷 미축적 종목).")
 

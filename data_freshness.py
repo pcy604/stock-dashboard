@@ -67,6 +67,24 @@ def _mtime(p):
     return _d.fromtimestamp(p.stat().st_mtime).strftime('%Y-%m-%d')
 
 
+def _jsonl_max_date(path):
+    """JSONL 누적 산출물 — 행들의 date 최대값(2026-10-19, 컨센서스 스냅샷용)."""
+    import json as _j
+    best = None
+    try:
+        with open(path, encoding='utf-8') as f:
+            for line in f:
+                try:
+                    d = _j.loads(line).get('date')
+                except Exception:
+                    continue
+                if d and (best is None or d > best):
+                    best = d
+    except Exception:
+        return None
+    return best
+
+
 def _csv_col(col):
     """CSV 산출물용. raw=True 와 함께 쓰며 getter 가 파일 경로를 받는다."""
     def get(path):
@@ -169,6 +187,11 @@ SOURCES = [
          cycle='분기 1회', max_age=150, producer='export_kr_fundq.py export',
          job='weekly-profile (tools/refresh_kr_fundq.py)', used_by='🚀 주도주 → 🇰🇷 · 🔄 흑자전환(KR)',
          getter=_fundq_quarter, raw=True),
+    # 2026-10-19 — 07-24 한 번 쌓이고 석 달 멈춰 있었는데 감시 목록에 없었다.
+    dict(path='results/consensus_history.jsonl', label='KR 컨센서스 주간 스냅샷',
+         cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
+         job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
+         getter=_jsonl_max_date, raw=True),
     dict(path='results/leaders_kr6.json', label='주도주 KR (KR-U6·규칙⑥ 이식)',
          cycle='주 1회', max_age=9, producer='leaders_kr6.py publish',
          job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',

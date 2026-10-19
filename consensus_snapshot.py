@@ -31,14 +31,25 @@ HISTORY = Path('results/consensus_history.jsonl')
 KEEP_WEEKS = 16
 
 
+DIAG = {}   # 실패 사유 집계 — 0종목이면 이걸 ::error 로 찍는다(2026-10-19)
+
+
+def _why(k):
+    DIAG[k] = DIAG.get(k, 0) + 1
+
+
 def fetch_consensus(sym: str) -> dict | None:
     """네이버 (E) 컨센서스 — 올해/내년 EPS·영업이익만 (리비전 추적용 최소셋)."""
     try:
         r = requests.get(f'https://finance.naver.com/item/main.naver?code={sym}',
                          headers={'User-Agent': 'Mozilla/5.0'}, timeout=8)
+        if r.status_code != 200:
+            _why(f'HTTP {r.status_code}')
+            return None
         soup = BeautifulSoup(r.text, 'html.parser')
         tb = soup.select_one('div.cop_analysis table')
         if tb is None:
+            _why(f'표 없음(응답 {len(r.text)}B)')
             return None
         heads = [th.get_text(' ', strip=True) for th in tb.select('thead th')]
         dh = [h for h in heads if re.match(r'\d{4}\.\d{2}', h)]
@@ -49,6 +60,7 @@ def fetch_consensus(sym: str) -> dict | None:
             if '(E)' in h:
                 emap[i] = '0y' if int(h[:4]) <= ynow else '1y'
         if not emap:
+            _why('(E) 열 없음')
             return None
 
         def _num(s):
@@ -69,7 +81,8 @@ def fetch_consensus(sym: str) -> dict | None:
                             out[f'{key}_{lab}'] = vals[i]
                     break
         return out or None
-    except Exception:
+    except Exception as e:
+        _why(type(e).__name__)
         return None
 
 
@@ -104,6 +117,14 @@ def run(limit=None):
         for sym, c in ex.map(_one, syms):
             if c:
                 results[sym] = c
+
+    # ⚠️ 2026-10-19 — 07-24 이후 석 달 동안 매주 "✅ 저장: 0종목" 을 찍고 초록불로 끝났다.
+    #   화면의 '컨센서스 추세'는 07-24 한 점에 멈춰 있었다. 대부분 실패하면 쓰지 않고
+    #   사유를 ::error 로 남긴 뒤 실패 코드로 끝낸다(Actions 주석에 보인다).
+    if len(results) < max(5, len(syms) * 0.3):
+        top = ', '.join(f'{k} {v}' for k, v in sorted(DIAG.items(), key=lambda x: -x[1])[:4])
+        print(f"::error title=컨센서스 스냅샷 실패::{len(results)}/{len(syms)}종목만 수집 — 사유: {top or '미상'}. 이력을 덮지 않는다.")
+        sys.exit(1)
 
     # 기존 이력 로드 → 오늘 것 제외(재실행 시 덮어씀) + 16주 초과분 정리
     cutoff = (datetime.now() - timedelta(weeks=KEEP_WEEKS)).strftime('%Y-%m-%d')

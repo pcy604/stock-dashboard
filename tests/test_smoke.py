@@ -103,7 +103,7 @@ def test_no_data_source_unwatched():
     import re
     import data_freshness
     src = (ROOT / 'dashboard.py').read_text(encoding='utf-8')
-    used = set(re.findall(r"results/[a-z_0-9]+\.json\b", src))
+    used = set(re.findall(r"results/[a-z_0-9]+\.jsonl?\b", src))
     watched = {s['path'] for s in data_freshness.SOURCES}
     # 화면이 쓰지만 감시 안 되는 것 (portfolio_latest 는 사용자 입력 산출물이라 제외)
     exempt = {'results/portfolio_latest.json', 'results/guru_chart_latest.png'}
