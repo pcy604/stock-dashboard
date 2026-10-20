@@ -469,6 +469,14 @@ def load_shares():
         return _SHARES
     d = pd.read_csv(p).dropna(subset=["sym", "filed", "shares_adj"])
     d = d.sort_values(["sym", "filed"])
+    # 2026-10-20 — 상장 전 공시의 '100주'(설립 주식, CHWY·FNKO)가 첫 공시로 잡혀 상장 직후 몇 주의
+    #   시총이 $0.00B 가 됐다 → 9월엔 있던 신호(CHWY 2019·FNKO 2018)가 시총 하한에서 사라짐.
+    #   그 종목 중앙값의 1% 미만이거나 10만 주 미만인 기록은 버린다(분할 환산 후 값 기준).
+    med = d.groupby("sym").shares_adj.transform("median")
+    bad = (d.shares_adj < 1e5) | (d.shares_adj < med * 0.01)
+    if bad.any():
+        print(f"주식수 이상치 제외 {int(bad.sum())}행 · {d[bad].sym.nunique()}종", flush=True)
+    d = d[~bad]
     _SHARES = {s: (pd.to_datetime(g.filed.values), g.shares_adj.values.astype(float))
                for s, g in d.groupby("sym", sort=False)}
     print(f"주식수 시계열 {len(d):,}행 · {len(_SHARES):,}종", flush=True)
@@ -753,9 +761,11 @@ def fixcap(sentinels=("NVDA", "AAPL", "MSFT", "TSLA", "AXTI", "PLTR")):
     sh = load_shares()
     con = sqlite3.connect(DB)
     d = pd.read_sql("SELECT rowid AS rid, sym, as_of, close, period_end, revenue, net_income "
-                    "FROM factor_weekly WHERE factor_ver=? AND marcap IS NULL AND close IS NOT NULL",
+                    "FROM factor_weekly WHERE factor_ver=? AND close IS NOT NULL "
+                    # 2026-10-20: 빈 값뿐 아니라 '주식수 10만 주 미만'에 해당하는 시총(상장 전 100주 공시)도 다시 계산
+                    "AND (marcap IS NULL OR marcap < close * 100000)",
                     con, params=(VER,))
-    print(f"시총 빈 행 {len(d):,} · {d.sym.nunique():,}종", flush=True)
+    print(f"시총 빈·이상 행 {len(d):,} · {d.sym.nunique():,}종", flush=True)
     upd = []
     for s_, g in d.groupby("sym"):
         if s_ not in sh:

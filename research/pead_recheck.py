@@ -98,6 +98,7 @@ def main():
                           and a["y14_19"] >= out["SPY"]["y14_19"]),
         bias_gap_pp=round(out["B_pead_big_today"]["CAGR"] - out["C_pead_rest"]["CAGR"], 1),
     )
+    out["verdict"] = {k: (bool(v) if isinstance(v, (bool, np.bool_)) else v) for k, v in out["verdict"].items()}
     out["verdict"]["pass"] = all(out["verdict"][k] for k in ("beats_star", "p10_beats_star", "y14_19_beats_spy"))
     out["secs"] = round(time.time() - t0)
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
