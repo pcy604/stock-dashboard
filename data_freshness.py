@@ -192,6 +192,11 @@ SOURCES = [
          cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
          getter=_jsonl_max_date, raw=True),
+    # 2026-10-21 — 애널 추정이 없는 종목 목록(화면이 '수집 대상 아님'과 '추정 없음'을 구분). 첫 수집은 10-26(월).
+    dict(path='results/consensus_nocover.json', label='KR 컨센서스 미커버 종목',
+         cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
+         job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
+         getter=_key('date')),
     dict(path='results/new_high_ai.json', label='52주 신고가 AI 공통점 요약',
          cycle='매일 06:00 (평일)', max_age=4, producer='new_high_ai.py',
          job='daily-refresh', used_by='📈 52주 신고가 → AI 공통점 요약',

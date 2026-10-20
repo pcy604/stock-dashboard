@@ -220,7 +220,17 @@ def peer_metrics(mcap: float, q: pd.DataFrame) -> dict:
     if not prev.empty and prev.revenue.iloc[-1] and prev.revenue.iloc[-1] > 0:
         g = (last.revenue / prev.revenue.iloc[-1] - 1) * 100
     ni, rev, op = last.get('net_income'), last.get('revenue'), last.get('op_income')
+    # 2026-10-21 — PBR·ROE 추가. 자본은 잔액이라 TTM 이 아니라 '마지막으로 공시된' 분기말 값.
+    #   자본잠식(≤0)이면 PBR·ROE 둘 다 '-'(음수 배수는 싸 보이는 착시).
+    eq = None
+    if 'equity' in q:
+        e = pd.to_numeric(q['equity'], errors='coerce').dropna()
+        e = e[e.index <= t.index[-1]]
+        eq = float(e.iloc[-1]) if len(e) else None
+    ok_eq = eq is not None and eq > 0
     return {'PER': (mcap / ni) if ni and ni > 0 else None,
+            'PBR': (mcap / eq) if ok_eq else None,
+            'ROE': (ni / eq * 100) if ok_eq and ni is not None and pd.notna(ni) else None,
             'PSR': (mcap / rev) if rev and rev > 0 else None,
             '매출성장': g,
             '영업이익률': (op / rev * 100) if op is not None and pd.notna(op) and rev else None,

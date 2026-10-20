@@ -4059,6 +4059,17 @@ def _kr_cons_hist(sym):
 
 
 @st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _kr_cons_live(sym):
+    """오늘 컨센서스 한 점(네이버 wisereport · FnGuide 추정). 실패는 None — 화면은 저장된 스냅샷만 그린다."""
+    try:
+        import kr_fin_naver as _kfn
+        c = _kfn.consensus(sym)
+        return {k: float(v) for k, v in (c or {}).items() if v is not None} or None
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
 def _peer_rows(sym, is_kr, n=4):
     ind, cands = _sx.peer_candidates(sym, is_kr, n)
     out = []
@@ -4086,7 +4097,8 @@ def _peer_rows(sym, is_kr, n=4):
             met = {}
         out.append({'종목': c['name'] or c['sym'], '코드': c['sym'],
                     '시총($B)': cap_usd_b(mc, 'KR' if is_kr else 'US') if mc else None,
-                    'PER(배)': met.get('PER'), 'PSR(배)': met.get('PSR'),
+                    'PER(배)': met.get('PER'), 'PBR(배)': met.get('PBR'), 'PSR(배)': met.get('PSR'),
+                    'ROE(%)': met.get('ROE'),
                     '매출성장(%)': met.get('매출성장'), '영업이익률(%)': met.get('영업이익률'),
                     '기준분기': met.get('기준분기')})
     return ind, out
@@ -5708,33 +5720,71 @@ def _tab_analysis():
                         st.dataframe(pd.DataFrame(_rows_t), filters=False, use_container_width=True)
                         st.caption("추정치가 계속 올라가는 종목이 주가도 강하다(이익 추정 리비전 효과). "
                                    "30일·90일 전 대비가 모두 + 이고 상향 건수가 하향보다 많으면 우호적.")
-                    elif is_kr_sym and _kr_cons_hist(sym8_clean):
+                    elif is_kr_sym:
+                        # 2026-10-21 — 삼아알미늄: 주간 수집 대상(value_kr 249종) 밖이라 07-24 한 점에서 멈춰 있었고,
+                        #   점 하나를 추세 차트로 그려 축만 보였다. → 수집 대상을 한국 커버 1,300종으로 넓히고(consensus_snapshot),
+                        #   화면에서는 오늘 값을 직접 받아 이력 끝에 붙인다. 점이 2개 미만이면 차트 대신 숫자.
                         _kh = pd.DataFrame(_kr_cons_hist(sym8_clean))
-                        _kh['date'] = pd.to_datetime(_kh['date'])
-                        _kh = _kh.sort_values('date')
-                        # 2026-10-19 — EPS(원)와 영업이익(억)은 단위가 수천 배 달라 한 축에 그리면
-                        #   EPS 가 바닥에 붙는다. 왼쪽 축 EPS · 오른쪽 축 영업이익.
-                        _fk = go.Figure()
-                        _xd = pd.DatetimeIndex(_kh['date'])
-                        if 'eps_0y' in _kh:
-                            _fk.add_trace(go.Scatter(x=_xd, y=_kh['eps_0y'], mode='lines+markers',
-                                                     name='올해 EPS(원) · 왼쪽', line=dict(color='#2453C8', width=2.5)))
-                        if 'op_0y' in _kh:
-                            _fk.add_trace(go.Scatter(x=_xd, y=_kh['op_0y'], mode='lines+markers', yaxis='y2',
-                                                     name='올해 영업이익(억원) · 오른쪽',
-                                                     line=dict(color='#7C8AA5', width=2, dash='dot')))
-                        _fk.update_layout(height=240, margin=dict(l=8, r=8, t=30, b=8),
-                                          legend=dict(orientation='h', y=1.12, x=0, yanchor='bottom'),
-                                          xaxis=dict(tickformat='%Y-%m-%d', dtick=7 * 86400000 if len(_kh) > 1 else None),
-                                          yaxis=dict(tickformat=',.0f'),
-                                          yaxis2=dict(overlaying='y', side='right', showgrid=False, tickformat=',.0f'))
-                        st.plotly_chart(_fk, use_container_width=True)
-                        _klast = _kh['date'].max().date()
-                        _kage = (pd.Timestamp.today().normalize() - pd.Timestamp(_klast)).days
-                        st.caption(f"출처: 네이버금융 컨센서스 주간 스냅샷(results/consensus_history.jsonl) · "
-                                   f"마지막 갱신: {_klast} · 스냅샷 {len(_kh)}개"
-                                   + (f" · ⚠️ {_kage}일째 갱신 안 됨 — 추세로 읽지 말 것" if _kage > 10 else "")
-                                   + (" · 4주 이상 쌓여야 방향을 말할 수 있다" if len(_kh) < 4 else ""))
+                        _klive = _kr_cons_live(sym8_clean)
+                        _today = pd.Timestamp.today().normalize()
+                        if _klive:
+                            _lrow = pd.DataFrame([{'date': _today.strftime('%Y-%m-%d'), 'sym': sym8_clean, **_klive}])
+                            _kh = _lrow if _kh.empty else pd.concat(
+                                [_kh[_kh['date'] != _lrow['date'].iloc[0]], _lrow], ignore_index=True)
+                        if _kh.empty:
+                            _nc = load_json(Path('results/consensus_nocover.json')) or {}
+                            if sym8_clean in set(_nc.get('none') or []):
+                                st.info(f"애널리스트 추정치가 없는 종목입니다(네이버·FnGuide 기준, {_nc.get('date')} 확인). "
+                                        "커버하는 증권사가 없으면 컨센서스 자체가 존재하지 않는다.")
+                            else:
+                                st.info("컨센서스를 받지 못했습니다 — 지금 네이버(wisereport) 응답이 없고 저장된 스냅샷도 없다.")
+                        else:
+                            _kh['date'] = pd.to_datetime(_kh['date'])
+                            _kh = _kh.sort_values('date').reset_index(drop=True)
+                            _xd = pd.DatetimeIndex(_kh['date'])
+                            _kl = _kh.iloc[-1]
+                            def _kv(k, fmt):
+                                v = _kl.get(k)
+                                return fmt.format(v) if v is not None and pd.notna(v) else '-'
+                            def _kchg(k):
+                                if len(_kh) < 2 or k not in _kh:
+                                    return None
+                                v0, v1 = _kh[k].iloc[0], _kh[k].iloc[-1]
+                                return (v1 / v0 - 1) * 100 if pd.notna(v0) and pd.notna(v1) and v0 > 0 else None
+                            _span = (_xd[-1] - _xd[0]).days
+                            _ce, _co = _kchg('eps_0y'), _kchg('op_0y')
+                            _stat_grid([('', [("올해 EPS(원)", _kv('eps_0y', '{:,.0f}')),
+                                              ("올해 영업이익(억원)", _kv('op_0y', '{:,.0f}')),
+                                              ("내년 EPS(원)", _kv('eps_1y', '{:,.0f}')),
+                                              (f"올해 EPS 변화({_span}일)" if _span else "올해 EPS 변화", f"{_ce:+.1f}%" if _ce is not None else '-'),
+                                              (f"올해 영업이익 변화({_span}일)" if _span else "올해 영업이익 변화", f"{_co:+.1f}%" if _co is not None else '-')])])
+                            if len(_kh) >= 2:
+                                # EPS(원)와 영업이익(억)은 단위가 수천 배 달라 축을 나눈다(왼쪽 EPS · 오른쪽 영업이익)
+                                _fk = go.Figure()
+                                if 'eps_0y' in _kh:
+                                    _fk.add_trace(go.Scatter(x=_xd, y=_kh['eps_0y'], mode='lines+markers',
+                                                             name='올해 EPS(원) · 왼쪽', line=dict(color='#2453C8', width=2.5)))
+                                if 'op_0y' in _kh:
+                                    _fk.add_trace(go.Scatter(x=_xd, y=_kh['op_0y'], mode='lines+markers', yaxis='y2',
+                                                             name='올해 영업이익(억원) · 오른쪽',
+                                                             line=dict(color='#7C8AA5', width=2, dash='dot')))
+                                # 날짜 눈금은 실제 스냅샷 날짜에만(자동 눈금이 같은 날짜를 여러 번 찍던 것)
+                                _fk.update_layout(height=240, margin=dict(l=8, r=8, t=30, b=8),
+                                                  legend=dict(orientation='h', y=1.12, x=0, yanchor='bottom'),
+                                                  xaxis=dict(tickvals=_xd, tickformat='%Y-%m-%d'),
+                                                  yaxis=dict(tickformat=',.0f'),
+                                                  yaxis2=dict(overlaying='y', side='right', showgrid=False, tickformat=',.0f'))
+                                st.plotly_chart(_fk, use_container_width=True)
+                            _gaps = _xd.to_series().diff().dt.days.dropna()
+                            _klast = (_kh[~_kh.index.isin([len(_kh) - 1])]['date'].max() if _klive else _xd[-1])
+                            _kage = (_today - pd.Timestamp(_klast)).days if pd.notna(_klast) else None
+                            st.caption("출처: 네이버금융(FnGuide) 컨센서스 — 주간 스냅샷(results/consensus_history.jsonl)"
+                                       + (" + 오늘 조회값" if _klive else "")
+                                       + f" · 점 {len(_kh)}개"
+                                       + (f" · ⚠️ 점 사이 최대 {int(_gaps.max())}일 공백 — 그 사이 움직임은 모른다" if len(_gaps) and _gaps.max() > 14 else "")
+                                       + (f" · 마지막 저장 스냅샷 {pd.Timestamp(_klast).date()}({_kage}일 전)" if _klive and _kage is not None and len(_kh) > 1 else "")
+                                       + (f" · ⚠️ {pd.Timestamp(_klast).date()} 값이다({_kage}일 전) — 지금 조회도 실패했다" if not _klive and _kage is not None and _kage > 10 else "")
+                                       + (" · 4주 이상 쌓여야 방향을 말할 수 있다" if len(_kh) < 4 else ""))
                     else:
                         st.info("컨센서스 추세 데이터 없음 (yfinance 미제공 · KR 스냅샷 미축적 종목).")
 
@@ -5758,13 +5808,14 @@ def _tab_analysis():
                             _peer_only = _pdf.iloc[1:]
                             _med = {c: (float(pd.to_numeric(_peer_only[c], errors='coerce').median())
                                         if pd.to_numeric(_peer_only[c], errors='coerce').notna().any() else None)
-                                    for c in ('시총($B)', 'PER(배)', 'PSR(배)', '매출성장(%)', '영업이익률(%)')}
+                                    for c in ('시총($B)', 'PER(배)', 'PBR(배)', 'PSR(배)', 'ROE(%)', '매출성장(%)', '영업이익률(%)')}
                             _pdf = pd.concat([_pdf, pd.DataFrame([{'종목': f'동종 중앙값({len(_peer_only)}종)', '코드': '', **_med,
                                                                    '기준분기': ''}])], ignore_index=True)
                             st.dataframe(_pdf, filters=False, use_container_width=True)
                             st.caption(f"업종: {_pind}. 첫 행이 이 종목. 같은 업종 안에서 시총이 가장 가까운 순. "
                                        "⚠️ 공식 업종분류는 사업 실제와 다를 수 있다(예: 대형 복합기업). "
-                                       "PER·PSR 은 TTM, 적자면 PER 은 '-'.")
+                                       "PER·PSR·ROE 는 TTM, PBR 은 마지막 분기말 자본 기준. 적자면 PER, 자본잠식이면 PBR·ROE 는 '-'. "
+                                       "PBR 은 ROE 와 같이 읽는다 — ROE 가 높으면 PBR 이 높은 게 정상이다.")
 
                 # ── 🧭 요약 판단 (맨 위) ─────────────────────────────────
                 _acch = None if is_kr_sym else _sx.accel_history(sym8_clean)

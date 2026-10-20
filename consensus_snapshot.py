@@ -5,7 +5,7 @@ consensus_snapshot.py — 컨센서스 시계열 스냅샷 (리비전 모멘텀�
    가장 강건한 펀더멘털 벡터인데, 그 방향을 보려면 컨센서스를 시계열로 저장해야 함.
    우린 그날 값만 봐서 방향을 몰랐음 → 지금부터 매주 스냅샷을 append(시간이 만드는 자산).
 
-동작: value_kr.json 유니버스의 KR 종목에 대해 네이버 (E) 컨센서스(올해/내년 EPS·영업익)를
+동작: value_kr.json + 한국 커버(시총 1,000억+ 보통주, 2026-10-21~) 종목에 대해 네이버 (E) 컨센서스(올해/내년 EPS·영업익)를
    긁어 results/consensus_history.jsonl 에 {date, sym, eps_0y, eps_1y, op_0y} 로 누적.
    종목당 최근 16주만 유지(용량 관리). daily가 아니라 주 1회(값 변화 느림).
 
@@ -106,18 +106,41 @@ def _fetch_consensus_main(sym: str) -> dict | None:
         return None
 
 
+KRX_LAST = Path('data/krx_listing_last.csv')
+NOCOVER = Path('results/consensus_nocover.json')
+COVER_MIN = 100_000_000_000      # 1,000억 — universe.kr_cover 와 같은 하한(2026-10-19 사용자 결정)
+
+
 def _universe(limit=None):
-    if not VALUE.exists():
-        return []
-    d = json.loads(VALUE.read_text(encoding='utf-8'))
-    syms = [(s['sym'], s.get('marcap', 0)) for s in d.get('stocks', []) if s.get('sym')]
-    syms.sort(key=lambda x: -(x[1] or 0))       # 시총 큰 것부터(리비전 신뢰도↑)
-    out = [s for s, _ in syms]
-    return out[:limit] if limit else out
+    """(전체 대상, 핵심 대상). 핵심 = value_kr(가치 발굴) — 성공률 판정은 여기서만 한다.
+
+    2026-10-21 — 대상이 value_kr 249종뿐이라 삼아알미늄처럼 그 밖의 종목은 07-24(당시 510종) 한 점에서
+    영영 멈췄다. 한국 커버 기준(시총 1,000억+ 보통주)으로 넓힌다. 애널 추정이 없는 중소형주가 많아
+    전체 성공률은 낮은 게 정상 → 실패 판정은 핵심 집합 기준."""
+    core = []
+    if VALUE.exists():
+        d = json.loads(VALUE.read_text(encoding='utf-8'))
+        core = [(s['sym'], s.get('marcap', 0) or 0) for s in d.get('stocks', []) if s.get('sym')]
+    ext = []
+    if KRX_LAST.exists():
+        try:
+            import pandas as pd
+            k = pd.read_csv(KRX_LAST, dtype={'Code': str})
+            k['Code'] = k['Code'].str.zfill(6)
+            k = k[(pd.to_numeric(k['Marcap'], errors='coerce') >= COVER_MIN) & k['Code'].str.fullmatch(r'\d{5}0')]
+            ext = list(zip(k['Code'], k['Marcap'].astype(float)))
+        except Exception as e:
+            print(f"[warn] KRX 목록 읽기 실패 — 핵심 대상만: {e}")
+    seen, out = set(), []
+    for sym, mc in sorted(core + ext, key=lambda x: -(x[1] or 0)):   # 시총 큰 것부터(리비전 신뢰도↑)
+        if sym not in seen:
+            seen.add(sym); out.append(sym)
+    out = out[:limit] if limit else out
+    return out, {s for s, _ in core}
 
 
 def run(limit=None):
-    syms = _universe(limit)
+    syms, core = _universe(limit)
     if not syms:
         print("value_kr.json 없음 — value_export.py 먼저")
         return
@@ -141,10 +164,18 @@ def run(limit=None):
     # ⚠️ 2026-10-19 — 07-24 이후 석 달 동안 매주 "✅ 저장: 0종목" 을 찍고 초록불로 끝났다.
     #   화면의 '컨센서스 추세'는 07-24 한 점에 멈춰 있었다. 대부분 실패하면 쓰지 않고
     #   사유를 ::error 로 남긴 뒤 실패 코드로 끝낸다(Actions 주석에 보인다).
-    if len(results) < max(5, len(syms) * 0.3):
+    core_n = len(core & set(syms)) or len(syms)
+    core_ok = len(core & set(results)) if core else len(results)
+    if core_ok < max(5, core_n * 0.3):
         top = ', '.join(f'{k} {v}' for k, v in sorted(DIAG.items(), key=lambda x: -x[1])[:4])
-        print(f"::error title=컨센서스 스냅샷 실패::{len(results)}/{len(syms)}종목만 수집 — 사유: {top or '미상'}. 이력을 덮지 않는다.")
+        print(f"::error title=컨센서스 스냅샷 실패::핵심 {core_ok}/{core_n}종목만 수집(전체 {len(results)}/{len(syms)}) — "
+              f"사유: {top or '미상'}. 이력을 덮지 않는다.")
         sys.exit(1)
+    # 추정치가 없는 종목을 남긴다 — 화면이 '수집 대상 아님'과 '애널 추정 없음'을 구분하게(2026-10-21)
+    NOCOVER.write_text(json.dumps({'date': today, 'tried': len(syms), 'got': len(results),
+                                   'none': sorted(set(syms) - set(results))}, ensure_ascii=False),
+                       encoding='utf-8')
+    print(f"::notice title=컨센서스 스냅샷::{len(results)}/{len(syms)}종목(핵심 {core_ok}/{core_n}) · 추정 없음 {len(syms) - len(results)}")
 
     # 기존 이력 로드 → 오늘 것 제외(재실행 시 덮어씀) + 16주 초과분 정리
     cutoff = (datetime.now() - timedelta(weeks=KEEP_WEEKS)).strftime('%Y-%m-%d')
