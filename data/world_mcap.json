@@ -49,10 +49,15 @@
   "year": 2025,
   "name": "United States"
  },
+ "TWN": {
+  "local": 94360000000000.0,
+  "ccy": "TWD",
+  "year": 2025,
+  "name": "Taiwan",
+  "source": "TWSE 상장사 시가총액 2025년 말 NT$94.36조 (중화민국 교무위원회 OCAC 2026-01 보도, TWSE 연보)"
+ },
  "_meta": {
   "source": "World Bank CM.MKT.LCAP.CD",
-  "missing": [
-   "TWN"
-  ]
+  "missing": []
  }
 }

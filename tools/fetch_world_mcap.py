@@ -17,14 +17,30 @@ import requests
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(BASE, 'data', 'world_mcap.json')
 CODES = ['USA', 'KOR', 'JPN', 'HKG', 'CHN', 'IND', 'DEU', 'GBR', 'BRA', 'EMU', 'TWN']
+# 세계은행에 없는 나라 — 거래소 공식 연말 값(현지 통화). 출처를 같이 적는다.
+MANUAL = {
+    'TWN': {'local': 94.36e12, 'ccy': 'TWD', 'year': 2025, 'name': 'Taiwan',
+            'source': 'TWSE 상장사 시가총액 2025년 말 NT$94.36조 (중화민국 교무위원회 OCAC 2026-01 보도, TWSE 연보)'},
+}
 
 
 def main():
     url = ('https://api.worldbank.org/v2/country/' + ';'.join(CODES) +
            '/indicator/CM.MKT.LCAP.CD?format=json&per_page=2000&date=2015:2026')
-    r = requests.get(url, timeout=40)
-    r.raise_for_status()
-    rows = r.json()[1] or []
+    rows, last = None, None
+    for i in range(4):                 # 세계은행 API 는 가끔 느리거나 HTML 오류 페이지를 준다
+        try:
+            r = requests.get(url, timeout=60)
+            r.raise_for_status()
+            rows = r.json()[1] or []
+            break
+        except Exception as e:
+            last = e
+            print(f'  재시도 {i + 1}: {str(e)[:100]}', flush=True)
+            import time; time.sleep(10 * (i + 1))
+    if rows is None:
+        print(f'::error::세계은행 API 실패 — {last}')
+        return 1
     out = {}
     for x in rows:
         c, v, y = x['countryiso3code'] or x['country']['id'], x['value'], x['date']
@@ -32,6 +48,9 @@ def main():
             continue
         if c not in out or int(y) > out[c]['year']:
             out[c] = {'usd': float(v), 'year': int(y), 'name': x['country']['value']}
+    for c, v in MANUAL.items():
+        if c not in out:
+            out[c] = v
     miss = [c for c in CODES if c not in out]
     print(json.dumps(out, ensure_ascii=False, indent=1))
     print('없음:', miss)

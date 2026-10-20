@@ -278,34 +278,124 @@ def greed_signals(core_on: bool | None, c1: float | None, phase: str | None, dxy
     return dict(word=word, tone=tone, ref=ref, n=n)
 
 
-# ── 국가별 주식시장 시총 (세계은행 연말 값 × 그 뒤 대표 지수 변동) ─────────────
-# 지수 이름 → (세계은행 국가코드, 그 나라 대표 지수 이름). 같은 나라 지수는 같은 시총을 보인다.
+# ── 국가별 주식시장 시총 (2026-10-21 v2) ─────────────────────────────────
+# 연말 공식 값(세계은행·거래소) × 그 뒤 대표 지수 변동 × 그 뒤 환율 변동 = 오늘 추정(달러).
+# 한국은 KRX 상장목록 시총 합(거래소 실측, 매일)을 원/달러로 나눈 값을 그대로 쓴다.
+# 지수 이름 → (국가코드, 대표 지수, 통화)
 INDEX_COUNTRY = {
-    'S&P500': ('USA', 'S&P500'), '나스닥': ('USA', 'S&P500'), '다우': ('USA', 'S&P500'), '러셀2000': ('USA', 'S&P500'),
-    '코스피': ('KOR', '코스피'), '코스닥': ('KOR', '코스피'), '닛케이225': ('JPN', '닛케이225'),
-    '대만 가권': ('TWN', '대만 가권'), '항셍': ('HKG', '항셍'), '상해종합': ('CHN', '상해종합'),
-    '니프티50': ('IND', '니프티50'), 'DAX': ('DEU', 'DAX'), '유로스톡스50': ('EMU', '유로스톡스50'),
-    'FTSE100': ('GBR', 'FTSE100'), '보베스파': ('BRA', '보베스파'),
+    'S&P500': ('USA', 'S&P500', 'USD'), '나스닥': ('USA', 'S&P500', 'USD'), '다우': ('USA', 'S&P500', 'USD'),
+    '러셀2000': ('USA', 'S&P500', 'USD'),
+    '코스피': ('KOR', '코스피', 'KRW'), '코스닥': ('KOR', '코스피', 'KRW'), '닛케이225': ('JPN', '닛케이225', 'JPY'),
+    '대만 가권': ('TWN', '대만 가권', 'TWD'), '항셍': ('HKG', '항셍', 'HKD'), '상해종합': ('CHN', '상해종합', 'CNY'),
+    '니프티50': ('IND', '니프티50', 'INR'), 'DAX': ('DEU', 'DAX', 'EUR'), '유로스톡스50': ('EMU', '유로스톡스50', 'EUR'),
+    'FTSE100': ('GBR', 'FTSE100', 'GBP'), '보베스파': ('BRA', '보베스파', 'BRL'),
 }
+# Yahoo 환율 심볼 → '현지통화 1단위 = 몇 달러' 로 바꾸는 방향(True = 심볼 값이 이미 달러/현지)
+FX_SYMBOL = {'KRW': ('KRW=X', False), 'JPY': ('JPY=X', False), 'TWD': ('TWD=X', False), 'HKD': ('HKD=X', False),
+             'CNY': ('CNY=X', False), 'INR': ('INR=X', False), 'EUR': ('EURUSD=X', True), 'GBP': ('GBPUSD=X', True),
+             'BRL': ('BRL=X', False)}
 
 
-def country_mcap(base: dict, closes_by_name: dict) -> dict:
-    """{지수 이름: (조 달러 추정, 기준 연도, 추정 여부)}.
-    base: data/world_mcap.json. 연말 값에 '연말 → 오늘' 대표 지수 변동률을 곱한다(현지 통화 지수 — 환율 변동은 미반영).
-    연말 종가를 못 찾으면 작년 값까지만 그대로 쓰고, 그보다 오래됐으면 뺀다."""
-    out = {}
-    for name, (cc, ref) in INDEX_COUNTRY.items():
-        b = (base or {}).get(cc)
-        if not b or not b.get('usd'):
+def usd_per_local(fx_raw: pd.Series | None, direct: bool) -> pd.Series:
+    s = _clean(fx_raw)
+    return s if direct else (1.0 / s)
+
+
+def _at(s: pd.Series, day: pd.Timestamp, tol_days: int = 10):
+    """day 이전 가장 가까운 값(tol_days 안). 없으면 None."""
+    x = s[s.index <= day]
+    if not len(x) or (day - x.index[-1]).days > tol_days:
+        return None
+    return float(x.iloc[-1])
+
+
+def country_mcap(base: dict, closes_by_name: dict, fx: dict | None = None, actual: dict | None = None) -> dict:
+    """{지수 이름: (조 달러, 기준 설명, 추정 여부)}.
+    base: data/world_mcap.json — {국가: {usd 또는 local+ccy, year}}
+    fx: {통화: Yahoo 원시 시계열}. 없으면 환율 보정 없이 지수 변동만 반영.
+    actual: {국가: (달러, 'YYYY-MM-DD')} — 거래소 실측이 있으면 그걸 쓴다."""
+    fx = fx or {}
+    out, cache = {}, {}
+    for name, (cc, ref, ccy) in INDEX_COUNTRY.items():
+        if cc in cache:
+            if cache[cc] is not None:
+                out[name] = cache[cc]
             continue
-        v, y, est = b['usd'] / 1e12, int(b['year']), False
+        cache[cc] = None
+        if actual and cc in actual and actual[cc][0]:
+            cache[cc] = out[name] = (actual[cc][0] / 1e12, f"거래소 실측 {actual[cc][1]}", False)
+            continue
+        b = (base or {}).get(cc)
+        if not b or not (b.get('usd') or b.get('local')):
+            continue
+        y = int(b['year']); ye = pd.Timestamp(y, 12, 31)
+        if pd.Timestamp.now().year - y > 4:
+            continue                       # 5년 넘은 연말 값을 지수 하나로 끌어오면 오차가 너무 크다(유로존 2018) → '-'
         s = _clean(closes_by_name.get(ref))
-        if len(s):
-            ye = s[s.index <= pd.Timestamp(y, 12, 31)]
-            if len(ye) and (pd.Timestamp(y, 12, 31) - ye.index[-1]).days <= 10:
-                v = v * float(s.iloc[-1]) / float(ye.iloc[-1])
-                est = True
-        if not est and y < pd.Timestamp.now().year - 1:
-            continue        # 오래된 연말 값을 오늘 값처럼 보이지 않는다(영국 2022·유로존 2018 등) → '-'
-        out[name] = (v, y, est)
+        i0 = _at(s, ye) if len(s) else None
+        if i0 is None:
+            continue                       # 연말 지수를 못 찾으면 오늘 값을 만들 수 없다 → '-'
+        r_idx = float(s.iloc[-1]) / i0
+        sym, direct = FX_SYMBOL.get(ccy, (None, True))
+        f = usd_per_local(fx.get(ccy), direct) if sym and fx.get(ccy) is not None else pd.Series(dtype=float)
+        f0, f1 = (_at(f, ye), float(f.iloc[-1])) if len(f) else (None, None)
+        if b.get('local'):                 # 현지통화 연말 값(예: 대만 거래소 연보)
+            if ccy == 'USD':
+                f0 = f1 = 1.0
+            if f1 is None:
+                continue
+            v = b['local'] * r_idx * f1
+            how = f"{y}년 말 거래소 공시 × 지수·환율 변동"
+        else:
+            v = b['usd'] * r_idx
+            if ccy != 'USD':
+                if f0 is None or f1 is None:
+                    continue               # 환율 보정 없이 내면 원화 강세 같은 구간에서 크게 틀린다
+                v *= f1 / f0
+            how = f"{y}년 말 세계은행 × 지수" + ("" if ccy == 'USD' else "·환율") + " 변동"
+        cache[cc] = out[name] = (v / 1e12, how, True)
     return out
+
+
+# ── 국면 이력 (2026-10-21) — 대시보드 macro_regime() 과 같은 규칙을 월별로 되돌려 본다 ─────
+def regime_history(fed: pd.Series, ip: pd.Series, ur: pd.Series, px: pd.Series, lag_months: int = 1) -> pd.DataFrame:
+    """월말 기준 국면. 월간 지표는 발표 시차만큼 밀어(lag_months) 그때 알 수 있던 값만 쓴다.
+    fed=FEDFUNDS(월), ip=INDPRO 지수(월), ur=UNRATE(월), px=지수 종가(일)."""
+    px = _clean(px)
+    if px.empty or fed.empty or ip.empty:
+        return pd.DataFrame()
+    me = px.resample('ME').last().dropna()
+    ma = px.rolling(200).mean().resample('ME').last()
+    mom = me / me.shift(12) - 1
+
+    def m(s):                       # 월초 표기 → 발표 시차만큼 민 뒤 월말에 맞춘다
+        s = s.dropna().copy()
+        s.index = (pd.to_datetime(s.index) + pd.DateOffset(months=lag_months)).to_period('M').to_timestamp('M')
+        return s.reindex(me.index, method='ffill')
+    f = m(fed); fed6 = f - f.shift(6)
+    ipy = m((ip / ip.shift(12) - 1) * 100)
+    u = m(ur); sahm = u - u.rolling(12, min_periods=6).min()
+    rate = np.where(fed6 <= -0.25, '하락', np.where(fed6 >= 0.25, '상승', '횡보'))
+    growth = np.where(ipy >= 1.0, '개선', np.where(ipy <= -1.0, '악화', '횡보'))
+    growth = np.where(sahm >= 0.5, '악화', growth)
+    up = (me > ma) & (mom > 0)
+    pxd = np.where(up, '상승', '하락')
+    sc = pd.DataFrame(index=me.index)
+    sc['FIN'] = (rate == '하락') * 2 + np.isin(growth, ['악화', '횡보']) * 1 + (pxd == '상승') * 2
+    sc['EARN'] = np.isin(rate, ['횡보', '상승']) * 1 + (growth == '개선') * 2 + (pxd == '상승') * 2
+    sc['RFIN'] = (rate == '상승') * 2 + np.isin(growth, ['개선', '횡보']) * 1 + (pxd == '하락') * 2
+    sc['RERN'] = (growth == '악화') * 2 + (pxd == '하락') * 2 + (rate == '하락') * 1
+    out = pd.DataFrame({'phase': sc.idxmax(axis=1), 'close': me, 'rate': rate, 'growth': growth, 'px': pxd}, index=me.index)
+    ok = fed6.notna() & ipy.notna() & ma.notna() & mom.notna()
+    return out[ok]
+
+
+def regime_forward(hist: pd.DataFrame, months: int = 3) -> pd.DataFrame:
+    """국면별 '그 다음 N개월' 지수 수익률 — 표본이 작으니 개월 수를 같이 보인다."""
+    if hist.empty:
+        return pd.DataFrame()
+    fwd = (hist['close'].shift(-months) / hist['close'] - 1) * 100
+    d = pd.DataFrame({'phase': hist['phase'], 'fwd': fwd}).dropna()
+    g = d.groupby('phase')['fwd']
+    return pd.DataFrame({'개월 수': g.size(), f'다음 {months}개월 평균(%)': g.mean(),
+                         f'다음 {months}개월 상승 비율(%)': g.apply(lambda x: (x > 0).mean() * 100)})

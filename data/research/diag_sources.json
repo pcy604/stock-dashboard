@@ -1,0 +1,417 @@
+{
+ "fred": {
+  "DFF": {
+   "last": "2026-10-16",
+   "value": "3.88",
+   "title": "Federal Funds Effective Rate",
+   "freq": "D",
+   "units": "%",
+   "start": "1954-07-01"
+  },
+  "FEDFUNDS": {
+   "last": "2026-09-01",
+   "value": "3.75",
+   "title": "Federal Funds Effective Rate",
+   "freq": "M",
+   "units": "%",
+   "start": "1954-07-01"
+  },
+  "ECBDFR": {
+   "last": "2026-10-20",
+   "value": "2.5",
+   "title": "ECB Deposit Facility Rate for Euro Area",
+   "freq": "D",
+   "units": "%",
+   "start": "1999-01-01"
+  },
+  "ECBMRRFR": {
+   "last": "2026-10-20",
+   "value": "2.65",
+   "title": "ECB Main Refinancing Operations Rate: Fixed Rate Tenders for Euro Area",
+   "freq": "D",
+   "units": "%",
+   "start": "1999-01-01"
+  },
+  "IRSTCI01JPM156N": {
+   "last": "2026-09-01",
+   "value": "1.043",
+   "title": "Interest Rates: Immediate Rates (< 24 Hours): Call Money/Interbank Rate: Total for Japan",
+   "freq": "M",
+   "units": "%",
+   "start": "1985-07-01"
+  },
+  "IR3TIB01JPM156N": {
+   "last": "2026-08-01",
+   "value": "1.55991",
+   "title": "Interest Rates: 3-Month or 90-Day Rates and Yields: Interbank Rates: Total for Japan",
+   "freq": "M",
+   "units": "%",
+   "start": "2002-04-01"
+  },
+  "INTDSRJPM193N": {
+   "last": "2017-04-01",
+   "value": "0.3",
+   "title": "Discount Rate, Percent per Annum for Japan",
+   "freq": "M",
+   "units": "% per Annum",
+   "start": "1953-01-01"
+  },
+  "INTDSRKRM193N": {
+   "last": "2026-07-01",
+   "value": "1.25",
+   "title": "Discount Rate, Percent per Annum for Republic of Korea",
+   "freq": "M",
+   "units": "% per Annum",
+   "start": "1964-01-01"
+  },
+  "IRSTCI01KRM156N": {
+   "last": "2026-09-01",
+   "value": "3.044",
+   "title": "Interest Rates: Immediate Rates (< 24 Hours): Call Money/Interbank Rate: Total for Korea",
+   "freq": "M",
+   "units": "%",
+   "start": "1991-01-01"
+  },
+  "IR3TIB01KRM156N": {
+   "last": "2026-09-01",
+   "value": "3.17",
+   "title": "Interest Rates: 3-Month or 90-Day Rates and Yields: Interbank Rates: Total for Korea",
+   "freq": "M",
+   "units": "%",
+   "start": "1991-01-01"
+  },
+  "IRSTCB01CNM156N": {
+   "last": "2023-11-01",
+   "value": "2.9",
+   "title": "Interest Rates: Immediate Rates (< 24 Hours): Central Bank Rates: Total for China",
+   "freq": "M",
+   "units": "%",
+   "start": "1990-03-01"
+  },
+  "INTDSRCNM193N": {
+   "last": "2025-06-01",
+   "value": "2.9",
+   "title": "Interest Rates, Discount Rate for China",
+   "freq": "M",
+   "units": "% per Annum",
+   "start": "1990-03-01"
+  },
+  "BOERUKM": {
+   "last": "2017-01-01",
+   "value": "0.25",
+   "title": "Bank of England Policy Rate in the United Kingdom",
+   "freq": "M",
+   "units": "% per Annum",
+   "start": "1694-11-01"
+  },
+  "IUDSOIA": {
+   "last": "2026-10-16",
+   "value": "3.7344",
+   "title": "Daily Sterling Overnight Index Average (SONIA) Rate",
+   "freq": "D",
+   "units": "%",
+   "start": "1997-01-02"
+  },
+  "IRSTCI01GBM156N": {
+   "last": "2026-09-01",
+   "value": "3.7305",
+   "title": "Interest Rates: Immediate Rates (< 24 Hours): Call Money/Interbank Rate: Total for United Kingdom",
+   "freq": "M",
+   "units": "%",
+   "start": "1978-01-01"
+  },
+  "WALCL": {
+   "last": "2026-10-14",
+   "value": "6755639",
+   "title": "Assets: Total Assets: Total Assets (Less Eliminations from Consolidation): Wednesday Level",
+   "freq": "W",
+   "units": "Mil. of U.S. $",
+   "start": "2002-12-18"
+  },
+  "ECBASSETSW": {
+   "last": "2026-10-16",
+   "value": "5935346.0",
+   "title": "Central Bank Assets for Euro Area (11-19 Countries)",
+   "freq": "W",
+   "units": "Mil. of Euros",
+   "start": "1999-01-01"
+  },
+  "JPNASSETS": {
+   "last": "2026-09-01",
+   "value": "6250253",
+   "title": "Bank of Japan: Total Assets for Japan",
+   "freq": "M",
+   "units": "100 Mil. Yen",
+   "start": "1998-04-01"
+  },
+  "DEXUSEU": {
+   "last": "2026-10-16",
+   "value": "1.1231",
+   "title": "U.S. Dollars to Euro Spot Exchange Rate",
+   "freq": "D",
+   "units": "U.S. $ to  1 Euro",
+   "start": "1999-01-04"
+  },
+  "DEXJPUS": {
+   "last": "2026-10-16",
+   "value": "158",
+   "title": "Japanese Yen to U.S. Dollar Spot Exchange Rate",
+   "freq": "D",
+   "units": "Japanese Yen to  1 U.S. $",
+   "start": "1971-01-04"
+  },
+  "DEXCHUS": {
+   "last": "2026-10-16",
+   "value": "6.6861",
+   "title": "Chinese Yuan Renminbi to U.S. Dollar Spot Exchange Rate",
+   "freq": "D",
+   "units": "Chinese Yuan Renminbi to  1 U.S. $",
+   "start": "1981-01-02"
+  },
+  "DEXKOUS": {
+   "last": "2026-10-16",
+   "value": "1334.03",
+   "title": "South Korean Won to U.S. Dollar Spot Exchange Rate",
+   "freq": "D",
+   "units": "South Korean Won to  1 U.S. $",
+   "start": "1981-04-13"
+  },
+  "M2SL": {
+   "last": "2026-08-01",
+   "value": "23342.8",
+   "title": "M2",
+   "freq": "M",
+   "units": "Bil. of $",
+   "start": "1959-01-01"
+  },
+  "MABMM301EZM189S": {
+   "last": "2023-11-01",
+   "value": "16025573773633.299",
+   "title": "Monetary Aggregates and Their Components: Broad Money and Components: M3 for Euro Area (19 Countries)",
+   "freq": "M",
+   "units": "Euro",
+   "start": "1970-01-01"
+  },
+  "MYAGM2JPM189S": {
+   "last": "2017-02-01",
+   "value": "963218700000000.000000",
+   "title": "M2 for Japan",
+   "freq": "M",
+   "units": "National Currency",
+   "start": "1955-01-01"
+  },
+  "MYAGM2CNM189N": {
+   "last": "2019-08-01",
+   "value": "193549242773720.0",
+   "title": "M2 for China",
+   "freq": "M",
+   "units": "National Currency",
+   "start": "1998-12-01"
+  },
+  "MABMM301JPM189S": {
+   "last": "2023-11-01",
+   "value": "1597003700000000.0",
+   "title": "Monetary Aggregates and Their Components: Broad Money and Components: M3 for Japan",
+   "freq": "M",
+   "units": "Yen",
+   "start": "1980-01-01"
+  },
+  "MABMM301CNM189S": {
+   "last": "2018-12-01",
+   "value": "183756962616180.0",
+   "title": "Monetary Aggregates and Their Components: Broad Money and Components: M3 for China",
+   "freq": "M",
+   "units": "Yuan Renminbi",
+   "start": "1999-01-01"
+  },
+  "MABMM301KRM189S": {
+   "last": "2023-10-01",
+   "value": "5207204000000000.0",
+   "title": "Monetary Aggregates and Their Components: Broad Money and Components: M3 for Korea",
+   "freq": "M",
+   "units": "Won",
+   "start": "1980-01-01"
+  },
+  "MABMM301GBM189S": {
+   "last": "2023-11-01",
+   "value": "3474731000000.0",
+   "title": "Monetary Aggregates and Their Components: Broad Money and Components: M3 for United Kingdom",
+   "freq": "M",
+   "units": "Pound Sterling",
+   "start": "1986-12-01"
+  },
+  "T10Y2Y": {
+   "last": "2026-10-19",
+   "value": "0.38",
+   "title": "10-Year Treasury Constant Maturity Minus 2-Year Treasury Constant Maturity",
+   "freq": "D",
+   "units": "%",
+   "start": "1976-06-01"
+  },
+  "T10Y3M": {
+   "last": "2026-10-19",
+   "value": "0.88",
+   "title": "10-Year Treasury Constant Maturity Minus 3-Month Treasury Constant Maturity",
+   "freq": "D",
+   "units": "%",
+   "start": "1982-01-04"
+  },
+  "USREC": {
+   "last": "2026-09-01",
+   "value": "0",
+   "title": "NBER based Recession Indicators for the United States from the Period following the Peak through the Trough",
+   "freq": "M",
+   "units": "+1 or 0",
+   "start": "1854-12-01"
+  },
+  "CPIAUCSL": {
+   "last": "2026-09-01",
+   "value": "336.298",
+   "title": "Consumer Price Index for All Urban Consumers: All Items in U.S. City Average",
+   "freq": "M",
+   "units": "Index 1982-1984=100",
+   "start": "1947-01-01"
+  },
+  "CPILFESL": {
+   "last": "2026-09-01",
+   "value": "338.896",
+   "title": "Consumer Price Index for All Urban Consumers: All Items Less Food and Energy in U.S. City Average",
+   "freq": "M",
+   "units": "Index 1982-1984=100",
+   "start": "1957-01-01"
+  },
+  "PCEPILFE": {
+   "last": "2026-08-01",
+   "value": "130.455",
+   "title": "Personal Consumption Expenditures Excluding Food and Energy (Chain-Type Price Index)",
+   "freq": "M",
+   "units": "Index 2017=100",
+   "start": "1959-01-01"
+  },
+  "IRLTLT01KRM156N": {
+   "last": "2026-09-01",
+   "value": "4.454",
+   "title": "Interest Rates: Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for Korea",
+   "freq": "M",
+   "units": "%",
+   "start": "2000-10-01"
+  },
+  "IRLTLT01JPM156N": {
+   "last": "2026-09-01",
+   "value": "3.05",
+   "title": "Interest Rates: Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for Japan",
+   "freq": "M",
+   "units": "%",
+   "start": "1989-01-01"
+  },
+  "IRLTLT01DEM156N": {
+   "last": "2026-09-01",
+   "value": "3.46952380952381",
+   "title": "Interest Rates: Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for Germany",
+   "freq": "M",
+   "units": "%",
+   "start": "1956-05-01"
+  }
+ },
+ "ecb": {
+  "ECB_DFR": {
+   "last": "2026-10-20",
+   "value": "2.5",
+   "title": "Deposit facility - date of changes (raw data) - Level",
+   "unit": " provided by ECB\""
+  },
+  "EZ_M2_YOY": {
+   "last": "2026-08",
+   "value": "3.241497989111042",
+   "title": "\"Monetary aggregate M2",
+   "unit": "\"Euro area (changing composition)"
+  },
+  "EZ_M2_LVL": {
+   "last": "2026-08",
+   "value": "16447405",
+   "title": "\"Monetary aggregate M2",
+   "unit": "\"Euro area (changing composition)"
+  },
+  "EZ_LISTED_SHARES_MV": {
+   "err": 404
+  },
+  "EZ_LISTED_SHARES_MV2": {
+   "last": "2022-03",
+   "value": "9370441.46548216",
+   "title": "Outstanding amounts of listed shares  issued by euro area residents ",
+   "unit": " Listed shares"
+  }
+ },
+ "yahoo": {
+  "JPY=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 158.14999389648438
+  },
+  "TWD=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 32.6349983215332
+  },
+  "HKD=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 7.8480000495910645
+  },
+  "CNY=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 6.666500091552734
+  },
+  "INR=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 94.91500091552734
+  },
+  "EURUSD=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 1.1238480806350708
+  },
+  "GBPUSD=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 1.3376494646072388
+  },
+  "BRL=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 5.010799884796143
+  },
+  "KRW=X": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 1325.5899658203125
+  },
+  "^TWII": {
+   "start": "2016-10-20",
+   "last": "2026-10-19",
+   "value": 46822.078125
+  },
+  "^FTSE": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 10733.0
+  },
+  "^STOXX50E": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 6121.66015625
+  },
+  "^NSEI": {
+   "start": "2016-10-19",
+   "last": "2026-10-19",
+   "value": 22888.94921875
+  },
+  "^BVSP": {
+   "start": "2016-10-20",
+   "last": "2026-10-20",
+   "value": 208687.421875
+  }
+ }
+}
