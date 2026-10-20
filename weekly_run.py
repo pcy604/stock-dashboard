@@ -235,33 +235,8 @@ def main():
                   f, ensure_ascii=False, indent=2)
     print(f'JSON 저장: {json_path}')
 
-    # 포워드 페이퍼 트레이딩: 이번 주 신호를 가상 진입 기록 + 만기분 실현 갱신
-    # (실패해도 본 작업에 영향 없도록 격리)
-    try:
-        import paper_trade
-        paper_trade.log_from_screener(min_signals=2, max_log=40)
-        paper_trade.update_outcomes()
-        paper_trade.export_weights('4w')
-    except Exception as e:
-        print(f'⚠️ 페이퍼 트레이딩 기록 건너뜀: {e}')
-
-    # 주간 추천 포트폴리오 10선·20선 생성 + 히스토리 누적 (격리)
-    try:
-        import weekly_portfolio
-        _cash = weekly_portfolio._macro_cash_pct()
-        _p10 = weekly_portfolio.generate(10, cash_pct=_cash)
-        _p20 = weekly_portfolio.generate(20, cash_pct=_cash)
-        _ckr = None
-        try:                                   # 역발상 KR (조정장 엔진) — 실패해도 본 포트 유지
-            _ckr = weekly_portfolio.generate_contrarian_kr(10, cash_pct=_cash)
-        except Exception as _ce:
-            print(f'⚠️ 역발상 KR 생성 실패: {_ce}')
-        weekly_portfolio.save_snapshot(_p10, _p20, _ckr)
-        print(f'주간 포트폴리오 생성: 10선/20선'
-              f'{" + 역발상KR " + str(len(_ckr["positions"])) + "종목" if _ckr else ""}'
-              f' · 현금 {_cash*100:.0f}%')
-    except Exception as e:
-        print(f'⚠️ 주간 포트폴리오 생성 건너뜀: {e}')
+    # 2026-10-21 — 페이퍼 트레이딩(paper_trade)·주간 추천 10선/20선(weekly_portfolio) 폐지.
+    #   위닝점수 체계(옛 주봉 신호 6종)용이었고 화면·원칙 어디에도 쓰이지 않았다. 자동매매 원장은 executor/.
 
     # 텔레그램 전송 — 비활성화(2026-07): daily-refresh 워크플로가 이 스크립트를
     # 매일 돌려서 "주간 신호종목" 요약이 매일 발송되던 스팸을 차단.

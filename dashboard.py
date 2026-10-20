@@ -463,17 +463,6 @@ def _mdd_map() -> dict:
     return {s['sym']: s for s in d.get('stocks', [])}
 
 
-@st.cache_data(ttl=1800)
-def _attract_map(market: str = "전체") -> dict:
-    """sym → 매력도(위닝점수 0~100 · S/A/B/C 등급). winning_score(백테스트 샤프 가중) 기반 —
-    주봉 신호 유니버스에만 계산돼 있어 커버리지 밖 종목은 '-'."""
-    try:
-        import winning_score as _ws
-        return {r['sym']: {'score': r['score'], 'grade': r['grade']} for r in _ws.rank_all(market)}
-    except Exception:
-        return {}
-
-
 def _mdd_col(sym: str, mmap: dict):
     """고점대비 낙폭(%) — **숫자**로 돌려준다(2026-10-15. 문자열이면 정렬·필터·색이 안 된다)."""
     r = mmap.get(sym)
@@ -557,10 +546,6 @@ def _traj_col(sym: str, tmap: dict):
     lab = {'improving': '📈', 'deteriorating': '📉', 'stable': '➖'}.get(t.get('verdict'), '')
     return f"{lab} {t.get('traj_score')}/7"
 
-
-def _attract_col(sym: str, amap: dict):
-    r = amap.get(sym)
-    return f"{r['grade']} {r['score']:.0f}" if r and r.get('score') is not None else '-'
 
 SIG_COLS_PAST = ['past_sig_52w','past_sig_vol','past_sig_ma5','past_sig_cup','past_sig_maconv','past_sig_rsimacd']
 SIG_COLS_NOW  = ['now_sig_52w', 'now_sig_vol', 'now_sig_ma5', 'now_sig_cup', 'now_sig_maconv', 'now_sig_rsimacd']
@@ -1263,7 +1248,7 @@ tab_rep = tab_home
 # 순서 주의: 서브탭 핸들(t_gain…)은 아래 6개 블록이 전부 의존하므로 **무조건 먼저** 만든다.
 # 매크로 스트립처럼 실패할 수 있는 계산을 먼저 두면, 그게 죽는 순간 핸들이 미정의가 되어
 # 서브탭 6개가 통째로 NameError로 날아간다. 스트립은 자리(container)만 잡아두고 뒤에서 채운다.
-_MDDM, _ATTM = {}, {}
+_MDDM = {}
 
 with tab_screen:                           # 데이터를 건드리지 않는 순수 레이아웃 → 가드 불필요
     _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
@@ -1286,10 +1271,6 @@ try:
     _MDDM = _mdd_map()            # sym → 고점대비 낙폭
 except Exception:
     _MDDM = {}
-try:
-    _ATTM = _attract_map(_GMKT)   # sym → 매력도(위닝점수·등급)
-except Exception:
-    _ATTM = {}
 
 # ════════════════════════════════════════════════════════════════════
 # 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
@@ -1306,9 +1287,8 @@ with t_gain, guard('상승 상위'):
         _PERIODS = {'1주': ('perf', 'ret_1w'), '1개월': ('ret', 'ret_1m'), '3개월': ('ret', 'ret_3m'),
                     '6개월': ('ret', 'ret_6m'), '1년': ('ret', 'ret_12m'), 'YTD': ('ret', 'ret_ytd')}
         _gmkt = _GMKT
-        _gc1, _gc2, _gc3, _gc4 = st.columns([1.2, 1.2, 1, 1])
+        _gc1, _gc3, _gc4 = st.columns([1.2, 1, 1])
         _gper = _gc1.selectbox("상승률 기간", list(_PERIODS.keys()), index=1, key="gain_per")
-        _gsort = _gc2.selectbox("정렬", ["상승률", "위닝점수"], key="gain_sort")
         _gsig = _gc3.checkbox("신호 있는 종목만", value=False, key="gain_sigonly")
         _gn = _gc4.slider("표시 종목수", 10, 60, 30, key="gain_n")
         # ⚡타이밍 발굴에서 흡수한 두 필터 — 같은 데이터를 별도 화면으로 두던 중복 제거
@@ -1320,14 +1300,7 @@ with t_gain, guard('상승 상위'):
                                help="바닥 탐색용. 예: -60~-25 로 좁히면 크게 조정받은 종목만 남는다.")
         _src, _retkey = _PERIODS[_gper]
 
-        # 위닝 셋업 스코어 흡수 (점수/등급) — JSON 기반이라 가벼움
-        _winmap = {}
-        try:
-            import winning_score as _ws
-            for _wr in _ws.rank_all(_gmkt):
-                _winmap[_wr['sym']] = {'score': _wr['score'], 'grade': _wr['grade']}
-        except Exception:
-            pass
+        # 2026-10-21 위닝점수(옛 주봉 신호 6종 샤프 가중 점수) 폐지 — 원칙 v1 어디에도 안 쓰였다
 
         # perf 맵: 1주 수익률 + 현재 신호
         _SIGL = [('now_sig_52w', '52주신고가'), ('now_sig_vol', '거래량'), ('now_sig_maconv', '이평수렴'),
@@ -1384,13 +1357,9 @@ with t_gain, guard('상승 상위'):
                 if _dd_v is None or not (_gdd[0] <= _dd_v <= _gdd[1]):
                     continue
             cm = _canmap.get(s['sym'], {})
-            wm = _winmap.get(s['sym'], {})
-            _ws_v = wm.get('score')
             _grows.append({
                 '시장': s['market'], '종목': s['name'], '코드': s['sym'],
                 '시총($B)': cap_usd_b(s.get('marcap'), s['market']),
-                '등급': wm.get('grade', '-'),
-                '위닝점수': _ws_v if _ws_v is not None else None,   # 정렬용 원값
                 '신호': ', '.join(pm.get('sigs', [])[:3]) or '-',
                 # CANSLIM 점수 열은 2026-08-12 제거 — 🏆CANSLIM 서브탭과 같은 판정을 두 곳에서
                 # 다르게 보여주던 중복. 실적 증감(매출·영업익)만 남긴다.
@@ -1401,55 +1370,34 @@ with t_gain, guard('상승 상위'):
                 '향후2M계절성': _seasmap.get(s['sym']),
                 '고점대비%': _mdd_col(s['sym'], _MDDM),
             })
-        if _gsort == "위닝점수":
-            _grows.sort(key=lambda r: -(r['위닝점수'] if r['위닝점수'] is not None else -999))
-        else:
-            _grows.sort(key=lambda r: -(r[_retc] if r[_retc] is not None else -999))
+        _grows.sort(key=lambda r: -(r[_retc] if r[_retc] is not None else -999))
         _grows = _grows[:_gn]
-        # (구) 여기서 위닝점수·계절성을 문자열로 바꿨다 → 정렬·필터가 깨져서 2026-10-15 제거.
+        # (구) 여기서 점수·계절성을 문자열로 바꿨다 → 정렬·필터가 깨져서 2026-10-15 제거.
         #     표시 포맷은 column_config 가 맡는다.
 
-        _slab = "위닝점수순" if _gsort == "위닝점수" else f"{_gper}상승순"
+        _slab = f"{_gper}상승순"
         st.subheader(f"🔥 {_gper} 상승 상위 — {len(_grows)}개 · {_slab} ({_cmo}·{_nmo}월 계절성 동반)")
         st.caption(data_stamp('results/returns.json', '상승률 기준일'))
         _gdf = pd.DataFrame(_grows)
         def _cg2(v):
             try: return 'color:#16a34a;font-weight:bold' if float(str(v).replace('%','').replace('+','')) >= 0 else 'color:#dc2626'
             except: return ''
-        def _cg_grade(v):
-            return {'S': 'background-color:#1a472a;color:white;font-weight:bold',
-                    'A': 'background-color:#2d6a4f;color:white',
-                    'B': 'color:#f0c040', 'C': 'color:#888'}.get(str(v), '')
-        def _cg_score(v):
-            try:
-                f = float(v)
-                if f >= 80: return 'color:#15803D;font-weight:bold'
-                if f >= 65: return 'color:#7ee787'
-                if f >= 50: return 'color:#f0c040'
-            except: pass
-            return 'color:#888'
         _gsub = [c for c in [_retc, '향후2M계절성'] if c in _gdf.columns]
         _tsrc('FinanceDataReader(주가) → returns.json·seasonality.json', path='results/returns.json')
         st.dataframe(
-            _gdf.style.map(_cg2, subset=_gsub)
-                .map(_cg_grade, subset=['등급']).map(_cg_score, subset=['위닝점수']),
+            _gdf.style.map(_cg2, subset=_gsub),
             use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_gdf)),
             column_config={
                 '시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
-                '위닝점수': st.column_config.NumberColumn(format='%.1f'),
                 '매출%': st.column_config.NumberColumn(format='%+.0f%%'),
                 '영업익%': st.column_config.NumberColumn(format='%+.0f%%'),
                 _retc: st.column_config.NumberColumn(format='%+.1f%%'),
                 '향후2M계절성': st.column_config.NumberColumn(format='%+.1f%%'),
                 '고점대비%': st.column_config.NumberColumn(format='%+.1f%%')})
         st.caption(cap_caption())
-        _ncov = sum(1 for r in _grows if r['등급'] != '-')
-        st.caption(f"ℹ️ 위닝점수·신호·CANSLIM은 **주봉 신호 유니버스(337종목)**에만 계산돼 있어 "
-                   f"급등 소형주는 '-'가 많음 (현재 표시 {len(_grows)}개 중 {_ncov}개 커버). "
-                   "커버리지 확대(전 종목 스코어링)는 로드맵 항목.")
-        st.caption("위닝점수=백테스트 샤프 가중 셋업 점수(S≥80·A≥65·B≥50). 신호=주봉(현재). "
+        st.caption("신호=주봉(현재) — 주봉 신호 유니버스 종목만, 나머지는 '-'. "
                    "CANSLIM·매출/영업익은 KR 한정. 계절성·1주는 perf 기준. "
-                   "⚠️ 상승률 상위 = '이미 오른' 종목, 점수 = '셋업의 질'(미래 보장 아님) — 추격 주의, 손익비·가드레일 확인.")
+                   "⚠️ 상승률 상위 = '이미 오른' 종목 — 추격 주의.")
 
 
 # ── 주도주 (섹터/전체 상대강도) ──
@@ -2523,7 +2471,6 @@ with t_value, guard('가치 발굴'):
                    "(US 개별 종목 밸류는 🔍 종목 분석에서 공식 멀티플로 확인)")
     if _GMKT != "US":
         _vj = load_json(Path('results/value_kr.json'))
-        _ATTM = _attract_map("KR")   # 이 탭은 KR 전용 — 전역 _GMKT가 US여도 KR 매력도로 조회
         try:
             import consensus_snapshot as _cs
             _REVM = _cs.revision_map()          # sym → 애널 추정 리비전 방향(시계열 축적분)
@@ -2540,8 +2487,6 @@ with t_value, guard('가치 발굴'):
                                 help="'흑자전환'은 항상 통과")
             _vvec = _vc5.selectbox("궤적(벡터)", ["전체", "개선만(함정 제외)", "개선 가속만"], key="val_vec",
                                    help="위치가 싸도 펀더멘털이 악화 중이면 밸류 함정 — 벡터로 거른다")
-            st.radio("정렬", ["저PER순", "위닝점수순"], horizontal=True, key="val_sort",
-                     help="위닝점수 = 백테스트 샤프 가중 셋업 점수. '싼 순'만 보면 저PER 함정이 늘 위로 온다.")
             def _fmt_growth(v):
                 # 숫자·'흑자전환' 문자열 혼재 컬럼 → 균일 문자열 (Arrow 직렬화 오류 방지)
                 # 2026-10-15 — 숫자로 둔다(정렬·필터·색). 문자열 판정은 매출 성장에 의미가 없어 결측 처리.
@@ -2577,12 +2522,7 @@ with t_value, guard('가치 발굴'):
                                           .get((_REVM.get(s['sym']) or {}).get('dir'), '-')),
                                '고점대비%': _mdd_col(s['sym'], _MDDM),
                                '기준': s.get('per_basis') or s.get('period')})   # 'TTM 2026Q2' 또는 'FY2025'
-            # 정렬 축을 '싼 순'에만 묶어두면 저PER 함정이 늘 맨 위로 온다.
-            # 위닝점수(셋업의 질)는 이미 전 표에 계산돼 있으니 정렬 축으로도 쓴다.
-            if st.session_state.get('val_sort', '저PER순') == '위닝점수순':
-                _vrows.sort(key=lambda r: -(( _ATTM.get(r['코드']) or {}).get('score') or -1))
-            else:
-                _vrows.sort(key=lambda r: r['PER'])
+            _vrows.sort(key=lambda r: r['PER'])     # 다른 축은 표 머리를 눌러 정렬 · 밸류 함정은 '궤적' 필터로
             _ntrap = sum(1 for s in _vj['stocks'] if (s.get('traj') or {}).get('verdict') == 'deteriorating')
             st.subheader(f"💎 저평가·우량 — {len(_vrows)}개 (PER≤{_vper} · PBR≤{_vpbr} · ROE≥{_vroe}% · 영업익≥{_vgrw}%)")
             if _vrows:
@@ -2622,7 +2562,6 @@ with tab3, guard('CANSLIM'):
     _CS_SETS = [(m, p) for m, p in (('KR', CANSLIM_JSON), ('US', Path('results/canslim_us_latest.json')))
                 if _GMKT in ("전체", m)]
     _CS = {m: load_json(p) for m, p in _CS_SETS}
-    _ATTM = _attract_map(_GMKT)
     _TRAJM = _traj_map()                             # 궤적(KR만) — US는 '-'
     st.header("🏆 CANSLIM 스크리너" + ("" if _GMKT == "전체" else f" ({'한국' if _GMKT == 'KR' else '미국'})"))
     for _m, _p in _CS_SETS:
@@ -2737,7 +2676,6 @@ with tab3, guard('CANSLIM'):
                 'I 순매수(억)': _n(i_inst),
                 '고점대비%': _mdd_col(s['sym'], _MDDM),
                 '궤적': _traj_col(s['sym'], _TRAJM) if _mk3 == 'KR' else '-',
-                '매력도': _attract_col(s['sym'], _ATTM),
                 '_score':  score,
                 '_ok': {'C': c_ok, 'A': a_ok, 'S': s_ok, 'I': i_ok},
             })
@@ -2761,7 +2699,7 @@ with tab3, guard('CANSLIM'):
 
             # 컬럼을 CANSLIM 글자 순서(C→A→N→S→L→I)로 (#3)
             disp3 = ['시장', '종목명', '코드', '시총($B)', _SC3, '통과', 'C 분기%', 'A 최근년%', 'A 전년%', '전환', '일회성',
-                     'N 거리%', 'S 배수', 'RS(L) 백분위(p)', 'I 순매수(억)', '고점대비%', '궤적', '매력도']
+                     'N 거리%', 'S 배수', 'RS(L) 백분위(p)', 'I 순매수(억)', '고점대비%', '궤적']
             if _GMKT != "전체":
                 disp3.remove('시장')
             if not _i_live:

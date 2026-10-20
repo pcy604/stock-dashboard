@@ -214,7 +214,7 @@ SOURCES = [
     #   시황 리포트·주간 포트폴리오·executor 는 낡은 판정을 읽는다.
     dict(path='results/macro.json', label='이번 주 판정 (코어 200일선 스위치)',
          cycle='매일 06:00', max_age=5, producer='verdict.py',
-         job='daily-refresh · verdict(수동)', used_by='상단 배지 · 🏠 종합 · 📰 시황 리포트 · 주간 포트폴리오 · executor',
+         job='daily-refresh · verdict(수동)', used_by='상단 배지 · 🏠 종합 · 📰 시황 리포트 · executor',
          getter=_key('asof')),
     dict(path='results/market_report.json', label='시황 리포트 (일간·주간)',
          cycle='매일 06:00 · 월 주간', max_age=4, producer='market_report.py',
@@ -224,11 +224,6 @@ SOURCES = [
          cycle='주 1회', max_age=9, producer='turnaround_run.py',
          job='weekly-accel (금 22:17 UTC)', used_by='🔎 종목 발굴 → 🔄 흑자전환',
          getter=_key('date')),
-    # 검증 루프의 심장 — 이게 멈추면 '못 하는 신호를 자동 감액'이 조용히 멈춘다
-    dict(path='results/signal_live_weights.json', label='실전 신뢰계수 (신호별 가중)',
-         cycle='주 1회 (weekly_run 동시)', max_age=9, producer='paper_trade.py',
-         job='daily-refresh', used_by='winning_score (🔥 상승 상위 점수 보정) — 관측 화면 없음',
-         getter=_key('updated')),
 ]
 
 
@@ -356,7 +351,6 @@ DEPS = {
     'results/leaders_kr6.json':          ['data/kr_fundamentals_q.parquet', 'src:fdr'],
     'results/leaders_kr.json':           ['src:fdr', 'src:dart'],
     'results/leaders_kr_paper.json':     ['results/leaders_kr6.json', 'results/leaders_kr.json'],
-    'results/signal_live_weights.json':  ['results/screener_latest.json'],
     'results/turnaround_latest.json':    ['src:yf', 'src:fdr'],
 }
 
