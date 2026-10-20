@@ -2908,7 +2908,7 @@ def _world_strength_panel():
     per = [k for k, _ in _is.PERIODS]
     t = pd.DataFrame({'지수': df['지수'], '지역': df['지역'],
                       '국가 시총($T)': df['지수'].map(lambda n: _cm[n][0] if n in _cm else np.nan),
-                      '실측/추정': df['지수'].map(lambda n: ('실측' if not _cm[n][2] else '추정') if n in _cm else '-')})
+                      '실측/추정': df['지수'].map(lambda n: ('실측' if not _cm[n][2] else f"추정({_cm[n][1][:4]})") if n in _cm else '-')})
     for k in per:
         t[f'{k}(%)'] = df[k].astype(float)
     t['고점대비(%)'] = df['고점대비'].astype(float)
@@ -2929,7 +2929,7 @@ def _world_strength_panel():
                "나머지는 **추정**: 연말 공식 값(세계은행, 대만은 TWSE 연보) × 그 뒤 대표 지수 변동 × 그 뒤 환율 변동. "
                "지수가 시장 전체를 다 담지 못하고 신규 상장·상장폐지를 반영하지 못해 수 % 오차가 날 수 있다. "
                "같은 나라 지수는 같은 값(미국 4개는 S&P500, 한국 2개는 KRX 합). "
-               "유로스톡스50 '-' = 유로존 시총 공식 값이 2018년(세계은행)·2022년(ECB)에서 끊겨 오늘 값을 만들 수 없음. "
+               "괄호 = 기준 연말. 유로스톡스50 '-' = 유로존 시총 공식 값이 2018년(세계은행)·2022년(ECB)에서 끊겨, 지수 하나로 8년을 끌어오면 오차가 너무 커서 비움. "
                "기준: " + (' / '.join(_how) if _how else '자료 없음') + ".")
     st.caption("순서 = **강도 순위**(고점대비 · 3개월 · 6개월 수익률의 순위 평균). "
                "**3개월 신고가(회)** = 최근 63거래일 중 52주 신고가를 새로 쓴 날 수 — 많을수록 추세가 살아 있다. "
@@ -3578,7 +3578,7 @@ def _macro_detail_charts():
             _cv = lambda a, f: (a * f.reindex(a.index, method='ffill')) if len(a) and len(f) else pd.Series(dtype=float)
             g3 = pd.DataFrame({'Fed': me(fed), 'ECB': _cv(me(ecb), me(eur)) / 1e6,
                                'BoJ': _cv(me(boj) * 1e8, 1 / me(jpy) if len(jpy) else pd.Series(dtype=float)) / 1e12})
-            g3 = _cut(g3).dropna(how='all')
+            g3 = _cut(g3).dropna(how='all').ffill()      # 월간(BoJ)·주간(Fed·ECB) 발표 시차로 마지막 달이 빠져 합계가 꺼지지 않게
             fig = go.Figure()
             for c in ['Fed', 'ECB', 'BoJ']:
                 if c in g3 and g3[c].notna().any():

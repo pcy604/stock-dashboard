@@ -27,9 +27,20 @@ MANUAL = {
 def main():
     url = ('https://api.worldbank.org/v2/country/' + ';'.join(CODES) +
            '/indicator/CM.MKT.LCAP.CD?format=json&per_page=2000&date=2015:2026')
-    r = requests.get(url, timeout=40)
-    r.raise_for_status()
-    rows = r.json()[1] or []
+    rows, last = None, None
+    for i in range(4):                 # 세계은행 API 는 가끔 느리거나 HTML 오류 페이지를 준다
+        try:
+            r = requests.get(url, timeout=60)
+            r.raise_for_status()
+            rows = r.json()[1] or []
+            break
+        except Exception as e:
+            last = e
+            print(f'  재시도 {i + 1}: {str(e)[:100]}', flush=True)
+            import time; time.sleep(10 * (i + 1))
+    if rows is None:
+        print(f'::error::세계은행 API 실패 — {last}')
+        return 1
     out = {}
     for x in rows:
         c, v, y = x['countryiso3code'] or x['country']['id'], x['value'], x['date']

@@ -329,6 +329,8 @@ def country_mcap(base: dict, closes_by_name: dict, fx: dict | None = None, actua
         if not b or not (b.get('usd') or b.get('local')):
             continue
         y = int(b['year']); ye = pd.Timestamp(y, 12, 31)
+        if pd.Timestamp.now().year - y > 4:
+            continue                       # 5년 넘은 연말 값을 지수 하나로 끌어오면 오차가 너무 크다(유로존 2018) → '-'
         s = _clean(closes_by_name.get(ref))
         i0 = _at(s, ye) if len(s) else None
         if i0 is None:
