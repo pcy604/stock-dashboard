@@ -1,0 +1,27 @@
+# 매크로 데이터 소스 신선도 진단 — 수동 또는 macro-* 브랜치에서 진단 스크립트가 바뀔 때
+name: diag-sources
+on:
+  workflow_dispatch:
+  push:
+    branches: ['macro-*']
+    paths: ['tools/diag_macro_sources.py', '.github/workflows/diag-sources.yml']
+permissions:
+  contents: write
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FRED_KEY: ${{ secrets.FRED_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests yfinance pandas
+      - run: python tools/diag_macro_sources.py
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add -f data/research/diag_sources.json
+          git commit -m "auto: 매크로 소스 진단 $(date -u +%F)" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"
