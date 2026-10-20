@@ -32,8 +32,22 @@ for s in lost:
     wks = pd.to_datetime(ow[s])
     rec = dict(old_weeks=ow[s], fw_rows=int(len(x)), in_marketcap=bool(s in mc.index),
                mcap_now=(float(mc[s]) if s in mc.index else None), in_universe_ever=s in ever)
+    rec['fq_file'] = os.path.exists(f'data/leaders_cache/fq_{s}.csv')
+    rec['dy_file'] = os.path.exists(f'data/leaders_cache/dy_{s}.csv')
+    try:
+        import price_store
+        _w = price_store.get(s, 'US')
+        rec['prices_wk'] = 0 if _w is None else int(len(_w))
+    except Exception as _e:
+        rec['prices_wk'] = f'err {str(_e)[:40]}'
+    if len(x):
+        _y = x.reindex(pd.to_datetime(ow[s]))
+        rec['marcap_at_old_B'] = [None if v != v else round(float(v) / 1e9, 3) for v in _y.marcap.tolist()][:6]
+        rec['close_at_old'] = [None if v != v else round(float(v), 2) for v in _y.close.tolist()][:6]
     if not len(x):
-        k = 'DB(factor_weekly)에 없음'
+        k = ('DB 없음 · 재무파일(fq_) 없음' if not rec['fq_file'] else
+             'DB 없음 · 주봉 80주 미만' if not rec['prices_wk'] or (isinstance(rec['prices_wk'], int) and rec['prices_wk'] < 80) else
+             'DB 없음 · 재무·주봉 있음(적재 누락)')
     else:
         y = x.reindex(wks)
         rec.update(rows_at_old_weeks=int(y.close.notna().sum()),
@@ -59,7 +73,7 @@ for s in lost:
     cat[k] += 1
     out[s] = rec
     print(f"::notice title=사라진 {s}::{k} · " + json.dumps({kk: vv for kk, vv in rec.items() if kk != 'old_weeks'},
-                                                          ensure_ascii=False)[:600])
+                                                          ensure_ascii=False)[:900])
 for k, n in cat.most_common():
     print(f"::warning title=사라진 {len(lost)}종 분류::{k} {n}종 — {' '.join(s for s in lost if out[s]['reason'] == k)}")
 json.dump(dict(cut=cut, lost=len(lost), by_reason=dict(cat), detail=out),

@@ -109,4 +109,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        import traceback
+        tb = traceback.format_exc()
+        print(tb)
+        print("::error title=PEAD 재검증 예외::" + tb[-900:].replace("\n", " | "))
+        sys.exit(1)
