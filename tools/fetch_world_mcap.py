@@ -17,6 +17,11 @@ import requests
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(BASE, 'data', 'world_mcap.json')
 CODES = ['USA', 'KOR', 'JPN', 'HKG', 'CHN', 'IND', 'DEU', 'GBR', 'BRA', 'EMU', 'TWN']
+# 세계은행에 없는 나라 — 거래소 공식 연말 값(현지 통화). 출처를 같이 적는다.
+MANUAL = {
+    'TWN': {'local': 94.36e12, 'ccy': 'TWD', 'year': 2025, 'name': 'Taiwan',
+            'source': 'TWSE 상장사 시가총액 2025년 말 NT$94.36조 (중화민국 교무위원회 OCAC 2026-01 보도, TWSE 연보)'},
+}
 
 
 def main():
@@ -32,6 +37,9 @@ def main():
             continue
         if c not in out or int(y) > out[c]['year']:
             out[c] = {'usd': float(v), 'year': int(y), 'name': x['country']['value']}
+    for c, v in MANUAL.items():
+        if c not in out:
+            out[c] = v
     miss = [c for c in CODES if c not in out]
     print(json.dumps(out, ensure_ascii=False, indent=1))
     print('없음:', miss)

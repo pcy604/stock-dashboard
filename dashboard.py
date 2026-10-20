@@ -2853,7 +2853,8 @@ def _world_index_closes():
     """세계 지수 종가 — FDR 먼저, 안 되면 yfinance. 실패한 지수는 빈칸(None)으로 남긴다."""
     import index_strength as _is
     # 3년 — 52주 창(252일) 위에서 '마지막 신고가'를 1년 넘게 거슬러 찾으려면 이만큼 필요하다
-    start = (datetime.now() - timedelta(days=1100)).strftime('%Y-%m-%d')
+    # 2026-10-21 — 10년: 비교 차트 기간 선택 + 국가 시총의 연말 기준점(영국 2022 등)을 찾으려면 길어야 한다
+    start = (datetime.now() - timedelta(days=3700)).strftime('%Y-%m-%d')
     out, src = {}, {}
     for fsym, ysym, name, region in _is.INDICES:
         s = None
@@ -2892,10 +2893,22 @@ def _world_strength_panel():
     # 2026-10-20 — 히트맵(plotly)을 다른 탭과 같은 표(table_ui)로 바꿨다. 색 규칙도 표 공통 규칙을 따른다.
     import macro_flow as _mfw
     _wb = load_json(Path('data/world_mcap.json')) or {}
-    _cm = _mfw.country_mcap(_wb, {n: v for (n, _), v in closes.items()})
+    _fx = _mo_fx_closes()
+    _act = {}
+    try:   # 한국 = KRX 상장목록 시총 합(거래소 실측) ÷ 원/달러
+        _kl = pd.read_csv('data/krx_listing_last.csv', usecols=['Marcap'])
+        _kfx = _mfw.usd_per_local(_fx.get('KRW'), False)
+        if len(_kl) > 2000 and len(_kfx):
+            _act['KOR'] = (float(_kl['Marcap'].sum()) * float(_kfx.iloc[-1]),
+                           (open('data/krx_listing_last.csv.asof').read().strip()
+                            if os.path.exists('data/krx_listing_last.csv.asof') else '날짜 미상'))
+    except Exception:
+        pass
+    _cm = _mfw.country_mcap(_wb, {n: v for (n, _), v in closes.items()}, fx=_fx, actual=_act)
     per = [k for k, _ in _is.PERIODS]
     t = pd.DataFrame({'지수': df['지수'], '지역': df['지역'],
-                      '국가 시총($T)': df['지수'].map(lambda n: _cm[n][0] if n in _cm else np.nan)})
+                      '국가 시총($T)': df['지수'].map(lambda n: _cm[n][0] if n in _cm else np.nan),
+                      '실측/추정': df['지수'].map(lambda n: ('실측' if not _cm[n][2] else '추정') if n in _cm else '-')})
     for k in per:
         t[f'{k}(%)'] = df[k].astype(float)
     t['고점대비(%)'] = df['고점대비'].astype(float)
@@ -2903,24 +2916,125 @@ def _world_strength_panel():
     t['3개월 신고가(회)'] = df['신고가3m']
     t['마지막 신고가'] = df['신고가일'].map(lambda d: d.strftime('%Y-%m-%d') if d is not None and not pd.isna(d) else '-')
     _asof = df['기준일'].max()
-    _yrs = sorted({v[1] for v in _cm.values()})
     st.dataframe(t, filters=False,
-                 src='FinanceDataReader·Yahoo(지수 종가: ' + ', '.join(sorted(set(src.values()))) + ') · 세계은행 CM.MKT.LCAP.CD(국가 시총)',
+                 src='FinanceDataReader·Yahoo(지수 종가: ' + ', '.join(sorted(set(src.values()))) + ') · 국가 시총: 세계은행 CM.MKT.LCAP.CD · TWSE 연보 · KRX 상장목록 · Yahoo 환율',
                  asof=_asof.strftime('%Y-%m-%d') if hasattr(_asof, 'strftime') else None,
                  column_config={'국가 시총($T)': st.column_config.NumberColumn('국가 시총($T)', format='%.2f'),
                                 **{f'{k}(%)': st.column_config.NumberColumn(f'{k}(%)', format='%+.1f') for k in per},
                                 '고점대비(%)': st.column_config.NumberColumn('고점대비(%)', format='%+.1f'),
                                 '신고가 후(일)': st.column_config.NumberColumn('신고가 후(일)', format='%d'),
                                 '3개월 신고가(회)': st.column_config.NumberColumn('3개월 신고가(회)', format='%d')})
-    st.caption("**국가 시총** = 세계은행 연말 상장기업 시가총액(" + (', '.join(map(str, _yrs)) if _yrs else '자료 없음') +
-               "년 말) × 그 뒤 그 나라 대표 지수 변동률로 낸 **추정치**다(지수는 현지 통화 — 환율 변동 미반영). "
-               "같은 나라 지수는 같은 값(미국 4개는 S&P500, 한국 2개는 코스피 기준). "
-               "'-' = 세계은행 자료가 없거나(대만) 너무 오래돼(영국·유로존) 오늘 값으로 보이면 안 되는 경우.")
+    _how = sorted({v[1] for v in _cm.values()})
+    st.caption("**국가 시총** — 한국은 KRX 상장목록 시총 합(거래소 실측, 매일)을 원/달러로 나눈 값. "
+               "나머지는 **추정**: 연말 공식 값(세계은행, 대만은 TWSE 연보) × 그 뒤 대표 지수 변동 × 그 뒤 환율 변동. "
+               "지수가 시장 전체를 다 담지 못하고 신규 상장·상장폐지를 반영하지 못해 수 % 오차가 날 수 있다. "
+               "같은 나라 지수는 같은 값(미국 4개는 S&P500, 한국 2개는 KRX 합). "
+               "유로스톡스50 '-' = 유로존 시총 공식 값이 2018년(세계은행)·2022년(ECB)에서 끊겨 오늘 값을 만들 수 없음. "
+               "기준: " + (' / '.join(_how) if _how else '자료 없음') + ".")
     st.caption("순서 = **강도 순위**(고점대비 · 3개월 · 6개월 수익률의 순위 평균). "
                "**3개월 신고가(회)** = 최근 63거래일 중 52주 신고가를 새로 쓴 날 수 — 많을수록 추세가 살아 있다. "
                "**신고가 후(일)** 가 '-' 면 최근 2년 안에 52주 신고가가 없었다는 뜻. "
                "⚠️ 각국 통화 기준(환율 미반영) · 종가 기준 신고가(장중 아님)."
                + (f" ⚠️ 못 받은 지수: {', '.join(miss)}." if miss else ""))
+    _index_compare_chart(closes)
+
+
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _mo_fx_closes_cached():
+    import macro_flow as _mfx
+    syms = {c: v[0] for c, v in _mfx.FX_SYMBOL.items()}
+    d = yf.download(list(syms.values()), period='10y', auto_adjust=True, progress=False, threads=True)
+    c = d['Close'] if isinstance(d.columns, pd.MultiIndex) else d
+    out = {ccy: c[sym].dropna() for ccy, sym in syms.items() if sym in c.columns and c[sym].notna().sum() > 100}
+    if len(out) < 4:
+        raise RuntimeError('환율 대부분 실패')
+    return out
+
+
+def _mo_fx_closes():
+    """{통화: Yahoo 환율 원시 시계열}. 실패하면 빈 dict(국가 시총은 환율 보정이 필요한 나라를 '-'로 둔다)."""
+    if _recently_failed('mo_fx'):
+        return {}
+    try:
+        return _mo_fx_closes_cached()
+    except Exception:
+        _mark_failed('mo_fx')
+        return {}
+
+
+def _index_compare_chart(closes):
+    """지수·자산 비교 — 시작일 = 100 으로 맞춰 같은 출발선에서 본다 (2026-10-21 사용자 요청)."""
+    import macro_flow as _mfc
+    st.markdown("##### 📈 비교 차트 — 시작일을 100으로")
+    pool = {n: v for (n, _), v in closes.items() if v is not None and len(v) > 30}
+    _ac = _mo_asset_closes()
+    for nm, sym, _ in _mfc.ASSETS:
+        if sym in ('SPY', '^KS11'):          # 지수와 중복
+            continue
+        if _ac.get(sym) is not None and len(_ac[sym]) > 30:
+            pool[nm] = _ac[sym]
+    if not pool:
+        st.info("비교할 시세를 받지 못했습니다.")
+        return
+    pool = {k: _mfc._clean(v) for k, v in pool.items()}
+    first = min(v.index[0] for v in pool.values()).date()
+    today = max(v.index[-1] for v in pool.values()).date()
+    c0, c1, c2 = st.columns([2.2, 1.2, 2.6])
+    preset = c0.segmented_control('기간', ['3개월', '6개월', '1년', '3년', '5년', '직접'], default='1년', key='cmp_p')
+    cur = c1.segmented_control('통화', ['현지', '달러', '원화'], default='현지', key='cmp_c',
+                               help='달러·원화 = 각 지수를 그 통화로 환산(Yahoo 환율). 원화 기준이 우리 계좌에 실제로 찍히는 수익이다')
+    _d = {'3개월': 91, '6개월': 182, '1년': 365, '3년': 1095, '5년': 1826}
+    if preset == '직접':
+        d1, d2 = c2.columns(2)
+        start = d1.date_input('시작일', value=today - timedelta(days=365), min_value=first, max_value=today, key='cmp_s')
+        end = d2.date_input('종료일', value=today, min_value=first, max_value=today, key='cmp_e')
+    else:
+        start, end = max(first, today - timedelta(days=_d.get(preset or '1년', 365))), today
+    default = [n for n in ('S&P500', '나스닥', '코스피', '닛케이225', '대만 가권', '비트코인') if n in pool]
+    sel = st.multiselect('비교 대상', list(pool), default=default, key='cmp_sel')
+    if not sel or start >= end:
+        st.caption("대상을 고르고 시작일이 종료일보다 앞서게 해 주세요.")
+        return
+    fx = _mo_fx_closes()
+    ccy_of = {n: v[2] for n, v in _mfc.INDEX_COUNTRY.items()}
+    krw = _mfc.usd_per_local(fx.get('KRW'), False) if fx.get('KRW') is not None else pd.Series(dtype=float)
+    fig = go.Figure(); rows = []; miss = []
+    for n in sel:
+        sr = pool[n]
+        loc = ccy_of.get(n, 'USD')          # 자산(금·BTC 등)은 달러 표시
+        if cur != '현지' and loc != 'USD':
+            sym, direct = _mfc.FX_SYMBOL.get(loc, (None, True))
+            f = _mfc.usd_per_local(fx.get(loc), direct) if fx.get(loc) is not None else pd.Series(dtype=float)
+            if not len(f):
+                miss.append(n); continue
+            sr = (sr * f.reindex(sr.index.union(f.index)).ffill().reindex(sr.index)).dropna()
+        if cur == '원화':
+            if not len(krw):
+                miss.append(n); continue
+            sr = (sr / krw.reindex(sr.index.union(krw.index)).ffill().reindex(sr.index)).dropna()
+        w = sr[(sr.index >= pd.Timestamp(start)) & (sr.index <= pd.Timestamp(end))]
+        if len(w) < 5:
+            miss.append(n); continue
+        y = w / float(w.iloc[0]) * 100
+        fig.add_trace(go.Scatter(x=y.index, y=y.values, mode='lines', name=n, line=dict(width=2),
+                                 hovertemplate=f'{n} %{{y:.1f}}<extra></extra>'))
+        r = w.pct_change().dropna()
+        rows.append({'대상': n, '기간 수익률(%)': float(y.iloc[-1] - 100),
+                     '기간 최대낙폭(%)': float((w / w.cummax() - 1).min() * 100),
+                     '연환산 변동성(%)': float(r.std() * np.sqrt(252) * 100) if len(r) > 5 else np.nan})
+    fig.add_hline(y=100, line_color='rgba(120,124,134,.55)', line_width=1)
+    fig.update_layout(height=380, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
+                      legend=dict(orientation='h', y=1.08, x=0), yaxis_title=f'시작일 {start} = 100')
+    st.plotly_chart(fig, use_container_width=True)
+    if rows:
+        tb = pd.DataFrame(rows).sort_values('기간 수익률(%)', ascending=False)
+        st.dataframe(tb, filters=False,
+                     src=f"FinanceDataReader·Yahoo(종가) · {'현지 통화' if cur == '현지' else cur + ' 환산(Yahoo 환율)'} · {start} ~ {end}",
+                     asof=str(end),
+                     column_config={c: st.column_config.NumberColumn(c, format='%+.1f' if '수익률' in c or '낙폭' in c else '%.1f')
+                                    for c in tb.columns if c != '대상'})
+    if miss:
+        st.caption(f"⚠️ 기간 안 시세나 환율이 부족해 뺀 대상: {', '.join(miss)}")
 
 
 def _fred_latest(series_id: str):
@@ -3176,7 +3290,7 @@ import macro_flow as _mf
 @st.cache_data(ttl=3 * 3600, show_spinner=False)
 def _mo_asset_closes_cached():
     syms = [s for _, s, _ in _mf.ASSETS] + [_mf.FX_KRW]
-    d = yf.download(syms, period='2y', auto_adjust=True, progress=False, threads=True)
+    d = yf.download(syms, period='10y', auto_adjust=True, progress=False, threads=True)   # 비교 차트 기간 선택용 10년
     c = d['Close'] if isinstance(d.columns, pd.MultiIndex) else d
     out = {s: c[s].dropna() for s in syms if s in c.columns}
     if sum(len(v) > 30 for v in out.values()) < 3:
@@ -3319,6 +3433,173 @@ def _macro_v2_top(_PX, _RG):
     return dict(core_on=core_on, gap200=gap200, c1=c1, dxy_gap=dxy_gap, dxy_13=dxy_13, G=G)
 
 
+def _regime_history_panel():
+    """국면 이력 — 지금 쓰는 4계절 판정 규칙을 지난 10년에 그대로 적용해 S&P500 위에 칠한다(2026-10-21).
+    판정이 그럴듯한지 눈으로 검산하는 용도다. 월간 지표는 발표 시차 1개월을 반영한다."""
+    import macro_svg as _msv
+    with st.spinner("국면 이력 계산 중..."):
+        fed = _mf.to_series(fetch_fred('FEDFUNDS', 170))
+        ip = _mf.to_series(fetch_fred('INDPRO', 170))
+        ur = _mf.to_series(fetch_fred('UNRATE', 170))
+        spx = fetch_index_history('SPY', 4300)
+    if spx.empty or fed.empty or ip.empty:
+        st.info("국면 이력에 필요한 시계열(FRED·지수)을 받지 못했습니다.")
+        return
+    h = _mf.regime_history(fed, ip, ur, spx.iloc[:, 0])
+    if h.empty:
+        st.info("국면 이력을 계산할 만큼 자료가 쌓이지 않았습니다.")
+        return
+    fig = go.Figure()
+    seg_start = h.index[0]; cur = h['phase'].iloc[0]
+    bounds = []
+    for dt, ph in h['phase'].items():
+        if ph != cur:
+            bounds.append((seg_start, dt, cur)); seg_start, cur = dt, ph
+    bounds.append((seg_start, h.index[-1] + pd.offsets.MonthEnd(0), cur))
+    for x0, x1, ph in bounds:
+        fig.add_vrect(x0=x0 - pd.offsets.MonthBegin(1), x1=x1, fillcolor=_msv.SEASON_COLOR[ph], opacity=0.13,
+                      line_width=0, layer='below')
+    fig.add_trace(go.Scatter(x=h.index, y=h['close'], mode='lines', name='S&P500(SPY)', line=dict(width=2, color='#16181D'),
+                             customdata=[SEASONS[p]['name'] for p in h['phase']],
+                             hovertemplate='%{x|%Y-%m} · %{customdata}<br>%{y:,.1f}<extra></extra>'))
+    for k in _msv.SEASON_ORDER:          # 범례용
+        fig.add_trace(go.Scatter(x=[None], y=[None], mode='markers', name=f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}",
+                                 marker=dict(size=12, symbol='square', color=_msv.SEASON_COLOR[k], opacity=.45)))
+    fig.update_layout(height=360, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
+                      legend=dict(orientation='h', y=1.1, x=0), yaxis=dict(type='log', title='SPY (로그)'))
+    st.plotly_chart(fig, use_container_width=True)
+    fw = _mf.regime_forward(h, 3)
+    if len(fw):
+        fw.index = [f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}" for k in fw.index]
+        fw = fw.reset_index().rename(columns={'index': '국면'})
+        st.dataframe(fw, filters=False,
+                     src=f"FRED(FEDFUNDS·INDPRO·UNRATE, 발표 시차 1개월) · FinanceDataReader(SPY) · {h.index[0]:%Y-%m}~{h.index[-1]:%Y-%m} 월말",
+                     asof=f"{h.index[-1]:%Y-%m-%d}",
+                     column_config={'개월 수': st.column_config.NumberColumn('개월 수', format='%d'),
+                                    '다음 3개월 평균(%)': st.column_config.NumberColumn('다음 3개월 평균(%)', format='%+.1f'),
+                                    '다음 3개월 상승 비율(%)': st.column_config.NumberColumn('다음 3개월 상승 비율(%)', format='%.0f')})
+    st.caption("배경색 = 그 달 판정 국면, 선 = S&P500. 같은 규칙을 과거에 그대로 적용했다(미래 값 미사용). "
+               "표의 '다음 3개월'은 국면 판정 뒤 지수가 실제로 어떻게 움직였나 — 10년·개월 수가 작아 통계적 결론이 아니라 검산용이다. "
+               "비중 규칙의 근거는 아래 '욕심 조절 원칙'(1988~2026 검증)이다.")
+
+
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _ecb_series_cached(key: str, start: str):
+    """ECB Data Portal(무료·키 없음) 시계열 → Series. 실패는 예외(캐시에 안 남김)."""
+    r = requests.get(f'https://data-api.ecb.europa.eu/service/data/{key}',
+                     params={'format': 'csvdata', 'startPeriod': start}, timeout=12)
+    r.raise_for_status()
+    df = pd.read_csv(io.StringIO(r.text))
+    s = pd.Series(pd.to_numeric(df['OBS_VALUE'], errors='coerce').values,
+                  index=pd.to_datetime(df['TIME_PERIOD'])).dropna().sort_index()
+    if s.empty:
+        raise RuntimeError('empty')
+    return s
+
+
+def _ecb_series(key: str, start: str = '2014-01'):
+    if _recently_failed(f'ecb:{key}'):
+        return pd.Series(dtype=float)
+    try:
+        return _ecb_series_cached(key, start)
+    except Exception:
+        _mark_failed(f'ecb:{key}')
+        return pd.Series(dtype=float)
+
+
+def _det_fig(series: dict, ytitle: str, step: bool = False, height: int = 300, yfmt: str = '.2f'):
+    fig = go.Figure()
+    for lab, sr in series.items():
+        if sr is None or len(sr) == 0:
+            continue
+        fig.add_trace(go.Scatter(x=sr.index, y=sr.values, mode='lines', name=lab,
+                                 line=dict(width=2, shape='hv' if step else 'linear'),
+                                 hovertemplate=f'{lab} %{{y:{yfmt}}}<extra></extra>'))
+    fig.update_layout(height=height, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
+                      legend=dict(orientation='h', y=1.12, x=0), yaxis_title=ytitle)
+    return fig
+
+
+def _last_dates(series: dict) -> str:
+    return ' · '.join(f"{k} {v.index[-1]:%Y-%m-%d}" for k, v in series.items() if v is not None and len(v))
+
+
+def _macro_detail_charts():
+    """상세 지표 차트 (2026-10-21 전면 정비).
+    고친 것: ① limit=60(일간 계열이면 두 달치)로 받아 금리·스프레드가 잘려 보이던 것 → 기간 선택(2·5·10년)
+    ② 끊긴 FRED 계열 교체 — PBoC(2023-11 중단)·유로존/일본/중국 M2(2017~2023 중단)·BoK 할인율(IMF)
+       → 일본·한국은 익일물 콜금리(OECD, 매월), 영국 SONIA, 유로존 M2 는 ECB Data Portal, 유동성은 G3 중앙은행 총자산."""
+    with st.expander("📊 상세 지표 차트 — 정책금리 · 장기금리 · 수익률곡선 · 물가 · 유동성"):
+        yrs = {'2년': 2, '5년': 5, '10년': 10}[st.segmented_control('기간', ['2년', '5년', '10년'], default='5년', key='det_rng') or '5년']
+        cut = pd.Timestamp.now() - pd.DateOffset(years=yrs)
+        _cut = lambda x: x[x.index >= cut] if len(x) else x
+        F = lambda sid, n: _cut(_mf.to_series(fetch_fred(sid, n)))
+        t1, t2, t3, t4, t5 = st.tabs(['🏦 정책금리', '📈 10년 국채', '📉 수익률곡선', '🔥 물가', '💧 유동성'])
+        with t1, st.spinner("금리 로딩..."):
+            S = {'미국 Fed': F('DFF', 3700), '유로존 ECB 예치금리': F('ECBDFR', 3700), '영국 SONIA': F('IUDSOIA', 2600),
+                 '일본 콜금리': F('IRSTCI01JPM156N', 130), '한국 콜금리': F('IRSTCI01KRM156N', 130)}
+            st.plotly_chart(_det_fig(S, '%', step=True), use_container_width=True)
+            st.caption("출처: FRED (DFF · ECBDFR · IUDSOIA · OECD IRSTCI01JPM156N · IRSTCI01KRM156N) · 마지막 관측: " + _last_dates(S) +
+                       ". 일본·한국은 익일물 콜금리(정책금리를 따라가는 시장 금리, 월간). "
+                       "중국 인민은행 금리는 FRED 계열이 2023-11에 끊겨 뺐다.")
+        with t2, st.spinner("국채 로딩..."):
+            S = {'미국': F('DGS10', 2700), '독일': F('IRLTLT01DEM156N', 130), '일본': F('IRLTLT01JPM156N', 130),
+                 '한국': F('IRLTLT01KRM156N', 130)}
+            st.plotly_chart(_det_fig(S, '%'), use_container_width=True)
+            st.caption("출처: FRED (DGS10 일간 · OECD 장기금리 월간) · 마지막 관측: " + _last_dates(S) +
+                       ". 장기금리는 성장주 할인율 — 실질금리는 축 1 카드에 있다.")
+        with t3, st.spinner("수익률곡선 로딩..."):
+            S = {'10Y−2Y': F('T10Y2Y', 2700), '10Y−3M': F('T10Y3M', 2700)}
+            fig = _det_fig(S, '%p')
+            rec = F('USREC', 140)
+            if len(rec):
+                on = rec[rec > 0]
+                for dt in on.index:
+                    fig.add_vrect(x0=dt, x1=dt + pd.offsets.MonthEnd(1), fillcolor='#A32C2C', opacity=.08, line_width=0, layer='below')
+            fig.add_hline(y=0, line_color='rgba(120,124,134,.6)', line_width=1)
+            st.plotly_chart(fig, use_container_width=True)
+            last = {k: float(v.iloc[-1]) for k, v in S.items() if len(v)}
+            st.caption("출처: FRED (T10Y2Y · T10Y3M · USREC) · 마지막 관측: " + _last_dates(S) +
+                       ". 빨간 띠 = NBER 경기침체. 0 아래(역전)는 침체 선행으로 알려졌지만, 우리 검증(1988~2026)에선 비중 신호로 탈락했다(주변값 1/3). "
+                       + ' · '.join(f"지금 {k} {v:+.2f}%p" for k, v in last.items()))
+        with t4, st.spinner("물가 로딩..."):
+            yo = lambda sid: (lambda x: (x / x.shift(12) - 1) * 100)(_mf.to_series(fetch_fred(sid, 140)))
+            S = {k: _cut(v).dropna() for k, v in {'CPI': yo('CPIAUCSL'), '근원 CPI': yo('CPILFESL'), '근원 PCE': yo('PCEPILFE')}.items()}
+            fig = _det_fig(S, 'YoY %', yfmt='.1f')
+            fig.add_hline(y=2, line_color='rgba(22,112,74,.6)', line_dash='dot', annotation_text='연준 목표 2%')
+            st.plotly_chart(fig, use_container_width=True)
+            st.caption("출처: FRED (CPIAUCSL · CPILFESL · PCEPILFE) · 마지막 관측: " + _last_dates(S) + ". 연준이 목표로 보는 것은 근원 PCE다.")
+        with t5, st.spinner("유동성 로딩..."):
+            fed = _mf.to_series(fetch_fred('WALCL', 560)) / 1e6                 # 백만 달러 → 조 달러
+            ecb = _mf.to_series(fetch_fred('ECBASSETSW', 560))                  # 백만 유로
+            boj = _mf.to_series(fetch_fred('JPNASSETS', 130))                   # 억 엔
+            eur = _mf.to_series(fetch_fred('DEXUSEU', 2700)); jpy = _mf.to_series(fetch_fred('DEXJPUS', 2700))
+            me = lambda x: x.resample('ME').last() if len(x) else pd.Series(dtype=float)
+            _cv = lambda a, f: (a * f.reindex(a.index, method='ffill')) if len(a) and len(f) else pd.Series(dtype=float)
+            g3 = pd.DataFrame({'Fed': me(fed), 'ECB': _cv(me(ecb), me(eur)) / 1e6,
+                               'BoJ': _cv(me(boj) * 1e8, 1 / me(jpy) if len(jpy) else pd.Series(dtype=float)) / 1e12})
+            g3 = _cut(g3).dropna(how='all')
+            fig = go.Figure()
+            for c in ['Fed', 'ECB', 'BoJ']:
+                if c in g3 and g3[c].notna().any():
+                    fig.add_trace(go.Scatter(x=g3.index, y=g3[c], name=c, stackgroup='g3', mode='lines',
+                                             hovertemplate=f'{c} %{{y:.2f}}조$<extra></extra>'))
+            fig.update_layout(height=280, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
+                              legend=dict(orientation='h', y=1.12, x=0), yaxis_title='조 달러')
+            st.markdown("**G3 중앙은행 총자산** — 돈을 찍어 푸는 규모(달러 환산)")
+            st.plotly_chart(fig, use_container_width=True)
+            m2u = _mf.to_series(fetch_fred('M2SL', 140)); m2u = (m2u / m2u.shift(12) - 1) * 100
+            m2e = _ecb_series('BSI/M.U2.Y.V.M20.X.I.U2.2300.Z01.A', f"{cut:%Y-%m}")
+            S = {'미국 M2': _cut(m2u).dropna(), '유로존 M2': _cut(m2e)}
+            fig2 = _det_fig(S, 'YoY %', height=260, yfmt='.1f')
+            fig2.add_hline(y=0, line_color='rgba(120,124,134,.6)', line_width=1)
+            st.markdown("**M2 증가율**")
+            st.plotly_chart(fig2, use_container_width=True)
+            st.caption("출처: FRED (WALCL · ECBASSETSW · JPNASSETS · DEXUSEU · DEXJPUS · M2SL), ECB Data Portal (유로존 M2 연간 증가율) · "
+                       "마지막 관측: " + _last_dates({'Fed': fed, 'ECB': ecb, 'BoJ': boj, **S}) +
+                       ". 일본·중국 M2는 무료 공개 계열이 2017~2023년에 끊겨 뺐다(예전 차트의 끊긴 선이 그것). 순유동성(Fed−TGA−역레포)은 축 1 카드에 있다.")
+
+
 def _macro_rules_section(V, _RG):
     """④ 욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다."""
     st.subheader("욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다")
@@ -3358,15 +3639,9 @@ with tab4, guard('매크로'):
     _RG = macro_regime(_MI, _PX)
     _S = SEASONS[_RG['phase']]
 
-    fed_rate = _MI.get('fed')
-    m2_yoy   = _MI.get('m2_yoy')
-    spx_yoy  = fetch_spx_yoy()
-    kr_rate  = _fred_latest('INTDSRKRM193N')
-    _MV = _macro_v2_top(_PX, _RG)
-
-    # ── 사이클 지도 ─────────────────────────────────────────────
-    st.subheader("사이클 지도 — 두 축이 만나는 곳")
-    st.caption("지도는 '어디쯤인가'를 보여줄 뿐, 비중은 아래 검증된 원칙이 정한다")
+    # ── 결론 먼저 (2026-10-21 사용자 피드백) — 지금 국면 → 이번 주 판정 → 근거(두 축) 순서
+    st.subheader("지금 국면")
+    st.caption("두 축(돈의 흐름 · 경제)이 만나는 곳. 지도는 '어디쯤인가'를 보여줄 뿐, 비중은 아래 검증된 원칙이 정한다.")
 
     # ── ① 국면 대형 카드 ──────────────────────────────────────────
     _SCOL = {'FIN': '#16a34a', 'EARN': '#ca8a04', 'RFIN': '#ea580c', 'RERN': '#2563eb'}
@@ -3401,98 +3676,41 @@ with tab4, guard('매크로'):
             f"<div style='font-size:13.5px;color:#374151;margin-top:8px;line-height:1.6'>{_txt}</div></div>",
             unsafe_allow_html=True)
 
-    # ── ② 세 렌즈 ────────────────────────────────────────────────
-    st.markdown("##### 🔭 세 렌즈로 본 현재 위치")
-    st.caption("셋이 서로 어긋나면 그 자체가 '전환기' 신호다.")
-    _L1, _L2, _L3 = st.columns(3, gap='medium')
-
-    with _L1.container(border=True):
-        st.markdown("##### 🗓️ 우라가미 4계절")
-        st.caption("장세의 **종류** — 지금이 무슨 장인가")
-        for k in ('FIN', 'EARN', 'RFIN', 'RERN'):
-            _on = (k == _RG['phase'])
-            _sv = SEASONS[k]
-            st.markdown(
-                f"<div style='display:flex;justify-content:space-between;align-items:center;"
-                f"padding:{'9px 12px' if _on else '7px 12px'};margin:4px 0;border-radius:8px;"
-                f"font-size:{'15px' if _on else '13.5px'};"
-                f"background:{'#0b0b0b' if _on else '#f4f4f2'};color:{'#fff' if _on else '#52514e'};"
-                f"font-weight:{'700' if _on else '500'}'>"
-                f"<span>{_sv['emoji']} {_sv['name']}</span>"
-                f"<span style='font-variant-numeric:tabular-nums;opacity:{'1' if _on else '.7'}'>"
-                f"{_RG['scores'][k]}점</span></div>",
-                unsafe_allow_html=True)
-        with st.expander("판정 근거"):
-            st.caption("점수 = (금리 방향 · 실적 방향 · 주가 추세) 3축 부합도의 합. "
-                       "최고점이 현재 국면이고, 1위와 2위의 점수차가 확신도다.")
-
-    with _L2.container(border=True):
-        st.markdown("##### 🥚 코스톨라니 달걀")
-        st.caption("무슨 **자산**을 들 때인가 — 금리 사이클 위치")
-        if _RG['egg_i'] is None:
-            st.caption("금리 데이터 없음 — 판정 불가")
+    # ── 사이클 도식 — 우라가미 4계절 바퀴 · 코스톨라니 달걀 (2026-10-21: 알약 목록 → 도는 그림)
+    #    막스 시계추는 뺐다 — 1988~2026 검증에서 '탐욕'이 매도 근거가 못 됐고(욕심 조절 원칙 C7),
+    #    위험 심리는 축 1의 하이일드 스프레드·VIX 기간구조 카드가 이미 보여준다.
+    import macro_svg as _msv
+    _conf_s = ('확신 높음' if _RG['conf'] >= 2 else ('경계선' if _RG['conf'] == 0 else '확신 보통'))
+    _D1, _D2 = st.columns(2, gap='medium')
+    with _D1.container(border=True):
+        st.markdown("##### 🗓️ 우라가미 4계절 — 지금 무슨 장인가")
+        st.markdown(_msv.season_wheel(_RG['phase'], _RG['scores'], SEASONS, _conf_s), unsafe_allow_html=True)
+        st.caption(f"시계 방향으로 돈다: 금융장세(봄) → 실적장세(여름) → 역금융장세(가을) → 역실적장세(겨울). "
+                   f"점수 = 금리 방향·실적 방향·주가 추세 3축 부합도. 1·2위 차이가 확신도"
+                   + (f" — 지금은 {SEASONS[_RG['second']]['name']}와 혼재." if _RG['conf'] == 0 else "."))
+    with _D2.container(border=True):
+        st.markdown("##### 🥚 코스톨라니 달걀 — 무슨 자산을 들 때인가")
+        _ei = _RG['egg_i']
+        _code = EGG[_ei][0] if _ei is not None else None
+        st.markdown(_msv.kostolany_egg(_code, flat=bool(_RG.get('egg_flat'))), unsafe_allow_html=True)
+        if _ei is None:
+            st.caption("금리 데이터가 없어 판정하지 못했습니다.")
+        elif _RG.get('egg_flat'):
+            _nb = [EGG[j][0] for j in (_ei - 1, _ei + 1) if 0 <= j < len(EGG)]
+            st.caption(f"금리 {_MI.get('fed','-')}%가 최근 10년의 {_MI.get('fed_pct','-')}% 지점, 6·12개월 변화가 작아 "
+                       f"**방향 미확정** — 금리가 움직이는 쪽에 따라 {' 또는 '.join(_nb)}로 갈린다. 지금은 4계절을 우선해 본다.")
         else:
-            for i, (code, title, why) in enumerate(EGG):
-                _on = (i == _RG['egg_i'])
-                st.markdown(
-                    f"<div style='padding:{'8px 12px' if _on else '5px 12px'};margin:3px 0;"
-                    f"border-radius:8px;font-size:{'14px' if _on else '12.5px'};"
-                    f"background:{'#0b0b0b' if _on else '#f4f4f2'};color:{'#fff' if _on else '#52514e'};"
-                    f"font-weight:{'700' if _on else '500'}'>{code} · {title}</div>",
-                    unsafe_allow_html=True)
-            _ei = _RG['egg_i']
-            if _RG.get('egg_flat'):
-                # 금리가 정체면 방향이 없으므로 '하락 중/상승 중' 같은 단정을 하지 않는다.
-                _nb = [EGG[j][0] for j in (_ei - 1, _ei + 1) if 0 <= j < len(EGG)]
-                _egg_line = (f"현재: **{EGG[_ei][0]} 부근 — 금리 정체로 방향 미확정**  \n"
-                             f"금리가 어느 쪽으로 움직이느냐에 따라 {' 또는 '.join(_nb)} 로 갈립니다. "
-                             f"지금은 달걀보다 위 두 렌즈를 우선해 보세요.")
-            else:
-                # 달걀은 6개월이 횡보면 12개월로 판정한다. 위 '방향'(6개월)과 달라 보일 수
-                # 있으므로 어느 창을 썼는지 밝힌다.
-                _win = ("6개월은 횡보지만 12개월 기준으로는 방향이 잡혀 이렇게 봅니다. "
-                        if _RG['rate_dir'] == '횡보' else "")
-                _egg_line = f"현재: **{EGG[_ei][1]}** — {_win}{EGG[_ei][2]}"
-            _egg_head, _, _egg_rest = _egg_line.partition('  \n')
-            st.caption(_egg_head)
-            with st.expander("판정 근거"):
-                st.caption(f"금리 {_MI.get('fed','-')}% = 최근 10년 분포의 {_MI.get('fed_pct','-')}% 지점  \n"
-                           f"6개월 {_MI.get('fed_6m','-')}%p · 12개월 {_MI.get('fed_12m','-')}%p "
-                           f"→ 방향 **{_RG['rate_dir']}**"
-                           + (f"  \n{_egg_rest}" if _egg_rest else ""))
+            st.caption(f"{EGG[_ei][1]} — {EGG[_ei][2]} (금리 {_MI.get('fed','-')}%, 10년 분포의 {_MI.get('fed_pct','-')}% 지점, "
+                       f"6개월 {_MI.get('fed_6m','-')}%p)")
 
-    with _L3.container(border=True):
-        st.markdown("##### ⏳ 하워드 막스 시계추")
-        st.caption("남들이 얼마나 **겁먹었나** — 역발상 눈금")
-        _p = _RG['pend']
-        if _p is None:
-            st.caption("위험지표 조회 실패 — 판정 불가")
-        else:
-            _plab = ('극도의 공포' if _p < 15 else '공포' if _p < 35 else
-                     '중립' if _p < 65 else '탐욕' if _p < 85 else '극도의 탐욕')
-            _pcol = '#2a78d6' if _p < 35 else ('#52514e' if _p < 65 else '#d03b3b')
-            st.markdown(
-                f"<div style='margin:10px 0 2px'>"
-                f"<div style='font-size:38px;font-weight:800;line-height:1.05;color:{_pcol}'>{_p}"
-                f"<span style='font-size:15px;font-weight:600;color:#898781'> / 100</span></div>"
-                f"<div style='font-size:16px;font-weight:700;color:{_pcol};margin-top:2px'>{_plab}</div>"
-                f"<div style='position:relative;height:14px;border-radius:7px;margin-top:14px;"
-                f"background:linear-gradient(90deg,#2a78d6,#eeeeec 50%,#d03b3b)'>"
-                f"<div style='position:absolute;left:calc({_p}% - 3px);top:-5px;width:6px;height:24px;"
-                f"background:#0b0b0b;border:2px solid #fff;border-radius:3px'></div></div>"
-                f"<div style='display:flex;justify-content:space-between;font-size:12px;color:#898781;"
-                f"margin-top:6px'><span>공포</span><span>중립</span><span>탐욕</span></div></div>",
-                unsafe_allow_html=True)
-            st.caption("오른쪽일수록 남들이 낙관적. ⚠️ 검증(1988~2026): '탐욕 ≥ 80'에 비중을 줄이면 오히려 손해였다 — 분위기 읽기용이다.")
-            with st.expander("판정 근거"):
-                st.caption(f"HY 스프레드 {_MI.get('hy','-')}% (하위 {_MI.get('hy_pct','-')}%)  \n"
-                           f"VIX {_MI.get('vix','-')} (하위 {_MI.get('vix_pct','-')}%)  \n"
-                           f"S&P 52주 위치 {_PX.get('pos52','-')}%")
-                st.caption("막스: *\"남들이 겁 없이 사는 곳에서 조심하고, "
-                           "아무도 안 사는 곳에서 사라.\"*")
+    _MV = _macro_v2_top(_PX, _RG)
 
-
-    _tb1, _tb2 = st.tabs(['🌀 사이클 궤적 — 지난 2년 어디서 어디로', '🚨 전이 감시판 — 무엇이 바뀌면 넘어가나'])
+    # ── 국면 이력 · 궤적 · 전이 감시판
+    st.subheader("국면은 어떻게 흘러왔나")
+    _tb0, _tb1, _tb2 = st.tabs(['🗓️ 국면 이력 — S&P500 위에 그린 10년', '🌀 사이클 궤적 — 지난 2년',
+                                '🚨 전이 감시판 — 무엇이 바뀌면 넘어가나'])
+    with _tb0:
+        _regime_history_panel()
     with _tb1:
         # ── ③ 사이클 궤적 ────────────────────────────────────────────
         _ip_h, _ff_h = _MI.get('ip_hist'), _MI.get('fed_hist')
@@ -3544,6 +3762,15 @@ with tab4, guard('매크로'):
                     textfont=dict(size=14, color=_INK, family='sans-serif'),
                     hovertemplate=f'현재 {_pts[-1][0][:7]}<br>산업생산 YoY %{{x:.2f}}%<br>금리 6개월 %{{y:+.2f}}%p<extra></extra>',
                     showlegend=False))
+                # 2026-10-21 개선 — 6개월마다 월 표기 + 흐름 방향 화살표(점만 있으면 어느 쪽으로 도는지 안 보인다)
+                for _i in range(len(_pts) - 7, 0, -6):
+                    _fig_cy.add_annotation(x=_xs[_i], y=_ys[_i], text=_pts[_i][0][:7], showarrow=False, yshift=14,
+                                           font=dict(size=11, color=_MUTED))
+                for _i in range(max(1, len(_pts) - 6), len(_pts)):
+                    if (_xs[_i], _ys[_i]) != (_xs[_i - 1], _ys[_i - 1]):
+                        _fig_cy.add_annotation(x=_xs[_i], y=_ys[_i], ax=_xs[_i - 1], ay=_ys[_i - 1], xref='x', yref='y',
+                                               axref='x', ayref='y', text='', showarrow=True, arrowhead=3, arrowsize=1.1,
+                                               arrowwidth=1.6, arrowcolor=_CY_NEW, opacity=.9)
                 _fig_cy.add_hline(y=0, line_color='#c3c2b7', line_width=1)
                 _fig_cy.add_vline(x=0, line_color='#c3c2b7', line_width=1)
                 for _tx, _ty, _ta, _tv, _tt in [
@@ -3618,116 +3845,7 @@ with tab4, guard('매크로'):
 
     _macro_rules_section(_MV, _RG)
 
-    with st.spinner(""):
-        ecb_rate = _fred_latest('ECBDFR')
-        boj_rate = _fred_latest('IRSTCI01JPM156N')
-        dgs10    = _fred_latest('DGS10')
-        dgs2     = _fred_latest('DGS2')
-        cpi_yoy_us = _fred_yoy('CPIAUCSL')
-        unrate   = _fred_latest('UNRATE')
-
-    spread = round(dgs10 - dgs2, 2) if dgs10 and dgs2 else None
-
-    if all(v is None for v in (fed_rate, ecb_rate, kr_rate, m2_yoy, cpi_yoy_us, unrate)):
-        st.warning("⚠️ FRED 데이터 일시 조회 실패 — 신호·차트가 비어 보일 수 있어요. "
-                   "잠시 후 새로고침하면 복구됩니다. (실패는 더 이상 캐싱되지 않음)")
-
-    # 개별 지표 차트는 국면 판정의 근거자료 — 기본은 접어두고 필요할 때만 편다.
-    with st.expander("📊 상세 지표 차트 — 중앙은행 금리 · 수익률곡선 · CPI · M2"):
-        st.subheader("🏦 주요국 중앙은행 기준금리")
-        with st.spinner("금리 데이터 로딩..."):
-            rate_series = [
-                ('FEDFUNDS',        'Fed (미국)',   '#3b82f6'),
-                ('ECBDFR',          'ECB (유럽)',   '#10b981'),
-                ('IRSTCI01JPM156N', 'BoJ (일본)',   '#f59e0b'),
-                ('INTDSRKRM193N',   'BoK (한국)',   '#ef4444'),
-                ('IRSTCB01CNM156N', 'PBoC (중국)',  '#a855f7'),
-            ]
-            rate_dfs = [fetch_fred_history(s, 60) for s, _, _ in rate_series]
-
-        fig_rates = _plotly_line(
-            rate_dfs, [l for _,l,_ in rate_series], [c for _,_,c in rate_series],
-            '중앙은행 기준금리 (%)', '{:.2f}', 280,
-        )
-        st.plotly_chart(fig_rates, use_container_width=True)
-
-        col_yc1, col_yc2 = st.columns(2)
-        with col_yc1:
-            st.subheader("📉 미국 수익률 곡선 (10Y-2Y 스프레드)")
-            with st.spinner(""):
-                spread_df10 = fetch_fred_history('DGS10', 60)
-                spread_df2  = fetch_fred_history('DGS2',  60)
-            if not spread_df10.empty and not spread_df2.empty:
-                merged = spread_df10.join(spread_df2, how='inner')
-                merged['스프레드'] = merged['DGS10'] - merged['DGS2']
-                fig_sp = go.Figure()
-                colors_sp = ['rgba(86,211,100,0.8)' if v >= 0 else 'rgba(247,129,102,0.8)'
-                             for v in merged['스프레드']]
-                fig_sp.add_trace(go.Bar(x=merged.index, y=merged['스프레드'],
-                                        marker_color=colors_sp, name='10Y-2Y'))
-                fig_sp.add_hline(y=0, line_color='rgba(110,118,129,0.6)')
-                fig_sp.update_layout(height=220, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                     font=dict(color='#4B5563', size=10),
-                                     margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
-                fig_sp.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
-                fig_sp.update_yaxes(gridcolor='rgba(128,128,128,0.2)')
-                st.plotly_chart(fig_sp, use_container_width=True)
-                if spread is None:
-                    st.info("스프레드 계산 불가 (금리 데이터 일시 조회 실패)")
-                elif spread < 0:
-                    st.warning(f"⚠️ 수익률 역전 중 ({spread:+.2f}%) — 역사적으로 12~18개월 후 침체 선행")
-                else:
-                    st.success(f"✅ 정상 곡선 ({spread:+.2f}%)")
-
-        with col_yc2:
-            st.subheader("📊 US 인플레이션 (CPI YoY)")
-            with st.spinner(""):
-                cpi_df = fetch_fred_history('CPIAUCSL', 36)
-            if not cpi_df.empty:
-                cpi_df['CPI YoY%'] = cpi_df['CPIAUCSL'].pct_change(12) * 100
-                fig_cpi = go.Figure()
-                fig_cpi.add_trace(go.Scatter(x=cpi_df.index, y=cpi_df['CPI YoY%'],
-                    mode='lines', line=dict(color='#f59e0b', width=2), name='CPI YoY'))
-                fig_cpi.add_hline(y=2, line_color='rgba(86,211,100,0.5)', line_dash='dash',
-                                  annotation_text=' 목표 2%')
-                fig_cpi.update_layout(height=220, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                      font=dict(color='#4B5563', size=10),
-                                      margin=dict(l=0,r=0,t=10,b=0), showlegend=False)
-                fig_cpi.update_xaxes(gridcolor='rgba(128,128,128,0.2)')
-                fig_cpi.update_yaxes(gridcolor='rgba(128,128,128,0.2)', ticksuffix='%')
-                st.plotly_chart(fig_cpi, use_container_width=True)
-
-        st.divider()
-        st.subheader("💧 글로벌 M2 유동성")
-        with st.spinner("M2 데이터 로딩..."):
-            m2_series = [
-                ('M2SL',            'M2 (미국)',    '#3b82f6'),
-                ('MABMM301EZM189S', 'M2 (유로존)',  '#10b981'),
-                ('MYAGM2JPM189S',   'M2 (일본)',    '#f59e0b'),
-                ('MYAGM2CNM189N',   'M2 (중국)',    '#ef4444'),
-            ]
-            m2_dfs = [fetch_fred_history(s, 36) for s, _, _ in m2_series]
-
-        m2_yoy_dfs = []
-        for df, (sid, label, color) in zip(m2_dfs, m2_series):
-            if df.empty: continue
-            yoy = df.copy()
-            yoy[sid] = df[sid].pct_change(12) * 100
-            yoy = yoy.dropna()
-            m2_yoy_dfs.append((yoy, label, color))
-
-        if m2_yoy_dfs:
-            fig_m2 = _plotly_line(
-                [x[0] for x in m2_yoy_dfs],
-                [x[1] for x in m2_yoy_dfs],
-                [x[2] for x in m2_yoy_dfs],
-                'M2 통화량 YoY 증가율 (%)', '{:.1f}', 260,
-            )
-            fig_m2.add_hline(y=0, line_color='rgba(110,118,129,0.4)', line_dash='dash')
-            fig_m2.add_hline(y=5, line_color='rgba(86,211,100,0.3)', line_dash='dot',
-                             annotation_text=' 팽창 기준 5%')
-            st.plotly_chart(fig_m2, use_container_width=True)
-
+    _macro_detail_charts()
 
 # ════════════════════════════════════════════════════════════════════
 # 탭5: 추천 포트폴리오

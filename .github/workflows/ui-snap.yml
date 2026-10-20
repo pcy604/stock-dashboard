@@ -1,0 +1,31 @@
+# 매크로 탭 실데이터 화면 캡처 — macro-* 브랜치에서 화면 코드가 바뀔 때(배포 전 확인용)
+name: ui-snap
+on:
+  workflow_dispatch:
+  push:
+    branches: ['macro-*']
+    paths: ['dashboard.py', 'macro_flow.py', 'macro_svg.py', 'tools/ui_snap.py', '.github/workflows/ui-snap.yml']
+permissions:
+  contents: write
+jobs:
+  snap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FRED_KEY: ${{ secrets.FRED_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt playwright && python -m playwright install --with-deps chromium
+      - run: |
+          nohup streamlit run dashboard.py --server.headless true --server.port 8501 > st.log 2>&1 &
+          sleep 20
+          python tools/ui_snap.py 1400 || (tail -50 st.log; exit 1)
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add -f data/research/ui/*.png
+          git commit -m "auto: 매크로 탭 화면 캡처 $(date -u +%F)" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"

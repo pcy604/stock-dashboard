@@ -65,10 +65,27 @@ def test_greed_only_core_switch_cuts():
     assert mf.greed_signals(None, None, None, None, None)['word'] == '판정 불가'
 
 
-def test_country_mcap_scales_by_index_and_drops_stale():
-    s = pd.Series([100.0, 110.0, 121.0], index=pd.to_datetime(['2025-12-31', '2026-06-30', '2026-10-16']))
-    base = {'USA': {'usd': 60e12, 'year': 2025}, 'EMU': {'usd': 5e12, 'year': 2018}}
-    m = mf.country_mcap(base, {'S&P500': s, '유로스톡스50': s})
-    assert abs(m['S&P500'][0] - 72.6) < 1e-6 and m['S&P500'][2] is True
-    assert m['나스닥'][0] == m['S&P500'][0]            # 같은 나라는 같은 값
-    assert '유로스톡스50' not in m                     # 2018년 값은 오늘 값처럼 보이지 않는다
+def test_country_mcap_index_fx_actual_and_stale():
+    idx = pd.Series([100.0, 110.0, 121.0], index=pd.to_datetime(['2025-12-31', '2026-06-30', '2026-10-16']))
+    jpy = pd.Series([150.0, 150.0, 100.0], index=idx.index)        # 엔 강세: 1달러 150엔 → 100엔
+    base = {'USA': {'usd': 60e12, 'year': 2025}, 'JPN': {'usd': 6e12, 'year': 2025},
+            'EMU': {'usd': 5e12, 'year': 2018}, 'TWN': {'local': 90e12, 'ccy': 'TWD', 'year': 2025}}
+    m = mf.country_mcap(base, {'S&P500': idx, '닛케이225': idx, '유로스톡스50': idx, '대만 가권': idx},
+                        fx={'JPY': jpy, 'TWD': pd.Series([30.0, 30.0, 30.0], index=idx.index)},
+                        actual={'KOR': (3.8e12, '2026-10-20')})
+    assert abs(m['S&P500'][0] - 72.6) < 1e-6 and m['나스닥'][0] == m['S&P500'][0]
+    assert abs(m['닛케이225'][0] - 6 * 1.21 * 1.5) < 1e-6           # 지수 +21% × 엔화 +50%
+    assert abs(m['대만 가권'][0] - 90 * 1.21 / 30) < 1e-6
+    assert m['코스피'][0] == 3.8 and '실측' in m['코스피'][1] and m['코스닥'][0] == 3.8
+    assert '유로스톡스50' not in m                                     # 2018년 말 지수가 없으면 만들지 않는다
+
+
+def test_regime_history_no_lookahead_and_labels():
+    days = pd.bdate_range('2014-01-01', '2026-09-30')
+    px = pd.Series(np.linspace(100, 300, len(days)), index=days)        # 꾸준한 상승
+    m = pd.date_range('2012-01-01', '2026-09-01', freq='MS')
+    fed = pd.Series(2.0, index=m); ip = pd.Series(np.linspace(100, 140, len(m)), index=m); ur = pd.Series(4.0, index=m)
+    h = mf.regime_history(fed, ip, ur, px)
+    assert not h.empty and set(h['phase']) == {'EARN'}       # 금리 횡보 · 실적 개선 · 주가 상승 = 실적장세
+    f = mf.regime_forward(h, 3)
+    assert f.loc['EARN', '다음 3개월 상승 비율(%)'] == 100
