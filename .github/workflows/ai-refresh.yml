@@ -1,0 +1,40 @@
+# AI 생성물만 다시 만든다 — 수동 실행 전용(2026-10-21). 키 등록 직후 확인·Gemini 한도 회복 후 재생성용.
+#   시황 리포트(텔레그램 발송 없이) + 52주 신고가 공통점 요약. 데이터 갱신은 하지 않는다.
+name: ai-refresh
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: 키 확인 (값은 찍지 않는다)
+        run: |
+          if [ -z "$GEMINI_KEY" ]; then echo "::error title=GEMINI_KEY 없음::Secrets 에 GEMINI_KEY 가 비어 있다"; exit 1; fi
+          echo "GEMINI_KEY 길이 ${#GEMINI_KEY}"
+      - name: 52주 신고가 AI 공통점 요약
+        run: python new_high_ai.py
+      - name: 시황 리포트 (텔레그램 없이)
+        run: python market_report.py daily
+        continue-on-error: true
+      - name: 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add results/new_high_ai.json results/market_report.json
+          git diff --staged --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "auto: AI 생성물 갱신 $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
+          exit 1
