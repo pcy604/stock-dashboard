@@ -1,5 +1,5 @@
 {
- "run": "2026-10-20 03:14",
+ "run": "2026-10-20 03:20",
  "factor_ver": "v1",
  "period": [
   "2018-01-01",
@@ -62,4 +62,9 @@
  "verdict": {
   "beats_star": true,
   "p10_beats_star": true,
-  "y14_19_beats_spy": 
+  "y14_19_beats_spy": false,
+  "bias_gap_pp": 24.0,
+  "pass": false
+ },
+ "secs": 35
+}
