@@ -1429,7 +1429,7 @@ _LEAD_KR = _GMKT != "US"
 with t_lead, guard('주도주'):
     if _LEAD_US and _LEAD_KR:
         st.caption("🇺🇸 미국(이익 가속) → 🇰🇷 한국(KR-U6 / KR-P1) 순서로 이어집니다. "
-                   "두 규칙은 검증 수준이 다릅니다 — 미국은 8년 백테스트와 청산 연구까지, 한국은 가격 백테스트만.")
+                   "미국은 12.5년 백테스트·청산 연구를 통과한 운영 규칙, **한국은 상폐 포함 백테스트에서 기각된 참고용**입니다(원칙 v1.2).")
     if _LEAD_US:
         st.markdown("## 🇺🇸 미국 — 이익 가속")
     if _LEAD_US:
@@ -1945,7 +1945,14 @@ if _LEAD_KR:
     with t_lead, guard('주도주 KR'):
         if _LEAD_US:
             st.divider()
-        st.markdown("## 🇰🇷 한국 — KR-U6 / KR-P1")
+        st.markdown("## 🇰🇷 한국 — KR-U6 / KR-P1 · 참고용")
+        # 2026-10-20: 원칙 v1.2(10-14)에서 KR 위성은 기각됐는데 화면은 매수 후보처럼 보였다 → 맨 위에 못 박는다.
+        st.warning(
+            "**백테스트 기각 · 참고용 — 매수 대상 아님.** 상장폐지 649종을 넣은 2014~2026 검증에서 "
+            "KR-P1 은 CAGR **4.3%** · MDD **-66%** 로 KOSPI(**9.3%** · -39%)에 졌다. "
+            "원인은 시장 구조(거래 가능한 한국 종목 전체가 KOSPI 보다 연 9%p 뒤짐, 신호 우위는 +1%p 남짓). "
+            "**원칙 v1.2: 한국 노출은 지수(코스피200 등)로 갖는다.** 아래 신호·원장은 관찰 기록으로만 남긴다. "
+            "근거 `research/kr_bt/RESULTS_2026-10-14.md`", icon="🚫")
         # 2026-08-16: 미국 규칙⑥ 원문을 KR에 이식한 KR-U6 추가. 실측에서 KR-P1보다 우수해
         # 기본값으로 둔다(평균 11.5% vs 9.6% · 손익비 3.53 vs 3.05 · 꼬리의존 36% vs 47%).
         _kr_rule = st.radio(
@@ -2610,7 +2617,9 @@ with tab3, guard('CANSLIM'):
     for _m, _p in _CS_SETS:
         st.caption(f"{_m} · " + data_stamp(str(_p)))
     if 'US' in _CS:
-        st.caption("US: C·A=SEC EDGAR 공식 재무 · I(기관 수급)는 무료 일간 소스가 없어 공란(13F는 분기 지연)")
+        st.caption("US: C·A=SEC EDGAR 공식 재무 · **영업이익 기준**(오닐의 '일회성 제외 EPS' 근사 — 부채 소멸 손실·평가손익·세금 효과가 "
+                   "순이익을 왜곡하던 것, 예: LITE -26,876%) · 영업이익 계정이 없는 금융·리츠는 순이익 · "
+                   "'일회성' 열 = 순이익 성장과 50%p 넘게 갈린 글자 · I(기관 수급)는 무료 일간 소스가 없어 공란(13F는 분기 지연)")
 
     _missing = [m for m, d in _CS.items() if d is None]
     for _m in _missing:
@@ -2637,7 +2646,7 @@ with tab3, guard('CANSLIM'):
                                 help="12개월 수익률이 전체 상위 X%")
             st.divider()
             th_C    = st.slider("C  분기 순이익 성장 (%)", 0, 150, 20, key="th_C",
-                                help="전년 동기 대비 순이익 성장")
+                                help="전년 동기 대비 성장 — KR 순이익 · US 영업이익(일회성 제외 근사)")
             th_A1   = st.slider("A  연간 성장 — 최근년 (%)", -50, 150, 20, key="th_A1")
             th_A2   = st.slider("A  연간 성장 — 전년 (%)", -50, 150, 20, key="th_A2")
             th_I    = st.slider("I  기관+외인 순매수 하한 (억원·20일)", -2000, 10000, 0, 100, key="th_I",
@@ -2710,6 +2719,7 @@ with tab3, guard('CANSLIM'):
                 'A 최근년%': _n(a_y1),
                 'A 전년%':  _n(a_y2),
                 '전환':    ' · '.join(_conv) or '',
+                '일회성':  ' '.join(s.get('oneoff') or []) or ('' if _mk3 == 'US' else '-'),
                 'N 거리%':  _n(n_dist),
                 'S 배수':   _n(vol),
                 'RS(L) 백분위(p)':  _n(rs),
@@ -2739,7 +2749,7 @@ with tab3, guard('CANSLIM'):
                 return ''
 
             # 컬럼을 CANSLIM 글자 순서(C→A→N→S→L→I)로 (#3)
-            disp3 = ['시장', '종목명', '코드', '시총($B)', _SC3, '통과', 'C 분기%', 'A 최근년%', 'A 전년%', '전환',
+            disp3 = ['시장', '종목명', '코드', '시총($B)', _SC3, '통과', 'C 분기%', 'A 최근년%', 'A 전년%', '전환', '일회성',
                      'N 거리%', 'S 배수', 'RS(L) 백분위(p)', 'I 순매수(억)', '고점대비%', '궤적', '매력도']
             if _GMKT != "전체":
                 disp3.remove('시장')
