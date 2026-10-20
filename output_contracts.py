@@ -339,6 +339,11 @@ def fail_if_violated():
            + "\n".join(lines)
            + ("\n\n⛔ 항목은 커밋하지 않고 직전 정상본을 유지했다." if v.get("blocked") else ""))
     print(msg)
+    if os.environ.get("GITHUB_ACTIONS"):
+        # 2026-10-20: 로그를 못 여는 곳(폰·API)에서도 원인이 보이게 주석으로 남긴다
+        for kind, lv in (("blocked", "error"), ("alarm", "error"), ("warn", "warning")):
+            for p, m in v.get(kind, {}).items():
+                print(f"::{lv} title=계약 {kind} {p}::" + " / ".join(m)[:900])
     _notify(msg)
     return 1 if (v.get("blocked") or v.get("alarm")) else 0
 

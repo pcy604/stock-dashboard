@@ -40,4 +40,9 @@ jobs:
       - name: 전 화면 렌더 + 데이터 감시 사각지대 검사
         env:
           FRED_KEY: ${{ secrets.FRED_KEY }}
-        run: pytest tests/ -q --tb=short
+        # 2026-10-20: 10-18 이후 매 푸시 빨간불인데 로그를 못 열어 원인을 몰랐다 → 실패 줄을 주석으로
+        run: |
+          set -o pipefail
+          pytest tests/ -q --tb=line -rfE 2>&1 | tee /tmp/pytest.txt || {
+            grep -E '^(FAILED|ERROR)|^E  |Error' /tmp/pytest.txt | head -25 | sed 's/^/::error title=smoke::/'
+            exit 1; }
