@@ -408,6 +408,7 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
   border: 1px solid var(--line); color: var(--ink-2); }
 .mo-hero .chip b { font-family: var(--mono); font-weight: 700; }
 .mo-hero .chip.pos b { color: var(--pos); } .mo-hero .chip.neg b { color: var(--neg); }
+.mo-hero a.chip.bot { margin-left: auto; color: var(--accent); background: var(--accent-2); text-decoration: none; font-weight: 600; }
 .mo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; margin: 4px 0 6px; }
 .mo-chip { background: var(--surface); border-radius: var(--radius-sm); padding: 9px 12px 8px; box-shadow: 0 0 0 1px var(--line) inset; }
 .mo-chip .l { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1179,6 +1180,25 @@ def _goto_analysis(code):
 
 
 _tui.set_nav(_goto_analysis)
+
+
+# ── 봇 → 대시보드 딥링크 (2026-10-20) ─────────────────────────────────
+#   ?sym=TSLA          : 종목 분석 탭을 그 종목으로 바로 연다(봇 요약·리포트의 '대시보드에서 보기')
+#   ?watch=SATL,AXTI   : 봇 감시 목록을 이 화면에 칩으로(서버에 저장하지 않는다 — 목록은 링크에만 실린다)
+def _dl_code(x):
+    x = str(x or '').strip().upper()
+    for suf in ('.KS', '.KQ'):
+        x = x.replace(suf, '')
+    return x if re.fullmatch(r'[0-9A-Z.\-]{1,12}', x) else ''
+
+
+_dl_sym = _dl_code(st.query_params.get('sym')) if st.query_params.get('diag') is None else ''
+if _dl_sym and st.session_state.get('_dl_done') != _dl_sym:
+    st.session_state['_dl_done'] = _dl_sym          # 같은 링크로 한 번만 — 그 뒤 사용자가 다른 종목을 고르면 그대로 둔다
+    _goto_analysis(_dl_sym)
+_dl_watch = [c for c in (_dl_code(t) for t in str(st.query_params.get('watch') or '').split(',')) if c][:30]
+if _dl_watch:
+    st.session_state['bot_watch'] = _dl_watch
 _tui.set_fx(lambda: _usdkrw())   # 한국 종목이 섞인 표의 시총($B) → 억원 (2026-10-19)
 tab_screen, tab7, tab4, tab_pf, tab_rep = st.tabs(key='main_tab', on_change='rerun', tabs=[
     "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오", "📰 시황 리포트"])
@@ -4140,7 +4160,10 @@ def _peer_rows(sym, is_kr, n=4):
                     mc, c['name'] = float(r.marketcap.iloc[0]), r.Name.iloc[0]
             except Exception:
                 mc = None
-        met = _sx.peer_metrics(mc, _sx.quarterly_frame(rows)) if mc else {}
+        try:                                   # 한 종목 재무가 비어도(조회 실패) 표 전체가 죽지 않게
+            met = _sx.peer_metrics(mc, _sx.quarterly_frame(rows)) if mc else {}
+        except Exception:
+            met = {}
         out.append({'종목': c['name'] or c['sym'], '코드': c['sym'],
                     '시총($B)': cap_usd_b(mc, 'KR' if is_kr else 'US') if mc else None,
                     'PER(배)': met.get('PER'), 'PSR(배)': met.get('PSR'),
@@ -4593,6 +4616,17 @@ def _tab_analysis():
                 st.session_state.pop('sym8_cands', None)
             else:
                 st.session_state['sym8_cands'] = _cands
+        # 봇 감시 목록(링크로 받은 것) — 한 번 눌러 바로 분석
+        _bw = st.session_state.get('bot_watch') or []
+        if _bw:
+            _bwk = f"bw_{','.join(_bw)}"
+
+            def _bw_go(k=_bwk):                       # 바뀐 순간에만 이동(검색으로 다른 종목을 고르면 그쪽을 존중)
+                v = st.session_state.get(k)
+                if v:
+                    st.session_state['analyze_sym'] = v
+                    st.session_state.pop('sym8_cands', None)
+            st.pills("🤖 봇 감시 목록", _bw, selection_mode='single', default=None, key=_bwk, on_change=_bw_go)
         _cands = st.session_state.get('sym8_cands')
         if _cands is not None:
             if not _cands:
@@ -4667,6 +4701,9 @@ def _tab_analysis():
                     pass
                 _chip_h = ''.join(f'<span class="chip {c}">{_h.escape(k)} <b>{_h.escape(v)}</b></span>'
                                   for c, k, v in _chips)
+                if not _is_kr0 and re.fullmatch(r'[A-Z]{1,10}', sym8_clean):   # 봇은 미국(SEC) 종목만 감시
+                    _chip_h += (f'<a class="chip bot" href="https://t.me/buza_alarm_bot?start=watch_{sym8_clean}" '
+                                f'target="_blank">🤖 봇에서 공시·뉴스 감시</a>')
                 _desc = str(info.get('longBusinessSummary') or '').strip()
                 if _desc:   # 첫 문장 — 'Inc.'·'Corp.' 의 마침표에서 자르지 않는다
                     _desc = re.split(r'(?<!Inc)(?<!Corp)(?<!Co)(?<!Ltd)(?<!Mr)(?<!U\.S)\.\s+(?=[A-Z])', _desc)[0].rstrip('.') + '.'
@@ -4936,6 +4973,7 @@ def _tab_analysis():
                     st.subheader("🏭 사업부문별 매출 구조 — 이 회사는 어디서 돈을 버나")
                     _segs, _seg_meta = [], {}
                     _seg_ai = None
+                    _seg_chk_pct, _seg_chk_ai = None, False      # → 요약의 데이터 점검
                     with st.spinner("사업부문 정리 중…"):
                         _seg_ai = _seg_ai_get(sym8_clean, is_kr_sym)
                     _ai_ok = bool(_seg_ai) and not _seg_ai.get('_error') and _seg_ai.get('segments')
@@ -4955,6 +4993,7 @@ def _tab_analysis():
                                 _segs.append(dict(x, products=_pd_))
                             _fl = _sx_['filing']
                             _chk = _P.get('check_pct')
+                            _seg_chk_pct = _chk
                             _seg_meta = {
                                 'src': f"SEC XBRL 원본 — {_fl['form']} ({_fl['date']} 공시) · 기간 {_P['start']} ~ {_P['end']}",
                                 'src_short': f"SEC XBRL({_fl['form']} {_fl['date']})",
@@ -4980,6 +5019,7 @@ def _tab_analysis():
                             _ss = sum(x['revenue'] for x in _segs if x.get('revenue'))
                             if _ann and _ss:
                                 _d_ = (_ss / _ann['revenue'] - 1) * 100
+                                _seg_chk_pct, _seg_chk_ai = _d_, True
                                 _chk_txt = (f"✅ 검산: AI 추출 부문 합이 공시 매출({_yr})과 {_d_:+.1f}% 차이" if abs(_d_) <= 3 else
                                             f"⚠️ 검산: AI 추출 부문 합이 공시 매출({_yr})과 {_d_:+.1f}% 다름 — 부문간 내부거래 포함이거나 추출 오류. 원문 확인 필요")
                             else:
@@ -5772,17 +5812,28 @@ def _tab_analysis():
 
                     # 동종업계
                     st.markdown("### 🧩 동종업계 비교")
-                    if st.button("동종업계 불러오기 (같은 업종 · 시총이 가까운 4종)", key=f"peer_{sym8_clean}"):
-                        st.session_state[f"peer_on_{sym8_clean}"] = True
-                    if st.session_state.get(f"peer_on_{sym8_clean}"):
+                    # 2026-10-20: 버튼 없이 바로(결과는 6시간 캐시 — 같은 종목을 다시 열면 즉시)
+                    if True:
                         with st.spinner("동종업계 재무 조회..."):
-                            _pind, _prows = _peer_rows(sym8_clean, is_kr_sym)
+                            try:
+                                _pind, _prows = _peer_rows(sym8_clean, is_kr_sym)
+                            except Exception as _pe:
+                                _pind, _prows = None, []
+                                st.caption(f"`동종업계 조회 실패: {type(_pe).__name__}`")
                         if not _prows or len(_prows) < 2:
                             st.info("같은 업종 종목을 찾지 못했습니다.")
                         else:
                             _tsrc(("KRX 업종분류·DART 저장 손익" if is_kr_sym else "SEC SIC 업종·EDGAR 분기재무")
                                   + " · 시총: 상장목록", live=True)
-                            st.dataframe(pd.DataFrame(_prows), filters=False, use_container_width=True)
+                            _pdf = pd.DataFrame(_prows)
+                            # 동종 중앙값 행 — 이 종목이 업종 안에서 비싼지·빠른지 한눈에(이 종목 제외 중앙값)
+                            _peer_only = _pdf.iloc[1:]
+                            _med = {c: (float(pd.to_numeric(_peer_only[c], errors='coerce').median())
+                                        if pd.to_numeric(_peer_only[c], errors='coerce').notna().any() else None)
+                                    for c in ('시총($B)', 'PER(배)', 'PSR(배)', '매출성장(%)', '영업이익률(%)')}
+                            _pdf = pd.concat([_pdf, pd.DataFrame([{'종목': f'동종 중앙값({len(_peer_only)}종)', '코드': '', **_med,
+                                                                   '기준분기': ''}])], ignore_index=True)
+                            st.dataframe(_pdf, filters=False, use_container_width=True)
                             st.caption(f"업종: {_pind}. 첫 행이 이 종목. 같은 업종 안에서 시총이 가장 가까운 순. "
                                        "⚠️ 공식 업종분류는 사업 실제와 다를 수 있다(예: 대형 복합기업). "
                                        "PER·PSR 은 TTM, 적자면 PER 은 '-'.")
@@ -5807,6 +5858,60 @@ def _tab_analysis():
                     _s4.metric("CANSLIM", f"{_tt:.0f}점 · {_gg}" if isinstance(_tt, (int, float)) else "-")
                     _s5.metric(f"{_bm['kind']} 위치 (현재 {_bm['now']:.1f}배)" if _bm else "멀티플 위치",
                                f"하위 {_bm['rank']:.0f}%" if _bm else "-")
+                    # ── ⚠️ 리스크 점검 · 🧪 데이터 점검 (2026-10-20) — 사실·규칙 판정만, 판정 불가는 '-' ──
+                    try:
+                        import analysis_checks as _ac
+                        _L = locals()
+                        _vb_ = _L.get('_vb') or {}
+                        _qq = unified_statements(sym8_clean, is_kr_sym, 'quarter') or []
+                        _opm = lambda r: (r['op_income'] / r['revenue'] * 100) if (r.get('op_income') is not None and r.get('revenue')) else None
+                        _et = (_L.get('_ed') or {}).get('eps_trend')
+                        _e0 = _e30 = None
+                        try:
+                            if _et is not None and '0y' in _et.index:
+                                _e0, _e30 = float(_et.loc['0y', 'current']), float(_et.loc['0y', '30daysAgo'])
+                        except Exception:
+                            pass
+                        _segs_ = _L.get('_segs') or []
+                        _risk = _ac.risk_checks(
+                            price=float(price_now), high52=float(hist['High'].tail(252).max()),
+                            band_rank=(_L.get('_bm') or {}).get('rank'), band_kind=(_L.get('_bm') or {}).get('kind', 'P/E'),
+                            ttm_net_income=_vb_.get('ttm_net_income'),
+                            opm_now=_opm(_qq[0]) if len(_qq) > 4 else None, opm_4q_ago=_opm(_qq[4]) if len(_qq) > 4 else None,
+                            debt_to_equity=info.get('debtToEquity'), eps_fy0_now=_e0, eps_fy0_30d=_e30,
+                            vol_annual=float(hist['Close'].pct_change().tail(252).std() * (252 ** 0.5) * 100),
+                            top_segment_share=max((x.get('revenue_pct') or 0) for x in _segs_) if _segs_ else None)
+                        _chk_ = _ac.integrity_checks(
+                            today=pd.Timestamp.today().date(), last_price_date=hist.index[-1].date(),
+                            latest_quarter=_qq[0]['period'] if _qq else None,
+                            per_ttm=_vb_.get('per_ttm'), yf_trailing_pe=info.get('trailingPE'),
+                            rev_ttm=_vb_.get('ttm_revenue'), yf_total_revenue=info.get('totalRevenue'),
+                            mcap=info.get('marketCap'), price=float(price_now),
+                            shares=(_shares_now(sym8_clean, is_kr_sym, info) if is_kr_sym else info.get('sharesOutstanding')),
+                            seg_check_pct=_L.get('_seg_chk_pct'), seg_src_ai=bool(_L.get('_seg_chk_ai')),
+                            n_analysts=info.get('numberOfAnalystOpinions'), is_kr=is_kr_sym)
+                        _ico = {'warn': '⚠️', 'ok': '✅', 'na': '·'}
+                        _rc1, _rc2 = st.columns(2, gap='large')
+                        with _rc1:
+                            _nw = sum(r['state'] == 'warn' for r in _risk)
+                            _nj = sum(r['state'] != 'na' for r in _risk)
+                            with st.container(border=True):
+                                st.markdown(f"**⚠️ 리스크 점검 — {_nj}개 판정 중 {_nw}개 해당**")
+                                st.markdown("\n".join(f"- {_ico[r['state']]} **{r['name']}** · {r['detail']}"
+                                                       for r in sorted(_risk, key=lambda r: {'warn': 0, 'ok': 1, 'na': 2}[r['state']])))
+                                st.caption("사실·규칙 판정(매수·매도 의견 아님). ' · '는 데이터가 없어 판정하지 않은 항목.")
+                        with _rc2:
+                            _nw = sum(r['state'] == 'warn' for r in _chk_)
+                            _nj = sum(r['state'] != 'na' for r in _chk_)
+                            with st.container(border=True):
+                                st.markdown(f"**🧪 데이터 점검 — {_nj}개 확인 · {'이상 ' + str(_nw) + '건' if _nw else '이상 없음'}**")
+                                st.markdown("\n".join(f"- {_ico[r['state']]} **{r['name']}** · {r['detail']}"
+                                                       for r in sorted(_chk_, key=lambda r: {'warn': 0, 'ok': 1, 'na': 2}[r['state']])))
+                                st.caption("이 화면 숫자가 서로 맞는지·최신인지 종목마다 그 자리에서 확인. "
+                                           "'확인 불가(·)'는 통과로 치지 않는다.")
+                    except Exception as _ace:
+                        st.caption(f"`리스크·데이터 점검 실패: {type(_ace).__name__}: {_ace}`")
+
                     if _acch and _acch['rows']:
                         with st.expander(f"🚀 이익 가속 신호 이력 — {len(_acch['rows'])}회"):
                             _tsrc('Yahoo Finance(주가)·SEC EDGAR(분기재무) → leaders_accel.json',
