@@ -2,10 +2,11 @@
  "cut": "2026-08-31",
  "lost": 27,
  "by_reason": {
-  "DB(factor_weekly)에 없음": 15,
+  "DB 없음 · 주봉 80주 미만": 7,
   "거래대금 하한 미달": 1,
   "시총 NULL": 6,
   "시총 하한 미달": 4,
+  "DB 없음 · 재무파일(fq_) 없음": 8,
   "이익가속 재계산 결과 불충족(재무 개정)": 1
  },
  "detail": {
@@ -26,7 +27,10 @@
    "in_marketcap": true,
    "mcap_now": 148715385.78515196,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": true,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "BBSI": {
    "old_weeks": [
@@ -36,6 +40,15 @@
    "in_marketcap": true,
    "mcap_now": 776354250.0,
    "in_universe_ever": true,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 720,
+   "marcap_at_old_B": [
+    1.062
+   ],
+   "close_at_old": [
+    40.64
+   ],
    "rows_at_old_weeks": 1,
    "marcap_null": 0,
    "adv_null": 0,
@@ -58,7 +71,10 @@
    "in_marketcap": true,
    "mcap_now": 1887607794.7395325,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": true,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "BSM": {
    "old_weeks": [
@@ -68,6 +84,15 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 599,
+   "marcap_at_old_B": [
+    null
+   ],
+   "close_at_old": [
+    11.6
+   ],
    "rows_at_old_weeks": 1,
    "marcap_null": 1,
    "adv_null": 0,
@@ -95,7 +120,10 @@
    "in_marketcap": true,
    "mcap_now": 1236853023.9789486,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": true,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "CHWY": {
    "old_weeks": [
@@ -105,6 +133,15 @@
    "in_marketcap": true,
    "mcap_now": 7771395312.88147,
    "in_universe_ever": true,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 384,
+   "marcap_at_old_B": [
+    0.0
+   ],
+   "close_at_old": [
+    38.49
+   ],
    "rows_at_old_weeks": 1,
    "marcap_null": 0,
    "adv_null": 0,
@@ -134,7 +171,10 @@
    "in_marketcap": true,
    "mcap_now": 149269994.73571777,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   },
   "EA": {
    "old_weeks": [
@@ -144,7 +184,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   },
   "ERIE": {
    "old_weeks": [
@@ -156,6 +199,19 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 720,
+   "marcap_at_old_B": [
+    null,
+    null,
+    null
+   ],
+   "close_at_old": [
+    176.0,
+    259.43,
+    385.56
+   ],
    "rows_at_old_weeks": 3,
    "marcap_null": 3,
    "adv_null": 0,
@@ -184,6 +240,25 @@
    "in_marketcap": true,
    "mcap_now": 370045835.8079181,
    "in_universe_ever": true,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 468,
+   "marcap_at_old_B": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "close_at_old": [
+    10.9,
+    11.43,
+    12.06,
+    13.47,
+    17.77,
+    19.48
+   ],
    "rows_at_old_weeks": 11,
    "marcap_null": 0,
    "adv_null": 0,
@@ -205,7 +280,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": false,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   },
   "GBTG": {
    "old_weeks": [
@@ -215,7 +293,10 @@
    "in_marketcap": true,
    "mcap_now": 4943536375.0,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": true,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "GEF": {
    "old_weeks": [
@@ -227,6 +308,19 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 720,
+   "marcap_at_old_B": [
+    null,
+    null,
+    null
+   ],
+   "close_at_old": [
+    27.23,
+    45.53,
+    63.2
+   ],
    "rows_at_old_weeks": 3,
    "marcap_null": 3,
    "adv_null": 0,
@@ -245,6 +339,15 @@
    "in_marketcap": true,
    "mcap_now": 8798816247.558594,
    "in_universe_ever": true,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 584,
+   "marcap_at_old_B": [
+    0.03
+   ],
+   "close_at_old": [
+    51.36
+   ],
    "rows_at_old_weeks": 1,
    "marcap_null": 0,
    "adv_null": 0,
@@ -272,7 +375,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   },
   "IMKTA": {
    "old_weeks": [
@@ -283,6 +389,17 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 720,
+   "marcap_at_old_B": [
+    null,
+    null
+   ],
+   "close_at_old": [
+    89.3,
+    84.43
+   ],
    "rows_at_old_weeks": 2,
    "marcap_null": 2,
    "adv_null": 0,
@@ -302,6 +419,17 @@
    "in_marketcap": true,
    "mcap_now": 412036971.01858526,
    "in_universe_ever": true,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 664,
+   "marcap_at_old_B": [
+    0.0,
+    0.0
+   ],
+   "close_at_old": [
+    71.22,
+    36.34
+   ],
    "rows_at_old_weeks": 2,
    "marcap_null": 0,
    "adv_null": 0,
@@ -324,6 +452,23 @@
    "in_marketcap": true,
    "mcap_now": 874632597.7385216,
    "in_universe_ever": true,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 274,
+   "marcap_at_old_B": [
+    0.667,
+    0.774,
+    0.899,
+    0.882,
+    0.792
+   ],
+   "close_at_old": [
+    3.54,
+    4.11,
+    4.77,
+    4.68,
+    4.19
+   ],
    "rows_at_old_weeks": 5,
    "marcap_null": 0,
    "adv_null": 0,
@@ -347,7 +492,10 @@
    "in_marketcap": true,
    "mcap_now": 10072263678.071367,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": true,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "SKYT": {
    "old_weeks": [
@@ -361,7 +509,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   },
   "SLP": {
    "old_weeks": [
@@ -375,7 +526,10 @@
    "in_marketcap": true,
    "mcap_now": 374004103.0,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": true,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "STZ": {
    "old_weeks": [
@@ -385,6 +539,15 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 720,
+   "marcap_at_old_B": [
+    null
+   ],
+   "close_at_old": [
+    167.57
+   ],
    "rows_at_old_weeks": 1,
    "marcap_null": 1,
    "adv_null": 0,
@@ -405,6 +568,19 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 720,
+   "marcap_at_old_B": [
+    null,
+    null,
+    null
+   ],
+   "close_at_old": [
+    10.74,
+    12.16,
+    13.64
+   ],
    "rows_at_old_weeks": 3,
    "marcap_null": 3,
    "adv_null": 0,
@@ -423,7 +599,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   },
   "TBPH": {
    "old_weeks": [
@@ -436,7 +615,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   },
   "WBD": {
    "old_weeks": [
@@ -454,7 +636,10 @@
    "in_marketcap": true,
    "mcap_now": 77706269483.8146,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": true,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "WBS": {
    "old_weeks": [
@@ -466,7 +651,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "reason": "DB(factor_weekly)에 없음"
+   "fq_file": false,
+   "dy_file": false,
+   "prices_wk": 0,
+   "reason": "DB 없음 · 재무파일(fq_) 없음"
   }
  }
 }
