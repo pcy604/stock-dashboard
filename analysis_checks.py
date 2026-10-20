@@ -49,11 +49,22 @@ def _qend(period: str) -> date | None:
 def integrity_checks(*, today: date, last_price_date: date | None, latest_quarter: str | None,
                      per_ttm=None, yf_trailing_pe=None, rev_ttm=None, yf_total_revenue=None,
                      mcap=None, price=None, shares=None, seg_check_pct=None, seg_src_ai=False,
-                     n_analysts=None, is_kr=False) -> list[dict]:
+                     n_analysts=None, is_kr=False, bad_bars=0) -> list[dict]:
     out = []
 
     def add(name, state, detail):
         out.append({'name': name, 'state': state, 'detail': detail})
+
+    # 0. 현재가 자체 — NaN·0 이면 화면의 거의 모든 숫자가 깨진다(2026-10-20 $nan 사고)
+    import math
+    try:
+        _pv = float(price) if price is not None else float('nan')
+    except Exception:
+        _pv = float('nan')
+    if math.isfinite(_pv) and _pv > 0:
+        add('현재가', 'ok', f"{_pv:,.2f}" + (f" · 종가 없는 미완성 봉 {bad_bars}개 제외" if bad_bars else ''))
+    else:
+        add('현재가', 'warn', '현재가를 계산하지 못함 — 가격 소스가 빈 봉을 보냄(아래 숫자 대부분이 무효)')
 
     # 1. 주가 최신성 — 평일 3일 넘게 비면 수집이 멈춘 것(휴장 연휴 감안)
     if last_price_date:

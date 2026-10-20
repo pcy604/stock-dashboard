@@ -97,7 +97,11 @@ def test_integrity_checks_flags():
     assert r['시총 정합']['state'] == 'warn'                 # 368×3.2B = 1.18T ≠ 1.45T
     assert r['부문 합계 검산']['state'] == 'ok' and r['컨센서스 표본']['state'] == 'warn'
     na = AC.integrity_checks(today=date(2026, 10, 20), last_price_date=None, latest_quarter=None)
-    assert all(x['state'] == 'na' for x in na)               # 못 재면 '확인 불가' — 통과로 치지 않는다
+    assert all(x['state'] == 'na' for x in na if x['name'] != '현재가')   # 못 재면 '확인 불가' — 통과로 치지 않는다
+    assert [x for x in na if x['name'] == '현재가'][0]['state'] == 'warn'
+    nan_px = {x['name']: x for x in AC.integrity_checks(today=date(2026, 10, 20), last_price_date=date(2026, 10, 19),
+                                                         latest_quarter='2026-06', price=float('nan'), bad_bars=1)}
+    assert nan_px['현재가']['state'] == 'warn'               # 2026-10-20 $nan 사고 재발 방지
 
 
 def test_risk_checks():

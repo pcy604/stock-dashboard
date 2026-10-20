@@ -409,6 +409,16 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
 .mo-hero .chip b { font-family: var(--mono); font-weight: 700; }
 .mo-hero .chip.pos b { color: var(--pos); } .mo-hero .chip.neg b { color: var(--neg); }
 .mo-hero a.chip.bot { margin-left: auto; color: var(--accent); background: var(--accent-2); text-decoration: none; font-weight: 600; }
+.mo-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin: 6px 0 10px; }
+.mo-kpi { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--line);
+  border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mo-kpi .l { font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
+.mo-kpi .v { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.mo-kpi .s { font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mo-kpi.good { border-left-color: #16A34A; } .mo-kpi.good .v { color: var(--pos); }
+.mo-kpi.mid  { border-left-color: #F59E0B; } .mo-kpi.mid .v  { color: var(--warn); }
+.mo-kpi.bad  { border-left-color: #DC2626; } .mo-kpi.bad .v  { color: var(--neg); }
+.mo-kpi.na   { border-left-color: #D1D5DB; }
 .mo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; margin: 4px 0 6px; }
 .mo-chip { background: var(--surface); border-radius: var(--radius-sm); padding: 9px 12px 8px; box-shadow: 0 0 0 1px var(--line) inset; }
 .mo-chip .l { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1141,7 +1151,8 @@ _ONBOARD_HTML = """
 </div>
 """
 with st.expander("📖 처음이신가요? — 30초 사용설명 (화면 안내 · 시작 순서 · 전체 설명서)",
-                 expanded=_first_visit and not IS_MOBILE):
+                 expanded=_first_visit and not IS_MOBILE
+                 and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
     st.html(_ONBOARD_HTML)
     # 구 '프로젝트 종합' 탭에 있던 전체 사용설명서 — 탭을 없애면서 여기로 이관
     with st.expander("📚 전체 사용설명서 — 개념 사전 · 데이터 신뢰등급 · 자주 묻는 것"):
@@ -1199,6 +1210,12 @@ if _dl_sym and st.session_state.get('_dl_done') != _dl_sym:
 _dl_watch = [c for c in (_dl_code(t) for t in str(st.query_params.get('watch') or '').split(',')) if c][:30]
 if _dl_watch:
     st.session_state['bot_watch'] = _dl_watch
+    # 2026-10-20: 감시 목록 링크로 들어오면 대시보드 첫 화면이 아니라 '종목 분석'에서 첫 종목을 바로 연다
+    #   (예전엔 칩만 종목 분석 탭 안에 깔아 둬서, 사용자 눈에는 그냥 대시보드가 열린 것으로 보였다)
+    _wk = ','.join(_dl_watch)
+    if not _dl_sym and st.session_state.get('_dl_watch_done') != _wk:
+        st.session_state['_dl_watch_done'] = _wk
+        _goto_analysis(_dl_watch[0])
 _tui.set_fx(lambda: _usdkrw())   # 한국 종목이 섞인 표의 시총($B) → 억원 (2026-10-19)
 tab_screen, tab7, tab4, tab_pf, tab_rep = st.tabs(key='main_tab', on_change='rerun', tabs=[
     "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오", "📰 시황 리포트"])
@@ -3838,6 +3855,9 @@ def _fetch_stock_data_cached(sym: str, days: int):
     try:
         hist = fdr.DataReader(fdr_sym, start)
         hist.index = pd.to_datetime(hist.index).tz_localize(None)
+        # 2026-10-20 사고: 장 시작 전·중에 소스가 '오늘' 행을 종가 NaN 으로 붙여 와 현재가가 $nan 이 됐고
+        #   52주·수익률·시총 정합이 전부 nan 으로 번졌다. 종가가 없는(또는 0 이하인) 행은 봉이 아니다.
+        hist = hist[pd.to_numeric(hist['Close'], errors='coerce') > 0] if 'Close' in hist.columns else hist
         for c in ['Open','High','Low','Close','Volume']:
             if c not in hist.columns: hist[c] = 0.0
 
@@ -4659,6 +4679,11 @@ def _tab_analysis():
                 # 20y를 요청해도 KR은 그 한계까지만 나옴 — 아래 캡션에서 사실대로 안내.
                 hist, info, earn, insid, fin_est = fetch_stock_data(sym8_clean, 365 * 20)
 
+            _n_bad_bar = 0
+            if hist is not None and not hist.empty:      # 캐시에 남은 옛 결과에도 같은 정리(위 수집 단계와 이중 안전)
+                _okb = pd.to_numeric(hist['Close'], errors='coerce') > 0
+                _n_bad_bar = int((~_okb).sum())
+                hist = hist[_okb]
             if hist is None or hist.empty:
                 st.error(f"데이터 없음 ({sym8_clean}). 종목코드 확인 — KR: 005930 · US: TSLA")
             else:
@@ -4717,7 +4742,7 @@ def _tab_analysis():
                 _desc = str(info.get('longBusinessSummary') or '').strip()
                 if _desc:   # 첫 문장 — 'Inc.'·'Corp.' 의 마침표에서 자르지 않는다
                     _desc = re.split(r'(?<!Inc)(?<!Corp)(?<!Co)(?<!Ltd)(?<!Mr)(?<!U\.S)\.\s+(?=[A-Z])', _desc)[0].rstrip('.') + '.'
-                    _desc = _desc if len(_desc) <= 170 else _desc[:167] + '…'
+                    _desc = _desc if len(_desc) <= 220 else _desc[:217].rsplit(' ', 1)[0] + '…'
                 _ind = str(info.get('industry') or info.get('sector') or '')
                 st.markdown(f"""<div class="mo-hero">
 <div class="t"><span class="k">{_h.escape(' · '.join(x for x in (sym8_clean, _ind, '시총 ' + _mcs) if x and x != '-'))}</span>
@@ -5852,26 +5877,15 @@ def _tab_analysis():
                 _acch = None if is_kr_sym else _sx.accel_history(sym8_clean)
                 with _SEC['summary']:
                     st.markdown("## 🧭 요약 판단")
-                    _s1, _s2, _s3, _s4, _s5 = st.columns(5)
+                    # 2026-10-20 개편: 숫자 카드 5개가 같은 무게로 늘어서 '그래서 어떤데'가 안 보였다 →
+                    #   카드마다 상태색(초록·주황·빨강·회색)을 입히고, 리스크·데이터 점검 결과를 카드로 끌어올린다.
+                    #   근거 목록은 아래 펼침에(데이터 이상이 있으면 펼친 채로).
+                    _L = locals()
                     _hi52 = _cl[_cl.index >= _cl.index.max() - pd.DateOffset(weeks=52)].max()
-                    _s1.metric("52주 고점대비", f"{(price_now / _hi52 - 1) * 100:.1f}%" if _hi52 else "-")
                     _e12 = _sx.drawdown_episodes(_cl, 12, 20)
-                    _s2.metric("1년간 −20% 낙폭", f"{len(_e12)}회")
-                    if is_kr_sym:
-                        _s3.metric("이익 가속 신호", "KR 미운영", help="이익 가속 규칙은 현재 미국 종목에만 돌린다.")
-                    elif _acch and _acch['rows']:
-                        _lr = _acch['rows'][0]
-                        _s3.metric("이익 가속 신호", f"{_lr['주차']}", f"그 해 {_lr['회차']}회차" if _lr['회차'] else None)
-                    else:
-                        _s3.metric("이익 가속 신호", "이력 없음")
-                    _tt, _gg = locals().get('_total'), locals().get('_grade')
-                    _s4.metric("CANSLIM", f"{_tt:.0f}점 · {_gg}" if isinstance(_tt, (int, float)) else "-")
-                    _s5.metric(f"{_bm['kind']} 위치 (현재 {_bm['now']:.1f}배)" if _bm else "멀티플 위치",
-                               f"하위 {_bm['rank']:.0f}%" if _bm else "-")
-                    # ── ⚠️ 리스크 점검 · 🧪 데이터 점검 (2026-10-20) — 사실·규칙 판정만, 판정 불가는 '-' ──
+                    _risk, _chk_ = [], []
                     try:
                         import analysis_checks as _ac
-                        _L = locals()
                         _vb_ = _L.get('_vb') or {}
                         _qq = unified_statements(sym8_clean, is_kr_sym, 'quarter') or []
                         _opm = lambda r: (r['op_income'] / r['revenue'] * 100) if (r.get('op_income') is not None and r.get('revenue')) else None
@@ -5899,28 +5913,66 @@ def _tab_analysis():
                             mcap=info.get('marketCap'), price=float(price_now),
                             shares=(_shares_now(sym8_clean, is_kr_sym, info) if is_kr_sym else info.get('sharesOutstanding')),
                             seg_check_pct=_L.get('_seg_chk_pct'), seg_src_ai=bool(_L.get('_seg_chk_ai')),
-                            n_analysts=info.get('numberOfAnalystOpinions'), is_kr=is_kr_sym)
-                        _ico = {'warn': '⚠️', 'ok': '✅', 'na': '·'}
-                        _rc1, _rc2 = st.columns(2, gap='large')
-                        with _rc1:
-                            _nw = sum(r['state'] == 'warn' for r in _risk)
-                            _nj = sum(r['state'] != 'na' for r in _risk)
-                            with st.container(border=True):
-                                st.markdown(f"**⚠️ 리스크 점검 — {_nj}개 판정 중 {_nw}개 해당**")
-                                st.markdown("\n".join(f"- {_ico[r['state']]} **{r['name']}** · {r['detail']}"
-                                                       for r in sorted(_risk, key=lambda r: {'warn': 0, 'ok': 1, 'na': 2}[r['state']])))
-                                st.caption("사실·규칙 판정(매수·매도 의견 아님). ' · '는 데이터가 없어 판정하지 않은 항목.")
-                        with _rc2:
-                            _nw = sum(r['state'] == 'warn' for r in _chk_)
-                            _nj = sum(r['state'] != 'na' for r in _chk_)
-                            with st.container(border=True):
-                                st.markdown(f"**🧪 데이터 점검 — {_nj}개 확인 · {'이상 ' + str(_nw) + '건' if _nw else '이상 없음'}**")
-                                st.markdown("\n".join(f"- {_ico[r['state']]} **{r['name']}** · {r['detail']}"
-                                                       for r in sorted(_chk_, key=lambda r: {'warn': 0, 'ok': 1, 'na': 2}[r['state']])))
-                                st.caption("이 화면 숫자가 서로 맞는지·최신인지 종목마다 그 자리에서 확인. "
-                                           "'확인 불가(·)'는 통과로 치지 않는다.")
+                            n_analysts=info.get('numberOfAnalystOpinions'), is_kr=is_kr_sym, bad_bars=_L.get('_n_bad_bar', 0))
                     except Exception as _ace:
                         st.caption(f"`리스크·데이터 점검 실패: {type(_ace).__name__}: {_ace}`")
+
+                    import html as _hx                     # _h 는 이 함수 안에서 다른 값으로 재사용된다(DART health)
+                    def _kpi(label, value, sub, tone):
+                        return (f'<div class="mo-kpi {tone}"><span class="l">{_hx.escape(label)}</span>'
+                                f'<span class="v">{_hx.escape(value)}</span><span class="s">{_hx.escape(sub)}</span></div>')
+                    _cards = []
+                    _dd52 = (price_now / _hi52 - 1) * 100 if _hi52 else None
+                    _cards.append(_kpi('추세', f"{_dd52:+.1f}%" if _dd52 is not None else '-',
+                                       f"52주 고점 대비 · 1년 −20% 낙폭 {len(_e12)}회",
+                                       'na' if _dd52 is None else ('bad' if _dd52 <= -20 else 'mid' if _dd52 <= -10 else 'good')))
+                    _bm_ = _L.get('_bm')
+                    if _bm_:
+                        _top = 100 - _bm_['rank']
+                        _cards.append(_kpi('밸류(과거 대비)', f"상위 {_top:.0f}%",
+                                           f"{_bm_['kind']} {_bm_['now']:.1f}배 · 낮을수록 쌈",
+                                           'bad' if _top <= 20 else 'mid' if _top <= 40 else 'good'))
+                    else:
+                        _cards.append(_kpi('밸류(과거 대비)', '-', '밴드 계산 불가', 'na'))
+                    if is_kr_sym:
+                        _cards.append(_kpi('이익 가속', 'KR 미운영', '미국 종목만 규칙 적용', 'na'))
+                    elif _acch and _acch['rows']:
+                        _lr = _acch['rows'][0]
+                        _rec = (pd.Timestamp.today() - pd.Timestamp(_lr['주차'])).days <= 365
+                        _cards.append(_kpi('이익 가속', str(_lr['주차']),
+                                           (f"그 해 {_lr['회차']}회차 · " if _lr['회차'] else '') + ('최근 1년 내' if _rec else '1년 넘음'),
+                                           'good' if _rec else 'na'))
+                    else:
+                        _cards.append(_kpi('이익 가속', '이력 없음', '2018년 이후 신호 없음', 'na'))
+                    _tt, _gg = _L.get('_total'), _L.get('_grade')
+                    _cards.append(_kpi('CANSLIM', f"{_gg}" if _gg else '-', f"{_tt:.0f}점" if isinstance(_tt, (int, float)) else '점수 없음',
+                                       'na' if not _gg else ('good' if str(_gg)[:1] in 'AB' else 'mid' if str(_gg)[:1] == 'C' else 'bad')))
+                    _nr = sum(r['state'] == 'warn' for r in _risk)
+                    _cards.append(_kpi('리스크', f"{_nr}개 해당" if _risk else '-',
+                                       ' · '.join(r['name'] for r in _risk if r['state'] == 'warn')[:40] or '해당 없음',
+                                       'na' if not _risk else ('good' if _nr == 0 else 'mid' if _nr <= 2 else 'bad')))
+                    _nd = sum(r['state'] == 'warn' for r in _chk_)
+                    _cards.append(_kpi('데이터', f"이상 {_nd}건" if _nd else ('정상' if _chk_ else '-'),
+                                       ' · '.join(r['name'] for r in _chk_ if r['state'] == 'warn')[:40] or
+                                       f"{sum(r['state'] == 'ok' for r in _chk_)}개 항목 확인",
+                                       'na' if not _chk_ else ('bad' if _nd else 'good')))
+                    st.markdown(f'<div class="mo-kpis">{"".join(_cards)}</div>', unsafe_allow_html=True)
+                    if _nd:
+                        st.error("데이터 이상이 있습니다 — 아래 숫자 중 일부가 틀렸을 수 있습니다. '근거 보기'에서 무엇이 이상한지 확인하세요.")
+
+                    _ico = {'warn': '⚠️', 'ok': '✅', 'na': '·'}
+                    _ord = lambda rs: sorted(rs, key=lambda r: {'warn': 0, 'ok': 1, 'na': 2}[r['state']])
+                    with st.expander("근거 보기 — 리스크 점검 · 데이터 점검", expanded=bool(_nd)):
+                        _rc1, _rc2 = st.columns(2, gap='large')
+                        with _rc1:
+                            st.markdown(f"**⚠️ 리스크 점검** — {sum(r['state'] != 'na' for r in _risk)}개 판정 중 {_nr}개 해당")
+                            st.markdown("\n".join(f"- {_ico[r['state']]} **{r['name']}** · {r['detail']}" for r in _ord(_risk)))
+                            st.caption("사실·규칙 판정(매수·매도 의견 아님). '·'는 데이터가 없어 판정하지 않은 항목.")
+                        with _rc2:
+                            st.markdown(f"**🧪 데이터 점검** — {sum(r['state'] != 'na' for r in _chk_)}개 확인 · "
+                                        + (f"이상 {_nd}건" if _nd else "이상 없음"))
+                            st.markdown("\n".join(f"- {_ico[r['state']]} **{r['name']}** · {r['detail']}" for r in _ord(_chk_)))
+                            st.caption("이 화면 숫자가 서로 맞는지·최신인지 종목마다 그 자리에서 확인. '확인 불가(·)'는 통과로 치지 않는다.")
 
                     if _acch and _acch['rows']:
                         with st.expander(f"🚀 이익 가속 신호 이력 — {len(_acch['rows'])}회"):
