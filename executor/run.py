@@ -30,7 +30,10 @@ def main():
     week = acc.get("signal_week") or date.today().isoformat()
     sigs = [dict(sym=c["sym"], mc=c.get("mc"), week=week) for c in acc.get("candidates", [])]
     syms = sorted({s["sym"] for s in sigs} | set(led.positions) | {cfg["core_symbol"]})
-    px, above = P.weekly_close(syms, cfg["core_symbol"], cfg.get("core_ma_switch_weeks", 40))
+    px, _ = P.weekly_close(syms, cfg["core_symbol"], 0)
+    # 코어 스위치 = verdict.py (화면·리포트와 같은 SPY 200일선, 2026-10-21). 예전엔 여기서 VOO 40주선을 따로 쟀다.
+    import verdict as V
+    above = V.latest_core_on() if cfg.get("core_ma_switch_days") else None
     res = planner.plan(led, cfg, week, px, above, sigs)
     print(report(res, week))
     if a.dry_run:

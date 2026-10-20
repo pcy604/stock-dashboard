@@ -310,6 +310,19 @@ def _():
     return not lost and _age(last) <= 9, f"{len(d.get('curves', {})):,}종 · 마지막 {last} · 누락 {lost or '없음'}"
 
 
+# ───────────────────────── 이번 주 판정 ─────────────────────────
+@check('이번 주 판정', 'SPY 가 200일선 대비 ±40% 안이고, ON/OFF 가 이격 부호와 맞고, 목표 비중 합이 100인가')
+def _():
+    d = _j('results/macro.json')
+    c, a = d.get('core') or {}, d.get('alloc') or {}
+    if not c:
+        return False, 'core 없음'
+    gap = c.get('gap') or 0
+    tot = (a.get('core_now') or 0) + (a.get('satellite') or 0) + (a.get('cash_total') or 0)
+    ok = abs(gap) < 40 and (gap > 0) == bool(c.get('on')) and tot == 100 and _age(d.get('asof')) <= 5
+    return ok, f"{d.get('asof')} {'ON' if c.get('on') else 'OFF'} {gap:+.1f}% · 비중합 {tot}"
+
+
 # ───────────────────────── 시황·컨센서스 ─────────────────────────
 @check('시황 리포트', '일간 리포트가 4일 이내인가')
 def _():

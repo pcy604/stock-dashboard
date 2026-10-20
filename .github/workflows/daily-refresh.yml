@@ -185,6 +185,12 @@ jobs:
       #   다시 계산해 봐야 보인다. 불일치면 텔레그램. 산출물을 막지는 않는다(원천도 틀릴 수 있다).
       # 2026-10-14 — 일간 시황 리포트(📰 탭·챗봇 근거). 지수는 Yahoo, 나머지는 위 산출물.
       #   GEMINI_KEY 가 없거나 한도면 숫자 템플릿으로 발행된다(계약 검사가 WARN 으로 알린다).
+      # 2026-10-21 — 이번 주 판정 단일 출처(verdict.py → results/macro.json). 화면 상단 배지·🏠 종합·
+      #   시황 리포트·주간 포트폴리오·executor 가 이 파일을 읽는다. 리포트보다 먼저 돌아야 한다.
+      - name: 이번 주 판정 (코어 200일선 스위치)
+        run: python verdict.py
+        continue-on-error: true
+
       - name: 일간 시황 리포트
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}

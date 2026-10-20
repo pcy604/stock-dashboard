@@ -141,14 +141,10 @@ def _earnings(sym):
 
 
 def _market_dir():
-    try:
-        import FinanceDataReader as fdr
-        spy = fdr.DataReader('SPY', (datetime.now() - timedelta(days=400)).strftime('%Y-%m-%d'))
-        ma200 = float(spy['Close'].rolling(200).mean().iloc[-1])
-        ok = float(spy['Close'].iloc[-1]) > ma200
-        return ok, ('상승추세 ✅' if ok else '하락추세 ⚠️')
-    except Exception:
-        return True, '판단불가'
+    """[M] S&P500 200일선 — verdict.core_switch (코어 스위치와 같은 함수, 2026-10-21)."""
+    import verdict as V
+    sw = V.core_switch(V.daily_closes(V.CORE_SYM))
+    return (sw['on'], V.market_dir(sw)) if sw else (True, '판단불가')
 
 
 def run(top=250):

@@ -46,24 +46,16 @@ _print_lock = threading.Lock()
 # ── M: 시장방향 ──────────────────────────────────────────────────────
 
 def check_market(verbose=True):
-    """KOSPI 주봉 MA10 > MA30 → 상승추세"""
-    try:
-        start = (datetime.now() - timedelta(days=500)).strftime('%Y-%m-%d')
-        df = fdr.DataReader('KS11', start)
-        df.index = pd.to_datetime(df.index).tz_localize(None)
-        wdf = df['Close'].resample('W').last().dropna()
-        if len(wdf) < 30:
-            return True, 'N/A'
-        ma10 = wdf.iloc[-10:].mean()
-        ma30 = wdf.iloc[-30:].mean()
-        ok = ma10 > ma30
-        direction = '상승추세 ✅' if ok else '하락추세 ⚠️'
-        if verbose:
-            print(f"  [M] KOSPI: MA10={ma10:,.0f} / MA30={ma30:,.0f} → {direction}")
-        return ok, direction
-    except Exception as e:
-        print(f"  [M] KOSPI 조회 실패: {e}")
+    """[M] 코스피 200일선 — 2026-10-21 verdict.core_switch 로 통일(KR·US·화면·리포트 같은 규칙).
+    예전: KOSPI 주봉 MA10 > MA30 (US 는 200일선) — 시장마다 규칙이 달랐다."""
+    import verdict as V
+    sw = V.core_switch(V.daily_closes(V.KR_SYM))
+    if not sw:
+        print("  [M] KOSPI 조회 실패 — 판단불가")
         return True, 'N/A'
+    if verbose:
+        print(f"  [M] KOSPI {sw['close']:,.0f} / 200일선 {sw['ma']:,.0f} → {V.market_dir(sw)}")
+    return sw['on'], V.market_dir(sw)
 
 
 # ── 유니버스 ─────────────────────────────────────────────────────────

@@ -1013,40 +1013,8 @@ def fetch_spx_yoy():
         _mark_failed('spx_yoy')
         return None
 
-def compute_macro_signal(fed_rate, m2_yoy, spx_yoy):
-    score = 0
-    details = []
-    if fed_rate is not None:
-        if fed_rate <= 2.5:
-            score += 2; details.append(f"Fed {fed_rate:.2f}% ✅ 완화")
-        elif fed_rate <= 4.5:
-            score += 1; details.append(f"Fed {fed_rate:.2f}% ⚠️ 중립")
-        else:
-            score -= 1; details.append(f"Fed {fed_rate:.2f}% ❌ 긴축")
-    if m2_yoy is not None:
-        if m2_yoy >= 5:
-            score += 2; details.append(f"M2 YoY {m2_yoy:.1f}% ✅ 팽창")
-        elif m2_yoy >= 0:
-            score += 1; details.append(f"M2 YoY {m2_yoy:.1f}% ⚠️ 보통")
-        else:
-            score -= 1; details.append(f"M2 YoY {m2_yoy:.1f}% ❌ 수축")
-    if spx_yoy is not None:
-        if spx_yoy >= 10:
-            score += 1; details.append(f"SPX YoY {spx_yoy:.1f}% ✅ 강세")
-        elif spx_yoy >= -10:
-            score += 0; details.append(f"SPX YoY {spx_yoy:.1f}% ⚠️ 보통")
-        else:
-            score -= 1; details.append(f"SPX YoY {spx_yoy:.1f}% ❌ 약세")
-    if score >= 4:
-        signal = "🟢 매수우호"
-        cash_min, cash_max = 10, 20
-    elif score >= 1:
-        signal = "🟡 중립관망"
-        cash_min, cash_max = 25, 40
-    else:
-        signal = "🔴 위험경계"
-        cash_min, cash_max = 50, 70
-    return signal, cash_min, cash_max, score, details
+# 2026-10-21 — compute_macro_signal(Fed·M2·SPX YoY → 현금 10~70%) 삭제.
+#   검증 목록 1-5 에서 기각된 규칙이 종목분석 M 칸에 남아 있었다. 판정은 verdict.py.
 
 
 # ── 탭 구성 ──────────────────────────────────────────────────────────
@@ -1217,8 +1185,77 @@ if _dl_watch:
         st.session_state['_dl_watch_done'] = _wk
         _goto_analysis(_dl_watch[0])
 _tui.set_fx(lambda: _usdkrw())   # 한국 종목이 섞인 표의 시총($B) → 억원 (2026-10-19)
-tab_screen, tab7, tab4, tab_pf, tab_rep = st.tabs(key='main_tab', on_change='rerun', tabs=[
-    "🔎 종목 발굴", "🔍 종목 분석", "🌍 매크로", "🛡️ 내 포트폴리오", "📰 시황 리포트"])
+
+
+# ── 이번 주 판정 — 단일 출처 (2026-10-21) ─────────────────────────────
+#   results/macro.json(CI 06:00, verdict.py) 을 먼저 읽고, 없거나 낡았으면 **같은 함수**로 라이브 계산.
+#   상단 배지·🏠 종합·🌍 매크로·종목분석 M·시황 리포트·주간 포트폴리오·executor 가 전부 이 값을 쓴다.
+def _verdict_now():
+    v = load_json(Path('results/macro.json')) or {}
+    a = _V.age_days(v)
+    if v.get('core') and a is not None and a <= 4:
+        return dict(v, _src='file')
+    px, kx = fetch_index_history('SPY', 400), fetch_index_history('KS11', 400)
+    sw = _V.core_switch(px.iloc[:, 0]) if not px.empty else {}
+    kw = _V.core_switch(kx.iloc[:, 0]) if not kx.empty else {}
+    return dict(asof=sw.get('date'), core=sw, kr_core=kw, alloc=_V.alloc(sw.get('on') if sw else None),
+                canslim_m=dict(US=_V.market_dir(sw), KR=_V.market_dir(kw)), phase=v.get('phase') or {},
+                greed=v.get('greed') or {}, flow=v.get('flow') or {}, econ=v.get('econ') or {},
+                history=v.get('history') or [], changed=False, generated=v.get('generated'),
+                _src='live', _file_asof=v.get('asof'))
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def _ops_counts():
+    """(정답 점검 틀림 수, 갱신 정지 수) — 상단 배지·종합 탭용. 10분 캐시(파일 수십 개를 읽는다)."""
+    try:
+        import tools.known_answers as _ka
+        ka = sum(1 for r in _ka.run() if not r['ok'])
+    except Exception:
+        ka = None
+    try:
+        import data_freshness as _dfm
+        stl = sum(1 for r in _dfm.statuses() if r['state'] != 'ok')
+    except Exception:
+        stl = None
+    return ka, stl
+
+
+def _status_bar(v):
+    """모든 탭 위 한 줄 — 같은 판정을 어느 탭에서 보든 같은 값으로."""
+    c, a, ph, g = v.get('core') or {}, v.get('alloc') or {}, v.get('phase') or {}, v.get('greed') or {}
+    if c:
+        sw = (f"<b style='color:{'#15803d' if c['on'] else '#b91c1c'}'>코어 {'ON' if c['on'] else 'OFF'}</b> "
+              f"S&P500 200일선 {c['gap']:+.1f}%")
+    else:
+        sw = "<b style='color:#6b7280'>코어 판정 불가</b>"
+    al = (f"목표 코어 {a['core_now']} · 위성 {a['satellite']} · 현금 {a['cash_total']}" if a.get('cash_total') is not None else "목표 비중 —")
+    ka, stl = _ops_counts()
+    bad = (ka or 0) + (stl or 0)
+    dat = ("<span style='color:#15803d'>데이터 정상</span>" if bad == 0 and ka is not None
+           else f"<span style='color:#b91c1c'>데이터 점검 {bad}건</span>")
+    bits = [sw, al]
+    if ph.get('name'):
+        bits.append(f"국면 {ph.get('emoji', '')} {ph['name']} <span style='color:#9ca3af'>(참고)</span>")
+    if g.get('word'):
+        bits.append(f"경고 {g.get('n', 0)}/3 <span style='color:#9ca3af'>(참고)</span>")
+    bits += [dat, f"<span style='color:#9ca3af'>{v.get('asof') or '-'} 종가 기준</span>"]
+    st.markdown("<div style='font-size:13px;padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;"
+                "background:#fafafa;color:#374151;margin:2px 0 6px'>" + " &nbsp;·&nbsp; ".join(bits) + "</div>",
+                unsafe_allow_html=True)
+    if v.get('changed'):
+        st.warning(f"⚠️ 이번 주 코어 스위치 전환 — {'OFF → ON: 코어 복귀' if c.get('on') else 'ON → OFF: 코어를 현금으로'}. 🏠 종합 탭 '할 일' 참고")
+
+
+# 자리만 잡고 맨 끝에서 채운다 — 라이브 계산(macro.json 이 낡았을 때)이 아래 탭 전부를 붙잡지 않게
+_status_slot = st.container()
+_VERDICT = {}
+
+# 2026-10-21 탭 재편 — 톱다운 의사결정 순서: 이번 주 판정·할 일·시황(종합) → 왜(매크로) → 무엇을(발굴)
+#   → 이게 맞나(분석) → 내 계좌(포트폴리오). 📰 시황 리포트는 매일 읽는 요약이라 종합으로 흡수했다.
+tab_home, tab4, tab_screen, tab7, tab_pf = st.tabs(key='main_tab', on_change='rerun', tabs=[
+    "🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"])
+tab_rep = tab_home
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 # 순서 주의: 서브탭 핸들(t_gain…)은 아래 6개 블록이 전부 의존하므로 **무조건 먼저** 만든다.
@@ -1228,7 +1265,7 @@ _MDDM, _ATTM = {}, {}
 
 with tab_screen:                           # 데이터를 건드리지 않는 순수 레이아웃 → 가드 불필요
     _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
-    _macro_strip = st.container()          # 매크로 요약이 들어갈 자리
+    # 2026-10-21 매크로 요약 스트립 삭제 — 같은 판정이 모든 탭 위 상단 배지에 있다(중복 제거)
     # 서브탭 순서 = 신뢰도 순서. 검증된 규칙(주도주·CANSLIM)을 앞에, 참고용 탐색을 뒤에.
     # 성적표는 2026-08-11 포트폴리오 탭으로 이관했다(실적 공시는 한 곳에서).
     # 2026-08-12 통폐합: ⚡타이밍 발굴 서브탭 제거.
@@ -1251,28 +1288,6 @@ try:
     _ATTM = _attract_map(_GMKT)   # sym → 매력도(위닝점수·등급)
 except Exception:
     _ATTM = {}
-
-# ── 매크로 요약 스트립 (구 '오늘의 종합' 카드 이관) ──
-# 2026-10-17 — 채우기는 스크립트 **맨 끝**에서 한다(_macro_strip 자리는 위에 잡아 둠).
-#   외부 API 3개(FRED×2·S&P)를 기다리는 동안 그 아래 탭 전부가 안 그려지던 구조였다.
-def _fill_macro_strip():
-    # 2026-10-20 — '매크로 신호·권고 현금(10~70%)'은 검증되지 않은 규칙이라 내렸다.
-    #   대신 확정 규칙(200일선 코어 스위치)과 사이클 국면(지도)을 보인다. 근거: research/macro_regime_result_2026-10-20.md
-    _s_can_h = load_json(CANSLIM_JSON) or {}
-    try:
-        _px_h = macro_price_state()
-        _sw = ('—' if not _px_h else
-               f"{'ON' if _px_h['above_ma'] else 'OFF'} ({(_px_h['spx'] / _px_h['ma200'] - 1) * 100:+.1f}%)")
-        _ph = SEASONS[macro_regime(macro_inputs(), _px_h)['phase']]
-        _phase = f"{_ph['emoji']} {_ph['name']}"
-    except Exception:
-        _sw, _phase = '—', '—'
-    _hm1, _hm2, _hm4 = st.columns(3)
-    _hm1.metric("시장 방향", _s_can_h.get('market_dir', '—'))
-    _hm2.metric("코어 스위치 (200일선)", _sw, help="S&P500(SPY)이 200일선 위면 ON — 원칙의 유일한 확정 비중 규칙 · 상세는 🌍 매크로 탭")
-    _hm4.metric("사이클 국면", _phase, help="우라가미 4계절 — 지도이며 비중 규칙이 아니다")
-
-
 
 # ════════════════════════════════════════════════════════════════════
 # 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
@@ -3079,169 +3094,21 @@ def _plotly_line(dfs, labels, colors, title, yformat='{:.2f}', height=260):
 #   판정은 전부 공개 임계값이다. 맞추려는 게 아니라 '어디쯤인지'와 '무엇이 바뀌면
 #   국면이 넘어가는지'를 눈에 보이게 하는 게 목적이다.
 # ════════════════════════════════════════════════════════════════════
-def _pctile(vals, x):
-    """vals 분포에서 x의 백분위(0~100)."""
-    if not vals or x is None:
-        return None
-    return round(sum(1 for v in vals if v <= x) / len(vals) * 100)
-
-
-def _yoy_series(obs, k=12):
-    """[(date,val)] → [(date, YoY%)]. 월간 시계열 전용."""
-    out = []
-    for i in range(k, len(obs)):
-        prev = obs[i - k][1]
-        if prev:
-            out.append((obs[i][0], (obs[i][1] / prev - 1) * 100))
-    return out
+# 2026-10-21 — 판정 계산(_pctile·_yoy_series·macro_inputs·200일선·SEASONS·EGG·macro_regime)은
+#   verdict.py 로 옮겼다. 화면·CANSLIM M·시황 리포트·주간 포트폴리오·executor 가 같은 함수를 쓴다.
+import verdict as _V
+from verdict import _pctile, _yoy_series, SEASONS, EGG, macro_regime
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def macro_inputs():
-    """국면 판정용 원지표를 한 번에 수집. 실패 항목은 None으로 남기고 나머지로 진행한다."""
-    d = {}
-    ff = fetch_fred('FEDFUNDS', 130)                      # 월간 ~10년
-    if ff:
-        d['fed'] = ff[-1][1]
-        d['fed_6m'] = round(ff[-1][1] - ff[-7][1], 2) if len(ff) >= 7 else None
-        d['fed_12m'] = round(ff[-1][1] - ff[-13][1], 2) if len(ff) >= 13 else None
-        d['fed_pct'] = _pctile([v for _, v in ff], ff[-1][1])
-        d['fed_hist'] = ff
-    ip = fetch_fred('INDPRO', 130)                        # 산업생산 = 실적 사이클 대용
-    if ip:
-        ipy = _yoy_series(ip)
-        d['ip_yoy'] = round(ipy[-1][1], 2) if ipy else None
-        d['ip_hist'] = ipy
-    ur = fetch_fred('UNRATE', 40)
-    if ur:
-        d['unrate'] = ur[-1][1]
-        lo12 = min(v for _, v in ur[-12:]) if len(ur) >= 12 else ur[-1][1]
-        d['sahm'] = round(ur[-1][1] - lo12, 2)            # 삼의 법칙 근사(12개월 최저 대비)
-    m2 = fetch_fred('M2SL', 26)
-    if m2 and len(m2) >= 13:
-        d['m2_yoy'] = round((m2[-1][1] / m2[-13][1] - 1) * 100, 2)
-    cpi = fetch_fred('CPIAUCSL', 26)
-    if cpi and len(cpi) >= 13:
-        d['cpi_yoy'] = round((cpi[-1][1] / cpi[-13][1] - 1) * 100, 2)
-    t10, t2 = fetch_fred('DGS10', 5), fetch_fred('DGS2', 5)
-    if t10 and t2:
-        d['spread'] = round(t10[-1][1] - t2[-1][1], 2)
-    hy = fetch_fred('BAMLH0A0HYM2', 2600)                 # 하이일드 OAS = 신용 스트레스
-    if hy:
-        d['hy'] = hy[-1][1]
-        d['hy_pct'] = _pctile([v for _, v in hy], hy[-1][1])
-    vx = fetch_fred('VIXCLS', 2600)
-    if vx:
-        d['vix'] = vx[-1][1]
-        d['vix_pct'] = _pctile([v for _, v in vx], vx[-1][1])
-    return d
+    return _V.macro_inputs(fetch_fred)
 
 
 def macro_price_state():
-    """주가 추세 — 200일선 위/아래, 52주 위치, 12개월 모멘텀."""
+    """S&P500(SPY) 200일선 — verdict.core_switch. 옛 키(spx·ma200·above_ma·pos52·mom12) 그대로."""
     df = fetch_index_history('SPY', 400)
-    if df.empty or len(df) < 210:
-        return {}
-    c = df.iloc[:, 0]
-    cur = float(c.iloc[-1])
-    ma200 = float(c.tail(200).mean())
-    hi, lo = float(c.tail(252).max()), float(c.tail(252).min())
-    return {
-        'spx': cur, 'ma200': ma200, 'above_ma': cur > ma200,
-        'pos52': round((cur - lo) / (hi - lo) * 100) if hi > lo else None,
-        'mom12': round((cur / float(c.iloc[-252]) - 1) * 100, 1) if len(c) >= 252 else None,
-    }
-
-
-# 우라가미 구미오 4계절 — (금리 방향 × 실적 방향 × 주가 추세)
-SEASONS = {
-    'FIN':  dict(emoji='🌱', name='금융장세', sub='유동성이 끌어올리는 장 (봄)',
-                 desc='실적은 아직 나쁜데 금리가 내려가며 돈이 먼저 들어온다. 밸류에이션이 먼저 오른다.',
-                 works='금리민감·성장주·소외 대형주. 실적보다 "금리 방향"이 주가를 정합니다.',
-                 fails='실적 기준 종목 선별. 지금 좋은 실적은 이미 과거다.'),
-    'EARN': dict(emoji='☀️', name='실적장세', sub='펀더멘털이 끌어올리는 장 (여름)',
-                 desc='금리가 올라도 이익이 더 빨리 는다. 이익이 나오는 종목만 오른다.',
-                 works='이익 증가·흑자전환·주도주. 이 도구의 🚀주도주·🏆CANSLIM이 가장 잘 맞는 구간.',
-                 fails='유동성만 보고 사는 저가 매수. 이익 없는 종목은 여기서 걸러집니다.'),
-    'RFIN': dict(emoji='🍂', name='역금융장세', sub='긴축이 눌러 내리는 장 (가을)',
-                 desc='이익은 아직 괜찮은데 금리·긴축이 멀티플을 깎는다. 좋은 실적에도 주가가 안 간다.',
-                 works='현금 비중 확대·손절 규율. 고PER·고PSR 축소.',
-                 fails='"실적 좋으니 괜찮다"는 논리. 이 국면에서 깨지는 대표적 착각입니다.'),
-    'RERN': dict(emoji='❄️', name='역실적장세', sub='이익이 무너지는 장 (겨울)',
-                 desc='금리는 내려오는데 이익이 더 빨리 무너집니다. 싸 보이는 게 함정인 구간.',
-                 works='현금·채권. 워치리스트 작성. "실탄을 들고 기다리는 것"이 전략입니다.',
-                 fails='물타기·저PER 매수. 분모(이익)가 계속 깎이면 PER은 사후에 올라간다.'),
-}
-
-# 코스톨라니 달걀 — 금리 사이클 위치로 '지금 무슨 자산을 들 때인가'
-EGG = [
-    ('A1', '금리 고점 통과 → 채권', '금리가 꼭대기를 찍고 내려오기 시작. 채권이 가장 유리한 구간.'),
-    ('A2', '금리 하락 중 → 채권·부동산', '금리 하락이 진행 중. 주식은 아직 이르지만 준비 구간.'),
-    ('A3', '금리 저점 → 주식 매수', '금리가 바닥. 코스톨라니가 "주식을 사라"고 한 자리.'),
-    ('B1', '금리 저점 통과 → 주식 보유', '금리가 바닥에서 오르기 시작. 주식 상승이 가장 강한 구간.'),
-    ('B2', '금리 상승 중 → 주식 축소', '금리 상승이 진행 중. 비중을 줄여가야 하는 구간.'),
-    ('B3', '금리 고점 접근 → 현금·예금', '금리가 꼭대기 근처. 현금이 가장 편한 구간.'),
-]
-
-
-def macro_regime(d, px):
-    """세 렌즈 판정 + 근거. d=macro_inputs(), px=macro_price_state()."""
-    fed6, ip, sahm = d.get('fed_6m'), d.get('ip_yoy'), d.get('sahm')
-    rate_dir = '하락' if (fed6 is not None and fed6 <= -0.25) else \
-               ('상승' if (fed6 is not None and fed6 >= 0.25) else '횡보')
-    if ip is None:
-        growth = '횡보'
-    elif ip >= 1.0:
-        growth = '개선'
-    elif ip <= -1.0:
-        growth = '악화'
-    else:
-        growth = '횡보'
-    if sahm is not None and sahm >= 0.5:          # 삼의 법칙 발동 시 성장은 악화로 덮어씀
-        growth = '악화'
-    up = bool(px.get('above_ma')) and (px.get('mom12') or 0) > 0
-    px_dir = '상승' if up else '하락'
-
-    sc = {
-        'FIN':  (2 if rate_dir == '하락' else 0) + (1 if growth in ('악화', '횡보') else 0) + (2 if px_dir == '상승' else 0),
-        'EARN': (1 if rate_dir in ('횡보', '상승') else 0) + (2 if growth == '개선' else 0) + (2 if px_dir == '상승' else 0),
-        'RFIN': (2 if rate_dir == '상승' else 0) + (1 if growth in ('개선', '횡보') else 0) + (2 if px_dir == '하락' else 0),
-        'RERN': (2 if growth == '악화' else 0) + (2 if px_dir == '하락' else 0) + (1 if rate_dir == '하락' else 0),
-    }
-    order = sorted(sc.items(), key=lambda kv: -kv[1])
-    phase, top = order[0]
-    conf = top - order[1][1]                       # 1위와 2위 점수차 = 확신도
-
-    # 코스톨라니 달걀 — 금리의 사이클 위치 × 방향
-    # 6개월 변화가 0 근처(횡보)면 달걀 위치가 정해지지 않는다. 이때 12개월 변화로 한 번 더
-    # 물어보고, 그래도 정체면 '방향 미정'을 숨기지 말고 표시한다(예전엔 횡보를 '하락'으로
-    # 흘려보내 "금리 하락 중"이라고 잘못 단정했다).
-    fp, f12 = d.get('fed_pct'), d.get('fed_12m')
-    egg_dir = rate_dir
-    if egg_dir == '횡보' and f12 is not None and abs(f12) >= 0.5:
-        egg_dir = '하락' if f12 < 0 else '상승'
-    egg_flat = (egg_dir == '횡보')
-    if fp is None:
-        egg_i = None
-    elif fp >= 70:
-        egg_i = 0 if egg_dir == '하락' else 5          # 고점 통과=A1(채권) / 고점 접근·정체=B3(현금)
-    elif fp >= 30:
-        egg_i = 1 if egg_dir == '하락' else (4 if egg_dir == '상승' else (4 if fp >= 50 else 1))
-    else:
-        egg_i = 2 if egg_dir == '하락' else 3          # 저점 하락중=A3(매수) / 저점 통과=B1(보유)
-
-    # 막스 시계추 — 0=극도의 공포, 100=극도의 탐욕
-    parts = []
-    if d.get('hy_pct') is not None:
-        parts.append(100 - d['hy_pct'])            # 스프레드 낮을수록 탐욕
-    if d.get('vix_pct') is not None:
-        parts.append(100 - d['vix_pct'])
-    if px.get('pos52') is not None:
-        parts.append(px['pos52'])
-    pend = round(sum(parts) / len(parts)) if parts else None
-
-    return dict(phase=phase, scores=sc, conf=conf, rate_dir=rate_dir, growth=growth,
-                px_dir=px_dir, egg_i=egg_i, egg_flat=egg_flat, pend=pend, second=order[1][0])
+    return {} if df.empty else _V.as_price_state(_V.core_switch(df.iloc[:, 0]))
 
 
 def macro_triggers(d, px):
@@ -3308,11 +3175,7 @@ def _mo_asset_closes():
         return {}
 
 
-# (FRED 코드, 받을 개수) — 화면 두 축에 쓰는 것만
-_MO_FRED = {'ICSA': 70, 'T10Y3M': 5, 'CFNAI': 6, 'NEWORDER': 16, 'XTEXVA01KRM667S': 16, 'GDPNOW': 3,
-            'INDPRO': 16, 'PAYEMS': 6, 'UNRATE': 18, 'PCEPILFE': 16, 'CPIAUCSL': 16, 'FEDFUNDS': 9,
-            'DGS10': 70, 'WALCL': 30, 'WTREGEN': 30, 'RRPONTSYD': 400, 'DFII10': 70,
-            'BAMLH0A0HYM2': 800, 'VIXCLS': 5, 'VXVCLS': 5, 'BAA10Y': 80}
+_MO_FRED = _V.MO_FRED      # 2026-10-21 verdict.py 로 이관 — CI 의 macro.json 과 같은 목록
 
 
 def _mo_series():
@@ -3328,25 +3191,17 @@ def _macro_v2_top(_PX, _RG):
     with st.spinner("두 축 지표 수집 중..."):
         S = _mo_series()
         closes = _mo_asset_closes()
-    at = _mf.asset_table(closes) if closes else pd.DataFrame()
-    flow = _mf.flow_verdict(at) if len(at) else dict(word='-', up=0, n=0, risk_up=0, risk_n=0)
-    rows = _mf.econ_rows(S)
-    ew, esub = _mf.econ_verdict(rows)
-
-    # 욕심 판정 재료
+    # 2026-10-21 — 두 축·욕심 경고 계산은 verdict.axes 하나(CI 의 results/macro.json 과 같은 함수)
     core_on = (bool(_PX.get('above_ma')) if _PX else None)
     gap200 = ((_PX['spx'] / _PX['ma200'] - 1) * 100) if _PX else None
-    baa = S['BAA10Y']; c1 = float(baa.iloc[-1] - baa.iloc[-66]) if len(baa) > 66 else None
-    dx = _mf._clean(closes.get('DX-Y.NYB')) if closes else pd.Series(dtype=float)
-    dxy_gap = _mf.ma_gap(dx) if len(dx) else None
-    dxy_13 = _mf.ret_pct(dx, 63) if len(dx) > 63 else None
-    G = _mf.greed_signals(core_on, c1, _RG.get('phase'), dxy_gap, dxy_13)
+    _A = _V.axes(S, closes, core_on, _RG.get('phase'))
+    at, flow, rows, ew, esub = _A['at'], _A['flow'], _A['rows'], _A['ew'], _A['esub']
+    c1, dx, dxy_gap, dxy_13, G = _A['c1'], _A['dx'], _A['dxy_gap'], _A['dxy_13'], _A['G']
 
     # ── ① 이번 주 판정 — 2026-10-20 다른 탭과 같은 st.metric 카드로 통일(사용자 피드백)
     st.subheader("이번 주 판정")
     st.caption("매주 월요일 아침에 이 한 줄만 보면 된다. 비중을 바꾸는 확정 규칙은 코어 스위치(200일선) 하나다.")
-    nl = _mf.net_liquidity(S['WALCL'], S['WTREGEN'], S['RRPONTSYD'])
-    nl13 = (float(nl.iloc[-1]) / float(nl.iloc[-14]) - 1) * 100 if len(nl) > 14 else None
+    nl, nl13 = _A['nl'], _A['nl13']
     _flow_short = {'위험자산으로 유입': '유입', '위험자산에서 이탈': '이탈'}.get(flow['word'], flow['word'])
     k1, k2, k3, k4 = st.columns(4)
     k1.metric('코어 스위치 · 확정 규칙', '판정 불가' if core_on is None else ('ON' if core_on else 'OFF'),
@@ -3467,7 +3322,7 @@ def _regime_history_panel():
                                  marker=dict(size=12, symbol='square', color=_msv.SEASON_COLOR[k], opacity=.45)))
     fig.update_layout(height=360, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
                       legend=dict(orientation='h', y=1.1, x=0), yaxis=dict(type='log', title='SPY (로그)'))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key='mac_pc_3325')
     fw = _mf.regime_forward(h, 3)
     if len(fw):
         fw.index = [f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}" for k in fw.index]
@@ -3538,14 +3393,14 @@ def _macro_detail_charts():
         with t1, st.spinner("금리 로딩..."):
             S = {'미국 Fed': F('DFF', 3700), '유로존 ECB 예치금리': F('ECBDFR', 3700), '영국 SONIA': F('IUDSOIA', 2600),
                  '일본 콜금리': F('IRSTCI01JPM156N', 130), '한국 콜금리': F('IRSTCI01KRM156N', 130)}
-            st.plotly_chart(_det_fig(S, '%', step=True), use_container_width=True)
+            st.plotly_chart(_det_fig(S, '%', step=True), use_container_width=True, key='mac_pc_3396')
             st.caption("출처: FRED (DFF · ECBDFR · IUDSOIA · OECD IRSTCI01JPM156N · IRSTCI01KRM156N) · 마지막 관측: " + _last_dates(S) +
                        ". 일본·한국은 익일물 콜금리(정책금리를 따라가는 시장 금리, 월간). "
                        "중국 인민은행 금리는 FRED 계열이 2023-11에 끊겨 뺐다.")
         with t2, st.spinner("국채 로딩..."):
             S = {'미국': F('DGS10', 2700), '독일': F('IRLTLT01DEM156N', 130), '일본': F('IRLTLT01JPM156N', 130),
                  '한국': F('IRLTLT01KRM156N', 130)}
-            st.plotly_chart(_det_fig(S, '%'), use_container_width=True)
+            st.plotly_chart(_det_fig(S, '%'), use_container_width=True, key='mac_pc_3403')
             st.caption("출처: FRED (DGS10 일간 · OECD 장기금리 월간) · 마지막 관측: " + _last_dates(S) +
                        ". 장기금리는 성장주 할인율 — 실질금리는 축 1 카드에 있다.")
         with t3, st.spinner("수익률곡선 로딩..."):
@@ -3557,7 +3412,7 @@ def _macro_detail_charts():
                 for dt in on.index:
                     fig.add_vrect(x0=dt, x1=dt + pd.offsets.MonthEnd(1), fillcolor='#A32C2C', opacity=.08, line_width=0, layer='below')
             fig.add_hline(y=0, line_color='rgba(120,124,134,.6)', line_width=1)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key='mac_pc_3415')
             last = {k: float(v.iloc[-1]) for k, v in S.items() if len(v)}
             st.caption("출처: FRED (T10Y2Y · T10Y3M · USREC) · 마지막 관측: " + _last_dates(S) +
                        ". 빨간 띠 = NBER 경기침체. 0 아래(역전)는 침체 선행으로 알려졌지만, 우리 검증(1988~2026)에선 비중 신호로 탈락했다(주변값 1/3). "
@@ -3567,7 +3422,7 @@ def _macro_detail_charts():
             S = {k: _cut(v).dropna() for k, v in {'CPI': yo('CPIAUCSL'), '근원 CPI': yo('CPILFESL'), '근원 PCE': yo('PCEPILFE')}.items()}
             fig = _det_fig(S, 'YoY %', yfmt='.1f')
             fig.add_hline(y=2, line_color='rgba(22,112,74,.6)', line_dash='dot', annotation_text='연준 목표 2%')
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key='mac_pc_3425')
             st.caption("출처: FRED (CPIAUCSL · CPILFESL · PCEPILFE) · 마지막 관측: " + _last_dates(S) + ". 연준이 목표로 보는 것은 근원 PCE다.")
         with t5, st.spinner("유동성 로딩..."):
             fed = _mf.to_series(fetch_fred('WALCL', 560)) / 1e6                 # 백만 달러 → 조 달러
@@ -3587,14 +3442,14 @@ def _macro_detail_charts():
             fig.update_layout(height=280, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
                               legend=dict(orientation='h', y=1.12, x=0), yaxis_title='조 달러')
             st.markdown("**G3 중앙은행 총자산** — 돈을 찍어 푸는 규모(달러 환산)")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key='mac_pc_3445')
             m2u = _mf.to_series(fetch_fred('M2SL', 140)); m2u = (m2u / m2u.shift(12) - 1) * 100
             m2e = _ecb_series('BSI/M.U2.Y.V.M20.X.I.U2.2300.Z01.A', f"{cut:%Y-%m}")
             S = {'미국 M2': _cut(m2u).dropna(), '유로존 M2': _cut(m2e)}
             fig2 = _det_fig(S, 'YoY %', height=260, yfmt='.1f')
             fig2.add_hline(y=0, line_color='rgba(120,124,134,.6)', line_width=1)
             st.markdown("**M2 증가율**")
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True, key='mac_pc_3452')
             st.caption("출처: FRED (WALCL · ECBASSETSW · JPNASSETS · DEXUSEU · DEXJPUS · M2SL), ECB Data Portal (유로존 M2 연간 증가율) · "
                        "마지막 관측: " + _last_dates({'Fed': fed, 'ECB': ecb, 'BoJ': boj, **S}) +
                        ". 일본·중국 M2는 무료 공개 계열이 2017~2023년에 끊겨 뺐다(예전 차트의 끊긴 선이 그것). 순유동성(Fed−TGA−역레포)은 축 1 카드에 있다.")
@@ -3790,7 +3645,7 @@ with tab4, guard('매크로'):
                                       xaxis_range=[-_xr, _xr], yaxis_range=[-_yr, _yr])
                 _fig_cy.update_xaxes(gridcolor=_GRID, zeroline=False, ticksuffix='%', tickfont=dict(size=12))
                 _fig_cy.update_yaxes(gridcolor=_GRID, zeroline=False, tickfont=dict(size=12))
-                st.plotly_chart(_fig_cy, use_container_width=True)
+                st.plotly_chart(_fig_cy, use_container_width=True, key='mac_pc_3648')
                 _c1, _c2 = st.columns([3, 2])
                 _c1.markdown(
                     "<span style='display:inline-block;width:22px;height:3px;background:#2a78d6;"
@@ -5309,9 +5164,9 @@ def _tab_analysis():
 
                         # L: 시장대비 6개월 초과수익 (10%p당 +5점)
                         _stk6 = (price_now / hist['Close'].iloc[-126] - 1) * 100 if len(hist) > 126 else None
-                        _mkt6 = None
+                        _mkt6, _idf = None, pd.DataFrame()
                         try:
-                            _idf = fetch_index_history('KS11' if is_kr_sym else 'SPY', 200)
+                            _idf = fetch_index_history('KS11' if is_kr_sym else 'SPY', 400)
                             if len(_idf) > 127:
                                 _mkt6 = (float(_idf.iloc[-1].values[0]) / float(_idf.iloc[-127].values[0]) - 1) * 100
                         except Exception:
@@ -5319,12 +5174,10 @@ def _tab_analysis():
                         _exc = (_stk6 - _mkt6) if (_stk6 is not None and _mkt6 is not None) else None
                         _L = round(max(0.0, min(25.0, _exc * 0.5)), 1) if _exc is not None else None
 
-                        # M: 시장국면
+                        # M: 시장방향 — 2026-10-21 기각된 3단계 신호(Fed·M2·SPX YoY) 대신 지수 200일선.
+                        #   CANSLIM 발굴 화면·종합 탭과 같은 verdict.core_switch (KR=코스피, US=S&P500)
                         try:
-                            _fr = fetch_fred('FEDFUNDS', 1); _frr = _fr[-1][1] if _fr else None
-                            _m2m = fetch_fred('M2SL', 14)
-                            _m2yy = round((_m2m[-1][1] / _m2m[-13][1] - 1) * 100, 1) if len(_m2m) >= 13 else None
-                            _Mlabel = compute_macro_signal(_frr, _m2yy, fetch_spx_yoy())[0]
+                            _Mlabel = _V.market_dir(_V.core_switch(_idf.iloc[:, 0])) if len(_idf) else '—'
                         except Exception:
                             _Mlabel = '—'
 
@@ -6344,6 +6197,8 @@ with tab_pf, guard('포트폴리오 가드레일'):
         if _pos:
             _res = _gr.evaluate(_pos, total_capital=(_total_cap or None))
             _vi = _res.get('violations') or []
+            st.session_state['pf_eval'] = dict(grade=_res.get('grade'), n=len(_pos), n_vi=len(_vi),
+                                               top=[v.get('msg') for v in _vi[:3]])   # 🏠 종합 '할 일'이 읽는다
             _m1, _m2, _m3 = st.columns(3)
             _m1.metric('원칙 준수 등급', _res.get('grade', '—'))
             _m2.metric('보유 종목', f"{len(_pos)}종")
@@ -6586,11 +6441,8 @@ if _ADMIN:
                        "필터링되고 있었습니다. 그래서 화면에 안 보여도 같이 감시합니다.")
 else:
     with guard('운영 점검 요약'):
-        try:
-            _ka_n = sum(1 for r in _known_answers() if not r['ok'])
-        except Exception:
-            _ka_n = 0
-        _st_n = sum(1 for r in _data_status() if r['state'] != 'ok')
+        _ka_n, _st_n = _ops_counts()          # 상단 배지와 같은 캐시(10분) — 두 번 읽지 않는다
+        _ka_n, _st_n = _ka_n or 0, _st_n or 0
         if _ka_n or _st_n:
             st.caption(f"🔴 운영 점검 — 정답 점검 틀림 {_ka_n}건 · 갱신 정지 {_st_n}건. "
                        "자세히는 주소 끝에 `?diag=admin`.")
@@ -6626,7 +6478,102 @@ def _related_rows(q):
     return out[:6]
 
 
+
+def _goto_tab(name):
+    st.session_state['main_tab'] = name
+
+
+def _home_verdict(V):
+    """① 이번 주 판정 — 🌍 매크로 탭 맨 위 카드와 같은 값(verdict.py)."""
+    st.subheader("① 이번 주 판정")
+    c, a, ph, g, fl, ec = (V.get(k) or {} for k in ('core', 'alloc', 'phase', 'greed', 'flow', 'econ'))
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric('코어 스위치 · 확정 규칙', '판정 불가' if not c else ('ON' if c['on'] else 'OFF'),
+              None if not c else f"S&P500 200일선 {c['gap']:+.1f}%", delta_color='normal' if c else 'off',
+              help='원칙 v1.3 §3 — SPY 종가가 200일 이평 위면 코어 보유, 아래면 코어를 현금으로. 비중을 바꾸는 유일한 규칙')
+    k2.metric('이번 주 목표 비중(%)',
+              '-' if a.get('cash_total') is None else f"{a['core_now']} / {a['satellite']} / {a['cash_total']}",
+              '코어 / 위성 / 현금', delta_color='off', delta_arrow='off',
+              help='시작 배분 50/30/20(executor/config.json). 스위치 OFF 면 코어 몫이 현금으로 간다. 위성에는 시장 필터가 없다(§4)')
+    k3.metric('사이클 국면 · 참고', f"{ph.get('emoji', '')} {ph.get('name') or '-'}",
+              f"욕심 경고 {g.get('n', '-')}/3" if g else None, delta_color='off', delta_arrow='off',
+              help='우라가미 4계절과 참고 경고 3종(신용 스프레드·역국면·강달러) — 백테스트에서 비중 규칙으로 살아남지 못해 표시만 한다')
+    k4.metric('돈의 흐름 · 경기 · 참고', f"{fl.get('word') or '-'}", ec.get('word') or None,
+              delta_color='off', delta_arrow='off', help='🌍 매크로 탭 축 1(자산 8종 200일선)·축 2(선행·동행 지표) 요약')
+    kr = V.get('kr_core') or {}
+    _src = ('results/macro.json (verdict.py · 매일 06:00 KST)' if V.get('_src') == 'file'
+            else f"라이브 계산(verdict.core_switch) — macro.json 이 없거나 낡음({V.get('_file_asof') or '없음'}) · 국면·흐름은 직전 파일 값")
+    _krt = '-' if not kr else f"{'위' if kr['on'] else '아래'} {kr['gap']:+.1f}%"
+    st.caption(f"코스피 200일선 {_krt} — 한국 노출은 지수로 갖는다(원칙 v1.2). 왜 이렇게 판정했는지는 🌍 매크로 탭.")
+    st.caption(f"출처: {_src} · 마지막 갱신: {V.get('asof') or '-'} 종가")
+
+
+def _home_todo(V):
+    """② 이번 주 할 일 — 원칙 v1 §8 주간 사이클 순서: 데이터 → 코어 → 위성 매도 → 위성 매수 → 보유 점검."""
+    st.subheader("② 이번 주 할 일")
+    c = V.get('core') or {}
+    ka, stl = _ops_counts()
+    acc = load_json(Path('results/leaders_accel.json')) or {}
+    cands = acc.get('candidates') or []
+    pf = st.session_state.get('pf_eval')
+    rows = []
+    bad = (ka or 0) + (stl or 0)
+    rows.append(('① 데이터', '🔴' if bad else '🟢',
+                 f"정답 점검 틀림 {ka}건 · 갱신 정지 {stl}건 — 신호를 쓰기 전에 데이터부터(원칙 §8 ①)" if bad
+                 else '정답 점검·신선도 전 항목 정상'))
+    if not c:
+        rows.append(('② 코어', '⚪', '판정 불가 — 지난주 상태 유지'))
+    elif V.get('changed'):
+        rows.append(('② 코어', '🟠', 'ON 전환 → 코어 복귀 매수' if c['on'] else 'OFF 전환 → 코어 매도, 현금으로'))
+    else:
+        rows.append(('② 코어', '🟢' if c['on'] else '🔴', '유지 (보유)' if c['on'] else '유지 (현금)'))
+    rows.append(('③ 위성 신규', '🟢' if cands else '⚪',
+                 f"이익가속 신호 {len(cands)}종 ({acc.get('signal_week', '-')} 주) — 시총 작은 순 · 칸당 위성 5% · 월요일 매수 · 보유 중이면 건너뜀"
+                 if cands else f"신규 신호 없음 ({acc.get('signal_week', '-')} 주) — 빈 칸은 S&P500 으로(§4-6)"))
+    rows.append(('④ 보유 점검', ('🟢' if pf and not pf['n_vi'] else '🟠') if pf else '⚪',
+                 (f"{pf['grade']} · {pf['n']}종 · 위반 {pf['n_vi']}건" + (' — ' + ' / '.join(pf['top']) if pf['top'] else ''))
+                 if pf else '보유 종목이 아직 없습니다 — 🛡️ 내 포트폴리오 탭에서 토스 잔고를 불러오거나 입력'))
+    st.dataframe(pd.DataFrame([{'단계': r[0], '상태': r[1], '할 일': r[2]} for r in rows]),
+                 filters=False, color=False, src='verdict.py · leaders_accel.json · 정답 점검·신선도 · 🛡️ 포트폴리오 평가',
+                 asof=V.get('asof'), use_container_width=True,
+                 column_config={'할 일': st.column_config.TextColumn('할 일', width='large')})
+    st.caption("위성 매도(52주 보유 후 33주 신고가 미갱신)·트림(위성 15% 초과)은 보유 기록이 있어야 판정된다 — "
+               "토스 자동매매(executor) 원장이 붙으면 이 표가 주문표가 된다.")
+    if cands:
+        _t = pd.DataFrame([{'종목': x.get('name'), '코드': x.get('sym'), '시총($B)': x.get('mc'),
+                            '신호 주 상승(%)': x.get('up'), '영업이익 가속(%p)': x.get('oia'),
+                            '매출 YoY(%)': x.get('revy'), 'PER': x.get('per')}
+                           for x in sorted(cands, key=lambda x: x.get('mc') or 9e9)])
+        for _c in _t.columns[2:]:
+            _t[_c] = pd.to_numeric(_t[_c], errors='coerce')        # None → NaN('-'), 숫자 정렬 유지
+        _tsrc('leaders_accel.py — 이익가속 신호 (시총 작은 순 = 원칙 §4 매수 순서)', path='results/leaders_accel.json',
+              asof=acc.get('signal_week'))
+        st.dataframe(_t, filters=False, column_config={
+            '시총($B)': st.column_config.NumberColumn(format='%.2f'),
+            '신호 주 상승(%)': st.column_config.NumberColumn(format='%+.1f'),
+            '영업이익 가속(%p)': st.column_config.NumberColumn(format='%+.1f'),
+            '매출 YoY(%)': st.column_config.NumberColumn(format='%+.1f'),
+            'PER': st.column_config.NumberColumn(format='%.1f')})
+        st.caption("종목·코드 칸을 누르면 🔍 종목 분석으로 · 전체 이력은 🔎 종목 발굴 → 🚀 주도주")
+    b1, b2, b3 = st.columns(3)
+    b1.button("🌍 매크로 근거 보기", on_click=_goto_tab, args=("🌍 매크로",), use_container_width=True, key='home_go_macro')
+    b2.button("🔎 발굴 전체 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')
+    b3.button("🛡️ 보유 점검하기", on_click=_goto_tab, args=("🛡️ 내 포트폴리오",), use_container_width=True, key='home_go_pf')
+
+
+# ── 상단 배지 + 🏠 종합 — 맨 끝에서(판정 계산이 다른 탭을 붙잡지 않게) ──────────
+with guard('이번 주 판정'):
+    _VERDICT = _verdict_now()
+with _status_slot, guard('상단 배지'):
+    _status_bar(_VERDICT)
+with tab_home, guard('종합 — 판정'):
+    st.caption("월요일 아침 이 화면 하나 — ① 판정 ② 할 일 ③ 시황. 판정은 verdict.py 한 곳에서 계산하고 모든 탭이 같은 값을 읽는다.")
+    _home_verdict(_VERDICT)
+with tab_home, guard('종합 — 할 일'):
+    _home_todo(_VERDICT)
+
 with tab_rep, guard('시황 리포트'):
+    st.subheader("③ 시황 리포트")
     _rep = load_json(Path('results/market_report.json')) or {}
     st.caption("매일 06시(KST) 일간 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
                "뉴스·전망을 지어내지 않도록 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
@@ -6640,6 +6587,19 @@ with tab_rep, guard('시황 리포트'):
         st.caption(f"작성: {'AI(' + _h['engine'].split(':')[-1] + ')' if _h['engine'].startswith('gemini') else '숫자 템플릿'}")
         st.markdown(_h['markdown'])
         _lf = (_rep.get(f"latest_{_h['kind']}") or {})
+        # 2026-10-21 — 리포트에 나온 종목을 눌러 종목 분석으로(리포트 → 분석 연결)
+        _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
+        _syms = []
+        for _m in ('KR', 'US'):
+            for _k in ('top', 'bottom'):
+                for _x in (_fst.get(_m) or {}).get(_k, [])[:3]:
+                    if _x.get('sym') and _x['sym'] not in [y for y, _ in _syms]:
+                        _syms.append((_x['sym'], f"{'▲' if _k == 'top' else '▼'} {_x.get('name') or _x['sym']} {_x.get('ret', 0):+.1f}%"))
+        if _syms:
+            st.caption("리포트에 나온 종목 — 누르면 🔍 종목 분석")
+            _bc = st.columns(6)
+            for _n, (_sy, _lb) in enumerate(_syms[:12]):
+                _bc[_n % 6].button(_lb, key=f"rep_go_{_sy}", on_click=_goto_analysis, args=(_sy,), use_container_width=True)
         if _lf.get('date') == _h['date']:
             with st.expander("근거 숫자 보기 (리포트가 쓴 원자료)"):
                 st.json(_lf.get('facts') or {}, expanded=False)
@@ -6673,7 +6633,3 @@ with tab_rep, guard('시황 리포트'):
             st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
             st.rerun()
 
-
-# ── 매크로 요약 스트립 채우기 — 맨 마지막(느린 외부 API 가 다른 탭을 붙잡지 않게) ──
-with _macro_strip, guard('매크로 요약'):
-    _fill_macro_strip()

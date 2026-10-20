@@ -6,7 +6,7 @@
 
 구성:
   · 후보·점수·비중·진입가 = auto_recommend (기술60+기본40 블렌딩 + 손익비 사이징)
-  · 현금비중 = 매크로 신호(FRED) 기반 자동 (10~70%)
+  · 현금비중 = verdict.py (원칙 완충 20% + 코어 스위치 OFF 면 코어 50%)
   · 매주 1회 스냅샷 → results/weekly_portfolio_history.json 에 누적
   · 사후분석 = 과거 스냅샷의 진입가 대비 현재가 → 비중가중 포트 수익률
 
@@ -28,36 +28,13 @@ HISTORY = Path('results/weekly_portfolio_history.json')
 
 
 def _macro_cash_pct():
-    """매크로 신호 기반 현금비중(중앙값, 0~1). 실패 시 0.30."""
+    """현금 비중(0~1) = 원칙 v1 완충 + (코어 스위치 OFF 면 코어 몫). verdict.py 단일 출처.
+    2026-10-21 — 기각된 3단계 신호(Fed·M2 점수 → 현금 10~70%) 를 대체했다(검증 목록 1-5)."""
     try:
-        import os, requests
-        FRED = os.environ.get('FRED_KEY', '')
-        if not FRED:
-            _kf = Path('data/.fred_key')
-            FRED = _kf.read_text(encoding='utf-8').strip() if _kf.exists() else ''
-        if not FRED:
-            return 0.30
-        def fred(s, n):
-            r = requests.get('https://api.stlouisfed.org/fred/series/observations',
-                             params=dict(series_id=s, api_key=FRED, file_type='json',
-                                         sort_order='desc', limit=n), timeout=10)
-            obs = r.json()['observations']
-            return [float(o['value']) for o in obs if o['value'] != '.']
-        fr = fred('FEDFUNDS', 1)
-        fed_rate = fr[0] if fr else None
-        m2 = fred('M2SL', 14)
-        m2_yoy = round((m2[0] / m2[12] - 1) * 100, 1) if len(m2) >= 13 else None
-        score = 0
-        if fed_rate is not None:
-            score += 2 if fed_rate <= 2.5 else (1 if fed_rate <= 4.5 else -1)
-        if m2_yoy is not None:
-            score += 2 if m2_yoy >= 5 else (1 if m2_yoy >= 0 else -1)
-        if score >= 4:   lo, hi = 10, 20
-        elif score >= 1: lo, hi = 25, 40
-        else:            lo, hi = 50, 70
-        return (lo + hi) / 2 / 100
+        import verdict as V
+        return V.cash_fraction()
     except Exception:
-        return 0.30
+        return 0.20
 
 
 def generate(n, market='전체', capital=10_000_000, cash_pct=None):

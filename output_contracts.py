@@ -235,7 +235,20 @@ def c_report():
             chk(str(new.get("engine", "")).startswith("gemini"), WARN, f"AI 대신 숫자 템플릿({new.get('engine')}) — 키·한도 확인")]
 
 
+def c_macro():
+    """2026-10-21 — 판정 파일. 0/None 이 '판정'으로 보이면 화면 전체가 같은 거짓말을 한다."""
+    d = _j("results/macro.json")
+    c, a = d.get("core") or {}, d.get("alloc") or {}
+    tot = (a.get("core_now") or 0) + (a.get("satellite") or 0) + (a.get("cash_total") or 0)
+    return [chk(bool(c), BLOCK, "코어 스위치 판정 없음"),
+            chk(_age(d.get("asof")) <= 5, BLOCK, f"판정 기준일 {d.get('asof')} 5일 초과"),
+            chk(0.5 < (c.get("close") or 0) / (c.get("ma") or 1) < 1.5, BLOCK, f"SPY {c.get('close')} vs 200일선 {c.get('ma')} — 시세 오류"),
+            chk(tot == 100, BLOCK, f"목표 비중 합 {tot} ≠ 100"),
+            chk(bool(d.get("fred_ok")), WARN, "FRED 실패 — 국면·경기(참고)가 비었다")]
+
+
 CONTRACTS = {
+    "results/macro.json": c_macro,
     "results/market_report.json": c_report,
     "results/perf_latest.json": c_perf,
     "results/screener_latest.json": c_screener,

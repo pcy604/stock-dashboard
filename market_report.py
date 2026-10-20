@@ -122,8 +122,22 @@ def signal_facts():
         turnaround={"KR": ta.get("kr"), "US": ta.get("us"), "date": ta.get("date")})
 
 
+def verdict_facts():
+    """이번 주 판정 — results/macro.json(verdict.py). 리포트가 지수를 따로 계산해 판정을 내리지 않는다(2026-10-21)."""
+    v = _j("results/macro.json")
+    c, a = v.get("core") or {}, v.get("alloc") or {}
+    if not c:
+        return {}
+    return dict(asof=v.get("asof"), core_on=c.get("on"), core_gap_200d=c.get("gap"), changed=v.get("changed"),
+                target_core_sat_cash=[a.get("core_now"), a.get("satellite"), a.get("cash_total")],
+                kospi_above_200d=(v.get("kr_core") or {}).get("on"),
+                phase_ref=(v.get("phase") or {}).get("name"), greed_ref=(v.get("greed") or {}).get("word"),
+                greed_warn_n=(v.get("greed") or {}).get("n"), flow_ref=(v.get("flow") or {}).get("word"),
+                econ_ref=(v.get("econ") or {}).get("word"), rule=v.get("rule"))
+
+
 def facts(kind):
-    return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"),
+    return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict=verdict_facts(),
                 indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
 
 
@@ -132,6 +146,7 @@ PROMPT = """너는 개인투자자용 시황 리포트를 쓰는 애널리스트
 - **JSON 에 있는 숫자와 이름만 쓴다.** 뉴스·이벤트·원인·전망을 지어내지 않는다. 원인을 모르면 '데이터상 원인 불명'.
 - 한국어, 마크다운. 숫자는 소수 1자리 %.
 - 형식:
+  ## 이번 주 판정 (verdict 그대로: 코어 스위치 ON/OFF·200일선 이격·목표 비중 코어/위성/현금. 국면·경고는 '참고'라고 표시. 전환(changed)이면 첫 줄에 강조)
   ## 한 줄 요약
   ## 지수 (한국·미국·변동성·환율·금리를 표 하나로)
   ## 강세·약세 종목 (KR/US 각각, 대형주 기준)
@@ -173,7 +188,14 @@ def ask_gemini(prompt, models=MODELS, key=None):
 
 def template(f):
     """AI 없이도 발행되는 숫자 리포트."""
-    L = [f"## {'일간' if f['kind']=='daily' else '주간'} 시황 — 숫자 요약", "", "| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |", "|---|---|---|---|---|---|"]
+    v = f.get("verdict") or {}
+    L = [f"## {'일간' if f['kind']=='daily' else '주간'} 시황 — 숫자 요약", ""]
+    if v:
+        t = v.get("target_core_sat_cash") or [None] * 3
+        L += [("⚠️ **코어 스위치 전환** · " if v.get("changed") else "") +
+              f"**이번 주 판정** — 코어 {'ON' if v.get('core_on') else 'OFF'} (S&P500 200일선 {v.get('core_gap_200d', 0):+.1f}%) · "
+              f"목표 코어 {t[0]} / 위성 {t[1]} / 현금 {t[2]} · 국면 {v.get('phase_ref') or '-'}(참고) · 욕심 경고 {v.get('greed_warn_n', '-')}/3(참고)", ""]
+    L += ["| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |", "|---|---|---|---|---|---|"]
     for x in f["indices"]:
         if "close" in x:
             L.append(f"| {x['name']} | {x['close']:,} | {x['d1']:+.1f}% | {x['d5']:+.1f}% | {x['m1']:+.1f}% | {x['from_52w_high']:+.1f}% |")

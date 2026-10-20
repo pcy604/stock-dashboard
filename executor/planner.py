@@ -62,10 +62,10 @@ def plan(ledger, cfg: dict, week: str, prices: Dict[str, float], core_above_ma: 
     ledger.sat_equity_peak = max(ledger.sat_equity_peak, sat_val)
 
     # 1) 코어 스위치
-    switch_on = cfg.get("core_ma_switch_weeks", 0) and core_above_ma is not None
+    switch_on = cfg.get("core_ma_switch_days", 0) and core_above_ma is not None
     core_on = (not switch_on) or bool(core_above_ma)
     if switch_on and not core_above_ma:
-        notes.append(f"코어 스위치 OFF — S&P500 이 {cfg['core_ma_switch_weeks']}주 이평 아래. 코어를 현금으로 둔다")
+        notes.append(f"코어 스위치 OFF — S&P500 이 {cfg['core_ma_switch_days']}일 이평 아래. 코어를 현금으로 둔다")
 
     # 2) 위성 매도
     sold = set()

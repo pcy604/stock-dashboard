@@ -210,9 +210,15 @@ SOURCES = [
          getter=_key('updated')),
     # 2026-10-10 추가 — 소비자가 없어 레지스트리에도 없었다. 화면을 붙였으니
     #   같이 감시한다. 09-16 자 종목 0개인 채로 아무도 모르고 있었다.
+    # 2026-10-21 — 이번 주 판정 단일 출처. 멈추면 상단 배지·🏠 종합이 라이브 계산으로 넘어가고
+    #   시황 리포트·주간 포트폴리오·executor 는 낡은 판정을 읽는다.
+    dict(path='results/macro.json', label='이번 주 판정 (코어 200일선 스위치)',
+         cycle='매일 06:00', max_age=5, producer='verdict.py',
+         job='daily-refresh · verdict(수동)', used_by='상단 배지 · 🏠 종합 · 📰 시황 리포트 · 주간 포트폴리오 · executor',
+         getter=_key('asof')),
     dict(path='results/market_report.json', label='시황 리포트 (일간·주간)',
          cycle='매일 06:00 · 월 주간', max_age=4, producer='market_report.py',
-         job='daily-refresh · weekly-profile', used_by='📰 시황 리포트 · 💬 챗봇',
+         job='daily-refresh · weekly-profile', used_by='🏠 종합 → 시황 리포트 · 💬 챗봇',
          getter=lambda p: (__import__('json').load(open(p, encoding='utf-8')).get('latest_daily') or {}).get('date'), raw=True),
     dict(path='results/turnaround_latest.json', label='흑자전환 (턴어라운드)',
          cycle='주 1회', max_age=9, producer='turnaround_run.py',
