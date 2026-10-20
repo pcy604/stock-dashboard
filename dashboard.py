@@ -1023,92 +1023,108 @@ except Exception:
 IS_MOBILE = any(k in _UA for k in ('Mobi', 'Android', 'iPhone', 'iPad'))
 st.session_state['seen_onboard'] = True
 
-_ONBOARD_HTML = """
+# 2026-10-21 — 30초 투어로 재작성: 글로 읽는 설명서 → 탭 5단계 카드 + 바로가기 버튼.
+#   옛 카드는 '화면은 셋'·'주봉 신호' 등 탭 재편 전 내용이 남아 있었다. 숫자(종목 수 등)는 일부러 안 넣는다 — 낡는다.
+_OB_CSS = """
 <style>
-  .ob { font-family:'Pretendard',-apple-system,'Malgun Gothic',system-ui,sans-serif;
-        color:var(--ink); line-height:1.62; }
-  .ob-hd { border-bottom:2px solid var(--accent); padding-bottom:12px; margin-bottom:18px; }
-  .ob-hd h3 { font-size:19px; font-weight:700; margin:0 0 6px; letter-spacing:-.02em;
-              color:var(--ink); }
-  .ob-hd p { font-size:13.5px; color:var(--ink-2); margin:0; }
-  .ob-sec { font-size:11px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
-            color:var(--accent); margin:22px 0 10px; }
-  .ob-grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
-  .ob-card { border:1px solid var(--line); border-radius:7px; padding:13px 15px;
-             background:var(--surface-2); }
-  /* 제목만 블록 — 본문 안의 굵은 글씨까지 잡으면 문장이 토막난다 */
-  .ob-card > b:first-child { display:block; font-size:13.5px; margin-bottom:5px;
-                             color:var(--ink); }
-  .ob-card span b { color:var(--ink); font-weight:640; }
-  .ob-card span { font-size:12.5px; color:var(--ink-2); }
-  .ob-card.key { border-color:var(--accent); background:var(--accent-2); }
-  .ob-steps { display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-              counter-reset:s; }
-  .ob-step { position:relative; border:1px solid var(--line); border-radius:7px;
-             padding:12px 14px 12px 40px; background:var(--surface-2); font-size:12.5px;
-             color:var(--ink-2); }
-  .ob-step::before { counter-increment:s; content:counter(s);
-             position:absolute; left:13px; top:11px; width:19px; height:19px;
-             border-radius:50%; background:var(--accent); color:#fff; font-size:11px;
-             font-weight:700; display:flex; align-items:center; justify-content:center; }
-  .ob-step b { color:var(--ink); }
-  .ob-note { border-left:3px solid var(--warn); background:var(--warn-bg);
-             padding:11px 14px; border-radius:0 6px 6px 0; font-size:12.5px;
-             color:var(--ink-2); margin-top:20px; }
-  .ob-note b { color:var(--ink); }
-  .ob-x { color:var(--ink-3); padding:0 3px; }
+  .ob2 { font-family:'Pretendard',-apple-system,'Malgun Gothic',system-ui,sans-serif; color:var(--ink); }
+  .ob2-hero { position:relative; overflow:hidden; border-radius:var(--radius,16px); padding:26px 28px 22px;
+              background:linear-gradient(135deg,var(--hero,#111827) 0%,var(--hero-2,#1F2937) 100%); color:#F9FAFB; }
+  .ob2-hero::after { content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
+              border-radius:50%; background:radial-gradient(circle,rgba(126,162,255,.35),transparent 70%); }
+  .ob2-kick { font-size:11px; font-weight:700; letter-spacing:.14em; color:#93B4FF; margin-bottom:8px; }
+  .ob2-hero h3 { font-size:24px; font-weight:800; letter-spacing:-.03em; margin:0 0 8px; color:#fff; line-height:1.3; }
+  .ob2-hero p { font-size:14px; color:#D1D5DB; margin:0; max-width:640px; line-height:1.6; }
+  .ob2-hero p b { color:#fff; }
+  .ob2-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; position:relative; z-index:1; }
+  .ob2-chip { font-size:12px; padding:5px 11px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
+              background:rgba(255,255,255,.06); color:#E5E7EB; }
+  .ob2-sec { display:flex; align-items:baseline; justify-content:space-between; margin:22px 2px 10px; }
+  .ob2-sec b { font-size:15px; font-weight:750; letter-spacing:-.02em; color:var(--ink); }
+  .ob2-sec span { font-size:12px; color:var(--ink-3); }
+  .ob2-step { height:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:var(--radius-sm,10px);
+              background:var(--surface); padding:14px 14px 12px; position:relative; }
+  .ob2-step.on { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-2); }
+  .ob2-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .ob2-n { width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-size:12px;
+           font-weight:800; display:flex; align-items:center; justify-content:center; font-family:var(--mono); }
+  .ob2-t { font-size:11px; color:var(--ink-3); font-family:var(--mono); }
+  .ob2-q { font-size:15px; font-weight:750; letter-spacing:-.02em; color:var(--ink); margin-bottom:2px; }
+  .ob2-tab { font-size:12px; color:var(--accent); font-weight:650; margin-bottom:8px; }
+  .ob2-d { font-size:12.5px; color:var(--ink-2); line-height:1.55; }
+  .ob2-bar { height:4px; border-radius:4px; background:var(--line-2); margin-top:12px; overflow:hidden; }
+  .ob2-bar i { display:block; height:100%; background:var(--accent); border-radius:4px; }
+  .ob2-rules { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  .ob2-rule { border-radius:var(--radius-sm,10px); padding:13px 15px; background:var(--surface);
+              border:1px solid var(--line); font-size:12.5px; color:var(--ink-2); line-height:1.55; }
+  .ob2-rule > b:first-child { display:block; font-size:13.5px; color:var(--ink); margin-bottom:3px; }
+  .ob2-rule.warn { border-left:4px solid var(--warn); }
+  .ob2-rule.pos  { border-left:4px solid var(--pos); }
+  .ob2-rule.acc  { border-left:4px solid var(--accent); }
+  .ob2-foot a { color:var(--accent); font-weight:650; text-decoration:none; }
+  .ob2-foot { font-size:11.5px; color:var(--ink-3); margin-top:12px; line-height:1.6; }
 </style>
-<div class="ob">
-  <div class="ob-hd">
-    <h3>시그널 트레이딩 대시보드</h3>
-    <p>공식 공시(DART·SEC EDGAR)와 시장 가격을 매일 자동으로 모아
-       <b>뭘 살까 · 언제 살까 · 얼마나 살까</b>를 숫자로 계산하는 개인 리서치 도구</p>
-  </div>
+"""
 
-  <div class="ob-sec">생각하는 방식 — 3층 프레임</div>
-  <div class="ob-grid">
-    <div class="ob-card"><b>가치 &mdash; 뭘 살까</b>
-      <span>재무 3표 · ROE · 성장 · 흑자전환<br>회사가 실제로 돈을 버는가</span></div>
-    <div class="ob-card"><b>멀티플 &mdash; 비싼가</b>
-      <span>PER · PBR · PSR<br>가치와 가격을 잇는 다리</span></div>
-    <div class="ob-card"><b>가격 &mdash; 언제 살까</b>
-      <span>차트 · 주봉 신호 · 계절성 · RS<br>지금이 들어갈 자리인가</span></div>
-  </div>
-
-  <div class="ob-sec">화면은 셋 &mdash; 왼쪽부터 의사결정 순서</div>
-  <div class="ob-grid">
-    <div class="ob-card key"><b>🔎 종목 발굴</b>
-      <span>조건에 맞는 종목을 기계가 골라 목록으로 줍니다.
-      이 도구가 가장 자신 있는 건 <b>주도주 &rarr; 이익 가속</b>입니다.<br>
-      <b>신호 목록이지 포트폴리오가 아닙니다</b> &mdash; 비중은 사람이 정합니다.</span></div>
-    <div class="ob-card"><b>🔍 종목 분석</b>
-      <span>종목코드 입력(US <code>NVDA</code> / KR <code>005930</code>) &rarr;
-      차트 · 공식 재무 3표 · 멀티플 · 목표주가 · AI 사업요약</span></div>
-    <div class="ob-card"><b>🌍 매크로</b>
-      <span>지금이 사이클의 어느 국면인지(우라가미 4계절 · 코스톨라니 달걀 ·
-      막스 시계추)와 권고 현금비중</span></div>
-  </div>
-
-  <div class="ob-sec">처음이라면 이 순서</div>
-  <div class="ob-steps">
-    <div class="ob-step"><b>국면 확인</b><br>매크로 탭에서 지금이 어느 계절인지와 권고 현금비중</div>
-    <div class="ob-step"><b>후보 3~5개</b><br>종목 발굴 &rarr; 주도주부터. 시장(KR/US)을 고릅니다</div>
-    <div class="ob-step"><b>한 종목씩 검증</b><br>종목 분석에 코드를 넣어 재무가 실제로 좋아지는지 확인</div>
-    <div class="ob-step"><b>손절가를 먼저</b><br>사기 전에 얼마에 자를지 정합니다. 정하기 전에는 사지 않습니다</div>
-  </div>
-
-  <div class="ob-note">
-    <b>의사결정 보조 도구다.</b> 점수·신호는 확률이지 보장이 아니며 매수 권유가 아닙니다.
-    숫자에 <code>-</code> 가 보이는 칸은 오류가 아니라 <b>그 종목에 그 데이터가 없다</b>는 뜻입니다.<br>
-    손절은 &lsquo;틀렸을 때의 한도&rsquo;다. <b>이긴 종목을 파는 규칙은 아직 없습니다</b> &mdash;
-    고점 대비 트레일은 측정한 모든 폭에서 안 파는 것보다 나빴습니다.
+_OB_HERO = """
+<div class="ob2"><div class="ob2-hero">
+  <div class="ob2-kick">QUICK TOUR · 30 SEC</div>
+  <h3>시장 → 종목 → 내 계좌,<br>위에서 아래로 좁혀 갑니다</h3>
+  <p>공식 공시(DART · SEC EDGAR)와 시장 가격을 매일 자동으로 모아
+     <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를 숫자로 답하는 리서치 도구입니다.</p>
+  <div class="ob2-chips">
+    <span class="ob2-chip">🇰🇷 🇺🇸 한 화면</span>
+    <span class="ob2-chip">📄 공식 공시 기반</span>
+    <span class="ob2-chip">⏱ 매일 자동 갱신</span>
+    <span class="ob2-chip">🔒 보유 종목은 암호화</span>
   </div>
 </div>
+<div class="ob2-sec"><b>다섯 단계, 탭 순서 그대로</b><span>카드 아래 버튼으로 바로 이동</span></div></div>
 """
-with st.expander("📖 처음이신가요? — 30초 사용설명 (화면 안내 · 시작 순서 · 전체 설명서)",
+
+# (탭 이름, 질문, 설명, 예상 초) — 탭 이름은 아래 st.tabs 와 글자까지 같아야 버튼이 작동한다
+_OB_STEPS = [
+    ("🏠 종합", "이번 주, 들어가도 되나?", "코어 ON/OFF · 목표 현금비중 · 이번 주 할 일을 한 장에.", 5),
+    ("🌍 매크로", "왜 그렇게 판정했나?", "글로벌 돈의 흐름과 경기 국면. 사계절·달걀 위 현재 위치.", 7),
+    ("🔎 종목 발굴", "그럼 뭘 살까?", "이익이 가속하는 주도주 후보. 신호 목록이지 포트폴리오가 아닙니다.", 7),
+    ("🔍 종목 분석", "이 종목, 진짜 맞나?", "코드 입력(NVDA · 005930) → 차트 · 재무 3표 · 멀티플 · AI 요약.", 6),
+    ("🛡️ 내 포트폴리오", "내 계좌는 원칙대로인가?", "보유 종목을 손절선 · 비중 원칙에 대 봅니다. 비밀번호로만 열립니다.", 5),
+]
+
+_OB_RULES = """
+<div class="ob2"><div class="ob2-sec"><b>지키는 원칙 세 줄</b><span>도구보다 먼저</span></div>
+<div class="ob2-rules">
+  <div class="ob2-rule acc"><b>판정 → 후보 → 검증</b>시장이 OFF 면 후보가 좋아 보여도 비중을 줄입니다.</div>
+  <div class="ob2-rule warn"><b>손절가를 먼저</b>사기 전에 자를 가격부터. 기준은 진입가가 아니라 <b>보유 중 고점 대비</b>.</div>
+  <div class="ob2-rule pos"><b>숫자는 확률</b>점수·신호는 보장이 아니며 매수 권유가 아닙니다. <code>-</code> 는 오류가 아니라 '데이터 없음'.</div>
+</div>
+<div class="ob2-foot">📲 매일 아침 요약은 텔레그램 <a href="https://t.me/buza_alarm_bot" target="_blank">@buza_alarm_bot</a> 으로 받을 수 있습니다.
+   다시 보려면 이 칸을 언제든 펼치세요.</div></div>
+"""
+
+
+def _ob_go(name):
+    st.session_state['main_tab'] = name
+
+
+_ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
+with st.expander("⚡ 처음이신가요? — 30초 투어 (5단계 · 원칙 · 전체 설명서)",
                  expanded=_first_visit and not IS_MOBILE
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
-    st.html(_ONBOARD_HTML)
+    st.html(_OB_CSS + _OB_HERO)
+    _tot = sum(s[3] for s in _OB_STEPS)
+    _acc = 0
+    for _i, (_col, (_tab, _q, _d, _sec)) in enumerate(zip(st.columns(len(_OB_STEPS)), _OB_STEPS), 1):
+        _acc += _sec
+        with _col:
+            st.html(_OB_CSS + f"""<div class="ob2"><div class="ob2-step{' on' if _tab == _ob_cur else ''}">
+              <div class="ob2-top"><span class="ob2-n">{_i}</span><span class="ob2-t">~{_sec}s</span></div>
+              <div class="ob2-q">{_q}</div><div class="ob2-tab">{_tab}</div>
+              <div class="ob2-d">{_d}</div>
+              <div class="ob2-bar"><i style="width:{round(_acc / _tot * 100)}%"></i></div></div></div>""")
+            st.button("지금 여기" if _tab == _ob_cur else "열기 →", key=f'ob_go_{_i}', on_click=_ob_go,
+                      args=(_tab,), width='stretch', disabled=_tab == _ob_cur)
+    st.html(_OB_CSS + _OB_RULES)
     # 구 '프로젝트 종합' 탭에 있던 전체 사용설명서 — 탭을 없애면서 여기로 이관
     with st.expander("📚 전체 사용설명서 — 개념 사전 · 데이터 신뢰등급 · 자주 묻는 것"):
         try:
