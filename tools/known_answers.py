@@ -332,6 +332,21 @@ def _():
     return _age(last) <= 10 and has, f"최신 {last} · 그날 {sum(1 for r in rows if r.get('date') == last)}종 · 삼성 {has}"
 
 
+
+@check('실적 이벤트', 'PEAD 검증용 실적 이벤트가 전 종목(2,000종+)으로 만들어져 있는가 — 옛 1,249종(시총 사후 선택) 재발 방지')
+def _():
+    d = _j('results/earnings_event_summary.json')
+    n = d.get('syms') or 0
+    return n >= 2000, f"{n:,}종 · {d.get('rows', 0):,}행 · {d.get('period')} · 기준 {d.get('factor_ver')}"
+
+
+@check('CANSLIM US', 'C·A 가 일회성 제외 기준(영업이익)으로 계산돼 있는가 — 전 종목에 기준 표기(2026-10-20)')
+def _():
+    st = list(_stocks('results/canslim_us_latest.json')[1].values())
+    nob = [x['sym'] for x in st if not x.get('earn_basis')]
+    one = sum(1 for x in st if x.get('oneoff'))
+    return bool(st) and not nob, f"{len(st)}종 · 기준 표기 없음 {len(nob)}종 · 일회성 의심 {one}종"
+
 def run():
     out = []
     for area, q, fn in CHECKS:
