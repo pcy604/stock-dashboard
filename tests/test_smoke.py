@@ -44,7 +44,9 @@ def test_no_exception(app):
 
 def test_no_error_box(app):
     """st.error 는 사용자에게 '고장'으로 보인다. 스타일 용도로도 쓰지 않는다."""
-    assert not app.error, [e.value[:300] for e in app.error]
+    # guard() 가 삼킨 예외 본문은 백틱으로 시작하는 caption 으로 남는다 — 같이 보여야 원인이 보인다(2026-10-20)
+    swallowed = [c.value[:600] for c in app.caption if (c.value or '').startswith('`')]
+    assert not app.error, [e.value[:300] for e in app.error] + swallowed
 
 
 def test_reached_last_line(app):

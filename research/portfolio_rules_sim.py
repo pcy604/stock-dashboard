@@ -15,13 +15,40 @@ import leaders_accel as A
 
 COST = 0.003   # 편도(기존 연구와 같은 관례: 매수·매도 각각 0.3%)
 
+def load_spy(index):
+    """SPY 주봉 종가(월요일 라벨). 2026-10-20: dy_SPY.csv 가 노트북 캐시에서 사라져 load() 가 죽었다.
+    1순위 일봉 캐시 → 2순위 market.db(prices, 주봉 보관소) → 둘 다 없으면 이유를 말하고 멈춘다.
+    둘 다 있으면 겹치는 구간을 대조해 0.5% 넘게 다르면 경고(수정주가 기준이 어긋난 것)."""
+    dyp = os.path.join(ROOT, 'data/leaders_cache/dy_SPY.csv')
+    w = None
+    if os.path.exists(dyp):
+        s = pd.read_csv(dyp, index_col=0, parse_dates=True).Close
+        w = s.resample('W-FRI').last(); w.index = w.index - pd.Timedelta(days=4)
+    try:
+        import price_store
+        db = price_store.get('SPY', 'US')
+        db = db['Close'] if db is not None and len(db) else None
+    except Exception as e:
+        print(f'[load_spy] market.db 조회 실패: {e}'); db = None
+    if w is None and db is None:
+        raise FileNotFoundError('SPY 주봉 없음 — dy_SPY.csv 도, market.db prices 의 SPY 도 없다. '
+                                '`python leaders_build.py update`(SPY 포함 수집)를 먼저 돌릴 것')
+    if w is not None and db is not None:
+        both = pd.concat([w, db], axis=1, keys=['csv', 'db']).dropna()
+        if len(both):
+            gap = (both.csv / both.db - 1).abs().max() * 100
+            if gap > 0.5:
+                print(f'[load_spy] ⚠️ dy_SPY.csv 와 DB 의 SPY 가 최대 {gap:.1f}% 다르다 — 일봉 캐시 우선 사용')
+    src = w if w is not None else db
+    if w is None:
+        print('[load_spy] dy_SPY.csv 없음 → market.db prices 의 SPY 주봉 사용')
+    return src.reindex(index).ffill()
+
 def load():
     d = A.load()
     M = A.matrices(d, ["close", "marcap", "adv_20d", "ret_1w", "ACC"])
     px = M["close"]; g = A.gate_of(M)
-    s = pd.read_csv(os.path.join(ROOT, 'data/leaders_cache/dy_SPY.csv'), index_col=0, parse_dates=True).Close
-    w = s.resample('W-FRI').last(); w.index = w.index - pd.Timedelta(days=4)
-    spy = w.reindex(px.index).ffill()
+    spy = load_spy(px.index)
     m = pd.read_parquet(os.path.join(ROOT, 'data/macro_hist.parquet'))
     ff = m['FEDFUNDS'].reindex(px.index.union(m.index)).ffill().reindex(px.index).bfill()
     cash_r = (1 + ff / 100) ** (1 / 52) - 1          # 주간 현금 이자
