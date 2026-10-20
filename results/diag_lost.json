@@ -1,0 +1,472 @@
+{
+ "cut": "2026-08-31",
+ "lost": 27,
+ "by_reason": {
+  "DB(factor_weekly)에 없음": 15,
+  "거래대금 하한 미달": 1,
+  "시총 NULL": 6,
+  "시총 하한 미달": 4,
+  "이익가속 재계산 결과 불충족(재무 개정)": 1
+ },
+ "detail": {
+  "BBBY": {
+   "old_weeks": [
+    "2020-08-17",
+    "2020-09-14",
+    "2020-11-02",
+    "2021-05-24",
+    "2021-07-05",
+    "2023-10-02",
+    "2023-10-30",
+    "2024-07-08",
+    "2026-01-05",
+    "2026-04-13"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 148715385.78515196,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "BBSI": {
+   "old_weeks": [
+    "2024-11-04"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": true,
+   "mcap_now": 776354250.0,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 1,
+   "marcap_null": 0,
+   "adv_null": 0,
+   "acc1": 1,
+   "adv_ok": 0,
+   "mc_ok": 1,
+   "surge_ok": 1,
+   "last_as_of": "2026-10-12",
+   "reason": "거래대금 하한 미달"
+  },
+  "BLFS": {
+   "old_weeks": [
+    "2024-11-18",
+    "2025-11-17",
+    "2026-05-18",
+    "2026-06-22",
+    "2026-08-03"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 1887607794.7395325,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "BSM": {
+   "old_weeks": [
+    "2022-10-03"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 1,
+   "marcap_null": 1,
+   "adv_null": 0,
+   "acc1": 1,
+   "adv_ok": 1,
+   "mc_ok": 0,
+   "surge_ok": 1,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 NULL"
+  },
+  "CCO": {
+   "old_weeks": [
+    "2021-04-05",
+    "2021-04-26",
+    "2021-08-23",
+    "2021-09-13",
+    "2021-11-01",
+    "2021-11-08",
+    "2022-07-18",
+    "2022-07-25",
+    "2022-08-08",
+    "2025-10-20"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 1236853023.9789486,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "CHWY": {
+   "old_weeks": [
+    "2025-09-15"
+   ],
+   "fw_rows": 324,
+   "in_marketcap": true,
+   "mcap_now": 7771395312.88147,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 1,
+   "marcap_null": 0,
+   "adv_null": 0,
+   "acc1": 1,
+   "adv_ok": 1,
+   "mc_ok": 0,
+   "surge_ok": 1,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 하한 미달"
+  },
+  "DOMO": {
+   "old_weeks": [
+    "2020-11-02",
+    "2020-11-30",
+    "2022-06-20",
+    "2022-07-04",
+    "2022-08-01",
+    "2022-09-05",
+    "2023-01-09",
+    "2023-01-23",
+    "2023-01-30",
+    "2025-07-14",
+    "2025-09-08",
+    "2025-10-20"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 149269994.73571777,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "EA": {
+   "old_weeks": [
+    "2021-09-27"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "ERIE": {
+   "old_weeks": [
+    "2022-06-20",
+    "2023-07-31",
+    "2024-02-26"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 3,
+   "marcap_null": 3,
+   "adv_null": 0,
+   "acc1": 3,
+   "adv_ok": 3,
+   "mc_ok": 0,
+   "surge_ok": 3,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 NULL"
+  },
+  "FNKO": {
+   "old_weeks": [
+    "2020-11-30",
+    "2020-12-14",
+    "2021-01-11",
+    "2021-02-01",
+    "2021-03-08",
+    "2021-03-22",
+    "2021-05-03",
+    "2021-11-01",
+    "2022-11-07",
+    "2022-11-28",
+    "2022-12-26"
+   ],
+   "fw_rows": 408,
+   "in_marketcap": true,
+   "mcap_now": 370045835.8079181,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 11,
+   "marcap_null": 0,
+   "adv_null": 0,
+   "acc1": 11,
+   "adv_ok": 11,
+   "mc_ok": 0,
+   "surge_ok": 11,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 하한 미달"
+  },
+  "FWONK": {
+   "old_weeks": [
+    "2021-02-01",
+    "2021-06-21",
+    "2022-03-21",
+    "2023-10-02"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": false,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "GBTG": {
+   "old_weeks": [
+    "2026-05-04"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 4943536375.0,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "GEF": {
+   "old_weeks": [
+    "2019-08-26",
+    "2021-03-01",
+    "2025-06-02"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 3,
+   "marcap_null": 3,
+   "adv_null": 0,
+   "acc1": 3,
+   "adv_ok": 3,
+   "mc_ok": 0,
+   "surge_ok": 3,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 NULL"
+  },
+  "HLI": {
+   "old_weeks": [
+    "2020-03-30"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": true,
+   "mcap_now": 8798816247.558594,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 1,
+   "marcap_null": 0,
+   "adv_null": 0,
+   "acc1": 1,
+   "adv_ok": 1,
+   "mc_ok": 0,
+   "surge_ok": 1,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 하한 미달"
+  },
+  "HLX": {
+   "old_weeks": [
+    "2019-06-03",
+    "2019-06-17",
+    "2021-03-01",
+    "2022-10-03",
+    "2022-10-17",
+    "2022-10-24",
+    "2022-12-19",
+    "2023-08-28",
+    "2025-12-01",
+    "2026-01-05"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "IMKTA": {
+   "old_weeks": [
+    "2022-02-28",
+    "2026-02-02"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 2,
+   "marcap_null": 2,
+   "adv_null": 0,
+   "acc1": 2,
+   "adv_ok": 2,
+   "mc_ok": 0,
+   "surge_ok": 2,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 NULL"
+  },
+  "MBUU": {
+   "old_weeks": [
+    "2021-01-11",
+    "2025-08-11"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": true,
+   "mcap_now": 412036971.01858526,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 2,
+   "marcap_null": 0,
+   "adv_null": 0,
+   "acc1": 2,
+   "adv_ok": 2,
+   "mc_ok": 0,
+   "surge_ok": 2,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 하한 미달"
+  },
+  "NABL": {
+   "old_weeks": [
+    "2026-06-22",
+    "2026-06-29",
+    "2026-07-13",
+    "2026-07-27",
+    "2026-08-24"
+   ],
+   "fw_rows": 214,
+   "in_marketcap": true,
+   "mcap_now": 874632597.7385216,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 5,
+   "marcap_null": 0,
+   "adv_null": 0,
+   "acc1": 0,
+   "adv_ok": 5,
+   "mc_ok": 5,
+   "surge_ok": 5,
+   "last_as_of": "2026-10-12",
+   "reason": "이익가속 재계산 결과 불충족(재무 개정)"
+  },
+  "QRVO": {
+   "old_weeks": [
+    "2020-03-23",
+    "2020-04-06",
+    "2020-05-04",
+    "2020-11-30",
+    "2024-04-22",
+    "2024-06-10"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 10072263678.071367,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "SKYT": {
+   "old_weeks": [
+    "2025-11-24",
+    "2025-12-01",
+    "2025-12-29",
+    "2026-01-05",
+    "2026-01-12"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "SLP": {
+   "old_weeks": [
+    "2022-11-07",
+    "2024-11-04",
+    "2025-01-20",
+    "2026-05-18",
+    "2026-06-15"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 374004103.0,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "STZ": {
+   "old_weeks": [
+    "2020-11-02"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 1,
+   "marcap_null": 1,
+   "adv_null": 0,
+   "acc1": 1,
+   "adv_ok": 1,
+   "mc_ok": 0,
+   "surge_ok": 1,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 NULL"
+  },
+  "SUN": {
+   "old_weeks": [
+    "2020-04-06",
+    "2020-04-13",
+    "2020-04-20"
+   ],
+   "fw_rows": 459,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "rows_at_old_weeks": 3,
+   "marcap_null": 3,
+   "adv_null": 0,
+   "acc1": 3,
+   "adv_ok": 3,
+   "mc_ok": 0,
+   "surge_ok": 3,
+   "last_as_of": "2026-10-12",
+   "reason": "시총 NULL"
+  },
+  "TALK": {
+   "old_weeks": [
+    "2026-02-16"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "TBPH": {
+   "old_weeks": [
+    "2021-10-04",
+    "2021-11-01",
+    "2022-07-18",
+    "2025-11-10"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "WBD": {
+   "old_weeks": [
+    "2020-11-09",
+    "2020-11-16",
+    "2021-01-04",
+    "2021-01-25",
+    "2021-02-08",
+    "2021-11-01",
+    "2024-12-09",
+    "2025-09-08",
+    "2025-10-20"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": true,
+   "mcap_now": 77706269483.8146,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  },
+  "WBS": {
+   "old_weeks": [
+    "2020-11-09",
+    "2021-01-04",
+    "2025-01-13"
+   ],
+   "fw_rows": 0,
+   "in_marketcap": false,
+   "mcap_now": null,
+   "in_universe_ever": true,
+   "reason": "DB(factor_weekly)에 없음"
+  }
+ }
+}
