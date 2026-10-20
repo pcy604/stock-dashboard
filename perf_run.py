@@ -16,7 +16,7 @@ socket.setdefaulttimeout(12)
 CACHE_DIR    = Path('data/price_cache')
 DATE_STR     = datetime.now().strftime('%Y-%m-%d')
 LOOKBACK_W   = 4        # 월간 = 4주
-MIN_WEEKS    = 24       # 최소 주봉 수
+MIN_WEEKS    = 9        # 최소 주봉 수 (2026-10-20: 24 → 9 — 신규 상장주도 보이게. 신호 계산은 짧으면 알아서 거짓)
 WORKERS      = 10
 _lock        = threading.Lock()
 
@@ -118,8 +118,9 @@ def analyze_one(sym, name, marcap, market):
         try:
             _hi = float(wdf['High'].iloc[-53:-1].max())
             _dist = (curr / _hi - 1) * 100 if _hi > 0 else None
-            # 상장 1년 미만은 '52주' 신고가가 성립하지 않는다(ANDG: 상장 후 최고가를 신고가로 셌다 → 주간 이력과 불일치)
-            _new = bool(float(wdf['High'].iloc[-1]) > _hi) if (_hi > 0 and len(wdf) >= 53) else False
+            # 상장 1년 미만은 '상장 후 최고가'를 신고가로 본다(2026-10-20 사용자 결정 — 신규 상장주가 빠지면 안 된다).
+            #   단 상장 8주 미만은 매주가 신고가라 의미가 없어 빼고, 화면에는 🆕 로 구분한다.
+            _new = bool(float(wdf['High'].iloc[-1]) > _hi) if (_hi > 0 and len(wdf) >= 9) else False
             _wk_since = None
             _hh = wdf['High'].iloc[-53:]
             if len(_hh):
@@ -133,7 +134,7 @@ def analyze_one(sym, name, marcap, market):
         _nh, _streak, _nh8 = [], 0, 0
         try:
             _H = wdf['High'].astype(float)
-            _prev = _H.shift(1).rolling(52, min_periods=52).max()
+            _prev = _H.shift(1).rolling(52, min_periods=8).max()   # 신규 상장: 상장 후 최고가(8주 이상부터)
             _flag = (_H > _prev) & _prev.notna()
             _f52 = _flag.iloc[-52:]
             _c52 = wdf['Close'].iloc[-52:]
@@ -162,6 +163,7 @@ def analyze_one(sym, name, marcap, market):
             'nh':          _nh,          # 최근 52주 중 신고가 경신 주 [[금요일, 종가], ...]
             'nh_streak':   _streak,      # 이번 주까지 연속 경신 주 수
             'nh_8w':       _nh8,         # 최근 8주 중 경신 주 수
+            'young':       len(wdf) < 53,   # 상장(이력) 1년 미만 — 신고가 = 상장 후 최고가
             'ret_12w':     round((curr / float(wdf['Close'].iloc[-13]) - 1) * 100, 2) if len(wdf) >= 13 else None,
             # 신호 레이블
             'sigs_past':   sig_labels(sigs_past),

@@ -131,6 +131,13 @@ jobs:
         run: python perf_run.py
         continue-on-error: true
 
+      # 2026-10-20 — 52주 신고가 공통점 AI 요약을 미리 만들어 둔다(화면은 누르지 않아도 보인다).
+      - name: 52주 신고가 AI 공통점 요약
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+        run: python new_high_ai.py
+        continue-on-error: true
+
       - name: CANSLIM 갱신
         run: python canslim_run.py
         continue-on-error: true

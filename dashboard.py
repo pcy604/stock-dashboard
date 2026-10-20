@@ -2272,46 +2272,15 @@ def _sector_map():
 
 @st.cache_data(ttl=3600 * 24, show_spinner=False)
 def _h52_ai(week: str, mkt: str, payload: str) -> str:
-    """신고가 종목 묶음의 공통점 — Gemini. 같은 주·같은 종목 묶음이면 하루 캐시(무료 한도 하루 20건)."""
+    """버튼용 — 같은 주·같은 묶음이면 하루 캐시(Gemini 무료 한도 하루 20건). 코드는 new_high_ai.py 와 공용."""
+    import new_high_ai as _nha
     key = ''
     try:
-        import config as _cfg
-        key = getattr(_cfg, 'GEMINI_KEY', '') or ''
+        key = st.secrets.get('GEMINI_KEY', '')
     except Exception:
         pass
-    if not key:
-        try:
-            key = st.secrets.get('GEMINI_KEY', '')
-        except Exception:
-            key = ''
-    key = key or os.environ.get('GEMINI_KEY', '')
-    if not key:
-        return "(Gemini 키 미설정 — Streamlit Secrets 에 GEMINI_KEY 를 넣어야 AI 요약이 됩니다)"
-    prompt = (
-        f"너는 20년차 한국 증권사 주식 전략가다. 아래는 {week} 주에 52주 신고가를 새로 쓴 "
-        f"{'한국·미국' if mkt == '전체' else mkt} 종목 목록이다(시총 큰 순, 업종·12주 상승률·연속 경신 주수·분기 실적 포함).\n"
-        "펀드매니저 아침 회의용으로 **공통점**을 한국어로 짧게 정리하라.\n\n"
-        "형식:\n"
-        "**한 줄 요약**: 이번 주 신고가의 성격을 한 문장으로.\n"
-        "**테마·업종 묶음** (3~5개 불릿): 어떤 업종·밸류체인이 몰렸는지, 묶음마다 대표 종목명 2~4개를 반드시 괄호로.\n"
-        "**질적 특징** (2~3개 불릿): 대형/중소형, 실적이 받치는지(분기 실적 열), 연속 경신(추세 지속) vs 첫 돌파.\n"
-        "**주의할 점** (1~2개 불릿): 과열·단일 이벤트 의존 등 이 목록에서 보이는 위험.\n\n"
-        "규칙: 목록에 있는 사실만으로 말하라. 목록에 없는 뉴스·원인을 지어내지 마라 — 원인을 추정할 때는 "
-        "'~로 보인다'로 표시. 매수 추천 금지. 일반론 금지. 15줄 이내.\n\n" + payload)
-    try:
-        from google import genai
-        cl = genai.Client(api_key=key)
-        last = None
-        for _m in ('gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'):
-            try:
-                r = cl.models.generate_content(model=_m, contents=prompt)
-                return (r.text or '').strip() or "(요약 생성 실패)"
-            except Exception as _e:
-                last = _e
-                time.sleep(2)
-        return f"(AI 요약 실패 — Gemini 혼잡 또는 하루 한도. 잠시 후 다시. [{str(last)[:60]}])"
-    except Exception as e:
-        return f"(AI 요약 실패: {str(e)[:80]})"
+    text, _ok = _nha.generate(week, mkt, payload, key=key or None)
+    return text
 
 
 with t_52, guard('52주 신고가'):
@@ -2393,7 +2362,7 @@ with t_52, guard('52주 신고가'):
                 for x, c in _items:
                     cur = x.get('curr_price')
                     _wrows.append({
-                        '종목': x.get('name'), '코드': x.get('sym'),
+                        '종목': ('🆕 ' if x.get('young') else '') + str(x.get('name')), '코드': x.get('sym'),
                         '시총($B)': cap_usd_b(x.get('marcap'), x.get('market')),
                         '업종': _SEC52.get(x.get('sym'), '-'),
                         '그주종가': c, '현재가': cur,
@@ -2412,22 +2381,30 @@ with t_52, guard('52주 신고가'):
                 _secs = pd.Series([_SEC52.get(x.get('sym'), '기타·미분류') for x, _ in _items]).value_counts()
                 st.caption("업종 상위: " + " · ".join(f"**{k}** {v}" for k, v in _secs.head(6).items()))
 
-                # ── ③ AI 공통점 요약 ─────────────────────────────────
-                if st.button(f"🤖 AI 공통점 요약 — {_sel} 주 {len(_items)}종", key=f"h52_ai_{_sel}_{_mk52}"):
-                    _lines = [f"{r['종목']}({r['코드']}, {'KR' if str(r['코드']).isdigit() else 'US'}) | 업종 {r['업종']} | 시총 ${r['시총($B)'] or 0:.1f}B | "
-                              f"12주 {(next((x.get('ret_12w') for x, _ in _items if x.get('sym') == r['코드']), None) or 0):+.0f}% | "
-                              f"연속경신 {r['연속(주)']}주 | 분기실적 {r['분기실적(C)']}"
-                              for r in _wrows[:80]]
-                    _payload = ("업종 분포: " + ", ".join(f"{k} {v}" for k, v in _secs.head(10).items())
-                                + "\n\n" + "\n".join(_lines))
+                # ── ③ AI 공통점 요약 — 06시 자동 생성분은 누르지 않아도 보인다 ────────────
+                _auto = ((load_json(Path('results/new_high_ai.json')) or {}).get('weeks') or {}).get(_sel)
+                _ktxt = f"h52_ai_txt_{_sel}_{_mk52}"
+                if _auto and not st.session_state.get(_ktxt):
+                    with st.container(border=True):
+                        st.markdown(f"**🤖 AI 공통점 요약 — {_sel} 주 ({_auto.get('n')}종, 한·미 전체)**")
+                        st.markdown(_auto.get('text', ''))
+                        st.caption(f"매일 06시 자동 생성({_auto.get('generated', '-')}) · Gemini · 표의 숫자·업종만 근거, "
+                                   "원인 추정은 '~로 보인다'로 표시 · 매수 신호가 아니다.")
+                _blab = (f"🔄 지금 다시 요약 ({_mk52} · {len(_items)}종)" if _auto
+                         else f"🤖 AI 공통점 요약 — {_sel} 주 {len(_items)}종")
+                if st.button(_blab, key=f"h52_ai_{_sel}_{_mk52}"):
+                    import new_high_ai as _nha
+                    _cgm = {k: _cg(k) for k in (x.get('sym') for x, _ in _items)}
                     with st.spinner("AI 가 공통점을 정리하는 중..."):
-                        st.session_state[f"h52_ai_txt_{_sel}_{_mk52}"] = _h52_ai(_sel, _mk52, _payload)
-                _txt = st.session_state.get(f"h52_ai_txt_{_sel}_{_mk52}")
+                        st.session_state[_ktxt] = _h52_ai(_sel, _mk52, _nha.payload(_items, _SEC52, _cgm))
+                _txt = st.session_state.get(_ktxt)
                 if _txt:
                     with st.container(border=True):
+                        st.markdown(f"**🤖 AI 공통점 요약 — {_sel} 주 ({'한·미 전체' if _mk52 == '전체' else _mk52})**")
                         st.markdown(_txt)
-                        st.caption("Gemini 요약 · 위 표의 숫자·업종만 근거로 쓰도록 제한했다. 원인 추정은 '~로 보인다'로 표시된다. "
-                                   "매수 신호가 아니다.")
+                        st.caption("Gemini · 표의 숫자·업종만 근거로 쓰도록 제한 · 원인 추정은 '~로 보인다' · 매수 신호가 아니다.")
+                if any(x.get('young') for x, _ in _items):
+                    st.caption("🆕 = 상장 1년 미만 — 52주 이력이 없어 **상장 후 최고가**를 신고가로 본다(상장 8주 이후부터).")
 
     st.divider()
     # ── ④ 지금 고점 근처 종목 (필터) ─────────────────────────────
@@ -2466,7 +2443,7 @@ with t_52, guard('52주 신고가'):
         if _min_cap.startswith("1조") and cap < (1e12 if kr else 1e10):
             continue
         _rows52.append({
-            '종목': x.get('name'), '코드': x.get('sym'), '시장': x.get('market'),
+            '종목': ('🆕 ' if x.get('young') else '') + str(x.get('name')), '코드': x.get('sym'), '시장': x.get('market'),
             '시총($B)': cap_usd_b(cap, x.get('market')), '_cap': cap_usd_b(cap, x.get('market')) or 0,
             '업종': _SEC52.get(x.get('sym'), '-'),
             '현재가': x.get('curr_price'), '52주고': x.get('hi52'),
@@ -2511,7 +2488,7 @@ with t_52, guard('52주 신고가'):
             '1주%': st.column_config.NumberColumn(format="%+.1f"),
             '4주%': st.column_config.NumberColumn(format="%+.1f"),
             '12주%': st.column_config.NumberColumn(format="%+.1f")})
-        st.caption(cap_caption())
+        st.caption(cap_caption() + " · 🆕 = 상장 1년 미만(신고가 = 상장 후 최고가)")
     else:
         st.write("조건에 맞는 종목이 없습니다.")
     st.caption("⚠️ 신고가는 **탐색 출발점**이지 매수 신호가 아닙니다. 상장폐지 종목까지 넣은 12.5년 검증에서 "
