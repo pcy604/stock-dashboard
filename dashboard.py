@@ -521,7 +521,7 @@ def _income_sankey(row, unit_div, unit, seg=None):
                     line=dict(width=0)),   # 적자 합계는 진한 빨강
         width=0.62,
         customdata=[(b0 - a0) / d if t in ('cost', 'gain') else b0 / d for _, a0, b0, t in steps],
-        hovertemplate='%{x}: %{customdata:,.2f}' + unit + '<extra></extra>'))
+        hovertemplate='%{x}: %{customdata:,.1f}' + unit + '<extra></extra>'))
     for i, (k, a0, b0, t) in enumerate(steps):          # 이음선 — 다음 막대 시작점까지 점선
         if i + 1 < len(steps):
             lvl = b0 if t != 'total' else b0
@@ -529,7 +529,9 @@ def _income_sankey(row, unit_div, unit, seg=None):
                           line=dict(color='#9CA3AF', width=1, dash='dot'))
     for i, (k, a0, b0, t) in enumerate(steps):          # 값 라벨 — 항상 막대 윗변 위
         v = (b0 - a0) if t in ('cost', 'gain') else b0
-        txt = f"<b>{v/d:+,.1f}</b>" if t in ('cost', 'gain') else f"<b>{v/d:,.1f}</b>"
+        _x = v / d
+        _f = ',.0f' if abs(_x) >= 100 else ',.1f'       # 억·M 단위의 큰 수는 소수점 없이
+        txt = f"<b>{_x:+{_f}}</b>" if t in ('cost', 'gain') else f"<b>{_x:{_f}}</b>"
         if t == 'total':
             txt += f"  <span style='color:#6B7280'>{b0/rv*100:.1f}%</span>"
         fig.add_annotation(x=i, y=max(a0, b0, 0) / d, text=txt, showarrow=False, yanchor='bottom',
@@ -3837,7 +3839,7 @@ def _fetch_stock_data_cached(sym: str, days: int):
 
         earn = {'annual': None, 'quarterly': None, 'naver': None}
         insid = fin_est = None
-        yf_sym = f"{code}.KS" if is_kr else sym
+        yf_sym = _yf_code(code, True) if is_kr else sym   # KOSDAQ 은 .KQ (2026-10-20: 전부 .KS 라 코스닥 종목 yfinance 가 통째로 비었다)
         try:
             t = yf.Ticker(yf_sym)
             yi = t.info or {}
@@ -4169,7 +4171,7 @@ def full_close_history(sym, is_kr):
 def consensus_scenarios(sym, is_kr):
     """컨센서스 목표주가 BEAR/BASE/BULL + 선행 EPS/PER (yfinance, 불안정)."""
     try:
-        yi = yf.Ticker(f"{sym}.KS" if is_kr else sym).info or {}
+        yi = yf.Ticker(_yf_code(sym, is_kr)).info or {}
         return {'bear': yi.get('targetLowPrice'), 'base': yi.get('targetMeanPrice'),
                 'bull': yi.get('targetHighPrice'), 'n': yi.get('numberOfAnalystOpinions'),
                 'fwd_eps': yi.get('forwardEps'), 'fwd_pe': yi.get('forwardPE')}
@@ -4301,7 +4303,7 @@ def _fwd_est_cached(sym, is_kr):
     """올해(0y)/내년(+1y) + 이번분기(0q)/다음분기(+1q) 컨센서스 — 매출·EPS·순이익(EPS×주식수).
     yfinance의 revenue_estimate/earnings_estimate는 연간·분기 행이 같은 표에 같이 들어있음
     (인덱스 '0y'/'+1y'/'0q'/'+1q') — 분기 행은 기존엔 안 읽고 버려지고 있었음. 빈 결과는 캐시 안 함."""
-    t = yf.Ticker(f"{sym}.KS" if is_kr else sym)
+    t = yf.Ticker(_yf_code(sym, is_kr))
     out = {}
     _PERIODS = (('0y', '0y'), ('1y', '+1y'), ('0q', '0q'), ('1q', '+1q'))
     try:
@@ -4412,7 +4414,7 @@ def company_profile(sym, is_kr):
     out = {'summary': None, 'officers': [], 'website': None,
            'edgar_url': None, 'form4_url': None, 'dart_url': None}
     try:
-        yi = yf.Ticker(f"{sym}.KS" if is_kr else sym).info or {}
+        yi = yf.Ticker(_yf_code(sym, is_kr)).info or {}
         out['summary'] = yi.get('longBusinessSummary')
         out['website'] = yi.get('website')
         out['officers'] = [{'name': o.get('name'), 'title': o.get('title')}
@@ -5089,7 +5091,12 @@ def _tab_analysis():
                     if not _flowq:
                         st.caption("손익 흐름 데이터 없음.")
                     else:
-                        _uq, _uu = (1e12, '조') if is_kr_sym else (1e9, 'B')
+                        # 단위는 규모에 맞춘다(2026-10-20: 매출 970억 회사가 '0.1조 · 0.0 · −0.0'으로 보였다)
+                        _rv0 = abs((_flowq[0] or {}).get('revenue') or 0)
+                        if is_kr_sym:
+                            _uq, _uu = (1e12, '조') if _rv0 >= 1e12 else (1e8, '억')
+                        else:
+                            _uq, _uu = (1e9, 'B') if _rv0 >= 1e9 else (1e6, 'M')
                         _seg_for_flow = None
                         if is_kr_sym:
                             try:
@@ -5274,7 +5281,7 @@ def _tab_analysis():
                     st.subheader("💹 밸류에이션 · 재무")
                     yi2 = {}
                     try:
-                        t_yf = yf.Ticker(f"{sym8_clean}.KS" if is_kr_sym else sym8_clean)
+                        t_yf = yf.Ticker(_yf_code(sym8_clean, is_kr_sym))
                         yi2 = t_yf.info or {}
                     except Exception:
                         yi2 = {}
