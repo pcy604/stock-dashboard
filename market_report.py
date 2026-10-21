@@ -58,6 +58,26 @@ def _series(sym, df):
     return s
 
 
+# 2026-10-21: 10-21 일간 리포트가 한국 09:26(장중)에 만들어져 코스피 장중 값이 '종가'로 찍혔다(실제 그날 +4%대).
+#   장이 아직 열려 있는 시장의 '오늘 봉'은 미완성이라 버린다 — 언제 돌려도 마지막 확정 종가만 쓴다.
+_SESSION = {"KR": ("Asia/Seoul", 15, 45), "US": ("America/New_York", 16, 15)}   # 마감 + 15분 여유
+_MKT_OF = {"^KS11": "KR", "^KQ11": "KR", "^GSPC": "US", "^IXIC": "US", "^SOX": "US", "^VIX": "US", "^TNX": "US"}
+
+
+def drop_open_bar(s, sym, now=None):
+    """시장이 아직 마감 전이면 오늘 날짜의 마지막 봉을 뺀다. 환율(KRW=X)은 24시간이라 그대로."""
+    m = _MKT_OF.get(sym)
+    if m is None or s is None or not len(s):
+        return s
+    from zoneinfo import ZoneInfo
+    from datetime import timezone as _tz
+    tzname, hh, mm = _SESSION[m]
+    loc = (now or datetime.now(_tz.utc)).astimezone(ZoneInfo(tzname))
+    if s.index[-1].date() == loc.date() and (loc.hour, loc.minute) < (hh, mm):
+        return s.iloc[:-1]
+    return s
+
+
 def index_facts():
     out = []
     df = None
@@ -69,7 +89,7 @@ def index_facts():
         df = None
     for sym, name in INDICES:
         try:
-            s = _series(sym, df)
+            s = drop_open_bar(_series(sym, df), sym)
             if s is None or len(s) < 30:
                 raise ValueError("시세 없음")
             c = s.iloc[-1]
@@ -141,19 +161,15 @@ def facts(kind):
                 indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
 
 
+# 2026-10-21: AI 는 '문장'만 쓴다 — 표·숫자 나열은 template() 가 facts 에서 그대로 찍는다.
+#   예전엔 AI 가 표까지 다시 썼고, 상승 비율 27%·67% 를 9.1%·9.5% 로 옮겨 적었다. 문장 안 숫자도 unbacked_pcts 로 검사.
 PROMPT = """너는 개인투자자용 시황 리포트를 쓰는 애널리스트다. 아래 JSON 은 {span} 시장 데이터다.
 규칙:
 - **JSON 에 있는 숫자와 이름만 쓴다.** 뉴스·이벤트·원인·전망을 지어내지 않는다. 원인을 모르면 '데이터상 원인 불명'.
-- 한국어, 마크다운. 숫자는 소수 1자리 %.
-- 형식:
-  ## 이번 주 판정 (verdict 그대로: 코어 스위치 ON/OFF·200일선 이격·목표 비중 코어/위성/현금. 국면·경고는 '참고'라고 표시. 전환(changed)이면 첫 줄에 강조)
-  ## 한 줄 요약
-  ## 지수 (한국·미국·변동성·환율·금리를 표 하나로)
-  ## 강세·약세 종목 (KR/US 각각, 대형주 기준)
-  ## 신고가와 시장 폭 (52주 신고가 근접 수, 상승 종목 비율)
-  ## 우리 신호 (CANSLIM 시장방향 · 이익가속 신규 · 흑자전환)
-  ## 체크포인트 (데이터에서 보이는 것 3가지 — 예측 금지, '확인할 것'만)
-- 마지막 줄: "※ 자동 생성 · 투자 권유 아님 · 데이터 기준 {asof}"
+- 숫자는 꼭 필요할 때만, JSON 값 그대로(소수 1자리 %). 표는 쓰지 않는다(표는 따로 붙는다).
+- 한국어, 마크다운. 아래 두 절만 쓴다:
+  ## 한 줄 요약   (한두 문장 — 한국·미국 시장 흐름)
+  ## 체크포인트   (데이터에서 보이는 것 3가지, 번호 목록 — 예측 금지, '확인할 것'만)
 JSON:
 {facts}"""
 
@@ -214,16 +230,74 @@ def template(f):
     return "\n".join(L)
 
 
+def _fact_numbers(x, acc=None):
+    acc = set() if acc is None else acc
+    if isinstance(x, dict):
+        for v in x.values():
+            _fact_numbers(v, acc)
+    elif isinstance(x, (list, tuple)):
+        for v in x:
+            _fact_numbers(v, acc)
+    elif isinstance(x, bool):
+        pass
+    elif isinstance(x, (int, float)):
+        acc.add(round(abs(float(x)), 1))
+    elif isinstance(x, str):
+        import re
+        for m in re.findall(r"\d+(?:\.\d+)?", x):
+            acc.add(round(float(m), 1))
+    return acc
+
+
+def unbacked_pcts(md, f):
+    """AI 글의 'n%' 중 facts 에 없는 숫자. 2026-10-21: AI 가 상승 비율 27%·67% 를 9.1%·9.5% 로 썼다
+    (규칙에 '숫자는 JSON 것만'이라고 적어도 지킨다는 보장이 없다 — 그래서 검사한다)."""
+    import re
+    have = _fact_numbers(f)
+    bad = []
+    for m in re.findall(r"(\d+(?:\.\d+)?)\s*%", md or ""):
+        v = round(float(m), 1)
+        if not any(abs(v - h) <= 0.1 for h in have):
+            bad.append(m + "%")
+    return bad
+
+
 def render(f):
     asof = next((x.get("date") for x in f["indices"] if x.get("date")), f["generated"][:10])
     span = "전일(최근 거래일)" if f["kind"] == "daily" else "지난 1주"
     try:
         txt, model = ask_gemini(PROMPT.format(span=span, asof=asof,
                                               facts=json.dumps(f, ensure_ascii=False)))
-        return txt, f"gemini:{model}"
     except Exception as e:
         print("  Gemini 생략 →", str(e)[:120])
         return template(f), "template"
+    bad = unbacked_pcts(txt, f)
+    if bad:   # 틀린 숫자가 하나라도 있으면 AI 글을 버리고 숫자 템플릿으로 — 사실만 쓰는 리포트다
+        print(f"  ⚠️ AI 글에 근거 없는 숫자 {len(bad)}개 → 숫자 템플릿: {', '.join(bad[:8])}")
+        return template(f), f"template(ai_unbacked:{len(bad)})"
+    return compose(txt, f), f"gemini:{model}"
+
+
+def _ai_section(md, title):
+    import re
+    m = re.search(rf"^##\s*{re.escape(title)}[^\n]*\n(.*?)(?=^##\s|\Z|^※)", md or "", re.S | re.M)
+    return m.group(1).strip() if m else ""
+
+
+def compose(ai_md, f):
+    """AI 문장(한 줄 요약·체크포인트) + 숫자 템플릿 본문. 숫자는 전부 template 이 facts 에서 찍는다."""
+    body = template(f).splitlines()
+    body = [ln for ln in body[1:] if not ln.startswith("※")]          # 제목·꼬리 줄은 새로
+    head = "## " + ("일간" if f["kind"] == "daily" else "주간") + " 시황"
+    one, chk = _ai_section(ai_md, "한 줄 요약"), _ai_section(ai_md, "체크포인트")
+    out = [head, ""]
+    if one:
+        out += ["## 한 줄 요약", one, ""]
+    out += ["## 숫자"] + body
+    if chk:
+        out += ["", "## 체크포인트", chk]
+    out += ["", f"※ 문장 AI · 숫자 자동 · 투자 권유 아님 · {f['generated']}"]
+    return "\n".join(out)
 
 
 def main(kind, telegram=False):
