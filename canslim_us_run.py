@@ -35,8 +35,15 @@ def _us_pool():
     return ss
 
 
-def _price_block(sym):
-    """1년 일봉 → (n_dist_pct, vol_ratio, body_pct, is_bull). 실패 시 None."""
+FETCH_FAIL = 'fetch_fail'   # _price_block 이 '수집 실패'(조건 미달 아님)를 알리는 표식
+
+
+def _price_block(sym, _retry=True):
+    """1년 일봉 → (n_dist_pct, vol_ratio, body_pct, is_bull). 데이터가 짧으면 None, 수집 실패면 FETCH_FAIL.
+
+    2026-10-21: 예전엔 수집 실패도 None 이라 '조건 미달'과 구분되지 않았다 — 10-21 06시 실행에서
+    250개 중 1개만 남았는데 CI 알림은 '후보 1종'뿐이라 원인을 알 수 없었다. 실패는 1회 재시도하고 따로 센다.
+    """
     try:
         import FinanceDataReader as fdr
         start = (datetime.now() - timedelta(days=370)).strftime('%Y-%m-%d')
@@ -55,7 +62,10 @@ def _price_block(sym):
         body_pct = round(body / rng * 100, 0) if rng > 0 else 0
         return n_dist, vol_ratio, body_pct, bool(last['Close'] >= last['Open'])
     except Exception:
-        return None
+        if _retry:
+            time.sleep(1.0)
+            return _price_block(sym, _retry=False)
+        return FETCH_FAIL
 
 
 def _yoy(cur, prev):
@@ -156,8 +166,12 @@ def run(top=250):
     print(f"US 풀 {len(pool)} → RS{RS_PREFILTER}+·시총$2B+ 후보 {len(cands)}개. 가격/재무 검사...")
 
     hits = []
+    n_fail = 0
     for i, s in enumerate(cands, 1):
         pb = _price_block(s['sym'])
+        if pb == FETCH_FAIL:
+            n_fail += 1
+            continue
         if pb is None:
             continue
         n_dist, vol_ratio, body_pct, bull = pb
@@ -186,9 +200,13 @@ def run(top=250):
         'date': datetime.now().strftime('%Y-%m-%d'),
         'generated': datetime.now().isoformat(timespec='seconds'),
         'market_ok': m_ok, 'market_dir': m_dir,
+        'n_cands': len(cands), 'price_fail': n_fail,
+        'fetch_fail_pct': round(n_fail / len(cands) * 100, 1) if cands else None,
         'stocks': hits,
     }, ensure_ascii=False), encoding='utf-8')
-    print(f"\n✅ US CANSLIM: 후보 {len(hits)}개 (M: {m_dir}) → {OUT}")
+    print(f"\n✅ US CANSLIM: 후보 {len(hits)}개 (M: {m_dir}) · 가격 수집 실패 {n_fail}/{len(cands)} → {OUT}")
+    if cands and n_fail / len(cands) >= 0.3:
+        print(f"::error::US CANSLIM 가격 수집 실패 {n_fail}/{len(cands)} — 후보 수가 아니라 수집 고장이다(FinanceDataReader)")
     for h in hits[:8]:
         print(f"  {h['name'][:18]:<18} RS{h['rs_pct']:>5} N{h['n_dist_pct']:>6}% "
               f"C={h['c_growth_pct']} A={h['a_growth_y1']}/{h['a_growth_y2']}")
