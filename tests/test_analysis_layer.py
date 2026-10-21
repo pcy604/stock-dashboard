@@ -188,3 +188,66 @@ def test_dilution_parse_and_summary():
     assert round(s['itm_pct'], 1) == 10.0 and round(s['eb_pct'], 1) == 2.5 and s['n_active'] == 2
     r = {x['name']: x for x in AC.risk_checks(dilution_pct=10.0)}
     assert r['잠재 희석']['state'] == 'warn'
+
+
+FORM4_XML = """<?xml version="1.0"?>
+<ownershipDocument>
+  <schemaVersion>X0508</schemaVersion><documentType>4</documentType>
+  <periodOfReport>2026-03-02</periodOfReport>
+  <aff10b5One>0</aff10b5One>
+  <issuer><issuerCik>0001</issuerCik><issuerTradingSymbol>TEST</issuerTradingSymbol></issuer>
+  <reportingOwner>
+    <reportingOwnerId><rptOwnerCik>0002</rptOwnerCik><rptOwnerName>DOE JANE</rptOwnerName></reportingOwnerId>
+    <reportingOwnerRelationship><isDirector>0</isDirector><isOfficer>1</isOfficer><officerTitle>Chief Financial Officer</officerTitle></reportingOwnerRelationship>
+  </reportingOwner>
+  <nonDerivativeTable>
+    <nonDerivativeTransaction>
+      <securityTitle><value>Common Stock</value></securityTitle>
+      <transactionDate><value>2026-03-02</value></transactionDate>
+      <transactionCoding><transactionFormType>4</transactionFormType><transactionCode>S</transactionCode><equitySwapInvolved>0</equitySwapInvolved><footnoteId id="F1"/></transactionCoding>
+      <transactionAmounts><transactionShares><value>1,000</value></transactionShares><transactionPricePerShare><value>50.25</value><footnoteId id="F2"/></transactionPricePerShare><transactionAcquiredDisposedCode><value>D</value></transactionAcquiredDisposedCode></transactionAmounts>
+      <postTransactionAmounts><sharesOwnedFollowingTransaction><value>9000</value></sharesOwnedFollowingTransaction></postTransactionAmounts>
+    </nonDerivativeTransaction>
+  </nonDerivativeTable>
+  <derivativeTable>
+    <derivativeTransaction>
+      <securityTitle><value>Restricted Stock Units</value></securityTitle>
+      <conversionOrExercisePrice><footnoteId id="F3"/></conversionOrExercisePrice>
+      <transactionDate><value>2026-03-01</value></transactionDate>
+      <transactionCoding><transactionFormType>4</transactionFormType><transactionCode>A</transactionCode></transactionCoding>
+      <transactionAmounts><transactionShares><value>4000</value></transactionShares><transactionPricePerShare><value>0</value></transactionPricePerShare><transactionAcquiredDisposedCode><value>A</value></transactionAcquiredDisposedCode></transactionAmounts>
+      <exerciseDate><footnoteId id="F4"/></exerciseDate><expirationDate><footnoteId id="F4"/></expirationDate>
+      <underlyingSecurity><underlyingSecurityTitle><value>Common Stock</value></underlyingSecurityTitle><underlyingSecurityShares><value>4000</value></underlyingSecurityShares></underlyingSecurity>
+    </derivativeTransaction>
+    <derivativeTransaction>
+      <securityTitle><value>Stock Option (Right to Buy)</value></securityTitle>
+      <conversionOrExercisePrice><value>42.10</value></conversionOrExercisePrice>
+      <transactionDate><value>2026-03-01</value></transactionDate>
+      <transactionCoding><transactionFormType>4</transactionFormType><transactionCode>A</transactionCode></transactionCoding>
+      <transactionAmounts><transactionShares><value>12000</value></transactionShares><transactionPricePerShare><value>0</value></transactionPricePerShare><transactionAcquiredDisposedCode><value>A</value></transactionAcquiredDisposedCode></transactionAmounts>
+      <exerciseDate><value>2027-03-01</value></exerciseDate><expirationDate><value>2036-03-01</value></expirationDate>
+      <underlyingSecurity><underlyingSecurityTitle><value>Common Stock</value></underlyingSecurityTitle><underlyingSecurityShares><value>12000</value></underlyingSecurityShares></underlyingSecurity>
+    </derivativeTransaction>
+  </derivativeTable>
+  <footnotes>
+    <footnote id="F1">The sales reported were effected pursuant to a Rule 10b5-1 trading plan adopted by the reporting person on November 14, 2025.</footnote>
+    <footnote id="F2">The price reported is a weighted average price.</footnote>
+    <footnote id="F3">Each restricted stock unit represents a contingent right to receive one share of common stock.</footnote>
+    <footnote id="F4">The RSUs vest in four equal annual installments beginning on the first anniversary of the grant date, subject to continued service.</footnote>
+  </footnotes>
+</ownershipDocument>"""
+
+
+def test_form4_parse():
+    import edgar_client as E
+    rows = E.parse_form4(FORM4_XML, 'u')
+    assert len(rows) == 3
+    s, rsu, opt = rows
+    assert s['code_label'] == '장내 매도' and s['shares'] == 1000 and s['price'] == 50.25 and s['plan_10b5_1']
+    assert s['role'] == 'Chief Financial Officer' and s['owner'] == 'DOE JANE'
+    assert any(t == '10b5-1 계획(채택 November 14, 2025)' for t in s['tags']), s['tags']
+    assert rsu['sec_kind'] == 'RSU' and rsu['code_label'] == '부여(보상)' and rsu['underlying'] == 4000
+    assert '4회 균등 분할(매년)' in rsu['tags'] and '재직 조건' in rsu['tags']
+    assert opt['sec_kind'] == '스톡옵션' and opt['exercise_price'] == 42.10 and opt['expiration'] == '2036-03-01'
+    assert E.classify_security('Warrants (right to buy)') == '워런트'
+    assert '성과 조건: 상대 주주수익률(TSR)' in E.vesting_tags('PSUs vest based on relative total shareholder return over three years')

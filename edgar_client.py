@@ -19,7 +19,7 @@ from pathlib import Path
 DATA = Path('data')
 _CIK_CACHE = DATA / 'edgar_cik.json'
 # 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
-API_VERSION = 2
+API_VERSION = 3
 # SEC는 연락처 포함 User-Agent 요구 (없으면 403)
 UA = {'User-Agent': 'stock-screener research pcy604604@gmail.com',
       'Accept-Encoding': 'gzip, deflate'}
@@ -348,3 +348,169 @@ if __name__ == '__main__':
         form = sys.argv[3] if len(sys.argv) > 3 else None
         for x in filings(tkr, form=form):
             print(f"  {x['date']} [{x['form']}] {x['url']}")
+
+
+# ── Form 4 원문 — 파생상품(스톡옵션·RSU·워런트)·수령 조건·10b5-1 (2026-10-21) ─────────────
+# yfinance 내부자 표는 '거래 문구'만 준다. 원문 XML 에는 거래 코드(P 장내매수·S 장내매도·A 부여·M 행사·F 세금 반납…),
+# 파생상품 표(행사가·행사 가능일·만기·기초 주식 수), 각주(수령 조건), 10b5-1 계획 매매 표시(2023-04~)가 있다.
+FORM4_CODE = {
+    'P': '장내 매수', 'S': '장내 매도', 'A': '부여(보상)', 'M': '행사·전환(파생→주식)', 'F': '세금 납부용 반납',
+    'G': '증여', 'C': '전환', 'X': '옵션 행사(내가격)', 'O': '옵션 행사(외가격)', 'D': '회사에 처분',
+    'J': '기타', 'W': '상속', 'I': '재량 거래', 'K': '스왑', 'V': '자발 보고', 'E': '만료(매도 포지션)',
+    'H': '만료·취소', 'Z': '신탁', 'L': '소액 취득', 'U': '공개매수 응모',
+}
+
+
+def classify_security(title: str) -> str:
+    t = (title or '').lower()
+    if 'performance' in t or 'psu' in t:
+        return '성과주식(PSU)'
+    if 'restricted stock unit' in t or 'rsu' in t:
+        return 'RSU'
+    if 'restricted' in t:
+        return '제한주식'
+    if 'warrant' in t:
+        return '워런트'
+    if 'option' in t:
+        return '스톡옵션'
+    if 'common' in t or 'ordinary' in t or 'class a' in t or 'class b' in t:
+        return '보통주'
+    return title or '-'
+
+
+_NUMW = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'eight': 8, 'twelve': 12, 'sixteen': 16}
+
+
+def vesting_tags(text: str) -> list:
+    """각주(영문)에서 수령 조건을 한국어 꼬리표로 뽑는다 — 규칙 기반(AI 무료 한도 절약). 원문은 화면에 같이 둔다."""
+    import re as _re
+    t = ' '.join(str(text or '').split())
+    lo = t.lower()
+    tags = []
+    m = _re.search(r'(\d+|one|two|three|four|five|six|eight|twelve|sixteen)\s+(?:substantially\s+)?(?:equal\s+)?'
+                   r'(annual|quarterly|monthly|semi-annual)\s+installments', lo)
+    if m:
+        n = _NUMW.get(m.group(1), m.group(1))
+        tags.append(f"{n}회 균등 분할({ {'annual': '매년', 'quarterly': '분기마다', 'monthly': '매달', 'semi-annual': '반년마다'}[m.group(2)] })")
+    m = _re.search(r'(\d+(?:\.\d+)?)%\s+of\s+the\s+(?:shares|units|award|option|rsus?)[^.]{0,80}?vest', lo)
+    if m:
+        tags.append(f"{m.group(1)}%씩 수령")
+    m = _re.search(r'(first|one-year|1-year|second|two-year|third|three-year)\s+anniversary', lo)
+    if m and 'installment' not in lo:
+        y = {'first': 1, 'one-year': 1, '1-year': 1, 'second': 2, 'two-year': 2, 'third': 3, 'three-year': 3}[m.group(1)]
+        tags.append(f"{y}년 뒤 수령(클리프)")
+    if 'fully vested' in lo or 'vested in full' in lo or 'immediately vest' in lo:
+        tags.append('즉시 수령')
+    if 'relative total shareholder return' in lo or 'relative tsr' in lo:
+        tags.append('성과 조건: 상대 주주수익률(TSR)')
+    elif 'performance' in lo and any(k in lo for k in ('goal', 'metric', 'criteria', 'condition', 'target')):
+        tags.append('성과 조건부')
+    if _re.search(r'stock price|closing price[^.]{0,60}(?:equals|exceeds|at least)', lo) and 'performance' in lo:
+        tags.append('주가 목표 조건')
+    if _re.search(r'continued (?:service|employment)', lo):
+        tags.append('재직 조건')
+    if 'change in control' in lo or 'change of control' in lo:
+        tags.append('경영권 변동 시 가속 수령')
+    m = _re.search(r'10b5-1[^.]{0,120}?adopted[^.]{0,60}?on\s+([A-Za-z]+\.? \d{1,2}, \d{4})', t, _re.I)
+    if m:
+        tags.append(f"10b5-1 계획(채택 {m.group(1)})")
+    elif '10b5-1' in lo:
+        tags.append('10b5-1 계획')
+    if 'withh' in lo and 'tax' in lo:
+        tags.append('세금 원천징수')
+    if 'weighted average' in lo:
+        tags.append('가중평균 체결가')
+    return list(dict.fromkeys(tags))
+
+
+def parse_form4(xml_text: str, url: str = '') -> list:
+    """Form 4 XML(ownershipDocument) → 거래 행 리스트."""
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml_text.encode('utf-8') if isinstance(xml_text, str) else xml_text)
+
+    def tx(node, path):
+        e = node.find(path) if node is not None else None
+        if e is None:
+            return None
+        v = e.find('value')
+        s = (v.text if v is not None else e.text) or ''
+        return s.strip() or None
+
+    def num(node, path):
+        s = tx(node, path)
+        try:
+            return float(s.replace(',', '')) if s else None
+        except ValueError:
+            return None
+
+    fn = {f.get('id'): ' '.join((f.text or '').split()) for f in root.iter('footnote')}
+    owners = []
+    for ro in root.findall('reportingOwner'):
+        rel = ro.find('reportingOwnerRelationship')
+        role = []
+        if rel is not None:
+            if (tx(rel, 'isDirector') or '').lower() in ('1', 'true'):
+                role.append('이사')
+            if (tx(rel, 'isOfficer') or '').lower() in ('1', 'true'):
+                role.append(tx(rel, 'officerTitle') or '임원')
+            if (tx(rel, 'isTenPercentOwner') or '').lower() in ('1', 'true'):
+                role.append('10% 주주')
+        owners.append((tx(ro, 'reportingOwnerId/rptOwnerName') or '-', ' · '.join(role) or '-'))
+    owner, role = owners[0] if owners else ('-', '-')
+    plan = (tx(root, 'aff10b5One') or '').lower() in ('1', 'true')
+    rows = []
+    for tbl, kind in (('nonDerivativeTable/nonDerivativeTransaction', '주식'),
+                      ('derivativeTable/derivativeTransaction', '파생')):
+        for t in root.findall(tbl):
+            ids = [f.get('id') for f in t.iter('footnoteId')]
+            notes = ' '.join(fn.get(i, '') for i in dict.fromkeys(ids))
+            code = tx(t, 'transactionCoding/transactionCode')
+            title = tx(t, 'securityTitle')
+            rows.append({
+                'date': tx(t, 'transactionDate'), 'owner': owner, 'role': role, 'table': kind,
+                'security': title, 'sec_kind': classify_security(title), 'code': code,
+                'code_label': FORM4_CODE.get(code or '', code or '-'),
+                'shares': num(t, 'transactionAmounts/transactionShares'),
+                'price': num(t, 'transactionAmounts/transactionPricePerShare'),
+                'ad': tx(t, 'transactionAmounts/transactionAcquiredDisposedCode'),
+                'after': num(t, 'postTransactionAmounts/sharesOwnedFollowingTransaction'),
+                'exercise_price': num(t, 'conversionOrExercisePrice'),
+                'exercisable': tx(t, 'exerciseDate'), 'expiration': tx(t, 'expirationDate'),
+                'underlying': num(t, 'underlyingSecurity/underlyingSecurityShares'),
+                'plan_10b5_1': plan or ('10b5-1' in notes), 'notes': notes, 'tags': vesting_tags(notes), 'url': url})
+    return rows
+
+
+def form4_transactions(ticker, days=365, limit=30, workers=6):
+    """최근 Form 4 원문을 받아 거래 행으로. 발행사 submissions 의 '4'·'4/A'(최신순)에서 limit 건."""
+    from concurrent.futures import ThreadPoolExecutor
+    from datetime import date, timedelta
+    cik = cik_map().get(ticker.upper())
+    if not cik:
+        return []
+    j = _get(f"https://data.sec.gov/submissions/CIK{cik}.json").json()
+    r = j.get('filings', {}).get('recent', {})
+    cut = (date.today() - timedelta(days=days)).isoformat()
+    jobs = []
+    for i in range(len(r.get('accessionNumber', []))):
+        if r['form'][i] not in ('4', '4/A') or r['filingDate'][i] < cut:
+            continue
+        doc = r['primaryDocument'][i].split('/')[-1]          # 'xslF345X05/form4.xml' → 원문 'form4.xml'
+        acc = r['accessionNumber'][i].replace('-', '')
+        jobs.append(f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{acc}/{doc}")
+        if len(jobs) >= limit:
+            break
+
+    def one(u):
+        try:
+            return parse_form4(_get(u).text, u.replace(u.split('/')[-1], ''))
+        except Exception:
+            return None
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        res = list(ex.map(one, jobs))
+    if jobs and sum(1 for x in res if x is None) > len(jobs) * 0.5:
+        raise RuntimeError(f"Form 4 원문 {len(jobs)}건 중 절반 넘게 실패")
+    out = [row for x in res if x for row in x]
+    out.sort(key=lambda x: x['date'] or '', reverse=True)
+    return out

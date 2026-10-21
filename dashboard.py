@@ -756,7 +756,7 @@ try:
     import importlib                            # 처음 본 프로세스인데 옛 모듈인 경우(위 시각 비교가 못 잡음)
     if getattr(_dc, 'API_VERSION', 0) < 4:
         _dc = importlib.reload(_dc)
-    if getattr(_ec, 'API_VERSION', 0) < 2:
+    if getattr(_ec, 'API_VERSION', 0) < 3:
         _ec = importlib.reload(_ec)
     _dc.set_interactive(True)
     _ec.set_interactive(True)
@@ -3916,6 +3916,14 @@ def _official_fetch(sym, is_kr):
 
 
 @st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _form4_rows(sym):
+    """US Form 4 원문 최근 1년(최대 30건) — 성공만 캐시(실패는 예외)."""
+    import edgar_client
+    edgar_client.set_interactive(True)
+    return edgar_client.form4_transactions(sym, days=365, limit=30)
+
+
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
 def _kr_dilution_live(sym):
     """성공만 캐시한다(실패는 예외 → 캐시 안 됨). 공시 목록 실패는 조건표만 살린다."""
     import dart_client
@@ -5807,6 +5815,61 @@ def _tab_analysis():
                         st.caption("금액: 매수 +, 매도 −(백만 달러). 부여(RSU·성과주식 등 회사 보상)·옵션 행사·전환·증여는 "
                                    "본인 현금 매매가 아니라 합계에서 뺀다 — 내부자 신호로 읽을 건 **시장에서 직접 산 매수**다. "
                                    "Form 4 에 금액이 비어 있으면 주수×그날 종가로 추정. 정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
+
+                    # ── 📑 Form 4 원문 (US, 2026-10-21) — 장내 매매만 신호, 부여·행사·세금 반납은 보상 흐름 ─────
+                    if not is_kr_sym:
+                        st.subheader("📑 Form 4 원문 — 장내 매매·스톡옵션·RSU·워런트")
+                        try:
+                            with st.spinner("SEC Form 4 원문 읽는 중…"):
+                                _f4 = _form4_rows(sym8_clean)
+                            _f4e = None
+                        except Exception as _e4:
+                            _f4, _f4e = [], f"{type(_e4).__name__}"
+                        if not _f4:
+                            st.info("최근 1년 Form 4 없음" if not _f4e else f"SEC 원문 조회 실패({_f4e}) — 위 yfinance 집계만 표시")
+                        else:
+                            _P = [r for r in _f4 if r['code'] == 'P' and r['table'] == '주식']
+                            _S = [r for r in _f4 if r['code'] == 'S' and r['table'] == '주식']
+                            _amt = lambda rs: sum((r['shares'] or 0) * (r['price'] or 0) for r in rs)
+                            _spl = _amt([r for r in _S if r['plan_10b5_1']])
+                            _grant = [r for r in _f4 if r['code'] == 'A' and r['table'] == '파생']
+                            _stat_grid([('', [
+                                ('장내 매수', f"${_amt(_P)/1e6:,.2f}M · {len(_P)}건", True),
+                                ('장내 매도', f"${_amt(_S)/1e6:,.2f}M · {len(_S)}건"),
+                                ('매도 중 사전계획(10b5-1)', f"{_spl/_amt(_S)*100:.0f}%" if _amt(_S) else '-'),
+                                ('옵션·RSU 부여', f"{len(_grant)}건 · {sum((r['underlying'] or r['shares'] or 0) for r in _grant):,.0f}주"),
+                                ('행사·전환', f"{sum(1 for r in _f4 if r['code'] in ('M', 'X', 'O'))}건"),
+                                ('세금 납부용 반납', f"{sum(1 for r in _f4 if r['code'] == 'F')}건")])])
+                            _der = [r for r in _f4 if r['table'] == '파생']
+                            if _der:
+                                st.markdown("**파생상품 — 스톡옵션 · RSU · 성과주식 · 워런트**")
+                                _tsrc('SEC EDGAR Form 4 원문(XML 파생상품 표·각주)', live=True)
+                                st.dataframe(pd.DataFrame([{
+                                    '일자': r['date'] or '-', '보고자': r['owner'], '직위': r['role'], '종류': r['sec_kind'],
+                                    '거래': r['code_label'], '수량(주)': r['underlying'] or r['shares'],
+                                    '행사가($)': r['exercise_price'], '행사 가능일': r['exercisable'] or '각주',
+                                    '만기': r['expiration'] or '각주',
+                                    '수령 조건': ' · '.join(t for t in r['tags'] if '10b5-1' not in t and '가중평균' not in t) or '-'}
+                                    for r in _der[:40]]), filters=False)
+                            _nd = [r for r in _f4 if r['table'] == '주식' and r['code'] in ('P', 'S')]
+                            if _nd:
+                                st.markdown("**장내 매매 — 사전계획(10b5-1) 여부**")
+                                _tsrc('SEC EDGAR Form 4 원문(XML 비파생 표)', live=True)
+                                st.dataframe(pd.DataFrame([{
+                                    '일자': r['date'] or '-', '보고자': r['owner'], '직위': r['role'], '거래': r['code_label'],
+                                    '수량(주)': r['shares'], '단가($)': r['price'],
+                                    '금액($M)': None if not (r['shares'] and r['price']) else
+                                                round((1 if r['code'] == 'P' else -1) * r['shares'] * r['price'] / 1e6, 2),
+                                    '사전계획': '10b5-1' if r['plan_10b5_1'] else '-', '거래 후 보유(주)': r['after']}
+                                    for r in _nd[:40]]), filters=False)
+                            _notes = list(dict.fromkeys((r['notes'], r['url']) for r in _f4 if r['notes']))
+                            if _notes:
+                                with st.expander(f"각주 원문 {len(_notes)}개(영문) — 수령 조건·계획 매매 근거"):
+                                    st.markdown("\n".join(f"- {n[:600]} [원문]({u})" for n, u in _notes[:30]))
+                            st.caption("내부자 신호로 의미가 큰 건 **장내 매수(P)** — 본인 돈으로 시장에서 산 것. 부여(A)는 회사 보상, "
+                                       "행사(M)·세금 반납(F)은 보상을 현금화하는 흐름이라 신호가 약하다. 10b5-1 = 미리 정해 둔 계획에 따른 "
+                                       "기계적 매매(2023-04부터 원문에 표시) — 계획 매도는 '팔고 싶어서 판' 매도보다 정보가 적다. "
+                                       "수령 조건은 각주 문장을 규칙으로 읽은 꼬리표다(원문 확인 권장). 최근 1년 최대 30건.")
 
                     # ── 🧨 잠재 희석 — CB·BW·EB (2026-10-21) ─────────────────────
                     #   한국 중소형주의 '조용한 물량'. 전환가 ≤ 주가면 전환 후 매도 유인, 주가가 내리면 리픽싱으로 주식 수가 더 는다.
