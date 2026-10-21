@@ -1259,6 +1259,11 @@ _VERDICT = {}
 tab_home, tab4, tab_screen, tab7, tab_pf = st.tabs(key='main_tab', on_change='rerun', tabs=[
     "🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"])
 tab_rep = tab_home
+try:
+    import access as _acc0
+    _acc0.track_session(st.session_state.get('main_tab') or '🏠 종합')   # 2026-10-21 사용량 측정(키 없으면 무동작)
+except Exception:
+    pass
 
 # 종목 발굴 — 발굴·분석·추천을 한 탭에 서브탭으로 통합
 # 순서 주의: 서브탭 핸들(t_gain…)은 아래 6개 블록이 전부 의존하므로 **무조건 먼저** 만든다.
@@ -6046,216 +6051,222 @@ def _marcap_join() -> dict:
 # ════════════════════════════════════════════════════════════════════
 with tab_pf, guard('포트폴리오 가드레일'):
     import guardrail as _gr
+    import access as _acc
+    # 2026-10-21 — 로그인 + 테스트 명단 통과해야 아래가 열린다(공개 사이트라 남의 화면에 보이면 안 된다)
+    if _acc.gate('내 포트폴리오'):
 
-    _PF_PATH = Path('data/portfolio.json')
-    _PF_COLS = ['sym', 'name', 'market', 'qty', 'avg_cost', 'buy_date']
+        _PF_PATH = Path('data/portfolio.json')
+        _PF_COLS = ['sym', 'name', 'market', 'qty', 'avg_cost', 'buy_date']
 
-    def _pf_load():
-        if 'pf_rows' in st.session_state:
-            return st.session_state['pf_rows']
-        try:
-            return json.loads(_PF_PATH.read_text(encoding='utf-8')).get('positions') or []
-        except Exception:
+        def _pf_load():
+            if 'pf_rows' in st.session_state:
+                return st.session_state['pf_rows']
+            # 2026-10-21: data/portfolio.json(서버 공용 파일)은 읽지 않는다 — 한 사람이 저장하면 다음 방문자에게 보였다
             return []
 
-    st.markdown("### 🛡️ 원칙 가드레일")
-    st.caption("**2026-06-23 정립한 원칙을 코드가 강제합니다.** "
-               "종목당 매입 20% 상한 · 평가 40% 초과 시 30%로 트림 · "
-               "청산은 **고점 대비 −20%**(진입가 대비 아님) · "
-               "3주간 52주 신고가 미갱신 시 30% 축소 · 레버리지 ETF 합계 10% 이내.")
+        st.markdown("### 🛡️ 원칙 가드레일")
+        st.caption("**2026-06-23 정립한 원칙을 코드가 강제합니다.** "
+                   "종목당 매입 20% 상한 · 평가 40% 초과 시 30%로 트림 · "
+                   "청산은 **고점 대비 −20%**(진입가 대비 아님) · "
+                   "3주간 52주 신고가 미갱신 시 30% 축소 · 레버리지 ETF 합계 10% 이내.")
 
-    # ── 🔐 토스 계좌 자동 연동 (2026-10-14) ─────────────────────────────
-    # 토스 Open API 는 허용 IP(고정)에서만 응답한다 → 이 사이트(유동 IP)는 직접 못 부른다.
-    # 노트북(tools/toss_sync.py)이 매일 받아 **암호화**해 올리고, 여기서는 비밀번호로만 푼다.
-    # 저장소·사이트가 공개라 평문 잔고는 어디에도 두지 않는다. 키도 이 사이트엔 없다.
-    import pf_vault as _pv
-    _tz_head = _pv.peek()
-    if _tz_head:
-        with st.container(border=True):
-            _tz_c1, _tz_c2 = st.columns([3, 1])
-            _tz_c1.markdown(f"**🔐 토스 계좌 연동** · 자료 기준 {_tz_head.get('asof') or '-'} "
-                            "(노트북이 매일 06:40 KST 갱신)")
-            if st.session_state.get('pf_toss'):
-                if _tz_c2.button('🔒 잠그기', key='pf_toss_lock', use_container_width=True):
-                    for _k in ('pf_toss', 'pf_rows', 'pf_cap', 'pf_src'):
-                        st.session_state.pop(_k, None)
-                    st.rerun()
-            else:
-                _tz_pw = _tz_c1.text_input('포트폴리오 비밀번호', type='password', key='pf_toss_pw',
-                                           label_visibility='collapsed', placeholder='포트폴리오 비밀번호')
-                if _tz_c2.button('🔓 불러오기', key='pf_toss_go', use_container_width=True) and _tz_pw:
-                    try:
-                        _snap = _pv.unseal(_tz_pw)
-                        st.session_state['pf_toss'] = _snap
-                        _rows_t, _cash_krw, _cash_usd = [], 0.0, 0.0
-                        for _a in _snap.get('accounts') or []:
-                            _cash_krw += float((_a.get('cash') or {}).get('KRW') or 0)
-                            _cash_usd += float((_a.get('cash') or {}).get('USD') or 0)
-                            for _h in _a.get('holdings') or []:
-                                if not _h.get('sym') or not _h.get('qty'):
-                                    continue
-                                _rows_t.append({'sym': _h['sym'], 'name': _h.get('name') or _h['sym'],
-                                                'market': 'KR' if _h.get('market') == 'KR' else 'US',
-                                                'qty': float(_h['qty']),
-                                                'avg_cost': float(_h.get('avg_cost') or 0), 'buy_date': ''})
-                        _hold_krw = sum(float(_h.get('value') or 0) * (_usdkrw() if _h.get('currency') == 'USD' else 1)
-                                        for _a in _snap.get('accounts') or [] for _h in _a.get('holdings') or [])
-                        st.session_state['pf_rows'] = _rows_t
-                        st.session_state['pf_cap'] = int(_hold_krw + _cash_krw + _cash_usd * _usdkrw())
-                        st.session_state['pf_src'] = 'toss'
-                        st.session_state.pop('pf_toss_pw', None)
+        # ── 🔐 토스 계좌 자동 연동 (2026-10-14) ─────────────────────────────
+        # 토스 Open API 는 허용 IP(고정)에서만 응답한다 → 이 사이트(유동 IP)는 직접 못 부른다.
+        # 노트북(tools/toss_sync.py)이 매일 받아 **암호화**해 올리고, 여기서는 비밀번호로만 푼다.
+        # 저장소·사이트가 공개라 평문 잔고는 어디에도 두지 않는다. 키도 이 사이트엔 없다.
+        import pf_vault as _pv
+        _tz_head = _pv.peek()
+        if _tz_head and _acc.is_owner():
+            with st.container(border=True):
+                _tz_c1, _tz_c2 = st.columns([3, 1])
+                _tz_c1.markdown(f"**🔐 토스 계좌 연동** · 자료 기준 {_tz_head.get('asof') or '-'} "
+                                "(노트북이 매일 06:40 KST 갱신)")
+                if st.session_state.get('pf_toss'):
+                    if _tz_c2.button('🔒 잠그기', key='pf_toss_lock', use_container_width=True):
+                        for _k in ('pf_toss', 'pf_rows', 'pf_cap', 'pf_src'):
+                            st.session_state.pop(_k, None)
                         st.rerun()
-                    except ValueError as _e:
-                        st.error(str(_e))
-                    except Exception as _e:
-                        st.error(f'불러오기 실패: {str(_e)[:120]}')
-            _snap = st.session_state.get('pf_toss')
-            if _snap:
-                _ck = sum(float((_a.get('cash') or {}).get('KRW') or 0) for _a in _snap['accounts'])
-                _cu = sum(float((_a.get('cash') or {}).get('USD') or 0) for _a in _snap['accounts'])
-                _nh = sum(len(_a.get('holdings') or []) for _a in _snap['accounts'])
-                _t1, _t2, _t3, _t4 = st.columns(4)
-                _t1.metric('총자산(원 환산)', f"{st.session_state.get('pf_cap', 0):,.0f}")
-                _t2.metric('보유 종목', f"{_nh}종")
-                _t3.metric('원화 현금', f"{_ck:,.0f}")
-                _t4.metric('달러 현금', f"${_cu:,.2f}")
-                st.caption(f"환율 {_usdkrw():,.1f}원/$ · 계좌 "
-                           + ', '.join(f"{_a.get('no_masked')}" for _a in _snap['accounts'])
-                           + " · 아래 표에 자동 반영됐습니다. 이 화면을 닫거나 '잠그기'를 누르면 지워집니다.")
-    else:
-        st.caption("🔐 토스 계좌 자동 연동: 노트북에서 `python tools/toss_sync.py --setup` 을 한 번 실행하면 켜집니다.")
+                else:
+                    _tz_pw = _tz_c1.text_input('포트폴리오 비밀번호', type='password', key='pf_toss_pw',
+                                               label_visibility='collapsed', placeholder='포트폴리오 비밀번호')
+                    if _tz_c2.button('🔓 불러오기', key='pf_toss_go', use_container_width=True) and _tz_pw:
+                        try:
+                            _snap = _pv.unseal(_tz_pw)
+                            st.session_state['pf_toss'] = _snap
+                            _rows_t, _cash_krw, _cash_usd = [], 0.0, 0.0
+                            for _a in _snap.get('accounts') or []:
+                                _cash_krw += float((_a.get('cash') or {}).get('KRW') or 0)
+                                _cash_usd += float((_a.get('cash') or {}).get('USD') or 0)
+                                for _h in _a.get('holdings') or []:
+                                    if not _h.get('sym') or not _h.get('qty'):
+                                        continue
+                                    _rows_t.append({'sym': _h['sym'], 'name': _h.get('name') or _h['sym'],
+                                                    'market': 'KR' if _h.get('market') == 'KR' else 'US',
+                                                    'qty': float(_h['qty']),
+                                                    'avg_cost': float(_h.get('avg_cost') or 0), 'buy_date': ''})
+                            _hold_krw = sum(float(_h.get('value') or 0) * (_usdkrw() if _h.get('currency') == 'USD' else 1)
+                                            for _a in _snap.get('accounts') or [] for _h in _a.get('holdings') or [])
+                            st.session_state['pf_rows'] = _rows_t
+                            st.session_state['pf_cap'] = int(_hold_krw + _cash_krw + _cash_usd * _usdkrw())
+                            st.session_state['pf_src'] = 'toss'
+                            st.session_state.pop('pf_toss_pw', None)
+                            st.rerun()
+                        except ValueError as _e:
+                            st.error(str(_e))
+                        except Exception as _e:
+                            st.error(f'불러오기 실패: {str(_e)[:120]}')
+                _snap = st.session_state.get('pf_toss')
+                if _snap:
+                    _ck = sum(float((_a.get('cash') or {}).get('KRW') or 0) for _a in _snap['accounts'])
+                    _cu = sum(float((_a.get('cash') or {}).get('USD') or 0) for _a in _snap['accounts'])
+                    _nh = sum(len(_a.get('holdings') or []) for _a in _snap['accounts'])
+                    _t1, _t2, _t3, _t4 = st.columns(4)
+                    _t1.metric('총자산(원 환산)', f"{st.session_state.get('pf_cap', 0):,.0f}")
+                    _t2.metric('보유 종목', f"{_nh}종")
+                    _t3.metric('원화 현금', f"{_ck:,.0f}")
+                    _t4.metric('달러 현금', f"${_cu:,.2f}")
+                    st.caption(f"환율 {_usdkrw():,.1f}원/$ · 계좌 "
+                               + ', '.join(f"{_a.get('no_masked')}" for _a in _snap['accounts'])
+                               + " · 아래 표에 자동 반영됐습니다. 이 화면을 닫거나 '잠그기'를 누르면 지워집니다.")
+        elif _acc.is_owner():
+            st.caption("🔐 토스 계좌 자동 연동: 노트북에서 `python tools/toss_sync.py --setup` 을 한 번 실행하면 켜집니다.")
 
-    _rows = _pf_load()
-    if not _rows:
-        _rows = [{'sym': '', 'name': '', 'market': 'KR', 'qty': 0,
-                  'avg_cost': 0.0, 'buy_date': ''}]
-    _df_in = pd.DataFrame(_rows)
-    for _c in _PF_COLS:
-        if _c not in _df_in.columns:
-            _df_in[_c] = '' if _c in ('sym', 'name', 'market', 'buy_date') else 0
-    _df_in = _df_in[_PF_COLS]
+        _pf_up = st.file_uploader('📂 백업 불러오기(my_portfolio.json)', type=['json'], key='pf_up',
+                                  help='이전에 내려받은 백업 파일. 서버에는 저장하지 않고 이 세션에만 올립니다.')
+        if _pf_up is not None and st.session_state.get('_pf_up_done') != _pf_up.file_id:
+            try:
+                _bk = json.loads(_pf_up.getvalue().decode('utf-8'))
+                st.session_state['pf_rows'] = [r for r in (_bk.get('positions') or []) if str(r.get('sym') or '').strip()]
+                st.session_state['pf_cap'] = int(_bk.get('total_capital') or 0)
+                st.session_state['_pf_up_done'] = _pf_up.file_id
+                st.rerun()
+            except Exception as _e:
+                st.error(f'백업 파일을 읽지 못했습니다: {str(_e)[:80]}')
+        _rows = _pf_load()
+        if not _rows:
+            _rows = [{'sym': '', 'name': '', 'market': 'KR', 'qty': 0,
+                      'avg_cost': 0.0, 'buy_date': ''}]
+        _df_in = pd.DataFrame(_rows)
+        for _c in _PF_COLS:
+            if _c not in _df_in.columns:
+                _df_in[_c] = '' if _c in ('sym', 'name', 'market', 'buy_date') else 0
+        _df_in = _df_in[_PF_COLS]
 
-    _cap_col, _btn_col = st.columns([2, 1])
-    _total_cap = _cap_col.number_input(
-        "총자본 (현금 포함, 원)", min_value=0,
-        value=int(st.session_state.get('pf_cap', 0)), step=1_000_000, format="%d",
-        help="현금 비중까지 점검하려면 넣으세요. 0이면 보유분만 봅니다.")
+        _cap_col, _btn_col = st.columns([2, 1])
+        _total_cap = _cap_col.number_input(
+            "총자본 (현금 포함, 원)", min_value=0,
+            value=int(st.session_state.get('pf_cap', 0)), step=1_000_000, format="%d",
+            help="현금 비중까지 점검하려면 넣으세요. 0이면 보유분만 봅니다.")
 
-    st.markdown("**보유 종목** — 행 추가·삭제 가능. "
-                "`종목코드`는 KR이면 6자리(005930), US면 티커(AAPL).")
-    _edited = st.data_editor(
-        _df_in, num_rows='dynamic', use_container_width=True, hide_index=True,
-        key='pf_editor',
-        # 표 규칙 ②: 종목 → 코드 순 (편집표라 행번호 열은 넣지 않는다 — 행 추가·삭제와 충돌)
-        column_order=['name', 'sym', 'market', 'qty', 'avg_cost', 'buy_date'],
-        column_config={
-            'sym': st.column_config.TextColumn('코드', width='small'),
-            'name': st.column_config.TextColumn('종목', width='medium'),
-            'market': st.column_config.SelectboxColumn('시장', options=['KR', 'US'], width='small'),
-            'qty': st.column_config.NumberColumn('수량', min_value=0.0, step=0.000001, format='%g'),  # 소수점 주식(토스) 대응
-            'avg_cost': st.column_config.NumberColumn('평균단가', min_value=0.0, format='%.2f'),
-            'buy_date': st.column_config.TextColumn('매수일 YYYY-MM-DD', width='small'),
-        })
-    st.caption("출처: 직접 입력 · 토스증권 계좌 연동 · 마지막 갱신: 저장 시점")
+        st.markdown("**보유 종목** — 행 추가·삭제 가능. "
+                    "`종목코드`는 KR이면 6자리(005930), US면 티커(AAPL).")
+        _edited = st.data_editor(
+            _df_in, num_rows='dynamic', use_container_width=True, hide_index=True,
+            key='pf_editor',
+            # 표 규칙 ②: 종목 → 코드 순 (편집표라 행번호 열은 넣지 않는다 — 행 추가·삭제와 충돌)
+            column_order=['name', 'sym', 'market', 'qty', 'avg_cost', 'buy_date'],
+            column_config={
+                'sym': st.column_config.TextColumn('코드', width='small'),
+                'name': st.column_config.TextColumn('종목', width='medium'),
+                'market': st.column_config.SelectboxColumn('시장', options=['KR', 'US'], width='small'),
+                'qty': st.column_config.NumberColumn('수량', min_value=0.0, step=0.000001, format='%g'),  # 소수점 주식(토스) 대응
+                'avg_cost': st.column_config.NumberColumn('평균단가', min_value=0.0, format='%.2f'),
+                'buy_date': st.column_config.TextColumn('매수일 YYYY-MM-DD', width='small'),
+            })
+        st.caption("출처: 직접 입력 · 토스증권 계좌 연동 · 마지막 갱신: 저장 시점")
 
-    if _btn_col.button('💾 저장 & 평가', use_container_width=True, type='primary'):
-        _keep = [r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
-        st.session_state['pf_rows'] = _keep
-        st.session_state['pf_cap'] = _total_cap
-        if st.session_state.get('pf_src') == 'toss':      # 계좌 자료는 평문 파일로 남기지 않는다
+        if _btn_col.button('💾 저장 & 평가', use_container_width=True, type='primary'):
+            _keep = [r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
+            st.session_state['pf_rows'] = _keep
+            st.session_state['pf_cap'] = _total_cap
+            st.success(f'{len(_keep)}종목 반영 — 이 세션에만 있습니다(서버 파일로 저장하지 않음)')
             st.rerun()
-        try:
-            _PF_PATH.parent.mkdir(parents=True, exist_ok=True)
-            _PF_PATH.write_text(json.dumps({'positions': _keep, 'total_capital': _total_cap},
-                                           ensure_ascii=False, indent=2), encoding='utf-8')
-            st.success(f'{len(_keep)}종목 저장됨 (data/portfolio.json)')
-        except Exception as _e:
-            st.info(f'세션에만 저장됐습니다 (파일 쓰기 불가: {str(_e)[:60]}).')
-        st.rerun()
 
-    _live = st.session_state.get('pf_rows') or [
-        r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
+        _live = st.session_state.get('pf_rows') or [
+            r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
 
-    if not _live:
-        st.info('보유 종목을 입력하고 **저장 & 평가**를 누르세요. '
-                '현재가 · 매수 후 최고가 · 신고가 경과주는 자동으로 채웁니다.')
-    else:
-        _pos, _miss = [], []
-        for _r in _live:
-            _sym = str(_r['sym']).strip()
-            _mk = (_r.get('market') or 'KR').upper()
-            _qty = float(_r.get('qty') or 0)
-            _avg = float(_r.get('avg_cost') or 0)
-            _cur = _fetch_pf_price(_sym, _mk)
-            if _cur is None or _qty <= 0:
-                _miss.append(_sym)
-                continue
-            _peak, _wk = None, None
-            try:
-                _peak, _wk = _pf_trail(_sym, _mk, str(_r.get('buy_date') or '') or None)
-            except Exception:
-                pass
-            # 2026-10-14: US 를 달러 그대로 더하면 KR(원)과 섞여 비중이 엉터리였다 → 원화 환산
-            _fxm = _usdkrw() if _mk == 'US' else 1.0
-            _pos.append({
-                'sym': _sym, 'name': _r.get('name') or _sym, 'market': _mk,
-                'qty': _qty, 'cur_price': _cur,
-                'value': _qty * _cur * _fxm, 'cost': (_qty * _avg * _fxm) if _avg else None,
-                'pnl_pct': ((_cur / _avg - 1) * 100) if _avg else None,
-                'peak_price': _peak, 'weeks_since_high': _wk})
-        if _miss:
-            st.warning('현재가를 못 가져온 종목: ' + ', '.join(_miss))
+        if not _live:
+            st.info('보유 종목을 입력하고 **저장 & 평가**를 누르세요. '
+                    '현재가 · 매수 후 최고가 · 신고가 경과주는 자동으로 채웁니다.')
+        else:
+            _pos, _miss = [], []
+            for _r in _live:
+                _sym = str(_r['sym']).strip()
+                _mk = (_r.get('market') or 'KR').upper()
+                _qty = float(_r.get('qty') or 0)
+                _avg = float(_r.get('avg_cost') or 0)
+                _cur = _fetch_pf_price(_sym, _mk)
+                if _cur is None or _qty <= 0:
+                    _miss.append(_sym)
+                    continue
+                _peak, _wk = None, None
+                try:
+                    _peak, _wk = _pf_trail(_sym, _mk, str(_r.get('buy_date') or '') or None)
+                except Exception:
+                    pass
+                # 2026-10-14: US 를 달러 그대로 더하면 KR(원)과 섞여 비중이 엉터리였다 → 원화 환산
+                _fxm = _usdkrw() if _mk == 'US' else 1.0
+                _pos.append({
+                    'sym': _sym, 'name': _r.get('name') or _sym, 'market': _mk,
+                    'qty': _qty, 'cur_price': _cur,
+                    'value': _qty * _cur * _fxm, 'cost': (_qty * _avg * _fxm) if _avg else None,
+                    'pnl_pct': ((_cur / _avg - 1) * 100) if _avg else None,
+                    'peak_price': _peak, 'weeks_since_high': _wk})
+            if _miss:
+                st.warning('현재가를 못 가져온 종목: ' + ', '.join(_miss))
 
-        if _pos:
-            _res = _gr.evaluate(_pos, total_capital=(_total_cap or None))
-            _vi = _res.get('violations') or []
-            st.session_state['pf_eval'] = dict(grade=_res.get('grade'), n=len(_pos), n_vi=len(_vi),
-                                               top=[v.get('msg') for v in _vi[:3]])   # 🏠 종합 '할 일'이 읽는다
-            _m1, _m2, _m3 = st.columns(3)
-            _m1.metric('원칙 준수 등급', _res.get('grade', '—'))
-            _m2.metric('보유 종목', f"{len(_pos)}종")
-            _m3.metric('위반', f"{len(_vi)}건")
+            if _pos:
+                _res = _gr.evaluate(_pos, total_capital=(_total_cap or None))
+                _vi = _res.get('violations') or []
+                st.session_state['pf_eval'] = dict(grade=_res.get('grade'), n=len(_pos), n_vi=len(_vi),
+                                                   top=[v.get('msg') for v in _vi[:3]])   # 🏠 종합 '할 일'이 읽는다
+                _m1, _m2, _m3 = st.columns(3)
+                _m1.metric('원칙 준수 등급', _res.get('grade', '—'))
+                _m2.metric('보유 종목', f"{len(_pos)}종")
+                _m3.metric('위반', f"{len(_vi)}건")
 
-            if _vi:
-                st.markdown('#### 조치가 필요한 항목')
-                for _v in _vi:
-                    (st.error if _v.get('sev') == '🔴' else st.warning)(
-                        f"**{_v.get('rule')}** — {_v.get('msg')}")
-            else:
-                st.success('원칙 위반 없음. 지금 손댈 것이 없습니다.')
+                if _vi:
+                    st.markdown('#### 조치가 필요한 항목')
+                    for _v in _vi:
+                        (st.error if _v.get('sev') == '🔴' else st.warning)(
+                            f"**{_v.get('rule')}** — {_v.get('msg')}")
+                else:
+                    st.success('원칙 위반 없음. 지금 손댈 것이 없습니다.')
 
-            _hd = _res.get('holdings') or []
-            if _hd:
-                st.markdown('#### 보유 현황')
-                _tsrc('보유: 직접 입력·토스증권 계좌 / 현재가: FinanceDataReader·yfinance', live=True)
-                st.dataframe(pd.DataFrame([{
-                    '종목': h.get('name') or h['sym'],
-                    '평가비중%': round(h.get('weight') or 0, 1),
-                    '매입비중%': round(h.get('cost_weight') or 0, 1),
-                    '분할': h.get('tranche'),
-                    '현재가': h.get('cur_price'),
-                    '수익률%': (round(h['pnl_pct'], 1) if h.get('pnl_pct') is not None else None),
-                    '보유중최고': h.get('peak_price'),
-                    '고점대비%': (round((h['cur_price'] / h['peak_price'] - 1) * 100, 1)
-                                  if h.get('peak_price') and h.get('cur_price') else None),
-                    '신고가경과주': h.get('weeks_since_high'),
-                    '레버리지': '⚠️' if h.get('lev') else '',
-                } for h in _hd]), use_container_width=True, hide_index=True, row_height=25)
+                _hd = _res.get('holdings') or []
+                if _hd:
+                    st.markdown('#### 보유 현황')
+                    _tsrc('보유: 직접 입력·토스증권 계좌 / 현재가: FinanceDataReader·yfinance', live=True)
+                    st.dataframe(pd.DataFrame([{
+                        '종목': h.get('name') or h['sym'],
+                        '평가비중%': round(h.get('weight') or 0, 1),
+                        '매입비중%': round(h.get('cost_weight') or 0, 1),
+                        '분할': h.get('tranche'),
+                        '현재가': h.get('cur_price'),
+                        '수익률%': (round(h['pnl_pct'], 1) if h.get('pnl_pct') is not None else None),
+                        '보유중최고': h.get('peak_price'),
+                        '고점대비%': (round((h['cur_price'] / h['peak_price'] - 1) * 100, 1)
+                                      if h.get('peak_price') and h.get('cur_price') else None),
+                        '신고가경과주': h.get('weeks_since_high'),
+                        '레버리지': '⚠️' if h.get('lev') else '',
+                    } for h in _hd]), use_container_width=True, hide_index=True, row_height=25)
 
-            # 준수 이력 — 이게 있어야 '얼마나 지켰나'를 나중에 실측할 수 있다
-            try:
-                _gr.append_snapshot(_res)
-                _stat = _gr.compliance_stats(_gr.load_history())
-                if _stat:
-                    st.caption(f"최근 30일 준수율 {_stat.get('green_pct', 0):.0f}% · "
-                               f"현재 연속 무위반 {_stat.get('cur_streak_green', 0)}일")
-            except Exception:
-                pass
+                # 준수 이력 — 이게 있어야 '얼마나 지켰나'를 나중에 실측할 수 있다
+                try:
+                    _gr.append_snapshot(_res)
+                    _stat = _gr.compliance_stats(_gr.load_history())
+                    if _stat:
+                        st.caption(f"최근 30일 준수율 {_stat.get('green_pct', 0):.0f}% · "
+                                   f"현재 연속 무위반 {_stat.get('cur_streak_green', 0)}일")
+                except Exception:
+                    pass
 
-        if st.session_state.get('pf_src') != 'toss':
-          with st.expander('📋 복사용 JSON — repo 의 data/portfolio.json 에 넣으면 영구 보관됩니다'):
-              st.code(json.dumps({'positions': _live, 'total_capital': _total_cap},
-                               ensure_ascii=False, indent=2), language='json')
+            if st.session_state.get('pf_src') != 'toss':
+                # 2026-10-21: '저장소에 넣으라'던 안내 삭제 — 저장소는 공개다. 대신 본인 기기에 파일로 받고, 다음에 올려서 복원.
+                st.download_button('💾 내 기기에 백업(JSON)', key='pf_dl', width='content',
+                                   data=json.dumps({'positions': _live, 'total_capital': _total_cap},
+                                                   ensure_ascii=False, indent=2).encode('utf-8'),
+                                   file_name='my_portfolio.json', mime='application/json')
 
 
 # ════════════════════════════════════════════════════════════════════
