@@ -669,6 +669,10 @@ pd.set_option('styler.format.thousands', ',')   # 천 단위 쉼표 (2026-10-21)
 
 #   숫자 열 %.1f 기본 포맷 · 부호 색(+초록/−빨강, 클수록 진하게) · 🔎 필터는 전부
 #   table_ui 한 곳에서 st.dataframe 을 감싸 처리한다(2026-10-15). 표마다 따로 하지 않는다.
+import analysis_checks as _ac_dil
+if not hasattr(_ac_dil, 'summarize_dilution'):   # 클라우드가 옛 모듈을 들고 있으면
+    import importlib as _il0
+    _ac_dil = _il0.reload(_ac_dil)
 import table_ui as _tui
 if getattr(_tui, 'API_VERSION', 0) < 4:          # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
     import importlib as _il
@@ -750,7 +754,7 @@ try:
     import kr_fin_naver as _kfn
     _kfn = _fresh_module(_kfn)
     import importlib                            # 처음 본 프로세스인데 옛 모듈인 경우(위 시각 비교가 못 잡음)
-    if getattr(_dc, 'API_VERSION', 0) < 3:
+    if getattr(_dc, 'API_VERSION', 0) < 4:
         _dc = importlib.reload(_dc)
     if getattr(_ec, 'API_VERSION', 0) < 2:
         _ec = importlib.reload(_ec)
@@ -3911,6 +3915,45 @@ def _official_fetch(sym, is_kr):
         return []
 
 
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _kr_dilution_live(sym):
+    """성공만 캐시한다(실패는 예외 → 캐시 안 됨). 공시 목록 실패는 조건표만 살린다."""
+    import dart_client
+    dart_client.set_interactive(True)
+    cc = dart_client.corp_map().get(sym)
+    if not cc:
+        raise LookupError('DART 회사코드 없음')
+    out = {'terms': dart_client.dilution_terms(cc, years=4), 'events': [], 'src': 'DART 주요사항보고(실시간)', 'err': None}
+    try:
+        out['events'] = dart_client.dilution_events(cc, days=365)
+    except Exception as e:
+        out['err'] = f"공시 목록 실패: {type(e).__name__}"
+    return out
+
+
+def kr_dilution(sym):
+    """KR 잠재 희석 — CB·BW·EB 발행 조건 + 최근 1년 관련 공시(2026-10-21).
+    실시간 DART(대화형 타임아웃·차단기) → 실패하면 주간 저장본 data/kr_dilution.parquet(발행 조건만)."""
+    try:
+        return _kr_dilution_live(sym)
+    except Exception as e:
+        out = {'terms': [], 'events': [], 'src': '', 'err': f"DART 실시간 실패: {type(e).__name__}"}
+    try:
+        d = _kr_dilution_store()
+        x = d[d['sym'] == sym]
+        out['terms'] = [{k: (None if (isinstance(v, float) and v != v) else v) for k, v in r.items()}
+                        for r in x.to_dict('records')]
+        out['src'] = f"DART 저장본(주간 갱신 {d['fetched'].max()})"
+    except Exception:
+        pass
+    return out
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _kr_dilution_store():
+    return pd.read_parquet('data/kr_dilution.parquet')
+
+
 @st.cache_data(ttl=6 * 3600)
 def kr_insiders(sym):
     """KR 내부자(임원·주요주주) 매수/매도 — DART 공식. [{date,name,position,change,holdings}]."""
@@ -5765,6 +5808,51 @@ def _tab_analysis():
                                    "본인 현금 매매가 아니라 합계에서 뺀다 — 내부자 신호로 읽을 건 **시장에서 직접 산 매수**다. "
                                    "Form 4 에 금액이 비어 있으면 주수×그날 종가로 추정. 정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
 
+                    # ── 🧨 잠재 희석 — CB·BW·EB (2026-10-21) ─────────────────────
+                    #   한국 중소형주의 '조용한 물량'. 전환가 ≤ 주가면 전환 후 매도 유인, 주가가 내리면 리픽싱으로 주식 수가 더 는다.
+                    _dil = None
+                    if is_kr_sym:
+                        _kd = kr_dilution(sym8_clean)
+                        _shn_d = _shares_now(sym8_clean, True, info)
+                        _dil = _ac_dil.summarize_dilution(_kd['terms'], shares_out=_shn_d, price=float(price_now))
+                        st.subheader("🧨 잠재 희석 — 전환사채·신주인수권부사채·교환사채")
+                        if not _kd['terms'] and not _kd['src']:
+                            st.info(f"조회 실패 — {_kd['err'] or 'DART 미접속'}. 저장본도 아직 없습니다(주간 갱신 후 표시).")
+                        else:
+                            _stat_grid([('', [
+                                ('아직 전환 가능한 발행', f"{_dil['n_active']}건"),
+                                ('잠재 신주(발행주식 대비)', f"{_dil['pot_pct']:.1f}%"),
+                                ('리픽싱 바닥까지 가면', f"{_dil['max_pct']:.1f}%"),
+                                ('지금 전환하면 이득인 물량', f"{_dil['itm_pct']:.1f}%"),
+                                ('EB(기존 주식 교환)', f"{_dil['eb_pct']:.1f}%")])])
+                            if _dil['rows']:
+                                _knm = {'CB': '전환사채', 'BW': '신주인수권부사채', 'EB': '교환사채'}
+                                _tsrc(_kd['src'] + ' · 비율 = 전환주식수 ÷ 현재 상장주식수', live='실시간' in _kd['src'])
+                                st.dataframe(pd.DataFrame([{
+                                    '종류': _knm.get(r['kind'], r['kind']), '회차': r.get('round') or '-',
+                                    '결정일': r.get('decided') or '-',
+                                    '발행액(억원)': None if not r.get('amount') else round(r['amount'] / 1e8, 1),
+                                    '전환가(원)': r.get('price'), '최저 조정가(원)': r.get('floor'),
+                                    '현재가÷전환가(%)': round(float(price_now) / r['price'] * 100) if r.get('price') else None,
+                                    '발행주식 대비(%)': None if r.get('pct') is None else round(r['pct'], 1),
+                                    '청구 종료': r.get('end') or '-',
+                                    '상태': ('전환 가능' if r['active'] else '기간 종료')} for r in _dil['rows']]),
+                                    filters=False)
+                            _ev = _kd.get('events') or []
+                            if _ev:
+                                _evc = pd.Series([e['label'] for e in _ev]).value_counts()
+                                st.markdown("**최근 1년 관련 공시** — " + " · ".join(f"{k} {v}건" for k, v in _evc.items()))
+                                with st.expander(f"공시 {len(_ev)}건 원문 링크"):
+                                    st.markdown("\n".join(f"- {e['date']} · {e['label']} · [{e['title']}]({e['url']})" for e in _ev[:40]))
+                            elif _kd.get('err'):
+                                st.caption(f"최근 공시 목록은 못 불러왔습니다({_kd['err']}) — 발행 조건만 저장본으로 표시.")
+                            st.caption("발행 **결정** 기준의 최대치다 — 이미 전환·상환된 분량은 DART 구조화 데이터로 차감할 수 없다"
+                                       "(전환청구 공시가 잦으면 이미 상당량이 주식으로 바뀌었다는 뜻). "
+                                       "'현재가÷전환가' 100% 이상 = 전환 후 바로 팔면 이익 → 매도 압력. "
+                                       "리픽싱 = 주가가 내리면 전환가를 최저 조정가까지 낮춰 주식 수가 늘어나는 조항. "
+                                       "EB 는 회사가 가진 주식을 내주는 것이라 신주 희석은 아니지만 유통 물량이 는다. "
+                                       "스톡옵션 부여 건수는 위 공시 목록에서 확인(행사가·조건은 원문).")
+
 
 
                 # ════════════════════════════════════════════════════════════
@@ -6070,7 +6158,10 @@ def _tab_analysis():
                             opm_now=_opm(_qq[0]) if len(_qq) > 4 else None, opm_4q_ago=_opm(_qq[4]) if len(_qq) > 4 else None,
                             debt_to_equity=info.get('debtToEquity'), eps_fy0_now=_e0, eps_fy0_30d=_e30,
                             vol_annual=float(hist['Close'].pct_change().tail(252).std() * (252 ** 0.5) * 100),
-                            top_segment_share=max((x.get('revenue_pct') or 0) for x in _segs_) if _segs_ else None)
+                            top_segment_share=max((x.get('revenue_pct') or 0) for x in _segs_) if _segs_ else None,
+                            dilution_pct=(_L.get('_dil') or {}).get('pot_pct') if (_L.get('_dil') or {}).get('rows') else None,
+                            dilution_note=(f" (리픽싱 시 최대 {_L['_dil']['max_pct']:.1f}%)" if (_L.get('_dil') or {}).get('rows')
+                                           and _L['_dil']['max_pct'] > _L['_dil']['pot_pct'] + 0.05 else ''))
                         _chk_ = _ac.integrity_checks(
                             today=pd.Timestamp.today().date(), last_price_date=hist.index[-1].date(),
                             latest_quarter=_qq[0]['period'] if _qq else None,

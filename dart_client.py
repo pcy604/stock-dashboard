@@ -26,7 +26,7 @@ _KEY_F = DATA / '.dart_key'
 _CORP_CACHE = DATA / 'dart_corpmap.json'
 BASE = "https://opendart.fss.or.kr/api"
 # 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
-API_VERSION = 3
+API_VERSION = 4
 
 # 사업보고서=11011(연간) · 반기=11012 · 1Q=11013 · 3Q=11014
 REPRT = {'annual': '11011', 'half': '11012', 'q1': '11013', 'q3': '11014'}
@@ -485,3 +485,111 @@ if __name__ == '__main__':
         cc = corp_map().get(code)
         print(f"{code} (corp_code={cc}) {year} 사업보고서:")
         print(json.dumps(financials(cc, year), ensure_ascii=False, indent=2))
+
+
+# ── 잠재 희석: 전환사채(CB)·신주인수권부사채(BW)·교환사채(EB) (2026-10-21) ─────────────
+# 한국 중소형주에서 CB·BW 는 '조용한 물량'이다. 전환가가 주가보다 낮아지면 전환 → 신주 → 매도 압력.
+# 주가가 떨어지면 전환가를 낮추는 리픽싱(최저 70%)으로 주식 수가 더 늘어난다.
+# 원천: OpenDART 주요사항보고서 구조화 API (cvbdIsDecsn · bdwtIsDecsn · exbdIsDecsn) + 공시검색(list.json).
+# ⚠️ '발행 결정' 기준이다. 이미 전환·상환된 분량은 이 API 로 차감할 수 없다 → 화면에 '최대치'로 적는다.
+_DIL_API = {'CB': 'cvbdIsDecsn', 'BW': 'bdwtIsDecsn', 'EB': 'exbdIsDecsn'}
+_DIL_KEYS = {   # 같은 뜻의 필드가 종류마다 이름이 다르다 — 앞에서부터 있는 것을 쓴다
+    'price':  ('cv_prc', 'ex_prc'),
+    'shares': ('cvisstk_cnt', 'nstk_isstk_cnt', 'extg_stkcnt'),
+    'ratio':  ('cvisstk_tisstk_vs', 'nstk_isstk_tisstk_vs', 'extg_tisstk_vs'),
+    'start':  ('cvrqpd_bgd', 'expd_bgd', 'exrqpd_bgd'),
+    'end':    ('cvrqpd_edd', 'expd_edd', 'exrqpd_edd'),
+    'floor':  ('act_mktprcfl_cvprc_lwtrsprc',),
+}
+# 공시 제목(report_nm)으로 고르는 사건 — 결정 외에 '실제로 물량이 나오는 중'인지 보여준다
+_DIL_EVENTS = [
+    ('전환청구', ('전환청구권행사',)),
+    ('신주인수권 행사', ('신주인수권행사',)),
+    ('가액 조정(리픽싱)', ('전환가액의조정', '행사가액의조정', '교환가액의조정', '행사가액조정', '전환가액조정')),
+    ('CB 발행결정', ('전환사채권발행결정',)),
+    ('BW 발행결정', ('신주인수권부사채권발행결정',)),
+    ('EB 발행결정', ('교환사채권발행결정',)),
+    ('스톡옵션 부여', ('주식매수선택권부여',)),
+    ('유상증자', ('유상증자결정',)),
+]
+
+
+def parse_kdate(s):
+    """'2026년 03월 15일' · '2026-03-15' · '20260315' · '2026.03.15' → 'YYYY-MM-DD' (실패 None)."""
+    m = re.search(r'(\d{4})\D{0,3}(\d{1,2})\D{0,3}(\d{1,2})', str(s or ''))
+    if not m:
+        return None
+    y, mo, d = (int(x) for x in m.groups())
+    if not (1990 <= y <= 2100 and 1 <= mo <= 12 and 1 <= d <= 31):
+        return None
+    return f"{y:04d}-{mo:02d}-{d:02d}"
+
+
+def parse_dilution_row(kind, x):
+    """DART 응답 한 줄 → 표준 dict. 숫자는 '1,234'·'-' 를 견딘다."""
+    def pick(k):
+        for f in _DIL_KEYS[k]:
+            v = x.get(f)
+            if v not in (None, '', '-'):
+                return v
+        return None
+    rno = str(x.get('rcept_no') or '')
+    return {'kind': kind, 'rcept_no': rno, 'decided': parse_kdate(x.get('bddd')) or parse_kdate(rno[:8]),
+            'round': str(x.get('bd_tm') or '').strip() or None,
+            'amount': _to_num(x.get('bd_fta')), 'price': _to_num(pick('price')),
+            'floor': _to_num(pick('floor')), 'shares': _to_num(pick('shares')),
+            'ratio': _to_num(pick('ratio')), 'start': parse_kdate(pick('start')), 'end': parse_kdate(pick('end')),
+            'url': f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={rno}" if rno else None}
+
+
+def dilution_terms(corp_code, years=4):
+    """CB·BW·EB 발행 결정 조건 [{kind, decided, round, amount, price, floor, shares, ratio, start, end, url}].
+    같은 회차의 정정 공시는 마지막 것만 남긴다."""
+    from datetime import date, timedelta
+    end = date.today()
+    bgn = end - timedelta(days=365 * years)
+    out = []
+    for kind, api in _DIL_API.items():
+        j = _get(f"{BASE}/{api}.json", {'crtfc_key': _key(), 'corp_code': corp_code,
+                                        'bgn_de': bgn.strftime('%Y%m%d'), 'end_de': end.strftime('%Y%m%d')}).json()
+        if j.get('status') not in ('000', '013'):          # 013 = 조회된 데이터 없음
+            raise RuntimeError(f"DART {api}: {j.get('status')} {j.get('message')}")
+        for x in j.get('list') or []:
+            out.append(parse_dilution_row(kind, x))
+    seen = {}
+    for r in sorted(out, key=lambda r: r['rcept_no']):
+        seen[(r['kind'], r['round'] or r['rcept_no'])] = r       # 정정은 접수번호가 뒤라 덮어쓴다
+    return sorted(seen.values(), key=lambda r: r['rcept_no'], reverse=True)
+
+
+def classify_event(report_nm):
+    nm = re.sub(r'\s+', '', str(report_nm or ''))
+    for label, keys in _DIL_EVENTS:
+        if any(k in nm for k in keys):
+            return label
+    return None
+
+
+def dilution_events(corp_code, days=365, max_pages=5):
+    """최근 공시 제목에서 희석 관련 사건 [{date, label, title, url}] (전환청구·리픽싱·발행결정·스톡옵션·유상증자)."""
+    from datetime import date, timedelta
+    end = date.today()
+    bgn = end - timedelta(days=days)
+    out = []
+    for page in range(1, max_pages + 1):
+        j = _get(f"{BASE}/list.json", {'crtfc_key': _key(), 'corp_code': corp_code, 'bgn_de': bgn.strftime('%Y%m%d'),
+                                        'end_de': end.strftime('%Y%m%d'), 'page_no': page, 'page_count': 100}).json()
+        if j.get('status') == '013':
+            break
+        if j.get('status') != '000':
+            raise RuntimeError(f"DART list: {j.get('status')} {j.get('message')}")
+        for x in j.get('list') or []:
+            lab = classify_event(x.get('report_nm'))
+            if lab:
+                rno = str(x.get('rcept_no') or '')
+                out.append({'date': parse_kdate(x.get('rcept_dt')), 'label': lab,
+                            'title': str(x.get('report_nm') or '').strip(),
+                            'url': f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={rno}"})
+        if page >= int(j.get('total_page') or 1):
+            break
+    return out

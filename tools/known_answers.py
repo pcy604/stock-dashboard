@@ -180,6 +180,22 @@ def _():
     return not bad, f"{len(s)}종 · 문제 {bad or '없음'}"
 
 
+@check('한국 잠재 희석', 'CB·BW·EB 저장본이 있으면: 100종 이상이고 전환가·청구기간이 80% 이상 채워졌으며 미래 결정일이 없는가')
+def _():
+    # 2026-10-21 신설. 한국은 CB·BW 발행 결정이 해마다 수백 건이라 4년 창에 100종 미만이면 수집 결손이다.
+    #   파일이 없을 수 있다(DART 가 해외 러너를 막는 주) — 그때는 화면이 실시간 조회만 쓴다고 적고 통과.
+    p = os.path.join(BASE, 'data/kr_dilution.parquet')
+    if not os.path.exists(p):
+        return True, '저장본 없음(첫 생성 전 또는 DART 미접속) — 화면은 실시간 조회만'
+    d = pd.read_parquet(p)
+    n = d['sym'].nunique()
+    fill_p = d['price'].gt(0).mean()
+    fill_e = d['end'].notna().mean()
+    fut = (pd.to_datetime(d['decided'], errors='coerce') > pd.Timestamp(TODAY)).sum()
+    ok = n >= 100 and fill_p >= 0.8 and fill_e >= 0.8 and fut == 0 and set(d['kind']) <= {'CB', 'BW', 'EB'}
+    return ok, f"{len(d):,}건 · {n}종 · 전환가 {fill_p:.0%} · 청구기간 {fill_e:.0%} · 미래 결정일 {fut}"
+
+
 # ───────────────────────── 화면 공용 산출물 ─────────────────────────
 for _rel, _lab in [('results/returns.json', '기간 수익률'), ('results/mdd.json', '고점대비 낙폭'),
                    ('results/seasonality.json', '계절성'), ('results/perf_latest.json', '월간 성과')]:

@@ -36,12 +36,18 @@ jobs:
         env:
           DART_KEY: ${{ secrets.DART_KEY }}
         run: python tools/refresh_kr_fundq.py
+      - name: KR 잠재 희석(CB·BW·EB) 저장본
+        env:
+          DART_KEY: ${{ secrets.DART_KEY }}
+        run: python tools/refresh_kr_dilution.py
+        continue-on-error: true
       - name: 커밋 & 푸시
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f data/kr_fundamentals_q.parquet data/kr_universe.parquet results/kr_fin_mismatch.json 2>/dev/null || true
           git add data/kr_nondec.json 2>/dev/null || true
+          git add -f data/kr_dilution.parquet 2>/dev/null || true
           if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
           git commit -m "auto: KR 분기재무 $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do git push origin main && exit 0; git pull --rebase -X theirs origin main || git rebase --abort; sleep 5; done

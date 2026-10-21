@@ -126,7 +126,7 @@ def integrity_checks(*, today: date, last_price_date: date | None, latest_quarte
 
 def risk_checks(*, price=None, high52=None, band_rank=None, band_kind='P/E', band_now=None, ttm_net_income=None,
                 opm_now=None, opm_4q_ago=None, debt_to_equity=None, eps_fy0_now=None, eps_fy0_30d=None,
-                vol_annual=None, top_segment_share=None) -> list[dict]:
+                vol_annual=None, top_segment_share=None, dilution_pct=None, dilution_note='') -> list[dict]:
     """사실·규칙 판정. warn = 해당, ok = 해당 없음, na = 판정 불가."""
     out = []
 
@@ -162,4 +162,48 @@ def risk_checks(*, price=None, high52=None, band_rank=None, band_kind='P/E', ban
         f"최대 부문이 매출의 {top_segment_share:.0f}%" if top_segment_share is not None else '',
         f"최대 부문 매출 비중 {top_segment_share:.0f}%" if top_segment_share is not None else '',
         top_segment_share is not None)
+    # 2026-10-21 — 잠재 희석(CB·BW 전환 가능 물량). 5% 이상이면 '해당' — 한국 중소형주 오버행 실무 기준점.
+    add('잠재 희석', dilution_pct is not None and dilution_pct >= 5,
+        f"전환·행사 가능 물량 = 발행주식의 {dilution_pct:.1f}%{dilution_note}" if dilution_pct is not None else '',
+        f"전환·행사 가능 물량 {dilution_pct:.1f}%{dilution_note}" if dilution_pct is not None else '',
+        dilution_pct is not None)
     return out
+
+
+def summarize_dilution(terms: list[dict], *, shares_out=None, price=None, today=None) -> dict:
+    """CB·BW·EB 발행 조건 → 아직 전환·행사 기간이 끝나지 않은 물량 요약 (2026-10-21).
+    · 잠재(pot): 공시된 전환/행사 주식 수(없으면 권면총액 ÷ 전환가) ÷ 현재 발행주식 수
+    · 리픽싱 최대(max): 권면총액 ÷ 최저 조정가액 — 주가가 계속 내려 전환가가 바닥까지 내려간 경우
+    · 지금 전환 이득(itm): 현재가 ≥ 전환가인 물량 — 전환 후 바로 팔 유인이 있는 물량(매도 압력)
+    · EB 는 신주가 아니라 회사가 가진 주식(자사주 등)을 내주는 것 — 희석이 아니라 '유통 물량 증가'라 따로 센다.
+    ⚠️ 발행 '결정' 기준. 이미 전환·상환된 분량은 차감하지 못하므로 **최대치**다."""
+    from datetime import date as _d
+    today = today or _d.today().isoformat()
+    rows, pot, mx, itm, eb, unk = [], 0.0, 0.0, 0.0, 0.0, 0
+    for t in terms or []:
+        active = t.get('end') is None or t['end'] >= today
+        n = t.get('shares')
+        if not n and t.get('amount') and t.get('price'):
+            n = t['amount'] / t['price']
+        nmax = (t['amount'] / t['floor']) if (t.get('amount') and t.get('floor')) else n
+        if nmax is not None and n is not None:
+            nmax = max(nmax, n)
+        pct = (n / shares_out * 100) if (n and shares_out) else t.get('ratio')
+        pmax = (nmax / shares_out * 100) if (nmax and shares_out) else pct
+        in_money = bool(price and t.get('price') and price >= t['price'])
+        r = dict(t, active=active, new_shares=n, pct=pct, pct_max=pmax, in_money=in_money)
+        rows.append(r)
+        if not active:
+            continue
+        if pct is None:
+            unk += 1
+            continue
+        if t['kind'] == 'EB':
+            eb += pct
+        else:
+            pot += pct
+            mx += pmax or pct
+            if in_money:
+                itm += pct
+    return {'rows': rows, 'n_active': sum(1 for r in rows if r['active']), 'pot_pct': pot, 'max_pct': mx,
+            'itm_pct': itm, 'eb_pct': eb, 'unknown': unk}

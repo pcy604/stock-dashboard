@@ -164,3 +164,27 @@ def test_earnings_trend_states():
     assert t['state'] == '이익 증가 · 감속', t['state']
     # 기저효과: 1년 전 이익이 아주 작았다
     assert sx.earnings_trend(rows([10, 10, 10, 0.5, 10, 10, 10, 12]))['base_warn'] is True
+
+
+def test_dilution_parse_and_summary():
+    import dart_client as D
+    assert D.parse_kdate('2026년 03월 05일') == '2026-03-05' and D.parse_kdate('20251231') == '2025-12-31'
+    assert D.parse_kdate('-') is None
+    cb = D.parse_dilution_row('CB', {'rcept_no': '20250310000123', 'bd_tm': '5', 'bd_fta': '10,000,000,000',
+                                     'cv_prc': '5,000', 'act_mktprcfl_cvprc_lwtrsprc': '3,500',
+                                     'cvisstk_cnt': '2,000,000', 'cvisstk_tisstk_vs': '10.00',
+                                     'cvrqpd_bgd': '2026년 03월 10일', 'cvrqpd_edd': '2030년 02월 10일', 'bddd': '2025년 03월 07일'})
+    bw = D.parse_dilution_row('BW', {'rcept_no': '20220101000001', 'bd_fta': '1,000,000,000', 'ex_prc': '10,000',
+                                     'nstk_isstk_cnt': '100,000', 'expd_edd': '2024-12-31'})
+    eb = D.parse_dilution_row('EB', {'rcept_no': '20250601000002', 'ex_prc': '6,000', 'extg_stkcnt': '500,000',
+                                     'exrqpd_edd': '20290101'})
+    assert cb['price'] == 5000 and cb['floor'] == 3500 and cb['end'] == '2030-02-10' and cb['decided'] == '2025-03-07'
+    assert bw['price'] == 10000 and bw['end'] == '2024-12-31' and bw['decided'] == '2022-01-01'
+    assert D.classify_event('[기재정정]전환청구권 행사') == '전환청구' and D.classify_event('전환가액의조정') == '가액 조정(리픽싱)'
+    assert D.classify_event('분기보고서 (2026.06)') is None
+    s = AC.summarize_dilution([cb, bw, eb], shares_out=20_000_000, price=6000, today='2026-10-21')
+    assert round(s['pot_pct'], 1) == 10.0            # BW 는 행사기간 끝 → 제외
+    assert round(s['max_pct'], 1) == round(1e10 / 3500 / 2e7 * 100, 1)   # 리픽싱 바닥까지 = 14.3%
+    assert round(s['itm_pct'], 1) == 10.0 and round(s['eb_pct'], 1) == 2.5 and s['n_active'] == 2
+    r = {x['name']: x for x in AC.risk_checks(dilution_pct=10.0)}
+    assert r['잠재 희석']['state'] == 'warn'
