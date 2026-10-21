@@ -39,4 +39,5 @@ jobs:
           git config user.name "github-actions"; git config user.email "actions@github.com"
           git add -f results/verify data/research/ui/stock_*.png 2>/dev/null || true
           git commit -m "auto: 종목 분석 실데이터 검증 $(date -u +%F' '%H:%M)" || exit 0
-          git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"
+          # 검증 브랜치는 이 잡만 쓴다 — pull 하지 않는다(실행 중 바뀐 다른 파일 때문에 rebase 가 exit 128 로 죽었다, 2026-10-21)
+          git push origin "HEAD:${GITHUB_REF_NAME}"
