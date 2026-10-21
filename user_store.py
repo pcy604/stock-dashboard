@@ -70,7 +70,12 @@ def _h(c, extra=None):
 
 
 def _url(c):
-    return str(c['url']).rstrip('/') + f'/rest/v1/{_T}'
+    # 2026-10-21: Data API 화면의 URL 은 '…supabase.co/rest/v1' 까지 들어 있다 → 그대로 붙이면 /rest/v1/rest/v1 (PGRST125)
+    base = str(c['url']).strip().rstrip('/')
+    for suf in ('/rest/v1', '/rest'):
+        if base.endswith(suf):
+            base = base[: -len(suf)]
+    return base + f'/rest/v1/{_T}'
 
 
 def load(email: str):
