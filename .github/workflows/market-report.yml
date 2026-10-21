@@ -28,6 +28,8 @@ jobs:
       GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 얕은 체크아웃은 'git pull --rebase' 가 실패한다(2026-10-21 첫 수동 실행 2회 커밋 단계 실패) — ai-refresh 와 같게
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
