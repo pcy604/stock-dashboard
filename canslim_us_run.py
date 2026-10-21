@@ -22,6 +22,7 @@ OUT = Path('results/canslim_us_latest.json')
 RS_PREFILTER = 60      # RS 백분위 사전필터 (대시보드 슬라이더로 정밀 조정)
 N_PREFILTER = -20.0    # 신고가 거리 사전필터(%)
 MIN_MARCAP = 3e8       # $3억 (2026-10-19 공통 커버 기준, 전 $2B)
+RETRY_WAIT_S = 45      # 수집 실패분 재시도 전 대기(초)
 
 
 def _us_pool():
@@ -35,13 +36,80 @@ def _us_pool():
     return ss
 
 
-def _price_block(sym):
-    """1년 일봉 → (n_dist_pct, vol_ratio, body_pct, is_bull). 실패 시 None."""
+FETCH_FAIL = 'fetch_fail'   # _price_block 이 '수집 실패'(조건 미달 아님)를 알리는 표식
+PRICE_CACHE = Path('data/price_cache')   # perf_run 이 같은 CI 실행에서 먼저 받아 둔 일봉(parquet)
+CACHE_MAX_AGE_D = 4                      # 마지막 봉이 이보다 오래면 캐시를 믿지 않는다(주말·휴장 포함)
+_SRC = {'cache': 0, 'fdr': 0, 'yahoo': 0}  # 어디서 받았는지 — 결과 파일에 남긴다
+
+
+def _ohlcv_cache(sym):
+    """같은 실행에서 perf_run 이 저장한 일봉. 신선하지 않으면 None (낡은 값으로 신고가를 재지 않는다)."""
+    import pandas as pd
+    cp = PRICE_CACHE / f"{sym.replace('/', '_')}.parquet"
+    if not cp.exists():
+        return None
+    try:
+        df = pd.read_parquet(cp)
+        if len(df) and (datetime.now() - pd.Timestamp(df.index[-1]).to_pydatetime()).days <= CACHE_MAX_AGE_D:
+            return df
+    except Exception:
+        pass
+    return None
+
+
+def _ohlcv_yahoo(sym):
+    """FinanceDataReader 를 거치지 않는 Yahoo v8 직접 호출 (query1 → query2)."""
+    import urllib.request
+    import pandas as pd
+    for host in ('query1', 'query2'):
+        try:
+            url = f"https://{host}.finance.yahoo.com/v8/finance/chart/{sym}?range=1y&interval=1d"
+            r = json.loads(urllib.request.urlopen(
+                urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'}), timeout=15).read())['chart']['result'][0]
+            q = r['indicators']['quote'][0]
+            df = pd.DataFrame({'Open': q['open'], 'High': q['high'], 'Low': q['low'],
+                               'Close': q['close'], 'Volume': q['volume']},
+                              index=pd.to_datetime(r['timestamp'], unit='s')).dropna(subset=['Close'])
+            if len(df):
+                return df
+        except Exception:
+            continue
+    return None
+
+
+def _ohlcv(sym):
+    """1년 일봉. 캐시 → FDR → Yahoo 직접. 셋 다 실패하면 None."""
+    df = _ohlcv_cache(sym)
+    if df is not None:
+        _SRC['cache'] += 1
+        return df
     try:
         import FinanceDataReader as fdr
-        start = (datetime.now() - timedelta(days=370)).strftime('%Y-%m-%d')
-        df = fdr.DataReader(sym, start)
-        if df is None or len(df) < 60:
+        df = fdr.DataReader(sym, (datetime.now() - timedelta(days=370)).strftime('%Y-%m-%d'))
+        if df is not None and len(df):
+            _SRC['fdr'] += 1
+            return df
+    except Exception:
+        pass
+    df = _ohlcv_yahoo(sym)
+    if df is not None:
+        _SRC['yahoo'] += 1
+    return df
+
+
+def _price_block(sym):
+    """1년 일봉 → (n_dist_pct, vol_ratio, body_pct, is_bull). 데이터가 짧으면 None, 수집 실패면 FETCH_FAIL.
+
+    2026-10-21: 예전엔 수집 실패도 None 이라 '조건 미달'과 구분되지 않았다. 10-20·10-21 정기 실행에서
+    250개 중 1개만 남았는데(이 단계가 28~51초 — 정상 80~107초), 원인은 Yahoo 가 CI 서버를 막은 것이었다.
+    이제 ① 같은 실행의 perf_run 캐시를 먼저 쓰고 ② FDR·Yahoo 직접 두 길로 받고 ③ 실패를 따로 센다.
+    """
+    df = _ohlcv(sym)
+    if df is None:
+        return FETCH_FAIL
+    try:
+        df = df[df.index >= df.index[-1] - timedelta(days=366)]
+        if len(df) < 60:
             return None
         hi52 = float(df['High'].max())
         c = float(df['Close'].iloc[-1])
@@ -55,7 +123,7 @@ def _price_block(sym):
         body_pct = round(body / rng * 100, 0) if rng > 0 else 0
         return n_dist, vol_ratio, body_pct, bool(last['Close'] >= last['Open'])
     except Exception:
-        return None
+        return FETCH_FAIL
 
 
 def _yoy(cur, prev):
@@ -153,18 +221,18 @@ def run(top=250):
              if s['rs_pct'] >= RS_PREFILTER and (s.get('marcap') or 0) >= MIN_MARCAP]
     cands.sort(key=lambda s: -s['rs_pct'])
     cands = cands[:top]
-    print(f"US 풀 {len(pool)} → RS{RS_PREFILTER}+·시총$2B+ 후보 {len(cands)}개. 가격/재무 검사...")
+    print(f"US 풀 {len(pool)} → RS{RS_PREFILTER}+·시총$3억+ 후보 {len(cands)}개. 가격/재무 검사...")
 
-    hits = []
-    for i, s in enumerate(cands, 1):
+    def _check(s):
+        """통과면 hit dict, 조건 미달이면 None, 수집 실패면 FETCH_FAIL."""
         pb = _price_block(s['sym'])
-        if pb is None:
-            continue
+        if pb is None or pb == FETCH_FAIL:
+            return pb
         n_dist, vol_ratio, body_pct, bull = pb
         if n_dist is None or n_dist != n_dist or n_dist < N_PREFILTER:   # None/NaN 차단
-            continue
+            return None
         e = _earnings(s['sym'])
-        hits.append({
+        return {
             'sym': s['sym'], 'name': s['name'], 'market': 'US',
             'marcap': s.get('marcap'),
             'rs_pct': s['rs_pct'], 'n_dist_pct': n_dist,
@@ -176,19 +244,48 @@ def run(top=250):
             'oneoff': e['oneoff'],                   # 순이익과 영업이익 성장이 크게 갈린 글자
             'i_inst_pct': None,                      # US 일간 수급 무료소스 없음
             'rev_growth': e['rev_g'], 'op_growth': e['op_g'],
-        })
+        }
+
+    hits, failed = [], []
+    for i, s in enumerate(cands, 1):
+        h = _check(s)
+        if h == FETCH_FAIL:
+            failed.append(s)
+        elif h:
+            hits.append(h)
         if i % 25 == 0:
-            print(f"  {i}/{len(cands)}  (통과 {len(hits)})")
+            print(f"  {i}/{len(cands)}  (통과 {len(hits)} · 수집 실패 {len(failed)})")
         time.sleep(0.05)
+
+    # 속도제한은 대개 몇십 초면 풀린다 — 실패분만 쉬었다가 천천히 한 번 더
+    if failed:
+        print(f"  수집 실패 {len(failed)}종 → {RETRY_WAIT_S}초 쉬고 재시도")
+        time.sleep(RETRY_WAIT_S)
+        still = []
+        for s in failed:
+            h = _check(s)
+            if h == FETCH_FAIL:
+                still.append(s)
+            elif h:
+                hits.append(h)
+            time.sleep(0.4)
+        failed = still
+    hits.sort(key=lambda h: -h['rs_pct'])
+    n_fail = len(failed)
 
     m_ok, m_dir = _market_dir()
     OUT.write_text(json.dumps({
         'date': datetime.now().strftime('%Y-%m-%d'),
         'generated': datetime.now().isoformat(timespec='seconds'),
         'market_ok': m_ok, 'market_dir': m_dir,
+        'n_cands': len(cands), 'price_fail': n_fail,
+        'fetch_fail_pct': round(n_fail / len(cands) * 100, 1) if cands else None,
+        'price_src': dict(_SRC),
         'stocks': hits,
     }, ensure_ascii=False), encoding='utf-8')
-    print(f"\n✅ US CANSLIM: 후보 {len(hits)}개 (M: {m_dir}) → {OUT}")
+    print(f"\n✅ US CANSLIM: 후보 {len(hits)}개 (M: {m_dir}) · 가격 수집 실패 {n_fail}/{len(cands)} · 출처 {_SRC} → {OUT}")
+    if cands and n_fail / len(cands) >= 0.3:
+        print(f"::error::US CANSLIM 가격 수집 실패 {n_fail}/{len(cands)} — 후보 수가 아니라 수집 고장이다(캐시·FDR·Yahoo 모두 실패, 출처 {_SRC})")
     for h in hits[:8]:
         print(f"  {h['name'][:18]:<18} RS{h['rs_pct']:>5} N{h['n_dist_pct']:>6}% "
               f"C={h['c_growth_pct']} A={h['a_growth_y1']}/{h['a_growth_y2']}")

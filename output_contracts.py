@@ -99,6 +99,8 @@ def c_canslim_kr():
 def c_canslim_us():
     d = _j("results/canslim_us_latest.json"); st = d.get("stocks", [])
     return [chk(_age(d.get("date")) <= 4, BLOCK, f"date {d.get('date')} 4일 초과"),
+            chk((d.get("fetch_fail_pct") or 0) < 30, BLOCK,
+                f"가격 수집 실패 {d.get('fetch_fail_pct')}% ({d.get('price_fail')}/{d.get('n_cands')}) — 후보 부족의 원인"),
             chk(len(st) >= 10, BLOCK, f"후보 {len(st)}종 (<10)"),
             chk(_fill(st, "c_growth_pct") >= 0.5, WARN, f"C 채움률 {_fill(st,'c_growth_pct'):.0%}")]
 
