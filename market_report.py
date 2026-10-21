@@ -11,7 +11,8 @@
   3) 저장       — latest_daily / latest_weekly + history(최근 60건)
   대시보드 📰 시황 리포트 탭과 챗봇이 이 파일을 근거로 쓴다.
 
-  python market_report.py daily [--telegram]
+  python market_report.py daily [--telegram]   # 미국 장 마감 후(KST 06:30) — 미국 중심 + 전 시장 표
+  python market_report.py kr                   # 한국 장 마감 후(KST 15:50) — 한국 지수·오늘 등락·수급 폭 (2026-10-21)
   python market_report.py weekly [--telegram]
 """
 import json
@@ -156,7 +157,39 @@ def verdict_facts():
                 econ_ref=(v.get("econ") or {}).get("word"), rule=v.get("rule"))
 
 
+KR_INDICES = ("^KS11", "^KQ11", "KRW=X")
+
+
+def kr_today_facts(today=None):
+    """한국 장 마감 리포트용 — 오늘 KRX 대형주(시총 1조+) 등락률. 오늘자 목록이 아니면 빈 값(어제 걸 오늘이라 하지 않는다)."""
+    from datetime import timezone as _tz, timedelta as _td
+    today = today or (datetime.now(_tz.utc) + _td(hours=9)).date().isoformat()
+    try:
+        import krx_listing
+        df = krx_listing.stock_listing("KRX", verbose=False, tradable=True)
+    except Exception as e:
+        print("  KRX 목록 실패:", str(e)[:100])
+        return {}
+    col = next((c for c in ("ChagesRatio", "ChangesRatio") if c in df), None)
+    if col is None or str(df.attrs.get("asof")) != today:
+        print(f"  KRX 오늘자 등락률 없음(asof={df.attrs.get('asof')}) → 종목 등락 생략")
+        return {}
+    import pandas as pd
+    df = df.assign(_r=pd.to_numeric(df[col], errors="coerce"))
+    big = df[(df["Marcap"] >= 1e12) & df["_r"].notna()].sort_values("_r")
+    row = lambda r: dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1))
+    return {"KR": dict(universe=len(big), basis="d1", asof=today,
+                       top=[row(r) for _, r in big[::-1].head(6).iterrows()],
+                       bottom=[row(r) for _, r in big.head(6).iterrows()],
+                       breadth_up=round((big["_r"] > 0).mean() * 100) if len(big) else None)}
+
+
 def facts(kind):
+    if kind == "kr":
+        sg = signal_facts()
+        return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict={},
+                    indices=[x for x in index_facts() if x.get("sym") in KR_INDICES], stocks=kr_today_facts(),
+                    signals=dict(market_direction={"KR": sg["market_direction"].get("KR")}))
     return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict=verdict_facts(),
                 indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
 
@@ -202,10 +235,14 @@ def ask_gemini(prompt, models=MODELS, key=None):
     raise RuntimeError(f"Gemini 실패: {str(last)[:120]}")
 
 
+_TITLE = {"daily": "일간 시황", "weekly": "주간 시황", "kr": "한국 장 마감 시황"}
+_BASIS = {"d1": "오늘", "ret_1w": "1주", "ret_4w": "4주"}
+
+
 def template(f):
     """AI 없이도 발행되는 숫자 리포트."""
     v = f.get("verdict") or {}
-    L = [f"## {'일간' if f['kind']=='daily' else '주간'} 시황 — 숫자 요약", ""]
+    L = [f"## {_TITLE.get(f['kind'], '시황')} — 숫자 요약", ""]
     if v:
         t = v.get("target_core_sat_cash") or [None] * 3
         L += [("⚠️ **코어 스위치 전환** · " if v.get("changed") else "") +
@@ -219,14 +256,17 @@ def template(f):
         s = f["stocks"].get(m) or {}
         if not s:
             continue
-        L += ["", f"**{m}** ({'1주' if s['basis']=='ret_1w' else '4주'} 수익률, 대형주 {s['universe']}종 · 상승 비율 {s['breadth_up']}%)",
+        L += ["", f"**{m}** ({_BASIS.get(s['basis'], s['basis'])} 수익률, 대형주 {s['universe']}종 · 상승 비율 {s['breadth_up']}%)",
               "강세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["top"]),
-              "약세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["bottom"]),
-              f"52주 신고가 근접 {s['near_52w']}종 · 이번 주 경신 {s['new_high']}종"]
+              "약세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["bottom"])]
+        if "near_52w" in s:
+            L.append(f"52주 신고가 근접 {s['near_52w']}종 · 이번 주 경신 {s['new_high']}종")
     sg = f["signals"]
-    L += ["", f"CANSLIM 시장방향 KR {sg['market_direction']['KR']} · US {sg['market_direction']['US']}",
-          f"이익가속 신규({sg['accel_week']}): " + (", ".join(c['sym'] for c in sg['accel_new']) or "없음"),
-          "", f"※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · {f['generated']}"]
+    md_ = sg.get("market_direction") or {}
+    L += ["", "CANSLIM 시장방향 " + " · ".join(f"{m} {md_[m]}" for m in ("KR", "US") if md_.get(m))]
+    if "accel_new" in sg:
+        L.append(f"이익가속 신규({sg.get('accel_week')}): " + (", ".join(c['sym'] for c in sg['accel_new']) or "없음"))
+    L += ["", f"※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · {f['generated']}"]
     return "\n".join(L)
 
 
@@ -264,7 +304,7 @@ def unbacked_pcts(md, f):
 
 def render(f):
     asof = next((x.get("date") for x in f["indices"] if x.get("date")), f["generated"][:10])
-    span = "전일(최근 거래일)" if f["kind"] == "daily" else "지난 1주"
+    span = {"daily": "전일(최근 거래일)", "weekly": "지난 1주", "kr": "오늘 한국 장(마감 기준)"}.get(f["kind"], "최근")
     try:
         txt, model = ask_gemini(PROMPT.format(span=span, asof=asof,
                                               facts=json.dumps(f, ensure_ascii=False)))
@@ -288,7 +328,7 @@ def compose(ai_md, f):
     """AI 문장(한 줄 요약·체크포인트) + 숫자 템플릿 본문. 숫자는 전부 template 이 facts 에서 찍는다."""
     body = template(f).splitlines()
     body = [ln for ln in body[1:] if not ln.startswith("※")]          # 제목·꼬리 줄은 새로
-    head = "## " + ("일간" if f["kind"] == "daily" else "주간") + " 시황"
+    head = "## " + _TITLE.get(f["kind"], "시황")
     one, chk = _ai_section(ai_md, "한 줄 요약"), _ai_section(ai_md, "체크포인트")
     out = [head, ""]
     if one:
@@ -302,8 +342,19 @@ def compose(ai_md, f):
 
 def main(kind, telegram=False):
     f = facts(kind)
+    if kind == "kr":   # 휴장일: 코스피 마지막 확정 봉이 오늘이 아니면 발행하지 않는다(어제 리포트를 오늘 것처럼 덮지 않게)
+        from datetime import timezone as _tz, timedelta as _td
+        today = (datetime.now(_tz.utc) + _td(hours=9)).date().isoformat()
+        ks = next((x for x in f["indices"] if x.get("sym") == "^KS11"), {})
+        if ks.get("date") != today:
+            print(f"⏭️ 한국 장 마감 리포트 생략 — 코스피 마지막 봉 {ks.get('date')} ≠ 오늘 {today}(휴장 또는 시세 지연)")
+            return
     md, engine = render(f)
-    rec = dict(kind=kind, date=date.today().isoformat(), generated=f["generated"], engine=engine,
+    # 리포트 날짜 = 그 리포트가 다루는 장의 날짜(실행일이 아니다). 일요일 실행이 금요일 미국 장을 '새 리포트'로
+    #   다시 내보내지 않게 — 봇은 이 날짜로 중복 발송을 막는다(2026-10-21).
+    key = {"daily": "^GSPC", "kr": "^KS11"}.get(kind)
+    d0 = next((x.get("date") for x in f["indices"] if x.get("sym") == key and x.get("date")), None)
+    rec = dict(kind=kind, date=d0 or date.today().isoformat(), generated=f["generated"], engine=engine,
                markdown=md, facts=f)
     db = _j("results/market_report.json") or {}
     db[f"latest_{kind}"] = rec
@@ -325,7 +376,7 @@ def main(kind, telegram=False):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    main("weekly" if "weekly" in a else "daily", telegram="--telegram" in a)
+    main("weekly" if "weekly" in a else "kr" if "kr" in a else "daily", telegram="--telegram" in a)
 
 
 CHAT_PROMPT = """너는 이 대시보드의 시황 도우미다. 아래 [자료]만 근거로 한국어로 짧고 정확하게 답한다.

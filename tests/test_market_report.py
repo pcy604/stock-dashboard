@@ -31,4 +31,19 @@ md = M.compose("## 한 줄 요약\n코스피 반등.\n## 체크포인트\n1. 200
 assert "## 한 줄 요약\n코스피 반등." in md and "| 코스피 | 5,900.0 | +4.4%" in md and "## 체크포인트" in md, md
 assert md.count("※") == 1
 print("✅ AI 문장 + 숫자 템플릿 합성")
+# 한국 장 마감 리포트 — 오늘자 KRX 목록일 때만 종목 등락, 아니면 생략
+import sys as _s, types
+fake = pd.DataFrame({"Code": ["005930", "000660", "123456"], "Name": ["삼성전자", "SK하이닉스", "소형주"],
+                     "Marcap": [1e15, 9e14, 1e11], "ChagesRatio": [4.4, -1.2, 30.0]})
+fake.attrs = {"asof": "2026-10-21"}
+_s.modules["krx_listing"] = types.SimpleNamespace(stock_listing=lambda *a, **k: fake)
+k = M.kr_today_facts("2026-10-21")["KR"]
+assert k["basis"] == "d1" and k["top"][0]["name"] == "삼성전자" and k["universe"] == 2 and k["breadth_up"] == 50, k
+assert M.kr_today_facts("2026-10-22") == {}, "어제 목록을 오늘 것으로 쓰지 않는다"
+fk = dict(kind="kr", generated="2026-10-21 15:52", verdict={},
+          indices=[{"name": "코스피", "sym": "^KS11", "date": "2026-10-21", "close": 5900.0, "d1": 4.4, "d5": 1.0, "m1": -10.0, "from_52w_high": -30.0}],
+          stocks={"KR": k}, signals={"market_direction": {"KR": "하락추세"}})
+t = M.template(fk)
+assert "한국 장 마감 시황" in t and "오늘 수익률" in t and "US" not in t and "이익가속" not in t, t
+print("✅ 한국 장 마감 리포트(오늘 등락·휴장 판정 재료)")
 print("ALL PASS")

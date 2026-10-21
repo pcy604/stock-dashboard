@@ -1,0 +1,52 @@
+# 시황 리포트 — 장 마감 직후 정해진 시각에 (2026-10-21 사용자 요청)
+#   한국 장 마감 리포트: KST 15:50 (마감 15:30 + 20분) · 월~금  → latest_kr
+#   미국 장 마감 리포트: KST 06:30 (= 21:30 UTC) · 화~토(= 미국 월~금 장)  → latest_daily
+#     서머타임: 미국 마감은 여름 05:00 KST · 겨울 06:00 KST. 한국은 서머타임이 없어 KST 06:30 은 일 년 내내
+#     21:30 UTC 하나로 고정되고, 두 계절 모두 마감 뒤(여름 +90분 · 겨울 +30분)라 크론을 계절마다 바꿀 필요가 없다.
+#   지수는 실행 시점 Yahoo(마감 전 봉은 drop_open_bar 가 버림), 종목 등락: 한국=오늘 KRX 목록 · 미국=최근 daily-refresh 산출물(perf_date 표기).
+#   휴장일 한국 리포트는 발행하지 않는다(market_report.main). 리포트 날짜는 '다루는 장의 날짜'라 같은 장을 두 번 보내지 않는다.
+name: market-report
+on:
+  schedule:
+    - cron: '50 6 * * 1-5'    # KST 15:50 월~금 — 한국 장 마감
+    - cron: '30 21 * * 1-5'   # KST 06:30 화~토 — 미국 장 마감(월~금 장)
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: 'kr | daily'
+        default: 'kr'
+permissions:
+  contents: write
+concurrency:
+  group: market-report
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: 시황 리포트
+        run: |
+          KIND="${{ inputs.kind }}"
+          if [ -z "$KIND" ]; then
+            if [ "${{ github.event.schedule }}" = "50 6 * * 1-5" ]; then KIND=kr; else KIND=daily; fi
+          fi
+          echo "kind=$KIND"
+          python market_report.py "$KIND"
+      - name: 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add results/market_report.json
+          git diff --staged --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "auto: 시황 리포트 $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
+          exit 1
