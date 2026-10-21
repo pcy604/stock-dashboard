@@ -15,7 +15,9 @@ SUF = '' if W >= 1000 else f'_m{W}'
 async def one(b, sym, w=W):
     mob = w < 1000
     pg = await b.new_page(viewport={'width': w, 'height': 1200 if not mob else 844},
-                          is_mobile=mob, has_touch=mob)
+                          is_mobile=mob, has_touch=mob,
+                          user_agent=('Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 '
+                                      '(KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1') if mob else None)
     await pg.goto(f'http://localhost:8501/?sym={sym}', timeout=300000)
     try:
         await pg.get_by_text('요약 판단').first.wait_for(timeout=900000)

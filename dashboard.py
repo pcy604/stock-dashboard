@@ -4777,6 +4777,16 @@ def _tab_analysis():
                 # 판단 → 가격·위험 → 실적 → 구조 → 가치 → 근거 상세 → 원표 → 개요 → 참고 통계.
                 _SEC = {_k: st.container() for _k in ('summary', 'price', 'flow', 'earn', 'seg', 'val',
                                                      'canslim', 'fin', 'profile', 'ref')}
+                if IS_MOBILE:
+                    # 2026-10-21 — 폰에서 종목 하나가 세로 2만 px(손가락 24번)였다. 요약 판단만 펼쳐 두고 나머지는 탭으로.
+                    #   (펼침 상자 안에 펼침 상자를 넣을 수 없어 '접기' 대신 탭 — 섹션 안에 이미 펼침 상자가 있다)
+                    _SEC = {'summary': _SEC['summary']}
+                    _mtabs = st.tabs(["📈 가격", "💵 실적", "🏭 구조", "⚖️ 가치", "📊 재무", "🏢 개요", "📆 참고·내부자"])
+                    for _tb, _keys in zip(_mtabs, (('price',), ('flow', 'earn'), ('seg',), ('val', 'canslim'),
+                                                   ('fin',), ('profile',), ('ref',))):
+                        with _tb:
+                            for _k in _keys:
+                                _SEC[_k] = st.container()
                 with _SEC['profile']:
                     st.divider()
                     # ── 🏢 기업 개요 · IR · 공식 공시 (item 7) ──
@@ -4836,6 +4846,8 @@ def _tab_analysis():
 
 
                         _freq = st.radio("기준", ["연간", "분기"], horizontal=True, key=f"fin_freq_{sym8_clean}")
+                        # 2026-10-21 — 폰(390px)에서는 13열 표가 3~4열만 보였다 → 최근 3개 기간만, 필요하면 펼친다
+                        _fin_all = (not IS_MOBILE) or st.toggle("전체 기간 보기", value=False, key=f"fin_all_{sym8_clean}")
                         _stm = unified_statements(sym8_clean, is_kr_sym, 'annual' if _freq == "연간" else 'quarter')
                         _stored = None                 # 저장본으로 대신 그렸으면 그 갱신일
                         if not _stm and is_kr_sym:
@@ -4897,6 +4909,8 @@ def _tab_analysis():
                                 _r['rev_basis'] = _rv if _freq == "연간" else _ttm(_ix, 'revenue')
                                 _r['roe'] = (_ni / _r['equity']) if (_ni and _r.get('equity')) else None
                                 _r['debt_ratio'] = (_r['liabilities'] / _r['equity']) if (_r.get('liabilities') and _r.get('equity')) else None
+                            if not _fin_all:
+                                _stm = _stm[:3]
                             _periods = [r['period'] for r in _stm]
                             _gl = "YoY" if _freq == "연간" else "QoQ"
                             _np = len(_stm)
