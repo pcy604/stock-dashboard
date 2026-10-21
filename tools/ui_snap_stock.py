@@ -8,8 +8,14 @@ OUT = os.path.join(ROOT, 'data', 'research', 'ui'); TXT = os.path.join(ROOT, 're
 os.makedirs(OUT, exist_ok=True); os.makedirs(TXT, exist_ok=True)
 
 
-async def one(b, sym, w=1400):
-    pg = await b.new_page(viewport={'width': w, 'height': 1200})
+W = int(os.environ.get('SNAP_W', '1400'))           # 모바일 = 390(아이폰 폭)
+SUF = '' if W >= 1000 else f'_m{W}'
+
+
+async def one(b, sym, w=W):
+    mob = w < 1000
+    pg = await b.new_page(viewport={'width': w, 'height': 1200 if not mob else 844},
+                          is_mobile=mob, has_touch=mob)
     await pg.goto(f'http://localhost:8501/?sym={sym}', timeout=300000)
     try:
         await pg.get_by_text('요약 판단').first.wait_for(timeout=900000)
@@ -22,11 +28,11 @@ async def one(b, sym, w=1400):
     H = await pg.evaluate("() => (document.querySelector('[data-testid=stMain]') || document.body).scrollHeight")
     await pg.set_viewport_size({'width': w, 'height': min(H + 200, 30000)})
     await pg.wait_for_timeout(10000)
-    await pg.screenshot(path=os.path.join(OUT, f'stock_{sym}.png'), full_page=True)
+    await pg.screenshot(path=os.path.join(OUT, f'stock_{sym}{SUF}.png'), full_page=True)
     txt = await pg.evaluate("() => (document.querySelector('[data-testid=stMain]') || document.body).innerText")
     errs = await pg.evaluate("() => [...document.querySelectorAll('[data-testid=stException],[data-testid=stAlertContentError]')].map(e => e.innerText.slice(0, 500))")
     swallowed = [l for l in txt.splitlines() if l.strip().startswith('`') or '실패' in l or 'Error' in l]
-    with open(os.path.join(TXT, f'ui_{sym}.txt'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(TXT, f'ui_{sym}{SUF}.txt'), 'w', encoding='utf-8') as f:
         f.write(f"H={H}\n== 오류 요소 {len(errs)}\n" + '\n'.join(errs) + f"\n== 실패·예외 문구 {len(swallowed)}\n" + '\n'.join(swallowed[:80])
                 + "\n== 전체 텍스트\n" + txt)
     print(sym, 'H', H, 'errs', len(errs), 'swallowed', len(swallowed))

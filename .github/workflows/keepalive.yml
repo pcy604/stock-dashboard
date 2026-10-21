@@ -1,0 +1,19 @@
+# 배포 앱 깨우기 (2026-10-21) — 지인 베타 '첫 접속이 느리다' 대응. 한국 시간 낮 동안 3시간마다.
+name: keepalive
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7 22,1,4,7,10,13 * * *'      # UTC → KST 07·10·13·16·19·22시
+permissions:
+  contents: read
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright && python -m playwright install --with-deps chromium
+      - run: python tools/keepalive.py
