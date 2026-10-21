@@ -58,13 +58,14 @@ def ttm(q: pd.DataFrame) -> pd.DataFrame:
 
 
 # ── 1) 멀티플 밴드 ────────────────────────────────────────────────
-def multiple_band(close: pd.Series, shares: float, q: pd.DataFrame, years: int = 5):
+def multiple_band(close: pd.Series, shares: float, q: pd.DataFrame, years: int | None = 5):
     """월말 시총(종가×현재 주식수) ÷ 그 시점까지 **공시된** TTM 값.
 
-    반환: {'kind': 'P/E'|'P/S'|'P/B', 'series': 월별 멀티플, 'pct': {10,25,50,75,90},
-           'now': 현재값, 'rank': 현재 백분위, 'implied': {분위: 주가}, 'why': 선택 이유}
-    · 최근 TTM 순이익이 적자면 P/E 대신 P/S 를 쓴다(적자 구간의 P/E 는 뜻이 없다).
-    · 공시 시차 45일 — 분기말 직후엔 아직 모르는 숫자를 쓰지 않는다(미래 정보 누설 방지).
+    반환: {'main': 판단에 쓰는 밴드, 'pe'·'ps'·'pb': 각 밴드(없으면 키 없음), 'start'·'end': 표본 기간}
+      각 밴드 = {'kind','series','pct':{10,25,50,75,90},'now','rank'(현재 백분위),'implied','why',...}
+    · main: 최근 TTM 순이익 흑자면 P/E, 적자면 P/S(적자 구간의 P/E 는 뜻이 없다).
+    · 2026-10-21 사용자 요청: 흑자 종목도 P/S·P/B 를 없애지 않고 셋 다 보여준다.
+    · years=None → 가진 데이터 전부. 공시 시차 45일(분기말 직후엔 아직 모르는 숫자를 쓰지 않는다).
     """
     if close is None or close.empty or not shares or q.empty:
         return None
@@ -72,7 +73,8 @@ def multiple_band(close: pd.Series, shares: float, q: pd.DataFrame, years: int =
     known = t.copy()
     known.index = known.index + pd.Timedelta(days=45)      # 공시 시차
     m = close.resample('ME').last().dropna()
-    m = m[m.index >= m.index.max() - pd.DateOffset(years=years)]
+    if years:
+        m = m[m.index >= m.index.max() - pd.DateOffset(years=years)]
     f = known.reindex(m.index, method='ffill')
     mcap = m * shares
     last = t.dropna(how='all').iloc[-1] if not t.dropna(how='all').empty else None
@@ -80,18 +82,27 @@ def multiple_band(close: pd.Series, shares: float, q: pd.DataFrame, years: int =
         return None
     out = {}
     ni_ok = last.get('net_income') is not None and pd.notna(last.get('net_income')) and last['net_income'] > 0
-    if ni_ok:
-        s = mcap / f['net_income'].where(f['net_income'] > 0)
-        kind, why = 'P/E', '최근 TTM 순이익 흑자'
-    elif pd.notna(last.get('revenue')) and last.get('revenue', 0) > 0:
-        s = mcap / f['revenue'].where(f['revenue'] > 0)
-        kind, why = 'P/S', '최근 TTM 순이익 적자 → P/E 대신 P/S'
-    else:
-        return None
-    out['main'] = _band(s, kind, why, m, shares, f, 'net_income' if kind == 'P/E' else 'revenue')
+    rv_ok = pd.notna(last.get('revenue')) and (last.get('revenue') or 0) > 0
+    if ni_ok and 'net_income' in f:
+        b = _band(mcap / f['net_income'].where(f['net_income'] > 0), 'P/E', '최근 TTM 순이익 흑자', m, shares, f, 'net_income')
+        if b:
+            out['pe'] = b
+    if rv_ok and 'revenue' in f:
+        b = _band(mcap / f['revenue'].where(f['revenue'] > 0), 'P/S',
+                  '매출 기준' if ni_ok else '최근 TTM 순이익 적자 → P/E 대신 P/S', m, shares, f, 'revenue')
+        if b:
+            out['ps'] = b
     if 'equity' in f and f['equity'].notna().sum() >= 8:
-        sb = mcap / f['equity'].where(f['equity'] > 0)
-        out['pb'] = _band(sb, 'P/B', '자본(잔액) 기준', m, shares, f, 'equity')
+        b = _band(mcap / f['equity'].where(f['equity'] > 0), 'P/B', '자본(잔액) 기준', m, shares, f, 'equity')
+        if b:
+            out['pb'] = b
+    main = out.get('pe') if ni_ok else out.get('ps')
+    if not main:
+        return out or None
+    out['main'] = main
+    ok = [x['series'] for x in (out.get('pe'), out.get('ps'), out.get('pb')) if x]
+    out['start'] = min(x.index.min() for x in ok)
+    out['end'] = max(x.index.max() for x in ok)
     return out
 
 
@@ -235,3 +246,105 @@ def peer_metrics(mcap: float, q: pd.DataFrame) -> dict:
             '매출성장': g,
             '영업이익률': (op / rev * 100) if op is not None and pd.notna(op) and rev else None,
             '기준분기': str(t.index[-1].date())}
+
+
+# ── 5) 추세 판정 — 미너비니 Trend Template (2026-10-21) ─────────────
+def trend_template(close: pd.Series, high: pd.Series | None = None, low: pd.Series | None = None) -> dict:
+    """'고점 대비 −20%' 는 **보유 중 청산선**이지 추세 판정이 아니다. 저점에서 3배 오른 종목을
+    '추세 이탈'이라 부르면 뜻이 뒤집힌다(2026-10-21 삼아알미늄). 추세는 업계 표준 하나로 잰다 —
+    마크 미너비니 Trend Template 8조건(오닐 계열 주도주 선별에 쓰는 기준):
+      ① 주가 > 150일선·200일선 ② 150일선 > 200일선 ③ 200일선이 1개월 전보다 위(상승 중)
+      ④ 50일선 > 150일선·200일선 ⑤ 주가 > 50일선 ⑥ 52주 저점 대비 +30% 이상
+      ⑦ 52주 고점 대비 −25% 이내 ⑧ (RS 상위 30%) — 여기선 RS 대신 '1년 수익률 > 0' 으로 대체
+    반환: {'n': 충족 수, 'of': 8, 'items': [(이름, 통과?, 설명)], 'state': 문장, 'tone',
+           'high_date', 'weeks_since_high', 'from_low', 'from_high'}"""
+    c = close.dropna()
+    if len(c) < 210:
+        return {'n': None, 'of': 8, 'items': [], 'state': '표본 부족(200거래일 미만)', 'tone': 'na'}
+    h = (high if high is not None else c).dropna().reindex(c.index).fillna(c)
+    l = (low if low is not None else c).dropna().reindex(c.index).fillna(c)
+    p = float(c.iloc[-1])
+    m50, m150, m200 = (float(c.rolling(n).mean().iloc[-1]) for n in (50, 150, 200))
+    m200_1m = float(c.rolling(200).mean().iloc[-22])
+    h52, l52 = h.tail(252), l.tail(252)
+    hi, lo = float(h52.max()), float(l52.min())
+    hi_d = h52.idxmax()
+    fl, fh = (p / lo - 1) * 100, (p / hi - 1) * 100
+    r1 = (p / float(c.iloc[-253]) - 1) * 100 if len(c) > 252 else None
+    items = [('주가 > 150·200일선', p > m150 and p > m200, f"150일선 {(p/m150-1)*100:+.0f}% · 200일선 {(p/m200-1)*100:+.0f}%"),
+             ('150일선 > 200일선', m150 > m200, f"{(m150/m200-1)*100:+.1f}%"),
+             ('200일선 상승 중', m200 > m200_1m, f"1개월 새 {(m200/m200_1m-1)*100:+.1f}%"),
+             ('50일선 > 150·200일선', m50 > m150 and m50 > m200, f"50일선/150일선 {(m50/m150-1)*100:+.1f}%"),
+             ('주가 > 50일선', p > m50, f"{(p/m50-1)*100:+.1f}%"),
+             ('52주 저점 대비 +30% 이상', fl >= 30, f"{fl:+.0f}%"),
+             ('52주 고점 대비 −25% 이내', fh >= -25, f"{fh:+.0f}%"),
+             ('1년 수익률 > 0 (RS 대용)', (r1 or 0) > 0, f"{r1:+.0f}%" if r1 is not None else '데이터 없음')]
+    n = sum(1 for _, ok, _ in items if ok)
+    if n == 8:
+        state, tone = '상승 추세', 'good'
+    elif n >= 6:
+        state, tone = '상승 추세 · 일부 이탈', 'mid'
+    elif n >= 4:
+        state, tone = '추세 약화', 'mid'
+    else:
+        state, tone = '하락·바닥 국면', 'bad'
+    return {'n': n, 'of': 8, 'items': items, 'state': state, 'tone': tone,
+            'high_date': pd.Timestamp(hi_d), 'weeks_since_high': int((c.index[-1] - pd.Timestamp(hi_d)).days // 7),
+            'from_low': fl, 'from_high': fh}
+
+
+# ── 6) 분기 이익 추이 — 적자 축소·흑자전환까지 (2026-10-21, KR 포함) ─────
+def earnings_trend(rows: list[dict], key: str = 'op_income') -> dict:
+    """분기 영업이익(3개월치) 추이로 상태를 판정한다. 같은 분기 전년 대비(YoY)로만 본다 — 계절성.
+    · 적자 → 흑자 = '흑자전환'(가장 강한 신호) · 적자 폭이 YoY 로 줄면 '적자 축소'(개선이지 가속은 아니다)
+    · 흑자 → 적자 = '적자전환' · 적자 폭이 커지면 '적자 확대'
+    · 흑자 → 흑자: YoY 성장률이 직전 분기보다 커졌으면 '이익 가속', 플러스면 '이익 증가', 아니면 '이익 감소'
+    적자 기저의 성장률(%)은 뜻이 없어서 계산하지 않는다(−10 → +5 를 '+150%'라 부르지 않는다).
+    반환: {'state','tone','detail','rows':[{분기, 영업이익, YoY(%), 매출YoY(%)}] 최신순, 'streak'}"""
+    q = quarterly_frame(rows)
+    if q.empty or key not in q or q[key].notna().sum() < 5:
+        return {'state': '데이터 부족', 'tone': 'na', 'detail': '분기 손익 5개 미만', 'rows': []}
+    q = q.sort_index()
+    v = q[key]
+    rv = q.get('revenue')
+    yo = v.shift(4)
+    # 4분기 전이 정확히 1년 전인지(분기 결손 방지)
+    span = pd.Series(q.index, index=q.index).diff(4).dt.days
+    valid = span.between(350, 380)
+
+    def g(a, b):
+        if pd.isna(a) or pd.isna(b) or b <= 0 or a <= 0:
+            return None
+        return (a / b - 1) * 100
+
+    tab = []
+    for d in q.index[::-1][:8]:
+        a, b = v.get(d), yo.get(d)
+        ok = bool(valid.get(d))
+        tab.append({'분기': f"{d.year}.{(d.month - 1) // 3 + 1}Q", '_d': d, 'op': a,
+                    'yoy': g(a, b) if ok else None, 'prev': b if ok else None,
+                    'rev_yoy': g(rv.get(d), rv.shift(4).get(d)) if (rv is not None and ok) else None})
+    if not tab or tab[0]['op'] is None or pd.isna(tab[0]['op']) or tab[0]['prev'] is None:
+        return {'state': '판정 불가', 'tone': 'na', 'detail': '1년 전 같은 분기 없음', 'rows': tab}
+    a, b = tab[0]['op'], tab[0]['prev']
+    if a > 0 and b <= 0:
+        state, tone = '흑자전환', 'good'
+    elif a <= 0 and b > 0:
+        state, tone = '적자전환', 'bad'
+    elif a <= 0 and b <= 0:
+        state, tone = ('적자 축소', 'mid') if a > b else ('적자 확대', 'bad')
+    else:
+        g0, g1 = tab[0]['yoy'], (tab[1]['yoy'] if len(tab) > 1 else None)
+        if g0 is not None and g0 > 0 and g1 is not None and g0 > g1:
+            state, tone = '이익 가속', 'good'
+        elif g0 is not None and g0 > 0:
+            state, tone = '이익 증가', 'good' if g0 >= 25 else 'mid'
+        else:
+            state, tone = '이익 감소', 'bad'
+    # 연속 개선 분기 수(YoY 로 영업이익이 늘어난 분기 — 적자 축소 포함)
+    streak = 0
+    for r in tab:
+        if r['prev'] is None or r['op'] is None or pd.isna(r['op']) or not (r['op'] > r['prev']):
+            break
+        streak += 1
+    return {'state': state, 'tone': tone, 'rows': tab, 'streak': streak, 'last': tab[0]}

@@ -38,7 +38,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 8
-API_VERSION = 2          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
+API_VERSION = 3          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -302,6 +302,14 @@ def _unit_convert(col: pd.Series):
     num = pd.Series(float('nan'), index=col.index)
     for i, x in out.items():
         num[i] = x
+    # 2026-10-21 — 규모에 맞는 단위로: '853,000억' 처럼 0 이 줄줄이 붙지 않게 중앙값이 1조 이상이면 조,
+    #   $B 인데 중앙값이 1 미만이면 $M. 시총 열은 사용자 규칙(한국 시총 = 억원)이라 그대로 둔다.
+    med = num.abs().median()
+    if '시총' not in str(col.name) and med == med:
+        if u in ('억', '억원') and med >= 1e4:
+            num, u = num / 1e4, u.replace('억', '조')
+        elif u in ('B', '$B') and med < 1:
+            num, u = num * 1e3, u.replace('B', 'M')
     return num, u
 
 
@@ -457,8 +465,11 @@ def restyle_for(sty: Styler, new_df: pd.DataFrame, ren: dict, conv: set) -> Styl
         nm = ren.get(old, old)
         if nm in pos and nm not in conv:
             new._display_funcs[(r, pos[nm])] = f
-    new.format({c: (lambda v: '-' if pd.isna(v) else f'{v:,.0f}') if str(c).endswith('원)')
-                else (lambda v: '-' if pd.isna(v) else f'{v:,.1f}') for c in conv})
+    # 2026-10-21 — conv 가 비면 format({}) 가 **모든 열의 서식을 기본값으로 덮어** 호출부 서식(부호·소수 자리)이
+    #   사라졌다(재무제표 증감 '+17' → '16.800000'). 변환한 열이 있을 때만, 그 열에만 건다.
+    if conv:
+        new.format({c: (lambda v: '-' if pd.isna(v) else f'{v:,.0f}') if str(c).endswith('원)')
+                    else (lambda v: '-' if pd.isna(v) else f'{v:,.1f}') for c in conv}, subset=list(conv))
     for a in ('table_styles', 'css', 'table_attributes'):
         if hasattr(sty, a):
             setattr(new, a, getattr(sty, a))
@@ -644,6 +655,12 @@ def install(st):
 
             # 열 폭 = 내용 폭, 표 폭 = 열 합 (컨테이너를 억지로 채우지 않는다)
             kw['column_config'] = auto_widths(df, kw.get('column_config'))
+            # 2026-10-21 — 열이 많은 표(재무제표 13열+)는 가로 스크롤바가 생기고, 그 높이(≈14px)만큼 마지막 행이 가려져
+            #   세로 드래그가 생겼다. 열 폭 합이 화면 본문 폭을 넘을 만한 표는 스크롤바 자리를 더 준다.
+            if len(df) <= 25:
+                _tw = sum((v.get('width') or 0) for v in kw['column_config'].values() if isinstance(v, dict))
+                if _tw > 900:
+                    kw['height'] += 16
             kw.pop('use_container_width', None)
             kw['width'] = 'content'
 

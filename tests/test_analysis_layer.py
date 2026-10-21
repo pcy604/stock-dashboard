@@ -109,7 +109,45 @@ def test_risk_checks():
                                                opm_now=5, opm_4q_ago=10, debt_to_equity=50,
                                                eps_fy0_now=0.9, eps_fy0_30d=1.0, vol_annual=70,
                                                top_segment_share=88)}
-    for k in ('추세 이탈', '밸류 부담', '적자', '마진 악화', '추정치 하향', '고변동성', '사업 집중'):
+    for k in ('청산선 아래(보유 시)', '밸류 부담', '적자', '마진 악화', '추정치 하향', '고변동성', '사업 집중'):
         assert r[k]['state'] == 'warn', k
     assert r['부채 부담']['state'] == 'ok'
     assert all(x['state'] == 'na' for x in AC.risk_checks())
+
+
+# ── 2026-10-21 추세(Trend Template)·분기 이익 추이 ─────────────────────
+def test_trend_template_rebound_not_called_breakdown():
+    """저점에서 3배 오른 뒤 고점 −23% 조정 중인 종목(삼아알미늄형)을 '하락'이라 부르지 않는다."""
+    import numpy as np, pandas as pd
+    import stock_extras as sx
+    idx = pd.bdate_range('2024-01-01', periods=520)
+    down = np.linspace(100, 30, 300)            # 하락 → 저점 30
+    up = np.linspace(30, 130, 180)              # 4배 넘게 반등 → 고점 130
+    pull = np.linspace(130, 100, 40)            # 고점 −23%
+    c = pd.Series(np.r_[down, up, pull], index=idx)
+    t = sx.trend_template(c)
+    assert t['n'] >= 6 and t['state'].startswith('상승 추세'), t
+    assert round(t['from_high']) == -23
+    assert t['weeks_since_high'] == 40 // 5 or t['weeks_since_high'] in (7, 8)
+    # 계속 내리는 종목은 하락·바닥
+    t2 = sx.trend_template(pd.Series(np.linspace(100, 40, 300), index=idx[:300]))
+    assert t2['state'] == '하락·바닥 국면'
+    assert sx.trend_template(c.head(100))['n'] is None
+
+
+def test_earnings_trend_states():
+    import stock_extras as sx
+
+    def rows(ops):   # 오래된 → 최근, 2024.1Q 부터
+        out = []
+        for i, v in enumerate(ops):
+            y, q = 2024 + i // 4, i % 4 + 1
+            out.append({'period': f'{y}.{q}Q', 'op_income': v, 'revenue': 100.0})
+        return out[::-1]
+    assert sx.earnings_trend(rows([-5, -5, -5, -5, 3]))['state'] == '흑자전환'
+    assert sx.earnings_trend(rows([-9, -5, -5, -5, -4]))['state'] == '적자 축소'
+    assert sx.earnings_trend(rows([-4, -5, -5, -5, -9]))['state'] == '적자 확대'
+    assert sx.earnings_trend(rows([5, 5, 5, 5, -1]))['state'] == '적자전환'
+    assert sx.earnings_trend(rows([10, 10, 10, 10, 11, 15]))['state'] == '이익 가속'
+    assert sx.earnings_trend(rows([10, 10, 10, 10, 9]))['state'] == '이익 감소'
+    assert sx.earnings_trend(rows([1, 2]))['state'] == '데이터 부족'

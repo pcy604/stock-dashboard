@@ -124,7 +124,7 @@ def integrity_checks(*, today: date, last_price_date: date | None, latest_quarte
     return out
 
 
-def risk_checks(*, price=None, high52=None, band_rank=None, band_kind='P/E', ttm_net_income=None,
+def risk_checks(*, price=None, high52=None, band_rank=None, band_kind='P/E', band_now=None, ttm_net_income=None,
                 opm_now=None, opm_4q_ago=None, debt_to_equity=None, eps_fy0_now=None, eps_fy0_30d=None,
                 vol_annual=None, top_segment_share=None) -> list[dict]:
     """사실·규칙 판정. warn = 해당, ok = 해당 없음, na = 판정 불가."""
@@ -135,11 +135,16 @@ def risk_checks(*, price=None, high52=None, band_rank=None, band_kind='P/E', ttm
                     'detail': '데이터 없음' if not have else (detail_hit if cond else detail_ok)})
 
     dd = (price / high52 - 1) * 100 if price and high52 else None
-    add('추세 이탈', dd is not None and dd <= -20, f"52주 고점 대비 {dd:.0f}% — 원칙상 청산 기준선(−20%) 아래" if dd is not None else '',
-        f"52주 고점 대비 {dd:.0f}%" if dd is not None else '', dd is not None)
+    # 2026-10-21 — '추세 이탈' 이 아니다. 고점 −20% 는 **보유 중 청산선**(매매 원칙 v1)이고,
+    #   추세 판정은 요약 카드의 Trend Template 이 한다(저점 대비 3배 오른 종목을 '추세 이탈'이라 부르던 오류).
+    add('청산선 아래(보유 시)', dd is not None and dd <= -20,
+        f"52주 고점 대비 {dd:.0f}% — 보유 중이면 원칙상 청산선(고점 −20%) 아래" if dd is not None else '',
+        f"52주 고점 대비 {dd:.0f}% — 청산선(−20%) 위" if dd is not None else '', dd is not None)
+    _bn = f" {band_now:.1f}배" if band_now is not None else ''
     add('밸류 부담', band_rank is not None and band_rank >= 80,
-        f"{band_kind} 과거 분포 상위 {100 - band_rank:.0f}% 구간" if band_rank is not None else '',
-        f"{band_kind} 과거 분포 하위 {band_rank:.0f}%" if band_rank is not None else '', band_rank is not None)
+        f"{band_kind}{_bn} — 과거 {band_rank:.0f}%의 기간보다 비쌈" if band_rank is not None else '',
+        f"{band_kind}{_bn} — 과거 {band_rank:.0f}%의 기간보다 비쌈(80% 미만)" if band_rank is not None else '',
+        band_rank is not None)
     add('적자', ttm_net_income is not None and ttm_net_income <= 0, '최근 4분기 순이익 합이 적자', '최근 4분기 흑자',
         ttm_net_income is not None)
     dm = (opm_now - opm_4q_ago) if (opm_now is not None and opm_4q_ago is not None) else None
