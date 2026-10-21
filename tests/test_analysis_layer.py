@@ -251,3 +251,12 @@ def test_form4_parse():
     assert opt['sec_kind'] == '스톡옵션' and opt['exercise_price'] == 42.10 and opt['expiration'] == '2036-03-01'
     assert E.classify_security('Warrants (right to buy)') == '워런트'
     assert '성과 조건: 상대 주주수익률(TSR)' in E.vesting_tags('PSUs vest based on relative total shareholder return over three years')
+
+
+def test_vesting_tags_real_tsla():
+    """2026-10-21 실데이터(TSLA Form 4) 각주 — '전부 수령 완료일'을 '즉시 수령'으로 읽던 오류."""
+    import edgar_client as E
+    t = E.vesting_tags("1/16 of the total restricted stock units initially subject to this award vested on December 5, 2024 and "
+                       "1/16th of the total units initially subject to this award vest every quarter thereafter, so that all such "
+                       "shares subject to this award will be fully vested on September 5, 2028.")
+    assert t == ['16회 분할(분기마다)', '전부 수령 완료 September 5, 2028'], t

@@ -188,8 +188,10 @@ def summarize_dilution(terms: list[dict], *, shares_out=None, price=None, today=
         nmax = (t['amount'] / t['floor']) if (t.get('amount') and t.get('floor')) else n
         if nmax is not None and n is not None:
             nmax = max(nmax, n)
-        pct = (n / shares_out * 100) if (n and shares_out) else t.get('ratio')
-        pmax = (nmax / shares_out * 100) if (nmax and shares_out) else pct
+        # 비율은 **공시 비율(발행주식총수 대비)** 우선 — 우리 상장주식수 파일은 최근 증자를 늦게 반영해
+        #   케이쓰리아이가 공시 34% → 계산 52% 로 부풀었다(10-21 실데이터). 공시 비율이 없을 때만 직접 계산.
+        pct = t.get('ratio') if t.get('ratio') else ((n / shares_out * 100) if (n and shares_out) else None)
+        pmax = (pct * nmax / n) if (pct and n and nmax) else pct
         in_money = bool(price and t.get('price') and price >= t['price'])
         r = dict(t, active=active, new_shares=n, pct=pct, pct_max=pmax, in_money=in_money)
         rows.append(r)

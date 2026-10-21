@@ -46,7 +46,10 @@ NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도'
 # '수준' 열 — 부호가 아니라 크기라서 칠하지 않는다(음수가 있어도: PER<0 은 적자일 뿐)
 _LEVEL = re.compile(r'PER|PBR|PSR|PEG|EV/|시총|가격|현재가|진입가|매수가|평단|종가|52주고|52주저|'
                     r'점수|등급|수량|주수|비중|통과율|통과수|개수|표본|건수|거래량|배수|RS ?\(L\)|퍼센타일|'
-                    r'^N$|^n$|평가금|원금|매입|중요도|경과|주기|의존|집중|변동성|베타')
+                    r'^N$|^n$|평가금|원금|매입|중요도|경과|주기|의존|집중|변동성|베타|'
+                    r'전환가|조정가|행사가|단가|발행액|희석|발행주식|보유\(주\)')
+# ↑ 2026-10-21 실화면: '최저 조정가'(이름의 '최저')·'발행주식 대비'(이름의 '대비')가 초록으로 칠해졌다 — 가격·물량은 수준이고,
+#   희석 비율은 높을수록 위험이라 초록이면 뜻이 뒤집힌다.
 # ↑ '의존·집중·변동성' 은 높을수록 '위험'이라 초록(=좋음)으로 칠하면 뜻이 뒤집힌다 → 칠하지 않는다
 # 부호 열 힌트 — 이름만으로 '변화량'임을 알 수 있는 것
 _SIGNED = ('%', '률', '대비', 'YoY', 'QoQ', '가속', 'Δ', '이후', '상승', '하락', '변화', '성장',
@@ -659,7 +662,9 @@ def install(st):
                 if c in cfg or c in _sty_cols or c == 'No.':
                     continue
                 if pd.api.types.is_float_dtype(df[c]):
-                    cfg[c] = st.column_config.NumberColumn(format='%,.1f' if not _yearish(df[c]) else '%.0f')
+                    # 주식 수는 정수로(6,539.0 → 6,539) — 2026-10-21 실화면
+                    _int = '(주)' in str(c) or str(c) in ('주수', '수량') or (df[c].dropna() % 1 == 0).all() and df[c].abs().max() >= 1000
+                    cfg[c] = st.column_config.NumberColumn(format='%.0f' if _yearish(df[c]) else '%,.0f' if _int else '%,.1f')
                 elif pd.api.types.is_integer_dtype(df[c]) and not _yearish(df[c]):
                     cfg[c] = st.column_config.NumberColumn(format='%,d')
             kw['column_config'] = add_thousands(cfg, df)
@@ -702,11 +707,15 @@ def install(st):
             # 2026-10-21 — 열이 많은 표(재무제표 13열+)는 가로 스크롤바가 생기고, 그 높이(≈14px)만큼 마지막 행이 가려져
             #   세로 드래그가 생겼다. 열 폭 합이 화면 본문 폭을 넘을 만한 표는 스크롤바 자리를 더 준다.
             if len(df) <= 25:
-                _tw = sum((v.get('width') or 0) for v in kw['column_config'].values() if isinstance(v, dict))
+                _tw = sum(v['width'] for v in kw['column_config'].values()     # 'small'·'medium' 같은 글자 폭은 뺀다(10-21 TypeError)
+                          if isinstance(v, dict) and isinstance(v.get('width'), (int, float)))
                 if _tw > 900:
                     kw['height'] += 16
             kw.pop('use_container_width', None)
             kw['width'] = 'content'
+            # 2026-10-21 — 빈 칸을 '-' 로. Streamlit 은 결측을 Styler 서식과 무관하게 회색 'None' 으로 그린다
+            #   (프런트 기본 placeholder='None'). 그래서 _na_dash 만으로는 안 바뀌었다(실화면 확인). streamlit>=1.66 인자.
+            kw.setdefault('placeholder', '-')
 
             # 종목·코드 칸 클릭 → 종목 분석으로 (호출부가 선택을 따로 쓰지 않을 때만)
             if NAV['fn'] and '코드' in df.columns and not kw.get('on_select') and 'key' not in kw:

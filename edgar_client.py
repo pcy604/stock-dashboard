@@ -399,7 +399,14 @@ def vesting_tags(text: str) -> list:
     if m and 'installment' not in lo:
         y = {'first': 1, 'one-year': 1, '1-year': 1, 'second': 2, 'two-year': 2, 'third': 3, 'three-year': 3}[m.group(1)]
         tags.append(f"{y}년 뒤 수령(클리프)")
-    if 'fully vested' in lo or 'vested in full' in lo or 'immediately vest' in lo:
+    m = _re.search(r'1/(\d+)(?:th|rd|nd|st)?\s+of\s+the\s+(?:total\s+)?(?:shares|units|restricted stock units|rsus?|option)[^.]{0,160}?'
+                   r'every\s+(quarter|month|year)', lo)
+    if m and not any('균등 분할' in x for x in tags):
+        tags.append(f"{m.group(1)}회 분할({ {'quarter': '분기마다', 'month': '매달', 'year': '매년'}[m.group(2)] })")
+    m = _re.search(r'fully vested (?:on|by) ([A-Za-z]+\.? \d{1,2}, \d{4})', t, _re.I)
+    if m:
+        tags.append(f"전부 수령 완료 {m.group(1)}")
+    elif _re.search(r'(?:is|was|were|are|be) (?:immediately |)fully vested(?! on| by)|vested in full (?:upon|at|on the date of) grant|immediately vest', lo):
         tags.append('즉시 수령')
     if 'relative total shareholder return' in lo or 'relative tsr' in lo:
         tags.append('성과 조건: 상대 주주수익률(TSR)')

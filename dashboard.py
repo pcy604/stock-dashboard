@@ -4779,7 +4779,8 @@ def _tab_analysis():
                         _ais = _ai_summary_auto(sym8_clean, is_kr_sym, info.get('longName', sym8_clean),
                                                 _prof.get('summary'))
                     _one = ''
-                    _m1 = re.search(r'한 줄 정의\**\s*[:：]\**\s*(.+)', str(_ais.get('text') or ''))
+                    # '**🎯 한 줄 정의**: …' 와 '### 🎯 한 줄 정의\n\n…'(제목 다음 줄) 두 형식 모두 — 후자를 놓쳐 영문이 떴다(10-21 실화면)
+                    _m1 = re.search(r'한 줄 정의[*:：\s]*([^\s#*][^\n]*)', str(_ais.get('text') or ''))
                     if _m1:
                         _one = re.sub(r'\*\*|__', '', _m1.group(1)).strip()
                     if not _one:
@@ -4914,7 +4915,7 @@ def _tab_analysis():
                                 #   조/억(US $B/$M) 중 하나 — 853000.0억 같은 0 행렬이 나오지 않게.
                                 _est_pairs = _EST_LABELS[freq]
                                 _ecols = [lab for lab, _ in _est_pairs] if est else []   # 미래→과거 방향 통일
-                                _amts = [abs(_stm[i].get(it[1])) for it in items if it[2] == 'amt' for i in range(_np)
+                                _amts = [abs(_stm[i].get(it[1])) for it in items if it[2] in ('amt', 'flow') for i in range(_np)
                                          if isinstance(_stm[i].get(it[1]), (int, float)) and _stm[i].get(it[1])]
                                 _med = float(np.median(_amts)) if _amts else 0
                                 if is_kr_sym:
@@ -4925,13 +4926,13 @@ def _tab_analysis():
                                 def _lab_u(lab, typ):
                                     base, _, note = lab.partition(' (')
                                     note = note.rstrip(')')
-                                    u = {'amt': _ulab, 'pct': '%', 'mult': '배', 'eps': '원' if is_kr_sym else '$'}[typ]
+                                    u = {'amt': _ulab, 'flow': _ulab, 'pct': '%', 'mult': '배', 'eps': '원' if is_kr_sym else '$'}[typ]
                                     return f"{base}({u}{', ' + note if note else ''})"
 
                                 def _val(v, typ):
                                     if not isinstance(v, (int, float)) or v != v:
                                         return None
-                                    if typ == 'amt':
+                                    if typ in ('amt', 'flow'):
                                         return v / _udiv
                                     if typ == 'pct':
                                         return v * 100
@@ -4942,6 +4943,14 @@ def _tab_analysis():
                                         return None
                                     if typ == 'pct':
                                         return (cur - prev) * 100
+                                    if typ == 'flow':
+                                        # 투자·재무활동·Capex 는 원래 마이너스(유출)인 흐름 — '적자 확대'가 아니다(10-21 TSLA 실화면).
+                                        #   규모 증감률만, 부호가 바뀌면 '유입↔유출'.
+                                        if not prev:
+                                            return None
+                                        if (cur < 0) != (prev < 0):
+                                            return '유입 전환' if cur > 0 else '유출 전환'
+                                        return (abs(cur) / abs(prev) - 1) * 100
                                     if prev < 0:
                                         return '흑전' if cur > 0 else ('적자 축소' if cur > prev else '적자 확대')
                                     if prev > 0 and cur < 0:
@@ -5001,7 +5010,8 @@ def _tab_analysis():
                                     return ''
                                 # 증감 열은 숫자와 '흑전·적자 축소' 글자가 섞여 Arrow 가 한 번 실패한다 → 색은 숫자로 먼저 칠하고
                                 #   표시는 미리 만든 문자열로(재무제표는 행마다 단위가 달라 열 정렬이 뜻이 없다).
-                                _dcss = pd.DataFrame({c: [_cdl(v) for v in _df[c]] for c in _dcols}, index=_df.index)
+                                _dcss = pd.DataFrame({c: [('' if _types[i] == 'flow' else _cdl(v)) for i, v in enumerate(_df[c])] for c in _dcols},
+                                                     index=_df.index)   # 흐름 항목은 증감에 좋고 나쁨이 없어 칠하지 않는다
                                 _dtxt = [c for c in _dcols if any(isinstance(v, str) for v in _df[c])]
                                 for _c in _dtxt:      # 글자 섞인 열만 문자열(순수 숫자 열은 table_ui 가 다시 숫자로 되돌려 부호가 사라진다)
                                     _df[_c] = [(v if isinstance(v, str) else '-' if v is None or v != v else
@@ -5010,7 +5020,7 @@ def _tab_analysis():
                                     _df[_c] = pd.to_numeric(_df[_c], errors='coerce')
                                 _sty = _df.style
                                 for _ri, _typ in enumerate(_types):
-                                    _dp = {'amt': _udp, 'pct': 1, 'mult': 1, 'eps': 0 if is_kr_sym else 2}[_typ]
+                                    _dp = {'amt': _udp, 'flow': _udp, 'pct': 1, 'mult': 1, 'eps': 0 if is_kr_sym else 2}[_typ]
                                     _sty = _sty.format(lambda v, dp=_dp: '-' if v is None or v != v else f"{v:,.{dp}f}",
                                                        subset=pd.IndexSlice[[_ri], _numc])
                                     _ndc = [c for c in _dcols if c not in _dtxt]
@@ -5041,8 +5051,8 @@ def _tab_analysis():
                                          ('EPS', 'eps', 'eps'), ('SG&A', 'sga', 'amt'), (f'ROE{_tt}', 'roe', 'pct'),
                                          (f'PER (현시총÷{_tt.strip()}순익)', 'ni_basis', 'mult', 'per_dir'),
                                          (f'PSR (현시총÷{_tt.strip()}매출)', 'rev_basis', 'mult')]
-                            _cf_items = [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'amt'),
-                                         ('재무활동', 'fin_cf', 'amt'), ('Capex', 'capex', 'amt')]
+                            _cf_items = [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'flow'),
+                                         ('재무활동', 'fin_cf', 'flow'), ('Capex', 'capex', 'flow')]
                             if _stored:                # 저장본은 손익 3항목뿐 — 빈 행('-')을 늘어놓지 않는다
                                 _is_items = [it for it in _is_items
                                              if it[1] in ('revenue', 'op_income', 'opm', 'net_income', 'ni_basis', 'rev_basis')]
@@ -5700,7 +5710,8 @@ def _tab_analysis():
                                     ('승률', f"{_wins/len(_trades)*100:.0f}%"),
                                     ('누적 수익(복리)', f"{_cum:+.1f}%", True),
                                     ('연환산', f"{_cagr(_cum):+.1f}%", True),
-                                    ('같은 기간 보유', f"{_bh:+.1f}% (연 {_cagr(_bh):+.1f}%)", True),
+                                    ('같은 기간 보유', f"{_bh:+.1f}%", True),
+                                    ('보유 연환산', f"{_cagr(_bh):+.1f}%", True),
                                     ('평균 수익', f"{sum(_rets)/len(_rets):+.1f}%", True),
                                     ('최저 수익', f"{min(_rets):+.1f}%", True),
                                     ('투자 기간 비중', f"{_inmk:.0f}%")])])
@@ -5740,11 +5751,19 @@ def _tab_analysis():
                         _b = sum(r['amt'] for r in rows if r['amt'] is not None and r['amt'] > 0 and r['d'] >= _1y)
                         _s = sum(-r['amt'] for r in rows if r['amt'] is not None and r['amt'] < 0 and r['d'] >= _1y)
                         _n1 = sum(1 for r in rows if r['d'] >= _1y)
-                        _f = (lambda v: f"{v/div:,.1f}{unit}") if div != 1e8 else (lambda v: f"{v/div:,.0f}{unit}" if abs(v) >= 1e9 else f"{v/div:,.1f}{unit}")
+                        _f = (lambda v: f"${v/div:,.1f}M") if unit == '$M' else (lambda v: f"{v/div:,.1f}{unit}") if div != 1e8 else (lambda v: f"{v/div:,.0f}{unit}" if abs(v) >= 1e9 else f"{v/div:,.1f}{unit}")
                         _stat_grid([('', [('최근 1년 신고', f"{_n1}건"),
                                           ('매수 금액', _f(_b)), ('매도 금액', _f(_s)),
                                           ('순매수', ('+' if _b - _s >= 0 else '−') + _f(abs(_b - _s)), True)])])
 
+                    # 2026-10-21 실화면: yfinance 집계 표와 Form 4 원문 표가 같은 거래를 두 번 보였다 → 원문이 되면 원문만
+                    _f4, _f4e = [], None
+                    if not is_kr_sym:
+                        try:
+                            with st.spinner("SEC Form 4 원문 읽는 중…"):
+                                _f4 = _form4_rows(sym8_clean)
+                        except Exception as _e4:
+                            _f4e = f"{type(_e4).__name__}"
                     if is_kr_sym:
                         _kins = kr_insiders(sym8_clean)
                         if _kins:
@@ -5773,7 +5792,7 @@ def _tab_analysis():
                                        "정확한 단가는 DART 원문 보고서에서.")
                         else:
                             st.info("내부자 거래 내역 없음 (DART)")
-                    elif insid is not None and not insid.empty:
+                    elif insid is not None and not insid.empty and not _f4:
                         st.subheader("👤 내부자 거래 (SEC Form 4 기반)")
                         _uins, _ur = [], []
                         for _, _ri in insid.head(20).iterrows():
@@ -5804,8 +5823,7 @@ def _tab_analysis():
                                           '보고자': _ri.get('Insider'), '직위': _ri.get('Position'),
                                           '구분': _ukind,
                                           '주수': float(_ush) if pd.notna(_ush) else None,
-                                          '금액($M)': round(_sg * _uv / 1e6, 2) if (_uv is not None and _sg) else
-                                                      (round(_uv / 1e6, 2) if _uv is not None else None)})
+                                          '금액($M)': round(_sg * _uv / 1e6, 2) if (_uv is not None and _sg) else None})
                         _ins_summary(_ur, '$M', 1e6)
                         _udf = pd.DataFrame(_uins)
                         _tsrc('SEC Form 4 (yfinance 집계)', live=True)
@@ -5819,14 +5837,8 @@ def _tab_analysis():
                     # ── 📑 Form 4 원문 (US, 2026-10-21) — 장내 매매만 신호, 부여·행사·세금 반납은 보상 흐름 ─────
                     if not is_kr_sym:
                         st.subheader("📑 Form 4 원문 — 장내 매매·스톡옵션·RSU·워런트")
-                        try:
-                            with st.spinner("SEC Form 4 원문 읽는 중…"):
-                                _f4 = _form4_rows(sym8_clean)
-                            _f4e = None
-                        except Exception as _e4:
-                            _f4, _f4e = [], f"{type(_e4).__name__}"
                         if not _f4:
-                            st.info("최근 1년 Form 4 없음" if not _f4e else f"SEC 원문 조회 실패({_f4e}) — 위 yfinance 집계만 표시")
+                            st.info("최근 1년 Form 4 없음" if not _f4e else f"SEC 원문 조회 실패({_f4e}) — 위 yfinance 집계로 대신 표시")
                         else:
                             _P = [r for r in _f4 if r['code'] == 'P' and r['table'] == '주식']
                             _S = [r for r in _f4 if r['code'] == 'S' and r['table'] == '주식']
@@ -5836,7 +5848,7 @@ def _tab_analysis():
                             _stat_grid([('', [
                                 ('장내 매수', f"${_amt(_P)/1e6:,.2f}M · {len(_P)}건", True),
                                 ('장내 매도', f"${_amt(_S)/1e6:,.2f}M · {len(_S)}건"),
-                                ('매도 중 사전계획(10b5-1)', f"{_spl/_amt(_S)*100:.0f}%" if _amt(_S) else '-'),
+                                ('계획 매도 비중', f"{_spl/_amt(_S)*100:.0f}%" if _amt(_S) else '-'),
                                 ('옵션·RSU 부여', f"{len(_grant)}건 · {sum((r['underlying'] or r['shares'] or 0) for r in _grant):,.0f}주"),
                                 ('행사·전환', f"{sum(1 for r in _f4 if r['code'] in ('M', 'X', 'O'))}건"),
                                 ('세금 납부용 반납', f"{sum(1 for r in _f4 if r['code'] == 'F')}건")])])
@@ -6328,17 +6340,19 @@ def _tab_analysis():
                                             + f" · 최근 8분기 중 가속 {_etr.get('acc_8q', 0)}회")
                                 _eu = ('억원', 1e8) if is_kr_sym else ('$M', 1e6)
                                 _tsrc(_L.get('_qsrc') or '분기 손익', live=True)
-                                st.dataframe(pd.DataFrame([{
-                                    '분기': r['분기'], f"영업이익({_eu[0]})": None if r['op'] is None or pd.isna(r['op']) else round(r['op'] / _eu[1]),
-                                    f"전년 같은 분기({_eu[0]})": None if r['prev'] is None else round(r['prev'] / _eu[1]),
-                                    '영업이익 YoY(%)': None if r['yoy'] is None else round(r['yoy'], 1),
-                                    '매출 YoY(%)': None if r['rev_yoy'] is None else round(r['rev_yoy'], 1),
-                                    '이익증가÷매출(%p)': None if r['oi_pp'] is None else round(r['oi_pp'], 1),
+                                # 2026-10-21 실화면 — None 만 있는 열이 글자 'None' 으로 찍히고, 머리말이 길어 반쪽 칸을 넘쳤다
+                                _nn = lambda v, d=1: float('nan') if v is None or pd.isna(v) else round(float(v), d)
+                                _etab = pd.DataFrame([{
+                                    '분기': r['분기'], f"영업익({_eu[0]})": _nn(None if r['op'] is None else r['op'] / _eu[1], 0),
+                                    f"전년 동기({_eu[0]})": _nn(None if r['prev'] is None else r['prev'] / _eu[1], 0),
+                                    '영업익 YoY(%)': _nn(r['yoy']), '매출 YoY(%)': _nn(r['rev_yoy']),
+                                    '개선폭÷매출(%p)': _nn(r['oi_pp']),
                                     '가속': '가속' if r['acc'] else ('-' if r['acc'] is None else '')}
-                                    for r in _etr['rows'][:6]]), filters=False,
-                                    column_config={f"영업이익({_eu[0]})": st.column_config.NumberColumn(format='localized'),
-                                                   f"전년 같은 분기({_eu[0]})": st.column_config.NumberColumn(format='localized')})
-                                st.caption("**가속 = 매출 YoY 와 '이익증가÷매출'이 둘 다 직전 분기보다 커진 분기** — 미국 이익 가속 신호와 같은 정의"
+                                    for r in _etr['rows'][:6]])
+                                if _etab['영업익 YoY(%)'].isna().all():      # 적자 구간이라 전부 '-' 면 열을 뺀다
+                                    _etab = _etab.drop(columns=['영업익 YoY(%)'])
+                                st.dataframe(_etab, filters=False)
+                                st.caption("**가속 = 매출 YoY 와 '개선폭÷매출'(1년 전 대비 영업익 증가분 ÷ 매출)이 둘 다 직전 분기보다 커진 분기** — 미국 이익 가속 신호와 같은 정의"
                                            "(이익 증가를 매출로 나눠 적자에서도 측정된다. 그래서 '이익 감소'인데 '가속'일 수 있다 = 감소 폭이 줄었다). "
                                            "한 분기는 기저효과·일회성일 수 있어 연속 분기 수를 본다: 1분기 확인 전 · 2분기 가속 · "
                                            "3분기+ 강한 가속(미너비니 'Code 33'). ⚠️ 연속 조건의 수익 우위는 아직 백테스트 전 — 상태 표시일 뿐 매수 신호 아님. "
