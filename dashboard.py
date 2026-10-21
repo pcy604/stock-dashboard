@@ -6466,6 +6466,14 @@ with tab_pf, guard('포트폴리오 가드레일'):
         import user_store as _us
         _pf_email = _acc.email()
 
+        if _pf_email:   # 2026-10-21 저장 연결 상태를 늘 보이게 — '안 떠 있음'을 추측 말고 화면에서 확인
+            if 'pf_db_ping' not in st.session_state:
+                st.session_state['pf_db_ping'] = _us.ping()
+            _pok, _pmsg = st.session_state['pf_db_ping']
+            (st.caption if _pok else st.warning)(f"🔐 계정 저장 연결: {'정상' if _pok else '오류 — ' + _pmsg}")
+            if st.session_state.get('pf_db_msg'):
+                st.caption(st.session_state.pop('pf_db_msg'))
+
         def _pf_load():
             if 'pf_rows' in st.session_state:
                 return st.session_state['pf_rows']
@@ -6603,11 +6611,14 @@ with tab_pf, guard('포트폴리오 가드레일'):
                 try:
                     _us.save(_pf_email, {'positions': _keep, 'total_capital': _total_cap})
                     st.session_state['pf_db_asof'] = datetime.now().strftime('%Y-%m-%d %H:%M')
-                    st.toast(f'🔐 {len(_keep)}종목 — 내 계정에 암호화 저장됨')
+                    st.session_state['pf_db_msg'] = f'✅ {len(_keep)}종목 — 내 계정에 암호화 저장됨'
                 except Exception as _e:
-                    st.toast(f'⚠️ 계정 저장 실패(이 세션에만 반영): {str(_e)[:60]}')
+                    _rt = getattr(getattr(_e, 'response', None), 'text', '') or ''
+                    st.session_state['pf_db_msg'] = f'⚠️ 계정 저장 실패(이 세션에만 반영): {str(_e)[:80]} {_rt[:120]}'
+            elif st.session_state.get('pf_src') == 'toss':
+                st.session_state['pf_db_msg'] = 'ℹ️ 토스 연동 자료는 계정에 저장하지 않습니다 — 🔒 잠그기 후 직접 입력분만 저장됩니다'
             else:
-                st.toast(f'{len(_keep)}종목 반영 — 이 세션에만 있습니다')
+                st.session_state['pf_db_msg'] = f'{len(_keep)}종목 반영 — 이 세션에만 있습니다(계정 저장 미설정)'
             st.rerun()
 
         _live = st.session_state.get('pf_rows') or [

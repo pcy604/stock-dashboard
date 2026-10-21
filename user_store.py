@@ -62,7 +62,9 @@ def _fernet(email: str):
 
 
 def _h(c, extra=None):
-    h = {'apikey': c['key'], 'Authorization': f"Bearer {c['key']}", 'Content-Type': 'application/json'}
+    h = {'apikey': c['key'], 'Content-Type': 'application/json'}
+    if str(c['key']).startswith('eyJ'):      # 옛 JWT 키만 Bearer 로 — 새 sb_secret_ 키는 apikey 헤더만 받는다
+        h['Authorization'] = f"Bearer {c['key']}"
     h.update(extra or {})
     return h
 
@@ -97,3 +99,26 @@ def delete(email: str):
     c = _cfg()
     r = requests.delete(_url(c), params={'uid': f'eq.{_uid(email)}'}, headers=_h(c), timeout=6)
     r.raise_for_status()
+
+
+def ping():
+    """(ok, 사람이 읽을 사유) — 화면에서 '왜 저장이 안 되나'를 바로 보이게(2026-10-21). 비밀값은 출력하지 않는다."""
+    c = _cfg()
+    if c is None:
+        try:
+            s = st.secrets.get('store')
+        except Exception:
+            s = None
+        if not s:
+            return False, 'Secrets 에 [store] 칸이 없습니다'
+        miss = [k for k in ('url', 'key', 'master_key') if not s.get(k)]
+        return False, f"[store] 에 빈 항목: {', '.join(miss)}"
+    try:
+        r = requests.get(_url(c), params={'select': 'uid', 'limit': 1}, headers=_h(c), timeout=6)
+    except Exception as e:
+        return False, f'DB 연결 실패: {type(e).__name__}'
+    if r.status_code == 200:
+        return True, '정상'
+    hint = {401: 'key 가 틀렸거나 anon 키입니다 — service_role 키를 넣으세요',
+            404: 'portfolios 표가 안 보입니다 — SQL 실행 여부, url 프로젝트, Data API 노출 설정 확인'}.get(r.status_code, '')
+    return False, f'HTTP {r.status_code} {hint} {r.text[:80]}'.strip()
