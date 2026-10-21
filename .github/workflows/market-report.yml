@@ -48,7 +48,8 @@ jobs:
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
           git add results/market_report.json
+          git status --short | head   # krx_listing 이 data/krx_listing_last.csv 를 갱신해 작업 트리가 더러워진다 → --autostash
           git diff --staged --quiet && { echo "변경 없음"; exit 0; }
           git commit -m "auto: 시황 리포트 $(date -u +%Y-%m-%dT%H:%MZ)"
-          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
+          for i in 1 2 3; do git pull --rebase --autostash -X theirs origin main && git push && exit 0; sleep 5; done
           exit 1
