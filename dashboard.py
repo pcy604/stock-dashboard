@@ -1026,6 +1026,25 @@ try:
 except Exception:
     _UA = ''
 IS_MOBILE = any(k in _UA for k in ('Mobi', 'Android', 'iPhone', 'iPad'))
+
+
+# 2026-10-21 모바일 실화면 — plotly 도구 막대(확대·저장 아이콘)가 터치 기기에선 늘 떠 있어 범례를 가렸다.
+#   모든 차트 공통: 폰에서는 숨기고, PC 는 마우스를 올렸을 때만. 한 번만 감싼다(스크립트 재실행마다 겹치지 않게).
+if not getattr(st.plotly_chart, '_mo_wrapped', False):
+    _orig_plotly_chart = st.plotly_chart
+
+    def _plotly_chart(fig, *a, **kw):
+        try:
+            _ua = st.context.headers.get('User-Agent', '') or ''
+        except Exception:
+            _ua = ''
+        _mob = any(k in _ua for k in ('Mobi', 'Android', 'iPhone', 'iPad'))
+        cfg = dict(kw.pop('config', None) or {})
+        cfg.setdefault('displayModeBar', False if _mob else 'hover')
+        cfg.setdefault('displaylogo', False)
+        return _orig_plotly_chart(fig, *a, config=cfg, **kw)
+    _plotly_chart._mo_wrapped = True
+    st.plotly_chart = _plotly_chart
 st.session_state['seen_onboard'] = True
 
 # 2026-10-21 — 30초 투어로 재작성: 글로 읽는 설명서 → 탭 5단계 카드 + 바로가기 버튼.
@@ -5783,6 +5802,7 @@ def _tab_analysis():
                                 '추정금액(억원)': None if r['amt'] is None else round(r['amt'] / 1e8, 1),
                                 '보유(주)': r['x']['holdings']} for r in _kr_r])
                             _tsrc('DART 임원·주요주주 소유상황보고 · 금액=증감×보고일 종가(추정)', live=True)
+                            _kidf = _kidf[['보고일', '구분', '추정금액(억원)', '증감(주)', '보고자', '직위', '보유(주)']]   # 폰에서도 핵심 열이 먼저 보이게
                             st.dataframe(_kidf, filters=False, row_height=25,
                                          column_config={'증감(주)': st.column_config.NumberColumn(format='localized'),
                                                         '보유(주)': st.column_config.NumberColumn(format='localized'),
@@ -5825,7 +5845,7 @@ def _tab_analysis():
                                           '주수': float(_ush) if pd.notna(_ush) else None,
                                           '금액($M)': round(_sg * _uv / 1e6, 2) if (_uv is not None and _sg) else None})
                         _ins_summary(_ur, '$M', 1e6)
-                        _udf = pd.DataFrame(_uins)
+                        _udf = pd.DataFrame(_uins)[['일자', '구분', '금액($M)', '주수', '보고자', '직위']]
                         _tsrc('SEC Form 4 (yfinance 집계)', live=True)
                         st.dataframe(_udf, filters=False, row_height=25,
                                      column_config={'주수': st.column_config.NumberColumn(format='localized'),
@@ -5862,7 +5882,8 @@ def _tab_analysis():
                                     '행사가($)': r['exercise_price'], '행사 가능일': r['exercisable'] or '각주',
                                     '만기': r['expiration'] or '각주',
                                     '수령 조건': ' · '.join(t for t in r['tags'] if '10b5-1' not in t and '가중평균' not in t) or '-'}
-                                    for r in _der[:40]]), filters=False)
+                                    for r in _der[:40]])[['일자', '종류', '거래', '수량(주)', '행사가($)', '만기', '수령 조건',
+                                                          '보고자', '직위', '행사 가능일']], filters=False)
                             _nd = [r for r in _f4 if r['table'] == '주식' and r['code'] in ('P', 'S')]
                             if _nd:
                                 st.markdown("**장내 매매 — 사전계획(10b5-1) 여부**")
@@ -5873,7 +5894,8 @@ def _tab_analysis():
                                     '금액($M)': None if not (r['shares'] and r['price']) else
                                                 round((1 if r['code'] == 'P' else -1) * r['shares'] * r['price'] / 1e6, 2),
                                     '사전계획': '10b5-1' if r['plan_10b5_1'] else '-', '거래 후 보유(주)': r['after']}
-                                    for r in _nd[:40]]), filters=False)
+                                    for r in _nd[:40]])[['일자', '거래', '금액($M)', '사전계획', '수량(주)', '단가($)',
+                                                         '보고자', '직위', '거래 후 보유(주)']], filters=False)
                             _notes = list(dict.fromkeys((r['notes'], r['url']) for r in _f4 if r['notes']))
                             if _notes:
                                 with st.expander(f"각주 원문 {len(_notes)}개(영문) — 수령 조건·계획 매매 근거"):
