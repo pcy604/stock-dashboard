@@ -6058,10 +6058,25 @@ with tab_pf, guard('포트폴리오 가드레일'):
         _PF_PATH = Path('data/portfolio.json')
         _PF_COLS = ['sym', 'name', 'market', 'qty', 'avg_cost', 'buy_date']
 
+        import user_store as _us
+        _pf_email = _acc.email()
+
         def _pf_load():
             if 'pf_rows' in st.session_state:
                 return st.session_state['pf_rows']
-            # 2026-10-21: data/portfolio.json(서버 공용 파일)은 읽지 않는다 — 한 사람이 저장하면 다음 방문자에게 보였다
+            # 2026-10-21: data/portfolio.json(서버 공용 파일)은 읽지 않는다 — 한 사람이 저장하면 다음 방문자에게 보였다.
+            #   대신 계정별 암호화 저장(user_store)에서 세션당 한 번 불러온다.
+            if _us.ready() and _pf_email and not st.session_state.get('_pf_db_tried'):
+                st.session_state['_pf_db_tried'] = True
+                try:
+                    _d = _us.load(_pf_email)
+                    if _d:
+                        st.session_state['pf_rows'] = _d.get('positions') or []
+                        st.session_state['pf_cap'] = int(_d.get('total_capital') or 0)
+                        st.session_state['pf_db_asof'] = _d.get('_updated_at')
+                        return st.session_state['pf_rows']
+                except Exception as _e:
+                    st.warning(f'저장된 포트폴리오를 불러오지 못했습니다: {str(_e)[:80]}')
             return []
 
         st.markdown("### 🛡️ 원칙 가드레일")
@@ -6179,7 +6194,15 @@ with tab_pf, guard('포트폴리오 가드레일'):
             _keep = [r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
             st.session_state['pf_rows'] = _keep
             st.session_state['pf_cap'] = _total_cap
-            st.success(f'{len(_keep)}종목 반영 — 이 세션에만 있습니다(서버 파일로 저장하지 않음)')
+            if _us.ready() and _pf_email and st.session_state.get('pf_src') != 'toss':   # 계좌 연동분은 저장하지 않는다
+                try:
+                    _us.save(_pf_email, {'positions': _keep, 'total_capital': _total_cap})
+                    st.session_state['pf_db_asof'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+                    st.toast(f'🔐 {len(_keep)}종목 — 내 계정에 암호화 저장됨')
+                except Exception as _e:
+                    st.toast(f'⚠️ 계정 저장 실패(이 세션에만 반영): {str(_e)[:60]}')
+            else:
+                st.toast(f'{len(_keep)}종목 반영 — 이 세션에만 있습니다')
             st.rerun()
 
         _live = st.session_state.get('pf_rows') or [
@@ -6267,6 +6290,18 @@ with tab_pf, guard('포트폴리오 가드레일'):
                                    data=json.dumps({'positions': _live, 'total_capital': _total_cap},
                                                    ensure_ascii=False, indent=2).encode('utf-8'),
                                    file_name='my_portfolio.json', mime='application/json')
+                if _us.ready() and _pf_email:
+                    st.caption(f"🔐 내 계정에 암호화 저장 · 마지막 저장 {str(st.session_state.get('pf_db_asof') or '-')[:16]} "
+                               "· 운영자도 내용을 볼 수 없습니다")
+                    if st.button('🗑️ 내 저장 데이터 완전 삭제', key='pf_db_del'):
+                        try:
+                            _us.delete(_pf_email)
+                            for _k in ('pf_rows', 'pf_cap', 'pf_db_asof'):
+                                st.session_state.pop(_k, None)
+                            st.toast('삭제했습니다 — 서버에 남은 것이 없습니다')
+                            st.rerun()
+                        except Exception as _e:
+                            st.error(f'삭제 실패: {str(_e)[:80]}')
 
 
 # ════════════════════════════════════════════════════════════════════
