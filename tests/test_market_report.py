@@ -40,6 +40,9 @@ _s.modules["krx_listing"] = types.SimpleNamespace(stock_listing=lambda *a, **k: 
 k = M.kr_today_facts("2026-10-21")["KR"]
 assert k["basis"] == "d1" and k["top"][0]["name"] == "삼성전자" and k["universe"] == 2 and k["breadth_up"] == 50, k
 assert M.kr_today_facts("2026-10-22") == {}, "어제 목록을 오늘 것으로 쓰지 않는다"
+assert k["breadth_all"] == {"up": 2, "down": 1, "flat": 0, "limit_up": 1, "limit_down": 0}, k["breadth_all"]
+assert [m["name"] for m in k["megacaps"]][:2] == ["삼성전자", "SK하이닉스"], k["megacaps"]
+assert M._sec_short("일차전지 및 이차전지 제조업") == "2차전지" and M._sec_short("가구 제조업") == "가구"
 fk = dict(kind="kr", generated="2026-10-21 15:52", verdict={},
           indices=[{"name": "코스피", "sym": "^KS11", "date": "2026-10-21", "close": 5900.0, "d1": 4.4, "d5": 1.0, "m1": -10.0, "from_52w_high": -30.0}],
           stocks={"KR": k}, signals={"market_direction": {"KR": "하락추세"}})

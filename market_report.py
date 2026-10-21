@@ -79,15 +79,60 @@ def drop_open_bar(s, sym, now=None):
     return s
 
 
-def index_facts():
-    out = []
-    df = None
+# 2026-10-21 디테일 보강(사용자: "디테일이 넘 떨어짐") — 전문 데일리(증권사 모닝·Bloomberg 류)가 늘 싣는 것:
+#   자산(달러·금·유가·구리·비트코인·장기채) · 업종 · 시총 상위 대장주. 전부 Yahoo 한 번에 받는다.
+US_ASSETS = [("DX-Y.NYB", "달러인덱스"), ("GC=F", "금"), ("CL=F", "WTI 유가"), ("HG=F", "구리"),
+             ("BTC-USD", "비트코인"), ("TLT", "미 장기채(TLT)")]
+US_SECTORS = [("XLK", "기술"), ("XLC", "통신서비스"), ("XLY", "경기소비재"), ("XLF", "금융"), ("XLV", "헬스케어"),
+              ("XLI", "산업재"), ("XLE", "에너지"), ("XLB", "소재"), ("XLP", "필수소비재"), ("XLU", "유틸리티"),
+              ("XLRE", "부동산")]
+US_MEGA = [("NVDA", "엔비디아"), ("MSFT", "마이크로소프트"), ("AAPL", "애플"), ("GOOGL", "알파벳"),
+           ("AMZN", "아마존"), ("META", "메타"), ("AVGO", "브로드컴"), ("TSLA", "테슬라"), ("BRK-B", "버크셔"),
+           ("JPM", "JP모건")]
+
+
+def _download(syms):
     try:
         import yfinance as yf
-        df = yf.download([s for s, _ in INDICES], period="1y", interval="1d", progress=False,
-                         auto_adjust=False, threads=True)["Close"]
+        return yf.download(list(syms), period="1y", interval="1d", progress=False,
+                           auto_adjust=False, threads=True)["Close"]
     except Exception:
-        df = None
+        return None
+
+
+def quote_facts(pairs, df=None, short=False):
+    """(심볼, 이름) 목록 → 1일·5일 등락. short=True 면 지수용 긴 항목(1개월·52주·200일선)은 뺀다."""
+    df = df if df is not None else _download([s for s, _ in pairs])
+    out = []
+    for sym, name in pairs:
+        try:
+            s = drop_open_bar(_series(sym, df), sym)
+            if s is None or len(s) < 30:
+                raise ValueError("시세 없음")
+            c = s.iloc[-1]
+            row = dict(name=name, sym=sym, date=str(s.index[-1].date()), close=_r(c),
+                       d1=_r((c / s.iloc[-2] - 1) * 100), d5=_r((c / s.iloc[-6] - 1) * 100))
+            if not short:
+                row.update(m1=_r((c / s.iloc[-22] - 1) * 100), from_52w_high=_r((c / s.max() - 1) * 100),
+                           above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None)
+            out.append(row)
+        except Exception as e:
+            out.append(dict(name=name, sym=sym, error=str(e)[:60]))
+    return out
+
+
+def us_extra_facts():
+    pairs = US_ASSETS + US_SECTORS + US_MEGA
+    df = _download([s for s, _ in pairs])
+    q = {x["sym"]: x for x in quote_facts(pairs, df, short=True)}
+    pick = lambda L: [q[s] for s, _ in L if "close" in q.get(s, {})]
+    sec = sorted(pick(US_SECTORS), key=lambda x: -x["d1"])
+    return dict(assets=pick(US_ASSETS), sectors=sec, megacaps=pick(US_MEGA))
+
+
+def index_facts():
+    out = []
+    df = _download([s for s, _ in INDICES])
     for sym, name in INDICES:
         try:
             s = drop_open_bar(_series(sym, df), sym)
@@ -178,10 +223,69 @@ def kr_today_facts(today=None):
     df = df.assign(_r=pd.to_numeric(df[col], errors="coerce"))
     big = df[(df["Marcap"] >= 1e12) & df["_r"].notna()].sort_values("_r")
     row = lambda r: dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1))
+    allr = df[df["_r"].notna()]
+    # 시장 폭 — 전 종목(코넥스·거래정지 제외) 상승/하락/보합, 상·하한가(±29.5% 이상)
+    breadth = dict(up=int((allr["_r"] > 0).sum()), down=int((allr["_r"] < 0).sum()), flat=int((allr["_r"] == 0).sum()),
+                   limit_up=int((allr["_r"] >= 29.5).sum()), limit_down=int((allr["_r"] <= -29.5).sum()))
+    # 거래대금(조원) — 코스피·코스닥
+    turnover = {}
+    if "Amount" in df and "MarketId" in df:
+        amt = pd.to_numeric(df["Amount"], errors="coerce")
+        for mid, nm in (("STK", "코스피"), ("KSQ", "코스닥")):
+            v = amt[df["MarketId"].astype(str) == mid].sum()
+            if v > 0:
+                turnover[nm] = _r(v / 1e12, 1)
+    # 시총 상위 10 — 지수를 움직인 대장주
+    mega = [row(r) for _, r in df[df["_r"].notna()].sort_values("Marcap", ascending=False).head(10).iterrows()]
+    # 업종 — sectors.json(KSIC 업종) 기준, 시총 1조+ 3종 이상인 업종의 시총가중 등락
+    sectors = []
+    try:
+        smap = _j("data/sectors.json") or {}
+        b2 = big.assign(_sec=big["Code"].map(lambda c: smap.get(str(c).zfill(6))))
+        b2 = b2[b2["_sec"].notna()]
+        for sec, g in b2.groupby("_sec"):
+            if len(g) >= 3:
+                w = g["Marcap"] / g["Marcap"].sum()
+                lead = g.sort_values("Marcap", ascending=False).iloc[0]
+                sectors.append(dict(name=_sec_short(sec), n=len(g), ret=_r((g["_r"] * w).sum(), 1),
+                                    lead=lead["Name"], lead_ret=_r(lead["_r"], 1)))
+        sectors.sort(key=lambda x: -x["ret"])
+    except Exception as e:
+        print("  업종 집계 생략:", str(e)[:80])
     return {"KR": dict(universe=len(big), basis="d1", asof=today,
                        top=[row(r) for _, r in big[::-1].head(6).iterrows()],
                        bottom=[row(r) for _, r in big.head(6).iterrows()],
-                       breadth_up=round((big["_r"] > 0).mean() * 100) if len(big) else None)}
+                       breadth_up=round((big["_r"] > 0).mean() * 100) if len(big) else None,
+                       breadth_all=breadth, turnover_tn=turnover, megacaps=mega, sectors=sectors)}
+
+
+_SEC_NAME = {  # KSIC 업종명 → 읽히는 이름. 없으면 _sec_short 규칙. (삼성전자는 KSIC상 '통신 및 방송 장비'다 — 대장주를 같이 적는 이유)
+    "기타 금융업": "지주·기타금융", "특수 목적용 기계 제조업": "특수기계(장비)", "전자부품 제조업": "전자부품",
+    "기타 화학제품 제조업": "화학제품", "의약품 제조업": "제약", "소프트웨어 개발 및 공급업": "소프트웨어",
+    "일차전지 및 이차전지 제조업": "2차전지", "기초 의약물질 제조업": "바이오·원료의약", "기초 화학물질 제조업": "기초화학",
+    "자연과학 및 공학 연구개발업": "바이오 R&D", "반도체 제조업": "반도체", "금융 지원 서비스업": "증권·금융지원",
+    "보험업": "보험", "일반 목적용 기계 제조업": "일반기계", "전동기, 발전기 및 전기 변환 · 공급 · 제어 장치 제조업": "전력기기",
+    "기타 식품 제조업": "식품", "종합 소매업": "유통", "자동차 신품 부품 제조업": "자동차부품", "자동차용 엔진 및 자동차 제조업": "자동차",
+    "통신 및 방송 장비 제조업": "통신·방송장비", "선박 및 보트 건조업": "조선", "건축기술, 엔지니어링 및 관련 기술 서비스업": "엔지니어링",
+    "절연선 및 케이블 제조업": "전선", "건물 건설업": "건설", "토목 건설업": "토목",
+    "측정, 시험, 항해, 제어 및 기타 정밀기기 제조업; 광학기기 제외": "정밀기기", "기타 전문 도매업": "전문도매",
+    "자료처리, 호스팅, 포털 및 기타 인터넷 정보매개 서비스업": "인터넷·포털", "1차 철강 제조업": "철강",
+    "1차 비철금속 제조업": "비철금속", "전기 통신업": "통신서비스", "은행 및 저축기관": "은행",
+    "오디오물 출판 및 원판 녹음업": "엔터(음반)", "의료용품 및 기타 의약 관련제품 제조업": "의료용품", "의료용 기기 제조업": "의료기기",
+    "항공기,우주선 및 부품 제조업": "항공우주", "무기 및 총포탄 제조업": "방산",
+}
+
+
+def _sec_short(s):
+    """'반도체 제조업' → '반도체' · 'XX, YY 및 ZZ 제조업; 무엇 제외' → 'XX'."""
+    if s in _SEC_NAME:
+        return _SEC_NAME[s]
+    s = str(s).split(";")[0]
+    for t in (" 제조업", " 도매업", " 소매업", " 서비스업", " 개발 및 공급업", "업"):
+        if s.endswith(t) and len(s) > len(t) + 1:
+            s = s[: -len(t)]
+            break
+    return s.split(",")[0].split(" 및 ")[0].strip()[:14]
 
 
 def facts(kind):
@@ -190,8 +294,14 @@ def facts(kind):
         return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict={},
                     indices=[x for x in index_facts() if x.get("sym") in KR_INDICES], stocks=kr_today_facts(),
                     signals=dict(market_direction={"KR": sg["market_direction"].get("KR")}))
-    return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict=verdict_facts(),
-                indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
+    f = dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict=verdict_facts(),
+             indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
+    if kind == "daily":
+        try:
+            f["us"] = us_extra_facts()
+        except Exception as e:
+            print("  미국 자산·업종·대장주 생략:", str(e)[:100])
+    return f
 
 
 # 2026-10-21: AI 는 '문장'만 쓴다 — 표·숫자 나열은 template() 가 facts 에서 그대로 찍는다.
@@ -201,8 +311,10 @@ PROMPT = """너는 개인투자자용 시황 리포트를 쓰는 애널리스트
 - **JSON 에 있는 숫자와 이름만 쓴다.** 뉴스·이벤트·원인·전망을 지어내지 않는다. 원인을 모르면 '데이터상 원인 불명'.
 - 숫자는 꼭 필요할 때만, JSON 값 그대로(소수 1자리 %). 표는 쓰지 않는다(표는 따로 붙는다).
 - 한국어, 마크다운. 아래 두 절만 쓴다:
-  ## 한 줄 요약   (한두 문장 — 한국·미국 시장 흐름)
-  ## 체크포인트   (데이터에서 보이는 것 3가지, 번호 목록 — 예측 금지, '확인할 것'만)
+  ## 한 줄 요약   (한두 문장 — 지수 방향 + 무엇이 끌었나(업종·대장주) + 시장 폭. 숫자는 소수 1자리)
+  ## 체크포인트   (데이터에서 보이는 것 3가지, 번호 목록 — 예측 금지, '확인할 것'만.
+                  표 숫자를 그대로 되풀이하지 말고 서로 다른 데이터를 연결해 읽는다:
+                  지수 vs 시장 폭(상승/하락 종목 수), 업종 vs 대장주, 1일 vs 5일·1개월, 자산(달러·금리·유가) vs 주식)
 JSON:
 {facts}"""
 
@@ -261,6 +373,26 @@ def template(f):
               "약세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["bottom"])]
         if "near_52w" in s:
             L.append(f"52주 신고가 근접 {s['near_52w']}종 · 이번 주 경신 {s['new_high']}종")
+    kr = (f.get("stocks") or {}).get("KR") or {}
+    if kr.get("breadth_all"):
+        b, t = kr["breadth_all"], kr.get("turnover_tn") or {}
+        L += ["", f"**시장 폭** 상승 {b['up']:,} · 하락 {b['down']:,} · 보합 {b['flat']:,} · 상한가 {b['limit_up']} · 하한가 {b['limit_down']}"
+              + (" · 거래대금 " + " · ".join(f"{k} {v:,.1f}조" for k, v in t.items()) if t else "")]
+    if kr.get("megacaps"):
+        L.append("**시총 상위 10** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in kr["megacaps"]))
+    if kr.get("sectors"):
+        sc = kr["sectors"]
+        L.append("**업종(시총가중)** 강세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[:3])
+                 + " · 약세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3]))
+    us = f.get("us") or {}
+    if us.get("assets"):
+        L += ["", "**자산** " + ", ".join(f"{a['name']} {a['d1']:+.1f}%" for a in us["assets"])]
+    if us.get("sectors"):
+        sc = us["sectors"]
+        L.append("**업종(섹터 ETF)** 강세 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[:3])
+                 + " · 약세 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[::-1][:3]))
+    if us.get("megacaps"):
+        L.append("**대장주** " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in us["megacaps"]))
     sg = f["signals"]
     md_ = sg.get("market_direction") or {}
     L += ["", "CANSLIM 시장방향 " + " · ".join(f"{m} {md_[m]}" for m in ("KR", "US") if md_.get(m))]
@@ -304,7 +436,8 @@ def unbacked_pcts(md, f):
 
 def render(f):
     asof = next((x.get("date") for x in f["indices"] if x.get("date")), f["generated"][:10])
-    span = {"daily": "전일(최근 거래일)", "weekly": "지난 1주", "kr": "오늘 한국 장(마감 기준)"}.get(f["kind"], "최근")
+    span = {"daily": "전일 미국 장(한국 지수는 오후 한국 리포트가 다루니 언급하지 말 것)", "weekly": "지난 1주",
+            "kr": "오늘 한국 장(마감 기준)"}.get(f["kind"], "최근")
     try:
         txt, model = ask_gemini(PROMPT.format(span=span, asof=asof,
                                               facts=json.dumps(f, ensure_ascii=False)))
