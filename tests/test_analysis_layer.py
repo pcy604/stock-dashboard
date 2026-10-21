@@ -136,18 +136,31 @@ def test_trend_template_rebound_not_called_breakdown():
 
 
 def test_earnings_trend_states():
+    """가속 = 매출 YoY 와 (이익증가÷매출) 이 둘 다 직전 분기보다 커짐(leaders_accel 정의) + 연속 분기 수."""
     import stock_extras as sx
 
-    def rows(ops):   # 오래된 → 최근, 2024.1Q 부터
-        out = []
-        for i, v in enumerate(ops):
-            y, q = 2024 + i // 4, i % 4 + 1
-            out.append({'period': f'{y}.{q}Q', 'op_income': v, 'revenue': 100.0})
+    def rows(ops, revs=None):   # 오래된 → 최근, 2024.1Q 부터. 매출 단위 1e9(하한 $10M 위)
+        revs = revs or [100.0] * len(ops)
+        out = [{'period': f'{2024 + i // 4}.{i % 4 + 1}Q', 'op_income': o * 1e9, 'revenue': r * 1e9}
+               for i, (o, r) in enumerate(zip(ops, revs))]
         return out[::-1]
-    assert sx.earnings_trend(rows([-5, -5, -5, -5, 3]))['state'] == '흑자전환'
+    # 수준 판정(가속 아님: 매출이 그대로라 Δrv = 0)
+    assert sx.earnings_trend(rows([-5, -5, -5, -5, 3]))['level'] == '흑자전환'
     assert sx.earnings_trend(rows([-9, -5, -5, -5, -4]))['state'] == '적자 축소'
     assert sx.earnings_trend(rows([-4, -5, -5, -5, -9]))['state'] == '적자 확대'
     assert sx.earnings_trend(rows([5, 5, 5, 5, -1]))['state'] == '적자전환'
-    assert sx.earnings_trend(rows([10, 10, 10, 10, 11, 15]))['state'] == '이익 가속'
     assert sx.earnings_trend(rows([10, 10, 10, 10, 9]))['state'] == '이익 감소'
     assert sx.earnings_trend(rows([1, 2]))['state'] == '데이터 부족'
+    # 매출·이익 둘 다 3분기 연속 빨라짐 → 3분기 연속 가속
+    ops = [10, 10, 10, 10, 10, 11, 13, 17]
+    revs = [100, 100, 100, 100, 100, 102, 106, 112]
+    t = sx.earnings_trend(rows(ops, revs))
+    assert t['streak'] == 3 and t['state'] == '이익 가속 · 3분기 연속' and t['tone'] == 'good', t['state']
+    # 마지막 분기만 빨라짐 → 확인 전
+    t = sx.earnings_trend(rows([10] * 7 + [12], [100] * 7 + [103]))
+    assert t['streak'] == 1 and t['state'] == '가속 1분기 · 확인 전'
+    # 이익은 늘지만 증가 속도가 줄면 '감속'
+    t = sx.earnings_trend(rows([10, 10, 10, 10, 15, 15, 15, 14], [100, 100, 100, 100, 110, 110, 110, 108]))
+    assert t['state'] == '이익 증가 · 감속', t['state']
+    # 기저효과: 1년 전 이익이 아주 작았다
+    assert sx.earnings_trend(rows([10, 10, 10, 0.5, 10, 10, 10, 12]))['base_warn'] is True

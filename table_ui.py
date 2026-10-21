@@ -38,7 +38,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 8
-API_VERSION = 3          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
+API_VERSION = 4          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -495,6 +495,38 @@ def strip_fmt_units(cfg: dict) -> dict:
     return cfg
 
 
+_PRINTF_NUM = re.compile(r'%(\+)?(0|\'.)?(-)?(,|_)?(\d+)?(\.\d+)?([dif])')
+
+
+def _yearish(s: pd.Series) -> bool:
+    """연도·코드처럼 쉼표를 찍으면 안 되는 정수 열(2,025 가 되면 안 된다)."""
+    if str(s.name) in _ID_COLS or str(s.name) == 'No.':
+        return True
+    v = pd.to_numeric(s, errors='coerce').dropna()
+    return len(v) > 0 and bool(((v >= 1900) & (v <= 2100) & (v == v.round())).all())
+
+
+def add_thousands(cfg: dict, df: pd.DataFrame) -> dict:
+    """2026-10-21 — 모든 표 숫자에 천 단위 쉼표. Streamlit 기본 표시는 쉼표를 안 찍는다(numbro thousandSeparated:false).
+    printf 서식 '%.1f'·'%+.1f'·'%d' → '%,.1f'·'%+,.1f'·'%,d' (Streamlit sprintf-js 는 '+' 다음 ',' 순서만 받는다)."""
+    for k, v in list(cfg.items()):
+        if not isinstance(v, dict) or k not in df.columns or _yearish(df[k]):
+            continue
+        tc = v.get('type_config') or {}
+        f = tc.get('format')
+        if not (isinstance(f, str) and '%' in f):
+            continue
+        m = _PRINTF_NUM.search(f)
+        if not m or m.group(4):
+            continue
+        sign, pad, left, _, width, prec, typ = m.groups()
+        nf = f[:m.start()] + '%' + (sign or '') + (pad or '') + (left or '') + ',' + (width or '') + (prec or '') + typ + f[m.end():]
+        v = dict(v)
+        v['type_config'] = dict(tc, format=nf)
+        cfg[k] = v
+    return cfg
+
+
 # ── 종목 클릭 → 종목 분석 (2026-10-19) ────────────────────────────
 NAV = {'fn': None}
 FX = {'fn': None}      # 원/달러 — 대시보드가 set_fx(_usdkrw) 로 넣는다
@@ -614,11 +646,23 @@ def install(st):
                 kw['column_order'] = ['No.'] + [ren.get(c, c) for c in kw['column_order'] if c != 'No.']
 
             # 표시 소수 1자리(2026-08-17 규칙) — 호출부가 column_config 를 안 줬을 때만
-            if 'column_config' not in kw:
-                cfg = {c: st.column_config.NumberColumn(format='%.1f')
-                       for c in df.columns if pd.api.types.is_float_dtype(df[c])}
-                cfg['No.'] = st.column_config.NumberColumn('No.', format='%d')
-                kw['column_config'] = cfg
+            # 2026-10-21 — column_config 서식은 Styler 서식보다 우선한다(Streamlit 문서). 호출부가 Styler 로 서식을 정한 열
+            #   (재무제표처럼 행마다 단위가 다른 표)에 기본 '%.1f' 를 깔면 그 서식(부호·쉼표·소수 자리)이 지워졌다 → 건너뛴다.
+            _sty_cols = set()
+            if sty is not None:
+                _sty_cols = {sty.data.columns[c] for (_r, c) in sty._display_funcs.keys()
+                             if c < len(sty.data.columns)}
+            cfg = kw.get('column_config') if isinstance(kw.get('column_config'), dict) else None
+            if cfg is None:
+                cfg = {'No.': st.column_config.NumberColumn('No.', format='%d')}
+            for c in df.columns:
+                if c in cfg or c in _sty_cols or c == 'No.':
+                    continue
+                if pd.api.types.is_float_dtype(df[c]):
+                    cfg[c] = st.column_config.NumberColumn(format='%,.1f' if not _yearish(df[c]) else '%.0f')
+                elif pd.api.types.is_integer_dtype(df[c]) and not _yearish(df[c]):
+                    cfg[c] = st.column_config.NumberColumn(format='%,d')
+            kw['column_config'] = add_thousands(cfg, df)
 
             fr = sys._getframe(2)   # dataframe() → _dataframe() 한 겹 더
             base = f'tf|{os.path.basename(fr.f_code.co_filename)}:{fr.f_lineno}'

@@ -293,58 +293,76 @@ def trend_template(close: pd.Series, high: pd.Series | None = None, low: pd.Seri
             'from_low': fl, 'from_high': fh}
 
 
-# ── 6) 분기 이익 추이 — 적자 축소·흑자전환까지 (2026-10-21, KR 포함) ─────
-def earnings_trend(rows: list[dict], key: str = 'op_income') -> dict:
-    """분기 영업이익(3개월치) 추이로 상태를 판정한다. 같은 분기 전년 대비(YoY)로만 본다 — 계절성.
-    · 적자 → 흑자 = '흑자전환'(가장 강한 신호) · 적자 폭이 YoY 로 줄면 '적자 축소'(개선이지 가속은 아니다)
-    · 흑자 → 적자 = '적자전환' · 적자 폭이 커지면 '적자 확대'
-    · 흑자 → 흑자: YoY 성장률이 직전 분기보다 커졌으면 '이익 가속', 플러스면 '이익 증가', 아니면 '이익 감소'
-    적자 기저의 성장률(%)은 뜻이 없어서 계산하지 않는다(−10 → +5 를 '+150%'라 부르지 않는다).
-    반환: {'state','tone','detail','rows':[{분기, 영업이익, YoY(%), 매출YoY(%)}] 최신순, 'streak'}"""
+# ── 6) 분기 이익 추이 — 이익 가속(미국 신호와 같은 정의) + 몇 분기 연속인지 (2026-10-21, KR 포함) ─────
+MAX_OIA = 10.0          # leaders_accel.MAX_OIA 와 같은 값(매출이 사업 규모를 대표 못 하는 회사 제외)
+
+
+def earnings_trend(rows: list[dict], key: str = 'op_income', is_kr: bool = False) -> dict:
+    """가속의 정의는 leaders_accel(미국 진입 신호)과 **같다** — 같은 이름에 정의가 둘이면 안 된다.
+      매출 성장률   rv = 매출 YoY(%)
+      이익 성장     oi = (영업익_t − 영업익_t−4) ÷ |매출_t|   ← 매출로 나눠 적자에서도 정의된다(적자 축소도 측정)
+      가속          Δrv > 0 AND Δoi > 0 (직전 분기보다 둘 다 빨라짐), |Δoi| ≤ 10
+    한 분기 가속은 잡음(기저효과·일회성)일 수 있어 **연속 분기 수**를 같이 낸다.
+      1분기 = '확인 전' · 2분기 = 가속 · 3분기+ = 미너비니 'Code 33'(3분기 연속 가속)에 해당하는 강한 가속.
+      (He & Narayanamoorthy 2020: 시장은 가속이 2~3분기 이어질 함의를 늦게 반영 — 연속은 그 확인)
+    ⚠️ 연속 조건이 1분기 조건보다 수익이 나은지는 아직 백테스트 안 했다 → 화면 '상태'일 뿐 신호가 아니다.
+    수준 판정(같은 분기 전년 대비): 흑자전환 · 적자전환 · 적자 축소 · 적자 확대 · 이익 증가 · 이익 감소.
+    기저효과: 1년 전 분기 이익이 최근 8분기 |이익| 중앙값의 25% 미만이면 성장률이 부풀려진다고 표시.
+    반환: {'state','tone','level','streak','acc_8q','base_warn','rows':[최신순], 'last'}"""
     q = quarterly_frame(rows)
     if q.empty or key not in q or q[key].notna().sum() < 5:
-        return {'state': '데이터 부족', 'tone': 'na', 'detail': '분기 손익 5개 미만', 'rows': []}
+        return {'state': '데이터 부족', 'tone': 'na', 'detail': '분기 손익 5개 미만', 'rows': [], 'streak': 0}
     q = q.sort_index()
-    v = q[key]
-    rv = q.get('revenue')
-    yo = v.shift(4)
-    # 4분기 전이 정확히 1년 전인지(분기 결손 방지)
-    span = pd.Series(q.index, index=q.index).diff(4).dt.days
-    valid = span.between(350, 380)
-
-    def g(a, b):
-        if pd.isna(a) or pd.isna(b) or b <= 0 or a <= 0:
-            return None
-        return (a / b - 1) * 100
+    v, rv = q[key], q.get('revenue')
+    if rv is None:
+        rv = pd.Series(float('nan'), index=q.index)
+    days = pd.Series(q.index, index=q.index)
+    ok4 = days.diff(4).dt.days.between(350, 380)          # 4분기 전이 정확히 1년 전(결손 분기 방지)
+    ok1 = days.diff(1).dt.days.between(80, 100)
+    min_rev = 1.4e10 if is_kr else 1e7                     # 미국 $10M 하한과 같은 규모(약 140억원)
+    rabs = rv.abs().where(rv.abs() >= min_rev)
+    oi = ((v - v.shift(4)) / rabs).where(ok4)
+    rg = ((rv / rv.shift(4) - 1) * 100).where(ok4 & (rv.shift(4) > 0))
+    oia = (oi - oi.shift(1)).where(ok1)
+    rva = (rg - rg.shift(1)).where(ok1)
+    acc = (rva > 0) & (oia > 0) & (oia.abs() <= MAX_OIA)
 
     tab = []
     for d in q.index[::-1][:8]:
-        a, b = v.get(d), yo.get(d)
-        ok = bool(valid.get(d))
+        a, b = v.get(d), (v.shift(4).get(d) if ok4.get(d) else None)
+        yoy = (a / b - 1) * 100 if (b is not None and pd.notna(a) and pd.notna(b) and a > 0 and b > 0) else None
         tab.append({'분기': f"{d.year}.{(d.month - 1) // 3 + 1}Q", '_d': d, 'op': a,
-                    'yoy': g(a, b) if ok else None, 'prev': b if ok else None,
-                    'rev_yoy': g(rv.get(d), rv.shift(4).get(d)) if (rv is not None and ok) else None})
+                    'prev': b if (b is not None and pd.notna(b)) else None, 'yoy': yoy,
+                    'rev_yoy': None if pd.isna(rg.get(d)) else float(rg.get(d)),
+                    'oi_pp': None if pd.isna(oi.get(d)) else float(oi.get(d)) * 100,     # 이익 증가폭 ÷ 매출(%p)
+                    'acc': bool(acc.get(d)) if pd.notna(oia.get(d)) and pd.notna(rva.get(d)) else None})
     if not tab or tab[0]['op'] is None or pd.isna(tab[0]['op']) or tab[0]['prev'] is None:
-        return {'state': '판정 불가', 'tone': 'na', 'detail': '1년 전 같은 분기 없음', 'rows': tab}
+        return {'state': '판정 불가', 'tone': 'na', 'detail': '1년 전 같은 분기 없음', 'rows': tab, 'streak': 0}
     a, b = tab[0]['op'], tab[0]['prev']
     if a > 0 and b <= 0:
-        state, tone = '흑자전환', 'good'
+        level = '흑자전환'
     elif a <= 0 and b > 0:
-        state, tone = '적자전환', 'bad'
+        level = '적자전환'
     elif a <= 0 and b <= 0:
-        state, tone = ('적자 축소', 'mid') if a > b else ('적자 확대', 'bad')
+        level = '적자 축소' if a > b else '적자 확대'
     else:
-        g0, g1 = tab[0]['yoy'], (tab[1]['yoy'] if len(tab) > 1 else None)
-        if g0 is not None and g0 > 0 and g1 is not None and g0 > g1:
-            state, tone = '이익 가속', 'good'
-        elif g0 is not None and g0 > 0:
-            state, tone = '이익 증가', 'good' if g0 >= 25 else 'mid'
-        else:
-            state, tone = '이익 감소', 'bad'
-    # 연속 개선 분기 수(YoY 로 영업이익이 늘어난 분기 — 적자 축소 포함)
+        level = '이익 증가' if a > b else '이익 감소'
     streak = 0
     for r in tab:
-        if r['prev'] is None or r['op'] is None or pd.isna(r['op']) or not (r['op'] > r['prev']):
+        if r['acc'] is not True:
             break
         streak += 1
-    return {'state': state, 'tone': tone, 'rows': tab, 'streak': streak, 'last': tab[0]}
+    acc_8q = sum(1 for r in tab if r['acc'] is True)
+    recent = [abs(x) for x in v.dropna().tail(8)]
+    base_warn = bool(recent and b is not None and abs(b) < 0.25 * float(np.median(recent)))
+    if streak >= 3:
+        state, tone = f'이익 가속 · {streak}분기 연속', 'good'
+    elif streak == 2:
+        state, tone = '이익 가속 · 2분기 연속', 'good'
+    elif streak == 1:
+        state, tone = '가속 1분기 · 확인 전', 'mid'
+    else:
+        state = {'이익 증가': '이익 증가 · 감속'}.get(level, level)
+        tone = {'흑자전환': 'good', '이익 증가': 'mid', '적자 축소': 'mid'}.get(level, 'bad')
+    return {'state': state, 'tone': tone, 'level': level, 'streak': streak, 'acc_8q': acc_8q,
+            'base_warn': base_warn, 'rows': tab, 'last': tab[0]}

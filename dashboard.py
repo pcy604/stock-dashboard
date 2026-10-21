@@ -148,11 +148,11 @@ def color_table(df: pd.DataFrame):
 
     빈 칸은 'None' 이 아니라 '-' 로 낸다 — 없는 데이터를 있는 척하지 않되,
     파이썬 내부 표현을 화면에 흘리지도 않는다."""
-    fmt = {c: ('{:.2f}' if c in _C_2DP else '{:.1f}')
+    fmt = {c: ('{:,.2f}' if c in _C_2DP else '{:,.1f}')
            for c in df.columns if pd.api.types.is_numeric_dtype(df[c])}
     for c in ('회차', '신호', '표본', '신호 수'):
         if c in fmt:
-            fmt[c] = '{:.0f}'
+            fmt[c] = '{:,.0f}'
     return df.style.format(fmt, na_rep='-')
 
 
@@ -665,11 +665,12 @@ def load_json(path):
 #   호출부에서 .format({...}) 을 명시한 열은 그 포맷이 그대로 우선한다.
 pd.set_option('styler.format.precision', 1)
 pd.set_option('styler.format.na_rep', '-')      # 결측은 '-' (nan/None 을 화면에 흘리지 않는다)
+pd.set_option('styler.format.thousands', ',')   # 천 단위 쉼표 (2026-10-21)
 
 #   숫자 열 %.1f 기본 포맷 · 부호 색(+초록/−빨강, 클수록 진하게) · 🔎 필터는 전부
 #   table_ui 한 곳에서 st.dataframe 을 감싸 처리한다(2026-10-15). 표마다 따로 하지 않는다.
 import table_ui as _tui
-if getattr(_tui, 'API_VERSION', 0) < 3:          # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
+if getattr(_tui, 'API_VERSION', 0) < 4:          # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
     import importlib as _il
     _tui = _il.reload(_tui)
 _tui.install(st)
@@ -2563,8 +2564,8 @@ with t_value, guard('가치 발굴'):
                 st.dataframe(
                     _vdf9.style.map(_c_verd, subset=['판정', '컨센리비전'])
                         .map(_c_delta, subset=['ΔROE(속도)', 'ΔOPM(마진속도)', '성장가속'])
-                        .format({'PER': '{:.1f}', 'PBR': '{:.2f}', 'PSR': '{:.2f}', 'ROE%(위치)': '{:.1f}',
-                                 'ΔROE(속도)': '{:+.1f}', 'ΔOPM(마진속도)': '{:+.1f}', '성장가속': '{:+.1f}'}, na_rep='-'),
+                        .format({'PER': '{:,.1f}', 'PBR': '{:,.2f}', 'PSR': '{:,.2f}', 'ROE%(위치)': '{:,.1f}',
+                                 'ΔROE(속도)': '{:+,.1f}', 'ΔOPM(마진속도)': '{:+,.1f}', '성장가속': '{:+,.1f}'}, na_rep='-'),
                     use_container_width=True, hide_index=True, row_height=25, height=_dfh(min(len(_vdf9), 20)),
                     column_config={'시총($B)': st.column_config.NumberColumn(format='$%.1fB'),
                                    '매출성장': st.column_config.NumberColumn(format='%+.0f%%'),
@@ -3026,7 +3027,7 @@ def _fred_yoy(series_id: str):
         return round((d[-1][1] / d[-13][1] - 1) * 100, 2)
     return None
 
-def _plotly_line(dfs, labels, colors, title, yformat='{:.2f}', height=260):
+def _plotly_line(dfs, labels, colors, title, yformat='{:,.2f}', height=260):
     fig = go.Figure()
     for df, label, color in zip(dfs, labels, colors):
         if df.empty: continue
@@ -3078,7 +3079,7 @@ def macro_price_state():
 def macro_triggers(d, px):
     """국면을 넘기는 관측 가능한 방아쇠. (방향, 지표, 현재, 임계, 넘었나, 뜻)"""
     T = []
-    def add(side, name, cur, thr, hit, why, fmt='{:+.2f}'):
+    def add(side, name, cur, thr, hit, why, fmt='{:+,.2f}'):
         T.append(dict(side=side, name=name, val=cur,
                       cur=('-' if cur is None else fmt.format(cur)),
                       thr=thr, hit=(None if cur is None else hit), why=why))
@@ -3089,7 +3090,7 @@ def macro_triggers(d, px):
         '재역전은 경기 침체 선행. 역전 해소 직후 침체가 오는 패턴도 있어 방향을 같이 봅니다.')
     add('악화', '실업률 상승폭(12개월 최저 대비)', d.get('sahm'), '≥ +0.50%p',
         (d.get('sahm') is not None and d['sahm'] >= 0.5),
-        '삼의 법칙. 발동하면 성장을 "악화"로 강제 전환한다 — 실적장세 종료 신호.', '{:+.2f}')
+        '삼의 법칙. 발동하면 성장을 "악화"로 강제 전환한다 — 실적장세 종료 신호.', '{:+,.2f}')
     add('악화', '산업생산 YoY', d.get('ip_yoy'), '< 0.0%',
         (d.get('ip_yoy') is not None and d['ip_yoy'] < 0),
         '이익 사이클의 대용치. 마이너스로 내려가면 ☀️실적장세가 유지되지 않는다.', '{:+.1f}%')
@@ -3146,7 +3147,7 @@ def _mo_series():
     return {k: _mf.to_series(fetch_fred(k, n)) for k, n in _MO_FRED.items()}
 
 
-def _mo_last(s, fmt='{:.2f}'):
+def _mo_last(s, fmt='{:,.2f}'):
     return fmt.format(float(s.iloc[-1])) if len(s) else '-'
 
 
@@ -4634,12 +4635,13 @@ def _tab_analysis():
                     # 2026-10-21 — 'KR 미운영' 대신 분기 영업이익 추이(흑자전환·적자 축소·가속). 주간 진입 신호는
                     #   한국에서 백테스트로 기각돼(원칙 v1.2) 신호로 쓰지 않는다 — 상태만 보인다.
                     try:
-                        _et0 = _sx.earnings_trend(_q_rows_long(sym8_clean, True)[0])
+                        _et0 = _sx.earnings_trend(_q_rows_long(sym8_clean, True)[0], is_kr=True)
                     except Exception:
                         _et0 = {'state': '판정 불가', 'tone': 'na'}
                     _l0 = _et0.get('last') or {}
                     _sig_b = f"분기 이익 · {_et0['state']}"
-                    _sig_s = (f"{_l0.get('분기')} 영업이익 전년 같은 분기 대비" if _l0 else "분기 손익 데이터 부족")
+                    _sig_s = (f"{_l0.get('분기')} 기준 · 이익 수준 {_et0.get('level', '-')} · 최근 8분기 중 가속 {_et0.get('acc_8q', 0)}회"
+                              if _l0 else "분기 손익 데이터 부족")
                     _dot = {'good': '#16A34A', 'mid': '#F59E0B', 'bad': '#DC2626'}.get(_et0.get('tone'), '#6B7280')
                 elif _ah0 and _ah0['rows']:
                     _r0 = _ah0['rows'][0]
@@ -5729,8 +5731,12 @@ def _tab_analysis():
                                 _ukind, _sg = '매도', -1
                             elif 'Purchase' in _utxt or 'Buy' in _utxt:
                                 _ukind, _sg = '매수', 1
-                            elif 'onversion' in _utxt or 'xercise' in _utxt:
-                                _ukind, _sg = '행사·전환', 0
+                            elif 'Award' in _utxt or 'Grant' in _utxt:
+                                _ukind, _sg = '부여(보상·RSU 등)', 0     # 회사가 준 주식 보상 — 본인 돈으로 산 게 아니다
+                            elif 'xercise' in _utxt:
+                                _ukind, _sg = '옵션 행사', 0
+                            elif 'onversion' in _utxt:
+                                _ukind, _sg = '전환', 0
                             elif 'Gift' in _utxt:
                                 _ukind, _sg = '증여', 0
                             else:
@@ -5755,7 +5761,8 @@ def _tab_analysis():
                         st.dataframe(_udf, filters=False, row_height=25,
                                      column_config={'주수': st.column_config.NumberColumn(format='localized'),
                                                     '금액($M)': st.column_config.NumberColumn(format='%+,.2f')})
-                        st.caption("금액: 매수 +, 매도 −(백만 달러). 행사·전환·증여는 현금 매매가 아니라 합계에서 뺀다. "
+                        st.caption("금액: 매수 +, 매도 −(백만 달러). 부여(RSU·성과주식 등 회사 보상)·옵션 행사·전환·증여는 "
+                                   "본인 현금 매매가 아니라 합계에서 뺀다 — 내부자 신호로 읽을 건 **시장에서 직접 산 매수**다. "
                                    "Form 4 에 금액이 비어 있으면 주수×그날 종가로 추정. 정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
 
 
@@ -6102,15 +6109,16 @@ def _tab_analysis():
                     else:
                         _cards.append(_kpi('밸류', '-', '밴드 계산 불가', 'na'))
                     # 이익 — KR 은 이익 가속 '신호'(US 주간 규칙)가 없으니 분기 영업이익 추이로 판정(흑자전환·적자 축소 포함)
-                    _etr = _sx.earnings_trend(_L.get('_qr') or [])
+                    _etr = _sx.earnings_trend(_L.get('_qr') or [], is_kr=is_kr_sym)
                     _el = _etr.get('last') or {}
                     _ef = (lambda v: (f"{v/1e12:+,.1f}조" if abs(v) >= 1e12 else f"{v/1e8:+,.0f}억") if is_kr_sym
                            else (f"{v/1e9:+,.2f}B" if abs(v) >= 1e9 else f"{v/1e6:+,.0f}M"))
                     _esub = ''
                     if _el.get('op') is not None and pd.notna(_el.get('op')):
-                        _esub = (f"{_el['분기']} 영업익 {_ef(_el['op'])}"
+                        _esub = (f"{_etr.get('level')} · " if _etr.get('level') and _etr.get('level') not in _etr['state'] else '') + (f"{_el['분기']} 영업익 {_ef(_el['op'])}"
                                  + (f" (전년 {_ef(_el['prev'])})" if _el.get('prev') is not None else '')
-                                 + (f" · 매출 {_el['rev_yoy']:+.0f}%" if _el.get('rev_yoy') is not None else ''))
+                                 + (f" · 매출 {_el['rev_yoy']:+.0f}%" if _el.get('rev_yoy') is not None else '')
+                                 + (" · ⚠️ 기저효과" if _etr.get('base_warn') else ''))
                     if is_kr_sym:
                         _cards.append(_kpi('이익 추이', _etr['state'], _esub or _etr.get('detail', ''), _etr['tone']))
                     elif _acch and _acch['rows']:
@@ -6161,20 +6169,26 @@ def _tab_analysis():
                                            "고점 −20% 는 추세가 아니라 **보유 중 청산선**이라 리스크 점검에 따로 둔다.")
                         with _rc4:
                             if _etr.get('rows'):
-                                st.markdown(f"**💰 분기 영업이익 — {_etr['state']}**"
-                                            + (f" · {_etr['streak']}분기 연속 개선" if _etr.get('streak', 0) >= 2 else ''))
+                                st.markdown(f"**💰 분기 이익 — {_etr['state']}**"
+                                            + (f" · 수준 {_etr['level']}" if _etr.get('level') and _etr['level'] not in _etr['state'] else '')
+                                            + f" · 최근 8분기 중 가속 {_etr.get('acc_8q', 0)}회")
                                 _eu = ('억원', 1e8) if is_kr_sym else ('$M', 1e6)
                                 _tsrc(_L.get('_qsrc') or '분기 손익', live=True)
                                 st.dataframe(pd.DataFrame([{
                                     '분기': r['분기'], f"영업이익({_eu[0]})": None if r['op'] is None or pd.isna(r['op']) else round(r['op'] / _eu[1]),
                                     f"전년 같은 분기({_eu[0]})": None if r['prev'] is None else round(r['prev'] / _eu[1]),
                                     '영업이익 YoY(%)': None if r['yoy'] is None else round(r['yoy'], 1),
-                                    '매출 YoY(%)': None if r['rev_yoy'] is None else round(r['rev_yoy'], 1)}
+                                    '매출 YoY(%)': None if r['rev_yoy'] is None else round(r['rev_yoy'], 1),
+                                    '이익증가÷매출(%p)': None if r['oi_pp'] is None else round(r['oi_pp'], 1),
+                                    '가속': '가속' if r['acc'] else ('-' if r['acc'] is None else '')}
                                     for r in _etr['rows'][:6]]), filters=False,
                                     column_config={f"영업이익({_eu[0]})": st.column_config.NumberColumn(format='localized'),
                                                    f"전년 같은 분기({_eu[0]})": st.column_config.NumberColumn(format='localized')})
-                                st.caption("같은 분기 전년 대비로만 본다(계절성). 적자 기저의 성장률은 뜻이 없어 '-' — "
-                                           "적자가 줄면 '적자 축소', 흑자로 돌면 '흑자전환'.")
+                                st.caption("**가속 = 매출 YoY 와 '이익증가÷매출'이 둘 다 직전 분기보다 커진 분기** — 미국 이익 가속 신호와 같은 정의"
+                                           "(이익 증가를 매출로 나눠 적자에서도 측정된다. 그래서 '이익 감소'인데 '가속'일 수 있다 = 감소 폭이 줄었다). "
+                                           "한 분기는 기저효과·일회성일 수 있어 연속 분기 수를 본다: 1분기 확인 전 · 2분기 가속 · "
+                                           "3분기+ 강한 가속(미너비니 'Code 33'). ⚠️ 연속 조건의 수익 우위는 아직 백테스트 전 — 상태 표시일 뿐 매수 신호 아님. "
+                                           "기저효과 = 1년 전 분기 이익이 최근 8분기 중앙값의 25% 미만.")
 
                     if _acch and _acch['rows']:
                         with st.expander(f"🚀 이익 가속 신호 이력 — {len(_acch['rows'])}회"):
