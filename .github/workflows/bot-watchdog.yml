@@ -1,0 +1,33 @@
+# 부자알람(buza-bot)이 아예 안 도는 고장을 바깥에서 감시 — tools/bot_watchdog.py 상단 참고.
+# 이 레포는 공개라 Actions 무료(비공개 buza-bot 의 월 2,000분 한도와 무관). 1회 1분 미만.
+name: bot-watchdog
+
+on:
+  schedule:
+    - cron: '41 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tools/bot_watchdog.py
+            telegram_notifier.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: 부자알람 생존 확인
+        env:
+          BUZA_READ_TOKEN:  ${{ secrets.BUZA_READ_TOKEN }}
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python tools/bot_watchdog.py
