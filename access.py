@@ -19,7 +19,9 @@ secrets.toml
 
   [access]
   owner_email = "pcy604604@gmail.com"      # 토스 연동 칸은 이 계정에만 보인다
-  allowed_emails = ["a@gmail.com", "b@gmail.com"]   # 비우면 owner 만
+  open = true                              # 로그인한 누구나 — 초대 없이 자동 입장
+  allowed_emails = ["a@gmail.com"]         # open=false 일 때만 쓰는 명단
+  blocked_emails = []                      # 문제 계정 차단(open 이어도 막힘)
 
   [analytics]
   posthog_key = "phc_..."                  # 없으면 측정 끔
@@ -69,6 +71,12 @@ def allowed(em: str | None = None) -> bool:
     em = (em if em is not None else email())
     if not em:
         return False
+    blk = [str(x).strip().lower() for x in (_sec('access', 'blocked_emails', []) or [])]
+    if em in blk:
+        return False
+    # open = true → 구글 로그인만 하면 누구나(2026-10-21). 보유 종목은 세션에만 있어 서로 볼 수 없으므로 명단이 보안 장치가 아니다.
+    if _sec('access', 'open', False):
+        return True
     lst = [str(x).strip().lower() for x in (_sec('access', 'allowed_emails', []) or [])]
     return em == owner() or em in lst
 
