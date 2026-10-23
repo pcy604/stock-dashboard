@@ -94,3 +94,4 @@ results/guru_chart_latest.png
 .contract_violations.json
 data/_fundq_ci.db
 executor/ledger.json.tmp
+data/fw_v13y.parquet

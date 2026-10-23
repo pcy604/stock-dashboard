@@ -57,7 +57,8 @@ def load():
 
 def run(px, g, *, slots=20, stop=20, stop_min=0, take=None, pyr=None, cap=None,
         trim=None, replace=False, brake=None, delay=1, shock=0.0, seed=0, cash_r=None,
-        pyr_first=True, order='alpha', mc=None, init_frac=1.0, red=None, red_exit=None, ratchet=None, lock=None, tstop=None):
+        pyr_first=True, order='alpha', mc=None, init_frac=1.0, red=None, red_exit=None, ratchet=None, lock=None, tstop=None,
+        log=None):
     """
     stop      고점 대비 % (None=없음). stop_min 주 이전엔 미적용
     take      (min_wk, dry_wk): min_wk 보유 후, 진입 후 최고가를 dry_wk 주 못 넘으면 전량 매도
@@ -67,6 +68,7 @@ def run(px, g, *, slots=20, stop=20, stop_min=0, take=None, pyr=None, cap=None,
     trim      종목 비중이 trim% 를 넘으면 cap(없으면 trim) 까지 덜어낸다
     replace   만석일 때 손실 중 최악 종목을 팔고 신규 진입
     brake     (dd%, mult): 계좌가 고점 대비 dd% 이상 빠져 있으면 신규·추가 매수 금액 × mult
+    log       list 를 주면 청산된 거래를 한 줄씩 남긴다(2026-10-24, 백테스트 상세 화면용) — 결과 수치는 그대로
     """
     rng = np.random.default_rng(seed)
     G = g.shift(delay).astype('boolean').fillna(False).astype(bool) if delay else g
@@ -78,13 +80,20 @@ def run(px, g, *, slots=20, stop=20, stop_min=0, take=None, pyr=None, cap=None,
         if v == v and v > 0:
             pos[j]['last'] = v; return v
         return pos[j]['last']
+    def _log(j, i, xp, why):
+        if log is not None:
+            e = pos[j]
+            log.append(dict(sym=str(cols[j]), buy=str(idx[e['i0']].date()), sell=str(idx[i].date()),
+                            buy_px=round(float(e['entry']), 4), sell_px=round(float(xp), 4),
+                            peak_px=round(float(e['peak']), 4), wk=int(e['wk']), inv=float(e['inv']),
+                            out=float(e['sh'] * xp * (1 - COST)), why=why))
     for i in range(len(idx)):
         if cash_r is not None and cash > 0:
             cash *= 1 + cash_r.iloc[i]
         if shock > 0:
             for j in list(pos):
                 if rng.random() < shock:
-                    trades.append((pos[j]['inv'], 0.0)); del pos[j]
+                    _log(j, i, 0.0, '상폐충격'); trades.append((pos[j]['inv'], 0.0)); del pos[j]
         # 1) 청산
         for j in list(pos):
             e = pos[j]; c = price(j, i); e['wk'] += 1
@@ -92,7 +101,7 @@ def run(px, g, *, slots=20, stop=20, stop_min=0, take=None, pyr=None, cap=None,
                 e['peak'] = c; e['pk_wk'] = e['wk']
             ddp = (c / e['peak'] - 1) * 100
             out = False
-            if stop is not None and e['wk'] > stop_min and ddp <= -stop: out = True
+            if stop is not None and e['wk'] > stop_min and ddp <= -stop: out = '고점대비 손절'
             if take and e['wk'] >= take[0] and (e['wk'] - e['pk_wk']) >= take[1]: out = True
             pg = (e['peak'] / e['entry'] - 1) * 100
             if red_exit is not None and red is not None and e['wk'] >= red_exit.get('min_wk', 1) \
@@ -108,6 +117,7 @@ def run(px, g, *, slots=20, stop=20, stop_min=0, take=None, pyr=None, cap=None,
                 if c <= floor: out = True
             if tstop and e['wk'] == tstop[0] and (c / e['entry'] - 1) * 100 < tstop[1]: out = True
             if out:
+                _log(j, i, c, out if isinstance(out, str) else '기타 청산')
                 v = e['sh'] * c * (1 - COST); cash += v; trades.append((e['inv'], v)); del pos[j]
         eq = cash + sum(pos[j]['sh'] * price(j, i) for j in pos)
         peak_eq = max(peak_eq, eq)
@@ -149,15 +159,19 @@ def run(px, g, *, slots=20, stop=20, stop_min=0, take=None, pyr=None, cap=None,
                 worst = min(pos, key=lambda k: price(k, i) / pos[k]['entry'])
                 wc = price(worst, i)
                 if wc / pos[worst]['entry'] >= 1: break
+                _log(worst, i, wc, '교체')
                 v = pos[worst]['sh'] * wc * (1 - COST); cash += v; trades.append((pos[worst]['inv'], v)); del pos[worst]
             amt = min(eq / slots * mult * init_frac, cash)
             if amt <= eq * 0.001: break
-            pos[j] = dict(sh=amt / c * (1 - COST), entry=c, peak=c, wk=0, pk_wk=0, last=c, adds=0, base=amt, inv=amt)
+            pos[j] = dict(sh=amt / c * (1 - COST), entry=c, peak=c, wk=0, pk_wk=0, last=c, adds=0, base=amt, inv=amt, i0=i)
             cash -= amt
         if not pyr_first: do_pyr()
         eq = cash + sum(pos[j]['sh'] * price(j, i) for j in pos)
         mx = max([pos[j]['sh'] * price(j, i) / eq for j in pos], default=0)
         hist.append((idx[i], eq, len(pos), cash / eq, mx))
+    if log is not None:                                   # 끝까지 보유 중인 종목(미청산)도 남긴다
+        for j in list(pos):
+            _log(j, len(idx) - 1, price(j, len(idx) - 1), '보유 중')
     h = pd.DataFrame(hist, columns=['t', 'v', 'n', 'cash', 'mx']).set_index('t')
     return h, dict(trades=len(trades), adds=nadd, trims=ntrim)
 
