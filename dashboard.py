@@ -4795,12 +4795,12 @@ def _tab_analysis():
                 # ── 화면 순서 (2026-10-19 재배치) ───────────────────────────────
                 # 코드는 데이터 의존 순서대로 돌고, **보이는 순서는 이 컨테이너 순서**가 정한다.
                 # 판단 → 가격·위험 → 실적 → 구조 → 가치 → 근거 상세 → 원표 → 개요 → 참고 통계.
-                _SEC = {_k: st.container() for _k in ('summary', 'price', 'flow', 'earn', 'seg', 'val',
+                _SEC = {_k: st.container() for _k in ('summary', 'plan', 'price', 'flow', 'earn', 'seg', 'val',
                                                      'canslim', 'fin', 'profile', 'ref')}
                 if IS_MOBILE:
                     # 2026-10-21 — 폰에서 종목 하나가 세로 2만 px(손가락 24번)였다. 요약 판단만 펼쳐 두고 나머지는 탭으로.
                     #   (펼침 상자 안에 펼침 상자를 넣을 수 없어 '접기' 대신 탭 — 섹션 안에 이미 펼침 상자가 있다)
-                    _SEC = {'summary': _SEC['summary']}
+                    _SEC = {'summary': _SEC['summary'], 'plan': _SEC['plan']}   # 매매 판단도 탭 밖에(핵심)
                     _mtabs = st.tabs(["📈 가격", "💵 실적", "🏭 구조", "⚖️ 가치", "📊 재무", "🏢 개요", "📆 참고·내부자"])
                     for _tb, _keys in zip(_mtabs, (('price',), ('flow', 'earn'), ('seg',), ('val', 'canslim'),
                                                    ('fin',), ('profile',), ('ref',))):
@@ -6468,6 +6468,168 @@ def _tab_analysis():
                                        "회차는 그 해 안에서 센 순번 — 11회를 넘으면 초과수익이 꺾이는 경향.")
                     elif not is_kr_sym and _acch is not None:
                         st.caption("이익 가속 신호 이력 없음 — 이 종목은 2018년 이후 진입 규칙에 걸린 적이 없습니다.")
+
+                # ── 🎯 매매 판단 — 규칙 계산 (2026-10-23) ─────────────────────────
+                #   목표가(컨센서스·역사적 PER·PEG) · 다운사이드(정류장 통계) · 손절 참고선 · 매수/관망/탈출 판정 · 비중.
+                #   계산은 trade_plan.py(테스트 있음). 원칙 v1: 위성은 가격 손절 대신 크기(총자산 1.5%)로 위험 관리.
+                with _SEC['plan']:
+                    try:
+                        import trade_plan as _tp
+                        import html as _hx
+                        _LP = locals()
+                        _c_all = hist['Close'].dropna().copy()
+                        _c_all.index = pd.to_datetime(_c_all.index)
+                        if getattr(_c_all.index, 'tz', None) is not None:
+                            _c_all.index = _c_all.index.tz_localize(None)
+                        _v_all = hist['Volume'].reindex(hist.index).values if 'Volume' in hist else None
+                        _v_all = pd.Series(_v_all, index=_c_all.index) if _v_all is not None and len(_v_all) == len(_c_all) else None
+                        _p = float(price_now)
+                        _ma50 = float(_c_all.rolling(50).mean().iloc[-1]) if len(_c_all) >= 50 else None
+                        _ma200s = _c_all.rolling(200).mean()
+                        _ma200 = float(_ma200s.iloc[-1]) if len(_c_all) >= 200 else None
+                        _ma200p = float(_ma200s.iloc[-22]) if len(_c_all) >= 222 else None
+                        _hi52v = float(hist['High'].tail(252).max())
+                        _dd52 = (_p / _hi52v - 1) * 100 if _hi52v else None
+                        _tt = _LP.get('_tpl') or _sx.trend_template(hist['Close'], hist.get('High'), hist.get('Low'))
+                        _rsi = _tp.rsi(_c_all)
+                        _mac = _tp.macd(_c_all)
+                        _liv = _tp.livermore(_c_all, _v_all)
+                        _vd = _tp.verdict(price=_p, ma50=_ma50, ma200=_ma200, ma200_prev=_ma200p, tt_n=_tt.get('n'),
+                                          rsi_v=_rsi, macd_d=_mac, canslim_grade=_LP.get('_gg'), liv=_liv, dd52=_dd52)
+                        _sw = _tp.swings(_c_all, theta=10)
+                        _cur = _sw['current'] or {}
+                        _low_piv = next((pv['price'] for pv in reversed(_sw['pivots']) if pv['type'] == 'L'), None)
+                        _st = _tp.stops(_p, ma50=_ma50, ma200=_ma200, last_low=_low_piv)
+                        _vb2 = _LP.get('_vb') or {}
+                        _bd = (_LP.get('_band') or {})
+                        _tg = _tp.targets(_p, cons={'mean': info.get('targetMeanPrice'), 'high': info.get('targetHighPrice'),
+                                                    'n': info.get('numberOfAnalystOpinions')},
+                                          band=_bd.get('pe') or _bd.get('main'), eps_fwd=_vb2.get('eps_12mf'),
+                                          eps_ttm=_vb2.get('eps_ttm'), hi52=_hi52v)
+                        _volA = float(_c_all.pct_change().tail(252).std() * (252 ** 0.5) * 100)
+                        # 기준 목표: 애널 3명 이상이면 컨센서스, 아니면 역사적 PER 중앙값 → PEG → 52주 고점
+                        _tmap = {t['name']: t for t in _tg}
+                        _base = None
+                        for _nm in ('컨센서스 평균', '역사적 PER 중앙값', 'PEG 1 적정가(린치)', '52주 고점 복귀'):
+                            _t = _tmap.get(_nm) or next((t for t in _tg if t['name'].endswith('중앙값') and _nm == '역사적 PER 중앙값'), None)
+                            if _t and not (_nm == '컨센서스 평균' and '3명 미만' in _t['basis']):
+                                _base = _t
+                                break
+                        # 조건은 '지금 위치'가 아니라 이 스윙이 **이미 도달한 깊이/높이**(빠졌다 반등 중이어도 그 깊이까지는 간 것)
+                        _ns_dn = _tp.next_stops(_sw['declines'], _cur.get('reached', 0) if _cur.get('dir') == 'down' else 0)
+                        _ns_up = _tp.next_stops(_sw['rallies'], _cur.get('reached', 0) if _cur.get('dir') == 'up' else 0)
+                        # 역사적 다운사이드: 지금 하락 중이면 '이만큼 빠진 스윙들의 최종 깊이 중앙값', 상승 중이면 '스윙 하락 중앙값'
+                        if _cur.get('dir') == 'down' and _cur.get('reached', 0) >= 10 and _ns_dn['median_final']:
+                            _dn_px = _cur['from'] * (1 - _ns_dn['median_final'] / 100)
+                        elif _sw['declines']:
+                            _dn_px = _p * (1 - float(np.median(_sw['declines'])) / 100)
+                        else:
+                            _dn_px = None
+                        _dn_pct = (_dn_px / _p - 1) * 100 if _dn_px else None
+                        _rr = ((_base['price'] - _p) / (_p - _st['s1'])) if _base and _base['price'] > _p else None
+                        _risk_b = st.session_state.get('plan_risk', 1.0)
+                        _slot = st.session_state.get('plan_slot', 1.5)
+                        _ps = _tp.position_size(verdict_state=_vd['state'], stop_pct=_st['s1_pct'], vol_annual=_volA,
+                                                risk_budget=_risk_b, slot_cap=_slot, trim_cap=_slot * 3)
+                        _fs = _tp.forward_similar(_c_all)
+
+                        st.markdown("## 🎯 매매 판단 — 규칙 계산")
+                        _pf_ = lambda v: (f"₩{v:,.0f}" if is_kr_sym else f"${v:,.2f}") if v else '-'
+                        _plan_cards = [
+                            _kpi('판정', _vd['state'], (' · '.join(_vd['exit']) if _vd['exit'] else f"체크 {_vd['ok']}/{len(_vd['checks'])} 통과"), _vd['tone']),
+                            _kpi('기준 목표', f"{_base['up']:+.0f}%" if _base else '-', (f"{_pf_(_base['price'])} · {_base['name']}" if _base else '목표가 계산 불가'),
+                                 'na' if not _base else ('good' if _base['up'] >= 20 else 'mid' if _base['up'] > 0 else 'bad')),
+                            _kpi('1차 손절(참고)', f"{_st['s1_pct']:.0f}%", f"{_pf_(_st['s1'])} · 2차 {_pf_(_st['s2'])}({_st['s2_pct']:.0f}%)", 'mid'),
+                            _kpi('역사적 다운사이드', f"{_dn_pct:.0f}%" if _dn_pct is not None else '-',
+                                 (f"{_pf_(_dn_px)} · 스윙 {len(_sw['declines'])}회 중앙값" if _dn_px else '표본 없음'),
+                                 'na' if _dn_pct is None else ('bad' if _dn_pct <= -30 else 'mid')),
+                            _kpi('보상 ÷ 위험', f"{_rr:.1f}배" if _rr else '-', '기준 목표 상승폭 ÷ 1차 손절폭', 'na' if not _rr else ('good' if _rr >= 3 else 'mid' if _rr >= 1.5 else 'bad')),
+                            _kpi('투입 가능 비중', f"{_ps['rec']:.1f}%", ("총자산 기준 · 변동성 커서 절반" if _ps['half'] else "총자산 기준 · 원칙 v1 상한"),
+                                 'good' if _ps['rec'] > 0 else 'na'),
+                        ]
+                        st.markdown('<div class="mo-kpis">' + ''.join(_plan_cards) + '</div>', unsafe_allow_html=True)
+
+                        _pl, _pr = st.columns(2, gap='large')
+                        with _pl:
+                            st.markdown("**🎯 목표가 — 근거별**")
+                            if _tg:
+                                _tsrc('yfinance(애널 목표가) · 멀티플 밴드(공시 TTM) · 컨센서스 EPS — 이 화면 계산', live=True)
+                                st.dataframe(pd.DataFrame([{'근거': t['name'], f"목표가({'원' if is_kr_sym else '$'})": t['price'],
+                                                            '업사이드(%)': round(t['up'], 1), '계산': t['basis']} for t in _tg]),
+                                             filters=False)
+                            else:
+                                st.caption("목표가를 계산할 재료(컨센서스·PER 밴드·12MF EPS)가 없다.")
+                            st.markdown("**🛑 손절 참고선**")
+                            st.markdown(f"- 1차 {_pf_(_st['s1'])} ({_st['s1_pct']:.0f}%) — {_st['why1']}\n"
+                                        f"- 2차 {_pf_(_st['s2'])} ({_st['s2_pct']:.0f}%) — {_st['why2']}\n"
+                                        f"- ⚠️ **매매 원칙 v1**: 위성 종목은 가격 손절을 쓰지 않는다(백테스트 CAGR 15.4% → 9.9%). "
+                                        f"대신 **비중**(한 종목 총자산 {_slot:.1f}%)이 손절을 대신한다 — 위 선은 트레이더식 참고값.")
+                        with _pr:
+                            st.markdown(f"**✅ 판정 근거 — {_vd['state']}**")
+                            _ico = {'ok': '✅', 'warn': '⚠️', 'bad': '❌', 'na': '·'}
+                            st.markdown("\n".join(f"- {_ico[sx_]} **{n_}** · {t_}" for n_, sx_, t_ in _vd['checks']))
+                            if _liv.get('pivot'):
+                                st.caption(f"리버모어 피벗 {_pf_(_liv['pivot'])}(직전 1년 최고 종가, 최근 2주 제외) · 지금 {_liv['gap']:+.1f}% · "
+                                           f"거래량 {('%.1f배' % _liv['vol_ratio']) if _liv.get('vol_ratio') else '-'}(최근 5일 ÷ 그 전 20일). "
+                                           f"피라미딩은 첫 매수가 수익일 때만 {_pf_(_liv['adds'][0])}·{_pf_(_liv['adds'][1])}(피벗 +5%·+10%)에서 — "
+                                           "손실 중 추가(물타기)는 금지. 원칙 v1 은 불타기 기본 OFF(검증상 수익 개선 없음).")
+
+                        # 🚏 정류장
+                        st.markdown("### 🚏 정류장 — 이만큼 움직였으면 어디까지 갔나")
+                        _nd = len(_sw['declines']); _nr = len(_sw['rallies'])
+                        if _cur:
+                            _dirk = '하락' if _cur['dir'] == 'down' else '상승'
+                            _nsx = _ns_dn if _cur['dir'] == 'down' else _ns_up
+                            _rch = _cur.get('reached', _cur['move'])
+                            st.markdown(f"지금은 **{_cur['from_date']:%Y-%m-%d} {('고점' if _cur['dir'] == 'down' else '저점')} {_pf_(_cur['from'])}에서 "
+                                        f"{_dirk} 스윙 진행 중** — 이번 스윙에서 최대 {_rch:.0f}%까지 갔고 지금은 {_cur['move']:.0f}%. "
+                                        + (f"과거 {_dirk} 스윙 {(_nd if _cur['dir'] == 'down' else _nr)}회 중 {_rch:.0f}% 이상 간 것이 **{_nsx['n']}회**"
+                                           + (f", 그 스윙들의 최종 {_dirk}폭 중앙값은 **{_nsx['median_final']:.0f}%**." if _nsx['median_final'] else '.')
+                                           if _rch >= 10 else f"아직 10% 미만이라 스윙으로 치기 전(과거 {_dirk} 스윙 중앙값 "
+                                           f"{float(np.median(_sw['declines'] if _cur['dir'] == 'down' else _sw['rallies']) if (_nd if _cur['dir'] == 'down' else _nr) else 0):.0f}%)."))
+                        _g1, _g2 = st.columns(2, gap='large')
+                        for _col, _nm2, _sz, _nsx, _clr in ((_g1, '하락', _sw['declines'], _ns_dn, '#DC2626'), (_g2, '상승', _sw['rallies'], _ns_up, '#16A34A')):
+                            with _col:
+                                _gm = _tp.gap_map(_sz)
+                                if _gm:
+                                    _fg = go.Figure(go.Bar(x=[f"{int(g['from'])}→{int(g['to'])}" for g in _gm], y=[g['p'] for g in _gm],
+                                                           marker_color=_clr, text=[f"{g['p']:.0f}%<br>n={g['n']}" for g in _gm],
+                                                           textposition='outside', cliponaxis=False))
+                                    _fg.update_layout(height=240, margin=dict(l=0, r=0, t=30, b=0), yaxis=dict(range=[0, 115], ticksuffix='%'),
+                                                      title=dict(text=f"{_nm2} 스윙: x% 넘으면 x+5% 도 넘은 비율", font=dict(size=13)))
+                                    st.plotly_chart(_fg, use_container_width=True)
+                                if _nsx['rows'] and _nsx['n']:
+                                    _now_m = _cur.get('reached', 0) if _cur.get('dir') == ('down' if _nm2 == '하락' else 'up') else 0
+                                    _tsrc(f"일봉 종가 지그재그(10% 되돌림 = 새 스윙) · {_c_all.index[0]:%Y-%m}~", live=True)
+                                    st.dataframe(pd.DataFrame([{f"{_nm2} 도달(%)": r['level'], '도달(회)': r['hit'],
+                                                                '확률(%)': None if r['p'] is None else round(r['p'])}
+                                                               for r in _nsx['rows'][:7]]), filters=False)
+                                    st.caption(f"기준: 지금까지 {_now_m:.0f}% {_nm2}한 스윙 {_nsx['n']}회"
+                                               + (" — ⚠️ 표본 8회 미만, 참고 불가" if _nsx['n'] < 8 else ''))
+                        st.caption("막대가 높은 구간 = 정류장 사이가 먼 곳: 그 지점을 넘으면 다음 5%도 대부분 넘었다(멈추지 않고 간다). "
+                                   "낮은 구간 = 자주 멈추던 정류장. 스윙은 일봉 종가 기준, 반대로 10% 이상 되돌리면 끝난 것으로 본다. "
+                                   "**이 종목 자체의 과거 빈도**일 뿐 — 시장 국면·실적이 바뀌면 달라진다.")
+
+                        if _fs and _fs.get('n'):
+                            st.markdown("### 📈 비슷한 자리에서 산 날의 6개월 뒤")
+                            _stat_grid([('', [('비슷한 날', f"{_fs['n']}번"), ('중앙값', f"{_fs['median']:+.0f}%", True),
+                                              ('하위 10%', f"{_fs['p10']:+.0f}%", True), ('상위 10%', f"{_fs['p90']:+.0f}%", True),
+                                              ('오른 비율', f"{_fs['win']:.0f}%")])])
+                            st.caption(f"지금처럼 52주 고점 대비 {_fs['dd_now']:.0f}%(±5%p)였던 날을 20거래일 간격으로 뽑아 126거래일(약 6개월) 뒤 수익을 셌다. "
+                                       + ("⚠️ 10번 미만 — 참고 불가. " if _fs['n'] < 10 else '') + "기대수익 '분포'이지 예측이 아니다.")
+
+                        with st.expander("💼 비중 계산 조건 바꾸기"):
+                            _k1, _k2 = st.columns(2)
+                            _k1.number_input("한 번에 잃어도 되는 금액(총자산 %)", 0.25, 5.0, float(_risk_b), 0.25, key='plan_risk')
+                            _k2.number_input("한 종목 상한(총자산 %) — 원칙 v1 위성 한 칸 1.5", 0.5, 20.0, float(_slot), 0.5, key='plan_slot')
+                            st.caption(f"위험예산식 비중 = {_risk_b:.2f}% ÷ 1차 손절폭 {abs(_st['s1_pct']):.0f}% = **{_ps['risk_size']:.1f}%** → "
+                                       f"상한 {_slot:.1f}%와 비교해 작은 쪽" + (" → 연 변동성 60% 이상이라 절반" if _ps['half'] else '')
+                                       + f". 판정이 '매수 가능 영역'이 아니면 신규 투입 0. 한 종목 최대(트림선) {_ps['trim_cap']:.1f}%. "
+                                       "AI 판단이 아니라 같은 입력이면 같은 답이 나오는 규칙이다 — 포트 전체(섹터 쏠림·현금)는 🛡️ 내 포트폴리오 탭에서.")
+                        st.caption("⚠️ 전부 공개 데이터와 정해진 규칙으로 계산한 참고값이며 투자 권유가 아니다. 판정·확률은 과거 빈도이고, "
+                                   "모든 투자 판단과 책임은 이용자에게 있다.")
+                    except Exception as _e_plan:
+                        st.caption(f"`매매 판단 계산 실패: {type(_e_plan).__name__}: {str(_e_plan)[:120]}`")
 
         else:
             st.caption("예: TSLA · NVDA · 005930(삼성전자) · 000660(SK하이닉스)")
