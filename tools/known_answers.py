@@ -312,18 +312,20 @@ def _():
     return not short and tsla_ok, f"신호 수 {cnt} · TSLA 첫 신호 {first.get('TSLA', '없음')}"
 
 
-@check('주도주', '신호 주차가 9일 이내인가')
+# 2026-10-23: 9일 → 14일. 주간 산출물(weekly-accel, 토 07:17 KST)은 signal_week=그 주 월요일이라
+#   정상 운영에서도 다음 실행 직전 나이가 12~13일 → 매주 수~금 daily-refresh 가 빨간불(오경보, 10-22).
+@check('주도주', '신호 주차가 14일 이내인가 (주간 갱신 + 예비 실행 여유)')
 def _():
     d = _j('results/leaders_accel.json')
-    return _age(d.get('signal_week')) <= 9, f"signal_week {d.get('signal_week')}"
+    return _age(d.get('signal_week')) <= 14, f"signal_week {d.get('signal_week')}"
 
 
-@check('가격 곡선', 'TSLA·NVDA·AAPL 곡선이 있고 마지막 날짜가 9일 이내인가')
+@check('가격 곡선', 'TSLA·NVDA·AAPL 곡선이 있고 마지막 날짜가 14일 이내인가 (주간 갱신)')
 def _():
     d = _j('results/price_curves.json')
     lost = [s for s in ('TSLA', 'NVDA', 'AAPL') if s not in d.get('curves', {})]
     last = (d.get('dates') or [None])[-1]
-    return not lost and _age(last) <= 9, f"{len(d.get('curves', {})):,}종 · 마지막 {last} · 누락 {lost or '없음'}"
+    return not lost and _age(last) <= 14, f"{len(d.get('curves', {})):,}종 · 마지막 {last} · 누락 {lost or '없음'}"
 
 
 # ───────────────────────── 이번 주 판정 ─────────────────────────
