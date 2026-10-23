@@ -593,3 +593,38 @@ def dilution_events(corp_code, days=365, max_pages=5):
         if page >= int(j.get('total_page') or 1):
             break
     return out
+
+
+# ── 실적 발표일 (2026-10-23) — 잠정실적 공정공시 · 분기/반기/사업보고서 ─────────────
+def classify_results_title(report_nm):
+    nm = re.sub(r'\s+', '', str(report_nm or ''))
+    if '잠정' in nm and '실적' in nm:
+        return '잠정실적'
+    for k in ('분기보고서', '반기보고서', '사업보고서'):
+        if k in nm and '첨부' not in nm:
+            return k
+    return None
+
+
+def results_dates(corp_code, days=500, max_pages=6):
+    """최근 공시에서 실적 발표 관련 [{date, kind, title, url}] — 다음 발표일이 미정일 때 전년 같은 분기 날짜를 찾는다."""
+    from datetime import date, timedelta
+    end = date.today()
+    bgn = end - timedelta(days=days)
+    out = []
+    for page in range(1, max_pages + 1):
+        j = _get(f"{BASE}/list.json", {'crtfc_key': _key(), 'corp_code': corp_code, 'bgn_de': bgn.strftime('%Y%m%d'),
+                                        'end_de': end.strftime('%Y%m%d'), 'page_no': page, 'page_count': 100}).json()
+        if j.get('status') == '013':
+            break
+        if j.get('status') != '000':
+            raise RuntimeError(f"DART list: {j.get('status')} {j.get('message')}")
+        for x in j.get('list') or []:
+            k = classify_results_title(x.get('report_nm'))
+            if k:
+                rno = str(x.get('rcept_no') or '')
+                out.append({'date': parse_kdate(x.get('rcept_dt')), 'kind': k, 'title': str(x.get('report_nm') or '').strip(),
+                            'url': f"https://dart.fss.or.kr/dsaf001/main.do?rcpNo={rno}"})
+        if page >= int(j.get('total_page') or 1):
+            break
+    return sorted(out, key=lambda r: r['date'] or '')

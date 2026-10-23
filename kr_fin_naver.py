@@ -171,4 +171,43 @@ def consensus(code, this_year=None):
                       if n in by and _num(by[n].get(f'DATA{i + 1}')) is not None), None)
             if v is not None:
                 out[f'{key}_{lab}'] = v
+    # 2026-10-23 — 분기 추정(E)도 같이: 실적 발표 후 '실적 vs 발표 직전 컨센서스'를 비교하려면 발표 전에 저장해 둬야 한다
+    #   (발표가 나면 추정 열은 실적 열로 바뀌어 사라진다). {'2026.3Q': {'op': 원, 'eps': 원, 'rev': 원}}
+    try:
+        out_q = consensus_quarters(s, enc, ref, code)
+        if out_q:
+            out['q'] = out_q
+    except Exception:
+        pass
     return out or None
+
+
+def parse_quarter_estimates(js):
+    """cF3002(frq=1) 응답 → {'2026.3Q': {'op','eps','rev'}} — '2026/09(E)' 같은 추정 열만. 금액은 원(억원×1e8)."""
+    yymm = [re.sub(r'<.*', '', str(y)).strip() for y in js.get('YYMM') or []]
+    est = {i: y for i, y in enumerate(yymm) if re.fullmatch(r'\d{4}/(03|06|09|12)\(E\)', y)}
+    if not est:
+        return {}
+    by = {}
+    for d in js.get('DATA') or []:
+        nm = str(d.get('ACC_NM') or '').lstrip('.').strip()
+        if nm not in by or (d.get('LVL') or 9) < (by[nm].get('LVL') or 9):
+            by[nm] = d
+    out = {}
+    for i, y in est.items():
+        per = f"{y[:4]}.{int(y[5:7]) // 3}Q"
+        row = {}
+        for key, names, mult in (('op', ['영업이익(발표기준)', '영업이익'], 1e8),
+                                 ('rev', ['매출액(수익)', '매출액', '영업수익'], 1e8),
+                                 ('eps', ['*(지배주주지분)주당순이익', '*주당순이익'], 1.0)):
+            v = next((_num(by[n].get(f'DATA{i + 1}')) for n in names
+                      if n in by and _num(by[n].get(f'DATA{i + 1}')) is not None), None)
+            if v is not None:
+                row[key] = v * mult
+        if row:
+            out[per] = row
+    return out
+
+
+def consensus_quarters(s, enc, ref, code):
+    return parse_quarter_estimates(_report(s, enc, ref, code, 1, 0))

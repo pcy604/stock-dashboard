@@ -366,3 +366,81 @@ def earnings_trend(rows: list[dict], key: str = 'op_income', is_kr: bool = False
         tone = {'흑자전환': 'good', '이익 증가': 'mid', '적자 축소': 'mid'}.get(level, 'bad')
     return {'state': state, 'tone': tone, 'level': level, 'streak': streak, 'acc_8q': acc_8q,
             'base_warn': base_warn, 'rows': tab, 'last': tab[0]}
+
+
+# ── 7) 실적 발표 — 분기별 실적 vs 발표 직전 컨센서스 · 다음 발표 시기 (2026-10-23) ─────
+def _qend(per: str) -> pd.Timestamp:
+    y, q = int(per[:4]), int(per[5])
+    return pd.Period(f"{y}Q{q}", freq='Q').end_time.normalize()
+
+
+def _qlabel(ts) -> str:
+    ts = pd.Timestamp(ts)
+    return f"{ts.year}.{(ts.month - 1) // 3 + 1}Q"
+
+
+def announce_date_for(qend, events: list[dict], max_days=100):
+    """분기말 뒤 max_days 안의 첫 발표. events=[{'date':'YYYY-MM-DD','kind':...}] — 잠정실적(공정공시)이 있으면 그 날짜가 우선."""
+    lo, hi = pd.Timestamp(qend), pd.Timestamp(qend) + pd.Timedelta(days=max_days)
+    c = [e for e in events if e.get('date') and lo < pd.Timestamp(e['date']) <= hi]
+    if not c:
+        return None, None
+    pre = [e for e in c if e.get('kind') == '잠정실적']
+    e = min(pre or c, key=lambda e: e['date'])
+    return pd.Timestamp(e['date']), e.get('kind')
+
+
+def earnings_quarters(qf: pd.DataFrame, events: list[dict] | None = None, cons_q: dict | None = None,
+                      eps_hist: list[dict] | None = None, today=None, n=4) -> dict:
+    """최근 n개 분기의 실적 vs 컨센서스 + 다음 발표 시기.
+    qf: quarterly_frame(분기말 인덱스; revenue·op_income·net_income)
+    events: 발표 이벤트(KR=DART 잠정실적·정기보고서, US=yfinance 발표일 → kind='발표')
+    cons_q: {'2026.3Q': {'op','rev','eps','date'}} 발표 직전 컨센서스(KR 스냅샷)
+    eps_hist: [{'date','est','rep'}] (US yfinance) — 발표일로 분기에 붙인다
+    반환 {'rows':[최신순], 'next': {...}, 'wins','losses'}"""
+    today = pd.Timestamp(today or pd.Timestamp.today().normalize())
+    events = events or []
+    cons_q = cons_q or {}
+    eps_hist = eps_hist or []
+    rows = []
+    q = qf.sort_index() if qf is not None and not qf.empty else pd.DataFrame()
+    for qe in list(q.index[::-1][:n]):
+        per = _qlabel(qe)
+        r = q.loc[qe]
+        ad, kind = announce_date_for(qe, events)
+        e = next((x for x in eps_hist if pd.notna(x.get('date')) and
+                  pd.Timestamp(qe) < pd.Timestamp(x['date']) <= pd.Timestamp(qe) + pd.Timedelta(days=100)), None)
+        if ad is None and e is not None:
+            ad, kind = pd.Timestamp(e['date']), '발표'
+        c = cons_q.get(per) or {}
+        op, op_c = r.get('op_income'), c.get('op')
+        rv, rv_c = r.get('revenue'), c.get('rev')
+        gap = lambda a, b: ((a - b) / abs(b) * 100) if (a is not None and b and pd.notna(a)) else None
+        row = {'분기': per, '발표일': ad, '발표 근거': kind,
+               '매출': rv, '매출 컨센서스': rv_c, '매출 차이(%)': gap(rv, rv_c),
+               '영업이익': op, '영업이익 컨센서스': op_c, '영업이익 차이(%)': gap(op, op_c),
+               'EPS': (e or {}).get('rep'), 'EPS 컨센서스': (e or {}).get('est') if e else c.get('eps'),
+               'EPS 차이(%)': None}
+        if row['EPS'] is not None and row['EPS 컨센서스']:
+            row['EPS 차이(%)'] = gap(row['EPS'], row['EPS 컨센서스'])
+        # 승패 기준: EPS 서프라이즈가 있으면 그것, 없으면 영업이익 차이
+        key = row['EPS 차이(%)'] if row['EPS 차이(%)'] is not None else row['영업이익 차이(%)']
+        row['판정'] = None if key is None else ('상회' if key > 0 else '하회')
+        rows.append(row)
+    wins = sum(1 for r in rows if r['판정'] == '상회')
+    losses = sum(1 for r in rows if r['판정'] == '하회')
+    # 다음 발표: 최신 실적 분기의 다음 분기 → 전년 같은 분기 발표일 + 1년(추정)
+    nxt = {}
+    if not q.empty:
+        nq_end = (pd.Period(q.index.max(), freq='Q') + 1).end_time.normalize()
+        ly_end = (pd.Period(nq_end, freq='Q') - 4).end_time.normalize()
+        ly_ad, ly_kind = announce_date_for(ly_end, events)
+        if ly_ad is None:
+            e = next((x for x in eps_hist if pd.notna(x.get('date')) and
+                      ly_end < pd.Timestamp(x['date']) <= ly_end + pd.Timedelta(days=100)), None)
+            if e:
+                ly_ad, ly_kind = pd.Timestamp(e['date']), '발표'
+        nxt = {'분기': _qlabel(nq_end), '전년 동기': _qlabel(ly_end), '전년 발표일': ly_ad, '전년 근거': ly_kind,
+               '예상': (ly_ad + pd.DateOffset(years=1)) if ly_ad is not None else None,
+               '법정 마감(KR)': nq_end + pd.Timedelta(days=90 if nq_end.month == 12 else 45)}
+    return {'rows': rows, 'next': nxt, 'wins': wins, 'losses': losses}

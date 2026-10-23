@@ -100,4 +100,14 @@ def test_consensus_from_estimate_columns(monkeypatch):
     monkeypatch.setattr(N, '_session', lambda code: (None, 'x', 'ref'))
     monkeypatch.setattr(N, '_report', lambda *a: SS_IS_Y)
     c = N.consensus('005930', this_year=2026)
+    c.pop('q', None)          # 분기 추정(E)은 아래 test_quarter_estimates 에서(2026-10-23)
     assert c == {'eps_0y': 45520.8, 'op_0y': 3716393.4}
+
+
+def test_quarter_estimates():
+    js = {'YYMM': ['2026/03', '2026/06', '2026/09(E)', '2026/12(E)', '전년대비'],
+          'DATA': [{'ACC_NM': '영업이익(발표기준)', 'LVL': 1, 'DATA1': 66853, 'DATA2': 89492, 'DATA3': 95000.5, 'DATA4': None},
+                   {'ACC_NM': '매출액(수익)', 'LVL': 1, 'DATA3': 1800000},
+                   {'ACC_NM': '*(지배주주지분)주당순이익', 'LVL': 2, 'DATA3': 11000}]}
+    q = N.parse_quarter_estimates(js)
+    assert set(q) == {'2026.3Q'} and q['2026.3Q']['op'] == 95000.5e8 and q['2026.3Q']['rev'] == 1.8e14 and q['2026.3Q']['eps'] == 11000

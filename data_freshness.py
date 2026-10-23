@@ -67,6 +67,16 @@ def _mtime(p):
     return _d.fromtimestamp(p.stat().st_mtime).strftime('%Y-%m-%d')
 
 
+def _cq_max_date(path):
+    """consensus_q.json {sym: {분기: {'date': ...}}} 의 가장 최근 저장일."""
+    try:
+        d = json.loads(Path(path).read_text(encoding='utf-8'))
+        ds = [v.get('date') for per in d.values() for v in per.values() if isinstance(v, dict) and v.get('date')]
+        return max(ds) if ds else None
+    except Exception:
+        return None
+
+
 def _jsonl_max_date(path):
     """JSONL 누적 산출물 — 행들의 date 최대값(2026-10-19, 컨센서스 스냅샷용)."""
     import json as _j
@@ -193,6 +203,11 @@ SOURCES = [
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
          getter=_jsonl_max_date, raw=True),
     # 2026-10-21 — 애널 추정이 없는 종목 목록(화면이 '수집 대상 아님'과 '추정 없음'을 구분). 첫 수집은 10-26(월).
+    # 2026-10-23 — 분기 컨센서스(발표 직전 값). 실적 vs 컨센서스 비교의 유일한 원천. 첫 수집 10-26(월).
+    dict(path='results/consensus_q.json', label='KR 분기 컨센서스(발표 직전)',
+         cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
+         job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 실적 발표 · 서프라이즈(KR)',
+         getter=_cq_max_date, raw=True),
     dict(path='results/consensus_nocover.json', label='KR 컨센서스 미커버 종목',
          cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',

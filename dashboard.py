@@ -4139,6 +4139,26 @@ def _earn_data(sym, is_kr):
     return out
 
 
+@st.cache_data(ttl=12 * 3600, show_spinner=False)
+def _kr_results_dates(sym):
+    """KR 실적 발표 이벤트(DART 잠정실적·정기보고서) — 성공만 캐시(실패는 예외)."""
+    import dart_client
+    dart_client.set_interactive(True)
+    cc = dart_client.corp_map().get(sym)
+    if not cc:
+        raise LookupError('DART 회사코드 없음')
+    return dart_client.results_dates(cc, days=500)
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _kr_cons_q(sym):
+    """주간 저장한 분기 컨센서스(발표 직전 값) — results/consensus_q.json."""
+    try:
+        return (json.loads(Path('results/consensus_q.json').read_text(encoding='utf-8')) or {}).get(sym) or {}
+    except Exception:
+        return {}
+
+
 def _kr_cons_hist(sym):
     rows = []
     try:
@@ -5266,15 +5286,22 @@ def _tab_analysis():
                                 _seg_for_flow = _sa2.load_cached(sym8_clean)
                             except Exception:
                                 pass
-                        _sank = _income_sankey(_flowq[0], _uq, _uu, _seg_for_flow)
                         _fc1, _fc2 = st.columns([1.15, 1], gap='large')    # 2026-10-20: 구조(이번 분기)와 추이를 나란히
                         with _fc1:
+                          # 2026-10-23 — 최근 분기 하나만 보였다 → 최근 4개 분기 중 고른다(기본 최신)
+                          _fq4 = [r for r in _flowq if r.get('revenue')][:4]
+                          _fqs = [str(r.get('period', '')) for r in _fq4]
+                          _fpick = (st.segmented_control("분기", _fqs, default=_fqs[0], key=f"flowq_{sym8_clean}")
+                                    if len(_fqs) > 1 else (_fqs[0] if _fqs else None)) or (_fqs[0] if _fqs else None)
+                          _frow = next((r for r in _fq4 if str(r.get('period', '')) == _fpick), _flowq[0])
+                          _sank = _income_sankey(_frow, _uq, _uu, _seg_for_flow)
                           if _sank:
-                            st.markdown(f"###### 🧱 이번 분기 구조 — {_flowq[0].get('period', '')}")
+                            st.markdown(f"###### 🧱 분기 구조 — {_frow.get('period', '')}")
                             _sank.update_layout(height=310, margin=dict(t=34))
                             st.plotly_chart(_sank, use_container_width=True)
-                            st.caption(f"{_flowq[0].get('period','')} 분기 · 단위 {_uu}{'원' if is_kr_sym else '$'} · "
-                                       "파랑=남은 이익(%는 매출 대비 마진) · 빨강=차감 · 초록=가산(영업외수익 등).")
+                            st.caption(f"{_frow.get('period','')} 분기 · 단위 {_uu}{'원' if is_kr_sym else '$'} · "
+                                       "파랑=남은 이익(%는 매출 대비 마진) · 빨강=차감 · 초록=가산(영업외수익 등). "
+                                       "위 버튼으로 최근 4개 분기를 바꿔 본다.")
                         # 마진 궤적 스트립
                         _mq = [r for r in _flowq if r.get('revenue')][:8][::-1]     # 오래된→최신
                         with _fc2:
@@ -6021,36 +6048,70 @@ def _tab_analysis():
                 with _SEC['earn']:
                     st.divider()
                     st.markdown("## 📅 실적 발표 · 서프라이즈")
+                    # 2026-10-23 개편 — ① '미정'이면 전년 같은 분기 발표일로 시기 추정 ② 최근 4개 분기를 순서대로
+                    #   실적 vs 발표 직전 컨센서스 ③ yfinance 의 띄엄띄엄한 옛 기록(KR 2011·2015…)은 본 표에서 뺐다.
                     _edf = _ed.get('dates')
-                    if _edf is None or _edf.empty:
-                        st.info("실적 발표 일정·서프라이즈 데이터 없음 (yfinance 미제공 — KR 중소형주는 대부분 비어 있습니다).")
-                    else:
+                    _now = pd.Timestamp.utcnow().tz_localize(None)
+                    _eps_hist, _next_us = [], None
+                    if _edf is not None and not _edf.empty:
                         _dcol = [c for c in _edf.columns if 'Date' in c][0]
                         _edf[_dcol] = pd.to_datetime(_edf[_dcol], utc=True).dt.tz_convert(None)
-                        _now = pd.Timestamp.utcnow().tz_localize(None)
                         _fut = _edf[_edf[_dcol] > _now].sort_values(_dcol)
-                        _past = _edf[_edf[_dcol] <= _now].sort_values(_dcol, ascending=False)
-                        _e1, _e2, _e3 = st.columns(3)
                         if not _fut.empty:
-                            _nd = _fut[_dcol].iloc[0]
-                            _e1.metric("다음 발표", _nd.strftime('%Y-%m-%d'), f"D-{(_nd - _now).days}")
-                            _ne = _fut.get('EPS Estimate')
-                            _e2.metric("다음 분기 예상 EPS", f"{_ne.iloc[0]:.2f}" if _ne is not None and pd.notna(_ne.iloc[0]) else "-")
-                        else:
-                            _e1.metric("다음 발표", "미정")
-                        _sp = _past.get('Surprise(%)')
-                        if _sp is not None:
-                            _sp4 = _sp.dropna().head(4)
-                            _e3.metric("최근 4분기 서프라이즈", f"{(_sp4 > 0).sum()}승 {(_sp4 <= 0).sum()}패" if len(_sp4) else "-")
-                        if not _past.empty:
-                            _tsrc('yfinance (EPS 컨센서스·발표치 집계)', live=True)
-                            st.dataframe(pd.DataFrame([{
-                                '발표일': r[_dcol].strftime('%Y-%m-%d'),
-                                '예상EPS': r.get('EPS Estimate'), '실제EPS': r.get('Reported EPS'),
-                                '서프라이즈(%)': r.get('Surprise(%)')} for _, r in _past.head(8).iterrows()]),
-                                filters=False, use_container_width=True)
-                        st.caption("서프라이즈 = (실제 − 예상) ÷ |예상|. EPS 는 회사 발표 기준(조정 EPS 일 수 있음) — "
-                                   "공시 재무제표의 순이익과 다를 수 있다.")
+                            _next_us = (_fut[_dcol].iloc[0], _fut.get('EPS Estimate').iloc[0] if 'EPS Estimate' in _fut else None)
+                        for _, _r in _edf[_edf[_dcol] <= _now].iterrows():
+                            _eps_hist.append({'date': _r[_dcol], 'est': _r.get('EPS Estimate') if pd.notna(_r.get('EPS Estimate')) else None,
+                                              'rep': _r.get('Reported EPS') if pd.notna(_r.get('Reported EPS')) else None})
+                    _ev_kr, _ev_err = [], None
+                    if is_kr_sym:
+                        try:
+                            _ev_kr = _kr_results_dates(sym8_clean)
+                        except Exception as _e:
+                            _ev_err = type(_e).__name__
+                    _qf_e = _sx.quarterly_frame(_q_rows_long(sym8_clean, is_kr_sym)[0])
+                    _cq = _kr_cons_q(sym8_clean) if is_kr_sym else {}
+                    _eq = _sx.earnings_quarters(_qf_e, _ev_kr, _cq, _eps_hist)
+                    _nx = _eq['next']
+                    _e1, _e2 = st.columns(2)
+                    if _next_us is not None:
+                        _e1.metric("다음 발표", _next_us[0].strftime('%Y-%m-%d'), f"D-{(_next_us[0] - _now).days}")
+                    elif _nx.get('예상') is not None:
+                        _e1.metric("다음 발표", f"{_nx['예상']:%m월 %d일} 전후(추정)",
+                                   f"전년 {_nx['전년 동기']} {_nx['전년 발표일']:%Y-%m-%d} {_nx['전년 근거'] or ''}", delta_color='off')
+                    else:
+                        _e1.metric("다음 발표", "미정", (f"법정 마감 {_nx['법정 마감(KR)']:%Y-%m-%d}" if is_kr_sym and _nx else None),
+                                   delta_color='off')
+                    _cmp = _eq['wins'] + _eq['losses']
+                    _e2.metric("최근 4분기 컨센서스 대비", f"상회 {_eq['wins']} · 하회 {_eq['losses']}" if _cmp else "비교 불가",
+                               (f"{len(_eq['rows']) - _cmp}개 분기는 컨센서스 기록 없음" if _cmp < len(_eq['rows']) else None),
+                               delta_color='off')
+                    if _eq['rows']:
+                        _amt0 = max([abs(r['매출'] or 0) for r in _eq['rows']] + [0])
+                        _eu2 = (('조원', 1e12) if _amt0 >= 1e12 else ('억원', 1e8)) if is_kr_sym else (('$B', 1e9) if _amt0 >= 1e9 else ('$M', 1e6))
+                        _dv = lambda v: None if v is None or pd.isna(v) else v / _eu2[1]
+                        _etb = pd.DataFrame([{
+                            '분기': r['분기'], '발표일': f"{r['발표일']:%Y-%m-%d}" if r['발표일'] is not None else '-',
+                            f"매출({_eu2[0]})": _dv(r['매출']), f"영업이익({_eu2[0]})": _dv(r['영업이익']),
+                            f"영업이익 컨센서스({_eu2[0]})": _dv(r['영업이익 컨센서스']), '영업이익 차이(%)': r['영업이익 차이(%)'],
+                            'EPS': r['EPS'], 'EPS 컨센서스': r['EPS 컨센서스'], 'EPS 차이(%)': r['EPS 차이(%)'],
+                            '판정': r['판정'] or '-'} for r in _eq['rows']])
+                        _etb = _etb[[c for c in _etb.columns if c in ('분기', '발표일', '판정') or _etb[c].notna().any()]]
+                        _tsrc(('DART 공시(실적·발표일) · 네이버 FnGuide 분기 컨센서스(주간 저장본)' if is_kr_sym else
+                               'SEC EDGAR(실적) · yfinance(EPS 컨센서스·발표일)'), live=True)
+                        st.dataframe(_etb, filters=False)
+                    st.caption("최근 4개 분기, 최신이 위. 차이 = (실적 − 발표 직전 컨센서스) ÷ |컨센서스|. 판정은 EPS 가 있으면 EPS, 없으면 영업이익. "
+                               + ("⚠️ 한국 분기 컨센서스는 2026-10 부터 매주 저장을 시작했다 — 발표 후엔 추정치가 사라져 과거분을 만들 수 없다. "
+                                  "2026.3Q 실적부터 비교가 채워진다. 발표일은 DART 잠정실적 공정공시(없으면 분기·반기·사업보고서) 접수일."
+                                  + (f" (DART 조회 실패: {_ev_err} — 발표일 '-')" if _ev_err else '')
+                                  if is_kr_sym else "EPS 는 회사 발표 기준(조정 EPS 일 수 있음)."))
+                    if not is_kr_sym and _eps_hist:
+                        _old = [h for h in _eps_hist if h['rep'] is not None and h['date'] >= _now - pd.DateOffset(years=3)]
+                        if len(_old) > 4:
+                            with st.expander(f"최근 3년 EPS 서프라이즈 {len(_old)}회"):
+                                _tsrc('yfinance (EPS 컨센서스·발표치)', live=True)
+                                st.dataframe(pd.DataFrame([{'발표일': f"{h['date']:%Y-%m-%d}", '예상 EPS': h['est'], '실제 EPS': h['rep'],
+                                                            '서프라이즈(%)': ((h['rep'] - h['est']) / abs(h['est']) * 100) if h['est'] else None}
+                                                           for h in sorted(_old, key=lambda h: h['date'], reverse=True)]), filters=False)
 
                 # ── ⚖️ 멀티플 밴드 · 컨센서스 추세 · 동종업계 ───────────────
                 with _SEC['val']:

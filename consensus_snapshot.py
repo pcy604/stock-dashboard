@@ -139,6 +139,33 @@ def _universe(limit=None):
     return out, {s for s, _ in core}
 
 
+QHIST = Path('results/consensus_q.json')
+
+
+def _save_quarter_estimates(results, today):
+    """분기 컨센서스 — 종목·분기마다 '발표 직전' 추정치 하나를 남긴다(2026-10-23).
+    분기말 + 30일까지만 갱신한다: 한국 잠정실적은 대개 분기말 4~6주 뒤라, 그 전 마지막 값이 '발표 직전 컨센서스'.
+    이후에는 얼린다(발표 후 추정 열은 사라지고 실적 열로 바뀐다). 기간 제한 없이 보관(작다)."""
+    try:
+        d = json.loads(QHIST.read_text(encoding='utf-8')) if QHIST.exists() else {}
+    except Exception:
+        d = {}
+    n = 0
+    for sym, c in results.items():
+        for per, est in (c.get('q') or {}).items():
+            try:
+                y, q = int(per[:4]), int(per[5])
+                qend = datetime(y, q * 3, [31, 30, 30, 31][q - 1])
+            except Exception:
+                continue
+            if datetime.strptime(today, '%Y-%m-%d') > qend + timedelta(days=30):
+                continue
+            d.setdefault(sym, {})[per] = {'date': today, **est}
+            n += 1
+    QHIST.write_text(json.dumps(d, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    print(f"분기 컨센서스 저장: {n}건 · {len(d)}종목 → {QHIST}")
+
+
 def run(limit=None):
     syms, core = _universe(limit)
     if not syms:
@@ -191,7 +218,8 @@ def run(limit=None):
             except Exception:
                 continue
     for sym, c in results.items():
-        rows.append({'date': today, 'sym': sym, **c})
+        rows.append({'date': today, 'sym': sym, **{k: v for k, v in c.items() if k != 'q'}})
+    _save_quarter_estimates(results, today)
     rows.sort(key=lambda r: (r['date'], r['sym']))
     HISTORY.write_text('\n'.join(json.dumps(r, ensure_ascii=False) for r in rows) + '\n',
                        encoding='utf-8')
