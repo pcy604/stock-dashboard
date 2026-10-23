@@ -6507,14 +6507,14 @@ def _tab_analysis():
                                           band=_bd.get('pe') or _bd.get('main'), eps_fwd=_vb2.get('eps_12mf'),
                                           eps_ttm=_vb2.get('eps_ttm'), hi52=_hi52v)
                         _volA = float(_c_all.pct_change().tail(252).std() * (252 ** 0.5) * 100)
-                        # 기준 목표: 애널 3명 이상이면 컨센서스, 아니면 역사적 PER 중앙값 → PEG → 52주 고점
-                        _tmap = {t['name']: t for t in _tg}
+                        # 기준 목표 = 근거별 목표가의 **중앙값**(한 근거에 휘둘리지 않게 — 2026-10-23 실화면: 애널 1명 제외 시
+                        #   '역사적 P/S 중앙값 −42%' 하나가 기준이 됐다). 범위(최저~최고)를 같이 보인다.
                         _base = None
-                        for _nm in ('컨센서스 평균', '역사적 PER 중앙값', 'PEG 1 적정가(린치)', '52주 고점 복귀'):
-                            _t = _tmap.get(_nm) or next((t for t in _tg if t['name'].endswith('중앙값') and _nm == '역사적 PER 중앙값'), None)
-                            if _t and not (_nm == '컨센서스 평균' and '3명 미만' in _t['basis']):
-                                _base = _t
-                                break
+                        if _tg:
+                            _pz = sorted(t['price'] for t in _tg)
+                            _bp = float(np.median(_pz))
+                            _base = {'name': f"근거 {len(_tg)}개 중앙값", 'price': _bp, 'up': (_bp / _p - 1) * 100,
+                                     'lo': (_pz[0] / _p - 1) * 100, 'hi': (_pz[-1] / _p - 1) * 100}
                         # 조건은 '지금 위치'가 아니라 이 스윙이 **이미 도달한 깊이/높이**(빠졌다 반등 중이어도 그 깊이까지는 간 것)
                         _ns_dn = _tp.next_stops(_sw['declines'], _cur.get('reached', 0) if _cur.get('dir') == 'down' else 0)
                         _ns_up = _tp.next_stops(_sw['rallies'], _cur.get('reached', 0) if _cur.get('dir') == 'up' else 0)
@@ -6534,20 +6534,23 @@ def _tab_analysis():
                         _fs = _tp.forward_similar(_c_all)
 
                         st.markdown("## 🎯 매매 판단 — 규칙 계산")
-                        _pf_ = lambda v: (f"₩{v:,.0f}" if is_kr_sym else f"${v:,.2f}") if v else '-'
+                        _pf_ = lambda v: (f"₩{v:,.0f}" if is_kr_sym else f"\\${v:,.2f}") if v else '-'   # $ 두 개가 수식으로 렌더되지 않게
                         _plan_cards = [
                             _kpi('판정', _vd['state'], (' · '.join(_vd['exit']) if _vd['exit'] else f"체크 {_vd['ok']}/{len(_vd['checks'])} 통과"), _vd['tone']),
-                            _kpi('기준 목표', f"{_base['up']:+.0f}%" if _base else '-', (f"{_pf_(_base['price'])} · {_base['name']}" if _base else '목표가 계산 불가'),
+                            _kpi('목표 중앙값', f"{_base['up']:+.0f}%" if _base else '-',
+                                 (f"{_pf_(_base['price']).replace(chr(92), '')} · 범위 {_base['lo']:+.0f}~{_base['hi']:+.0f}% · {_base['name']}" if _base else '목표가 계산 불가'),
                                  'na' if not _base else ('good' if _base['up'] >= 20 else 'mid' if _base['up'] > 0 else 'bad')),
                             _kpi('1차 손절(참고)', f"{_st['s1_pct']:.0f}%", f"{_pf_(_st['s1'])} · 2차 {_pf_(_st['s2'])}({_st['s2_pct']:.0f}%)", 'mid'),
                             _kpi('역사적 다운사이드', f"{_dn_pct:.0f}%" if _dn_pct is not None else '-',
                                  (f"{_pf_(_dn_px)} · 스윙 {len(_sw['declines'])}회 중앙값" if _dn_px else '표본 없음'),
                                  'na' if _dn_pct is None else ('bad' if _dn_pct <= -30 else 'mid')),
-                            _kpi('보상 ÷ 위험', f"{_rr:.1f}배" if _rr else '-', '기준 목표 상승폭 ÷ 1차 손절폭', 'na' if not _rr else ('good' if _rr >= 3 else 'mid' if _rr >= 1.5 else 'bad')),
-                            _kpi('투입 가능 비중', f"{_ps['rec']:.1f}%", ("총자산 기준 · 변동성 커서 절반" if _ps['half'] else "총자산 기준 · 원칙 v1 상한"),
+                            _kpi('보상 ÷ 위험', f"{_rr:.1f}배" if _rr else '-', ('목표 중앙값 상승폭 ÷ 1차 손절폭' if _rr else '목표 중앙값이 현재가 아래'), 'na' if not _rr else ('good' if _rr >= 3 else 'mid' if _rr >= 1.5 else 'bad')),
+                            _kpi('투입 가능 비중', f"{_ps['rec']:.1f}%",
+                                 (f"판정이 '매수 가능 영역' 아님 → 신규 0 (조건 충족 시 {min(_ps['risk_size'], _slot) * (0.5 if _ps['half'] else 1):.1f}%)"
+                                  if _ps['rec'] == 0 else ("총자산 기준 · 변동성 60%↑ 절반" if _ps['half'] else "총자산 기준 · 원칙 v1 상한")),
                                  'good' if _ps['rec'] > 0 else 'na'),
                         ]
-                        st.markdown('<div class="mo-kpis">' + ''.join(_plan_cards) + '</div>', unsafe_allow_html=True)
+                        st.markdown('<div class="mo-kpis">' + ''.join(_plan_cards).replace('\\$', '$') + '</div>', unsafe_allow_html=True)
 
                         _pl, _pr = st.columns(2, gap='large')
                         with _pl:
