@@ -411,6 +411,11 @@ def build():
             final=int(g.loc[tt].sum()))
 
     cands = weeks.get(str(last.date()), [])
+    # 2026-10-23 — 🚀 주도주(교집합) 화면용: 이번 주 이익가속(ACC==1, 유동성 통과) 전 종목.
+    #   candidates 는 '급등' 까지 통과한 종목만이라 교집합의 분모로 못 쓴다.
+    _L = liq.loc[last] & (M["ACC"].loc[last] == 1)
+    acc_now = [dict(sym=s_, oia=_r(M["oi_a"].loc[last, s_] * 100, 1), rva=_r(M["rv_a"].loc[last, s_], 1))
+               for s_ in _L[_L].index]
     out = dict(funnel=funnel, generated=str(pd.Timestamp.today().date()),
                signal_week=str(last.date()),
                universe=int(px.loc[last].notna().sum()),
@@ -421,7 +426,7 @@ def build():
                perf=perf, by_year=by_year, by_month=by_month, by_moy=by_moy,
                by_step=by_step, by_step_y=by_step_y,
                roster=list(roster.values()),
-               candidates=cands, weeks=weeks)
+               candidates=cands, acc_now=acc_now, weeks=weeks)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))

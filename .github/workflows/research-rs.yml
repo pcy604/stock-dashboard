@@ -1,0 +1,70 @@
+# RS 강도 × 이익가속/흑자전환 백테스트 (2026-10-23) — research/rs_accel_bt.py
+#
+# 왜 CI 인가: market.db·leaders_cache(ek_·dy_)는 git 밖이고, 노트북 캐시는 dy_SPY.csv 처럼 조각이 빠져 있었다.
+#   weekly-accel 이 매주 저장하는 최신 캐시를 복원해 **읽기만** 한다 — 캐시를 다시 저장하지 않으므로
+#   주간 파이프라인 상태를 건드리지 않는다. 결과 JSON 3개만 커밋한다.
+# 실행: 이 파일·leaders_events.py·research/pead_recheck.py·tools/diag_lost.py 를 고쳐 푸시하거나 수동 실행.
+name: research-rs
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'research/rs_accel_bt.py'
+      - '.github/workflows/research-rs.yml'
+permissions:
+  contents: write
+concurrency:
+  group: leaders-cache
+  cancel-in-progress: false
+jobs:
+  rs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/market.db
+          key: marketdb-none
+          restore-keys: |
+            marketdb-
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-none
+          restore-keys: |
+            leaders-cache-
+      - name: 캐시 상태
+        run: |
+          echo "::notice title=캐시::leaders_cache $(ls data/leaders_cache | wc -l) 파일 · ek_ $(ls data/leaders_cache/ek_*.csv 2>/dev/null | wc -l) · dy_ $(ls data/leaders_cache/dy_*.csv 2>/dev/null | wc -l) · dy_SPY $(test -f data/leaders_cache/dy_SPY.csv && echo 있음 || echo 없음)"
+          python - <<'PY'
+          import sqlite3
+          c = sqlite3.connect('data/market.db')
+          v = c.execute("SELECT factor_ver, COUNT(DISTINCT sym), MIN(as_of), MAX(as_of) FROM factor_weekly GROUP BY factor_ver").fetchall()
+          s = c.execute("SELECT COUNT(*), MIN(date), MAX(date) FROM prices WHERE sym='SPY'").fetchone()
+          print(f"::notice title=market.db::factor_weekly {v} · SPY 주봉 {s}")
+          ver = 'v13y' if any(r[0] == 'v13y' for r in v) else 'v1'
+          open('/tmp/ver', 'w').write(ver)
+          PY
+      - name: RS × 이익가속 백테스트
+        run: FACTOR_VER=$(cat /tmp/ver) python research/rs_accel_bt.py
+      - name: 결과 커밋
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add results/rs_accel_bt.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "auto: RS×이익가속 백테스트 $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
