@@ -5525,8 +5525,8 @@ def _tab_analysis():
                         ('목표가 여력',   _fx(_upside, '%')),
                     ]
                     # 2026-10-19 — 2열 세로 표(20행) → 묶음별 칩 격자. 세로 길이 ⅓.
-                    _V = dict(val_rows)
-                    _sg = lambda ks, signed=(): [(k, _V[k], k in signed) for k in ks]
+                    _VR = dict(val_rows)      # 2026-10-23 — 이름이 _V 였을 때 verdict 모듈(_V)을 가려 CANSLIM M 이 늘 '—' 였다
+                    _sg = lambda ks, signed=(): [(k, _VR[k], k in signed) for k in ks]
                     _stat_grid([
                         ('가격', _sg(['52주 고점', '52주 저점', '52주 저점 대비', '연간 변동성', '애널 목표가', '목표가 여력'], ('목표가 여력',))),
                         ('멀티플', _sg(['PER (TTM)', 'PER (12MF)', 'PBR', 'PSR (TTM)', 'PEG', '배당수익률'])),
@@ -6491,11 +6491,11 @@ def _tab_analysis():
                         _hi52v = float(hist['High'].tail(252).max())
                         _dd52 = (_p / _hi52v - 1) * 100 if _hi52v else None
                         _tt = _LP.get('_tpl') or _sx.trend_template(hist['Close'], hist.get('High'), hist.get('Low'))
-                        _rsi = _tp.rsi(_c_all)
+                        _rsi_now = _tp.rsi(_c_all)
                         _mac = _tp.macd(_c_all)
                         _liv = _tp.livermore(_c_all, _v_all)
                         _vd = _tp.verdict(price=_p, ma50=_ma50, ma200=_ma200, ma200_prev=_ma200p, tt_n=_tt.get('n'),
-                                          rsi_v=_rsi, macd_d=_mac, canslim_grade=_LP.get('_gg'), liv=_liv, dd52=_dd52)
+                                          rsi_v=_rsi_now, macd_d=_mac, canslim_grade=_LP.get('_gg'), liv=_liv, dd52=_dd52)
                         _sw = _tp.swings(_c_all, theta=10)
                         _cur = _sw['current'] or {}
                         _low_piv = next((pv['price'] for pv in reversed(_sw['pivots']) if pv['type'] == 'L'), None)

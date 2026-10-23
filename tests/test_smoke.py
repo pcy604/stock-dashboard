@@ -111,3 +111,20 @@ def test_no_data_source_unwatched():
     exempt = {'results/portfolio_latest.json', 'results/guru_chart_latest.png'}
     gap = used - watched - exempt
     assert not gap, f'감시 목록에 없는 데이터 소스: {sorted(gap)} → data_freshness.SOURCES 에 등록할 것'
+
+
+def test_no_shadowed_names():
+    """2026-10-23 사고: 종목 분석 함수 안에서 `_rsi = ...` 로 값을 넣자 같은 함수의 `_rsi()` 호출이 전부 UnboundLocalError →
+    탭 전체가 멈췄다(guard 가 삼켜 화면엔 빈칸). `_V = dict(...)` 도 verdict 모듈을 가려 CANSLIM M 이 늘 '—' 였다.
+    pyflakes 의 '정의 전 참조'·'정의 안 된 이름'을 막는다."""
+    import pytest
+    pyflakes = pytest.importorskip('pyflakes.api')
+    from pyflakes import reporter as R
+    import io
+    import os
+    out = io.StringIO()
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for f in ('dashboard.py', 'trade_plan.py', 'stock_extras.py', 'analysis_checks.py', 'table_ui.py'):
+        pyflakes.checkPath(os.path.join(root, f), R.Reporter(out, out))
+    bad = [l for l in out.getvalue().splitlines() if 'referenced before assignment' in l or 'undefined name' in l]
+    assert not bad, '\n'.join(bad)
