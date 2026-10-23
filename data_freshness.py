@@ -124,7 +124,7 @@ SOURCES = [
     dict(path='data/us_marketcap.csv', label='미국 시총 (유니버스 기준)',
          cycle='매일 06:00 (평일)', max_age=4, producer='marketcap_refresh.py build',
          job='daily-refresh',
-         used_by='🚀 주도주 · 🏆 CANSLIM(US) · 🔥 상승 상위 · 전 미국 스크리너',
+         used_by='💎 펀더멘털 → 이익가속 · 🚀 주도주 → CANSLIM(US) · 🔥 모멘텀 → 상승 상위 · 전 미국 스크리너',
          getter=_csv_col('as_of'), raw=True),
     dict(path='data/us_shares.csv', label='미국 주식수 (SEC 공시)',
          cycle='주 1회 (일 08:00)', max_age=10,
@@ -168,7 +168,7 @@ SOURCES = [
     # ★ 2026-08-23 신설 — 이익 가속 신호. 주도주 탭의 첫 화면이라 밀리면 바로 보인다.
     dict(path='results/leaders_accel.json', label='이익 가속 신호',
          cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_accel.py',
-         job='leaders_weekly (로컬 스케줄러)', used_by='🚀 주도주 → ⚡ 이익 가속',
+         job='leaders_weekly (로컬 스케줄러)', used_by='💎 펀더멘털 → 이익가속 → ⚡ 이익 가속',
          getter=_key('generated')),
     # ★ 2026-08-25 신설 — 두 심층조회가 같은 곡선을 각자 갖고 있어 합쳤다(674종 중복).
     # 이게 밀리면 차트의 ▲ 는 최신인데 곡선만 지난주까지 그려진다 — 조용히 어긋난다.
@@ -178,12 +178,12 @@ SOURCES = [
     dict(path='results/leaders_accel_wf.json', label='이익 가속 워크포워드',
          cycle='규칙 변경 시 수동', max_age=400, producer='leaders_accel_wf.py',
          job='수동 (python leaders_accel_wf.py)',
-         used_by='🚀 주도주 → 🧪 워크포워드 검증',
+         used_by='💎 펀더멘털 → 이익가속 → 🧪 워크포워드 검증',
          getter=_key('generated')),
     dict(path='results/price_curves.json', label='가격 곡선 (L/S·가속 공용)',
          cycle='주 1회 (토 08:00)', max_age=9, producer='curves_build.py',
          job='weekly-accel + leaders_weekly(로컬)',
-         used_by='🚀 주도주 → 심층조회 차트 (L/S·이익가속 양쪽)',
+         used_by='💎 펀더멘털 → 이익가속 → 심층조회 차트 (L/S·이익가속 양쪽)',
          getter=_key('generated')),
     # 종료된 규칙이지만 화면에 기록으로 남아 있어 계속 감시한다.
     # ★ 2026-08-22 추가 — 이 파일이 밀리면 새 주차의 vw 가 NaN 이 되어
@@ -195,7 +195,7 @@ SOURCES = [
     # 보내고, 여기서는 그 값을 본다 — 배포된 화면에서도 보인다.
         dict(path='data/kr_fundamentals_q.parquet', label='KR 분기재무 (KR-U6 입력)',
          cycle='분기 1회', max_age=150, producer='export_kr_fundq.py export',
-         job='weekly-profile (tools/refresh_kr_fundq.py)', used_by='🚀 주도주 → 🇰🇷 · 🔄 흑자전환(KR)',
+         job='weekly-profile (tools/refresh_kr_fundq.py)', used_by='💎 펀더멘털 → 이익가속 → 🇰🇷 · 🔄 흑자전환(KR)',
          getter=_fundq_quarter, raw=True),
     # 2026-10-19 — 07-24 한 번 쌓이고 석 달 멈춰 있었는데 감시 목록에 없었다.
     dict(path='results/consensus_history.jsonl', label='KR 컨센서스 주간 스냅샷',
@@ -218,15 +218,15 @@ SOURCES = [
          getter=_key('generated')),
     dict(path='results/leaders_kr6.json', label='주도주 KR (KR-U6·규칙⑥ 이식)',
          cycle='주 1회', max_age=9, producer='leaders_kr6.py publish',
-         job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 → 규칙⑥ 이식',
+         job='weekly-profile', used_by='💎 펀더멘털 → 이익가속 → 🇰🇷 → 규칙⑥ 이식',
          getter=_key('generated')),
     dict(path='results/leaders_kr.json', label='주도주 KR (KR-P1)',
          cycle='주 1회', max_age=9, producer='leaders_kr.py publish',
-         job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 한국',
+         job='weekly-profile', used_by='💎 펀더멘털 → 이익가속 → 🇰🇷 한국',
          getter=_key('generated')),
     dict(path='results/leaders_kr_paper.json', label='주도주 KR 포워드 원장',
          cycle='주 1회', max_age=9, producer='leaders_kr_paper.py update',
-         job='weekly-profile', used_by='🚀 주도주 → 🇰🇷 (포워드 검증)',
+         job='weekly-profile', used_by='💎 펀더멘털 → 이익가속 → 🇰🇷 (포워드 검증)',
          getter=_key('updated')),
     # 2026-10-10 추가 — 소비자가 없어 레지스트리에도 없었다. 화면을 붙였으니
     #   같이 감시한다. 09-16 자 종목 0개인 채로 아무도 모르고 있었다.
@@ -240,9 +240,13 @@ SOURCES = [
          cycle='매일 06:00 · 월 주간', max_age=4, producer='market_report.py',
          job='daily-refresh · weekly-profile', used_by='🏠 종합 → 시황 리포트 · 💬 챗봇',
          getter=lambda p: (__import__('json').load(open(p, encoding='utf-8')).get('latest_daily') or {}).get('date'), raw=True),
+    dict(path='results/rs_accel_bt.json', label='RS × 이익가속 백테스트 판정',
+         cycle='수동(연구)', max_age=400, producer='research/rs_accel_bt.py',
+         job='research-rs (수동·코드 변경 시)', used_by='🔎 종목 발굴 → 🚀 주도주 → 교집합 후보',
+         getter=_key('run')),
     dict(path='results/turnaround_latest.json', label='흑자전환 (턴어라운드)',
          cycle='주 1회', max_age=9, producer='turnaround_run.py',
-         job='weekly-accel (금 22:17 UTC)', used_by='🔎 종목 발굴 → 🔄 흑자전환',
+         job='weekly-accel (금 22:17 UTC)', used_by='🔎 종목 발굴 → 💎 펀더멘털 → 흑자전환 · 🚀 주도주 → 교집합 후보',
          getter=_key('date')),
 ]
 
