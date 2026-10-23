@@ -1,0 +1,107 @@
+{
+ "run": "2026-10-23 02:49",
+ "factor_ver": "v1",
+ "period": [
+  "2018-01-01",
+  "2026-10-12"
+ ],
+ "universe": 2570,
+ "SPY": {
+  "CAGR": 14.1,
+  "MDD": -31.8,
+  "y14_19": 10.7
+ },
+ "variants": {
+  "star": {
+   "CAGR": 8.75,
+   "p10": 7.15,
+   "MDD": -42.15,
+   "Sharpe": 0.45999999999999996,
+   "y14_19": -1.2,
+   "signals_per_week": 16.6,
+   "overlap_star": 1.0
+  },
+  "acc": {
+   "CAGR": 10.45,
+   "p10": 8.02,
+   "MDD": -37.05,
+   "Sharpe": 0.605,
+   "y14_19": 8.95,
+   "signals_per_week": 334.7,
+   "overlap_star": 0.05
+  },
+  "rs80_acc": {
+   "CAGR": 9.45,
+   "p10": 7.79,
+   "MDD": -37.15,
+   "Sharpe": 0.55,
+   "y14_19": 5.75,
+   "signals_per_week": 79.0,
+   "overlap_star": 0.095,
+   "shock1": 8.75,
+   "verdict": {
+    "beats_star": true,
+    "p10_beats_star": false,
+    "beats_spy": false,
+    "y14_19_beats_spy": false,
+    "shock_beats_spy": false,
+    "pass": false
+   }
+  },
+  "rs90_acc": {
+   "CAGR": 10.850000000000001,
+   "p10": 7.3,
+   "MDD": -38.099999999999994,
+   "Sharpe": 0.545,
+   "y14_19": 5.15,
+   "signals_per_week": 37.6,
+   "overlap_star": 0.132,
+   "shock1": 12.850000000000001,
+   "verdict": {
+    "beats_star": true,
+    "p10_beats_star": false,
+    "beats_spy": false,
+    "y14_19_beats_spy": false,
+    "shock_beats_spy": false,
+    "pass": false
+   }
+  },
+  "rs80_fund": {
+   "CAGR": 12.15,
+   "p10": 8.64,
+   "MDD": -34.75,
+   "Sharpe": 0.65,
+   "y14_19": 9.3,
+   "signals_per_week": 91.2,
+   "overlap_star": 0.083,
+   "shock1": 10.15,
+   "verdict": {
+    "beats_star": true,
+    "p10_beats_star": false,
+    "beats_spy": false,
+    "y14_19_beats_spy": false,
+    "shock_beats_spy": false,
+    "pass": false
+   }
+  },
+  "rs80": {
+   "CAGR": 11.6,
+   "p10": 7.9,
+   "MDD": -35.35,
+   "Sharpe": 0.655,
+   "y14_19": 14.15,
+   "signals_per_week": 273.9,
+   "overlap_star": 0.028
+  },
+  "ta": {
+   "CAGR": 13.649999999999999,
+   "p10": 11.19,
+   "MDD": -39.45,
+   "Sharpe": 0.675,
+   "y14_19": 5.75,
+   "signals_per_week": 76.3,
+   "overlap_star": 0.034
+  }
+ },
+ "secs": 71
+}
