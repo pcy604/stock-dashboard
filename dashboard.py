@@ -5478,14 +5478,28 @@ def _tab_analysis():
                     def _pcur(v):   # 통화 포맷
                         if v is None: return '-'
                         return f"{price_unit}{v:,.0f}" if is_kr_sym else f"${v:.2f}"
-                    def _fx(v, suffix='', mult=1, dp=1):  # 숫자 포맷 (None 안전)
-                        if v is None: return '-'
-                        try: return f"{v*mult:.{dp}f}{suffix}"
+                    def _fx(v, suffix='', mult=1, dp=1):  # 숫자 포맷 (None 안전) — 천 단위 쉼표(2026-10-23)
+                        if v is None or (isinstance(v, float) and v != v): return '-'
+                        try: return f"{v*mult:,.{dp}f}{suffix}"
                         except Exception: return '-'
+
+                    # 2026-10-23 — ROE·ROA·마진·성장·부채비율이 KR 중소형주에서 '-'(야후 미제공)였다 → 공시 분기 재무로 직접 계산.
+                    #   공시 기준을 먼저, 없을 때만 야후. PEG = PER(12MF) ÷ EPS 성장률(12MF vs TTM, %).
+                    try:
+                        _pf = _sx.profitability(_sx.quarterly_frame(_q_rows_long(sym8_clean, is_kr_sym)[0]))
+                    except Exception:
+                        _pf = {}
+                    _pick = lambda own, yfk, mult=100: own if own is not None else (yi2.get(yfk) * mult if yi2.get(yfk) is not None else None)
+                    _e_t, _e_f = _vb.get('eps_ttm'), _vb.get('eps_12mf')
+                    _peg_own = None
+                    if _e_t and _e_f and _e_t > 0 and _e_f > _e_t and _vb.get('per_12mf'):
+                        _peg_own = _vb['per_12mf'] / ((_e_f / _e_t - 1) * 100)
 
                     _tgt = yi2.get('targetMeanPrice')
                     _upside = (_tgt/price_now - 1)*100 if (_tgt and price_now) else None
                     _peg = yi2.get('trailingPegRatio') or yi2.get('pegRatio')
+                    if _peg is None:
+                        _peg = _peg_own
 
                     # 지표: (라벨, 표시값)  — 없으면 '-'
                     val_rows = [
@@ -5501,12 +5515,12 @@ def _tab_analysis():
                         ('배당수익률',   _fx(yi2.get('dividendYield'), '%', mult=100, dp=2)),
                         ('EPS (TTM)',   _fx(_vb.get('eps_ttm'), '', dp=2 if not is_kr_sym else 0)),
                         ('EPS (12MF)',  _fx(_vb.get('eps_12mf'), '', dp=2 if not is_kr_sym else 0)),
-                        ('ROE',         _fx(yi2.get('returnOnEquity'), '%', mult=100)),
-                        ('ROA',         _fx(yi2.get('returnOnAssets'), '%', mult=100)),
-                        ('영업마진',     _fx(yi2.get('operatingMargins'), '%', mult=100)),
-                        ('순이익률',     _fx(yi2.get('profitMargins'), '%', mult=100)),
-                        ('매출성장(YoY)', _fx(yi2.get('revenueGrowth'), '%', mult=100)),
-                        ('부채비율(D/E)', _fx(yi2.get('debtToEquity'), '%')),
+                        ('ROE',         _fx(_pick(_pf.get('roe'), 'returnOnEquity'), '%')),
+                        ('ROA',         _fx(_pick(_pf.get('roa'), 'returnOnAssets'), '%')),
+                        ('영업마진',     _fx(_pick(_pf.get('opm'), 'operatingMargins'), '%')),
+                        ('순이익률',     _fx(_pick(_pf.get('npm'), 'profitMargins'), '%')),
+                        ('매출성장(YoY)', _fx(_pick(_pf.get('rev_growth'), 'revenueGrowth'), '%')),
+                        ('부채비율(D/E)', _fx(_pick(_pf.get('debt_ratio'), 'debtToEquity', 1), '%')),
                         ('애널 목표가',   _pcur(_tgt)),
                         ('목표가 여력',   _fx(_upside, '%')),
                     ]
@@ -5521,8 +5535,11 @@ def _tab_analysis():
                     ])
                     st.caption(f"기준 — PER·PSR(TTM)·EPS(TTM): 공시 확정 최근 4분기({_vb.get('ttm_label', '-')}) 합 · "
                                f"PBR: {_vb.get('equity_label', '-')} 분기말 자본 · 12MF: 컨센서스 올해E·내년E를 남은 기간으로 가중 · "
-                               "주가·시총은 실시간. PEG·ROE·ROA·마진·성장·배당·목표가 = yfinance(무료, 기준일 비공개). "
-                               "KR 일부 항목은 빌 수 있음('-').")
+                               "주가·시총은 실시간. "
+                               f"ROE·ROA·마진·매출성장·부채비율 = 공시 분기 재무 자체 계산({_pf.get('basis', '-')}, ROE·ROA 분모는 최신 분기말 잔액, "
+                               "부채비율 = 부채총계÷자본) — 공시값이 없을 때만 yfinance. "
+                               f"PEG = {'yfinance' if (yi2.get('trailingPegRatio') or yi2.get('pegRatio')) else 'PER(12MF) ÷ EPS 성장률(12MF vs TTM)'}. "
+                               "배당·목표가 = yfinance(무료, 기준일 비공개). 적자거나 성장률이 음수면 PEG 는 '-'.")
 
 
                 with _SEC['price']:
@@ -5720,9 +5737,17 @@ def _tab_analysis():
                         _cx_base.index = pd.to_datetime(_cx_base.index)
                         if getattr(_cx_base.index, 'tz', None) is not None:
                             _cx_base.index = _cx_base.index.tz_localize(None)
-                        _PRE = {"50/200 (정통 골든크로스)": (50, 200), "20/60": (20, 60), "5/20 (국내 단기)": (5, 20), "직접 입력": None}
+                        # 2026-10-23 — 구루·업계가 쓰는 조합을 기본 목록으로, 이 종목에서 같은 기간 1등 조합에 ★.
+                        _PRE = {nm: (f, sl) for nm, f, sl in _sx.MA_PRESETS}
+                        _PRE["직접 입력"] = None
                         _gc1, _gc2, _gc3, _gc4 = st.columns([2.6, 0.9, 0.9, 1.6])
-                        _gpair = _gc1.selectbox("이평 조합", list(_PRE), index=0, key="gcdc_pair2")
+                        _y0 = _cx_base.index.min().date()
+                        _cstart = _gc4.date_input("검증 시작일", value=max(_y0, (pd.Timestamp.today() - pd.DateOffset(years=10)).date()),
+                                                  min_value=_y0, max_value=pd.Timestamp.today().date(), key=f"gcs_{sym8_clean}")
+                        _cmp = _sx.ma_cross_compare(_cx_base, _cstart)
+                        _best = next((r['name'] for r in _cmp if r.get('best')), None)
+                        _lab = lambda k: (f"★ {k} (이 종목 1등)" if k == _best else k)
+                        _gpair = _gc1.selectbox("이평 조합", list(_PRE), index=0, key="gcdc_pair3", format_func=_lab)
                         if _PRE[_gpair]:
                             _ff, _ss = _PRE[_gpair]
                             _gc2.number_input("X일선", value=_ff, disabled=True, key=f"gcx_d_{_ff}")
@@ -5730,66 +5755,45 @@ def _tab_analysis():
                         else:
                             _ff = int(_gc2.number_input("X일선", 2, 250, 10, 1, key="gcx"))
                             _ss = int(_gc3.number_input("Y일선", 3, 400, 60, 1, key="gcy"))
-                        _y0 = _cx_base.index.min().date()
-                        _cstart = _gc4.date_input("검증 시작일", value=max(_y0, (pd.Timestamp.today() - pd.DateOffset(years=10)).date()),
-                                                  min_value=_y0, max_value=pd.Timestamp.today().date(), key=f"gcs_{sym8_clean}")
+                        _bt = _sx.ma_cross_bt(_cx_base, _ff, _ss, _cstart) if _ff < _ss else None
                         if _ff >= _ss:
                             st.warning("X일선이 Y일선보다 짧아야 합니다(예: 5/20, 50/200).")
+                        elif _bt and _bt['n']:
+                            st.markdown(f"**검증 기간 {_bt['start']:%Y-%m-%d} ~ {_bt['end']:%Y-%m-%d} ({_bt['years']:.1f}년)** · "
+                                        f"MA{_ff}/MA{_ss} · 종가 기준, 수수료·세금·슬리피지 미반영")
+                            _stat_grid([('', [
+                                ('거래 횟수', f"{_bt['n']}회"),
+                                ('승률', f"{_bt['win']:.0f}%"),
+                                ('누적 수익', f"{_bt['cum']:+,.0f}%", True),
+                                ('연환산', f"{_bt['cagr']:+.1f}%", True),
+                                ('보유 연환산', f"{_bt['bh_cagr']:+.1f}%", True),
+                                ('보유 대비', f"{_bt['excess']:+.1f}%p", True),
+                                ('전략 MDD', f"{_bt['mdd']:.0f}%", True),
+                                ('투자 기간 비중', f"{_bt['inmk']:.0f}%")])])
+                            st.caption("출처: FinanceDataReader(일봉 주가) · 마지막 갱신: 실시간 조회")
+                            _cur_gc = "🟢 골든(정배열)" if _bt['state'] == 'golden' else "🔴 데드(역배열)"
+                            _openmsg = " · 현재 진입 중(미청산 — 마지막 행은 오늘 종가로 평가)" if _bt['trades'][-1]['open'] else ""
+                            with st.expander(f"거래 내역 {_bt['n']}건"):
+                                _tsrc('FinanceDataReader(일봉 종가) · 이 화면 계산', live=True)
+                                st.dataframe(pd.DataFrame([{'진입일': f"{t['진입일']:%Y-%m-%d}",
+                                                            '청산일': f"{t['청산일']:%Y-%m-%d}" + (' (보유 중)' if t['open'] else ''),
+                                                            '수익률(%)': round(t['ret'], 1), '보유(일)': t['days']}
+                                                           for t in reversed(_bt['trades'])]), filters=False)
+                            if _cmp:
+                                st.markdown("**조합 비교 — 같은 기간, 연환산 순**")
+                                _tsrc('FinanceDataReader(일봉 종가) · 이 화면 계산', live=True)
+                                st.dataframe(pd.DataFrame([{
+                                    '조합': ('★ ' if r.get('best') else '') + r['name'], '연환산(%)': round(r['cagr'], 1),
+                                    '보유 대비(%p)': round(r['excess'], 1), '전략 MDD(%)': round(r['mdd'], 1),
+                                    '승률(%)': round(r['win'], 0) if r['win'] is not None else None, '거래(회)': r['n'],
+                                    '지금': '골든' if r['state'] == 'golden' else '데드'} for r in _cmp]), filters=False)
+                            st.caption(f"현재 상태: **{_cur_gc}**{_openmsg}. X일선이 Y일선을 상향 돌파한 날 종가 매수 → "
+                                       "다음 하향 이탈 날 종가 매도. ⚠️ 후행지표라 횡보장에서는 잦은 손실(휩쏘). "
+                                       "'보유 대비'가 마이너스면 이 종목에선 크로스 매매가 그냥 들고 있는 것보다 못했다는 뜻. "
+                                       "⚠️ ★ 1등은 **과거 이 종목에서** 1등일 뿐이다 — 5개 중 1등을 고르면 운이 섞인다(과적합). "
+                                       "다른 종목·다른 기간에서도 1등인지 봐야 원칙이 된다.")
                         else:
-                            # 이평은 시작일 이전 데이터로 미리 데워 둔다(시작일부터 계산하면 첫 Y일은 신호가 없다)
-                            _maf = _cx_base.rolling(_ff).mean()
-                            _mas = _cx_base.rolling(_ss).mean()
-                            _rel = (_maf > _mas).astype(float)
-                            _rel[_maf.isna() | _mas.isna()] = float('nan')
-                            _win_ix = _cx_base.index >= pd.Timestamp(_cstart)
-                            _c = _cx_base[_win_ix]
-                            _r = _rel[_win_ix]
-                            _cross = _r.diff()   # +1 골든, -1 데드
-                            _ent = list(_c.index[_cross == 1])
-                            _exs = list(_c.index[_cross == -1])
-                            _trades = []
-                            for _e in _ent:
-                                _later = [x for x in _exs if x > _e]
-                                _xd = _later[0] if _later else _c.index[-1]
-                                _pe = float(_c.loc[_e]); _px = float(_c.loc[_xd])
-                                if _pe > 0:
-                                    _trades.append({'진입일': _e, '청산일': _xd, 'ret': (_px / _pe - 1) * 100,
-                                                    'days': (_xd - _e).days, 'open': not _later})
-                            if _trades and len(_c) > 1:
-                                _rets = [t['ret'] for t in _trades]
-                                _wins = sum(1 for r in _rets if r > 0)
-                                _yrs = max((_c.index[-1] - _c.index[0]).days / 365.25, 1e-9)
-                                _cum = (np.prod([1 + r / 100 for r in _rets]) - 1) * 100
-                                _bh = (float(_c.iloc[-1]) / float(_c.iloc[0]) - 1) * 100
-                                _cagr = lambda tot: ((1 + tot / 100) ** (1 / _yrs) - 1) * 100 if tot > -100 else -100.0
-                                _inmk = sum(t['days'] for t in _trades) / max((_c.index[-1] - _c.index[0]).days, 1) * 100
-                                st.markdown(f"**검증 기간 {_c.index[0]:%Y-%m-%d} ~ {_c.index[-1]:%Y-%m-%d} ({_yrs:.1f}년)** · "
-                                            f"MA{_ff}/MA{_ss} · 종가 기준, 수수료·세금·슬리피지 미반영")
-                                _stat_grid([('', [
-                                    ('거래 횟수', f"{len(_trades)}회"),
-                                    ('승률', f"{_wins/len(_trades)*100:.0f}%"),
-                                    ('누적 수익(복리)', f"{_cum:+.1f}%", True),
-                                    ('연환산', f"{_cagr(_cum):+.1f}%", True),
-                                    ('같은 기간 보유', f"{_bh:+.1f}%", True),
-                                    ('보유 연환산', f"{_cagr(_bh):+.1f}%", True),
-                                    ('평균 수익', f"{sum(_rets)/len(_rets):+.1f}%", True),
-                                    ('최저 수익', f"{min(_rets):+.1f}%", True),
-                                    ('투자 기간 비중', f"{_inmk:.0f}%")])])
-                                st.caption("출처: FinanceDataReader(일봉 주가) · 마지막 갱신: 실시간 조회")
-                                _cur_gc = "🟢 골든(정배열)" if (_r.iloc[-1] == 1) else "🔴 데드(역배열)"
-                                _openmsg = " · 현재 진입 중(미청산 — 마지막 행은 오늘 종가로 평가)" if _trades[-1]['open'] else ""
-                                with st.expander(f"거래 내역 {len(_trades)}건"):
-                                    _tsrc('FinanceDataReader(일봉 종가) · 이 화면 계산', live=True)
-                                    st.dataframe(pd.DataFrame([{'진입일': f"{t['진입일']:%Y-%m-%d}",
-                                                                '청산일': f"{t['청산일']:%Y-%m-%d}" + (' (보유 중)' if t['open'] else ''),
-                                                                '수익률(%)': round(t['ret'], 1), '보유(일)': t['days']}
-                                                               for t in reversed(_trades)]), filters=False)
-                                st.caption(f"현재 상태: **{_cur_gc}**{_openmsg}. X일선이 Y일선을 상향 돌파한 날 종가 매수 → "
-                                           "다음 하향 이탈 날 종가 매도. ⚠️ 후행지표라 횡보장에서는 잦은 손실(휩쏘). "
-                                           "'같은 기간 보유'를 못 이기면 이 종목에선 크로스 매매가 의미 없었다는 뜻. "
-                                           "⚠️ 한 종목의 과거 한 번 — 다른 종목·다른 기간에서도 통하는지 봐야 원칙이 된다.")
-                            else:
-                                st.info(f"교차 신호 없음 — 검증 기간이 짧거나 MA{_ff}/MA{_ss} 교차가 없었다. 시작일을 앞당겨 보세요.")
+                            st.info(f"교차 신호 없음 — 검증 기간이 짧거나 MA{_ff}/MA{_ss} 교차가 없었다. 시작일을 앞당겨 보세요.")
 
 
                     # 2026-10-21 — '그래서 얼마 샀나/팔았나'가 안 보였다 → 금액 열 + 최근 1년 매수·매도·순매수 합계.

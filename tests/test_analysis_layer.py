@@ -260,3 +260,25 @@ def test_vesting_tags_real_tsla():
                        "1/16th of the total units initially subject to this award vest every quarter thereafter, so that all such "
                        "shares subject to this award will be fully vested on September 5, 2028.")
     assert t == ['16회 분할(분기마다)', '전부 수령 완료 September 5, 2028'], t
+
+
+def test_profitability_ttm():
+    import stock_extras as sx
+    rows = [{'period': f'{2025 + i // 4}.{i % 4 + 1}Q', 'revenue': 100.0 + i * 10, 'op_income': 10.0, 'net_income': 5.0,
+             'equity': 200.0, 'assets': 500.0, 'liabilities': 300.0} for i in range(8)][::-1]
+    p = sx.profitability(sx.quarterly_frame(rows))
+    assert round(p['roe'], 1) == 10.0 and round(p['roa'], 1) == 4.0 and round(p['debt_ratio']) == 150
+    assert round(p['rev_growth'], 1) == round((sum(140 + 10 * i for i in range(4)) / sum(100 + 10 * i for i in range(4)) - 1) * 100, 1)
+    assert p['basis'] == '2026.4Q TTM' and sx.profitability(sx.quarterly_frame([])) == {}
+
+
+def test_ma_cross_bt():
+    import numpy as np, pandas as pd
+    import stock_extras as sx
+    idx = pd.bdate_range('2018-01-01', periods=900)
+    c = pd.Series(np.r_[np.linspace(100, 50, 300), np.linspace(50, 200, 300), np.linspace(200, 120, 300)], index=idx)
+    r = sx.ma_cross_bt(c, 20, 60)
+    assert r['n'] >= 1 and r['trades'][0]['ret'] > 0 and r['mdd'] <= 0 and r['state'] == 'dead'
+    assert sx.ma_cross_bt(c, 60, 20) is None
+    cmp = sx.ma_cross_compare(c)
+    assert cmp and cmp[0].get('best') and all(cmp[i]['cagr'] >= cmp[i + 1]['cagr'] for i in range(len(cmp) - 1))

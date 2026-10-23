@@ -34,7 +34,8 @@ def quarterly_frame(rows: list[dict]) -> pd.DataFrame:
         except Exception:
             continue
         out.append({'end': end, 'revenue': r.get('revenue'), 'net_income': r.get('net_income'),
-                    'op_income': r.get('op_income'), 'equity': r.get('equity')})
+                    'op_income': r.get('op_income'), 'equity': r.get('equity'),
+                    'assets': r.get('assets'), 'liabilities': r.get('liabilities')})
     if not out:
         return pd.DataFrame()
     d = pd.DataFrame(out).drop_duplicates('end').set_index('end').sort_index()
@@ -49,8 +50,9 @@ def ttm(q: pd.DataFrame) -> pd.DataFrame:
     for c in ('revenue', 'net_income', 'op_income'):
         if c in q:
             t[c] = q[c].rolling(4, min_periods=4).sum()
-    if 'equity' in q:
-        t['equity'] = q['equity']
+    for c in ('equity', 'assets', 'liabilities'):     # 잔액 — 합치지 않는다
+        if c in q:
+            t[c] = q[c]
     # 분기 간격이 끊긴 곳(4분기 창이 1년을 넘는 곳)은 TTM 무효
     span = pd.Series(q.index, index=q.index).diff(3).dt.days
     t[span > 370] = np.nan
@@ -444,3 +446,100 @@ def earnings_quarters(qf: pd.DataFrame, events: list[dict] | None = None, cons_q
                '예상': (ly_ad + pd.DateOffset(years=1)) if ly_ad is not None else None,
                '법정 마감(KR)': nq_end + pd.Timedelta(days=90 if nq_end.month == 12 else 45)}
     return {'rows': rows, 'next': nxt, 'wins': wins, 'losses': losses}
+
+
+
+# ── 8) 수익성 지표 자체 계산 (2026-10-23) — 야후가 비우는 KR 중소형주용 ─────────
+def profitability(q: pd.DataFrame) -> dict:
+    """공시 분기 재무 → TTM 기준 ROE·ROA·영업마진·순이익률·매출성장(YoY)·부채비율(부채÷자본).
+    ROE·ROA 분모는 최신 분기말 잔액(평균 잔액이 아니다 — 캡션에 명시). 값이 없으면 키가 없다."""
+    out = {}
+    if q is None or q.empty:
+        return out
+    t = ttm(q.sort_index())
+    tv = t.dropna(subset=[c for c in ('revenue',) if c in t]).copy() if 'revenue' in t else t
+    if tv.empty:
+        return out
+    last = tv.iloc[-1]
+    rv, op, ni = last.get('revenue'), last.get('op_income'), last.get('net_income')
+    bal = q.sort_index()
+    eq = bal['equity'].dropna().iloc[-1] if 'equity' in bal and bal['equity'].notna().any() else None
+    at = bal['assets'].dropna().iloc[-1] if 'assets' in bal and bal['assets'].notna().any() else None
+    li = bal['liabilities'].dropna().iloc[-1] if 'liabilities' in bal and bal['liabilities'].notna().any() else None
+    ok = lambda v: v is not None and pd.notna(v)
+    if ok(ni) and ok(eq) and eq > 0:
+        out['roe'] = ni / eq * 100
+    if ok(ni) and ok(at) and at > 0:
+        out['roa'] = ni / at * 100
+    if ok(op) and ok(rv) and rv > 0:
+        out['opm'] = op / rv * 100
+    if ok(ni) and ok(rv) and rv > 0:
+        out['npm'] = ni / rv * 100
+    if ok(li) and ok(eq) and eq > 0:
+        out['debt_ratio'] = li / eq * 100
+    prev = tv['revenue'].shift(4).iloc[-1] if len(tv) >= 5 else None
+    span = (tv.index[-1] - tv.index[-5]).days if len(tv) >= 5 else None
+    if ok(prev) and prev > 0 and ok(rv) and span and 350 <= span <= 380:
+        out['rev_growth'] = (rv / prev - 1) * 100
+    out['basis'] = f"{tv.index[-1].year}.{(tv.index[-1].month - 1) // 3 + 1}Q TTM"
+    return out
+
+
+# ── 9) 이동평균 크로스 백테스트 (2026-10-23 함수로 분리 — 조합 여러 개를 같은 기간에 비교) ─────
+MA_PRESETS = [
+    ('50/200 — 골든크로스 표준(월가·오닐)', 50, 200),
+    ('50/150 — 미너비니 추세 템플릿 이평', 50, 150),
+    ('20/50 — 중기 스윙', 20, 50),
+    ('20/60 — 국내 중기', 20, 60),
+    ('5/20 — 국내 단기', 5, 20),
+]
+
+
+def ma_cross_bt(close: pd.Series, fast: int, slow: int, start=None) -> dict | None:
+    """X일선이 Y일선을 상향 돌파한 날 종가 매수 → 다음 하향 이탈 날 종가 매도. 이평은 시작일 이전 데이터로 데운다.
+    반환 {'trades':[...], 'n','win','cum','cagr','bh','bh_cagr','excess','inmk','mdd','state','years','start','end'}"""
+    c = close.dropna()
+    if fast >= slow or len(c) < slow + 5:
+        return None
+    maf, mas = c.rolling(fast).mean(), c.rolling(slow).mean()
+    rel = (maf > mas).astype(float)
+    rel[maf.isna() | mas.isna()] = np.nan
+    if start is not None:
+        keep = c.index >= pd.Timestamp(start)
+        c, rel = c[keep], rel[keep]
+    if len(c) < 2:
+        return None
+    cross = rel.diff()
+    ent, exs = list(c.index[cross == 1]), list(c.index[cross == -1])
+    trades = []
+    for e in ent:
+        later = [x for x in exs if x > e]
+        xd = later[0] if later else c.index[-1]
+        pe, px = float(c.loc[e]), float(c.loc[xd])
+        if pe > 0:
+            trades.append({'진입일': e, '청산일': xd, 'ret': (px / pe - 1) * 100, 'days': (xd - e).days, 'open': not later})
+    yrs = max((c.index[-1] - c.index[0]).days / 365.25, 1e-9)
+    cg = lambda tot: ((1 + tot / 100) ** (1 / yrs) - 1) * 100 if tot > -100 else -100.0
+    # 전략 자산곡선(보유 중일 때만 주가를 따라감) → MDD
+    held = rel.shift(1).fillna(0).clip(lower=0)
+    eq = (1 + c.pct_change().fillna(0) * held).cumprod()
+    mdd = float((eq / eq.cummax() - 1).min() * 100)
+    cum = (np.prod([1 + t['ret'] / 100 for t in trades]) - 1) * 100 if trades else 0.0
+    bh = (float(c.iloc[-1]) / float(c.iloc[0]) - 1) * 100
+    return {'trades': trades, 'n': len(trades), 'win': (sum(t['ret'] > 0 for t in trades) / len(trades) * 100) if trades else None,
+            'cum': cum, 'cagr': cg(cum), 'bh': bh, 'bh_cagr': cg(bh), 'excess': cg(cum) - cg(bh),
+            'inmk': sum(t['days'] for t in trades) / max((c.index[-1] - c.index[0]).days, 1) * 100, 'mdd': mdd,
+            'state': 'golden' if rel.iloc[-1] == 1 else 'dead', 'years': yrs, 'start': c.index[0], 'end': c.index[-1]}
+
+
+def ma_cross_compare(close: pd.Series, start=None, presets=MA_PRESETS) -> list[dict]:
+    """프리셋 조합 전부를 같은 기간으로 — 연환산 순. 1등에 'best'=True."""
+    out = []
+    for name, f, s in presets:
+        r = ma_cross_bt(close, f, s, start)
+        if r and r['n']:
+            out.append({'name': name, 'fast': f, 'slow': s, **{k: r[k] for k in ('n', 'win', 'cagr', 'bh_cagr', 'excess', 'mdd', 'state')}})
+    out.sort(key=lambda r: r['cagr'], reverse=True)
+    if out:
+        out[0]['best'] = True
+    return out
