@@ -329,6 +329,13 @@ def _():
 
 
 # ───────────────────────── 이번 주 판정 ─────────────────────────
+@check('이번 주 판정', 'FRED 경제지표가 들어왔는가 (축 2 경기·국면 판정의 원자료 — 2026-10-22 fred_ok=False 로 조용히 비어 있었음)')
+def _():
+    d = _j('results/macro.json')
+    err = d.get('fred_err') or {}
+    return bool(d.get('fred_ok')), f"fred_ok {d.get('fred_ok')} · 경기 {(d.get('econ') or {}).get('word')} · 사유 {next(iter(err.values()), '기록 없음(구버전 산출물)')}"
+
+
 @check('이번 주 판정', 'SPY 가 200일선 대비 ±40% 안이고, ON/OFF 가 이격 부호와 맞고, 목표 비중 합이 100인가')
 def _():
     d = _j('results/macro.json')

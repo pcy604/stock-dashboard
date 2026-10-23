@@ -294,13 +294,17 @@ def axes(S: dict, closes: dict, core_on: bool | None, phase: str | None) -> dict
 
 
 # ── 배치(CI) 전용 수집기 ─────────────────────────────────────────────
+FRED_ERR = {}   # 2026-10-23: 조용한 실패 금지 — 시리즈별 실패 사유(macro.json fred_err 로 노출)
+
+
 def fred_fetch(series_id: str, limit: int = 24):
-    """dashboard.fetch_fred 와 같은 모양 [(date, value)] 오름차순. 키 없거나 실패면 []."""
+    """dashboard.fetch_fred 와 같은 모양 [(date, value)] 오름차순. 키 없거나 실패면 [] (사유는 FRED_ERR)."""
     key = os.environ.get('FRED_KEY', '')
     if not key:
         kf = os.path.join(BASE, 'data', '.fred_key')
         key = open(kf, encoding='utf-8').read().strip() if os.path.exists(kf) else ''
     if not key:
+        FRED_ERR[series_id] = 'FRED_KEY 없음'
         return []
     try:
         import requests
@@ -309,7 +313,8 @@ def fred_fetch(series_id: str, limit: int = 24):
                                      sort_order='desc', limit=limit), timeout=15)
         r.raise_for_status()
         return sorted((o['date'], float(o['value'])) for o in r.json()['observations'] if o['value'] != '.')
-    except Exception:
+    except Exception as e:
+        FRED_ERR[series_id] = f'{type(e).__name__}: {str(e)[:120]}'.replace(key, '***')
         return []
 
 
@@ -357,6 +362,7 @@ def build(spy=None, kospi=None, fetch=None, closes=None) -> dict:
         flow=dict(ax['flow'], nl13=_r(ax['nl13'], 1)),
         econ=dict(word=ax['ew'], sub=ax['esub']),
         fred_ok=bool(d),
+        fred_err=dict(list(FRED_ERR.items())[:6]),
     )
 
 
