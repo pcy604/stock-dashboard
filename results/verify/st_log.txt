@@ -1,0 +1,80 @@
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+2026-10-23 02:32:16.633 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+2026-10-23 02:32:17.121 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+2026-10-23 02:32:17.289 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+2026-10-23 02:32:17.416 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+2026-10-23 02:32:17.459 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+2026-10-23 02:32:17.521 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+2026-10-23 02:32:17.719 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')
+2026-10-23 02:32:17.754 Please replace `use_container_width` with `width`.
+
+`use_container_width` will be removed after 2025-12-31.
+
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+/home/runner/work/stock-dashboard/stock-dashboard/dashboard.py:723: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  asof = (_dt.datetime.utcnow() + _dt.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M KST 조회')

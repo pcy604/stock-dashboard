@@ -1,0 +1,748 @@
+{
+ "date": "2026-10-23",
+ "dart_cb_raw": {
+  "status": "000",
+  "total": 1893,
+  "hits": [
+   [
+    "126340",
+    "비나텍",
+    "[기재정정]주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "000490",
+    "대동",
+    "주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "002990",
+    "금호건설",
+    "[기재정정]주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "115160",
+    "휴맥스",
+    "주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "335870",
+    "윙스풋",
+    "[기재정정]주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "083640",
+    "인콘",
+    "[기재정정]주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "102280",
+    "쌍방울",
+    "[기재정정]주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "900100",
+    "파이온엑스",
+    "[기재정정]주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "038060",
+    "루멘스바이오스",
+    "주요사항보고서(전환사채권발행결정)"
+   ],
+   [
+    "357880",
+    "SKAI",
+    "주요사항보고서(전환사채권발행결정)"
+   ]
+  ],
+  "cvbdIsDecsn": {
+   "corp": "비나텍",
+   "raw": {
+    "rcept_no": "20260319000390",
+    "corp_cls": "K",
+    "corp_code": "00563518",
+    "corp_name": "비나텍",
+    "bddd": "2026년 03월 12일",
+    "od_a_at_t": "3",
+    "od_a_at_b": "-",
+    "adt_a_atn": "참석",
+    "fdpp_fclt": "35,000,000,000",
+    "fdpp_bsninh": "-",
+    "fdpp_op": "6,000,000,000",
+    "fdpp_dtrp": "-",
+    "fdpp_ocsa": "-",
+    "fdpp_etc": "-",
+    "ftc_stt_atn": "미해당",
+    "bd_tm": "3",
+    "bd_knd": "무기명식 이권부 무보증 사모 전환사채",
+    "bd_fta": "41,000,000,000",
+    "atcsc_rmislmt": "80,000,000,000",
+    "ovis_fta": "-",
+    "ovis_fta_crn": "-",
+    "ovis_ster": "-",
+    "ovis_isar": "-",
+    "ovis_mktnm": "-",
+    "bd_intr_ex": "0.0",
+    "bd_intr_sf": "3.0",
+    "bd_mtd": "2031년 03월 20일",
+    "bdis_mthn": "사모",
+    "cv_rt": "100",
+    "cv_prc": "147,686",
+    "cvisstk_knd": "비나텍 주식회사 기명식 보통주",
+    "cvisstk_cnt": "277,616",
+    "cvisstk_tisstk_vs": "3.96",
+    "cvrqpd_bgd": "2028년 03월 20일",
+    "cvrqpd_edd": "2031년 02월 20일",
+    "act_mktprcfl_cvprc_lwtrsprc": "-",
+    "act_mktprcfl_cvprc_lwtrsprc_bs": "-",
+    "rmislmt_lt70p": "-",
+    "abmg": "-",
+    "sbd": "2026년 03월 20일",
+    "pymd": "2026년 03월 20일",
+    "rpmcmp": "-",
+    "grint": "-",
+    "rs_sm_atn": "아니오",
+    "ex_sm_r": "사모 발행 (사채 발행일로부터 1년간 전환 및 권면분할 금지)",
+    "ovis_ltdtl": "-"
+   }
+  }
+ },
+ "dart_cb_parsed": [
+  {
+   "sym": "126340",
+   "name": "비나텍",
+   "n_terms": 5,
+   "terms": [
+    {
+     "kind": "CB",
+     "rcept_no": "20261023000071",
+     "decided": "2026-10-20",
+     "round": "5",
+     "amount": 29000000000.0,
+     "price": 83102.0,
+     "floor": null,
+     "shares": 348968.0,
+     "ratio": 4.64,
+     "start": "2027-10-28",
+     "end": "2031-09-28",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261023000071"
+    },
+    {
+     "kind": "CB",
+     "rcept_no": "20260814003891",
+     "decided": "2026-08-14",
+     "round": "4",
+     "amount": 22000000000.0,
+     "price": 78818.0,
+     "floor": null,
+     "shares": 279124.0,
+     "ratio": 3.74,
+     "start": "2027-08-24",
+     "end": "2031-07-24",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003891"
+    },
+    {
+     "kind": "CB",
+     "rcept_no": "20260319000390",
+     "decided": "2026-03-12",
+     "round": "3",
+     "amount": 41000000000.0,
+     "price": 147686.0,
+     "floor": null,
+     "shares": 277616.0,
+     "ratio": 3.96,
+     "start": "2028-03-20",
+     "end": "2031-02-20",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260319000390"
+    }
+   ],
+   "events": [
+    {
+     "date": "2026-10-23",
+     "label": "CB 발행결정",
+     "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261023000071"
+    },
+    {
+     "date": "2026-10-20",
+     "label": "CB 발행결정",
+     "title": "주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261020000332"
+    },
+    {
+     "date": "2026-08-14",
+     "label": "CB 발행결정",
+     "title": "주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003891"
+    },
+    {
+     "date": "2026-03-19",
+     "label": "CB 발행결정",
+     "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260319000390"
+    },
+    {
+     "date": "2026-03-12",
+     "label": "CB 발행결정",
+     "title": "주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260312001260"
+    },
+    {
+     "date": "2026-03-03",
+     "label": "전환청구",
+     "title": "전환청구권행사",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260303901030"
+    },
+    {
+     "date": "2025-12-11",
+     "label": "전환청구",
+     "title": "전환청구권행사",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251211900765"
+    },
+    {
+     "date": "2025-11-25",
+     "label": "전환청구",
+     "title": "전환청구권행사",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251125900593"
+    }
+   ],
+   "summary": {
+    "n_active": 5,
+    "pot_pct": 20.27,
+    "max_pct": 20.27,
+    "itm_pct": 16.31,
+    "eb_pct": 2.6,
+    "unknown": 0
+   }
+  },
+  {
+   "sym": "000490",
+   "name": "대동",
+   "n_terms": 2,
+   "terms": [
+    {
+     "kind": "CB",
+     "rcept_no": "20261022000505",
+     "decided": "2026-10-22",
+     "round": "43",
+     "amount": 6000000000.0,
+     "price": 7105.0,
+     "floor": 5684.0,
+     "shares": 844475.0,
+     "ratio": 2.85,
+     "start": "2027-10-30",
+     "end": "2031-09-30",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261022000505"
+    },
+    {
+     "kind": "EB",
+     "rcept_no": "20250909000263",
+     "decided": "2025-09-09",
+     "round": "56",
+     "amount": 15000000000.0,
+     "price": 11106.0,
+     "floor": null,
+     "shares": 1350621.0,
+     "ratio": 5.28,
+     "start": "2025-10-17",
+     "end": "2030-08-17",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250909000263"
+    }
+   ],
+   "events": [
+    {
+     "date": "2026-10-22",
+     "label": "CB 발행결정",
+     "title": "주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261022000505"
+    },
+    {
+     "date": "2025-11-26",
+     "label": "유상증자",
+     "title": "주요사항보고서(유상증자결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20251126000696"
+    }
+   ],
+   "summary": {
+    "n_active": 2,
+    "pot_pct": 2.85,
+    "max_pct": 3.5625030429713496,
+    "itm_pct": 2.85,
+    "eb_pct": 5.28,
+    "unknown": 0
+   }
+  },
+  {
+   "sym": "002990",
+   "name": "금호건설",
+   "n_terms": 1,
+   "terms": [
+    {
+     "kind": "CB",
+     "rcept_no": "20261022000506",
+     "decided": "2026-10-20",
+     "round": "304",
+     "amount": 50000000000.0,
+     "price": 11839.0,
+     "floor": null,
+     "shares": 4223329.0,
+     "ratio": 10.24,
+     "start": "2027-10-31",
+     "end": "2056-09-30",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261022000506"
+    }
+   ],
+   "events": [
+    {
+     "date": "2026-10-22",
+     "label": "CB 발행결정",
+     "title": "[기재정정]주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261022000506"
+    },
+    {
+     "date": "2026-10-20",
+     "label": "CB 발행결정",
+     "title": "주요사항보고서(전환사채권발행결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261020000370"
+    },
+    {
+     "date": "2026-04-17",
+     "label": "유상증자",
+     "title": "[기재정정]주요사항보고서(유상증자결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260417000439"
+    },
+    {
+     "date": "2026-03-26",
+     "label": "유상증자",
+     "title": "주요사항보고서(유상증자결정)",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001295"
+    }
+   ],
+   "summary": {
+    "n_active": 1,
+    "pot_pct": 10.24,
+    "max_pct": 10.24,
+    "itm_pct": 0.0,
+    "eb_pct": 0.0,
+    "unknown": 0
+   }
+  },
+  {
+   "sym": "006110",
+   "name": "삼아알미늄",
+   "n_terms": 1,
+   "terms": [
+    {
+     "kind": "CB",
+     "rcept_no": "20230112000130",
+     "decided": "2022-12-22",
+     "round": "1",
+     "amount": 10000000000.0,
+     "price": 34712.0,
+     "floor": 24299.0,
+     "shares": 288084.0,
+     "ratio": 2.55,
+     "start": "2024-01-27",
+     "end": "2027-12-31",
+     "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230112000130"
+    }
+   ],
+   "events": [],
+   "summary": {
+    "n_active": 1,
+    "pot_pct": 2.55,
+    "max_pct": 3.642777461783737,
+    "itm_pct": 2.55,
+    "eb_pct": 0.0,
+    "unknown": 0
+   }
+  }
+ ],
+ "form4": {
+  "TSLA": {
+   "n": 95,
+   "codes": {
+    "D": 1,
+    "G": 3,
+    "S": 66,
+    "A": 2,
+    "M": 22,
+    "F": 1
+   },
+   "kinds": [
+    "RSU",
+    "보통주",
+    "스톡옵션"
+   ],
+   "plan_share": 0.7473684210526316,
+   "tagged": 85,
+   "sample": [
+    {
+     "date": "2026-09-08",
+     "owner": "Taneja Vaibhav",
+     "role": "Chief Financial Officer",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 2605.75,
+     "price": 360.134,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": false,
+     "tags": [
+      "세금 원천징수"
+     ]
+    },
+    {
+     "date": "2026-09-05",
+     "owner": "Taneja Vaibhav",
+     "role": "Chief Financial Officer",
+     "sec_kind": "보통주",
+     "code_label": "행사·전환(파생→주식)",
+     "shares": 6539.0,
+     "price": 0.0,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": false,
+     "tags": []
+    },
+    {
+     "date": "2026-09-05",
+     "owner": "Taneja Vaibhav",
+     "role": "Chief Financial Officer",
+     "sec_kind": "RSU",
+     "code_label": "행사·전환(파생→주식)",
+     "shares": 6539.0,
+     "price": 0.0,
+     "exercise_price": 0.0,
+     "expiration": null,
+     "plan_10b5_1": false,
+     "tags": [
+      "16회 분할(분기마다)",
+      "전부 수령 완료 September 5, 2028"
+     ]
+    },
+    {
+     "date": "2026-06-16",
+     "owner": "Musk Elon",
+     "role": "이사 · CEO · 10% 주주",
+     "sec_kind": "보통주",
+     "code_label": "행사·전환(파생→주식)",
+     "shares": 303960630.0,
+     "price": 23.34,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": false,
+     "tags": [
+      "성과 조건부"
+     ]
+    },
+    {
+     "date": "2026-06-16",
+     "owner": "Musk Elon",
+     "role": "이사 · CEO · 10% 주주",
+     "sec_kind": "보통주",
+     "code_label": "세금 납부용 반납",
+     "shares": 17531857.0,
+     "price": 404.66,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": false,
+     "tags": []
+    },
+    {
+     "date": "2026-06-16",
+     "owner": "Musk Elon",
+     "role": "이사 · CEO · 10% 주주",
+     "sec_kind": "스톡옵션",
+     "code_label": "행사·전환(파생→주식)",
+     "shares": 303960630.0,
+     "price": 0.0,
+     "exercise_price": 23.34,
+     "expiration": "2028-01-20",
+     "plan_10b5_1": false,
+     "tags": [
+      "성과 조건부"
+     ]
+    }
+   ],
+   "notes": [
+    "PURSUANT TO THE ISSUER'S EQUITY PLAN AND POLICIES, THESE SHARES OF COMMON STOCK WERE AUTOMATICALLY WITHHELD AND SOLD BY THE ISSUER TO SATISFY THE REPORTING PERSON'S TAX WITHHOLDING OBLIGATIONS RELATED TO THE VESTING OF RESTRICTED STOCK UNITS REPORTED HEREIN.",
+    "Shares of the Issuer's common stock were issued to the reporting person upon the vesting of restricted stock units on September 5, 2026.",
+    "1/16 of the total restricted stock units initially subject to this award vested on December 5, 2024 and 1/16th of the total units initially subject to this award vest every quarter thereafter, so that all such shares subject to this award will be fully vested on September 5, 2028.",
+    "Represents shares of restricted stock underlying exercise of a performance-based stock option award to purchase shares of common stock of Tesla, Inc. (the \"Company\" and such award, the \"Award\") in accordance with an implementation agreement, dated April 21, 2026 (the \"Implementation Agreement\") betw",
+    "Represents shares of common stock withheld by the Company in connection with net share settlement, in accordance with the Implementation Agreement, to satisfy the Reporting Person's exercise price obligations related to the Reporting Person's exercise of the Award. The transaction did not involve an",
+    "Shares of the Issuer's common stock were issued to the reporting person upon the vesting of restricted stock units on June 5, 2026."
+   ]
+  },
+  "NVDA": {
+   "n": 52,
+   "codes": {
+    "G": 5,
+    "S": 27,
+    "A": 13,
+    "F": 7
+   },
+   "kinds": [
+    "보통주"
+   ],
+   "plan_share": 0.2692307692307692,
+   "tagged": 38,
+   "sample": [
+    {
+     "date": "2026-10-07",
+     "owner": "COXE TENCH",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "증여",
+     "shares": 500000.0,
+     "price": 0.0,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획(채택 March 19, 2026)"
+     ]
+    },
+    {
+     "date": "2026-09-21",
+     "owner": "Teter Timothy S.",
+     "role": "EVP, General Counsel and Sec",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 12483.0,
+     "price": 222.1932,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획(채택 May 22, 2026)",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-09-21",
+     "owner": "Teter Timothy S.",
+     "role": "EVP, General Counsel and Sec",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 13478.0,
+     "price": 223.0489,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획(채택 May 22, 2026)",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-09-21",
+     "owner": "Teter Timothy S.",
+     "role": "EVP, General Counsel and Sec",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 4499.0,
+     "price": 223.7479,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획(채택 May 22, 2026)",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-09-18",
+     "owner": "STEVENS MARK A",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 1356000.0,
+     "price": 219.7219,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": false,
+     "tags": [
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-09-18",
+     "owner": "STEVENS MARK A",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 10000.0,
+     "price": 220.4199,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": false,
+     "tags": [
+      "가중평균 체결가"
+     ]
+    }
+   ],
+   "notes": [
+    "The reported transaction was effected pursuant to a Rule 10b5-1 trading plan adopted by the Reporting Person on March 19, 2026. Gift without consideration. Shares held by a trust of which the Reporting Person is a trustee. The Reporting Person disclaims beneficial ownership in these shares except as",
+    "The reported transaction was effected pursuant to a Rule 10b5-1 trading plan adopted by the Reporting Person on May 22, 2026. Represents weighted average sales price. The shares were sold at prices ranging from $221.59 to $222.58. The Reporting Person will provide upon request, to the Securities and",
+    "The reported transaction was effected pursuant to a Rule 10b5-1 trading plan adopted by the Reporting Person on May 22, 2026. Represents weighted average sales price. The shares were sold at prices ranging from $222.59 to $223.58. The Reporting Person will provide upon request, to the SEC, the Issue",
+    "The reported transaction was effected pursuant to a Rule 10b5-1 trading plan adopted by the Reporting Person on May 22, 2026. Represents weighted average sales price. The shares were sold at prices ranging from $223.59 to $224.00. The Reporting Person will provide upon request, to the SEC, the Issue",
+    "Represents weighted average sales price. The shares were sold at prices ranging from $219.40 to $220.35. The Reporting Person will provide upon request, to the Securities and Exchange Commission (the \"SEC\"), the Issuer or security holder of the Issuer, full information regarding the number of shares",
+    "Represents weighted average sales price. The shares were sold at prices ranging from $220.41 to $220.48. The Reporting Person will provide upon request, to the SEC, the Issuer or security holder of the Issuer, full information regarding the number of shares sold at each separate price. Held by the T"
+   ]
+  },
+  "PLTR": {
+   "n": 109,
+   "codes": {
+    "G": 2,
+    "S": 81,
+    "C": 10,
+    "A": 8,
+    "M": 8
+   },
+   "kinds": [
+    "RSU",
+    "Stock Appreciation Rights",
+    "보통주"
+   ],
+   "plan_share": 0.926605504587156,
+   "tagged": 101,
+   "sample": [
+    {
+     "date": "2026-10-15",
+     "owner": "Moore Alexander D.",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 600.0,
+     "price": 193.4133,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-10-15",
+     "owner": "Moore Alexander D.",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 1600.0,
+     "price": 195.1327,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-10-15",
+     "owner": "Moore Alexander D.",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 2400.0,
+     "price": 195.8857,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-10-15",
+     "owner": "Moore Alexander D.",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 900.0,
+     "price": 196.7972,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-10-15",
+     "owner": "Moore Alexander D.",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 2700.0,
+     "price": 198.1277,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획",
+      "가중평균 체결가"
+     ]
+    },
+    {
+     "date": "2026-10-15",
+     "owner": "Moore Alexander D.",
+     "role": "이사",
+     "sec_kind": "보통주",
+     "code_label": "장내 매도",
+     "shares": 3500.0,
+     "price": 199.068,
+     "exercise_price": null,
+     "expiration": null,
+     "plan_10b5_1": true,
+     "tags": [
+      "10b5-1 계획",
+      "가중평균 체결가"
+     ]
+    }
+   ],
+   "notes": [
+    "The Reporting Person sold shares of Class A Common Stock in the open market pursuant to a Rule 10b5-1 trading plan intended to satisfy the affirmative defense conditions of Rule 10b5-1(c), entered into on December 11, 2025. This transaction represents sales executed in multiple open market sales. Th",
+    "The Reporting Person sold shares of Class A Common Stock in the open market pursuant to a Rule 10b5-1 trading plan intended to satisfy the affirmative defense conditions of Rule 10b5-1(c), entered into on December 11, 2025.",
+    "The Reporting Person sold shares of Class A Common Stock in the open market pursuant to a Rule 10b5-1 trading plan intended to satisfy the affirmative defense conditions of Rule 10b5-1(c), entered into on May 27, 2026.",
+    "The Reporting Person sold shares of Class A Common Stock in the open market pursuant to a Rule 10b5-1 trading plan intended to satisfy the affirmative defense conditions of Rule 10b5-1(c), entered into on February 11, 2026.",
+    "The Reporting Person sold shares of Class A Common Stock in the open market pursuant to a Rule 10b5-1 trading plan intended to satisfy the affirmative defense conditions of Rule 10b5-1(c), entered into on March 16, 2026.",
+    "Represents stock appreciation rights (\"SARs\") that are fully vested and exercisable as of the date of grant. The SARs have a maximum term of 40 years from the date of grant, subject to earlier termination upon certain change in control transactions and/or following termination of service. The aggreg"
+   ]
+  }
+ },
+ "trend_earn": {
+  "TSLA": {
+   "n": 2,
+   "state": "하락·바닥 국면",
+   "from_high": -24.90828605830012,
+   "from_low": 25.96004452951537,
+   "weeks_since_high": 43
+  },
+  "006110": {
+   "n": 7,
+   "state": "상승 추세 · 일부 이탈",
+   "from_high": -33.36520076481836,
+   "from_low": 242.00937824958345,
+   "weeks_since_high": 23
+  },
+  "005930": {
+   "n": 4,
+   "state": "추세 약화",
+   "from_high": -44.598515418221716,
+   "from_low": 131.61715016527663,
+   "weeks_since_high": 18
+  },
+  "TSLA_earn": {
+   "state": "이익 감소",
+   "level": "이익 감소",
+   "streak": 0,
+   "acc_8q": 1,
+   "base_warn": false
+  }
+ }
+}
