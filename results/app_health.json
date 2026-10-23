@@ -1,0 +1,70 @@
+{
+ "at": "2026-10-23T00:41:38Z",
+ "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
+ "checks": [
+  {
+   "page": "🏠 종합",
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 4018,
+   "samples": [],
+   "finished": true
+  },
+  {
+   "page": "🌍 매크로",
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 5094,
+   "samples": [],
+   "finished": true
+  },
+  {
+   "page": "🔎 종목 발굴",
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 6039,
+   "samples": [],
+   "finished": true
+  },
+  {
+   "page": "🔍 종목 분석",
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 931,
+   "samples": [],
+   "finished": true
+  },
+  {
+   "page": "🛡️ 내 포트폴리오",
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 944,
+   "samples": [],
+   "finished": true
+  },
+  {
+   "page": "종목 분석 ?sym=TSLA",
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 14260,
+   "samples": [],
+   "finished": true
+  },
+  {
+   "page": "종목 분석 ?sym=005930",
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 13846,
+   "samples": [],
+   "finished": true
+  }
+ ],
+ "ok": true
+}
