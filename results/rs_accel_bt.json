@@ -1,46 +1,46 @@
 {
- "run": "2026-10-23 02:49",
- "factor_ver": "v1",
+ "run": "2026-10-23 22:59",
+ "factor_ver": "v13y",
  "period": [
-  "2018-01-01",
+  "2014-02-24",
   "2026-10-12"
  ],
- "universe": 2570,
+ "universe": 2418,
  "SPY": {
-  "CAGR": 14.1,
+  "CAGR": 13.7,
   "MDD": -31.8,
-  "y14_19": 10.7
+  "y14_19": 12.1
  },
  "variants": {
   "star": {
-   "CAGR": 8.75,
-   "p10": 7.15,
-   "MDD": -42.15,
-   "Sharpe": 0.45999999999999996,
-   "y14_19": -1.2,
-   "signals_per_week": 16.6,
+   "CAGR": 11.7,
+   "p10": 5.96,
+   "MDD": -40.4,
+   "Sharpe": 0.6,
+   "y14_19": 9.0,
+   "signals_per_week": 12.7,
    "overlap_star": 1.0
   },
   "acc": {
-   "CAGR": 10.45,
-   "p10": 8.02,
-   "MDD": -37.05,
-   "Sharpe": 0.605,
-   "y14_19": 8.95,
-   "signals_per_week": 334.7,
-   "overlap_star": 0.05
+   "CAGR": 11.6,
+   "p10": 9.110000000000001,
+   "MDD": -34.7,
+   "Sharpe": 0.66,
+   "y14_19": 10.149999999999999,
+   "signals_per_week": 296.2,
+   "overlap_star": 0.043
   },
   "rs80_acc": {
-   "CAGR": 9.45,
-   "p10": 7.79,
-   "MDD": -37.15,
-   "Sharpe": 0.55,
-   "y14_19": 5.75,
-   "signals_per_week": 79.0,
-   "overlap_star": 0.095,
-   "shock1": 8.75,
+   "CAGR": 11.149999999999999,
+   "p10": 9.16,
+   "MDD": -32.45,
+   "Sharpe": 0.64,
+   "y14_19": 9.8,
+   "signals_per_week": 70.9,
+   "overlap_star": 0.081,
+   "shock1": 11.3,
    "verdict": {
-    "beats_star": true,
+    "beats_star": false,
     "p10_beats_star": false,
     "beats_spy": false,
     "y14_19_beats_spy": false,
@@ -49,16 +49,16 @@
    }
   },
   "rs90_acc": {
-   "CAGR": 10.850000000000001,
-   "p10": 7.3,
-   "MDD": -38.099999999999994,
-   "Sharpe": 0.545,
-   "y14_19": 5.15,
-   "signals_per_week": 37.6,
-   "overlap_star": 0.132,
-   "shock1": 12.850000000000001,
+   "CAGR": 11.3,
+   "p10": 10.31,
+   "MDD": -33.4,
+   "Sharpe": 0.61,
+   "y14_19": 9.55,
+   "signals_per_week": 34.3,
+   "overlap_star": 0.114,
+   "shock1": 12.0,
    "verdict": {
-    "beats_star": true,
+    "beats_star": false,
     "p10_beats_star": false,
     "beats_spy": false,
     "y14_19_beats_spy": false,
@@ -67,41 +67,41 @@
    }
   },
   "rs80_fund": {
-   "CAGR": 12.15,
-   "p10": 8.64,
-   "MDD": -34.75,
-   "Sharpe": 0.65,
-   "y14_19": 9.3,
-   "signals_per_week": 91.2,
-   "overlap_star": 0.083,
-   "shock1": 10.15,
+   "CAGR": 13.55,
+   "p10": 11.09,
+   "MDD": -32.25,
+   "Sharpe": 0.755,
+   "y14_19": 12.149999999999999,
+   "signals_per_week": 81.0,
+   "overlap_star": 0.071,
+   "shock1": 11.35,
    "verdict": {
     "beats_star": true,
     "p10_beats_star": false,
     "beats_spy": false,
-    "y14_19_beats_spy": false,
+    "y14_19_beats_spy": true,
     "shock_beats_spy": false,
     "pass": false
    }
   },
   "rs80": {
-   "CAGR": 11.6,
-   "p10": 7.9,
-   "MDD": -35.35,
-   "Sharpe": 0.655,
-   "y14_19": 14.15,
-   "signals_per_week": 273.9,
-   "overlap_star": 0.028
+   "CAGR": 10.4,
+   "p10": 6.72,
+   "MDD": -34.25,
+   "Sharpe": 0.635,
+   "y14_19": 10.1,
+   "signals_per_week": 252.7,
+   "overlap_star": 0.023
   },
   "ta": {
-   "CAGR": 13.649999999999999,
-   "p10": 11.19,
-   "MDD": -39.45,
-   "Sharpe": 0.675,
-   "y14_19": 5.75,
-   "signals_per_week": 76.3,
-   "overlap_star": 0.034
+   "CAGR": 11.8,
+   "p10": 9.43,
+   "MDD": -36.65,
+   "Sharpe": 0.64,
+   "y14_19": 7.8,
+   "signals_per_week": 62.1,
+   "overlap_star": 0.031
   }
  },
- "secs": 71
+ "secs": 54
 }
