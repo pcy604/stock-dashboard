@@ -20,7 +20,7 @@ concurrency:
 jobs:
   rs:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 300
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: '1'
@@ -57,6 +57,24 @@ jobs:
           ver = 'v13y' if any(r[0] == 'v13y' for r in v) else 'v1'
           open('/tmp/ver', 'w').write(ver)
           PY
+      # 2026-10-24 — CI DB 에는 v1(2018~)만 있다. 장기판 v13y(2014-02-24~)를 이 러너 안에서만 쌓는다.
+      #   캐시는 다시 저장하지 않는다(주간 파이프라인 무영향). 가격 이력이 2013 이전까지 없으면 이유를 남기고 v1 로 진행.
+      - name: 장기판 v13y 생성(이 러너 안에서만)
+        id: v13y
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import sqlite3
+          c = sqlite3.connect('data/market.db')
+          n, old = c.execute("SELECT COUNT(DISTINCT sym), SUM(m < '2013-03-01') FROM (SELECT sym, MIN(date) m FROM prices GROUP BY sym)").fetchone()
+          spy = c.execute("SELECT MIN(date) FROM prices WHERE sym='SPY'").fetchone()[0]
+          print(f"::notice title=가격 이력 깊이::{old}/{n}종이 2013-03 이전부터 · SPY {spy}~")
+          open('/tmp/deep', 'w').write('1' if old and old / n > 0.3 and spy and spy < '2013-03-01' else '0')
+          PY
+          if [ "$(cat /tmp/deep)" = "1" ] && [ "$(cat /tmp/ver)" != "v13y" ]; then
+            FACTOR_VER=v13y python leaders_build.py build 2014-02-24 && echo v13y > /tmp/ver
+          fi
+          echo "::notice title=백테스트 시계열::$(cat /tmp/ver)"
       - name: RS × 이익가속 백테스트
         run: FACTOR_VER=$(cat /tmp/ver) python research/rs_accel_bt.py
       - name: 결과 커밋
