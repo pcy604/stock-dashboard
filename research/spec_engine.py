@@ -21,6 +21,8 @@
                 ('below_ma', k)        주봉 종가 < k주 이동평균
                 ('below_ma_after', k, w)  w주 보유 뒤부터 종가 < k주선
                 ('time', w)            w주 보유 후 매도
+                ('rank_below', x)      그 주 우선순위 값(RS)이 x 미만으로 떨어지면 매도
+                ('slope_neg', k, lag)  k주 이동평균이 lag주 전보다 낮아지면(기울기 하락 전환) 매도
   market      신규 매수 허용 조건 행렬 이름(주 단위 불리언, 종목 무관) 또는 None
   pyramid     None(추가매수 없음)
   rebalance   None(비중 조절 없음)
@@ -45,7 +47,7 @@ def check(spec):
         raise ValueError("pyramid/rebalance 미지원(None 만)")
 
 
-def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None):
+def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0.0):
     """px: 주봉 종가 DataFrame · sig: 진입 불리언 DataFrame · rank_mat: 우선순위 값(클수록 먼저)
     mkt: 주별 불리언 Series(None=항상 허용) · ma: {k: k주 이동평균 DataFrame}"""
     check(spec)
@@ -55,6 +57,7 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None):
     MK = (mkt.shift(1).fillna(False).values.astype(bool) if mkt is not None else np.ones(n, bool))
     R = rank_mat.shift(1).values if rank_mat is not None else None
     MA = {k: v.values for k, v in (ma or {}).items()}
+    RN = rank_mat.values if rank_mat is not None else None              # 청산 판단용(그 주 값)
     cost = spec["cost"]; slots = spec["slots"]; wt = spec["weight"]
     cash = 1.0; pos = {}; hist = []
 
@@ -68,6 +71,15 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None):
     for i in range(n):
         if cash_r is not None and cash > 0:
             cash *= 1 + cash_r.iloc[i]
+        if shock > 0:                                                  # 상장폐지 충격: 보유 종목이 주당 확률 shock 로 0원
+            for j in list(pos):
+                if rng.random() < shock:
+                    if log is not None:
+                        e = pos[j]
+                        log.append(dict(sym=str(cols[j]), buy=str(idx[e["i0"]].date()), sell=str(idx[i].date()),
+                                        buy_px=round(float(e["entry"]), 4), sell_px=0.0, peak_px=round(float(e["peak"]), 4),
+                                        wk=int(e["wk"]), inv=float(e["inv"]), out=0.0, why="상폐충격"))
+                    del pos[j]
         for j in list(pos):
             e = pos[j]; c = price(j, i); e["wk"] += 1
             e["peak"] = max(e["peak"], c)
@@ -92,6 +104,12 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None):
                     m = MA[rule[1]][i, j]
                     if e["wk"] >= rule[2] and m == m and c < m: why = t
                 elif t == "time" and e["wk"] >= rule[1]: why = t
+                elif t == "rank_below":
+                    rv = RN[i, j]
+                    if rv == rv and rv < rule[1]: why = t
+                elif t == "slope_neg":
+                    m0, m1 = MA[rule[1]][i, j], MA[rule[1]][i - rule[2], j] if i >= rule[2] else np.nan
+                    if m0 == m0 and m1 == m1 and m0 < m1: why = t
                 if why:
                     break
             if why:
