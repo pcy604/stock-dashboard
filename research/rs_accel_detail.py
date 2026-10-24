@@ -62,12 +62,18 @@ def main():
     rs = B.rs_rank(px, liq)
     ta = B.turnaround(d, px) & liq
     G = dict(star=star, rs80_fund=(acc | ta) & (rs >= 80))
+    # 2026-10-24 측정 정정: 이익가속은 4분기+1 이력, RS 는 52주 이력이 있어야 첫 신호가 난다 →
+    #   v13y 첫 ~1년(2014-02~2015-02)은 어떤 변형도 살 수 없어 현금만 들고 SPY(+12%)를 그냥 놓쳤다(CAGR -1.1%p 왜곡).
+    #   평가 구간을 '어느 변형이든 첫 신호가 가능한 주'부터로 통일한다(규칙·문턱은 그대로, 모든 변형·SPY 동일 적용).
+    t0 = min(g.index[g.any(axis=1)][0] for g in G.values())
+    px, spy, cr = px.loc[t0:], spy.loc[t0:], cr.loc[t0:]
+    G = {k: g.loc[t0:] for k, g in G.items()}
     names = {c: n for c, n in d.drop_duplicates("sym", keep="last")[["sym", "name"]].values}
 
     spy_w = spy.dropna()
     s100 = spy_w / spy_w.iloc[0] * 100
     out = dict(run=time.strftime("%Y-%m-%d %H:%M"), factor_ver=A.VER,
-               period=[str(px.index[0].date()), str(px.index[-1].date())], universe=int(px.shape[1]),
+               period=[str(px.index[0].date()), str(px.index[-1].date())], eval_start_reason='첫 신호가 가능한 주부터(이익가속 5분기·RS 52주 이력 필요)', universe=int(px.shape[1]),
                rules=dict(
                    start="시작 자산 100(현금). 매주 월요일 라벨 주봉 종가로 체결",
                    slots=f"최대 {SLOTS}종목 동시 보유 — 신규 매수 1건 = 그 시점 총자산의 1/{SLOTS}(5%). 현금이 모자라면 남은 만큼",

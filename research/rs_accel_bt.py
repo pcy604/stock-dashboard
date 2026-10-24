@@ -76,10 +76,16 @@ def main():
     G = dict(star=star, acc=acc,
              rs80_acc=acc & (rs >= 80), rs90_acc=acc & (rs >= 90),
              rs80_fund=(acc | ta) & (rs >= 80), rs80=liq & (rs >= 80), ta=ta)
+    # 2026-10-24 측정 정정: 이익가속은 4분기+1 이력, RS 는 52주 이력이 있어야 첫 신호가 난다 →
+    #   v13y 첫 ~1년(2014-02~2015-02)은 어떤 변형도 살 수 없어 현금만 들고 SPY(+12%)를 그냥 놓쳤다(CAGR -1.1%p 왜곡).
+    #   평가 구간을 '어느 변형이든 첫 신호가 가능한 주'부터로 통일한다(규칙·문턱은 그대로, 모든 변형·SPY 동일 적용).
+    t0 = min(g.index[g.any(axis=1)][0] for g in G.values())
+    px, spy, cr = px.loc[t0:], spy.loc[t0:], cr.loc[t0:]
+    G = {k: g.loc[t0:] for k, g in G.items()}
     spy_w = spy.dropna()
     sub = spy_w[(spy_w.index >= "2014-01-01") & (spy_w.index < "2020-01-01")]
     out = dict(run=time.strftime("%Y-%m-%d %H:%M"), factor_ver=A.VER,
-               period=[str(px.index[0].date()), str(px.index[-1].date())], universe=int(px.shape[1]),
+               period=[str(px.index[0].date()), str(px.index[-1].date())], eval_start_reason='첫 신호가 가능한 주부터(이익가속 5분기·RS 52주 이력 필요)', universe=int(px.shape[1]),
                SPY=dict(CAGR=S.stats(spy_w)[0]["CAGR"], MDD=S.stats(spy_w)[0]["MDD"],
                         y14_19=S.stats(sub)[0]["CAGR"] if len(sub) > 52 else None),
                variants={})

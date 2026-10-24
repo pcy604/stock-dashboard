@@ -1393,6 +1393,90 @@ with t_core, guard('주도주 교집합'):
         else:
             st.info("조건을 모두 통과한 종목이 없습니다 — RS 하한을 낮춰 보세요.")
 
+    # ── 🔬 백테스트 상세 (2026-10-24 차니 요청) — 판정 숫자가 어떻게 나왔는지 100에서부터 따라가게 ──
+    _dt = load_json(Path('results/rs_accel_detail.json')) or {}
+    with st.expander("🔬 백테스트 상세 — 100으로 시작하면 실제로 무슨 일이 있었나", expanded=False):
+        if not _dt.get('variants'):
+            st.info("상세 결과를 만드는 중입니다(GitHub 서버의 research-rs 작업). 끝나면 이 자리에 자동으로 나옵니다.")
+        else:
+            _ru = _dt.get('rules') or {}
+            st.markdown("**운용 규칙** (판정 숫자와 똑같은 규칙)\n"
+                        + "\n".join(f"- **{k}** — {v}" for k, v in [
+                            ('시작', _ru.get('start')), ('자산배분', _ru.get('slots')), ('매수', _ru.get('entry')),
+                            ('만석일 때', _ru.get('full')), ('손절·익절', _ru.get('exit')),
+                            ('리밸런싱', _ru.get('rebalance')), ('현금', _ru.get('cash')),
+                            ('비용', _ru.get('cost')), ('대표 회차', _ru.get('seeds'))] if v))
+            _vk = {v['label']: k for k, v in sorted(_dt['variants'].items(), key=lambda kv: kv[0] != 'rs80_fund')}
+            _vsel = _vk[st.radio("전략", list(_vk), horizontal=True, key="core_bt_v")]
+            _V = _dt['variants'][_vsel]; _sm = _V['summary']; _sp = _dt['spy']
+            _m = st.columns(6)
+            _m[0].metric("100 →", f"{_sm['final']:,.0f}", f"SPY {_sm['spy_final']:,.0f}", delta_color="off")
+            _m[1].metric("연수익(CAGR)", f"{_V['stats']['CAGR']}%", f"SPY {_sp['stats']['CAGR']}%", delta_color="off")
+            _m[2].metric("최대낙폭(MDD)", f"{_V['stats']['MDD']}%", f"SPY {_sp['stats']['MDD']}%", delta_color="off")
+            _m[3].metric("거래 수 · 승률", f"{_sm['trades']:,}건", f"승률 {_sm['win_rate']}%", delta_color="off")
+            _m[4].metric("평균 이익 / 손실", f"{_sm['avg_win']:+.0f}% / {_sm['avg_loss']:+.0f}%")
+            _m[5].metric("평균 보유", f"{_sm['avg_wk']:.0f}주", f"평균 {_sm['avg_pos']:.0f}종목 · 현금 {_sm['avg_cash']:.0f}%",
+                         delta_color="off")
+            st.caption(f"기간 {_dt['period'][0]} ~ {_dt['period'][1]}"
+                       + (f" ({_dt['eval_start_reason']})" if _dt.get('eval_start_reason') else "")
+                       + f" · 시계열 {_dt['factor_ver']} · {_dt['universe']:,}종 · "
+                       f"대표 회차 = 10회 CAGR {_V['seed_cagrs'][0]}~{_V['seed_cagrs'][-1]}% 중 중앙값에 가장 가까운 회차 · "
+                       f"상위 10개 거래가 전체 수익의 {_sm['top10_share']:.0f}%")
+            _x = pd.DatetimeIndex(_dt['dates'])
+            _f = go.Figure()
+            _f.add_trace(go.Scatter(x=_x, y=_V['curve'], mode='lines', name='전략', line=dict(color='#0e5a6b', width=1.8),
+                                    hovertemplate='%{x|%Y-%m-%d}<br>전략 %{y:,.0f}<extra></extra>'))
+            _f.add_trace(go.Scatter(x=_x, y=_sp['curve'], mode='lines', name='SPY', line=dict(color='#9ca3af', width=1.4),
+                                    hovertemplate='%{x|%Y-%m-%d}<br>SPY %{y:,.0f}<extra></extra>'))
+            for _e in _V['dd5']:
+                _f.add_vrect(x0=_e['peak'], x1=_e['recover'] or _dt['dates'][-1], fillcolor='#a03028', opacity=0.07,
+                             line_width=0)
+            _f.update_yaxes(type='log', title='자산(시작 100, 로그)')
+            _f.update_layout(height=320, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
+                             title="자산 곡선 — 빨간 띠 = 낙폭 상위 5회",
+                             legend=dict(orientation='h', yanchor='bottom', y=1.0, xanchor='right', x=1))
+            st.plotly_chart(_f, use_container_width=True)
+
+            st.markdown("**낙폭 상위 5회** — 고점에서 바닥까지, 다시 고점을 넘기까지")
+            _ddr = []
+            for _n, (_e, _se) in enumerate(zip(_V['dd5'], _sp['dd5'] + [None] * 5), 1):
+                _ddr.append({'순위': _n, '고점': _e['peak'], '바닥': _e['trough'], '회복': _e['recover'] or '미회복',
+                             '낙폭(%)': _e['depth'], '하락(주)': _e['wk_down'], '회복까지(주)': _e['wk_total'],
+                             'SPY 같은 순위 낙폭(%)': (_se or {}).get('depth'),
+                             'SPY 고점→바닥': f"{_se['peak']} → {_se['trough']}" if _se else '-'})
+            _tsrc('research/rs_accel_detail.py (GitHub Actions research-rs)', path='results/rs_accel_detail.json')
+            st.dataframe(pd.DataFrame(_ddr), use_container_width=True, hide_index=True, filters=False,
+                         column_config={'낙폭(%)': st.column_config.NumberColumn(format='%.1f'),
+                                        'SPY 같은 순위 낙폭(%)': st.column_config.NumberColumn(format='%.1f')})
+
+            st.markdown("**연도별 수익률**")
+            _yr = sorted(set(_V['yearly']) | set(_sp['yearly']))
+            _yrow = [{'연도': str(y), '전략(%)': _V['yearly'].get(str(y), _V['yearly'].get(y)),
+                      'SPY(%)': _sp['yearly'].get(str(y), _sp['yearly'].get(y))} for y in _yr]
+            for _r in _yrow:
+                _r['차이(%p)'] = (round(_r['전략(%)'] - _r['SPY(%)'], 1)
+                                 if _r['전략(%)'] is not None and _r['SPY(%)'] is not None else None)
+            _tsrc('research/rs_accel_detail.py', path='results/rs_accel_detail.json')
+            st.dataframe(pd.DataFrame(_yrow), use_container_width=True, hide_index=True, filters=False,
+                         column_config={c: st.column_config.NumberColumn(format='%+.1f')
+                                        for c in ('전략(%)', 'SPY(%)', '차이(%p)')})
+
+            st.markdown("**거래 원장** — 이 회차에서 실제로 사고판 모든 종목")
+            _tr = pd.DataFrame([{'종목': t['name'] or t['sym'], '코드': t['sym'], '매수일': t['buy'], '매도일': t['sell'],
+                                 '매수가($)': t['buy_px'], '보유중 최고가($)': t['peak_px'], '매도가($)': t['sell_px'],
+                                 '보유(주)': t['wk'], '수익률(%)': t['ret'], '매수 비중(%)': t['weight'],
+                                 '계좌 기여(%p)': t['contrib'], '청산 사유': t['why']} for t in _V['trades']])
+            _tsrc('research/rs_accel_detail.py', path='results/rs_accel_detail.json')
+            st.dataframe(_tr, use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_tr)),
+                         column_config={'수익률(%)': st.column_config.NumberColumn(format='%+.1f'),
+                                        '계좌 기여(%p)': st.column_config.NumberColumn(format='%+.2f'),
+                                        '매수가($)': st.column_config.NumberColumn(format='%,.2f'),
+                                        '보유중 최고가($)': st.column_config.NumberColumn(format='%,.2f'),
+                                        '매도가($)': st.column_config.NumberColumn(format='%,.2f'),
+                                        '매수 비중(%)': st.column_config.NumberColumn(format='%.1f')})
+            st.caption("계좌 기여 = (매도 금액 − 매수 금액 − 비용) ÷ 매수 시점 총자산. '보유 중' = 기간 끝까지 들고 있던 종목(마지막 주 가격으로 평가). "
+                       "가격은 수정주가(분할 반영)라 당시 실제 호가와 다를 수 있습니다.")
+
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
     st.caption("기간별 상승 상위 + 주봉 신호 · 매출/영업익 증감 · 향후 2개월 계절성. CANSLIM 점수는 🏆 서브탭에서 슬라이더로 직접 조정해 보세요.")
