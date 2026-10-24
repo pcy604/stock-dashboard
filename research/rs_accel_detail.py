@@ -65,9 +65,9 @@ def main():
     # 2026-10-24 측정 정정: 이익가속은 4분기+1 이력, RS 는 52주 이력이 있어야 첫 신호가 난다 →
     #   v13y 첫 ~1년(2014-02~2015-02)은 어떤 변형도 살 수 없어 현금만 들고 SPY(+12%)를 그냥 놓쳤다(CAGR -1.1%p 왜곡).
     #   평가 구간을 '어느 변형이든 첫 신호가 가능한 주'부터로 통일한다(규칙·문턱은 그대로, 모든 변형·SPY 동일 적용).
-    t0 = min(g.index[g.any(axis=1)][0] for g in G.values())
-    px, spy, cr = px.loc[t0:], spy.loc[t0:], cr.loc[t0:]
-    G = {k: g.loc[t0:] for k, g in G.items()}
+    t_ev = min(g.index[g.any(axis=1)][0] for g in G.values())
+    px, spy, cr = px.loc[t_ev:], spy.loc[t_ev:], cr.loc[t_ev:]
+    G = {k: g.loc[t_ev:] for k, g in G.items()}
     names = {c: n for c, n in d.drop_duplicates("sym", keep="last")[["sym", "name"]].values}
 
     spy_w = spy.dropna()
