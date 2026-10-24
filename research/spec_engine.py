@@ -26,6 +26,7 @@
   market      신규 매수 허용 조건 행렬 이름(주 단위 불리언, 종목 무관) 또는 None
   pyramid     None(추가매수 없음) 또는 dict(step=%, add=첫 매수금액 대비 배수, max_adds=횟수):
               진입가 대비 +step%·+2step%… 에 도달하고 그 주가 보유 중 신고가면 다음 주 종가에 첫 매수금액 × add 추가(현금 한도 안)
+              선택 cap=종목당 상한(계좌 %), fund='sell_weakest' 이면 현금이 모자랄 때 RS 가장 낮은 보유 종목을 팔아 재원 마련
   (선택) reentry   None 또는 dict(mode='breakout'|'rebound'|'both', rb=0.2, window=26, max_n=3):
               청산 뒤 window주 안에 breakout = 종가 > 청산가, rebound = 종가 ≥ 청산 후 최저가 × (1+rb) 이면 다음 주 종가에 같은 비중 재매수
   (선택) cooldown  청산 뒤 그 자리(자금)를 k주 동안 '다른 종목' 신규 매수에 쓰지 않음(같은 종목 재매수는 허용)
@@ -143,7 +144,25 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0
             c = P[i, j]
             if not (c == c and c > 0):
                 continue
-            amt = min(pos[j]["base"] * PY["add"], cash)
+            amt = pos[j]["base"] * PY["add"]
+            if PY.get("cap"):                                         # 종목당 상한(계좌 대비 %)
+                amt = min(amt, PY["cap"] / 100 * eq - pos[j]["sh"] * c)
+            if amt > cash and PY.get("fund") == "sell_weakest":       # 약한 종목을 팔아 이긴 종목에 몰아주기
+                others = [k for k in pos if k != j]
+                if others:
+                    def _rk(k):
+                        rv = RN[i, k] if RN is not None else np.nan
+                        return rv if rv == rv else price(k, i) / pos[k]["entry"] - 1
+                    k = min(others, key=_rk)
+                    ck = price(k, i); v = pos[k]["sh"] * ck * (1 - cost); cash += v
+                    if log is not None:
+                        ek = pos[k]
+                        log.append(dict(sym=str(cols[k]), buy=str(idx[ek["i0"]].date()), sell=str(idx[i].date()),
+                                        buy_px=round(float(ek["entry"]), 4), sell_px=round(float(ck), 4),
+                                        peak_px=round(float(ek["peak"]), 4), wk=int(ek["wk"]), inv=float(ek["inv"]),
+                                        out=float(v), why="불타기 재원"))
+                    del pos[k]
+            amt = min(amt, cash)
             if amt > eq * 0.001:
                 pos[j]["sh"] += amt / c * (1 - cost); pos[j]["inv"] += amt; pos[j]["adds"] += 1; cash -= amt
         for j in pend_re:
@@ -206,7 +225,8 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0
                 pos[j] = dict(sh=amt / c * (1 - cost), entry=c, peak=c, wk=0, last=c, inv=amt, i0=i, base=amt, adds=0)
                 cash -= amt
         eq = cash + sum(pos[j]["sh"] * price(j, i) for j in pos)
-        hist.append((idx[i], eq, len(pos), cash / eq))
+        mx = max([pos[j]["sh"] * price(j, i) / eq for j in pos], default=0.0)
+        hist.append((idx[i], eq, len(pos), cash / eq, mx))
     if log is not None:
         for j in list(pos):
             e = pos[j]; c = price(j, n - 1)
@@ -214,4 +234,4 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0
                             buy_px=round(float(e["entry"]), 4), sell_px=round(float(c), 4),
                             peak_px=round(float(e["peak"]), 4), wk=int(e["wk"]), inv=float(e["inv"]),
                             out=float(e["sh"] * c * (1 - cost)), why="보유 중"))
-    return pd.DataFrame(hist, columns=["t", "v", "n", "cash"]).set_index("t")
+    return pd.DataFrame(hist, columns=["t", "v", "n", "cash", "mx"]).set_index("t")

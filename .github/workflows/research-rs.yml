@@ -16,6 +16,7 @@ on:
       - 'research/master_specs.py'
       - 'research/robust_rs.py'
       - 'research/loss_cut_grid.py'
+      - 'research/pyramid_grid.py'
       - 'research/spec_engine.py'
       - '.github/workflows/research-rs.yml'
 permissions:
@@ -121,12 +122,15 @@ jobs:
       - name: 래칫·재매수·냉각·불타기 격자(810조합)
         continue-on-error: true
         run: FACTOR_VER=$(cat /tmp/ver) python research/loss_cut_grid.py
+      - name: 불타기 재검증(재원·상한)
+        continue-on-error: true
+        run: FACTOR_VER=$(cat /tmp/ver) python research/pyramid_grid.py
       - name: 결과 커밋
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add results/rs_accel_bt.json results/rs_accel_detail.json results/lifecycle_study.json results/master_specs.json results/robust_rs.json results/loss_cut_grid.json 2>/dev/null || true
+          git add results/rs_accel_bt.json results/rs_accel_detail.json results/lifecycle_study.json results/master_specs.json results/robust_rs.json results/loss_cut_grid.json results/pyramid_grid.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "auto: RS×이익가속 백테스트 $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
