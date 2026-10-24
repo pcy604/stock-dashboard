@@ -973,7 +973,7 @@ if st.query_params.get('diag') == 'fin':
     st.json({'dart_client.health()': _dc.health() if _dc else None, 'dart_client 로드 오류': _DC_ERR})
     st.stop()
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, max_entries=48)
 def _fetch_fred_cached(series_id: str, limit: int):
     """실패 시 예외 → 캐시에 실패가 박제되지 않음 (핵심: 빈 결과 1시간 캐싱 버그 방지)."""
     url = 'https://api.stlouisfed.org/fred/series/observations'
@@ -3269,7 +3269,7 @@ with tab3, guard('CANSLIM'):
 # ════════════════════════════════════════════════════════════════════
 # 탭4: 글로벌 매크로
 # ════════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, max_entries=48)
 def _fetch_fred_history_cached(series_id: str, limit: int):
     """실패 시 예외 → 빈 DataFrame이 캐시에 박제되지 않음."""
     data = _fetch_fred_cached(series_id, limit)      # 재시도·성공만 캐싱 공유
@@ -3285,7 +3285,7 @@ def fetch_fred_history(series_id: str, limit: int = 60):
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, max_entries=48)
 def _fetch_index_history_cached(symbol: str, days: int):
     import FinanceDataReader as fdr
     start = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
@@ -3780,7 +3780,7 @@ def _regime_history_panel():
                "비중 규칙의 근거는 아래 '욕심 조절 원칙'(1988~2026 검증)이다.")
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _ecb_series_cached(key: str, start: str):
     """ECB Data Portal(무료·키 없음) 시계열 → Series. 실패는 예외(캐시에 안 남김)."""
     r = requests.get(f'https://data-api.ecb.europa.eu/service/data/{key}',
@@ -4231,7 +4231,7 @@ def _tf_signal(rsi_val, macd_val, sig_val, price, ma20, ma50):
     label = '🟢 매수적정' if score >= 3 else ('🔴 매도위험' if score <= -2 else '🟡 중립관망')
     return label, score, reasons
 
-@st.cache_data(ttl=1800, show_spinner=False)
+@st.cache_data(ttl=1800, show_spinner=False, max_entries=48)
 def _fetch_stock_data_cached(sym: str, days: int):
     """실패는 raise → 캐시에 안 남는다. (2026-10-17 전: 실패도 (None, …) 로 30분 캐시돼
     일시 오류 한 번이면 그 종목이 30분 동안 '데이터 없음'으로 고정됐다.)"""
@@ -4325,7 +4325,7 @@ def fetch_stock_data(sym: str, days: int):
         return None, {}, None, None, None
 
 
-@st.cache_data(ttl=6 * 3600)
+@st.cache_data(ttl=6 * 3600, max_entries=48)
 def _official_cached(sym, is_kr):
     rows = _official_fetch(sym, is_kr)
     if not rows:
@@ -4388,7 +4388,7 @@ def _official_fetch(sym, is_kr):
         return []
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _form4_rows(sym):
     """US Form 4 원문 최근 1년(최대 30건) — 성공만 캐시(실패는 예외)."""
     import edgar_client
@@ -4396,7 +4396,7 @@ def _form4_rows(sym):
     return edgar_client.form4_transactions(sym, days=365, limit=30)
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _kr_dilution_live(sym):
     """성공만 캐시한다(실패는 예외 → 캐시 안 됨). 공시 목록 실패는 조건표만 살린다."""
     import dart_client
@@ -4435,7 +4435,7 @@ def _kr_dilution_store():
     return pd.read_parquet('data/kr_dilution.parquet')
 
 
-@st.cache_data(ttl=6 * 3600)
+@st.cache_data(ttl=6 * 3600, max_entries=48)
 def kr_insiders(sym):
     """KR 내부자(임원·주요주주) 매수/매도 — DART 공식. [{date,name,position,change,holdings}]."""
     try:
@@ -4446,7 +4446,7 @@ def kr_insiders(sym):
         return []
 
 
-@st.cache_data(ttl=6 * 3600)
+@st.cache_data(ttl=6 * 3600, max_entries=48)
 def _unified_cached(sym, is_kr, freq):
     """빈 결과는 raise → 캐시 안 됨 (서버 일시 실패가 6시간 눌러붙는 것 방지).
     KR: DART 우선 → 막힌 서버(해외 클라우드)면 네이버 기업분석(FnGuide 집계, kr_fin_naver — 공시 대조 확인)."""
@@ -4540,7 +4540,7 @@ def _yf_code(sym, is_kr):
         return f"{sym}.KS"
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _q_rows_long(sym, is_kr):
     """멀티플 밴드용 긴 분기 시계열. US=EDGAR 최대 60분기(XBRL 2009~) / KR=저장된 DART 손익 2017~(자본은 2021~ 연말·2025.2Q~ 분기)."""
     if is_kr:
@@ -4567,7 +4567,7 @@ def _shares_now(sym, is_kr, info):
     return float(info.get('sharesOutstanding') or 0) or None
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _earn_data(sym, is_kr):
     """실적 발표일·서프라이즈·컨센서스 추이 — yfinance. 실패는 빈 dict(캐시 안 됨 아님: 6시간)."""
     out = {}
@@ -4593,7 +4593,7 @@ def _earn_data(sym, is_kr):
     return out
 
 
-@st.cache_data(ttl=12 * 3600, show_spinner=False)
+@st.cache_data(ttl=12 * 3600, show_spinner=False, max_entries=48)
 def _kr_results_dates(sym):
     """KR 실적 발표 이벤트(DART 잠정실적·정기보고서) — 성공만 캐시(실패는 예외)."""
     import dart_client
@@ -4604,7 +4604,7 @@ def _kr_results_dates(sym):
     return dart_client.results_dates(cc, days=500)
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=3600, show_spinner=False, max_entries=48)
 def _kr_cons_q(sym):
     """주간 저장한 분기 컨센서스(발표 직전 값) — results/consensus_q.json."""
     try:
@@ -4627,7 +4627,7 @@ def _kr_cons_hist(sym):
     return rows
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _kr_cons_live(sym):
     """오늘 컨센서스 한 점(네이버 wisereport · FnGuide 추정). 실패는 None — 화면은 저장된 스냅샷만 그린다."""
     try:
@@ -4638,7 +4638,7 @@ def _kr_cons_live(sym):
         return None
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _peer_rows(sym, is_kr, n=4):
     """2026-10-21 — 주석엔 '6시간 캐시'라 적혀 있었지만 데코레이터가 없었다. 화면을 다시 그릴 때마다
     (표 클릭·더블클릭 포함) 동종 4~5종의 분기 재무를 새로 읽어서 렉이 걸렸다."""
@@ -4675,7 +4675,7 @@ def _peer_rows(sym, is_kr, n=4):
     return ind, out
 
 
-@st.cache_data(ttl=24 * 3600)
+@st.cache_data(ttl=24 * 3600, max_entries=48)
 def full_close_history(sym, is_kr):
     """전체 상장 히스토리 종가 (월별 계절성 통계용, 차트 기간과 무관). FDR 1990~."""
     try:
@@ -4688,7 +4688,7 @@ def full_close_history(sym, is_kr):
         return None
 
 
-@st.cache_data(ttl=3 * 3600)
+@st.cache_data(ttl=3 * 3600, max_entries=48)
 def consensus_scenarios(sym, is_kr):
     """컨센서스 목표주가 BEAR/BASE/BULL + 선행 EPS/PER (yfinance, 불안정)."""
     try:
@@ -4700,7 +4700,7 @@ def consensus_scenarios(sym, is_kr):
         return {}
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=3600, show_spinner=False, max_entries=48)
 def _seg_ai_get(sym, is_kr):
     """AI 부문 추출 — 성공본은 디스크(results/segments, 120일), 실패도 1시간은 기억(위젯 누를 때마다 재호출 방지)."""
     try:
@@ -4710,7 +4710,7 @@ def _seg_ai_get(sym, is_kr):
         return {'_error': str(e)[:150]}
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=3600, show_spinner=False, max_entries=48)
 def _ai_summary_auto(sym, is_kr, name, fallback_text):
     """기업 개요 AI 요약 — 검색 즉시. 원천 문서(10-K) 날짜가 같으면 디스크 결과 재사용 → 보고서당 1회만 호출."""
     import json as _j
@@ -4744,7 +4744,7 @@ def _ai_summary_auto(sym, is_kr, name, fallback_text):
     return out
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _seg_xbrl_cached(sym):
     import segment_xbrl
     r = segment_xbrl.latest(sym)
@@ -4819,7 +4819,7 @@ def valuation_basis(sym, is_kr, mc, price, fest, info):
     return out
 
 
-@st.cache_data(ttl=6 * 3600)
+@st.cache_data(ttl=6 * 3600, max_entries=48)
 def _fwd_est_cached(sym, is_kr):
     """올해(0y)/내년(+1y) + 이번분기(0q)/다음분기(+1q) 컨센서스 — 매출·EPS·순이익(EPS×주식수).
     yfinance의 revenue_estimate/earnings_estimate는 연간·분기 행이 같은 표에 같이 들어있음
@@ -4856,7 +4856,7 @@ def _fwd_est_cached(sym, is_kr):
     return out
 
 
-@st.cache_data(ttl=6 * 3600)
+@st.cache_data(ttl=6 * 3600, max_entries=48)
 def _kr_naver_consensus_cached(sym):
     """KR 컨센서스 폴백 — 네이버 '기업실적분석' (E) 컬럼(증권사 추정 평균).
     yfinance에 없는 영업이익 추정까지 제공. 반환 단위: 원(EPS는 원 그대로).
@@ -4929,7 +4929,7 @@ def forward_estimates(sym, is_kr):
     return out
 
 
-@st.cache_data(ttl=12 * 3600)
+@st.cache_data(ttl=12 * 3600, max_entries=48)
 def company_profile(sym, is_kr):
     """기업 개요: 사업설명·경영진·홈페이지·공식공시 링크(EDGAR/DART/Form4)."""
     out = {'summary': None, 'officers': [], 'website': None,
@@ -4960,7 +4960,7 @@ def company_profile(sym, is_kr):
     return out
 
 
-@st.cache_data(ttl=24 * 3600)
+@st.cache_data(ttl=24 * 3600, max_entries=48)
 def official_business_text(sym, is_kr):
     """공식 사업 텍스트 — US: 최신 10-K(Item 1 사업 + Item 7 MD&A), KR: DART 사업보고서 원문.
     홈페이지 스크래핑 대신 공식 제출문서 사용 (정확·안정)."""
@@ -7095,7 +7095,7 @@ with tab7:
 # 탭: 포트폴리오 관리 + 🛡️ 원칙 가드레일
 # (2026-07-02 탭 재편 때 대시보드에서 12일간 빠져 있었음 — 2026-07-14 복원 + 준수이력 추가)
 # ════════════════════════════════════════════════════════════════════
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=300, max_entries=48)
 def _fetch_pf_price(sym: str, market: str):
     try:
         import FinanceDataReader as fdr
@@ -7108,7 +7108,7 @@ def _fetch_pf_price(sym: str, market: str):
         return None
 
 
-@st.cache_data(ttl=1800)
+@st.cache_data(ttl=1800, max_entries=48)
 def _pf_trail(sym: str, market: str, buy_date: str):
     """(매수 후 주봉 최고가, 마지막 52주 신고가 이후 경과 주) — 가드레일 트레일링용.
 
@@ -7141,7 +7141,7 @@ def _pf_trail(sym: str, market: str, buy_date: str):
         return None, None
 
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=600, max_entries=48)
 def _px_series(sym: str, market: str, days: int = 75):
     """(현재가, 최근 45영업일 종가 리스트) — 현재가와 추세 스파크라인을 호출 1회로."""
     try:
