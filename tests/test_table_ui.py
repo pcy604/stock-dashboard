@@ -62,3 +62,25 @@ def test_restyle_keeps_formats_after_row_filter():
     new = T._restyle(sty, keep)
     html = new.to_html()
     assert '-2.00' in html and '+3.50' in html and '+1.23' not in html
+
+
+# ── 2026-10-24 디자인 재점검 ─────────────────────────────────────
+def test_fit_height_no_blank_row():
+    """5행 표 = 머리행 31 + 5×31 + 테두리 2 — 35px 가정으로 빈 행이 생기던 사고 재발 방지(크로미움 실측값)."""
+    import table_ui as t
+    assert t.fit_height(5) == 31 + 5 * 31 + 2
+    assert t.fit_height(0) == t.fit_height(1)          # 빈 표도 한 줄 자리
+
+
+def test_split_note_keeps_all_text():
+    import table_ui as t
+    long = ('표본 21개월 — 분위가 불안정하다. 자본(잔액) 기준. 월말 시가총액 ÷ 그 시점 TTM. '
+            '⚠️ 증자·자사주로 주식수가 크게 변한 종목은 과거 멀티플이 왜곡된다. ⚠️ **10분위는 바닥이 아니다** — 분모가 줄면 하단도 뚫린다. '
+            '환산주가는 최근 TTM 이 유지된다면의 가정이다.')
+    assert len(long) > t.NOTE_MAX
+    head, rest = t.split_note(long)
+    assert rest and len(head) <= t.NOTE_MAX
+    assert (head + ' ' + rest).replace(' ', '') .startswith(long.replace(' ', '')[:20])
+    assert len(head.replace(' ', '')) + len(rest.replace(' ', '')) >= len(long.replace(' ', '')) - 3   # 글자를 버리지 않는다
+    short = '짧은 설명.'
+    assert t.split_note(short) == (short, '')

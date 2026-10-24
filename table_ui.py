@@ -38,7 +38,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 8
-API_VERSION = 4          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
+API_VERSION = 5          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -571,6 +571,18 @@ def _fmt_len(v) -> int:
     return _dw(str(v))
 
 
+# 표 높이 계측값(2026-10-24, 크로미움 실측): 앱 CSS 가 글자 기준을 14px 로 줄여 머리행·행이 31px.
+#   row_height 를 따로 주면 행만 그 값이고 머리행은 31 그대로다. 테두리 2px.
+HEAD_PX, ROW_PX, BORDER_PX = 31, 31, 2
+HSCROLL = 8           # 가로 스크롤바 자리(윈도, CSS 로 6px). 넓은 표에만
+WIDE_PX = 700         # 열 폭 합이 이보다 크면 반쪽 칸에서 가로로 넘칠 수 있다
+
+
+def fit_height(n: int, row_height=None) -> int:
+    """n행이 빈 행 없이 딱 들어가는 높이(px)."""
+    return HEAD_PX + max(int(n), 1) * int(row_height or ROW_PX) + BORDER_PX
+
+
 def auto_widths(df: pd.DataFrame, cfg: dict) -> dict:
     cfg = dict(cfg or {})
     for c in df.columns:
@@ -579,12 +591,14 @@ def auto_widths(df: pd.DataFrame, cfg: dict) -> dict:
         # 2026-10-19 '너무 넉넉하다' — 머리글은 12px 글꼴(한글 ≈ 12px = _dw 2칸), 값은 12.5px 고정폭.
         hw = _dw(str(c)) * 6.1 + 22
         vw = max([_fmt_len(v) for v in col.tolist()] or [1]) * 7.3 + 18
-        px = int(min(max(hw, vw, 44), 240))     # 긴 글(회사명·업종)은 잘리고 마우스를 올리면 전체가 보인다
+        # 긴 글(회사명·업종)은 잘리고 마우스를 올리면 전체가 보인다. 단 '할 일·근거' 같은 문장 열은 넓게(2026-10-24)
+        _cap = 520 if (col.dtype == object and str(c) not in ('종목', '코드') and vw > 360) else 240
+        px = int(min(max(hw, vw, 44), _cap))
         if str(c) == '종목':
             px = min(px, 170)                   # 미국 회사명이 길어 표를 옆으로 밀었다(2026-10-19)
         cur = cfg.get(c)
         if isinstance(cur, dict):
-            if not cur.get('width'):
+            if not cur.get('width') or (isinstance(cur.get('width'), str) and px > 400):   # 'large'(≈400px)보다 긴 문장 열
                 cur = dict(cur); cur['width'] = px; cfg[c] = cur
         elif cur is None:
             cfg[c] = {'width': px}
@@ -601,6 +615,62 @@ def _footer(st, text, asof):
     if not text:
         text, asof = st.session_state.get('_tbl_src') or (None, None)
     st.caption(f"출처: {text or '⚠️ 미지정'} · 마지막 갱신: {asof or '미상'}")
+
+
+# ── 긴 설명 접기 (2026-10-24) ─────────────────────────────────────
+#   캡션이 최대 415자 — 표·차트 아래 회색 문단이 화면을 덮었다. 첫 문장만 보이고 나머지는 '자세히'.
+#   글자를 지우지 않는다(데이터 원칙: 한계는 화면에 남긴다). 출처 줄·예외 문구(백틱 시작)는 그대로.
+NOTE_MAX = 150
+
+
+def _md_inline(t: str) -> str:
+    import html as _h, re as _re
+    t = _h.escape(t, quote=False)
+    t = _re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', t)
+    t = _re.sub(r'`([^`]+)`', r'<code>\1</code>', t)
+    t = _re.sub(r'\[([^\]]+)\]\((https?://[^)\s]+)\)', r'<a href="\2" target="_blank">\1</a>', t)
+    return t.replace('\n', '<br>')
+
+
+def split_note(text: str, limit: int = NOTE_MAX):
+    """(머리, 나머지). 짧으면 나머지는 ''. 문장 끝(. — ·) 에서 자르고 없으면 공백에서."""
+    t = text.strip()
+    if len(t) <= limit:
+        return t, ''
+    cut = -1                                     # 첫 문장(30자 이상)에서 끊는다 — 요지만 보이게
+    for mark in ('. ', ' — ', '; '):
+        i = t.find(mark, 30)
+        if i != -1 and i + 1 <= limit and (cut < 0 or i + 1 < cut):
+            cut = i + (1 if mark == '. ' else 0)
+    if cut < 20:
+        cut = t.rfind(' ', 0, limit)
+    if cut < 20:
+        cut = limit
+    head, rest = t[:cut].strip(), t[cut:].strip(' —;')
+    if head.count('**') % 2:                     # 굵게 표시가 반으로 갈라지지 않게
+        return t, ''
+    return head, rest
+
+
+def _caption_patch(st, orig):
+    def caption(body, *a, **kw):
+        try:
+            if a or set(kw) - {'unsafe_allow_html'} or not isinstance(body, str):
+                return orig(body, *a, **kw)
+            t = body.strip()
+            # 법적 안내(투자 권유 아님·면책)는 접지 않는다 — 다 보여야 한다
+            if t.startswith('`') or t.startswith('출처') or '<' in t or '$' in t or '권유' in t or '책임' in t:
+                return orig(body, *a, **kw)
+            head, rest = split_note(t)
+            if not rest:
+                return orig(body, *a, **kw)
+            return st.markdown(f"<div class='mo-note'>{_md_inline(head)}<details><summary>자세히 ▾</summary>"
+                               f"{_md_inline(rest)}</details></div>", unsafe_allow_html=True)
+        except Exception as e:
+            if type(e).__module__.startswith('streamlit'):
+                raise
+            return orig(body, *a, **kw)
+    return caption
 
 
 # ── 설치 ──────────────────────────────────────────────────────────
@@ -637,6 +707,8 @@ def install(st):
 
             # 표 형식(행번호·좌측 열 순서·단위는 머리행) — 2026-10-19
             df, ren, conv = normalize(df)
+            # 2026-10-24 행 높이 하나로 — 표마다 25·31px 가 섞여 탭마다 표 밀도가 달랐다
+            kw.pop('row_height', None)
             if sty is not None:
                 sty = restyle_for(sty, df, ren, conv)
             data = sty if sty is not None else df
@@ -687,30 +759,23 @@ def install(st):
                     order = kw.get('column_order') or list(df.columns)
                     kw['column_order'] = [c for c in order if c not in hide]
                 if 'height' in kw and isinstance(kw['height'], int) and len(df) < len(data.data if isinstance(data, Styler) else data):
-                    kw['height'] = min(kw['height'], 35 + 26 * max(len(df), 1) + 4)
+                    kw['height'] = min(kw['height'], fit_height(len(df), kw.get('row_height')))
 
             if '시총(억원)' in df.columns:          # 억원은 천 단위 쉼표 정수
                 kw.setdefault('column_config', {})
                 kw['column_config']['시총(억원)'] = st.column_config.NumberColumn('시총(억원)', format='localized')
 
-            # 높이 — 25행 이하는 스크롤 없이 전부 보이게(2026-10-19: 7행 표인데 6행만 보이고 세로 드래그).
-            #   호출부의 _dfh 는 행 25px 를 가정했는데 실제 행은 35px(테마·기본) 이라 늘 한두 행이 잘렸다.
-            _rh = kw.get('row_height') or 35
-            if len(df) <= 25:
-                kw['height'] = (len(df) + 1) * _rh + 3 + (12 if len(df) <= 4 else 0)
-                # ↑ 2026-10-20: 2행 표(사업부문)가 가로 스크롤바 높이만큼 잘려 세로 드래그가 생겼다 — 짧은 표에 여유
-            elif not kw.get('height'):
-                kw['height'] = 26 * _rh + 3
-
-            # 열 폭 = 내용 폭, 표 폭 = 열 합 (컨테이너를 억지로 채우지 않는다)
+            # 높이 — 25행 이하는 스크롤 없이 전부, 빈 행 없이(2026-10-24 재설계).
+            #   원인: 행 높이를 35px 로 가정했는데 이 앱은 글자 기준을 14px 로 줄여(rem) 실제 행·머리행이 31px 다.
+            #   행마다 4px 씩 남아 5행이면 빈 행 하나가 생겼고, 짧은 표 +12·넓은 표 +16 여유분이 그 위에 더해졌다.
             kw['column_config'] = auto_widths(df, kw.get('column_config'))
-            # 2026-10-21 — 열이 많은 표(재무제표 13열+)는 가로 스크롤바가 생기고, 그 높이(≈14px)만큼 마지막 행이 가려져
-            #   세로 드래그가 생겼다. 열 폭 합이 화면 본문 폭을 넘을 만한 표는 스크롤바 자리를 더 준다.
+            _tw = sum(v['width'] for v in kw['column_config'].values()     # 'small'·'medium' 같은 글자 폭은 뺀다(10-21 TypeError)
+                      if isinstance(v, dict) and isinstance(v.get('width'), (int, float)))
             if len(df) <= 25:
-                _tw = sum(v['width'] for v in kw['column_config'].values()     # 'small'·'medium' 같은 글자 폭은 뺀다(10-21 TypeError)
-                          if isinstance(v, dict) and isinstance(v.get('width'), (int, float)))
-                if _tw > 900:
-                    kw['height'] += 16
+                # 가로 스크롤바가 자리를 차지하는 환경(윈도 크롬)에서 마지막 행이 가려지지 않게 — 넓은 표만
+                kw['height'] = fit_height(len(df), kw.get('row_height')) + (HSCROLL if _tw > WIDE_PX else 0)
+            elif not kw.get('height'):
+                kw['height'] = fit_height(25, kw.get('row_height'))
             kw.pop('use_container_width', None)
             kw['width'] = 'content'
             # 2026-10-21 — 빈 칸을 '-' 로. Streamlit 은 결측을 Styler 서식과 무관하게 회색 'None' 으로 그린다
@@ -752,5 +817,6 @@ def install(st):
             return orig(data, *a, **kw)
 
     st.dataframe = dataframe
+    st.caption = _caption_patch(st, st._main.caption)
     st._tbl_patched = True
     st._tbl_ver = API_VERSION

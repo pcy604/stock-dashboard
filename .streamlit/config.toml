@@ -4,9 +4,20 @@ primaryColor = "#2453c8"
 backgroundColor = "#ffffff"
 secondaryBackgroundColor = "#f3f4f6"
 textColor = "#111827"
+# 2026-10-24 글꼴 하나로 — 표(캔버스)·차트·위젯까지 전부 Pretendard.
+#   CSS 로는 표(캔버스)와 차트(Streamlit 테마) 글꼴을 못 바꿔 Source Sans 가 섞였다. 테마 글꼴이 유일한 경로.
+#   외부 CDN 에 기대지 않고 앱이 직접 서빙한다(static/fonts, OFL-1.1).
+font = "Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
+
+[[theme.fontFaces]]
+family = "Pretendard"
+url = "app/static/fonts/PretendardVariable.woff2"
+weight = "100 900"
+style = "normal"
 
 [server]
 headless = true
+enableStaticServing = true
 
 [browser]
 gatherUsageStats = false

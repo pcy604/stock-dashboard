@@ -181,7 +181,7 @@ st.markdown("""
      · warn    : 주의해서 볼 것(회차 초과·데이터 낡음)
    히트맵처럼 셀마다 색을 칠하면 어디를 볼지 알 수 없어진다. 색은 아껴 쓴다.
    ══════════════════════════════════════════════════════════════════════ */
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css');
+/* 글꼴은 .streamlit/config.toml [theme] font 가 static/fonts/PretendardVariable.woff2 로 직접 서빙(2026-10-24). */
 
 :root {
   --ink:      #16181D;   /* 본문 */
@@ -199,17 +199,6 @@ st.markdown("""
   --neg-bg:   #FBECEC;
   --warn:     #8A5D0F;   /* 주의 */
   --warn-bg:  #FBF3E2;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink:#E8EAEF; --ink-2:#AEB4BF; --ink-3:#7C838F;
-    --line:#2A2E37; --line-2:#212530;
-    --surface:#14171D; --surface-2:#1B1F27;
-    --accent:#7FA7D4; --accent-2:#1A2432;
-    --pos:#5FBF93; --pos-bg:#152A22;
-    --neg:#E08282; --neg-bg:#2B1A1A;
-    --warn:#D6AA5C; --warn-bg:#2A2317;
-  }
 }
 
 /* ── 타이포 ───────────────────────────────────────────────────────────
@@ -322,7 +311,6 @@ div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem 
    위 토큰을 덮어쓴다(같은 이름 → 기존 화면 코드는 손대지 않아도 따라온다).
    ⚠️ 초록 글자는 #15803D — 흰 바탕 4.5:1. 셀 배경 초록(#16A34A)과 다르다.
    ══════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap');
 :root {
   --ink:#111827; --ink-2:#374151; --ink-3:#4B5563;
   --line:#E5E7EB; --line-2:#F3F4F6;
@@ -332,14 +320,7 @@ div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem 
   --warn:#B45309; --warn-bg:#FEF3C7;
   --hero:#111827; --hero-2:#1F2937;
   --radius:16px; --radius-sm:10px;
-  --mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --ink:#F3F4F6; --ink-2:#D1D5DB; --ink-3:#9CA3AF; --line:#2A303B; --line-2:#1F242D;
-          --surface:#161A21; --surface-2:#1C212A; --page:#0E1116;
-          --accent:#7EA2FF; --accent-2:#1A2340; --pos:#4ADE80; --pos-bg:#123221;
-          --neg:#F87171; --neg-bg:#3A1717; --warn:#FBBF24; --warn-bg:#33270F;
-          --hero:#1C212A; --hero-2:#262C37; }
+  --mono:'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;   /* 2026-10-24 이름만 남김 — 숫자 정렬은 tabular-nums */
 }
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { background: var(--page) !important; }
 h1 { font-size: 26px !important; font-weight: 800 !important; letter-spacing: -.025em !important; }
@@ -426,6 +407,62 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
 .mo-chip .v.na { color: #9CA3AF; font-weight: 400; }
 .mo-chip .v.pos { color: var(--pos); } .mo-chip .v.neg { color: var(--neg); }
 .mo-gh { font-size: 12px; font-weight: 700; color: var(--ink-2); margin: 10px 0 2px; letter-spacing: .02em; }
+/* ══════════════════════════════════════════════════════════════════════
+   D · 표준화 (2026-10-24 디자인 재점검) — 탭마다 다르게 보이던 것을 한 규격으로.
+   · 글꼴 1종(Pretendard, 테마가 서빙) + 숫자는 어디서나 고정폭 숫자(tabular-nums)
+   · 곡률 1종(12px) · 그림자 1종 — 표·차트·카드·펼침이 같은 '흰 카드'
+   · 제목 3단: ## 섹션 / ### 소제목 / ####·#####·###### 는 전부 같은 '작은 제목'
+   ══════════════════════════════════════════════════════════════════════ */
+:root { --radius:12px; --radius-sm:10px; --shadow:0 1px 2px rgba(17,24,39,.06); }
+.stApp, .stApp * { font-variant-numeric: tabular-nums; }
+[data-testid="stMarkdownContainer"] h4, [data-testid="stMarkdownContainer"] h5,
+[data-testid="stMarkdownContainer"] h6 { font-size: 14.5px !important; font-weight: 700 !important;
+  color: var(--ink) !important; letter-spacing: -.01em !important; margin: .2rem 0 .1rem !important;
+  padding: 0 !important; }
+/* 표: 카드 안쪽 여백(4px)이 격자 높이를 깎아 마지막 행이 잘리고, 그걸 메우려던 여유분이 빈 행이 됐다 */
+[data-testid="stDataFrame"] { padding: 0 !important; border-radius: var(--radius) !important;
+  overflow: hidden; box-shadow: var(--shadow) !important; }
+/* 차트도 표와 같은 흰 카드 */
+[data-testid="stPlotlyChart"] { background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 6px 8px 2px; overflow: hidden; }
+/* 지표 카드 — 값이 한글 문장이어도 잘리지 않게, 한 줄 안의 카드 높이는 같게 */
+[data-testid="stMetric"] { border-radius: var(--radius) !important; box-shadow: var(--shadow) !important;
+  min-height: 96px; height: 100%; box-sizing: border-box; }
+[data-testid="stMetricValue"] { font-size: 21px !important; }
+[data-testid="stMetricValue"] > div { white-space: normal !important; overflow: visible !important;
+  text-overflow: clip !important; word-break: keep-all; line-height: 1.25; }
+.mo-hero { border-radius: var(--radius) !important; }
+/* 카드 3종(지표·판정·칩)을 한 모양으로 — 흰 면 + 옅은 1px 선 + 같은 곡률. 판정 카드만 왼쪽 색 막대가 뜻을 가진다 */
+[data-testid="stMetric"] { border: 1px solid var(--line) !important; box-shadow: none !important; }
+[data-testid="stMetricLabel"], [data-testid="stMetricLabel"] * { white-space: normal !important;
+  overflow: visible !important; text-overflow: clip !important; }
+.mo-chip { box-shadow: none; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+/* 표 가로 스크롤바는 얇게 — 자리를 차지하는 환경(윈도)에서도 행을 거의 가리지 않게 */
+[data-testid="stDataFrame"] .dvn-scroller::-webkit-scrollbar { height: 6px; width: 6px; }
+[data-testid="stDataFrame"] .dvn-scroller::-webkit-scrollbar-thumb { background: #CBD0D8; border-radius: 6px; }
+.mo-kpi { border-radius: var(--radius); }
+.mo-kpi .v { font-size: 21px; word-break: keep-all; }
+.mo-chip .v { white-space: normal; word-break: keep-all; }
+.mo-chip .l { white-space: normal; overflow: visible; text-overflow: clip; word-break: keep-all; line-height: 1.35; }
+.mo-grid.one { grid-template-columns: 1fr; }
+[data-testid="stExpander"] details { border-radius: var(--radius) !important; box-shadow: var(--shadow) !important; }
+/* 긴 설명은 첫 문장만 — 나머지는 '자세히'로 접는다(table_ui.caption) */
+/* 마크다운 표(시황 리포트 본문 등)도 데이터 표와 같은 카드 모양 */
+[data-testid="stMarkdownContainer"] table { border-collapse: separate !important; border-spacing: 0;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  font-size: 13px; margin: 4px 0 8px; }
+[data-testid="stMarkdownContainer"] th { background: var(--surface-2); color: var(--ink-3) !important;
+  font-weight: 500 !important; font-size: 12.5px; border: none !important; border-bottom: 1px solid var(--line) !important;
+  padding: 7px 12px !important; text-align: left; }
+[data-testid="stMarkdownContainer"] td { border: none !important; border-top: 1px solid var(--line-2) !important;
+  padding: 6px 12px !important; }
+[data-testid="stMarkdownContainer"] td:not(:first-child) { text-align: right; }
+.mo-note { font-size: 12.5px; line-height: 1.66; color: var(--ink-3); margin: -2px 0 2px; }
+.mo-note details > summary { cursor: pointer; color: var(--accent); font-weight: 600; list-style: none;
+  display: inline; margin-left: 4px; }
+.mo-note details > summary::-webkit-details-marker { display: none; }
+.mo-note details[open] > summary { display: block; margin: 0 0 2px; }
+.mo-note code { font-size: 11.5px; }
 @media (max-width: 640px) { .mo-hero { padding: 18px; } .mo-hero .n { font-size: 22px; }
   .mo-hero .pv { font-size: 26px; } }
 </style>
@@ -439,7 +476,7 @@ _pio.templates['market_os'] = go.layout.Template(layout=dict(
     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
     xaxis=dict(gridcolor='#E5E7EB', zeroline=False, linecolor='#E5E7EB'),
     yaxis=dict(gridcolor='#E5E7EB', zeroline=False, linecolor='#E5E7EB'),
-    hoverlabel=dict(font_family="JetBrains Mono, monospace", bgcolor='#111827', font_color='#F9FAFB'),
+    hoverlabel=dict(font_family="Pretendard, sans-serif", bgcolor='#111827', font_color='#F9FAFB'),
     legend=dict(bgcolor='rgba(0,0,0,0)')))
 _pio.templates.default = 'plotly_white+market_os'
 
@@ -524,7 +561,7 @@ def _income_sankey(row, unit_div, unit, seg=None):
         if t == 'total':
             txt += f"  <span style='color:#6B7280'>{b0/rv*100:.1f}%</span>"
         fig.add_annotation(x=i, y=max(a0, b0, 0) / d, text=txt, showarrow=False, yanchor='bottom',
-                           yshift=4, font=dict(family="JetBrains Mono, monospace", size=12,
+                           yshift=4, font=dict(family="Pretendard, sans-serif", size=12,
                                                color=('#B91C1C' if (t == 'total' and b0 < 0) else (COL[t] if t != 'rev' else '#111827'))))
     hi = max(rv, 0) / d
     lo = min(0, op, ni if ni is not None else 0) / d
@@ -697,7 +734,7 @@ def _asof_of(path: str) -> str | None:
     return None
 
 
-def _stat_grid(groups):
+def _stat_grid(groups, one: bool = False):
     """키-값 묶음을 칩 격자로 — 2열 세로 표 대신(2026-10-19 '억지로 키운 표' 정리).
     groups: [(묶음이름, [(라벨, 표시값, 부호색 여부), ...]), ...]. 값 '-' 는 흐리게 그대로 보인다."""
     import html as _h
@@ -713,7 +750,8 @@ def _stat_grid(groups):
                 cls = 'neg' if t.startswith('-') or t.startswith('−') else ('pos' if t not in ('0', '0.0%') else '')
             chips.append(f"<div class='mo-chip'><div class='l'>{_h.escape(k)}</div>"
                          f"<div class='v {cls}'>{_h.escape(str(v if v not in (None, '') else '-'))}</div></div>")
-        out.append((f"<div class='mo-gh'>{_h.escape(g)}</div>" if g else '') + f"<div class='mo-grid'>{''.join(chips)}</div>")
+        # one=True: 한 줄에 하나씩(옆 표와 높이를 맞출 때 — 2+1 로 남는 빈 칸 없이, 2026-10-24)
+        out.append((f"<div class='mo-gh'>{_h.escape(g)}</div>" if g else '') + f"<div class='mo-grid{' one' if one else ''}'>{''.join(chips)}</div>")
     st.markdown(''.join(out), unsafe_allow_html=True)
 
 
@@ -1030,8 +1068,10 @@ IS_MOBILE = any(k in _UA for k in ('Mobi', 'Android', 'iPhone', 'iPad'))
 
 # 2026-10-21 모바일 실화면 — plotly 도구 막대(확대·저장 아이콘)가 터치 기기에선 늘 떠 있어 범례를 가렸다.
 #   모든 차트 공통: 폰에서는 숨기고, PC 는 마우스를 올렸을 때만. 한 번만 감싼다(스크립트 재실행마다 겹치지 않게).
-if not getattr(st.plotly_chart, '_mo_wrapped', False):
-    _orig_plotly_chart = st.plotly_chart
+# 2026-10-24 — 버전 표식: 클라우드 프로세스가 옛 래퍼를 들고 있으면 새 규격이 안 먹는다(table_ui 와 같은 사고) → 버전이 다르면 다시 감싼다.
+if getattr(st.plotly_chart, '_mo_wrapped', 0) != 2:
+    _orig_plotly_chart = st._main.plotly_chart
+    CHART_H = {'S': 260, 'M': 320, 'L': 420}     # 차트 높이 3단(작게·보통·크게)
 
     def _plotly_chart(fig, *a, **kw):
         try:
@@ -1042,8 +1082,18 @@ if not getattr(st.plotly_chart, '_mo_wrapped', False):
         cfg = dict(kw.pop('config', None) or {})
         cfg.setdefault('displayModeBar', False if _mob else 'hover')
         cfg.setdefault('displaylogo', False)
+        # 2026-10-24 차트 규격 — 높이가 230·240·284·300·310·380·420·430 으로 10가지였다. 3단으로 맞춘다.
+        #   여러 줄짜리(서브플롯·행 수에 비례해 키운) 차트는 그대로 둔다. 범례·제목 글꼴 크기도 하나로.
+        try:
+            _h = getattr(fig.layout, 'height', None)
+            _multi = bool(getattr(fig, '_grid_ref', None)) and len(fig._grid_ref) > 1
+            if isinstance(_h, (int, float)) and not _multi and _h <= 480:
+                fig.update_layout(height=CHART_H['S'] if _h <= 270 else CHART_H['M'] if _h <= 360 else CHART_H['L'])
+            fig.update_layout(legend_font_size=12, font_size=12, title_font_size=14)
+        except Exception:
+            pass
         return _orig_plotly_chart(fig, *a, config=cfg, **kw)
-    _plotly_chart._mo_wrapped = True
+    _plotly_chart._mo_wrapped = 2
     st.plotly_chart = _plotly_chart
 st.session_state['seen_onboard'] = True
 
@@ -1057,7 +1107,7 @@ _OB_CSS = """
   .ob2-hero::after { content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
               border-radius:50%; background:radial-gradient(circle,rgba(126,162,255,.35),transparent 70%); }
   .ob2-kick { font-size:11px; font-weight:700; letter-spacing:.14em; color:#93B4FF; margin-bottom:8px; }
-  .ob2-hero h3 { font-size:24px; font-weight:800; letter-spacing:-.03em; margin:0 0 8px; color:#fff; line-height:1.3; }
+  .ob2-hero h3 { font-size:24px !important; font-weight:800 !important; letter-spacing:-.03em; margin:0 0 8px; color:#fff !important; line-height:1.3; }
   .ob2-hero p { font-size:14px; color:#D1D5DB; margin:0; max-width:640px; line-height:1.6; }
   .ob2-hero p b { color:#fff; }
   .ob2-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; position:relative; z-index:1; }
@@ -5627,18 +5677,19 @@ def _tab_analysis():
                                 _seg_for_flow = _sa2.load_cached(sym8_clean)
                             except Exception:
                                 pass
+                        # 2026-10-23 — 최근 분기 하나만 보였다 → 최근 4개 분기 중 고른다(기본 최신)
+                        # 2026-10-24 — 고르는 버튼을 두 차트 위로: 왼쪽에만 있어 좌우 차트 시작 높이가 어긋났다
+                        _fq4 = [r for r in _flowq if r.get('revenue')][:4]
+                        _fqs = [str(r.get('period', '')) for r in _fq4]
+                        _fpick = (st.segmented_control("분기", _fqs, default=_fqs[0], key=f"flowq_{sym8_clean}")
+                                  if len(_fqs) > 1 else (_fqs[0] if _fqs else None)) or (_fqs[0] if _fqs else None)
                         _fc1, _fc2 = st.columns([1.15, 1], gap='large')    # 2026-10-20: 구조(이번 분기)와 추이를 나란히
                         with _fc1:
-                          # 2026-10-23 — 최근 분기 하나만 보였다 → 최근 4개 분기 중 고른다(기본 최신)
-                          _fq4 = [r for r in _flowq if r.get('revenue')][:4]
-                          _fqs = [str(r.get('period', '')) for r in _fq4]
-                          _fpick = (st.segmented_control("분기", _fqs, default=_fqs[0], key=f"flowq_{sym8_clean}")
-                                    if len(_fqs) > 1 else (_fqs[0] if _fqs else None)) or (_fqs[0] if _fqs else None)
                           _frow = next((r for r in _fq4 if str(r.get('period', '')) == _fpick), _flowq[0])
                           _sank = _income_sankey(_frow, _uq, _uu, _seg_for_flow)
                           if _sank:
                             st.markdown(f"###### 🧱 분기 구조 — {_frow.get('period', '')}")
-                            _sank.update_layout(height=310, margin=dict(t=34))
+                            _sank.update_layout(height=320, margin=dict(t=34))
                             st.plotly_chart(_sank, use_container_width=True)
                             st.caption(f"{_frow.get('period','')} 분기 · 단위 {_uu}{'원' if is_kr_sym else '$'} · "
                                        "파랑=남은 이익(%는 매출 대비 마진) · 빨강=차감 · 초록=가산(영업외수익 등). "
@@ -5656,7 +5707,7 @@ def _tab_analysis():
                                        for r in _mq]
                                 _mfig.add_trace(go.Scatter(x=_mx, y=_my, mode='lines+markers', name=_mlab,
                                                            line=dict(color=_mcol, width=2.5)))
-                            _mfig.update_layout(height=310, margin=dict(l=0, r=8, t=34, b=0), xaxis_type='category',
+                            _mfig.update_layout(height=320, margin=dict(l=0, r=8, t=34, b=0), xaxis_type='category',
                                                 legend=dict(orientation='h', y=1.15, x=0, yanchor='bottom'),
                                                 yaxis_ticksuffix='%')
                             _mfig.update_yaxes(gridcolor='#F3F4F6', zeroline=True, zerolinecolor='#D1D5DB')
@@ -5718,11 +5769,16 @@ def _tab_analysis():
                         except Exception:
                             _Mlabel = '—'
 
-                        # 콤팩트 1행 배치: 총점 | 점수표 | 수익률 | 정성 슬라이더(세로) — #2
-                        _cc0, _cc2, _cc3, _cc4 = st.columns([0.7, 1.6, 0.9, 1.3])
-                        _N = _cc4.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
-                        _S = _cc4.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
-                        _I = _cc4.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
+                        # 2026-10-24 배치 정리 — 4칸(총점·점수표·좁은 수익률표·슬라이더)에 표가 눌리고 출처 줄이 세로로 깨졌다.
+                        #   ① 판정 카드 한 줄(총점·등급·시장)  ② 점수표 | 정성 입력  ③ 수익률은 칩 한 줄(L 의 근거)
+                        _ca, _cb, _cm = st.columns(3)
+                        _cl, _cr_ = st.columns([1.7, 1], gap='large')
+                        with _cr_:
+                            with st.container(border=True):
+                                st.markdown("###### ✍️ 정성 입력 (N·S·I, 각 0~25)")
+                                _N = st.slider("N 신성장·경영진", 0, 25, 12, key=f"cans_n_{sym8_clean}")
+                                _S = st.slider("S 자사주·수급", 0, 25, 0, key=f"cans_s_{sym8_clean}")
+                                _I = st.slider("I 기관 보유증가", 0, 25, 12, key=f"cans_i_{sym8_clean}")
 
                         _parts = [('C', _C, '영업익 최근 YoY − 5'), ('A', _A, '영업익 3년 CAGR − 5'),
                                   ('N', float(_N), '신성장·경영진 (입력)'), ('S', float(_S), '자사주·수급 (입력)'),
@@ -5732,26 +5788,17 @@ def _tab_analysis():
                         _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
                                   else 'C' if _total >= 30 else 'D')
 
-                        _cc0.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
-                        _cc0.metric("등급", _grade)
-                        _cc0.caption(f"M: {_Mlabel}")
-                        _scdf = pd.DataFrame([{'항목': k, '점수': (f"{v:+.1f}" if isinstance(v, (int, float)) else '-'),
-                                               '근거': d} for k, v, d in _parts])
-                        _cc2.dataframe(_scdf, use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(_scdf)))
-                        with _cc3:
-                            r_df = pd.DataFrame([
-                                {'기간': k, '수익률': f"{v:+.1f}%" if v is not None else '-'}
-                                for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]
-                            ])
-                            def _cr(v):
-                                try:
-                                    _f = float(str(v).replace('%', '').replace('+', ''))
-                                    return 'color:#15803D' if _f >= 0 else 'color:#DC2626'
-                                except Exception:
-                                    return ''
-                            _tsrc('FinanceDataReader·yfinance(주가)·DART·SEC EDGAR(재무) — 조회 시 계산', live=True)
-                            st.dataframe(r_df.style.map(_cr, subset=['수익률']),
-                                         use_container_width=True, hide_index=True, row_height=25, height=_dfh(len(r_df)))
+                        _ca.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
+                        _cb.metric("등급", _grade, help="S 90+ · A 70+ · B 50+ · C 30+ · D")
+                        _cm.metric("M 시장 국면", _Mlabel or '—', help="verdict.core_switch — KR=코스피, US=S&P500 200일선")
+                        with _cl:
+                            _scdf = pd.DataFrame([{'항목': k, '점수': (round(v, 1) if isinstance(v, (int, float)) else None),
+                                                   '근거': d} for k, v, d in _parts])
+                            _tsrc('DART·SEC EDGAR(재무) · FinanceDataReader·yfinance(주가) — 조회 시 계산', live=True)
+                            st.dataframe(_scdf, filters=False, color=True,
+                                         column_config={'점수': st.column_config.NumberColumn('점수', format='%+.1f')})
+                            _stat_grid([('수익률 — L(상대강도)의 근거', [(k, '-' if v is None else f"{v:+.1f}%", True)
+                                         for k, v in [('1개월', ret_1m), ('3개월', ret_3m), ('6개월', ret_6m), ('1년', ret_1y)]])])
                         st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
                                    "N·S·I=정성 입력(체슬리 엑셀 방식) · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심.")
                         st.divider()
@@ -6505,7 +6552,7 @@ def _tab_analysis():
                                 with _bL:
                                     _stat_grid([('', [(f"현재 {_b['kind']}", f"{_b['now']:.1f}배"),
                                                       ("과거 대비", f"{_b['rank']:.0f}%의 기간보다 비쌈"),
-                                                      ("10분위 아래였던 기간", f"{_b['below10']:.0f}%")])])
+                                                      ("10분위 아래였던 기간", f"{_b['below10']:.0f}%")])], one=True)
                                 with _bR:
                                     if _b['implied']:
                                         _tsrc(f"{_qsrc} TTM · 종가×현재 주식수", live=True)
@@ -6767,38 +6814,36 @@ def _tab_analysis():
                                         + (f"이상 {_nd}건" if _nd else "이상 없음"))
                             st.markdown("\n".join(f"- {_ico[r['state']]} **{r['name']}** · {r['detail']}" for r in _ord(_chk_)))
                             st.caption("이 화면 숫자가 서로 맞는지·최신인지 종목마다 그 자리에서 확인. '확인 불가(·)'는 통과로 치지 않는다.")
-                        _rc3, _rc4 = st.columns(2, gap='large')
-                        with _rc3:
-                            if _tpl.get('items'):
-                                st.markdown(f"**📈 추세 — Trend Template {_tpl['n']}/8**")
-                                st.markdown("\n".join(f"- {'✅' if ok else '⚠️'} **{nm}** · {dt}" for nm, ok, dt in _tpl['items']))
-                                st.caption("마크 미너비니의 주도주 추세 조건(이동평균 정배열 + 저점 대비 +30% 이상 + 고점 −25% 이내). "
-                                           "8/8 = 상승 추세 · 6~7 = 일부 이탈 · 4~5 = 약화 · 3 이하 = 하락·바닥. "
-                                           "고점 −20% 는 추세가 아니라 **보유 중 청산선**이라 리스크 점검에 따로 둔다.")
-                        with _rc4:
-                            if _etr.get('rows'):
-                                st.markdown(f"**💰 분기 이익 — {_etr['state']}**"
-                                            + (f" · 수준 {_etr['level']}" if _etr.get('level') and _etr['level'] not in _etr['state'] else '')
-                                            + f" · 최근 8분기 중 가속 {_etr.get('acc_8q', 0)}회")
-                                _eu = ('억원', 1e8) if is_kr_sym else ('$M', 1e6)
-                                _tsrc(_L.get('_qsrc') or '분기 손익', live=True)
-                                # 2026-10-21 실화면 — None 만 있는 열이 글자 'None' 으로 찍히고, 머리말이 길어 반쪽 칸을 넘쳤다
-                                _nn = lambda v, d=1: float('nan') if v is None or pd.isna(v) else round(float(v), d)
-                                _etab = pd.DataFrame([{
-                                    '분기': r['분기'], f"영업익({_eu[0]})": _nn(None if r['op'] is None else r['op'] / _eu[1], 0),
-                                    f"전년 동기({_eu[0]})": _nn(None if r['prev'] is None else r['prev'] / _eu[1], 0),
-                                    '영업익 YoY(%)': _nn(r['yoy']), '매출 YoY(%)': _nn(r['rev_yoy']),
-                                    '개선폭÷매출(%p)': _nn(r['oi_pp']),
-                                    '가속': '가속' if r['acc'] else ('-' if r['acc'] is None else '')}
-                                    for r in _etr['rows'][:6]])
-                                if _etab['영업익 YoY(%)'].isna().all():      # 적자 구간이라 전부 '-' 면 열을 뺀다
-                                    _etab = _etab.drop(columns=['영업익 YoY(%)'])
-                                st.dataframe(_etab, filters=False)
-                                st.caption("**가속 = 매출 YoY 와 '개선폭÷매출'(1년 전 대비 영업익 증가분 ÷ 매출)이 둘 다 직전 분기보다 커진 분기** — 미국 이익 가속 신호와 같은 정의"
-                                           "(이익 증가를 매출로 나눠 적자에서도 측정된다. 그래서 '이익 감소'인데 '가속'일 수 있다 = 감소 폭이 줄었다). "
-                                           "한 분기는 기저효과·일회성일 수 있어 연속 분기 수를 본다: 1분기 확인 전 · 2분기 가속 · "
-                                           "3분기+ 강한 가속(미너비니 'Code 33'). ⚠️ 연속 조건의 수익 우위는 아직 백테스트 전 — 상태 표시일 뿐 매수 신호 아님. "
-                                           "기저효과 = 1년 전 분기 이익이 최근 8분기 중앙값의 25% 미만.")
+                        # 2026-10-24 — 분기 이익 표(7열)가 반쪽 칸을 넘어 가로 드래그가 생겼다 → 추세·분기 이익을 위아래 전체 폭으로
+                        if _tpl.get('items'):
+                            st.markdown(f"**📈 추세 — Trend Template {_tpl['n']}/8**")
+                            st.markdown("\n".join(f"- {'✅' if ok else '⚠️'} **{nm}** · {dt}" for nm, ok, dt in _tpl['items']))
+                            st.caption("마크 미너비니의 주도주 추세 조건(이동평균 정배열 + 저점 대비 +30% 이상 + 고점 −25% 이내). "
+                                       "8/8 = 상승 추세 · 6~7 = 일부 이탈 · 4~5 = 약화 · 3 이하 = 하락·바닥. "
+                                       "고점 −20% 는 추세가 아니라 **보유 중 청산선**이라 리스크 점검에 따로 둔다.")
+                        if _etr.get('rows'):
+                            st.markdown(f"**💰 분기 이익 — {_etr['state']}**"
+                                        + (f" · 수준 {_etr['level']}" if _etr.get('level') and _etr['level'] not in _etr['state'] else '')
+                                        + f" · 최근 8분기 중 가속 {_etr.get('acc_8q', 0)}회")
+                            _eu = ('억원', 1e8) if is_kr_sym else ('$M', 1e6)
+                            _tsrc(_L.get('_qsrc') or '분기 손익', live=True)
+                            # 2026-10-21 실화면 — None 만 있는 열이 글자 'None' 으로 찍히고, 머리말이 길어 반쪽 칸을 넘쳤다
+                            _nn = lambda v, d=1: float('nan') if v is None or pd.isna(v) else round(float(v), d)
+                            _etab = pd.DataFrame([{
+                                '분기': r['분기'], f"영업익({_eu[0]})": _nn(None if r['op'] is None else r['op'] / _eu[1], 0),
+                                f"전년 동기({_eu[0]})": _nn(None if r['prev'] is None else r['prev'] / _eu[1], 0),
+                                '영업익 YoY(%)': _nn(r['yoy']), '매출 YoY(%)': _nn(r['rev_yoy']),
+                                '개선폭÷매출(%p)': _nn(r['oi_pp']),
+                                '가속': '가속' if r['acc'] else ('-' if r['acc'] is None else '')}
+                                for r in _etr['rows'][:6]])
+                            if _etab['영업익 YoY(%)'].isna().all():      # 적자 구간이라 전부 '-' 면 열을 뺀다
+                                _etab = _etab.drop(columns=['영업익 YoY(%)'])
+                            st.dataframe(_etab, filters=False)
+                            st.caption("**가속 = 매출 YoY 와 '개선폭÷매출'(1년 전 대비 영업익 증가분 ÷ 매출)이 둘 다 직전 분기보다 커진 분기** — 미국 이익 가속 신호와 같은 정의"
+                                       "(이익 증가를 매출로 나눠 적자에서도 측정된다. 그래서 '이익 감소'인데 '가속'일 수 있다 = 감소 폭이 줄었다). "
+                                       "한 분기는 기저효과·일회성일 수 있어 연속 분기 수를 본다: 1분기 확인 전 · 2분기 가속 · "
+                                       "3분기+ 강한 가속(미너비니 'Code 33'). ⚠️ 연속 조건의 수익 우위는 아직 백테스트 전 — 상태 표시일 뿐 매수 신호 아님. "
+                                       "기저효과 = 1년 전 분기 이익이 최근 8분기 중앙값의 25% 미만.")
 
                     if _acch and _acch['rows']:
                         with st.expander(f"🚀 이익 가속 신호 이력 — {len(_acch['rows'])}회"):
@@ -7680,7 +7725,8 @@ with tab_rep, guard('시황 리포트'):
         _i = st.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick")
         _h = _hist[_i]
         st.caption(f"작성: {'AI(' + _h['engine'].split(':')[-1] + ')' if _h['engine'].startswith('gemini') else '숫자 템플릿'}")
-        st.markdown(_h['markdown'])
+        # 2026-10-24 — 리포트 본문의 #·## 가 탭 제목(①②③)보다 커서 위계가 뒤집혔다 → 두 단계 내려 그린다
+        st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _h['markdown'], flags=re.M))
         _lf = (_rep.get(f"latest_{_h['kind']}") or {})
         # 2026-10-21 — 리포트에 나온 종목을 눌러 종목 분석으로(리포트 → 분석 연결)
         _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
