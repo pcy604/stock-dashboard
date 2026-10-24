@@ -66,6 +66,10 @@ def main():
     #   v13y 첫 ~1년(2014-02~2015-02)은 어떤 변형도 살 수 없어 현금만 들고 SPY(+12%)를 그냥 놓쳤다(CAGR -1.1%p 왜곡).
     #   평가 구간을 '어느 변형이든 첫 신호가 가능한 주'부터로 통일한다(규칙·문턱은 그대로, 모든 변형·SPY 동일 적용).
     t_ev = min(g.index[g.any(axis=1)][0] for g in G.values())
+    try:                                   # 판정 파일(rs_accel_bt.json, 같은 잡에서 먼저 실행)과 평가 시작을 맞춘다
+        t_ev = min(t_ev, pd.Timestamp(json.load(open(B.OUT, encoding="utf-8"))["period"][0]))
+    except Exception:
+        pass
     px, spy, cr = px.loc[t_ev:], spy.loc[t_ev:], cr.loc[t_ev:]
     G = {k: g.loc[t_ev:] for k, g in G.items()}
     names = {c: n for c, n in d.drop_duplicates("sym", keep="last")[["sym", "name"]].values}
