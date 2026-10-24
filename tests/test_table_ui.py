@@ -84,3 +84,18 @@ def test_split_note_keeps_all_text():
     assert len(head.replace(' ', '')) + len(rest.replace(' ', '')) >= len(long.replace(' ', '')) - 3   # 글자를 버리지 않는다
     short = '짧은 설명.'
     assert t.split_note(short) == (short, '')
+
+
+def test_auto_widths_fit_container_text_first():
+    """반쪽 칸에 글 많은 표(부문·주요제품)가 넘쳐 오른쪽 숫자 열이 잘리던 사고(2026-10-24 TSLA) —
+    자리를 넘으면 글 열만 줄이고 숫자 열 폭은 그대로."""
+    import pandas as pd, table_ui as t
+    df = pd.DataFrame({'No.': [1, 2], '사업부문': ['Automotive', 'Energy Generation And Storage'],
+                       '주요제품': ['Electric vehicles (sales, leasing), regulatory credits and services', 'Energy storage'],
+                       '매출($B)': [25.2, 2.9], '부문 GPM(%)': [18.0, 33.1]})
+    wide = t.auto_widths(df, {}, None)
+    fit = t.auto_widths(df, {}, 560)
+    assert t.total_width(fit) <= 560 < t.total_width(wide)
+    for c in ('매출($B)', '부문 GPM(%)', 'No.'):
+        assert fit[c]['width'] == wide[c]['width']
+    assert fit['주요제품']['width'] < wide['주요제품']['width']

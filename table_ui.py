@@ -38,7 +38,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 8
-API_VERSION = 5          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
+API_VERSION = 6          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -575,7 +575,6 @@ def _fmt_len(v) -> int:
 #   row_height 를 따로 주면 행만 그 값이고 머리행은 31 그대로다. 테두리 2px.
 HEAD_PX, ROW_PX, BORDER_PX = 31, 31, 2
 HSCROLL = 8           # 가로 스크롤바 자리(윈도, CSS 로 6px). 넓은 표에만
-WIDE_PX = 700         # 열 폭 합이 이보다 크면 반쪽 칸에서 가로로 넘칠 수 있다
 
 
 def fit_height(n: int, row_height=None) -> int:
@@ -583,26 +582,95 @@ def fit_height(n: int, row_height=None) -> int:
     return HEAD_PX + max(int(n), 1) * int(row_height or ROW_PX) + BORDER_PX
 
 
-def auto_widths(df: pd.DataFrame, cfg: dict) -> dict:
+# ── 표가 놓인 칸의 폭 (2026-10-24) ─────────────────────────────────
+#   종목마다 글 길이가 달라(부문명·주요제품) 반쪽 칸에서 표가 넘쳐 오른쪽 열이 잘렸다.
+#   서버는 화면 폭을 모르지만 st.columns 비율은 안다 → 본문 폭 × 비율로 '들어갈 자리'를 어림한다.
+PAGE_PX = 1150          # 본문 최대 1320(1400−여백)이지만 노트북(1280~1366px) 화면에 맞춰 보수적으로 — 넘쳐서 숫자가 잘리는 것보다 글이 줄어드는 게 낫다
+GAP_PX = 28             # 칸 사이 간격(중간 gap) 몫
+
+
+def _patch_blocks():
+    """st.columns 가 만든 칸에 비율(_mo_frac)을 붙인다. 한 번만."""
+    from streamlit.delta_generator import DeltaGenerator as _DG
+    if getattr(_DG._block, '_mo_frac', False):
+        return
+    _orig = _DG._block
+
+    def _block(self, block_proto=None, dg_type=None):
+        dg = _orig(self, block_proto, dg_type)
+        try:
+            if block_proto is not None and block_proto.WhichOneof('type') == 'column':
+                dg._mo_frac = float(block_proto.column.weight) or 1.0
+        except Exception:
+            pass
+        return dg
+    _block._mo_frac = True
+    _DG._block = _block
+
+
+def avail_px() -> int:
+    """지금 그리려는 자리의 대략적 폭(px). 칸 안의 칸이면 비율을 곱한다."""
+    try:
+        import streamlit as st
+        dg = st._main._active_dg
+        w, n = float(PAGE_PX), 0
+        while dg is not None and n < 12:
+            # DeltaGenerator 는 없는 속성도 함수로 돌려준다(__getattr__) → __dict__ 에서 직접 읽는다
+            f = vars(dg).get('_mo_frac')
+            if isinstance(f, float) and f > 0:
+                w = w * f - GAP_PX
+            dg = vars(dg).get('_parent')
+            n += 1
+        return int(max(w, 240))
+    except Exception:
+        return PAGE_PX
+
+
+def auto_widths(df: pd.DataFrame, cfg: dict, avail: int | None = None) -> dict:
+    """열 폭 = 내용 폭. 자리(avail)를 넘으면 **글 열부터** 줄여 맞춘다 — 숫자 열은 자르지 않는다
+    (잘린 글은 마우스를 올리면 전체가 보인다)."""
     cfg = dict(cfg or {})
+    want, floor, textcol, fixed = {}, {}, set(), {}
     for c in df.columns:
         col = df[c].head(300)
-        # 머리글(12px)은 값(12.5px 고정폭 숫자)보다 좁게 친다 — 머리글이 열 폭을 지배하지 않게
-        # 2026-10-19 '너무 넉넉하다' — 머리글은 12px 글꼴(한글 ≈ 12px = _dw 2칸), 값은 12.5px 고정폭.
+        # 머리글(12px)은 값보다 좁게 친다 — 머리글이 열 폭을 지배하지 않게(2026-10-19)
         hw = _dw(str(c)) * 6.1 + 22
         vw = max([_fmt_len(v) for v in col.tolist()] or [1]) * 7.3 + 18
-        # 긴 글(회사명·업종)은 잘리고 마우스를 올리면 전체가 보인다. 단 '할 일·근거' 같은 문장 열은 넓게(2026-10-24)
-        _cap = 520 if (col.dtype == object and str(c) not in ('종목', '코드') and vw > 360) else 240
+        is_text = col.dtype == object and str(c) not in ('No.', '코드')
+        # 문장 열('할 일·근거')은 넓게, 이름 열은 240·종목은 170 상한(2026-10-19·24)
+        _cap = 520 if (is_text and str(c) != '종목' and vw > 360) else 240
         px = int(min(max(hw, vw, 44), _cap))
         if str(c) == '종목':
-            px = min(px, 170)                   # 미국 회사명이 길어 표를 옆으로 밀었다(2026-10-19)
+            px = min(px, 170)
         cur = cfg.get(c)
-        if isinstance(cur, dict):
-            if not cur.get('width') or (isinstance(cur.get('width'), str) and px > 400):   # 'large'(≈400px)보다 긴 문장 열
-                cur = dict(cur); cur['width'] = px; cfg[c] = cur
-        elif cur is None:
-            cfg[c] = {'width': px}
+        if isinstance(cur, dict) and isinstance(cur.get('width'), (int, float)):
+            fixed[c] = cur['width']                       # 호출부가 정한 숫자 폭은 존중
+            continue
+        if isinstance(cur, dict) and isinstance(cur.get('width'), str) and px <= 400:
+            continue                                      # 'small'·'medium'·'large' 그대로
+        want[c] = px
+        if is_text:
+            textcol.add(c)
+            floor[c] = int(max(hw, 96))                   # 글 열은 머리글이 보이는 만큼까지 줄일 수 있다
+        else:
+            floor[c] = px
+    if avail:
+        total = sum(want.values()) + sum(fixed.values())
+        over = total - avail
+        room = sum(want[c] - floor[c] for c in textcol)
+        if over > 0 and room > 0:
+            k = min(1.0, over / room)                     # 글 열의 '줄일 수 있는 몫'을 같은 비율로
+            for c in textcol:
+                want[c] = int(want[c] - (want[c] - floor[c]) * k)
+    for c, px in want.items():
+        cur = cfg.get(c)
+        cfg[c] = dict(cur, width=px) if isinstance(cur, dict) else {'width': px}
     return cfg
+
+
+def total_width(cfg: dict) -> int:
+    return int(sum(v['width'] for v in cfg.values()
+                   if isinstance(v, dict) and isinstance(v.get('width'), (int, float))))
 
 
 def src(text: str, asof: str | None = None):
@@ -689,6 +757,7 @@ def install(st):
     if getattr(st, '_tbl_ver', None) == API_VERSION:
         return
     orig = st._main.dataframe
+    _patch_blocks()
 
     def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, footer=True, **kw):
         # footer=False: 바로 아래 이어지는 표(한 묶음)가 출처를 대신 단다 — 같은 줄이 두 번 뜨지 않게
@@ -768,12 +837,12 @@ def install(st):
             # 높이 — 25행 이하는 스크롤 없이 전부, 빈 행 없이(2026-10-24 재설계).
             #   원인: 행 높이를 35px 로 가정했는데 이 앱은 글자 기준을 14px 로 줄여(rem) 실제 행·머리행이 31px 다.
             #   행마다 4px 씩 남아 5행이면 빈 행 하나가 생겼고, 짧은 표 +12·넓은 표 +16 여유분이 그 위에 더해졌다.
-            kw['column_config'] = auto_widths(df, kw.get('column_config'))
-            _tw = sum(v['width'] for v in kw['column_config'].values()     # 'small'·'medium' 같은 글자 폭은 뺀다(10-21 TypeError)
-                      if isinstance(v, dict) and isinstance(v.get('width'), (int, float)))
+            _av = avail_px()
+            kw['column_config'] = auto_widths(df, kw.get('column_config'), _av)
+            _tw = total_width(kw['column_config'])
             if len(df) <= 25:
-                # 가로 스크롤바가 자리를 차지하는 환경(윈도 크롬)에서 마지막 행이 가려지지 않게 — 넓은 표만
-                kw['height'] = fit_height(len(df), kw.get('row_height')) + (HSCROLL if _tw > WIDE_PX else 0)
+                # 가로 스크롤바가 자리를 차지하는 환경(윈도 크롬)에서 마지막 행이 가려지지 않게 — 실제로 넘칠 표만
+                kw['height'] = fit_height(len(df), kw.get('row_height')) + (HSCROLL if _tw > _av else 0)
             elif not kw.get('height'):
                 kw['height'] = fit_height(25, kw.get('row_height'))
             kw.pop('use_container_width', None)

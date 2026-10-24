@@ -423,8 +423,13 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
 [data-testid="stDataFrame"] { padding: 0 !important; border-radius: var(--radius) !important;
   overflow: hidden; box-shadow: var(--shadow) !important; }
 /* 차트도 표와 같은 흰 카드 */
-[data-testid="stPlotlyChart"] { background: var(--surface); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 6px 8px 2px; overflow: hidden; }
+/*   안쪽 여백·overflow:hidden 을 주면 Streamlit 이 잡은 높이에서 그만큼 잘려 x축 눈금이 사라졌다(10-24 TSLA 실화면) → 둘 다 없음 */
+[data-testid="stPlotlyChart"] { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+/* 줄바꿈 — 마지막 줄에 한두 글자만 남는 것(고아 글자)을 막는다. 짧은 글은 줄 길이를 고르게 */
+[data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li,
+[data-testid="stCaptionContainer"], .mo-note, .mo-kpi .s { text-wrap: pretty; word-break: keep-all; }
+h1, h2, h3, h4, h5, h6, [data-testid="stMetricLabel"] p, [data-testid="stMetricValue"] > div,
+.mo-kpi .l, .mo-kpi .v, .mo-chip .l, .mo-chip .v, .ob2-q, .ob2-d { text-wrap: balance; word-break: keep-all; }
 /* 지표 카드 — 값이 한글 문장이어도 잘리지 않게, 한 줄 안의 카드 높이는 같게 */
 [data-testid="stMetric"] { border-radius: var(--radius) !important; box-shadow: var(--shadow) !important;
   min-height: 96px; height: 100%; box-sizing: border-box; }
