@@ -1,50 +1,70 @@
 {
- "at": "2026-10-24T09:16:11Z",
+ "at": "2026-10-24T09:33:17Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
    "page": "🏠 종합",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🏠 종합\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 4504,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🌍 매크로",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🌍 매크로\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 4212,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🔎 종목 발굴",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔎 종목 발굴\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 1534,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🔍 종목 분석",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔍 종목 분석\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 931,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🛡️ 내 포트폴리오",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🛡️ 내 포트폴리오\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 944,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "종목 분석 ?sym=TSLA",
-   "ok": false,
+   "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 0,
+   "text_len": 12843,
    "samples": [],
    "finished": true
   },
   {
    "page": "종목 분석 ?sym=005930",
-   "ok": false,
+   "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 0,
+   "text_len": 14770,
    "samples": [],
    "finished": true
   }
  ],
- "ok": false
+ "ok": true
 }
