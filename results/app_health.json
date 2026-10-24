@@ -1,39 +1,31 @@
 {
- "at": "2026-10-24T09:10:52Z",
+ "at": "2026-10-24T09:16:11Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
    "page": "🏠 종합",
-   "ok": true,
-   "exceptions": 0,
-   "error_words": [],
-   "text_len": 4504,
-   "samples": [],
-   "finished": true
+   "ok": false,
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🏠 종합\").first\n"
   },
   {
    "page": "🌍 매크로",
-   "ok": true,
-   "exceptions": 0,
-   "error_words": [],
-   "text_len": 4276,
-   "samples": [],
-   "finished": false
+   "ok": false,
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🌍 매크로\").first\n"
   },
   {
    "page": "🔎 종목 발굴",
    "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔎 종목 발굴\").first\n    - locator resolved to <div role=\"tab\" data-rac=\"\" data-key=\"2\" tabindex=\"-1\" data-testid=\"stTab\" aria-selected=\"false\" data-react-aria-pressable=\"true\" id=\"react-aria2424760310-:r"
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔎 종목 발굴\").first\n"
   },
   {
    "page": "🔍 종목 분석",
    "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔍 종목 분석\").first\n    - locator resolved to <div role=\"tab\" data-rac=\"\" data-key=\"3\" tabindex=\"-1\" data-testid=\"stTab\" aria-selected=\"false\" data-react-aria-pressable=\"true\" id=\"react-aria2424760310-:r"
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔍 종목 분석\").first\n"
   },
   {
    "page": "🛡️ 내 포트폴리오",
    "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🛡️ 내 포트폴리오\").first\n    - locator resolved to <div role=\"tab\" data-rac=\"\" data-key=\"4\" tabindex=\"-1\" data-testid=\"stTab\" aria-selected=\"false\" data-react-aria-pressable=\"true\" id=\"react-aria2424760310"
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🛡️ 내 포트폴리오\").first\n"
   },
   {
    "page": "종목 분석 ?sym=TSLA",
