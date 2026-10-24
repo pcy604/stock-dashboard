@@ -48,7 +48,7 @@ jobs:
   accel:
     runs-on: ubuntu-latest
     # backfill 은 1,700종 전 기간 재계산이라 길다(2026-10-19). 평시는 50분.
-    timeout-minutes: ${{ inputs.backfill && 340 || 50 }}
+    timeout-minutes: ${{ inputs.backfill && 340 || 80 }}   # 2026-10-24 50→80: 가격 실패 순차 재시도(최대 25분)
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: '1'

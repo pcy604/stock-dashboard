@@ -416,9 +416,12 @@ def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (�
         ok_e = fetch_8k(s, cik) if cik else False
         return s, ok_px, ok_f, ok_e
     t0 = time.time(); done = [0, 0, 0]
+    px_fail = []
     with ThreadPoolExecutor(max_workers=4) as ex:
         for i, (s, a, b, c) in enumerate(ex.map(job, syms), 1):
             done[0] += a; done[1] += b; done[2] += c
+            if not a:
+                px_fail.append(s)
             if a:
                 fail.pop(s, None)
             elif is_full(s):
@@ -426,6 +429,25 @@ def cmd_fetch(n, lo=1.5e8, hi=None, full=False):   # 2026-08-14: 5e8 -> 1.5e8 (�
             if i % 25 == 0:
                 print(f"  {i}/{len(syms)}  가격{done[0]} 재무{done[1]} 8K{done[2]}  "
                       f"{time.time()-t0:.0f}s", flush=True)
+    # 2026-10-24 — 금요일 밤 정기 실행이 2주 연속(10-17·10-24) 가격 대부분을 못 받고(Yahoo 제한 추정)
+    #   새 주차가 31~34종에만 생겨 fixcap 파수꾼에서 실패했다. 실패분만 1개씩 천천히 다시 받는다.
+    if px_fail:
+        print(f"  가격 실패 {len(px_fail):,}종 → 순차 재시도(최대 25분)", flush=True)
+        t1 = time.time(); ok2 = 0
+        for j, s in enumerate(px_fail, 1):
+            if time.time() - t1 > 1500:
+                break
+            _full = full or s in splits
+            if fetch_px(s, last=(None if _full else have.get(s)), force_full=_full):
+                ok2 += 1; done[0] += 1; fail.pop(s, None)
+            time.sleep(0.4)
+            if j % 100 == 0:
+                print(f"    재시도 {j}/{len(px_fail)} 성공 {ok2}", flush=True)
+        print(f"  재시도 성공 {ok2:,}/{len(px_fail):,}", flush=True)
+    rate = done[0] / max(len(syms), 1)
+    # Actions 로그를 못 여는 환경에서도 원인이 보이게 주석(annotation)으로 남긴다
+    lvl = "error" if rate < 0.8 else "notice"
+    print(f"::{lvl} title=가격 수집::{done[0]:,}/{len(syms):,}종 성공({rate:.0%}) · 재무 {done[1]:,} · 8K {done[2]:,}", flush=True)
     u.to_csv(os.path.join(CACHE, "_universe.csv"), index=False)
     try:
         json.dump(fail, open(fail_p, "w", encoding="utf-8"))
