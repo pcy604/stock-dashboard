@@ -25,6 +25,7 @@ jobs:
         run: |
           [ -f results/app_health.json ] || exit 0
           cp results/app_health.json /tmp/app_health.json
+          rm -f results/app_health.json   # 추적 안 된 같은 경로 파일이 있으면 브랜치 전환이 거부된다(10-24 푸시 실패 원인)
           git config user.name github-actions; git config user.email actions@github.com
           git fetch -q origin app-health:refs/remotes/origin/app-health && git checkout -q -B app-health origin/app-health || git checkout -q --orphan app-health   # 얕은 checkout 은 refspec 이 main 뿐이라 명시해야 함(10-23 첫 회 뒤 푸시 거부 → || true 에 묻힘)
           git rm -rq --cached . 2>/dev/null || true
