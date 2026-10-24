@@ -1477,6 +1477,89 @@ with t_core, guard('주도주 교집합'):
             st.caption("계좌 기여 = (매도 금액 − 매수 금액 − 비용) ÷ 매수 시점 총자산. '보유 중' = 기간 끝까지 들고 있던 종목(마지막 주 가격으로 평가). "
                        "가격은 수정주가(분할 반영)라 당시 실제 호가와 다를 수 있습니다.")
 
+    # ── 🧪 RS순 강건성 (2026-10-24 차니 지정) — 144개 조합 전부 + 시작 월 골라 100 으로 다시 맞춰 보기 ──
+    _rb = load_json(Path('results/robust_rs.json')) or {}
+    with st.expander("🧪 RS순 우선 강건성 — 144개 조합 전부 · 시작 시점 직접 선택", expanded=False):
+        if not _rb.get('grid'):
+            st.info("격자 결과를 만드는 중입니다(GitHub 서버 research-rs 작업). 끝나면 이 자리에 자동으로 나옵니다.")
+        else:
+            _sm = _rb['summary']; _spc = _rb['spy']['stats']['CAGR']
+            st.caption("**질문:** 교집합을 '동시 신호 RS 높은 순'으로 채운 24.7%가 우연인가? RS 정의 3 × 슬롯 3 × 청산 16 = "
+                       f"{_sm['n']}개 조합을 한 번에 전부 돌렸다(골라 보여주지 않음). 상폐충격 = 보유 종목이 연 1% 확률로 0원이 되는 가정, 3회 중앙값.")
+            _m = st.columns(4)
+            _m[0].metric("SPY 초과 조합", f"{_sm['beat_spy']} / {_sm['n']}", f"SPY {_spc}%", delta_color="off")
+            _m[1].metric("상폐충격 후에도 초과", f"{_sm['beat_spy_shock']} / {_sm['n']}")
+            _m[2].metric("조합 중앙 CAGR", f"{_sm['median_cagr']:.1f}%", f"충격 후 {_sm['median_shock']:.1f}%", delta_color="off")
+            _m[3].metric("RS순 − 무작위 순서", f"{_sm['rs_minus_ref']:+.1f}%p", "같은 정의·슬롯, 고점 -20% 기준 중앙", delta_color="off")
+            _ex = _rb['exits']; _rsn = _rb['rs_defs']
+            _met = st.radio("표에 보일 값", ["SPY 대비 CAGR 차이(%p)", "상폐충격 후 SPY 대비(%p)", "MDD(%)", "샤프"],
+                            horizontal=True, key="rb_met")
+            _G = pd.DataFrame(_rb['grid'])
+            _val = {"SPY 대비 CAGR 차이(%p)": _G.CAGR - _spc, "상폐충격 후 SPY 대비(%p)": _G.shock1 - _spc,
+                    "MDD(%)": _G.MDD, "샤프": _G.Sharpe}[_met]
+            _G['_v'] = _val.round(2)
+            _G['_c'] = _G.rs.map({'w': '가중', 'r13': '13주', 'm121': '12-1'}) + ' · ' + _G.slots.astype(str) + '칸'
+            _pv = _G.pivot_table(index='exit', columns='_c', values='_v')
+            _pv = _pv.reindex(index=list(_ex)).rename(index=_ex)
+            _pv = _pv[[c for r in ('가중', '13주', '12-1') for c in _pv.columns if c.startswith(r)]]
+            _pv.index.name = '청산 규칙'
+            _tsrc('research/robust_rs.py (GitHub Actions research-rs)', path='results/robust_rs.json')
+            st.dataframe(_pv.reset_index(), use_container_width=True, hide_index=True, filters=False,
+                         color=_met != "MDD(%)" and _met != "샤프",
+                         column_config={c: st.column_config.NumberColumn(format='%+.1f' if '%p' in _met else '%.2f')
+                                        for c in _pv.columns})
+            st.caption("RS 정의 — " + " · ".join(f"**{ {'w': '가중', 'r13': '13주', 'm121': '12-1'}[k] }** = {v}" for k, v in _rsn.items())
+                       + ". 진입 문턱(RS ≥ 80)과 우선순위가 같은 정의를 쓴다. 칸 = 최대 보유 종목 수(비중 = 1/칸).")
+
+            st.markdown("**조합 하나 골라 보기** — 시작 월을 고르면 그 달 첫 주 자산을 100 으로 다시 맞춘다")
+            _c = st.columns(4)
+            _rk = _c[0].selectbox("RS 정의", list(_rsn), format_func=lambda k: {'w': '가중(현행)', 'r13': '13주', 'm121': '12-1개월'}[k],
+                                  key="rb_rs")
+            _ns = _c[1].selectbox("최대 종목 수", _rb['slots'], index=1, key="rb_ns")
+            _ek = _c[2].selectbox("청산", list(_ex), index=list(_ex).index('t20'), format_func=lambda k: _ex[k], key="rb_ex")
+            _dx = pd.DatetimeIndex(_rb['dates'])
+            _months = sorted({(t.year, t.month) for t in _dx})
+            _mo = _c[3].selectbox("시작 월", _months, format_func=lambda m: f"{m[0]}-{m[1]:02d}", key="rb_mo")
+            _cv = pd.Series(_rb['curves'][f"{_rk}|{_ns}|{_ek}"], index=_dx)
+            _sp = pd.Series(_rb['spy']['curve'], index=_dx).ffill()
+            _i0 = int(np.argmax((_dx.year == _mo[0]) & (_dx.month == _mo[1])))
+            _a = _cv.iloc[_i0:] / _cv.iloc[_i0] * 100; _b = _sp.iloc[_i0:] / _sp.iloc[_i0] * 100
+            _yr = max(1e-9, (_a.index[-1] - _a.index[0]).days / 365.25)
+            _cg = lambda x: ((x.iloc[-1] / x.iloc[0]) ** (1 / _yr) - 1) * 100
+            _md = lambda x: (x / x.cummax() - 1).min() * 100
+            _gr = next(r for r in _rb['grid'] if r['key'] == f"{_rk}|{_ns}|{_ek}")
+            _m = st.columns(5)
+            _m[0].metric("100 →", f"{_a.iloc[-1]:,.0f}", f"SPY {_b.iloc[-1]:,.0f}", delta_color="off")
+            _m[1].metric("연수익(이 기간)", f"{_cg(_a):.1f}%", f"SPY {_cg(_b):.1f}%", delta_color="off")
+            _m[2].metric("최대낙폭(이 기간)", f"{_md(_a):.1f}%", f"SPY {_md(_b):.1f}%", delta_color="off")
+            _m[3].metric("거래 · 평균 보유", f"{_gr['trades']:,}건", f"{_gr['avg_wk']}주 · 승률 {_gr['win']}%", delta_color="off")
+            _m[4].metric("상폐충격 후 CAGR(전체)", f"{_gr['shock1']:.1f}%", f"충격 없음 {_gr['CAGR']:.1f}%", delta_color="off")
+            _f = go.Figure()
+            _f.add_trace(go.Scatter(x=_a.index, y=_a.values, mode='lines', name='전략', line=dict(color='#0e5a6b', width=1.8),
+                                    hovertemplate='%{x|%Y-%m-%d}<br>전략 %{y:,.0f}<extra></extra>'))
+            _f.add_trace(go.Scatter(x=_b.index, y=_b.values, mode='lines', name='SPY', line=dict(color='#9ca3af', width=1.4),
+                                    hovertemplate='%{x|%Y-%m-%d}<br>SPY %{y:,.0f}<extra></extra>'))
+            _f.update_yaxes(type='log', title='자산(시작 월 = 100, 로그)')
+            _f.update_layout(height=300, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
+                             title=f"{_mo[0]}-{_mo[1]:02d} 시작 · {_rsn[_rk]} · {_ns}칸 · {_ex[_ek]}",
+                             legend=dict(orientation='h', yanchor='bottom', y=1.0, xanchor='right', x=1))
+            st.plotly_chart(_f, use_container_width=True)
+            st.markdown("**연도별 수익률 — 처음부터**")
+            _yrow = []
+            for _y, _g in _cv.groupby(_cv.index.year):
+                _gs = _sp.loc[_g.index]
+                if len(_g) < 5:
+                    continue
+                _yrow.append({'연도': str(_y), '전략(%)': round((_g.iloc[-1] / _g.iloc[0] - 1) * 100, 1),
+                              'SPY(%)': round((_gs.iloc[-1] / _gs.iloc[0] - 1) * 100, 1)})
+            for _r in _yrow:
+                _r['차이(%p)'] = round(_r['전략(%)'] - _r['SPY(%)'], 1)
+            _tsrc('research/robust_rs.py', path='results/robust_rs.json')
+            st.dataframe(pd.DataFrame(_yrow), use_container_width=True, hide_index=True, filters=False,
+                         column_config={c: st.column_config.NumberColumn(format='%+.1f') for c in ('전략(%)', 'SPY(%)', '차이(%p)')})
+            st.caption(f"기간 {_rb['period'][0]} ~ {_rb['period'][1]} · 시계열 {_rb['factor_ver']} · {_rb['universe']:,}종 · "
+                       "연도별 첫 해는 평가 시작 주부터. 주봉 종가 체결·1주 지연·편도 0.3%·현금 기준금리 이자.")
+
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
     st.caption("기간별 상승 상위 + 주봉 신호 · 매출/영업익 증감 · 향후 2개월 계절성. CANSLIM 점수는 🏆 서브탭에서 슬라이더로 직접 조정해 보세요.")
