@@ -24,7 +24,11 @@
                 ('rank_below', x)      그 주 우선순위 값(RS)이 x 미만으로 떨어지면 매도
                 ('slope_neg', k, lag)  k주 이동평균이 lag주 전보다 낮아지면(기울기 하락 전환) 매도
   market      신규 매수 허용 조건 행렬 이름(주 단위 불리언, 종목 무관) 또는 None
-  pyramid     None(추가매수 없음)
+  pyramid     None(추가매수 없음) 또는 dict(step=%, add=첫 매수금액 대비 배수, max_adds=횟수):
+              진입가 대비 +step%·+2step%… 에 도달하고 그 주가 보유 중 신고가면 다음 주 종가에 첫 매수금액 × add 추가(현금 한도 안)
+  (선택) reentry   None 또는 dict(mode='breakout'|'rebound'|'both', rb=0.2, window=26, max_n=3):
+              청산 뒤 window주 안에 breakout = 종가 > 청산가, rebound = 종가 ≥ 청산 후 최저가 × (1+rb) 이면 다음 주 종가에 같은 비중 재매수
+  (선택) cooldown  청산 뒤 그 자리(자금)를 k주 동안 '다른 종목' 신규 매수에 쓰지 않음(같은 종목 재매수는 허용)
   rebalance   None(비중 조절 없음)
   cost        편도 비용(소수)
   cash        현금 이자: 'fedfunds'
@@ -43,8 +47,10 @@ def check(spec):
         raise ValueError(f"명세서 빈칸: {miss}")
     if spec["freq"] != "W" or spec["fill"] != "next_close" or spec["full"] != "skip":
         raise ValueError("지원하지 않는 freq/fill/full")
-    if spec["pyramid"] is not None or spec["rebalance"] is not None:
-        raise ValueError("pyramid/rebalance 미지원(None 만)")
+    if spec["rebalance"] is not None:
+        raise ValueError("rebalance 미지원(None 만)")
+    if spec["pyramid"] is not None and not {"step", "add", "max_adds"} <= set(spec["pyramid"]):
+        raise ValueError("pyramid 는 step·add·max_adds 필요")
 
 
 def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0.0):
@@ -60,6 +66,10 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0
     RN = rank_mat.values if rank_mat is not None else None              # 청산 판단용(그 주 값)
     cost = spec["cost"]; slots = spec["slots"]; wt = spec["weight"]
     cash = 1.0; pos = {}; hist = []
+    PY = spec.get("pyramid"); RE = spec.get("reentry"); CD = int(spec.get("cooldown") or 0)
+    gone = {}              # 청산 종목: j → dict(px, i, low, n)  (재매수 감시)
+    locks = {}             # 냉각 중인 자리: j(청산 종목) → 해제 주
+    pend_re, pend_py = [], []
 
     def price(j, i):
         v = P[i, j]
@@ -114,6 +124,11 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0
                     break
             if why:
                 v = e["sh"] * c * (1 - cost); cash += v
+                if RE is not None or CD:
+                    n_prev = gone.get(j, {}).get("n", 0)
+                    gone[j] = dict(px=c, i=i, low=c, n=n_prev)
+                if CD:
+                    locks[j] = i + CD
                 if log is not None:
                     log.append(dict(sym=str(cols[j]), buy=str(idx[e["i0"]].date()), sell=str(idx[i].date()),
                                     buy_px=round(float(e["entry"]), 4), sell_px=round(float(c), 4),
@@ -121,6 +136,52 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0
                                     out=float(v), why=why))
                 del pos[j]
         eq = cash + sum(pos[j]["sh"] * price(j, i) for j in pos)
+        # ── 지난주에 정한 불타기·재매수를 이번 주 종가에 체결 ──
+        for j in pend_py:
+            if j not in pos:
+                continue
+            c = P[i, j]
+            if not (c == c and c > 0):
+                continue
+            amt = min(pos[j]["base"] * PY["add"], cash)
+            if amt > eq * 0.001:
+                pos[j]["sh"] += amt / c * (1 - cost); pos[j]["inv"] += amt; pos[j]["adds"] += 1; cash -= amt
+        for j in pend_re:
+            if j in pos:
+                continue
+            c = P[i, j]
+            if not (c == c and c > 0):
+                continue
+            locked = sum(1 for k, u in locks.items() if u > i and k != j)
+            if len(pos) + locked >= slots:
+                continue
+            amt = min(eq * wt, cash)
+            if amt <= eq * 0.001:
+                continue
+            pos[j] = dict(sh=amt / c * (1 - cost), entry=c, peak=c, wk=0, last=c, inv=amt, i0=i, base=amt, adds=0, re=True)
+            cash -= amt; locks.pop(j, None)
+            gone[j]["n"] += 1; gone[j]["i"] = -10 ** 9
+        pend_py, pend_re = [], []
+        # ── 이번 주 종가로 다음 주 불타기·재매수 판정 ──
+        if PY is not None:
+            for j, e in pos.items():
+                c = P[i, j]
+                if e["adds"] < PY["max_adds"] and c == c and c >= e["peak"] * 0.999 \
+                   and c / e["entry"] - 1 >= PY["step"] / 100 * (e["adds"] + 1):
+                    pend_py.append(j)
+        if RE is not None:
+            for j, gj in list(gone.items()):
+                if j in pos or gj["n"] >= RE.get("max_n", 3) or i - gj["i"] > RE.get("window", 26) or gj["i"] < 0:
+                    continue
+                c = P[i, j]
+                if not (c == c and c > 0):
+                    continue
+                if i > gj["i"]:
+                    gj["low"] = min(gj["low"], c)
+                    up = (RE["mode"] in ("breakout", "both") and c > gj["px"]) or \
+                         (RE["mode"] in ("rebound", "both") and c >= gj["low"] * (1 + RE.get("rb", 0.2)))
+                    if up:
+                        pend_re.append(j)
         if MK[i]:
             hit = np.where(G[i])[0]
             if spec["rank"] == "random" or R is None:
@@ -136,12 +197,13 @@ def run(spec, px, sig, rank_mat, mkt, cash_r, ma=None, seed=0, log=None, shock=0
                 c = P[i, j]
                 if not (c == c and c > 0):
                     continue
-                if len(pos) >= slots:
+                locked = sum(1 for u in locks.values() if u > i)
+                if len(pos) + locked >= slots:
                     break
                 amt = min(eq * wt, cash)
                 if amt <= eq * 0.001:
                     break
-                pos[j] = dict(sh=amt / c * (1 - cost), entry=c, peak=c, wk=0, last=c, inv=amt, i0=i)
+                pos[j] = dict(sh=amt / c * (1 - cost), entry=c, peak=c, wk=0, last=c, inv=amt, i0=i, base=amt, adds=0)
                 cash -= amt
         eq = cash + sum(pos[j]["sh"] * price(j, i) for j in pos)
         hist.append((idx[i], eq, len(pos), cash / eq))
