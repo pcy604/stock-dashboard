@@ -1,5 +1,5 @@
 {
- "at": "2026-10-24T07:43:00Z",
+ "at": "2026-10-24T09:10:52Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
@@ -16,55 +16,43 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 4212,
+   "text_len": 4276,
    "samples": [],
-   "finished": true
+   "finished": false
   },
   {
    "page": "🔎 종목 발굴",
-   "ok": true,
-   "exceptions": 0,
-   "error_words": [],
-   "text_len": 1534,
-   "samples": [],
-   "finished": true
+   "ok": false,
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔎 종목 발굴\").first\n    - locator resolved to <div role=\"tab\" data-rac=\"\" data-key=\"2\" tabindex=\"-1\" data-testid=\"stTab\" aria-selected=\"false\" data-react-aria-pressable=\"true\" id=\"react-aria2424760310-:r"
   },
   {
    "page": "🔍 종목 분석",
-   "ok": true,
-   "exceptions": 0,
-   "error_words": [],
-   "text_len": 931,
-   "samples": [],
-   "finished": true
+   "ok": false,
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔍 종목 분석\").first\n    - locator resolved to <div role=\"tab\" data-rac=\"\" data-key=\"3\" tabindex=\"-1\" data-testid=\"stTab\" aria-selected=\"false\" data-react-aria-pressable=\"true\" id=\"react-aria2424760310-:r"
   },
   {
    "page": "🛡️ 내 포트폴리오",
-   "ok": true,
-   "exceptions": 0,
-   "error_words": [],
-   "text_len": 944,
-   "samples": [],
-   "finished": true
+   "ok": false,
+   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🛡️ 내 포트폴리오\").first\n    - locator resolved to <div role=\"tab\" data-rac=\"\" data-key=\"4\" tabindex=\"-1\" data-testid=\"stTab\" aria-selected=\"false\" data-react-aria-pressable=\"true\" id=\"react-aria2424760310"
   },
   {
    "page": "종목 분석 ?sym=TSLA",
-   "ok": true,
+   "ok": false,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 11978,
+   "text_len": 0,
    "samples": [],
    "finished": true
   },
   {
    "page": "종목 분석 ?sym=005930",
-   "ok": true,
+   "ok": false,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 14366,
+   "text_len": 0,
    "samples": [],
    "finished": true
   }
  ],
- "ok": true
+ "ok": false
 }
