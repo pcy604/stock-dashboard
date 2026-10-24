@@ -26,11 +26,11 @@ jobs:
           [ -f results/app_health.json ] || exit 0
           cp results/app_health.json /tmp/app_health.json
           git config user.name github-actions; git config user.email actions@github.com
-          git fetch -q origin app-health && git checkout -q -B app-health origin/app-health || git checkout -q --orphan app-health
+          git fetch -q origin app-health:refs/remotes/origin/app-health && git checkout -q -B app-health origin/app-health || git checkout -q --orphan app-health   # 얕은 checkout 은 refspec 이 main 뿐이라 명시해야 함(10-23 첫 회 뒤 푸시 거부 → || true 에 묻힘)
           git rm -rq --cached . 2>/dev/null || true
           mkdir -p results && cp /tmp/app_health.json results/app_health.json
           git add -f results/app_health.json
-          git commit -qm "app-health $(date -u +%FT%TZ)" && git push -q origin app-health || true
+          git commit -qm "app-health $(date -u +%FT%TZ)" && git push -q origin app-health
       - name: 실패 시 텔레그램
         if: failure() && steps.health.outcome == 'failure'
         env:
