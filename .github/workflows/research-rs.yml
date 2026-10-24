@@ -12,6 +12,7 @@ on:
     paths:
       - 'research/rs_accel_bt.py'
       - 'research/rs_accel_detail.py'
+      - 'research/lifecycle_study.py'
       - '.github/workflows/research-rs.yml'
 permissions:
   contents: write
@@ -104,12 +105,15 @@ jobs:
         run: FACTOR_VER=$(cat /tmp/ver) python research/rs_accel_bt.py
       - name: 백테스트 상세(대표 1회차 원장·낙폭 상위 5)
         run: FACTOR_VER=$(cat /tmp/ver) python research/rs_accel_detail.py
+      - name: 주도주 생로병사 실측
+        continue-on-error: true
+        run: FACTOR_VER=$(cat /tmp/ver) python research/lifecycle_study.py
       - name: 결과 커밋
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add results/rs_accel_bt.json results/rs_accel_detail.json 2>/dev/null || true
+          git add results/rs_accel_bt.json results/rs_accel_detail.json results/lifecycle_study.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "auto: RS×이익가속 백테스트 $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
