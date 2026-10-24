@@ -1715,6 +1715,64 @@ with t_core, guard('주도주 교집합'):
             st.caption(f"기간 {_lc['period'][0]} ~ {_lc['period'][1]} · 시계열 {_lc['factor_ver']} · {_lc['universe']:,}종 · 1주 지연 체결 · 편도 0.3% · "
                        "⚠️ 810개 중 가장 좋은 조합은 우연일 가능성이 크다 — 항목별 효과(중앙값)와 이웃 조합이 같은 방향인지로 판단할 것.")
 
+    # ── 🔥 불타기 재검증 (2026-10-24 차니 지적: 수익금 플레이어 관점) ──
+    _pg = load_json(Path('results/pyramid_grid.json')) or {}
+    with st.expander("🔥 불타기 재검증 — 재원(현금·예비·약한 종목 정리) × 시점·금액·종목당 상한", expanded=False):
+        if not _pg.get('grid'):
+            st.info("결과를 만드는 중입니다(GitHub 서버 research-rs 작업).")
+        else:
+            _sps = _pg['spy']['stats']
+            st.caption("지난 810조합의 불타기는 '남는 현금'으로만 사서 대부분 실행되지 못했다(측정 결함). 이번엔 재원을 바꿔 다시 쟀다. "
+                       "불타기 = 진입가 대비 +step% 마다(그 주 신고가) 첫 매수의 50/100% 를 다음 주 추가, 최대 3회, 추가 시점에 종목당 상한 적용. "
+                       "상위5 = 수익금 상위 5종목이 순수익금에서 차지한 비중(100% 초과 = 나머지가 합쳐서 손실).")
+            _bn = _pg['bases']; _fn = _pg['funds']
+            _er = []
+            for _k, _v in _pg['effects'].items():
+                _b, _f = _k.split('|')
+                _er.append({'기준 전략': _bn[_b], '재원': _fn[_f], '불타기 없음 CAGR(%)': _v['none_CAGR'], '불타기 없음 MDD(%)': _v['none_MDD'],
+                            '불타기 중앙 CAGR(%)': _v['on_CAGR'], '불타기 중앙 MDD(%)': _v['on_MDD'],
+                            '수익 늘어난 조합': f"{_v['better_cagr']}/{_v['n']}", '수익÷낙폭 나아진 조합': f"{_v['better_calmar']}/{_v['n']}",
+                            '상위5 비중(%)': _v['on_top5'], '최대 비중(%)': _v['on_maxw']})
+            _tsrc('research/pyramid_grid.py (GitHub Actions research-rs)', path='results/pyramid_grid.json')
+            st.dataframe(pd.DataFrame(_er), use_container_width=True, hide_index=True, filters=False, color=False,
+                         column_config={c: st.column_config.NumberColumn(format='%.1f') for c in
+                                        ('불타기 없음 CAGR(%)', '불타기 없음 MDD(%)', '불타기 중앙 CAGR(%)', '불타기 중앙 MDD(%)', '상위5 비중(%)', '최대 비중(%)')})
+            st.markdown("**조합 골라 보기** — 같은 기준 전략의 '불타기 없음'과 나란히, 시작 월 = 100")
+            _c = st.columns(6)
+            _b = _c[0].selectbox("기준 전략", list(_bn), index=1, key="pg_b", format_func=lambda k: _bn[k])
+            _f = _c[1].selectbox("재원", list(_fn), key="pg_f", format_func=lambda k: _fn[k])
+            _stp = _c[2].selectbox("불타기 시점", _pg['dims']['step'], index=1, key="pg_s", format_func=lambda k: f"+{k}%마다")
+            _ad = _c[3].selectbox("추가 금액", _pg['dims']['add'], key="pg_a", format_func=lambda k: f"첫 매수의 {int(k*100)}%")
+            _cp = _c[4].selectbox("종목당 상한", _pg['dims']['cap'], index=1, key="pg_c", format_func=lambda k: f"계좌의 {k}%")
+            _dx = pd.DatetimeIndex(_pg['dates'])
+            _months = sorted({(t.year, t.month) for t in _dx})
+            _mo = _c[5].selectbox("시작 월", _months, key="pg_mo", format_func=lambda m: f"{m[0]}-{m[1]:02d}")
+            _k1 = f"{_b}|{_f}|{_stp}_{_ad}_{_cp}"
+            _k0 = f"{_b}|{'cash' if _f == 'sell_weakest' else _f}|none"
+            _g1 = next(r for r in _pg['grid'] if r['key'] == _k1); _g0 = next(r for r in _pg['grid'] if r['key'] == _k0)
+            _i0 = int(np.argmax((_dx.year == _mo[0]) & (_dx.month == _mo[1])))
+            _a1, _a0, _sb = (pd.Series(z, index=_dx).ffill().iloc[_i0:] for z in (_pg['curves'][_k1], _pg['curves'][_k0], _pg['spy']['curve']))
+            _a1, _a0, _sb = (z / z.iloc[0] * 100 for z in (_a1, _a0, _sb))
+            _yr = max(1e-9, (_a1.index[-1] - _a1.index[0]).days / 365.25)
+            _cg = lambda z: ((z.iloc[-1] / z.iloc[0]) ** (1 / _yr) - 1) * 100
+            _md = lambda z: (z / z.cummax() - 1).min() * 100
+            _m = st.columns(5)
+            _m[0].metric("100 → (불타기)", f"{_a1.iloc[-1]:,.0f}", f"없음 {_a0.iloc[-1]:,.0f} · SPY {_sb.iloc[-1]:,.0f}", delta_color="off")
+            _m[1].metric("연수익(이 기간)", f"{_cg(_a1):.1f}%", f"없음 {_cg(_a0):.1f}% · SPY {_cg(_sb):.1f}%", delta_color="off")
+            _m[2].metric("최대낙폭(이 기간)", f"{_md(_a1):.1f}%", f"없음 {_md(_a0):.1f}% · SPY {_md(_sb):.1f}%", delta_color="off")
+            _m[3].metric("상위 5종목 수익금 비중", f"{_g1['top5']}%", f"없음 {_g0['top5']}%", delta_color="off")
+            _m[4].metric("한 종목 최대 비중", f"{_g1['max_w']}%", f"평균 최대 {_g1['avg_max_w']}% · 정리 매도 {_g1['funding_sells']}건", delta_color="off")
+            _fig = go.Figure()
+            for _z, _nm, _col, _w in ((_a1, '불타기', '#0e5a6b', 1.8), (_a0, '불타기 없음', '#ca8a04', 1.2), (_sb, 'SPY', '#9ca3af', 1.2)):
+                _fig.add_trace(go.Scatter(x=_z.index, y=_z.values, mode='lines', name=_nm, line=dict(color=_col, width=_w),
+                                          hovertemplate='%{x|%Y-%m-%d}<br>' + _nm + ' %{y:,.0f}<extra></extra>'))
+            _fig.update_yaxes(type='log', title='자산(시작 월 = 100, 로그)')
+            _fig.update_layout(height=300, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
+                               title=f"{_bn[_b]} · {_fn[_f]} · +{_stp}%마다 {int(_ad*100)}% · 상한 {_cp}%",
+                               legend=dict(orientation='h', yanchor='bottom', y=1.0, xanchor='right', x=1))
+            st.plotly_chart(_fig, use_container_width=True)
+            st.caption(f"기간 {_pg['period'][0]} ~ {_pg['period'][1]} · SPY {_sps['CAGR']}% / MDD {_sps['MDD']}% · 1주 지연 · 편도 0.3%")
+
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
     st.caption("기간별 상승 상위 + 주봉 신호 · 매출/영업익 증감 · 향후 2개월 계절성. CANSLIM 점수는 🏆 서브탭에서 슬라이더로 직접 조정해 보세요.")
