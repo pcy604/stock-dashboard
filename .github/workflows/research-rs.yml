@@ -87,7 +87,7 @@ jobs:
           if not have and os.path.exists('data/fw_v13y.parquet'):
               f = pd.read_parquet('data/fw_v13y.parquet')
               last_v1 = c.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver='v1'").fetchone()[0]
-              if str(f.as_of.max())[:10] >= str(last_v1)[:10]:
+              if (pd.Timestamp(str(last_v1)[:10]) - pd.Timestamp(str(f.as_of.max())[:10])).days <= 56:   # 8주 이내면 사용(연구용, 48분 재생성 방지)
                   f.to_sql('factor_weekly', c, if_exists='append', index=False); c.commit()
                   print(f"::notice title=v13y 캐시 사용::{len(f):,}행 · 최신 {str(f.as_of.max())[:10]}")
                   open('/tmp/ver', 'w').write('v13y'); open('/tmp/fresh', 'w').write('0')
