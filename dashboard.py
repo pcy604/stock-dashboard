@@ -4895,16 +4895,33 @@ def _kr_naver_consensus_cached(sym):
 
 
 def forward_estimates(sym, is_kr):
-    """올해E/내년E 컨센서스 — US=yfinance, KR=yfinance→네이버 폴백(영업이익 포함)."""
+    """올해E/내년E 컨센서스 — US=yfinance. KR=FnGuide(wisereport) 1차→yfinance→네이버 메인표.
+
+    2026-10-25: '컨센서스 추이' 패널(_kr_cons_live)은 FnGuide를 쓰는데 이 함수(밸류에이션
+    12MF EPS 입력)는 yfinance를 1차로 썼다 — 한국 소형주는 yfinance 커버리지가 약해
+    같은 화면 안에서 같은 종목의 EPS 추정치가 서로 다르게 보일 수 있었다(사용자 지적).
+    두 패널이 같은 1차 소스를 보도록 KR은 FnGuide를 먼저 쓴다."""
     out = {}
+    if is_kr:
+        try:
+            import kr_fin_naver as _kfn
+            c = _kfn.consensus(sym) or {}
+            for lab in ('0y', '1y'):
+                if c.get(f'eps_{lab}') is not None:
+                    out[f'eps_{lab}'] = c[f'eps_{lab}']
+                if c.get(f'op_{lab}') is not None:
+                    out[f'op_income_{lab}'] = c[f'op_{lab}']
+        except Exception:
+            pass
     try:
-        out = dict(_fwd_est_cached(sym, is_kr))
+        for k, v in _fwd_est_cached(sym, is_kr).items():
+            out.setdefault(k, v)
     except Exception:
-        out = {}
+        pass
     if is_kr:
         try:
             for k, v in _kr_naver_consensus_cached(sym).items():
-                out.setdefault(k, v)      # yfinance 값 우선, 빈 곳만 네이버로 보충
+                out.setdefault(k, v)      # FnGuide·yfinance 둘 다 없는 항목만 네이버 메인표로 보충
         except Exception:
             pass
     return out
