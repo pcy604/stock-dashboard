@@ -31,6 +31,7 @@ price_store.py — 주봉 가격의 단일 보관소 (market.db · prices 테이
 import os
 import sqlite3
 import pandas as pd
+import db as _db
 
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'market.db')
 _COLS = ('Open', 'High', 'Low', 'Close', 'Volume')
@@ -43,15 +44,11 @@ def _conn(db=None):
 
 
 def ensure(db=None):
-    """테이블·인덱스 보장. 스키마는 이미 있었지만 0행인 채 방치돼 있었다."""
+    """테이블·인덱스 보장. 스키마는 db.py의 SCHEMA(단일 원천)를 그대로 쓴다 — 여기서
+    따로 CREATE TABLE 을 들고 있으면 db.py 가 바뀔 때 조용히 갈라진다(2026-10-25 발견:
+    인덱스 이름이 idx_prices_date/ix_prices_date 로 이미 갈라져 있었음)."""
     c = _conn(db)
-    c.execute("""CREATE TABLE IF NOT EXISTS prices (
-        sym TEXT NOT NULL, market TEXT NOT NULL, date TEXT NOT NULL,
-        open REAL, high REAL, low REAL, close REAL, volume INTEGER,
-        PRIMARY KEY (sym, market, date))""")
-    # 'A 종목의 마지막 날짜'와 '특정 주차 전체'를 자주 묻는다
-    c.execute('CREATE INDEX IF NOT EXISTS ix_prices_date ON prices(date)')
-    c.commit()
+    c.executescript(_db.SCHEMA)
     return c
 
 
