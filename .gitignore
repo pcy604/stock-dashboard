@@ -14,6 +14,8 @@ data/.toss_client_secret
 data/.toss_token
 data/.pf_password
 data/portfolio_toss.json
+# 2026-10-26: 봉인본도 공개 저장소에 두지 않는다(오프라인 대입 차단) — Supabase vaults 로 이전
+data/portfolio_toss.enc
 .streamlit/secrets.toml
 
 # 중앙 DB (로컬 적재본, 대용량·재생성 가능)

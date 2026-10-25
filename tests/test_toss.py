@@ -86,3 +86,36 @@ def test_vault_roundtrip_and_wrong_password(tmp_path):
     assert pf_vault.unseal("correct-horse", p)["accounts"] == [{"x": 1}]
     with pytest.raises(ValueError):
         pf_vault.unseal("wrong-password", p)
+
+
+def test_vault_remote_roundtrip(monkeypatch, tmp_path):
+    """2026-10-26: 봉인본은 Supabase vaults 표에서 읽는다 — 공개 git 에 두지 않는다."""
+    import requests
+    monkeypatch.setenv("STORE_URL", "https://x.supabase.co/rest/v1")
+    monkeypatch.setenv("STORE_KEY", "sb_secret_test")
+    store, seen = {}, []
+
+    class R:
+        def __init__(s, code, data=None): s.status_code, s._d, s.text = code, data, ""
+        def json(s): return s._d
+        def raise_for_status(s):
+            if s.status_code >= 300: raise RuntimeError(s.status_code)
+
+    def post(url, json=None, headers=None, timeout=None):
+        seen.append(url); store["toss"] = json[0]["blob"]; return R(201)
+
+    def get(url, params=None, headers=None, timeout=None):
+        return R(200, [{"blob": store["toss"]}] if "toss" in store else [])
+
+    monkeypatch.setattr(requests, "post", post)
+    monkeypatch.setattr(requests, "get", get)
+    pf_vault._CACHE.update(t=0.0, doc=None)
+    assert pf_vault.peek() is None
+    p = tmp_path / "t.enc"
+    pf_vault.seal({"asof": "2026-10-26 08:00", "accounts": [{"x": 1}]}, "correct-horse", p)
+    pf_vault.push(p)
+    assert seen == ["https://x.supabase.co/rest/v1/vaults"]          # /rest/v1 중복 없음
+    assert pf_vault.peek()["asof"] == "2026-10-26 08:00"
+    assert pf_vault.unseal("correct-horse")["accounts"] == [{"x": 1}]
+    with pytest.raises(ValueError):
+        pf_vault.unseal("wrong-password")

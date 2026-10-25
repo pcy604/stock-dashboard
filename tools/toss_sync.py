@@ -7,7 +7,8 @@
   그리고 키에 조회 전용 권한이 없어 client_secret 이 새면 주문까지 가능하다 —
   키는 이 PC 의 data/.toss_* (gitignore) 에만 둔다.
 
-흐름  run_update.bat(매일 06:40 KST) → 이 스크립트 → .enc 커밋·푸시 → 사이트가 비밀번호로 해제
+흐름  run_update.bat(매일 06:40 KST) → 이 스크립트 → .enc 봉인 → Supabase vaults 업로드 → 사이트가 비밀번호로 해제
+      (2026-10-26 전까지는 .enc 를 공개 git 에 커밋했다 — 오프라인 대입 위험으로 중단)
 
   python tools/toss_sync.py --setup    처음 한 번: 키·비밀번호 입력(화면에 안 보임) 후 저장, 바로 동기화
   python tools/toss_sync.py            동기화 (키 없으면 조용히 건너뜀 — 배치를 멈추지 않는다)
@@ -99,7 +100,15 @@ def main():
         return 1
     PLAIN.write_text(json.dumps(snap, ensure_ascii=False, indent=1), encoding="utf-8")
     pf_vault.seal(snap, pw)
-    print("[toss_sync] 암호화 저장 → data/portfolio_toss.enc")
+    print("[toss_sync] 암호화 저장 → data/portfolio_toss.enc (로컬 사본, git 에 안 올라감)")
+    # 2026-10-26: 사이트는 git 이 아니라 Supabase vaults 표에서 읽는다(공개 저장소 오프라인 대입 차단)
+    try:
+        pf_vault.push()
+        print("[toss_sync] Supabase 업로드 완료 → vaults/toss")
+    except Exception as e:
+        print("[toss_sync] Supabase 업로드 실패:", e)
+        _alert(f"🔐 [screener] 토스 스냅샷 Supabase 업로드 실패\n{str(e)[:300]}")
+        return 1
     print(_summary(snap))
     return 0
 

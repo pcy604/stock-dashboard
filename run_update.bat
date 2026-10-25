@@ -57,7 +57,7 @@ rem 경로 분리 필수: git add는 pathspec 하나라도 없으면 전체 실�
 git add results/*.json 2>nul
 git add data/sectors.json 2>nul
 git add data/portfolio.json 2>nul
-git add data/portfolio_toss.enc 2>nul
+rem 2026-10-26: portfolio_toss.enc 는 더 이상 커밋하지 않는다 - toss_sync 가 Supabase vaults 로 올린다(공개 저장소 오프라인 대입 차단)
 rem [0/5]에서 이미 원격과 맞춰뒀으므로 여기서는 rebase 없이 바로 푸시한다.
 rem 푸시가 거절되면(그 사이 원격이 움직인 경우) 다음 실행의 [0/5]이 알아서 정리한다.
 rem 2026-10-17 고침: 위 가정이 깨졌다 - 실행 중 06:00~07:15 에 원격에 코드 커밋이 들어오면 푸시가 거절되고,
