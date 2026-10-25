@@ -4863,36 +4863,17 @@ def _kr_naver_consensus_cached(sym):
 
     이 표엔 연간 (E) 다음에 분기 (E)도 같이 들어있는데(예: ...2025.12, 2026.03, 2026.06(E))
     기존엔 연간 구간만 읽고 분기 구간은 그냥 버려지고 있었음 — 실측(005930)으로 확인.
-    분기 (E)는 대개 가장 가까운 미래분기 1개만 나옴 → 0q(이번), 그 다음 것이 있으면 1q(다음)."""
-    import re
-    from bs4 import BeautifulSoup
-    from datetime import datetime as _d
-    r = requests.get(f'https://finance.naver.com/item/main.naver?code={sym}',
-                     headers={'User-Agent': 'Mozilla/5.0'}, timeout=8)
-    soup = BeautifulSoup(r.text, 'html.parser')
-    tb = soup.select_one('div.cop_analysis table')
+    분기 (E)는 대개 가장 가까운 미래분기 1개만 나옴 → 0q(이번), 그 다음 것이 있으면 1q(다음).
+
+    2026-10-25: 표 수집·헤더 해석(이 분기 (E) 처리 포함)을 naver_main_table로 통합
+    (consensus_snapshot.py·canslim_run.py와 공유) — 이 함수의 로직이 셋 중 가장
+    완전해서 naver_main_table.fetch()의 기준이 됐다."""
+    import naver_main_table as nmt
+    tb = nmt.fetch(sym)
     if tb is None:
         raise RuntimeError('no table')
-    heads = [th.get_text(' ', strip=True) for th in tb.select('thead th')]
-    dh = [h for h in heads if re.match(r'\d{4}\.\d{2}', h)]
-    n_annual = 4 if len(dh) >= 10 else max(len(dh) - 6, 0)
-    ynow = _d.now().year
-    emap = {}                             # 컬럼 인덱스 → 0y(올해)/1y(내년)/0q(이분기)/1q(다음분기)
-    for i, h in enumerate(dh[:n_annual]):
-        if '(E)' in h:
-            emap[i] = '0y' if int(h[:4]) <= ynow else '1y'
-    _q_e_idx = [i for i, h in enumerate(dh[n_annual:], start=n_annual) if '(E)' in h]
-    for j, i in enumerate(_q_e_idx[:2]):
-        emap[i] = '0q' if j == 0 else '1q'
-    if not emap:
+    if not tb['emap']:
         raise RuntimeError('no E cols')
-
-    def _num(s):
-        s = s.replace(',', '').strip()
-        try:
-            return float(s)
-        except Exception:
-            return None
 
     out = {}
     for kw, key, mult in [('매출액', 'revenue', 1e8), ('영업이익률', 'opm', 0.01),
@@ -4900,14 +4881,14 @@ def _kr_naver_consensus_cached(sym):
                           ('당기순이익', 'net_income', 1e8), ('ROE', 'roe', 0.01),
                           ('부채비율', 'debt_ratio', 0.01), ('EPS', 'eps', 1.0),
                           ('PER', 'per_dir', 1.0), ('PBR', 'pbr_dir', 1.0)]:
-        for row in tb.select('tbody tr'):
-            th = row.select_one('th')
-            if th and kw in th.get_text():
-                vals = [_num(td.get_text(strip=True)) for td in row.select('td')]
-                for i, lab in emap.items():
-                    if i < len(vals) and vals[i] is not None:
-                        out[f'{key}_{lab}'] = vals[i] * mult
-                break
+        vals = nmt.row(tb, kw)
+        if vals is None:
+            continue
+        for i, lab in tb['emap'].items():
+            if i < len(vals):
+                v = nmt.num(vals[i])
+                if v is not None:
+                    out[f'{key}_{lab}'] = v * mult
     if not out:
         raise RuntimeError('empty')
     return out

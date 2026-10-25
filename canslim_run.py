@@ -159,51 +159,29 @@ def fetch_naver_earnings_table(sym):
     """네이버 종목 메인 '기업실적분석' 테이블 파싱
     반환: {'annual': [(label, ni), ...], 'quarterly': [(label, ni), ...]}
     (E) 추정치 컬럼은 제외, ni는 억원 (음수 보존)
+
+    2026-10-25: 표 수집·헤더 해석을 naver_main_table로 통합(dashboard.py·
+    consensus_snapshot.py와 공유, 행 추출 방식은 그대로 유지).
     """
-    import requests
-    from bs4 import BeautifulSoup
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    r = requests.get(f'https://finance.naver.com/item/main.naver?code={sym}',
-                     headers=headers, timeout=8)
-    soup = BeautifulSoup(r.text, 'html.parser')
-    tb = soup.select_one('div.cop_analysis table')
+    import naver_main_table as nmt
+    tb = nmt.fetch(sym)
     if tb is None:
         return None
-
-    heads = [th.get_text(' ', strip=True) for th in tb.select('thead th')]
-    # 날짜 형식(yyyy.mm) 헤더만 추출 — 앞쪽 메타 헤더 제외
-    import re
-    date_heads = [h for h in heads if re.match(r'\d{4}\.\d{2}', h)]
+    date_heads = tb['date_heads']
+    n_annual = tb['n_annual']
     if len(date_heads) < 4:
         return None
-    # 통상 연간 4개 + 분기 6개
-    n_annual = 4 if len(date_heads) >= 10 else len(date_heads) - 6
 
-    def parse_num(s):
-        s = s.replace(',', '').strip()
-        if not s or s == '-':
-            return None
-        try:
-            return float(s)
-        except:
-            return None
-
-    def _row(keyword):
-        for row in tb.select('tbody tr'):
-            th = row.select_one('th')
-            if th and keyword in th.get_text():
-                return [parse_num(td.get_text(strip=True)) for td in row.select('td')]
-        return None
-
-    ni_vals  = _row('당기순이익')
-    rev_vals = _row('매출액')
-    op_vals  = _row('영업이익')
+    ni_vals  = nmt.row(tb, '당기순이익')
+    rev_vals = nmt.row(tb, '매출액')
+    op_vals  = nmt.row(tb, '영업이익')
     if ni_vals is None:
         return None
 
-    def _split(vals):
-        if vals is None:
+    def _split(vals_raw):
+        if vals_raw is None:
             return [], []
+        vals = [nmt.num(v) for v in vals_raw]
         pr = list(zip(date_heads, vals))
         a = [(l, v) for l, v in pr[:n_annual] if '(E)' not in l and v is not None]
         q = [(l, v) for l, v in pr[n_annual:] if '(E)' not in l and v is not None]

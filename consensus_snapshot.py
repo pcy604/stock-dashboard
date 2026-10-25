@@ -59,47 +59,30 @@ def fetch_consensus(sym: str) -> dict | None:
 
 
 def _fetch_consensus_main(sym: str) -> dict | None:
-    """(구) finance.naver.com 종목 메인 '기업실적분석' 표 — 해외 러너에는 표가 빠져 내려온다."""
+    """(구) finance.naver.com 종목 메인 '기업실적분석' 표 — 해외 러너에는 표가 빠져 내려온다.
+
+    2026-10-25: 표 수집·헤더 해석을 naver_main_table로 통합(dashboard.py·canslim_run.py와
+    공유) — 전에는 세 곳이 각자 파싱해 한쪽만 고쳐진 버그가 드리프트하고 있었다."""
+    import naver_main_table as nmt
     try:
-        r = requests.get(f'https://finance.naver.com/item/main.naver?code={sym}',
-                         headers={'User-Agent': 'Mozilla/5.0'}, timeout=8)
-        if r.status_code != 200:
-            _why(f'HTTP {r.status_code}')
-            return None
-        soup = BeautifulSoup(r.text, 'html.parser')
-        tb = soup.select_one('div.cop_analysis table')
+        tb = nmt.fetch(sym)
         if tb is None:
-            _why(f'표 없음(응답 {len(r.text)}B)')
+            _why('표 없음/요청 실패')
             return None
-        heads = [th.get_text(' ', strip=True) for th in tb.select('thead th')]
-        dh = [h for h in heads if re.match(r'\d{4}\.\d{2}', h)]
-        n_annual = 4 if len(dh) >= 10 else max(len(dh) - 6, 0)
-        ynow = datetime.now().year
-        emap = {}
-        for i, h in enumerate(dh[:n_annual]):
-            if '(E)' in h:
-                emap[i] = '0y' if int(h[:4]) <= ynow else '1y'
+        emap = {i: lab for i, lab in tb['emap'].items() if lab in ('0y', '1y')}
         if not emap:
             _why('(E) 열 없음')
             return None
-
-        def _num(s):
-            s = s.replace(',', '').strip()
-            try:
-                return float(s)
-            except Exception:
-                return None
-
         out = {}
         for kw, key in [('EPS', 'eps'), ('영업이익', 'op')]:
-            for row in tb.select('tbody tr'):
-                th = row.select_one('th')
-                if th and kw in th.get_text():
-                    vals = [_num(td.get_text(strip=True)) for td in row.select('td')]
-                    for i, lab in emap.items():
-                        if i < len(vals) and vals[i] is not None:
-                            out[f'{key}_{lab}'] = vals[i]
-                    break
+            vals = nmt.row(tb, kw)
+            if vals is None:
+                continue
+            for i, lab in emap.items():
+                if i < len(vals):
+                    v = nmt.num(vals[i])
+                    if v is not None:
+                        out[f'{key}_{lab}'] = v
         return out or None
     except Exception as e:
         _why(type(e).__name__)
