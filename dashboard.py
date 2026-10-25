@@ -7118,16 +7118,32 @@ def _pf_trail(sym: str, market: str, buy_date: str):
     신고가를 못 낸 종목이 당일 축소 대상이 되는 것을 막는다.
     """
     try:
-        import FinanceDataReader as fdr
-        code = sym.replace('.KS', '').replace('.KQ', '')
-        fdr_sym = code if market == 'KR' else sym
-        start = (datetime.now() - timedelta(days=520)).strftime('%Y-%m-%d')
-        s = fdr.DataReader(fdr_sym, start)['Close'].dropna()
-        if s.empty:
-            return None, None
-        w = s.resample('W-MON', label='left', closed='left').last().dropna()
-        if len(w) and (pd.Timestamp(s.index[-1]) - pd.Timestamp(w.index[-1])).days < 4:
-            w = w.iloc[:-1]
+        w = None
+        # 2026-10-25: US 종목이면 price_store(leaders_build 주봉, 같은 W-MON anchor)를
+        # 먼저 본다 — 10일 이내로 신선할 때만 믿는다(weekly-accel 크론 지연 대비,
+        # 낡은 캐시로 트레일링 피크를 잘못 계산하면 가드레일이 틀린 판정을 내린다).
+        # KR은 price_store에 데이터가 없어 항상 FDR로 간다.
+        if market != 'KR':
+            try:
+                import price_store
+                _cached = price_store.get(sym, 'US')
+                if _cached is not None and len(_cached) >= 10:
+                    _last = pd.Timestamp(_cached.index[-1])
+                    if (pd.Timestamp.today().normalize() - _last).days <= 10:
+                        w = _cached['Close'].dropna()
+            except Exception:
+                w = None
+        if w is None:
+            import FinanceDataReader as fdr
+            code = sym.replace('.KS', '').replace('.KQ', '')
+            fdr_sym = code if market == 'KR' else sym
+            start = (datetime.now() - timedelta(days=520)).strftime('%Y-%m-%d')
+            s = fdr.DataReader(fdr_sym, start)['Close'].dropna()
+            if s.empty:
+                return None, None
+            w = s.resample('W-MON', label='left', closed='left').last().dropna()
+            if len(w) and (pd.Timestamp(s.index[-1]) - pd.Timestamp(w.index[-1])).days < 4:
+                w = w.iloc[:-1]
         if not len(w):
             return None, None
         bd = pd.Timestamp(buy_date).normalize() if buy_date else w.index[0]
