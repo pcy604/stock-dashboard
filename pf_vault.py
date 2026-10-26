@@ -10,7 +10,11 @@
   파일: {"v":1, "salt":b64, "iter":n, "token":fernet토큰, "asof":"YYYY-MM-DD HH:MM"}
         asof 만 평문 — 사이트가 비밀번호 전에 '언제 자료인지'는 보여줄 수 있게.
 
-2026-10-26 — 저장 위치를 공개 git → Supabase `vaults` 표로 옮겼다
+2026-10-26 — 저장 구조 (같은 날 두 번 바꿨다, 최종은 ②)
+  ① 처음엔 봉인본을 Supabase `vaults` 표로 옮겼다 — 그러려면 노트북에 Supabase 키가 필요했다.
+  ② 최종: **공개키 이중 봉인**(아래 wrap/unwrap). 노트북은 비밀값 없이 공개키로 감싸 git 커밋,
+     개인키는 Supabase vaults/toss_key 에만. 노트북 설정 변경 0.
+  아래는 ① 의 설명 — vaults/toss 행은 이관본 폴백으로 남아 있다.
   암호화돼 있어도 공개 저장소에 있으면 누구나 내려받아 비밀번호를 **오프라인으로 무한 대입**할 수 있다.
   그래서 봉인된 문서를 Supabase(BUZA_ALARM 프로젝트) `vaults` 표 name='toss' 행에 둔다.
   표는 RLS 켜고 정책 없음 → anon 키로는 안 보이고 service_role 키로만 읽고 쓴다(user_store 와 같은 [store] 설정).
@@ -116,14 +120,78 @@ def _fetch_remote():
     return doc
 
 
+# ── 공개키 이중 봉인 (2026-10-26) ──────────────────────────────────────────────
+#   노트북에 Supabase 키를 두지 않으려고(차니 원칙: 노트북 작업 0) 방향을 바꿨다.
+#   노트북: 비밀번호 봉인본을 저장소의 공개키(data/vault_pub.pem)로 한 번 더 감싸 git 커밋.
+#   사이트: Supabase vaults/toss_key 의 개인키로 겉을 벗기고, 사용자 비밀번호로 속을 푼다.
+#   공개 저장소의 파일은 개인키 없이는 비밀번호 대입 자체가 불가능하다(겉 = RSA-3072 + Fernet).
+#   파일: {"v":2, "asof":평문, "wk":RSA-OAEP(무작위 Fernet키) b64, "ct":Fernet(속 봉인본)}
+PUB_PATH = ROOT / "data" / "vault_pub.pem"
+VAULT_PATH = ROOT / "data" / "portfolio_toss.vault"
+_KEY_NAME = "toss_key"
+_PRIV = {"k": None}
+
+
+def _oaep():
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import padding
+    return padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
+
+
+def wrap(src: Path = ENC_PATH, dst: Path = VAULT_PATH, pub: Path = PUB_PATH) -> Path:
+    """비밀번호 봉인본을 공개키로 감싼다 — 노트북용, 비밀값 불필요."""
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives import serialization
+    inner = Path(src).read_text(encoding="utf-8")
+    k = Fernet.generate_key()
+    pk = serialization.load_pem_public_key(Path(pub).read_bytes())
+    dst.write_text(json.dumps({"v": 2, "asof": json.loads(inner).get("asof"),
+                               "wk": base64.b64encode(pk.encrypt(k, _oaep())).decode(),
+                               "ct": Fernet(k).encrypt(inner.encode("utf-8")).decode()}), encoding="utf-8")
+    return dst
+
+
+def _private_key(pem: bytes | None = None):
+    from cryptography.hazmat.primitives import serialization
+    if pem is None:
+        if _PRIV["k"] is not None:
+            return _PRIV["k"]
+        import requests
+        c = _store_cfg()
+        if c is None:
+            raise RuntimeError("[store] 설정 없음 — 개인키를 읽을 수 없습니다")
+        r = requests.get(_url(c), params={"name": f"eq.{_KEY_NAME}", "select": "blob"}, headers=_h(c), timeout=6)
+        r.raise_for_status()
+        rows = r.json()
+        if not rows:
+            raise RuntimeError("Supabase vaults 에 toss_key 가 없습니다")
+        pem = rows[0]["blob"].encode()
+    k = serialization.load_pem_private_key(pem, password=None)
+    _PRIV["k"] = k
+    return k
+
+
+def unwrap(doc: dict, pem: bytes | None = None) -> dict:
+    """v2 겉봉을 벗겨 v1 속 봉인본(dict)을 돌려준다."""
+    from cryptography.fernet import Fernet
+    k = _private_key(pem).decrypt(base64.b64decode(doc["wk"]), _oaep())
+    return json.loads(Fernet(k).decrypt(doc["ct"].encode()).decode("utf-8"))
+
+
 def _load_doc(path: Path):
-    """원격 우선, 원격 설정이 없을 때만 로컬 파일. 경로를 직접 주면(테스트) 그 파일만 본다."""
-    if Path(path) == ENC_PATH and remote_ready():
-        return _fetch_remote()
+    """v1 속 봉인본(dict) 또는 None.
+    기본 경로면: ① 저장소의 v2 파일(개인키로 벗김) ② Supabase vaults/toss(10-26 이전 이관본) ③ 로컬 v1 파일.
+    경로를 직접 주면(테스트) 그 파일만 본다."""
+    if Path(path) == ENC_PATH:
+        if VAULT_PATH.exists() and remote_ready():
+            return unwrap(json.loads(VAULT_PATH.read_text(encoding="utf-8")))
+        if remote_ready():
+            return _fetch_remote()
     try:
-        return json.loads(Path(path).read_text(encoding="utf-8"))
+        d = json.loads(Path(path).read_text(encoding="utf-8"))
     except FileNotFoundError:
         return None
+    return unwrap(d) if d.get("v") == 2 else d
 
 
 # ── 봉인·해제 ─────────────────────────────────────────────────────────────────
@@ -142,6 +210,12 @@ def seal(obj: dict, password: str, path: Path = ENC_PATH) -> Path:
 
 def peek(path: Path = ENC_PATH) -> dict | None:
     """비밀번호 없이 보이는 머리말(asof) — 자료가 없거나 읽기 실패면 None."""
+    if Path(path) == ENC_PATH and VAULT_PATH.exists():      # v2 는 asof 가 겉에 평문 — 키 없이 읽는다
+        try:
+            d = json.loads(VAULT_PATH.read_text(encoding="utf-8"))
+            return {"asof": d.get("asof"), "v": d.get("v")}
+        except Exception:
+            pass
     try:
         d = _load_doc(path)
         return {"asof": d.get("asof"), "v": d.get("v")} if d else None

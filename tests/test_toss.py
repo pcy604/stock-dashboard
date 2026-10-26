@@ -109,6 +109,7 @@ def test_vault_remote_roundtrip(monkeypatch, tmp_path):
 
     monkeypatch.setattr(requests, "post", post)
     monkeypatch.setattr(requests, "get", get)
+    monkeypatch.setattr(pf_vault, "VAULT_PATH", tmp_path / "none.vault")   # v2 파일이 없는 경우의 폴백 경로
     pf_vault._CACHE.update(t=0.0, doc=None)
     assert pf_vault.peek() is None
     p = tmp_path / "t.enc"
@@ -119,3 +120,27 @@ def test_vault_remote_roundtrip(monkeypatch, tmp_path):
     assert pf_vault.unseal("correct-horse")["accounts"] == [{"x": 1}]
     with pytest.raises(ValueError):
         pf_vault.unseal("wrong-password")
+
+
+def test_vault_v2_wrap_unwrap(tmp_path):
+    """2026-10-26: 공개키 이중 봉인 — 노트북은 공개키만, 개인키 없이는 겉을 못 연다."""
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography.hazmat.primitives import serialization
+    k = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    pub, pem = tmp_path / "pub.pem", k.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+                                                    serialization.NoEncryption())
+    pub.write_bytes(k.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo))
+    inner = tmp_path / "t.enc"
+    pf_vault.seal({"asof": "2026-10-26 09:00", "accounts": [{"y": 2}]}, "correct-horse", inner)
+    v = pf_vault.wrap(inner, tmp_path / "t.vault", pub)
+    doc = json.loads(v.read_text(encoding="utf-8"))
+    assert doc["v"] == 2 and doc["asof"] == "2026-10-26 09:00" and "token" not in doc   # 속 봉인본이 겉에 안 보인다
+    pf_vault._PRIV["k"] = None
+    d1 = pf_vault.unwrap(doc, pem)
+    pf_vault._PRIV["k"] = None
+    assert d1 == json.loads(inner.read_text(encoding="utf-8"))
+    other = rsa.generate_private_key(public_exponent=65537, key_size=2048).private_bytes(
+        serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+    with pytest.raises(Exception):
+        pf_vault.unwrap(doc, other)                                                    # 다른 키로는 못 연다
+    pf_vault._PRIV["k"] = None
