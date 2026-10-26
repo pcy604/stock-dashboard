@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T00:13:05Z",
+ "at": "2026-10-26T04:10:57Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
@@ -7,7 +7,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 4411,
+   "text_len": 4362,
    "samples": [],
    "finished": true
   },
@@ -16,16 +16,18 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 4231,
+   "text_len": 4230,
    "samples": [],
    "finished": true
   },
   {
    "page": "🔎 종목 발굴",
-   "ok": true,
+   "ok": false,
    "exceptions": 0,
-   "error_words": [],
-   "text_len": 1534,
+   "error_words": [
+    "TypeError"
+   ],
+   "text_len": 1580,
    "samples": [],
    "finished": true
   },
@@ -61,10 +63,10 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 14770,
+   "text_len": 14769,
    "samples": [],
    "finished": true
   }
  ],
- "ok": true
+ "ok": false
 }
