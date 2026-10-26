@@ -716,7 +716,7 @@ if not hasattr(_ac_dil, 'summarize_dilution'):   # 클라우드가 옛 모듈을
     import importlib as _il0
     _ac_dil = _il0.reload(_ac_dil)
 import table_ui as _tui
-if getattr(_tui, 'API_VERSION', 0) < 4:          # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
+if getattr(_tui, 'API_VERSION', 0) < 7:          # (7 = tkey·시총 두 단위, 2026-10-26) 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
     import importlib as _il
     _tui = _il.reload(_tui)
 _tui.install(st)
@@ -1493,7 +1493,10 @@ def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=
         _tsrc(src + ' · ' + _cm.source_label(_CMM), path=path)
     import sys as _sys
     _fr = _sys._getframe(1)                       # 부른 자리(줄 번호)가 표의 필터 키 — 서브탭마다 달라야 한다
-    st.dataframe(df, hide_index=True, column_config=cfg, tkey=f'std:{_fr.f_lineno}')
+    if getattr(st, '_tbl_ver', 0) >= 7:
+        st.dataframe(df, hide_index=True, column_config=cfg, tkey=f'std:{_fr.f_lineno}')
+    else:                                          # 옛 래퍼가 메모리에 남은 프로세스 — tkey 를 모른다
+        st.dataframe(df, hide_index=True, column_config=cfg, key=f'std_{_fr.f_lineno}')
     cap = cap_caption()
     if not _CMM.get('rs_exact', True):
         cap += " · ⚠️ RS 는 9개월 수익률이 다음 주간 갱신부터 들어와 그 전까지 3·6·12개월로 근사"
