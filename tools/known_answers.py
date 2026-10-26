@@ -272,6 +272,14 @@ def _():
     return d.get('kr', 0) >= 100 and d.get('us', 0) >= 50, f"KR {d.get('kr')} · US {d.get('us')}"
 
 
+@check('공통 재무', '한국 1,000종 이상 · 삼성전자 TTM 순이익이 양수인가')
+def _():
+    d = _j('results/fund_snapshot.json')
+    sam = (d.get('stocks') or {}).get('005930') or {}
+    return (d.get('n_kr') or 0) >= 1000 and (sam.get('ttm_ni') or 0) > 0, \
+        f"KR {d.get('n_kr')} · US {d.get('n_us')} · 삼성 TTM 순이익 {sam.get('ttm_ni')}"
+
+
 @check('CANSLIM', '미국 50종·한국 20종 이상 채점했는가')
 def _():
     u = len(_j('results/canslim_us_latest.json').get('stocks', []))

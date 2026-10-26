@@ -66,11 +66,22 @@ def _from_cache(days_back=14):
                 continue
             df = pd.read_csv(io.StringIO(r.text), index_col=0,
                              dtype={"Code": str, "MarketId": str, "Dept": str, "ChangeCode": str})
-            if _valid(df):
+            # 2026-10-26 — 주말·휴장일 파일은 종목 목록은 멀쩡한데 거래량이 전부 0 이다.
+            #   그 파일을 쓰면 tradable 필터(거래량>0)가 한국 종목을 **전부** 지워
+            #   토요일 weekly-accel 의 흑자전환 KR 이 0종이 됐다(10-24·10-26). 거래일 파일까지 거슬러 간다.
+            if _valid(df) and _traded(df):
                 return df, d
         except Exception:
             continue
     return None, None
+
+
+def _traded(df) -> bool:
+    """거래일 파일인가 — 거래량이 0보다 큰 종목이 절반 이상."""
+    if "Volume" not in df:
+        return True
+    v = pd.to_numeric(df["Volume"], errors="coerce").fillna(0)
+    return (v > 0).mean() >= 0.5
 
 
 def _filter(df, market):
@@ -87,7 +98,8 @@ def _tradable(df):
     가격이 없는 종목은 52주 고가·RS 계산이 무의미하고, 코넥스는 개인 매매 제약이 있다."""
     if "MarketId" in df:
         df = df[df["MarketId"].astype(str) != "KNX"]
-    if "Volume" in df:
+    # 거래량이 대부분 0 인 목록(휴장일 스냅샷)이면 거래량으로 거르지 않는다 — 전부 지워진다(2026-10-26)
+    if "Volume" in df and _traded(df):
         v = pd.to_numeric(df["Volume"], errors="coerce")
         df = df[v.fillna(0) > 0]
     return df.reset_index(drop=True)

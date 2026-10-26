@@ -45,7 +45,7 @@ NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도'
             '그 해 회차', '신호', '표본', '신호 수', '첫 신호', '마지막 신호', '기준일', '날짜'}
 # '수준' 열 — 부호가 아니라 크기라서 칠하지 않는다(음수가 있어도: PER<0 은 적자일 뿐)
 _LEVEL = re.compile(r'PER|PBR|PSR|PEG|EV/|시총|가격|현재가|진입가|매수가|평단|종가|52주고|52주저|'
-                    r'점수|등급|수량|주수|비중|통과율|통과수|개수|표본|건수|거래량|배수|RS ?\(L\)|퍼센타일|'
+                    r'점수|등급|백분위|수량|주수|비중|통과율|통과수|개수|표본|건수|거래량|배수|RS ?\(L\)|퍼센타일|'
                     r'^N$|^n$|평가금|원금|매입|중요도|경과|주기|의존|집중|변동성|베타|'
                     r'전환가|조정가|행사가|단가|발행액|희석|발행주식|보유\(주\)')
 # ↑ 2026-10-21 실화면: '최저 조정가'(이름의 '최저')·'발행주식 대비'(이름의 '대비')가 초록으로 칠해졌다 — 가격·물량은 수준이고,
@@ -253,6 +253,7 @@ _CELL_RE = re.compile(r'^\s*([+\-−]?)\s*([$₩]?)\s*([+\-−]?)(\d[\d,]*(?:\.\
                       r'(%p|%|bp|p|x|배|억|조|원|B|M|K|T)?\s*$')
 _SCALE = {'억': ('억', 1), '조': ('억', 1e4),
           'K': ('B', 1e-6), 'M': ('B', 1e-3), 'B': ('B', 1), 'T': ('B', 1e3)}
+CAP_MIXED = '시총(억원·$B)'
 _MISSING = {'', '-', '—', '·', 'None', 'nan', 'NaN', 'N/A', 'n/a'}
 
 
@@ -321,7 +322,7 @@ _HEAD_UNIT = [
     (re.compile(r'^(평균|중앙값|시장대비|그주상승|고점대비|저점대비|YTD|매출YoY|매출성장|GPM|OPM|NPM|ROE|ROA|'
                 r'이후\d+주|\d+개월상승|향후\dM계절성|수익률|상승률|승률|알파|MDD)$'), '%'),
     (re.compile(r'^(매출가속|이익가속|ΔGPM|ΔOPM|ΔNPM|ΔROE)$'), '%p'),
-    (re.compile(r'^(RS\d*|PER|PBR|PSR|PEG|손익비)$'), '배'),
+    (re.compile(r'^(RS\d+|PER|PBR|PSR|PEG|손익비)$'), '배'),   # RS 단독은 백분위(2026-10-26 'RS(배)' 오표기)
     (re.compile(r'^(신호|신호 수|표본)$'), '건'),
     (re.compile(r'^(누적|보유|청산|통과수)$'), '종'),
     (re.compile(r'^(종가|현재가|52주고|52주저|진입가|매수가|평단|그주종가)$'), '현지'),
@@ -372,17 +373,21 @@ def normalize(df: pd.DataFrame):
     df = df.rename(columns=ren)
     # 2026-10-19 사용자 요청 — 한국 종목이 있는 표의 시총은 **억원**. ($B 로 '0.3B' 는 감이 안 온다)
     #   미국만 있는 표는 $B 그대로. 섞인 표도 억원으로 통일(같은 단위여야 정렬·필터가 성립한다).
+    # 2026-10-26 사용자 규칙 갱신 — 한국 = 억원, 미국 = $B. **섞인 표는 값은 각자 단위 그대로 두고
+    #   머리행에 두 단위를 함께 적는다** '시총(억원·$B)'(두 단위가 다르다는 걸 보이게). 기본 정렬은 호출부가 달러 환산으로.
     capb = next((c for c in df.columns if str(c) == '시총($B)'), None)
     if capb is not None and FX['fn']:
         kr = _kr_rows(df)
         if kr is not None and kr.any():
             try:
                 rate = float(FX['fn']())
-                df[capb] = (pd.to_numeric(df[capb], errors='coerce') * rate * 10).round(0)
-                df = df.rename(columns={capb: '시총(억원)'})
+                v = pd.to_numeric(df[capb], errors='coerce')
+                name = '시총(억원)' if kr.all() else CAP_MIXED
+                df[capb] = v.where(~kr, (v * rate * 10).round(0)).where(kr, v.round(1))
+                df = df.rename(columns={capb: name})
                 src = next((k for k, v in ren.items() if v == capb), capb)
-                ren[src] = '시총(억원)'
-                conv.add('시총(억원)')
+                ren[src] = name
+                conv.add(name)
             except Exception:
                 pass
     # 가격 머리글의 통화 — 전부 한국이면 (원), 전부 미국이면 ($), 섞이면 (현지). 머리글이 짧아야 표가 안 넓어진다.
@@ -759,15 +764,17 @@ def install(st):
     orig = st._main.dataframe
     _patch_blocks()
 
-    def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, footer=True, **kw):
+    def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, footer=True, tkey=None, **kw):
+        # tkey: 공통 함수(dashboard._std_table)가 대신 부를 때 호출 자리를 키로 넘긴다 — 안 주면 모든 표가
+        #   같은 줄 번호 키를 써서 필터 위젯 키가 겹친다(2026-10-26 DuplicateElementKey)
         # footer=False: 바로 아래 이어지는 표(한 묶음)가 출처를 대신 단다 — 같은 줄이 두 번 뜨지 않게
         try:
-            return _dataframe(data, *a, filters=filters, color=color, **kw)
+            return _dataframe(data, *a, filters=filters, color=color, _tkey=tkey, **kw)
         finally:
             if footer:
                 _footer(st, src, asof)
 
-    def _dataframe(data=None, *a, filters=None, color=True, **kw):
+    def _dataframe(data=None, *a, filters=None, color=True, _tkey=None, **kw):
         try:
             sty = data if isinstance(data, Styler) else None
             df = sty.data if sty is not None else data
@@ -811,7 +818,7 @@ def install(st):
             kw['column_config'] = add_thousands(cfg, df)
 
             fr = sys._getframe(2)   # dataframe() → _dataframe() 한 겹 더
-            base = f'tf|{os.path.basename(fr.f_code.co_filename)}:{fr.f_lineno}'
+            base = f'tf|{_tkey}' if _tkey else f'tf|{os.path.basename(fr.f_code.co_filename)}:{fr.f_lineno}'
             seen = st.session_state.setdefault('_tbl_seen', {})
             seen[base] = seen.get(base, -1) + 1
             key = f'{base}#{seen[base]}'
@@ -830,9 +837,17 @@ def install(st):
                 if 'height' in kw and isinstance(kw['height'], int) and len(df) < len(data.data if isinstance(data, Styler) else data):
                     kw['height'] = min(kw['height'], fit_height(len(df), kw.get('row_height')))
 
-            if '시총(억원)' in df.columns:          # 억원은 천 단위 쉼표 정수
-                kw.setdefault('column_config', {})
+            # 시총 — 억원은 쉼표 정수, $B 는 소수 1자리, 섞인 열은 행마다 자기 단위(localized 가 소수 자리를 값대로 보인다)
+            kw.setdefault('column_config', {})
+            if '시총(억원)' in df.columns:
                 kw['column_config']['시총(억원)'] = st.column_config.NumberColumn('시총(억원)', format='localized')
+            if '시총($B)' in df.columns:
+                kw['column_config']['시총($B)'] = st.column_config.NumberColumn('시총($B)', format='%,.1f')
+            if CAP_MIXED in df.columns:
+                kw['column_config'][CAP_MIXED] = st.column_config.NumberColumn(
+                    CAP_MIXED, format='localized',
+                    help='한국 종목 = 억원, 미국 종목 = $B (값의 단위가 다르다). 기본 순서는 달러 환산 시총 기준 — '
+                         '머리글을 눌러 정렬하면 두 단위가 섞여 정렬된다')
 
             # 높이 — 25행 이하는 스크롤 없이 전부, 빈 행 없이(2026-10-24 재설계).
             #   원인: 행 높이를 35px 로 가정했는데 이 앱은 글자 기준을 14px 로 줄여(rem) 실제 행·머리행이 31px 다.

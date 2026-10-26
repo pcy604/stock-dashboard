@@ -1,9 +1,12 @@
 """
 turnaround_run.py  —  흑자전환 스크리너
 '테슬라 2019 Q3' 같은 종목 발굴
-  - 흑자전환완료: 최근 1-2분기 흑자 + 직전 연속 적자
-  - 흑자전환임박: 적자 지속이나 YoY 50%+ 개선 중
-  - 적자개선중:   YoY 25~50% 개선 중
+  판정은 **영업이익** 기준이다(2026-10-26 — 백테스트 rs_accel_bt.turnaround 와 같은 정의).
+  - 흑자전환완료: 이번 분기 영업이익 흑자 + 전년 같은 분기 적자(계절 적자 오판 방지)
+  - 흑자전환임박: 영업적자지만 전년 같은 분기 대비 적자 폭 50%+ 축소
+  - 적자개선중:   같은 기준 25~50% 축소
+  (구) 순이익 기준 + '직전 3분기 중 한 번이라도 적자'였다 → LG전자(매년 4분기만 적자)·SKT(3분기 전 1회 적자)가
+  '흑자전환완료'로 떠서 KR 341종·US 330종이 완료였다. 일회성 손익과 계절 적자를 전환으로 읽은 것.
 
 실행: python turnaround_run.py
 결과: results/turnaround_latest.json
@@ -104,7 +107,7 @@ def _kr_quarterly_all():
         if d is None or d.empty:
             print('  [KR] DART 분기재무가 비어 있다')
             return {}
-        d = d.dropna(subset=['net_income'])
+        d = d.dropna(subset=['op_income'])
         d['_end'] = pd.to_datetime(
             d.year.astype(int).astype(str) + '-' + (d.q.astype(int) * 3).astype(str) + '-01')
         for sym, g in d.groupby('sym'):
@@ -130,6 +133,7 @@ def fetch_quarterly_fin(sym_yf: str):
             data = {
                 'Net Income':    [None if pd.isna(v) else float(v) for v in g['net_income']],
                 'Total Revenue': [None if pd.isna(v) else float(v) for v in g['revenue']],
+                'Operating Income': [None if pd.isna(v) else float(v) for v in g['op_income']],
             }
             return pd.DataFrame(data, index=cols).T
         # ── US: EDGAR 분기재무 캐시 (leaders_build.fetch_fund 가 만든다) ──
@@ -144,6 +148,8 @@ def fetch_quarterly_fin(sym_yf: str):
         cols = list(d.period_end)
         data = {'Net Income': [None if pd.isna(v) else float(v) for v in d.netinc],
                 'Total Revenue': [None if pd.isna(v) else float(v) for v in d.revenue]}
+        if 'opinc' in d.columns:
+            data['Operating Income'] = [None if pd.isna(v) else float(v) for v in d.opinc]
         if 'gross' in d.columns:
             data['Gross Profit'] = [None if pd.isna(v) else float(v) for v in d.gross]
         return pd.DataFrame(data, index=cols).T
@@ -155,130 +161,99 @@ from collections import Counter
 _SKIP = Counter()
 
 
+def _fmt(v, market):
+    if v is None:
+        return '-'
+    if market == 'KR':
+        b = v / 1e8
+        return f"{b:.0f}억" if abs(b) < 10000 else f"{b/10000:.1f}조"
+    return f"${v/1e6:.0f}M" if abs(v) < 1e9 else f"${v/1e9:.2f}B"
+
+
 def analyze(sym: str, name: str, marcap: int, market: str):
+    """영업이익 기준 흑자전환 판정. 숫자는 원값(KR 원 · US 달러)으로 싣고 단위 변환은 화면이 한다."""
     sym_yf = f"{sym}.KS" if market == 'KR' else sym
     qf = fetch_quarterly_fin(sym_yf)
-    if qf is None or qf.empty:
+    if qf is None or qf.empty or 'Operating Income' not in qf.index:
         return None
-
     try:
-        # Net Income
-        ni_row = None
-        for key in ('Net Income', 'Net Income Common Stockholders'):
-            if key in qf.index:
-                ni_row = qf.loc[key]
-                break
-        if ni_row is None:
+        op_all = qf.loc['Operating Income'].sort_index(ascending=False)
+        op = op_all.dropna()
+        if len(op) < 5:
             return None
-        ni_all = ni_row.sort_index(ascending=False)
-        ni = ni_all.dropna()
-        if len(ni) < 5:
+        # 2026-10-14 — 낡은 분기로 판정하던 고장 차단(최신 분기가 비면 몇 년 전 분기가 '최신'이 된다)
+        if pd.Timestamp(op.index[0]) < pd.Timestamp(op_all.index[0]):
+            _SKIP['최신분기_영업익_공란'] += 1
             return None
-        # 2026-10-14 — 낡은 분기로 '흑자전환완료'를 내던 고장 차단.
-        #   ① 최신 분기의 순이익이 비어 있으면(태그 변경 등) dropna 가 몇 년 전 분기를
-        #      '최신'으로 끌어올렸다 — PNW 2011, MS 2018 이 그렇게 상위에 떴다.
-        #   ② 재무 캐시가 갱신 안 되면 한 분기 늦은 판정이 된다(fq_ 08-02 정지).
-        #   둘 다 판정하지 않고 _SKIP 에 이유를 남긴다. 없는 데이터를 있는 척하지 않는다.
-        if pd.Timestamp(ni.index[0]) < pd.Timestamp(ni_all.index[0]):
-            _SKIP['최신분기_순이익_공란'] += 1
-            return None
-        if (pd.Timestamp(DATE_STR) - pd.Timestamp(ni.index[0])).days > 200:
+        if (pd.Timestamp(DATE_STR) - pd.Timestamp(op.index[0])).days > 200:
             _SKIP['최신분기_200일초과'] += 1
             return None
-        # 2026-10-14 — 분기 누락 차단. 아래 계산은 '최근 8개 값 = 연속 8분기'를 가정한다.
-        #   KR 분기재무에 2025Q3·Q4 가 통째로 빠져 있어(적재 버그) 2026Q2·Q1·2025Q2·Q1 을
-        #   '최근 4분기'로, 2024Q4 를 '전년 동기'로 계산하고 있었다. 기간 간격으로 검사한다.
-        _p = [pd.Timestamp(x) for x in ni.index[:min(len(ni), 8)]]
-        _gaps = [(a - b).days for a, b in zip(_p, _p[1:])]
-        if any(g > 100 for g in _gaps):
+        # 분기 누락 차단 — 아래 계산은 '최근 8개 값 = 연속 8분기'를 가정한다
+        _p = [pd.Timestamp(x) for x in op.index[:min(len(op), 8)]]
+        if any((a - b).days > 100 for a, b in zip(_p, _p[1:])):
             _SKIP['분기_누락'] += 1
             return None
-        niv = [float(v) for v in ni.values]
-        q0, q1, q2, q3 = niv[0], niv[1], niv[2], niv[3]
-        q4 = niv[4] if len(niv) > 4 else None
+        v = [float(x) for x in op.values]
+        q0, q4 = v[0], v[4]
 
-        # TTM
-        ttm      = sum(niv[:4])
-        ttm_1y   = sum(niv[4:8]) if len(niv) >= 8 else None
+        # 연속 흑자 분기 수(이번 분기 포함) · 그 직전 연속 적자 분기 수
+        streak = 0
+        while streak < len(v) and v[streak] > 0:
+            streak += 1
+        loss_run = 0
+        while streak + loss_run < len(v) and v[streak + loss_run] <= 0:
+            loss_run += 1
 
-        # Revenue YoY
-        rev_growth = None
-        for key in ('Total Revenue', 'Revenue'):
-            if key in qf.index:
-                rv = qf.loc[key].sort_index(ascending=False).dropna()
-                if len(rv) >= 5:
-                    rv0, rv4 = float(rv.iloc[0]), float(rv.iloc[4])
-                    if rv4 > 0:
-                        rev_growth = (rv0 / rv4 - 1) * 100
-                break
+        yoy_imp = None                           # 전년 같은 분기 대비 적자 축소율
+        if q4 < 0:
+            yoy_imp = 100.0 if q0 >= 0 else (q0 - q4) / abs(q4) * 100
 
-        # Gross Margin trend
-        gm_improving = False
-        if 'Gross Profit' in qf.index and 'Total Revenue' in qf.index:
-            gp = qf.loc['Gross Profit'].sort_index(ascending=False).dropna()
-            rv = qf.loc['Total Revenue'].sort_index(ascending=False).dropna()
-            if len(gp) >= 5 and len(rv) >= 5:
-                gm0 = float(gp.iloc[0]) / float(rv.iloc[0]) if float(rv.iloc[0]) > 0 else 0
-                gm4 = float(gp.iloc[4]) / float(rv.iloc[4]) if float(rv.iloc[4]) > 0 else 0
-                gm_improving = gm0 > gm4 + 0.03
-
-        # YoY improvement (같은 분기 대비)
-        yoy_imp = None
-        if q4 is not None and q4 < 0:
-            if q0 >= 0:
-                yoy_imp = 100.0
-            else:
-                yoy_imp = (q0 - q4) / abs(q4) * 100
-
-        # ── 분류 ──────────────────────────────────────────────────────
-        prev_neg = sum(1 for q in (q1, q2, q3) if q < 0)
-
-        if q0 > 0 and prev_neg >= 1:
-            status, score = '흑자전환완료', 5
-        elif q0 > 0 and q1 < 0:
-            status, score = '흑자전환완료', 4
-        elif q0 < 0 and yoy_imp is not None and yoy_imp >= 50:
-            status, score = '흑자전환임박', 3
-        elif q0 < 0 and yoy_imp is not None and yoy_imp >= 25:
-            status, score = '적자개선중', 2
+        if q0 > 0 and q4 <= 0:
+            status = '흑자전환완료'
+        elif q0 <= 0 and yoy_imp is not None and yoy_imp >= 50:
+            status = '흑자전환임박'
+        elif q0 <= 0 and yoy_imp is not None and yoy_imp >= 25:
+            status = '적자개선중'
         else:
             return None
 
-        # 보너스
-        if rev_growth and rev_growth > 20:       score += 1
-        if gm_improving:                          score += 1
-        if ttm_1y is not None and ttm > ttm_1y:  score += 1
-
-        def _fm(v):
-            if v is None: return '-'
-            if market == 'KR':
-                b = v / 1e8
-                return f"{b:.0f}억" if abs(b) < 10000 else f"{b/10000:.1f}조"
-            return f"${v/1e6:.0f}M" if abs(v) < 1e9 else f"${v/1e9:.2f}B"
-
+        rev_growth = None
+        if 'Total Revenue' in qf.index:
+            rv = qf.loc['Total Revenue'].sort_index(ascending=False).dropna()
+            if len(rv) >= 5 and float(rv.iloc[4]) > 0:
+                rev_growth = (float(rv.iloc[0]) / float(rv.iloc[4]) - 1) * 100
+        opm0 = opm4 = None
+        if 'Total Revenue' in qf.index:
+            rv = qf.loc['Total Revenue'].sort_index(ascending=False)
+            try:
+                r0, r4 = float(rv.loc[op.index[0]]), float(rv.loc[op.index[4]])
+                opm0 = q0 / r0 * 100 if r0 > 0 else None
+                opm4 = q4 / r4 * 100 if r4 > 0 else None
+            except Exception:
+                pass
+        ttm = sum(v[:4])
+        ttm_1y = sum(v[4:8]) if len(v) >= 8 else None
         return {
-            'sym':         sym,
-            'name':        name,
-            'market':      market,
-            'marcap':      int(marcap) if marcap else 0,
-            'status':      status,
-            'score':       score,
-            'q0_ni':       _fm(q0),
-            'q1_ni':       _fm(q1),
-            'q2_ni':       _fm(q2),
-            'q3_ni':       _fm(q3),
-            'ttm_ni':      _fm(ttm),
-            'ttm_1y_ni':   _fm(ttm_1y) if ttm_1y is not None else '-',
+            'sym': sym, 'name': name, 'market': market,
+            'marcap': int(marcap) if marcap else 0,
+            'status': status,
+            'basis': '영업이익',
+            'op': [round(x) for x in v[:5]],          # 최근 5분기 영업이익(원값, 최신 먼저)
+            'op_ttm': round(ttm), 'op_ttm_1y': round(ttm_1y) if ttm_1y is not None else None,
+            'profit_streak': streak if q0 > 0 else 0, 'loss_run_before': loss_run if q0 > 0 else None,
             'yoy_imp_pct': round(yoy_imp, 1) if yoy_imp is not None else None,
-            'rev_growth':  round(rev_growth, 1) if rev_growth is not None else None,
-            'gm_improving': gm_improving,
-            'q0_date':     str(ni.index[0])[:10],
+            'rev_growth': round(rev_growth, 1) if rev_growth is not None else None,
+            'opm_chg': round(opm0 - opm4, 1) if opm0 is not None and opm4 is not None else None,
+            'q0_date': str(op.index[0])[:10],
+            # 옛 키(다른 소비자 호환) — 값은 이제 영업이익이다
+            'score': {'흑자전환완료': 5, '흑자전환임박': 3, '적자개선중': 2}[status],
+            **{f'q{i}_ni': _fmt(v[i], market) for i in range(4)},
+            'ttm_ni': _fmt(ttm, market),
         }
     except Exception:
         return None
 
 
-# ── 메인 ─────────────────────────────────────────────────────────────
 def main():
     print(f"[{DATE_STR}] 흑자전환 스크리너 시작")
     results = []
@@ -320,13 +295,15 @@ def main():
     print(f"  US 완료: 흑자전환 {us_cnt}개")
 
     # 저장
-    results.sort(key=lambda x: x['score'], reverse=True)
+    _rank = {'흑자전환완료': 0, '흑자전환임박': 1, '적자개선중': 2}
+    results.sort(key=lambda x: (_rank[x['status']], -(x.get('marcap') or 0)))
     out = {
         'date':   DATE_STR,
         'total':  len(results),
         'kr':     kr_cnt,
         'us':     us_cnt,
         'skipped': dict(_SKIP),          # 판정 보류 사유별 종목 수 (2026-10-14)
+        'basis': '영업이익 · 전년 같은 분기 대비 (2026-10-26)',
         'stocks': results,
     }
     with open(RESULT_PATH, 'w', encoding='utf-8') as f:
@@ -337,10 +314,10 @@ def main():
         sub = [r for r in results if r['status'] == st]
         print(f"  [{st}] {len(sub)}개")
         for r in sub[:3]:
-            yoy = f"YoY{r['yoy_imp_pct']:+.0f}%" if r['yoy_imp_pct'] else ''
-            rev = f" 매출YoY{r['rev_growth']:+.0f}%" if r['rev_growth'] else ''
-            print(f"    {r['market']} {r['name']} ({r['sym']}) "
-                  f"점수:{r['score']} Q0:{r['q0_ni']} Q-1:{r['q1_ni']} {yoy}{rev}")
+            print(f"    {r['market']} {r['name']} ({r['sym']}) 영업익 최근5분기 {r['op']}")
+    if kr_cnt == 0:
+        # 한국 0종은 시장이 아니라 거의 항상 데이터 문제다(10-24 휴장일 목록 사고) — 조용히 넘기지 않는다
+        print('::error::흑자전환 KR 0종 — KRX 목록 또는 분기재무 적재를 확인할 것')
 
 
 if __name__ == '__main__':

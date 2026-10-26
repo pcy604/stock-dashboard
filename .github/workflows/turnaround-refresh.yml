@@ -1,0 +1,61 @@
+# 흑자전환 · 공통 재무 스냅샷만 다시 만든다 — 수동 실행 전용 (2026-10-26)
+#
+# 왜: weekly-accel 은 주 1회이고 이미 처리한 주차는 건너뛴다. 흑자전환 정의를 바꾸거나
+#   (10-26 영업이익 기준) 휴장일 KRX 목록 사고(KR 0종)를 고친 뒤 다음 토요일까지 기다리지 않게,
+#   주봉·재무 캐시(leaders-cache)만 복원해 두 산출물을 다시 만든다. 캐시는 읽기만 한다.
+name: turnaround-refresh
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - run: pip install -r requirements.txt
+
+      - name: 재무 캐시 복원 (US 분기재무 fq_)
+        uses: actions/cache/restore@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-${{ github.run_id }}
+          restore-keys: |
+            leaders-cache-
+
+      - name: 흑자전환 스크리너
+        run: python turnaround_run.py
+
+      - name: 공통 재무 스냅샷
+        run: python tools/fund_snapshot.py
+
+      - name: 결과 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f results/turnaround_latest.json results/fund_snapshot.json
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "auto: 흑자전환·공통 재무 스냅샷 $(date -u +%Y-%m-%d)"
+            for i in 1 2 3; do
+              git push origin main && break
+              git pull --rebase -X theirs origin main
+              sleep 5
+            done
+          fi

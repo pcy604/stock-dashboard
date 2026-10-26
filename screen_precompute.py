@@ -170,7 +170,7 @@ def run(start=None):
         _cyc = close[close.index >= f'{_cy}-01-01']
         _ytd = round((close.iloc[-1] / _cyc.iloc[0] - 1) * 100, 1) if len(_cyc) > 1 else None
         r_entry = {'sym': sym, 'name': name, 'market': mkt, 'marcap': marcap,
-                   'ret_1m': _p(21), 'ret_3m': _p(63), 'ret_6m': _p(126),
+                   'ret_1m': _p(21), 'ret_3m': _p(63), 'ret_6m': _p(126), 'ret_9m': _p(189),   # 9개월 = RS 가중(13·26·39·52주)용
                    'ret_12m': _p(252), 'ret_ytd': _ytd}
         if len(close) < 250:
             return None, None, r_entry
