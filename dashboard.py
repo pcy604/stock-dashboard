@@ -1778,6 +1778,46 @@ with t_core, guard('주도주 교집합'):
             st.plotly_chart(_fig, use_container_width=True)
             st.caption(f"기간 {_pg['period'][0]} ~ {_pg['period'][1]} · SPY {_sps['CAGR']}% / MDD {_sps['MDD']}% · 1주 지연 · 편도 0.3%")
 
+    # ── ✅ 후보 A·B 사전 등록 재확인 + 코어·위성 결합표 (2026-10-26) ──
+    _ca = load_json(Path('results/confirm_ab.json')) or {}
+    with st.expander("✅ 위성 후보 A·B 사전 등록 재확인 · 코어+위성 결합표", expanded=False):
+        if not _ca.get('cands'):
+            st.info("결과를 만드는 중입니다(GitHub 서버 research-rs 작업).")
+        else:
+            _sps = _ca['spy']
+            st.caption("A = 교집합 RS순 · 20칸 · 손절 max(진입가 -15%, 고점 -15%) · 청산가 재돌파 재매수 · 냉각 4주 · 불타기 없음 / "
+                       "B = A + 불타기(+30%마다 첫 매수의 50%, 최대 3회, 종목당 상한 25%). 합격 기준은 결과 보기 전에 커밋했다(research/confirm_ab.py).")
+            _rows = []
+            for _k, _v in _ca['cands'].items():
+                _r = {'후보': _k, 'CAGR(%)': _v['center']['CAGR'], 'MDD(%)': _v['center']['MDD'], '수익÷낙폭': _v['center']['Calmar'],
+                      '이웃 유지': f"{_v['nb_ok']}/{_v['nb_n']}", '상폐충격 후 CAGR(%)': round(_v['shock1'], 1),
+                      'RS 가중(%)': _v['rs']['w']['CAGR'], 'RS 13주(%)': _v['rs']['r13']['CAGR'], 'RS 12-1(%)': _v['rs']['m121']['CAGR'],
+                      '무작위 순서 중앙(%)': round(_v['random']['median'], 1), '판정': '✅ 합격' if _v['passed'] else '❌ 불합격'}
+                _rows.append(_r)
+            _tsrc('research/confirm_ab.py (GitHub Actions research-rs)', path='results/confirm_ab.json')
+            st.dataframe(pd.DataFrame(_rows), use_container_width=True, hide_index=True, filters=False, color=False,
+                         column_config={c: st.column_config.NumberColumn(format='%.1f') for c in
+                                        ('CAGR(%)', 'MDD(%)', '상폐충격 후 CAGR(%)', 'RS 가중(%)', 'RS 13주(%)', 'RS 12-1(%)', '무작위 순서 중앙(%)')}
+                         | {'수익÷낙폭': st.column_config.NumberColumn(format='%.2f')})
+            for _k, _v in _ca['cands'].items():
+                st.caption(f"**{_k}** 기준별: " + " · ".join(f"{'✅' if ok else '❌'} {nm}" for nm, ok in _v['criteria'].items()))
+            st.caption(f"SPY 같은 구간 {_sps['CAGR']}% / MDD {_sps['MDD']}% · 수익÷낙폭 {_sps['Calmar']}")
+            st.markdown(f"**코어+위성 결합표** — 코어 = SPY + 40주선 스위치(아래면 현금) 단독 {_ca['core']['CAGR']}% / MDD {_ca['core']['MDD']}% · 13주마다 비중 복원")
+            _bn = {'A': '위성 A', 'B': '위성 B', 'cur': '위성 현행(20칸·고점 -20%)'}
+            _br = []
+            for _sk, _rws in _ca['blend'].items():
+                for _r in _rws:
+                    if _r['w'] == 0:
+                        continue
+                    _br.append({'위성': _bn.get(_sk, _sk), '위성 비중(%)': int(_r['w'] * 100), 'CAGR(%)': _r['CAGR'], 'MDD(%)': _r['MDD'],
+                                '수익÷낙폭': _r['Calmar'], 'MDD -20% 이내': '✅' if _r['MDD'] >= -20 else '',
+                                'SPY 수익 초과': '✅' if _r['CAGR'] > _sps['CAGR'] else ''})
+            _tsrc('research/confirm_ab.py', path='results/confirm_ab.json')
+            st.dataframe(pd.DataFrame(_br), use_container_width=True, hide_index=True, color=False,
+                         column_config={'CAGR(%)': st.column_config.NumberColumn(format='%.1f'),
+                                        'MDD(%)': st.column_config.NumberColumn(format='%.1f'),
+                                        '수익÷낙폭': st.column_config.NumberColumn(format='%.2f')})
+
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
     st.caption("기간별 상승 상위 + 주봉 신호 · 매출/영업익 증감 · 향후 2개월 계절성. CANSLIM 점수는 🏆 서브탭에서 슬라이더로 직접 조정해 보세요.")
