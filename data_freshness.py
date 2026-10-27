@@ -208,6 +208,11 @@ SOURCES = [
          cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 실적 발표 · 서프라이즈(KR)',
          getter=_cq_max_date, raw=True),
+    # 2026-10-27 — 전 종목 스윙 정류장 지도(종목 분석 🚏). 월 1회(첫 일요일).
+    dict(path='results/swing_stations.json', label='전 종목 스윙 정류장 지도',
+         cycle='월 1회 (첫 일요일)', max_age=40, producer='tools/swing_stations.py',
+         job='swing-stations', used_by='🔍 종목 분석 → 🎯 매매 판단 → 🚏 정류장',
+         getter=_key('asof')),
     dict(path='results/consensus_nocover.json', label='KR 컨센서스 미커버 종목',
          cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',

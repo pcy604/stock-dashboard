@@ -409,6 +409,15 @@ def _():
     one = sum(1 for x in st if x.get('oneoff'))
     return bool(st) and not nob, f"{len(st)}종 · 기준 표기 없음 {len(nob)}종 · 일회성 의심 {one}종"
 
+@check('스윙 정류장', '전 종목 스윙 표본이 충분한가 (미국 하락 5만+·한국 2만+, 변동성 경계 오름차순)')
+def _():
+    import json as _j
+    d = _j.load(open(os.path.join(BASE, 'results/swing_stations.json'), encoding='utf-8'))['markets']
+    us, kr = d['US']['buckets']['all']['n_dec'], d['KR']['buckets']['all']['n_dec']
+    cuts_ok = all(m['cut'][0] < m['cut'][1] for m in d.values())
+    return us > 50000 and kr > 20000 and cuts_ok, f"미국 하락 {us:,} · 한국 {kr:,} · 경계 {[d[m]['cut'] for m in d]}"
+
+
 def run():
     out = []
     for area, q, fn in CHECKS:

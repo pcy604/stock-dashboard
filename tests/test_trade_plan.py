@@ -99,3 +99,16 @@ def test_station_map_finds_stops():
     lk = TP.station_lookup(sm, 21)
     assert lk['next'][0]['from'] == 35 and 0 < lk['next'][0]['p_reach'] < 100
     assert TP.vol_bucket(70, [35, 55]) == 'high' and TP.vol_bucket(None, None) == 'all'
+
+
+def test_pooled_outlook_memoryless():
+    """멈춤 확률이 칸마다 20%로 일정한 분포 → 50% 지점은 x 에서 약 3칸(7.5%p) 위."""
+    E = TP.DEC_EDGES
+    ends, alive = [], 100000.0
+    for _ in E:
+        ends.append(alive * 0.2)
+        alive *= 0.8
+    o = TP.pooled_outlook(E, ends, 20)
+    assert o['n'] > 0 and o['q50'] in (27.5, 30.0) and o['q25'] > o['q50'] and o['q10'] > o['q25']
+    s = TP.stock_outlook([12, 15, 22, 30, 41, 55], 20)
+    assert s['n'] == 4 and s['q10'] >= s['q50'] and round(s['p'](30)) == 75

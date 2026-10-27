@@ -368,3 +368,34 @@ def vol_bucket(vol: float | None, cut: list | None) -> str:
     if vol is None or not cut:
         return 'all'
     return 'low' if vol < cut[0] else ('mid' if vol < cut[1] else 'high')
+
+
+def pooled_outlook(edges, ends, x: float) -> dict:
+    """전 종목 칸별 '끝난 수' → 이미 x% 움직인 스윙이 y% 까지 갈 확률 곡선과 50·25·10% 도달 지점.
+    x 가 칸 안이면 그 칸 시작점 기준(보수적이지 않게 칸 안 위치를 선형 보간)."""
+    reach = [sum(ends[i:]) for i in range(len(ends))]
+    if x < edges[0]:
+        x = edges[0]
+    i0 = min(int(np.searchsorted(edges, x, side='right')) - 1, len(edges) - 1)
+    w = edges[1] - edges[0]
+    nxt = reach[i0 + 1] if i0 + 1 < len(reach) else 0
+    frac = min(max((x - edges[i0]) / w, 0), 1)
+    base = reach[i0] - (reach[i0] - nxt) * frac              # x 이상 간 스윙 수(칸 안 선형 보간)
+    if base <= 0:
+        return {'n': 0}
+    curve = [(edges[i], reach[i] / base * 100) for i in range(i0 + 1, len(edges))]
+    q = {}
+    for lvl in (50, 25, 10):
+        q[lvl] = next((y for y, p in curve if p <= lvl), None)
+    return {'n': int(round(base)), 'curve': curve, 'q50': q[50], 'q25': q[25], 'q10': q[10]}
+
+
+def stock_outlook(sizes, x: float) -> dict:
+    """이 종목 자체 스윙으로 같은 계산(표본 작음)."""
+    base = [s for s in sizes if s >= x]
+    if not base:
+        return {'n': 0}
+    srt = sorted(base)
+    qq = lambda p: float(np.percentile(srt, 100 - p))        # p% 확률로 도달 = 상위 p% 분위
+    return {'n': len(base), 'q50': qq(50), 'q25': qq(25), 'q10': qq(10),
+            'p': lambda y: sum(1 for s in base if s >= y) / len(base) * 100}

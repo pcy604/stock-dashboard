@@ -4634,6 +4634,15 @@ def _earn_data(sym, is_kr):
     return out
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def _swing_stations():
+    """전 종목 스윙 역 지도(results/swing_stations.json, swing-stations 워크플로 월 1회)."""
+    try:
+        return json.loads(Path('results/swing_stations.json').read_text(encoding='utf-8'))
+    except Exception:
+        return None
+
+
 @st.cache_data(ttl=12 * 3600, show_spinner=False, max_entries=48)
 def _kr_results_dates(sym):
     """KR 실적 발표 이벤트(DART 잠정실적·정기보고서) — 성공만 캐시(실패는 예외)."""
@@ -7114,41 +7123,71 @@ def _tab_analysis():
                                            f"피라미딩은 첫 매수가 수익일 때만 {_pf_(_liv['adds'][0])}·{_pf_(_liv['adds'][1])}(피벗 +5%·+10%)에서 — "
                                            "손실 중 추가(물타기)는 금지. 원칙 v1 은 불타기 기본 OFF(검증상 수익 개선 없음).")
 
-                        # 🚏 정류장
+                        # 🚏 정류장 — 전 종목 빅데이터 (2026-10-27 개편)
+                        #   사용자 지적: 5% 간격 막대는 '역'을 무시하고 n 미터마다 자른 것. → 전 종목 스윙(한국 1,240종 12.6만 개·
+                        #   미국 2,511종 33만 개, results/swing_stations.json)으로 '이미 x% 간 스윙이 y% 까지 간 확률'을 잰다.
+                        #   발견: 하락은 2.5%p마다 멈출 확률이 거의 일정(특별한 % 역이 없다), 상승은 멀리 갈수록 덜 멈춘다(급행).
                         st.markdown("### 🚏 정류장 — 이만큼 움직였으면 어디까지 갔나")
-                        _nd = len(_sw['declines']); _nr = len(_sw['rallies'])
-                        if _cur:
-                            _dirk = '하락' if _cur['dir'] == 'down' else '상승'
-                            _nsx = _ns_dn if _cur['dir'] == 'down' else _ns_up
-                            _rch = _cur.get('reached', _cur['move'])
-                            st.markdown(f"지금은 **{_cur['from_date']:%Y-%m-%d} {('고점' if _cur['dir'] == 'down' else '저점')} {_pf_(_cur['from'])}에서 "
-                                        f"{_dirk} 스윙 진행 중** — 이번 스윙에서 최대 {_rch:.0f}%까지 갔고 지금은 {_cur['move']:.0f}%. "
-                                        + (f"과거 {_dirk} 스윙 {(_nd if _cur['dir'] == 'down' else _nr)}회 중 {_rch:.0f}% 이상 간 것이 **{_nsx['n']}회**"
-                                           + (f", 그 스윙들의 최종 {_dirk}폭 중앙값은 **{_nsx['median_final']:.0f}%**." if _nsx['median_final'] else '.')
-                                           if _rch >= 10 else f"아직 10% 미만이라 스윙으로 치기 전(과거 {_dirk} 스윙 중앙값 "
-                                           f"{float(np.median(_sw['declines'] if _cur['dir'] == 'down' else _sw['rallies']) if (_nd if _cur['dir'] == 'down' else _nr) else 0):.0f}%)."))
+                        _ssj = _swing_stations()
+                        _mk = 'KR' if is_kr_sym else 'US'
+                        _mm = (_ssj or {}).get('markets', {}).get(_mk)
+                        _vol_full = float(np.log(_c_all[_c_all > 0]).diff().std() * np.sqrt(252) * 100)
+                        _bk = _tp.vol_bucket(_vol_full, (_mm or {}).get('cut'))
+                        _bkl = {'low': '변동성 낮은', 'mid': '변동성 중간', 'high': '변동성 높은', 'all': '전체'}[_bk]
+                        _pool = ((_mm or {}).get('buckets') or {}).get(_bk) if _mm else None
+                        _rch = _cur.get('reached', _cur.get('move', 0)) if _cur else 0
+                        _dirk = ('하락' if _cur.get('dir') == 'down' else '상승') if _cur else None
+                        if _cur and _pool:
+                            _key = 'dec' if _cur['dir'] == 'down' else 'ral'
+                            _po = _tp.pooled_outlook(_tp.DEC_EDGES if _key == 'dec' else _tp.RAL_EDGES, _pool[_key], _rch)
+                            _sgn = '-' if _key == 'dec' else '+'
+                            if _po.get('n'):
+                                st.markdown(f"지금은 **{_cur['from_date']:%Y-%m-%d} {('고점' if _key == 'dec' else '저점')} {_pf_(_cur['from'])}에서 {_dirk} 스윙 중** "
+                                            f"(이번 스윙 최대 {_rch:.0f}%, 지금 {_cur['move']:.0f}%). "
+                                            f"{_mk} {_bkl} 종목들의 {_dirk} 스윙 중 {_rch:.0f}% 이상 간 **{_po['n']:,}개**를 보면 → "
+                                            f"**절반은 {_sgn}{_po['q50'] or '-'}%까지**, 4개 중 1개는 {_sgn}{_po['q25'] or '-'}%, 10개 중 1개는 {_sgn}{_po['q10'] or '-'}%까지 갔다.")
+                        elif _cur:
+                            st.caption("전 종목 역 지도가 아직 없다 — 이 종목 자체 스윙만 본다.")
                         _g1, _g2 = st.columns(2, gap='large')
-                        for _col, _nm2, _sz, _nsx, _clr in ((_g1, '하락', _sw['declines'], _ns_dn, '#DC2626'), (_g2, '상승', _sw['rallies'], _ns_up, '#16A34A')):
+                        for _col, _dk, _nm2, _key2, _E, _sz, _clr in ((_g1, 'down', '하락', 'dec', _tp.DEC_EDGES, _sw['declines'], '#DC2626'),
+                                                                     (_g2, 'up', '상승', 'ral', _tp.RAL_EDGES, _sw['rallies'], '#16A34A')):
                             with _col:
-                                _gm = _tp.gap_map(_sz)
-                                if _gm:
-                                    _fg = go.Figure(go.Bar(x=[f"{int(g['from'])}→{int(g['to'])}" for g in _gm], y=[g['p'] for g in _gm],
-                                                           marker_color=_clr, text=[f"{g['p']:.0f}%<br>n={g['n']}" for g in _gm],
-                                                           textposition='outside', cliponaxis=False))
-                                    _fg.update_layout(height=240, margin=dict(l=0, r=0, t=30, b=0), yaxis=dict(range=[0, 115], ticksuffix='%'),
-                                                      title=dict(text=f"{_nm2} 스윙: x% 넘으면 x+5% 도 넘은 비율", font=dict(size=13)))
-                                    st.plotly_chart(_fg, use_container_width=True)
-                                if _nsx['rows'] and _nsx['n']:
-                                    _now_m = _cur.get('reached', 0) if _cur.get('dir') == ('down' if _nm2 == '하락' else 'up') else 0
-                                    _tsrc(f"일봉 종가 지그재그(10% 되돌림 = 새 스윙) · {_c_all.index[0]:%Y-%m}~", live=True)
-                                    st.dataframe(pd.DataFrame([{f"{_nm2} 도달(%)": r['level'], '도달(회)': r['hit'],
-                                                                '확률(%)': None if r['p'] is None else round(r['p'])}
-                                                               for r in _nsx['rows'][:7]]), filters=False)
-                                    st.caption(f"기준: 지금까지 {_now_m:.0f}% {_nm2}한 스윙 {_nsx['n']}회"
-                                               + (" — ⚠️ 표본 8회 미만, 참고 불가" if _nsx['n'] < 8 else ''))
-                        st.caption("막대가 높은 구간 = 정류장 사이가 먼 곳: 그 지점을 넘으면 다음 5%도 대부분 넘었다(멈추지 않고 간다). "
-                                   "낮은 구간 = 자주 멈추던 정류장. 스윙은 일봉 종가 기준, 반대로 10% 이상 되돌리면 끝난 것으로 본다. "
-                                   "**이 종목 자체의 과거 빈도**일 뿐 — 시장 국면·실적이 바뀌면 달라진다.")
+                                _x0 = _rch if (_cur and _cur.get('dir') == _dk) else 10.0
+                                _po2 = _tp.pooled_outlook(_E, _pool[_key2], _x0) if _pool else {'n': 0}
+                                _so2 = _tp.stock_outlook(_sz, _x0)
+                                _fg = go.Figure()
+                                if _po2.get('n'):
+                                    _cv = [(y, p) for y, p in _po2['curve'] if p >= 1][:40]
+                                    _fg.add_trace(go.Scatter(x=[y for y, _ in _cv], y=[p for _, p in _cv], mode='lines', name=f"{_mk} {_bkl} 전체",
+                                                             line=dict(color=_clr, width=3)))
+                                if _so2.get('n', 0) >= 8:
+                                    _ys = [y for y in _E if y > _x0][:20]
+                                    _fg.add_trace(go.Scatter(x=_ys, y=[_so2['p'](y) for y in _ys], mode='markers+lines', name='이 종목',
+                                                             line=dict(color='#6B7280', width=1.5, dash='dot'), marker=dict(size=5)))
+                                _fg.update_layout(height=250, margin=dict(l=0, r=0, t=34, b=0), yaxis=dict(range=[0, 101], ticksuffix='%'),
+                                                  xaxis=dict(ticksuffix='%'), legend=dict(orientation='h', y=-0.25, x=0),
+                                                  title=dict(text=f"{_nm2} {_x0:.0f}% 간 스윙이 x% 까지 간 확률", font=dict(size=13)))
+                                for _lv in (50, 25, 10):
+                                    _fg.add_hline(y=_lv, line=dict(color='#D1D5DB', width=1, dash='dash'))
+                                st.plotly_chart(_fg, use_container_width=True)
+                                _lvls = ([5, 10, 15, 20, 30, 40] if _key2 == 'dec' else [10, 20, 30, 50, 80, 120])
+                                _rows = []
+                                for _d in _lvls:
+                                    _y = _x0 + _d
+                                    _pp = next((p for yy, p in (_po2.get('curve') or []) if yy >= _y), None) if _po2.get('n') else None
+                                    _rows.append({f"{_nm2} 도달(%)": round(_y), "전 종목 확률(%)": None if _pp is None else round(_pp),
+                                                  '이 종목 확률(%)': round(_so2['p'](_y)) if _so2.get('n', 0) >= 8 else None})
+                                _tsrc(f"전 종목 일봉 지그재그(10% 되돌림 = 새 스윙) · {(_ssj or {}).get('asof', '-')} 집계 · 이 종목 {_c_all.index[0]:%Y-%m}~",
+                                      path='results/swing_stations.json')
+                                st.dataframe(pd.DataFrame(_rows), filters=False, color=False)
+                                st.caption(f"기준: 이미 {_x0:.0f}% {_nm2}한 스윙 — 전 종목 {_po2.get('n', 0):,}개 · 이 종목 {_so2.get('n', 0)}개"
+                                           + (" (이 종목 8개 미만 — 이 종목 열 생략)" if _so2.get('n', 0) < 8 else ''))
+                        st.caption(f"묶음: {_mk} · 연 변동성 {_vol_full:.0f}% → '{_bkl}' 그룹"
+                                   + (f"(경계 {_mm['cut'][0]:.0f}%·{_mm['cut'][1]:.0f}%, {(_mm or {}).get('n_stocks', 0):,}종에서 3분위)" if _mm else '')
+                                   + ". **전 종목 스윙 수십만 개에서 확인된 사실**: 하락은 10%를 넘긴 뒤 2.5%p마다 멈출 확률이 미국 약 20%로 거의 일정하다 — "
+                                   "'특정 % 에서 잘 멈추는 역'은 없다(역은 % 가 아니라 가격대 — 지지·매물대 — 에 있을 가능성). "
+                                   "상승은 멀리 갈수록 멈출 확률이 24% → 11%로 줄어든다 — 많이 오른 스윙일수록 다음 구간도 잘 간다(급행). "
+                                   "⚠️ 상장폐지 종목이 빠져 있어 큰 하락 확률은 실제보다 낮게 나온다.")
 
                         if _fs and _fs.get('n'):
                             st.markdown("### 📈 비슷한 자리에서 산 날의 6개월 뒤")
