@@ -5232,6 +5232,14 @@ def _tab_analysis():
                 price_prev= hist['Close'].iloc[-2] if len(hist) > 1 else price_now
                 chg_pct   = (price_now / price_prev - 1) * 100
 
+                # 2026-10-28 — 시총을 야후 info 하나에만 기대고 있었다. 클라우드에서 야후가 요청 제한으로 비면 시총 0 →
+                #   PER·PBR·PSR·EPS 가 전부 '-'(AXTI 실화면, 사용자 지적). S&P500 밖 미국 종목은 다른 출처도 없었다.
+                #   → 커밋된 공시 주식수(SEC dei · KRX 상장주식수) × 지금 주가로 메운다.
+                if not info.get('marketCap'):
+                    _shn = _shares_now(sym8_clean, len(sym8_clean) == 6 and sym8_clean[:5].isdigit(), info)
+                    if _shn and float(price_now) > 0:
+                        info['marketCap'] = _shn * float(price_now)
+                        info['_mc_src'] = '공시 주식수 × 현재가(야후 시총 없음)'
                 mc = info.get('marketCap', 0) or 0
                 # 2026-10-17 — KR 시총(원)을 달러 기호로 찍고 있었다(삼성전자 '$1403319.4B'). 통화대로 표기.
                 if len(sym8_clean) == 6 and sym8_clean[:5].isdigit():
@@ -6188,7 +6196,7 @@ def _tab_analysis():
                     ])
                     st.caption(f"기준 — PER·PSR(TTM)·EPS(TTM): 공시 확정 최근 4분기({_vb.get('ttm_label', '-')}) 합 · "
                                f"PBR: {_vb.get('equity_label', '-')} 분기말 자본 · 12MF: 컨센서스 올해E·내년E를 남은 기간으로 가중 · "
-                               "주가·시총은 실시간. "
+                               f"주가 실시간 · 시총 {info.get('_mc_src') or '야후 실시간'}. "
                                f"ROE·ROA·마진·매출성장·부채비율 = 공시 분기 재무 자체 계산({_pf.get('basis', '-')}, ROE·ROA 분모는 최신 분기말 잔액, "
                                "부채비율 = 부채총계÷자본) — 공시값이 없을 때만 yfinance. "
                                f"PEG = {'yfinance' if (yi2.get('trailingPegRatio') or yi2.get('pegRatio')) else 'PER(12MF) ÷ EPS 성장률(12MF vs TTM)'}. "
