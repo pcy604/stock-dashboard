@@ -208,6 +208,11 @@ SOURCES = [
          cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 실적 발표 · 서프라이즈(KR)',
          getter=_cq_max_date, raw=True),
+    # 2026-10-27 — 공통 재무 스냅샷(종목 목록 표 공통 열 · 종목 분석 🏁 업종 내 순위). 감시 누락이던 것.
+    dict(path='results/fund_snapshot.json', label='공통 재무 스냅샷(매출·영업익 YoY·PER)',
+         cycle='주 1회 (금)', max_age=10, producer='tools/fund_snapshot.py',
+         job='weekly-accel · turnaround-refresh', used_by='모든 종목 목록 표 · 🔍 종목 분석 → 🏁 업종 내 순위',
+         getter=_key('date')),
     # 2026-10-27 — 전 종목 스윙 정류장 지도(종목 분석 🚏). 월 1회(첫 일요일).
     dict(path='results/swing_stations.json', label='전 종목 스윙 정류장 지도',
          cycle='월 1회 (첫 일요일)', max_age=40, producer='tools/swing_stations.py',

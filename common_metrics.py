@@ -113,11 +113,46 @@ def build(usdkrw: float) -> tuple[pd.DataFrame, dict]:
 
     sec = _sector_map()
     out['업종'] = [(sec.get(s) or None) for s in out.index]
+    out['_업종full'] = out['업종']                     # 잘리기 전 이름 — 업종 내 순위(peer_rank)가 쓴다
     out['업종'] = out['업종'].map(lambda x: x if not isinstance(x, str) or len(x) <= SECTOR_MAX
                                 else x[:SECTOR_MAX - 1] + '…')
     meta = dict(ret_date=rj.get('date'), perf_date=pj.get('date'), fund_date=fj.get('date'),
                 rs_exact=exact, n_fund_kr=fj.get('n_kr'), n_fund_us=fj.get('n_us'))
     return out, meta
+
+
+# 업종 내 순위 — 높을수록 좋은 열 / 낮을수록 '싼' 열(PER). 시총은 업종 내 덩치 순서.
+PEER_METRICS = [('시총', False), ('RS', False), ('1개월(%)', False), ('52주고점대비(%)', False),
+                ('매출YoY(%)', False), ('영업익YoY(%)', False), ('PER(배)', True)]
+
+
+def peer_rank(base: pd.DataFrame, sym: str) -> dict | None:
+    """같은 시장 · 같은 업종(잘리기 전 이름) 안에서 이 종목의 지표별 순위.
+
+    반환: {'sector', 'market', 'n', 'rows': [{'지표', '값', '순위', '비교수', '상위(%)', '업종중앙'}], 'peers': [코드…(시총순)]}
+    값이 없는 종목은 그 지표의 분모에서 뺀다(비교수가 지표마다 다를 수 있다). PER 은 낮은 순(싼 순)."""
+    if base is None or base.empty or sym not in base.index:
+        return None
+    me = base.loc[sym]
+    sec = me.get('_업종full') if '_업종full' in base.columns else me.get('업종')
+    if not isinstance(sec, str) or not sec:
+        return None
+    col = '_업종full' if '_업종full' in base.columns else '업종'
+    g = base[(base[col] == sec) & (base['시장'] == me['시장'])].copy()
+    g['시총'] = g['_mc_usd']
+    rows = []
+    for c, asc in PEER_METRICS:
+        v = pd.to_numeric(g[c], errors='coerce').dropna()
+        mv = pd.to_numeric(pd.Series([g.loc[sym, c]]), errors='coerce').iloc[0]
+        if pd.isna(mv) or len(v) < 2:
+            rows.append({'지표': c, '값': None if pd.isna(mv) else float(mv), '순위': None, '비교수': int(len(v)),
+                         '상위(%)': None, '업종중앙': float(v.median()) if len(v) else None})
+            continue
+        rk = int((v < mv).sum() + 1) if asc else int((v > mv).sum() + 1)
+        rows.append({'지표': c, '값': float(mv), '순위': rk, '비교수': int(len(v)),
+                     '상위(%)': round(rk / len(v) * 100), '업종중앙': float(v.median())})
+    peers = g.sort_values('시총', ascending=False, na_position='last').index.astype(str).tolist()
+    return {'sector': sec, 'market': me['시장'], 'n': int(len(g)), 'rows': rows, 'peers': peers}
 
 
 def frame(rows: pd.DataFrame, base: pd.DataFrame, specific: list[str], market: str = '전체',

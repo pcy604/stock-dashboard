@@ -1456,7 +1456,7 @@ def _cand_register(rows, key: str):
 
 
 _CAND_FROM = {'core': '교집합', 'gain': '상승 상위', 'h52': '52주 신고가', 'canslim': 'CANSLIM',
-              'accel': '이익가속', 'turn': '흑자전환', 'value': '가치 발굴'}
+              'accel': '이익가속', 'turn': '흑자전환', 'value': '가치 발굴', 'peer': '종목 분석·업종 순위'}
 
 
 def _cand_panel():
@@ -5297,18 +5297,81 @@ def _tab_analysis():
                 # ── 화면 순서 (2026-10-19 재배치) ───────────────────────────────
                 # 코드는 데이터 의존 순서대로 돌고, **보이는 순서는 이 컨테이너 순서**가 정한다.
                 # 판단 → 가격·위험 → 실적 → 구조 → 가치 → 근거 상세 → 원표 → 개요 → 참고 통계.
-                _SEC = {_k: st.container() for _k in ('summary', 'plan', 'price', 'flow', 'earn', 'seg', 'val',
+                _SEC = {_k: st.container() for _k in ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val',
                                                      'canslim', 'fin', 'profile', 'ref')}
                 if IS_MOBILE:
                     # 2026-10-21 — 폰에서 종목 하나가 세로 2만 px(손가락 24번)였다. 요약 판단만 펼쳐 두고 나머지는 탭으로.
                     #   (펼침 상자 안에 펼침 상자를 넣을 수 없어 '접기' 대신 탭 — 섹션 안에 이미 펼침 상자가 있다)
                     _SEC = {'summary': _SEC['summary'], 'plan': _SEC['plan']}   # 매매 판단도 탭 밖에(핵심)
-                    _mtabs = st.tabs(["📈 가격", "💵 실적", "🏭 구조", "⚖️ 가치", "📊 재무", "🏢 개요", "📆 참고·내부자"])
-                    for _tb, _keys in zip(_mtabs, (('price',), ('flow', 'earn'), ('seg',), ('val', 'canslim'),
+                    _mtabs = st.tabs(["🏁 업종", "📈 가격", "💵 실적", "🏭 구조", "⚖️ 가치", "📊 재무", "🏢 개요", "📆 참고·내부자"])
+                    for _tb, _keys in zip(_mtabs, (('peer',), ('price',), ('flow', 'earn'), ('seg',), ('val', 'canslim'),
                                                    ('fin',), ('profile',), ('ref',))):
                         with _tb:
                             for _k in _keys:
                                 _SEC[_k] = st.container()
+                with _SEC['peer']:
+                    # ── 🏁 업종 내 순위 (2026-10-27) ─────────────────────────────────────
+                    #   대가 5인 관점 평가의 공통 결손 = '동종업계 대비'. 오닐(업종 1·2등만)·린치(동종 PER)·리버모어(동반 상승)·
+                    #   박세익·윤지호(주도 업종 안의 위치). 숫자는 종목발굴 표와 같은 common_metrics 에서만 가져온다.
+                    try:
+                        import html as _hp
+                        _pr = _cm.peer_rank(_CMB, sym8_clean)
+                        st.divider()
+                        st.subheader("🏁 업종 내 순위 — 같은 업종에서 몇 등인가")
+                        if not _pr:
+                            st.caption("업종 분류가 없어 비교할 수 없다(공통 지표 명단 밖 종목이거나 업종 미분류).")
+                        elif _pr['n'] < 3:
+                            st.caption(f"'{_pr['sector']}' 업종에 비교할 종목이 {_pr['n'] - 1}개뿐이라 순위가 의미 없다.")
+                        else:
+                            _usd = _pr['market'] == 'US'
+                            def _pv(c, v):
+                                if v is None:
+                                    return '-'
+                                if c == '시총':
+                                    return f"${v / 1e9:,.1f}B" if _usd else f"{v * _usdkrw() / 1e8:,.0f}억원"
+                                if c == 'RS':
+                                    return f"{v:.0f}"
+                                if c == 'PER(배)':
+                                    return f"{v:,.1f}배"
+                                return f"{v:+,.1f}%"
+                            _lab = {'시총': '시총 (덩치)', 'RS': 'RS (주가 강도)', '1개월(%)': '1개월 수익률',
+                                    '52주고점대비(%)': '52주 고점 근접', '매출YoY(%)': '매출 성장(YoY)',
+                                    '영업익YoY(%)': '영업익 성장(YoY)', 'PER(배)': 'PER (싼 순)'}
+                            _cards = []
+                            for _r in _pr['rows']:
+                                _c = _r['지표']
+                                if _r['순위'] is None:
+                                    _cards.append(f'<div class="mo-kpi na"><span class="l">{_hp.escape(_lab[_c])}</span><span class="v">-</span>'
+                                                  f'<span class="s">이 종목 {_hp.escape(_pv(_c, _r["값"]))} · 업종 중앙 {_hp.escape(_pv(_c, _r["업종중앙"]))}'
+                                                  f' · 비교 {_r["비교수"]}종</span></div>')
+                                    continue
+                                _q = _r['순위'] / _r['비교수']
+                                _tone = 'na' if _c in ('시총', 'PER(배)') else ('good' if _q <= 1 / 3 else 'bad' if _q > 2 / 3 else 'mid')
+                                _cards.append(f'<div class="mo-kpi {_tone}"><span class="l">{_hp.escape(_lab[_c])}</span>'
+                                              f'<span class="v">{_r["순위"]}<small style="font-size:14px;font-weight:500"> / {_r["비교수"]}위</small></span>'
+                                              f'<span class="s">이 종목 {_hp.escape(_pv(_c, _r["값"]))} · 업종 중앙 {_hp.escape(_pv(_c, _r["업종중앙"]))}</span></div>')
+                            _top = [r for r in _pr['rows'] if r['순위'] == 1 and r['지표'] not in ('PER(배)',)]
+                            _rs_r = next(r for r in _pr['rows'] if r['지표'] == 'RS')
+                            _lead = ('**업종 RS 1등** — 오닐이 말한 "업종의 1·2등만 산다"에 맞는다.' if _rs_r['순위'] == 1 else
+                                     '**업종 RS 2등**' if _rs_r['순위'] == 2 else
+                                     (f"업종 RS {_rs_r['순위']}등 — 이 업종의 주도주는 따로 있다(아래 표 RS 순으로 확인)." if _rs_r['순위'] else 'RS 없음'))
+                            st.markdown(f"**{_pr['sector']}** · {'미국' if _usd else '한국'} {_pr['n']}종 중 → {_lead}"
+                                        + (f" 1등 항목: {', '.join(_lab[r['지표']].split(' (')[0] for r in _top)}." if _top else ''))
+                            st.markdown(f'<div class="mo-kpis">{"".join(_cards)}</div>', unsafe_allow_html=True)
+                            _pe = _pr['peers'][:15]
+                            if sym8_clean not in _pe:
+                                _pe.append(sym8_clean)
+                            _prow = pd.DataFrame({'코드': _pe, '구분': ['⭐ 이 종목' if c == sym8_clean else '' for c in _pe]})
+                            with st.expander(f"같은 업종 종목 {len(_pe)}개 (시총순)", expanded=not IS_MOBILE):
+                                _std_table(_prow, ['구분'], sort_by='시총', src=f"업종 = {'SEC SIC 분류' if _usd else '한국 표준산업분류(KRX)'}",
+                                           path='results/fund_snapshot.json', note='RS 머리글을 누르면 업종 내 주도주 순')
+                                _cand_register(_cm.frame(_prow, _CMB, ['구분']), 'peer')
+                            st.caption("순위 = 같은 시장·같은 업종 안. 값이 없는 종목은 그 지표의 분모에서 뺀다(그래서 지표마다 비교 수가 다르다). "
+                                       "초록 = 상위 1/3 · 빨강 = 하위 1/3 · 시총·PER 은 좋고 나쁨이 아니라 칠하지 않는다. "
+                                       "⚠️ 업종 분류는 공식 분류라 거칠다 — 예: 삼성전자는 한국 표준산업분류상 '통신 및 방송 장비 제조업'.")
+                    except Exception as _e_peer:
+                        st.caption(f"`업종 내 순위 실패: {type(_e_peer).__name__}: {str(_e_peer)[:120]}`")
+
                 with _SEC['profile']:
                     st.divider()
                     # ── 🏢 기업 개요 · IR · 공식 공시 (item 7) ──
@@ -5933,7 +5996,7 @@ def _tab_analysis():
 
                         # 2026-10-24 배치 정리 — 4칸(총점·점수표·좁은 수익률표·슬라이더)에 표가 눌리고 출처 줄이 세로로 깨졌다.
                         #   ① 판정 카드 한 줄(총점·등급·시장)  ② 점수표 | 정성 입력  ③ 수익률은 칩 한 줄(L 의 근거)
-                        _ca, _cb, _cm = st.columns(3)
+                        _ca, _cb, _cmk = st.columns(3)
                         _cl, _cr_ = st.columns([1.7, 1], gap='large')
                         with _cr_:
                             with st.container(border=True):
@@ -5952,7 +6015,7 @@ def _tab_analysis():
 
                         _ca.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
                         _cb.metric("등급", _grade, help="S 90+ · A 70+ · B 50+ · C 30+ · D")
-                        _cm.metric("M 시장 국면", _Mlabel or '—', help="verdict.core_switch — KR=코스피, US=S&P500 200일선")
+                        _cmk.metric("M 시장 국면", _Mlabel or '—', help="verdict.core_switch — KR=코스피, US=S&P500 200일선")
                         with _cl:
                             _scdf = pd.DataFrame([{'항목': k, '점수': (round(v, 1) if isinstance(v, (int, float)) else None),
                                                    '근거': d} for k, v, d in _parts])
