@@ -27,3 +27,13 @@ def test_peer_rank_custom_group():
     r = cm.peer_rank(b, 'A', codes=['B', 'C', 'ZZ'], label='반도체 장비')
     assert r['sector'] == '반도체 장비' and r['n'] == 3          # 자기 자신은 항상 포함 · 없는 코드는 무시
     assert {x['지표']: x['순위'] for x in r['rows']}['RS'] == 3
+
+
+def test_kr_peer_groups_prefers_industry_theme():
+    import common_metrics as cm
+    sd = {'kr': {'A': {'upjong': '반도체와반도체장비', 'themes': ['LED장비', '반도체 장비']}},
+          'theme': {'LED장비': ['A', 'B', 'C'], '반도체 장비': ['A', 'B', 'C', 'D', 'E']},
+          'upjong': {'반도체와반도체장비': ['A', 'B', 'C', 'D', 'E', 'F']}}
+    g = cm.kr_peer_groups('A', sd, set('ABCDEF'))
+    assert g[0][0].startswith('테마 · 반도체 장비')          # 좁은 'LED장비'가 아니라 업종형 테마가 기본
+    assert g[1][0].startswith('네이버 업종')

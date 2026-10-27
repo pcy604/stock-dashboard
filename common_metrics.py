@@ -223,3 +223,40 @@ def help_config(st, df: pd.DataFrame) -> dict:
 def source_label(meta: dict) -> str:
     return (f"공통 열: 수익률·RS returns.json({meta.get('ret_date', '-')}) · 52주고점 perf_latest.json({meta.get('perf_date', '-')}) "
             f"· 매출·영업익·PER fund_snapshot.json({meta.get('fund_date', '-')}, DART·네이버·SEC EDGAR)")
+
+
+# ── 세부 업종 기본값 (2026-10-27) ──────────────────────────────────────────
+# 네이버 테마 261개는 '업종형(밸류체인)'과 '화제형(HBM·뉴로모픽·밸류업…)'이 섞여 있다. 좁은 순·업종 일치율로 고르면
+# 주성엔지니어링 → 'LED장비', 삼성전자 → '뉴로모픽 반도체'가 됐다. → 업종형 테마를 사람이 골라 우선순위로 둔다(앞이 우선).
+INDUSTRY_THEMES = [
+    '반도체 대표주(생산)', '반도체 장비', '반도체 재료/부품', '반도체 기판(FC-BGA/PCB/MLB 등)',
+    '2차전지(생산)', '2차전지(장비)', '2차전지(소재/부품)',
+    'PCB(FPCB 등)', 'MLCC(적층세라믹콘덴서)', '카메라모듈/부품', '통신장비', 'LED장비',
+    '조선', '조선기자재', '자동차 대표주', '자동차부품', '타이어', '방위산업/전쟁 및 테러', '항공기부품',
+    '원자력발전', '전력설비', '전선', '건설기계', '공작기계', '건설 대표주', '건설 중소형', '시멘트/레미콘',
+    '철강 주요종목', '철강 중소형', '강관업체(Steel pipe)', '비철금속', '석유화학', '정유', '화학섬유', '페인트', '윤활유',
+    '제약업체', '바이오시밀러(복제 바이오의약품)', '의료기기', '화장품', '음식료업종', '주류업(주정, 에탄올 등)',
+    '패션/의류', '게임', '엔터테인먼트', '영상콘텐츠', '미디어(방송/신문)', '광고',
+    '증권', '생명보험', '손해보험', '창투사', '해운', '항공/저가 항공사(LCC)', '종합 물류',
+    '통신', '인터넷 대표주', 'SI(시스템통합)', '보안주(정보)', '제지', '골판지 제조',
+    '소매유통', '백화점', '편의점', '홈쇼핑', '카지노', '호텔/리조트', '여행', '도시가스', '폐기물처리',
+    '비료', '사료', '수산', '육계', '피팅(관이음쇠)/밸브', '리츠(REITs)',
+]
+
+
+def kr_peer_groups(sym: str, sd: dict, universe: set) -> list[tuple[str, list]]:
+    """KR 종목의 '비교할 무리' 후보(앞이 기본값). sd = 대시보드 _sector_detail() 역색인.
+    순서: 업종형 테마(INDUSTRY_THEMES 순) → 나머지 테마(명단 안 종목 수 적은 순) → 네이버 업종. 명단 안 3종 미만은 뺀다."""
+    mine = (sd.get('kr') or {}).get(sym) or {}
+    cnt = lambda cs: sum(1 for c in cs if c in universe)
+    ths = [(t, (sd.get('theme') or {}).get(t, [])) for t in mine.get('themes') or []]
+    ths = [(t, cs) for t, cs in ths if cnt(cs) >= 3]
+    pri = {t: i for i, t in enumerate(INDUSTRY_THEMES)}
+    ths.sort(key=lambda x: (pri.get(x[0], 999), cnt(x[1])))
+    out = [(f"테마 · {t} ({cnt(cs)}종)", cs) for t, cs in ths]
+    if mine.get('upjong'):
+        cs = (sd.get('upjong') or {}).get(mine['upjong'], [])
+        nu = (f"네이버 업종 · {mine['upjong']} ({cnt(cs)}종)", cs)
+        # 업종형 테마가 하나도 없으면 네이버 업종(WICS 비슷)이 화제형 테마보다 낫다
+        out = out[:1] + [nu] + out[1:] if (out and ths[0][0] in pri) else [nu] + out
+    return out

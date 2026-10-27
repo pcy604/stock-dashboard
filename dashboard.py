@@ -5343,14 +5343,7 @@ def _tab_analysis():
                         _inb = set(_CMB.index) if not _CMB.empty else set()
                         _grp = []                                  # (라벨, 코드목록 or None)
                         if is_kr_sym:
-                            _mine = (_sd.get('kr') or {}).get(sym8_clean) or {}
-                            _ths = [(t, _sd['theme'].get(t, [])) for t in _mine.get('themes') or []]
-                            _ths = [(t, c) for t, c in _ths if sum(1 for x in c if x in _inb) >= 4]
-                            _ths.sort(key=lambda x: sum(1 for c in x[1] if c in _inb))   # 좁은 테마부터
-                            _grp += [(f"테마 · {t} ({sum(1 for c in cs if c in _inb)}종)", cs) for t, cs in _ths]
-                            if _mine.get('upjong'):
-                                _cs = _sd['upjong'].get(_mine['upjong'], [])
-                                _grp.append((f"네이버 업종 · {_mine['upjong']} ({sum(1 for c in _cs if c in _inb)}종)", _cs))
+                            _grp += _cm.kr_peer_groups(sym8_clean, _sd, _inb)
                         else:
                             _ind = ((_sd.get('us') or {}).get(sym8_clean) or {}).get('industry')
                             if _ind:
@@ -5358,7 +5351,7 @@ def _tab_analysis():
                                 _grp.append((f"세부 산업 · {_ind} ({sum(1 for c in _cs if c in _inb)}종)", _cs))
                         _grp.append(("공식 분류 · " + ('한국 표준산업분류' if is_kr_sym else 'SEC SIC'), None))
                         _gsel = st.selectbox("비교할 무리", [g[0] for g in _grp], index=0, key=f'peer_grp_{sym8_clean}',
-                                             help="테마는 네이버 금융이 사람 손으로 묶은 분류라 한 종목이 여러 테마에 들어간다(좁은 테마부터). "
+                                             help="테마는 네이버 금융이 사람 손으로 묶은 분류라 한 종목이 여러 테마에 들어간다. 기본값은 업종형 테마(반도체 장비·2차전지 소재 등) → 네이버 업종 → 화제형 테마 순. "
                                                   "공식 분류는 거칠다(반도체 장비가 '특수 목적용 기계').")
                         _gcodes = dict(_grp)[_gsel]
                         _glabel = _gsel.split(' · ', 1)[1].rsplit(' (', 1)[0] if _gcodes is not None else None
