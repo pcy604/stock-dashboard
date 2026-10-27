@@ -43,6 +43,10 @@ _PROMPT = """당신은 재무 애널리스트다. 아래는 한국 기업의 DAR
     ※ 회계기준(K-IFRS 부문정보)은 경영진이 쓰는 지표를 공시 → 회사마다 다름. 원문에 실제 있는 것만.
 - segment_measure_label: 위 지표의 한글 표시명 ("부문 OPM" 또는 "부문 GPM" 또는 "부문 마진 미공시")
 - note: 한 줄 특이사항 (없으면 "")
+- regions: 지역별 매출 배열 — '매출 및 수주상황'의 내수/수출 또는 국가·지역별 매출 표. 각 항목 {name, revenue(원), pct(%)}.
+    원문에 표가 없으면 빈 배열 []. 수출을 다시 지역으로 나눈 표가 있으면 그 표를 쓴다.
+- customers: 주요 매출처(고객사) 배열 — 원문에 실제로 적힌 것만. 각 항목 {name, pct(전체 매출 대비 %, 없으면 null), note(짧게)}.
+    이름이 'A사'·'가사'처럼 익명이면 그대로 쓴다. 원문에 없으면 빈 배열 [].
 
 JSON만 출력. 마크다운 코드블록 없이."""
 
@@ -59,6 +63,8 @@ def load_cached(sym, max_age_days=30):
         d = json.loads(p.read_text(encoding='utf-8'))
         gen = datetime.fromisoformat(d.get('_generated', '2000-01-01'))
         if (datetime.now() - gen).days > max_age_days:
+            return None
+        if 'regions' not in d:          # 2026-10-23 지역·고객 항목 추가 전 캐시 → 한 번 다시 뽑는다
             return None
         return d
     except Exception:
@@ -83,6 +89,8 @@ Fields:
     Only what's actually in the text.
 - segment_measure_label: Korean label — "부문 GPM" or "부문 OPM" or "부문 마진 미공시"
 - note: one-line caveat in Korean (or "")
+- regions: revenue by geography if the text has it — array of {name (Korean if obvious, e.g. "미국","중국"), revenue (USD), pct}; [] if absent
+- customers: major customers disclosed — array of {name (as written, e.g. "Customer A"), pct (% of revenue or null), note (short Korean)}; [] if absent
 
 JSON only, no markdown fence."""
 
@@ -125,7 +133,7 @@ def analyze_kr(sym, force=False):
         txt = dart_client.business_text(cc, max_chars=120000)
         if not txt:
             return None
-        head = txt[:60000]                  # 세그먼트 표는 '사업의 내용' 앞부분에 몰림
+        head = txt[:110000]                 # 부문 표는 앞부분, '매출 및 수주상황'(내수/수출·주요 매출처)은 뒤쪽 — 둘 다 들어가게
         client = G._gemini_client()
         resp = G._generate(client, [_PROMPT, "\n\n[사업보고서 원문]\n" + head])
         raw = resp.text if hasattr(resp, 'text') else str(resp)

@@ -1,0 +1,47 @@
+# 전 종목 스윙 '역 지도' (2026-10-27) — weekly-profile 이 저장한 longcache(일봉, 2008~)를 읽기만 하고 결과 JSON 만 커밋.
+# 매달 첫 일요일 + 수동 + 스크립트 수정 시.
+name: swing-stations
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 3 1-7 * 0'
+  push:
+    branches: [main]
+    paths: ['tools/swing_stations.py', 'trade_plan.py', '.github/workflows/swing-stations.yml']
+permissions:
+  contents: write
+concurrency:
+  group: swing-stations
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/longcache
+          key: longcache-none
+          restore-keys: |
+            longcache-
+      - name: 캐시 상태
+        run: echo "::notice title=longcache::$(ls data/longcache 2>/dev/null | wc -l) 종목"
+      - name: 역 지도 계산
+        run: python tools/swing_stations.py
+      - name: 커밋
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add results/swing_stations.json
+          git diff --cached --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "auto: 스윙 역 지도 $(date -u +%F)"
+          for i in 1 2 3; do git push origin HEAD:main && exit 0; git pull --rebase origin main; sleep 5; done
+          echo "::error::push 3회 실패"; exit 1

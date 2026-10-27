@@ -62,7 +62,7 @@ def parse(xml_bytes) -> dict | None:
                 en = _d(e.text or '')
         ctx[c.get('id')] = (dims, st, en)
 
-    dei, facts = {}, []
+    dei, facts, conc = {}, [], []
     for el in root:
         cr = el.get('contextRef')
         if not cr:
@@ -70,6 +70,13 @@ def parse(xml_bytes) -> dict | None:
         name = _local(el.tag)
         if el.tag.startswith('{http://xbrl.sec.gov/dei'):
             dei[name] = (el.text or '').strip()
+            continue
+        if name == 'ConcentrationRiskPercentage1':          # 주요 고객 비중(2026-10-23)
+            dims, st, en = ctx.get(cr, ([], None, None))
+            try:
+                conc.append((dims, st, en, float(el.text)))
+            except Exception:
+                pass
             continue
         if name not in _REV and not any(name in v for v in _PROFIT.values()):
             continue
@@ -148,7 +155,82 @@ def parse(xml_bytes) -> dict | None:
         if res:
             out['periods'] = res
             break                         # 사업부문 축이 있으면 그걸 쓰고, 없을 때만 제품 축
-    return out if out['periods'] else None
+    # ── 지역별 매출 · 주요 고객 (2026-10-23) — 같은 공시 파일, AI 없음 ──
+    try:
+        out['geo'] = _geo(facts, _bucket)
+        out['customers'] = _customers(conc, pe)
+    except Exception:
+        pass
+    return out if (out['periods'] or out.get('geo') or out.get('customers')) else None
+
+
+_GEO_AXIS = 'StatementGeographicalAxis'
+_GEO_KO = {'US': '미국', 'CN': '중국', 'TW': '대만', 'KR': '한국', 'JP': '일본', 'DE': '독일', 'GB': '영국', 'IN': '인도',
+           'CA': '캐나다', 'MX': '멕시코', 'SG': '싱가포르', 'HK': '홍콩', 'NL': '네덜란드', 'FR': '프랑스', 'IE': '아일랜드',
+           'BR': '브라질', 'AU': '호주', 'IL': '이스라엘', 'CH': '스위스', 'MY': '말레이시아', 'VN': '베트남'}
+
+
+def geo_name(member: str) -> str:
+    m = member.split(':')
+    if len(m) == 2 and m[0] == 'country':
+        return _GEO_KO.get(m[1], m[1])
+    n = pretty(member)
+    rep = {'Non Us': '미국 외', 'Americas': '미주', 'Europe': '유럽', 'Asia Pacific': '아시아·태평양', 'EMEA': '유럽·중동·아프리카',
+           'Europe Middle East And Africa': '유럽·중동·아프리카', 'Greater China': '중화권', 'Rest Of World': '기타 지역',
+           'Other Countries': '기타 국가', 'Asia': '아시아', 'North America': '북미', 'Latin America': '중남미'}
+    return rep.get(n, n)
+
+
+def _geo(facts, bucket) -> dict | None:
+    """매출 × StatementGeographicalAxis — 연간(fy) 우선, 없으면 누적(ytd)·분기(q). 지역은 회사가 겹치게 나누기도 한다
+    (미주 안에 미국) → 합이 연결 매출과 다르면 check_pct 로 드러낸다."""
+    per = {}
+    for name, dims, st, en, val in facts:
+        if name not in _REV:
+            continue
+        b = bucket(st, en)
+        if not b:
+            continue
+        main = [m for a, m in dims if a == _GEO_AXIS]
+        rest = [(a, m.split(':')[-1]) for a, m in dims if a != _GEO_AXIS]
+        if dims and not (len(main) == 1 and all(r in _OK_EXTRA for r in rest)):
+            continue
+        key = main[0] if main else '__total__'
+        rank = _REV.index(name)
+        row = per.setdefault(b, {}).setdefault(key, (rank, val, st, en))
+        if rank < row[0]:
+            per[b][key] = (rank, val, st, en)
+    for b in ('fy', 'ytd', 'q'):
+        rows = per.get(b) or {}
+        regs = [(m, v[1]) for m, v in rows.items() if m != '__total__' and v[1] > 0]
+        if len(regs) < 2:
+            continue
+        tot = (rows.get('__total__') or (None, None))[1]
+        regs.sort(key=lambda x: -x[1])
+        any_v = next(iter(rows.values()))
+        return {'basis': b, 'start': any_v[2].isoformat(), 'end': any_v[3].isoformat(), 'total': tot,
+                'regions': [{'member': m, 'name': geo_name(m), 'revenue': v, 'pct': (v / tot * 100) if tot else None} for m, v in regs],
+                'check_pct': (sum(v for _, v in regs) / tot - 1) * 100 if tot else None}
+    return None
+
+
+def _customers(conc, pe) -> list | None:
+    """ConcentrationRiskPercentage1 × MajorCustomersAxis, 매출 기준만. 고객 이름은 대부분 'Customer A' 처럼 익명."""
+    out = {}
+    for dims, st, en, v in conc:
+        if not en or abs((en - pe).days) > 7:
+            continue
+        d = {a: m for a, m in dims}
+        cust = d.get('MajorCustomersAxis')
+        bench = (d.get('ConcentrationRiskByBenchmarkAxis') or '').split(':')[-1]
+        if not cust or not re.search(r'Revenue|Sales', bench, re.I):
+            continue
+        days = (en - st).days if st else 0
+        k = cust
+        if k not in out or days > out[k]['days']:            # 같은 고객이면 긴 기간(연간)을 쓴다
+            out[k] = {'member': cust, 'name': pretty(cust), 'pct': v * 100 if v <= 1 else v, 'days': days}
+    rows = sorted(out.values(), key=lambda r: -r['pct'])
+    return rows or None
 
 
 def latest(ticker: str) -> dict | None:

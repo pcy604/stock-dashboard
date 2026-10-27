@@ -5756,6 +5756,55 @@ def _tab_analysis():
                                    + ("주요제품 설명은 AI 요약(숫자와 무관)." if not is_kr_sym else
                                       "⚠️ KR 부문 숫자는 AI 가 사업보고서에서 뽑은 값 — 위 검산 결과를 같이 볼 것."))
 
+                    # ── 🌍 지역별 매출 · 👥 주요 고객 (2026-10-23) ─────────────────────
+                    #   US = 같은 XBRL 파일(StatementGeographicalAxis · MajorCustomersAxis, AI 없음), 없으면 AI 추출
+                    #   KR = 사업보고서 '매출 및 수주상황'(내수/수출·주요 매출처) → 부문과 같은 AI 호출(추가 비용 없음)
+                    try:
+                        _sxg = _seg_xbrl(sym8_clean) if not is_kr_sym else None
+                        _geo = (_sxg or {}).get('geo')
+                        _cus = (_sxg or {}).get('customers')
+                        _ai_geo = (_seg_ai or {}).get('regions') if _ai_ok else None
+                        _ai_cus = (_seg_ai or {}).get('customers') if _ai_ok else None
+                        _rg_rows, _rg_src = [], ''
+                        if _geo:
+                            _rg_rows = [{'지역': r['name'], '매출': r['revenue'], '비중(%)': r['pct']} for r in _geo['regions']]
+                            _rg_src = (f"SEC XBRL 원본 · {_geo['start']}~{_geo['end']}"
+                                       + (f" · 합계 검산 {_geo['check_pct']:+.1f}%(겹치는 지역 구분이면 100% 넘음)" if _geo.get('check_pct') is not None else ''))
+                        elif _ai_geo:
+                            _rg_rows = [{'지역': r.get('name'), '매출': r.get('revenue'), '비중(%)': r.get('pct')} for r in _ai_geo if r.get('name')]
+                            _rg_src = f"{(_seg_ai or {}).get('source') or '공시 원문'} → AI 추출(원문 대조 권장)"
+                        _cu_rows, _cu_src = [], ''
+                        if _cus:
+                            _cu_rows = [{'고객': r['name'], '매출 비중(%)': r['pct'], '비고': '공시상 익명' if re.match(r'Customer [A-Z]', r['name']) else ''} for r in _cus]
+                            _cu_src = "SEC XBRL 원본(매출 집중도 공시)"
+                        elif _ai_cus:
+                            _cu_rows = [{'고객': r.get('name'), '매출 비중(%)': r.get('pct'), '비고': r.get('note') or ''} for r in _ai_cus if r.get('name')]
+                            _cu_src = f"{(_seg_ai or {}).get('source') or '공시 원문'} → AI 추출(원문 대조 권장)"
+                        if _rg_rows or _cu_rows:
+                            _gc1_, _gc2_ = st.columns(2, gap='large')
+                            with _gc1_:
+                                st.markdown("**🌍 지역별 매출**")
+                                if _rg_rows:
+                                    _rmax = max([abs(r['매출'] or 0) for r in _rg_rows] + [0])
+                                    _ru = (('조원', 1e12) if _rmax >= 1e12 else ('억원', 1e8)) if is_kr_sym else (('$B', 1e9) if _rmax >= 1e9 else ('$M', 1e6))
+                                    _rdf = pd.DataFrame([{'지역': r['지역'], f"매출({_ru[0]})": (r['매출'] / _ru[1]) if r['매출'] else None,
+                                                          '비중(%)': r['비중(%)']} for r in _rg_rows])
+                                    st.dataframe(_rdf, filters=False, color=False, src=_rg_src, asof=None)
+                                else:
+                                    st.caption("공시에 지역별 매출 구분이 없다.")
+                            with _gc2_:
+                                st.markdown("**👥 주요 고객(매출처)**")
+                                if _cu_rows:
+                                    st.dataframe(pd.DataFrame(_cu_rows), filters=False, color=False, src=_cu_src, asof=None)
+                                else:
+                                    st.caption("공시에 주요 고객 비중이 없다(10% 넘는 고객이 없으면 미국은 공시 의무 없음).")
+                            st.caption("미국은 매출 10% 이상 고객만 공시 의무가 있고 이름은 대부분 'Customer A'처럼 익명이다. "
+                                       "한국은 사업보고서에 실명이 적힌 경우가 많다. AI 추출분은 숫자를 원문과 대조할 것.")
+                        elif is_kr_sym and _ai_ok and 'regions' not in (_seg_ai or {}):
+                            st.caption("지역별 매출·주요 고객은 다음 사업부문 갱신 때 채워진다.")
+                    except Exception as _e_geo:
+                        st.caption(f"`지역·고객 표시 실패: {type(_e_geo).__name__}: {str(_e_geo)[:100]}`")
+
                 with _SEC['flow']:
                     # ── 💵 손익 흐름(Sankey) + 마진 궤적 (App Economy Insights 스타일) ──
                     st.divider()

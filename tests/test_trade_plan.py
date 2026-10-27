@@ -87,3 +87,15 @@ def test_rsi_macd_livermore():
     v.iloc[-5:] = 3.0
     lv = TP.livermore(c, v)
     assert lv['state'] in ('돌파 매수 구간', '연장 — 추격 금지') and lv['vol_ratio'] > 1.4
+
+
+def test_station_map_finds_stops():
+    """일부러 20%·35% 에서 많이 멈추게 만든 분포 → 그 두 곳이 역, 사이(22.5~32.5)는 멈춤 확률이 낮다."""
+    rng = np.random.default_rng(3)
+    sizes = list(rng.uniform(10, 60, 2000)) + [20.5] * 900 + [35.5] * 700
+    sm = TP.station_map(TP.DEC_EDGES, TP.bin_counts(sizes, TP.DEC_EDGES))
+    st = [sm['edges'][i] for i in sm['stations']]
+    assert 20 in st and 35 in st, st
+    lk = TP.station_lookup(sm, 21)
+    assert lk['next'][0]['from'] == 35 and 0 < lk['next'][0]['p_reach'] < 100
+    assert TP.vol_bucket(70, [35, 55]) == 'high' and TP.vol_bucket(None, None) == 'all'

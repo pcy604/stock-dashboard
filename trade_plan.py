@@ -304,3 +304,67 @@ def position_size(*, verdict_state: str, stop_pct: float, vol_annual: float | No
     else:
         rec = 0.0
     return {'risk_size': risk_size, 'slot_cap': slot_cap, 'trim_cap': trim_cap, 'half': half, 'rec': rec}
+
+
+# ── 6) 역(驛) 지도 — 스윙이 '어디서 잘 멈췄나' (2026-10-27) ─────────────────
+# 사용자 지적: 5% 간격 막대는 '역'을 무시하고 n 미터마다 자른 것이다. 버스 노선처럼 역 사이 간격이 제각각인지 보려면
+#   '그 구간에 도달한 스윙 중 거기서 멈춘 비율'(멈춤 확률, hazard)을 봐야 한다. 멈춤 확률이 솟는 곳 = 역,
+#   낮게 이어지는 구간 = 역 사이(한번 들어서면 잘 안 멈추고 지나감).
+# 한 종목은 스윙이 30~100개라 역이 노이즈에 묻힌다 → 전 종목(같은 시장·비슷한 변동성)의 스윙 수만 개로 잰다.
+DEC_EDGES = [10 + 2.5 * i for i in range(33)]           # 10, 12.5, … 90  (+ 90 이상 한 칸)
+RAL_EDGES = [10 + 5 * i for i in range(59)]             # 10, 15, … 300  (+ 300 이상 한 칸)
+
+
+def bin_counts(sizes, edges) -> list[int]:
+    """스윙 최종 크기 → 칸별 '여기서 끝난' 개수. 마지막 칸은 edges[-1] 이상 전부."""
+    out = [0] * len(edges)
+    for s in sizes:
+        if s < edges[0]:
+            continue
+        i = min(int(np.searchsorted(edges, s, side='right')) - 1, len(edges) - 1)
+        out[i] += 1
+    return out
+
+
+def station_map(edges, ends, min_reach: int = 30) -> dict:
+    """칸별 도달 수·멈춤 확률 → 역(멈춤 확률의 국소 최대)과 역 사이 구간.
+    도달 수가 min_reach 미만인 칸은 판정하지 않는다(표본 부족)."""
+    ends = list(ends)
+    reach = [sum(ends[i:]) for i in range(len(ends))]
+    haz = [(ends[i] / reach[i] * 100) if reach[i] else None for i in range(len(ends))]
+    ok = [i for i in range(1, len(ends) - 1) if reach[i] >= min_reach and haz[i] is not None]   # 첫 칸(정의상 많이 멈춤)·마지막(이상) 칸 제외
+    okset = set(ok)
+    # 역 = 국소 돌출: 그 칸의 멈춤 확률이 주변 ±3칸(자기 제외) 중앙값보다 30% 이상 높고, 바로 옆 칸보다 크거나 같다.
+    #   (평활화는 정점을 옆 칸으로 번지게 했고, 전역 중앙값 비교는 꼬리에서 자연히 오르는 멈춤 확률에 속았다)
+    sm = {}
+    for i in ok:
+        nb = [haz[j] for j in range(i - 3, i + 4) if j != i and j in okset]
+        sm[i] = float(np.median(nb)) if nb else None
+    stations = [i for i in ok if sm[i] and haz[i] >= sm[i] * 1.3
+                and all(haz[i] >= (haz[j] or 0) for j in (i - 1, i + 1) if j in okset)]
+    med = float(np.median([haz[i] for i in ok])) if ok else None
+    return {'edges': list(edges), 'ends': ends, 'reach': reach, 'hazard': haz, 'smooth': sm,
+            'median_hazard': med, 'stations': stations}
+
+
+def station_lookup(sm: dict, x: float) -> dict:
+    """이미 x% 움직인 스윙 → 다음 역 2개와 각 역까지 갈 확률·거기서 멈출 확률, 50% 확률 지점."""
+    edges, ends, reach = sm['edges'], sm['ends'], sm['reach']
+    i0 = max(0, min(int(np.searchsorted(edges, x, side='right')) - 1, len(edges) - 1))
+    base = reach[i0]
+    if not base:
+        return {'n': 0}
+    nxt = [i for i in sm['stations'] if edges[i] > x][:2]
+    w = edges[1] - edges[0]
+    rows = []
+    for i in nxt:
+        rows.append({'from': edges[i], 'to': edges[i] + w, 'p_reach': reach[i] / base * 100,
+                     'p_stop': ends[i] / base * 100, 'n': reach[i]})
+    half = next((edges[i] for i in range(i0, len(edges)) if reach[i] / base <= 0.5), None)
+    return {'n': base, 'next': rows, 'half': half, 'bin': edges[i0]}
+
+
+def vol_bucket(vol: float | None, cut: list | None) -> str:
+    if vol is None or not cut:
+        return 'all'
+    return 'low' if vol < cut[0] else ('mid' if vol < cut[1] else 'high')
