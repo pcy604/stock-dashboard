@@ -1,0 +1,47 @@
+# 세부 업종(2026-10-27) — KR 네이버 테마·업종 + US 야후 세부 산업 → data/sector_detail.json
+# 매주 일요일 + 수동 + 스크립트 수정 시. 종목 분석 🏁 업종 내 순위가 쓴다.
+name: sector-detail
+on:
+  workflow_dispatch:
+    inputs:
+      us_cap:
+        description: 'US 한 번에 시도할 종목 수'
+        default: '3000'
+  schedule:
+    - cron: '41 4 * * 0'
+  push:
+    branches: [main]
+    paths: ['tools/sector_detail.py', '.github/workflows/sector-detail.yml']
+permissions:
+  contents: write
+concurrency:
+  group: sector-detail
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+      US_CAP: ${{ github.event.inputs.us_cap || '3000' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: 수집
+        id: run
+        run: python tools/sector_detail.py
+      - name: 커밋
+        if: always()
+        run: |
+          [ -f data/sector_detail.json ] || exit 0
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add data/sector_detail.json
+          git diff --cached --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "auto: 세부 업종 $(date -u +%F)"
+          for i in 1 2 3; do git push origin HEAD:main && exit 0; git pull --rebase origin main; sleep 5; done
+          echo "::error::push 3회 실패"; exit 1
