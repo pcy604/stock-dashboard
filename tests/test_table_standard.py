@@ -60,7 +60,10 @@ def test_rs_scores_weighted():
 
 
 def test_tradable_keeps_holiday_listing():
-    import krx_listing as K
+    import importlib
+    if not hasattr(sys.modules.get('krx_listing'), '_tradable'):   # test_market_report 가 가짜 모듈을 남겨 둔다(순서 의존)
+        sys.modules.pop('krx_listing', None)
+    K = importlib.import_module('krx_listing')
     hol = pd.DataFrame({'Code': ['1', '2', '3'], 'Volume': [0, 0, 0], 'MarketId': ['STK', 'KSQ', 'KNX']})
     assert len(K._tradable(hol)) == 2                       # 휴장일 목록이 한국 전 종목을 지우던 사고
     day = pd.DataFrame({'Code': ['1', '2'], 'Volume': [5, 0], 'MarketId': ['STK', 'STK']})
