@@ -1393,6 +1393,25 @@ def _cm_base():
     return _cm.build(_usdkrw())
 
 
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _sector_detail():
+    """data/sector_detail.json(tools/sector_detail.py) → 역색인. KR 네이버 테마·업종 · US 야후 세부 산업."""
+    try:
+        d = json.load(open('data/sector_detail.json', encoding='utf-8'))
+    except Exception:
+        return {}
+    th, uj, ind = {}, {}, {}
+    for c, v in (d.get('kr') or {}).items():
+        for t in v.get('themes') or []:
+            th.setdefault(t, []).append(c)
+        if v.get('upjong'):
+            uj.setdefault(v['upjong'], []).append(c)
+    for c, v in (d.get('us') or {}).items():
+        if (v or {}).get('industry'):
+            ind.setdefault(v['industry'], []).append(c)
+    return {'asof': d.get('asof'), 'kr': d.get('kr') or {}, 'us': d.get('us') or {}, 'theme': th, 'upjong': uj, 'industry': ind}
+
+
 try:
     _CMB, _CMM = _cm_base()
 except Exception:
@@ -5316,9 +5335,34 @@ def _tab_analysis():
                     #   박세익·윤지호(주도 업종 안의 위치). 숫자는 종목발굴 표와 같은 common_metrics 에서만 가져온다.
                     try:
                         import html as _hp
-                        _pr = _cm.peer_rank(_CMB, sym8_clean)
                         st.divider()
                         st.subheader("🏁 업종 내 순위 — 같은 업종에서 몇 등인가")
+                        # 2026-10-27 — 공식 분류는 '특수 목적용 기계'처럼 거칠다(사용자 지적: 반도체 소부장을 못 발라냄).
+                        #   비교 무리를 고를 수 있게: KR 네이버 테마(사람 분류·여러 개) · 네이버 업종 / US 야후 세부 산업 / 공식 분류.
+                        _sd = _sector_detail()
+                        _inb = set(_CMB.index) if not _CMB.empty else set()
+                        _grp = []                                  # (라벨, 코드목록 or None)
+                        if is_kr_sym:
+                            _mine = (_sd.get('kr') or {}).get(sym8_clean) or {}
+                            _ths = [(t, _sd['theme'].get(t, [])) for t in _mine.get('themes') or []]
+                            _ths = [(t, c) for t, c in _ths if sum(1 for x in c if x in _inb) >= 4]
+                            _ths.sort(key=lambda x: sum(1 for c in x[1] if c in _inb))   # 좁은 테마부터
+                            _grp += [(f"테마 · {t} ({sum(1 for c in cs if c in _inb)}종)", cs) for t, cs in _ths]
+                            if _mine.get('upjong'):
+                                _cs = _sd['upjong'].get(_mine['upjong'], [])
+                                _grp.append((f"네이버 업종 · {_mine['upjong']} ({sum(1 for c in _cs if c in _inb)}종)", _cs))
+                        else:
+                            _ind = ((_sd.get('us') or {}).get(sym8_clean) or {}).get('industry')
+                            if _ind:
+                                _cs = _sd['industry'].get(_ind, [])
+                                _grp.append((f"세부 산업 · {_ind} ({sum(1 for c in _cs if c in _inb)}종)", _cs))
+                        _grp.append(("공식 분류 · " + ('한국 표준산업분류' if is_kr_sym else 'SEC SIC'), None))
+                        _gsel = st.selectbox("비교할 무리", [g[0] for g in _grp], index=0, key=f'peer_grp_{sym8_clean}',
+                                             help="테마는 네이버 금융이 사람 손으로 묶은 분류라 한 종목이 여러 테마에 들어간다(좁은 테마부터). "
+                                                  "공식 분류는 거칠다(반도체 장비가 '특수 목적용 기계').")
+                        _gcodes = dict(_grp)[_gsel]
+                        _glabel = _gsel.split(' · ', 1)[1].rsplit(' (', 1)[0] if _gcodes is not None else None
+                        _pr = _cm.peer_rank(_CMB, sym8_clean, codes=_gcodes, label=_glabel)
                         if not _pr:
                             st.caption("업종 분류가 없어 비교할 수 없다(공통 지표 명단 밖 종목이거나 업종 미분류).")
                         elif _pr['n'] < 3:
@@ -5364,12 +5408,14 @@ def _tab_analysis():
                                 _pe.append(sym8_clean)
                             _prow = pd.DataFrame({'코드': _pe, '구분': ['⭐ 이 종목' if c == sym8_clean else '' for c in _pe]})
                             with st.expander(f"같은 업종 종목 {len(_pe)}개 (시총순)", expanded=not IS_MOBILE):
-                                _std_table(_prow, ['구분'], sort_by='시총', src=f"업종 = {'SEC SIC 분류' if _usd else '한국 표준산업분류(KRX)'}",
-                                           path='results/fund_snapshot.json', note='RS 머리글을 누르면 업종 내 주도주 순')
+                                _std_table(_prow, ['구분'], sort_by='시총',
+                                           src=(f"무리 = {_gsel} · 네이버 금융·야후({_sd.get('asof', '-')})" if _gcodes is not None
+                                                else f"업종 = {'SEC SIC 분류' if _usd else '한국 표준산업분류(KRX)'}"),
+                                           path='data/sector_detail.json' if _gcodes is not None else 'results/fund_snapshot.json', note='RS 머리글을 누르면 업종 내 주도주 순')
                                 _cand_register(_cm.frame(_prow, _CMB, ['구분']), 'peer')
                             st.caption("순위 = 같은 시장·같은 업종 안. 값이 없는 종목은 그 지표의 분모에서 뺀다(그래서 지표마다 비교 수가 다르다). "
                                        "초록 = 상위 1/3 · 빨강 = 하위 1/3 · 시총·PER 은 좋고 나쁨이 아니라 칠하지 않는다. "
-                                       "⚠️ 업종 분류는 공식 분류라 거칠다 — 예: 삼성전자는 한국 표준산업분류상 '통신 및 방송 장비 제조업'.")
+                                       "표의 '업종' 열은 공식 분류 그대로다. 테마는 한 종목이 여러 개에 들고 테마끼리 겹친다 — 위 '비교할 무리'에서 바꿀 것.")
                     except Exception as _e_peer:
                         st.caption(f"`업종 내 순위 실패: {type(_e_peer).__name__}: {str(_e_peer)[:120]}`")
 

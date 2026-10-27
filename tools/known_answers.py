@@ -418,6 +418,18 @@ def _():
     return us > 50000 and kr > 20000 and cuts_ok, f"미국 하락 {us:,} · 한국 {kr:,} · 경계 {[d[m]['cut'] for m in d]}"
 
 
+@check('세부 업종', '네이버 테마가 살아 있는가 (테마 150+ · 한미반도체·주성엔지니어링이 반도체 장비 · NVDA 반도체)')
+def _():
+    import json as _j
+    d = _j.load(open(os.path.join(BASE, 'data/sector_detail.json'), encoding='utf-8'))
+    kr, us = d.get('kr') or {}, d.get('us') or {}
+    eq = all('반도체 장비' in ((kr.get(c) or {}).get('themes') or []) for c in ('042700', '036930'))
+    nv = 'Semiconductor' in str((us.get('NVDA') or {}).get('industry'))
+    n_us = sum(1 for v in us.values() if v)
+    return len(d.get('themes') or {}) >= 150 and eq and nv and n_us >= 1500, \
+        f"테마 {len(d.get('themes') or {})} · KR {len(kr):,} · US {n_us:,} · 장비 {eq} · NVDA {(us.get('NVDA') or {}).get('industry')}"
+
+
 def run():
     out = []
     for area, q, fn in CHECKS:

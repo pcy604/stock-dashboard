@@ -126,7 +126,7 @@ PEER_METRICS = [('시총', False), ('RS', False), ('1개월(%)', False), ('52주
                 ('매출YoY(%)', False), ('영업익YoY(%)', False), ('PER(배)', True)]
 
 
-def peer_rank(base: pd.DataFrame, sym: str) -> dict | None:
+def peer_rank(base: pd.DataFrame, sym: str, codes=None, label: str | None = None) -> dict | None:
     """같은 시장 · 같은 업종(잘리기 전 이름) 안에서 이 종목의 지표별 순위.
 
     반환: {'sector', 'market', 'n', 'rows': [{'지표', '값', '순위', '비교수', '상위(%)', '업종중앙'}], 'peers': [코드…(시총순)]}
@@ -135,10 +135,16 @@ def peer_rank(base: pd.DataFrame, sym: str) -> dict | None:
         return None
     me = base.loc[sym]
     sec = me.get('_업종full') if '_업종full' in base.columns else me.get('업종')
-    if not isinstance(sec, str) or not sec:
+    if (not isinstance(sec, str) or not sec) and codes is None:
         return None
     col = '_업종full' if '_업종full' in base.columns else '업종'
-    g = base[(base[col] == sec) & (base['시장'] == me['시장'])].copy()
+    if codes is not None:                  # 세부 업종(테마·야후 산업) — 그룹 구성은 호출자가 준다
+        idx = [c for c in dict.fromkeys(map(str, codes)) if c in base.index] + ([] if sym in set(map(str, codes)) else [sym])
+        g = base.loc[idx]
+        g = g[g['시장'] == me['시장']].copy()
+        sec = label or sec
+    else:
+        g = base[(base[col] == sec) & (base['시장'] == me['시장'])].copy()
     g['시총'] = g['_mc_usd']
     rows = []
     for c, asc in PEER_METRICS:

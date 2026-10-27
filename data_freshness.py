@@ -208,6 +208,11 @@ SOURCES = [
          cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 실적 발표 · 서프라이즈(KR)',
          getter=_cq_max_date, raw=True),
+    # 2026-10-27 — 세부 업종(KR 네이버 테마·업종 · US 야후 산업). 종목 분석 🏁 업종 내 순위의 '비교할 무리'.
+    dict(path='data/sector_detail.json', label='세부 업종(네이버 테마·야후 산업)',
+         cycle='주 1회 (일)', max_age=10, producer='tools/sector_detail.py',
+         job='sector-detail', used_by='🔍 종목 분석 → 🏁 업종 내 순위',
+         getter=_key('asof')),
     # 2026-10-27 — 공통 재무 스냅샷(종목 목록 표 공통 열 · 종목 분석 🏁 업종 내 순위). 감시 누락이던 것.
     dict(path='results/fund_snapshot.json', label='공통 재무 스냅샷(매출·영업익 YoY·PER)',
          cycle='주 1회 (금)', max_age=10, producer='tools/fund_snapshot.py',

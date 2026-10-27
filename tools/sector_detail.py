@@ -164,14 +164,18 @@ def collect_us(old: dict):
     print(f"  US: 명단 {len(syms):,} · 이미 {len(syms) - len([s for s in syms if not (old.get(s) or {}).get('industry')]):,} · 이번 시도 {len(todo):,}")
 
     def one(s):
-        try:
-            inf = yf.Ticker(s.replace('.', '-')).get_info()
-            ind, sec = inf.get('industry'), inf.get('sector')
-            return s, ({'industry': ind, 'sector': sec} if ind else None)
-        except Exception:
-            return s, None
+        for i in range(3):                     # 야후 요청 제한(429) — 쉬었다 다시
+            try:
+                inf = yf.Ticker(s.replace('.', '-')).get_info()
+                ind, sec = inf.get('industry'), inf.get('sector')
+                if ind or inf.get('quoteType') in ('ETF', 'MUTUALFUND'):
+                    return s, ({'industry': ind, 'sector': sec} if ind else None)
+            except Exception:
+                pass
+            time.sleep(3 * (i + 1))
+        return s, None
     out, ok = dict(old), 0
-    with ThreadPoolExecutor(6) as ex:
+    with ThreadPoolExecutor(3) as ex:
         for s, v in ex.map(one, todo):
             if v:
                 out[s] = v
