@@ -30,8 +30,8 @@ jobs:
         run: |
           nohup streamlit run dashboard.py --server.headless true --server.port 8501 > st.log 2>&1 &
           sleep 20
-          python tools/ui_snap_stock.py 006110 TSLA || true
-          SNAP_W=390 python tools/ui_snap_stock.py 006110 TSLA || true
+          python tools/ui_snap_stock.py 036930 AMAT || true
+          SNAP_W=390 python tools/ui_snap_stock.py 036930 AMAT || true
           tail -80 st.log > results/verify/st_log.txt || true
         continue-on-error: true
       - name: 결과 커밋
