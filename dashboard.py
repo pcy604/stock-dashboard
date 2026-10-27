@@ -636,7 +636,8 @@ def cap_usd_b(marcap, market):
 
 def cap_caption() -> str:
     # 2026-10-26 사용자 규칙: 한국 = 억원, 미국 = $B, 섞인 표는 값은 각자 단위 · 머리행에 두 단위
-    return "시총 — 한국 = 억원 · 미국 = $B (두 시장이 섞인 표는 머리행에 '억원·$B', 기본 순서는 달러 환산 시총)"
+    # st.caption 은 $…$ 를 수식으로 그린다(10-27 실화면 깨짐) → \$ 로 이스케이프
+    return "시총 — 한국 = 억원 · 미국 = \\$B (두 시장이 섞인 표는 머리행에 '억원·\\$B', 기본 순서는 달러 환산 시총)"
 
 
 def _ni_usd_m(v):
@@ -5353,7 +5354,7 @@ def _tab_analysis():
                             _top = [r for r in _pr['rows'] if r['순위'] == 1 and r['지표'] not in ('PER(배)',)]
                             _rs_r = next(r for r in _pr['rows'] if r['지표'] == 'RS')
                             _lead = ('**업종 RS 1등** — 오닐이 말한 "업종의 1·2등만 산다"에 맞는다.' if _rs_r['순위'] == 1 else
-                                     '**업종 RS 2등**' if _rs_r['순위'] == 2 else
+                                     '**업종 RS 2등** — 오닐 기준(업종 1·2등) 안.' if _rs_r['순위'] == 2 else
                                      (f"업종 RS {_rs_r['순위']}등 — 이 업종의 주도주는 따로 있다(아래 표 RS 순으로 확인)." if _rs_r['순위'] else 'RS 없음'))
                             st.markdown(f"**{_pr['sector']}** · {'미국' if _usd else '한국'} {_pr['n']}종 중 → {_lead}"
                                         + (f" 1등 항목: {', '.join(_lab[r['지표']].split(' (')[0] for r in _top)}." if _top else ''))
