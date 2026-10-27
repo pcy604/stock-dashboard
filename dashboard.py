@@ -5396,11 +5396,11 @@ def _tab_analysis():
                             st.markdown(f"**{_pr['sector']}** · {'미국' if _usd else '한국'} {_pr['n']}종 중 → {_lead}"
                                         + (f" 1등 항목: {', '.join(_lab[r['지표']].split(' (')[0] for r in _top)}." if _top else ''))
                             st.markdown(f'<div class="mo-kpis">{"".join(_cards)}</div>', unsafe_allow_html=True)
-                            _pe = _pr['peers'][:15]
+                            _pe = _pr['peers'][:100]
                             if sym8_clean not in _pe:
                                 _pe.append(sym8_clean)
                             _prow = pd.DataFrame({'코드': _pe, '구분': ['⭐ 이 종목' if c == sym8_clean else '' for c in _pe]})
-                            with st.expander(f"같은 업종 종목 {len(_pe)}개 (시총순)", expanded=not IS_MOBILE):
+                            with st.expander(f"같은 무리 종목 {len(_pe)}개 (시총순 · RS 머리글 = 주도주 순)", expanded=False):
                                 _std_table(_prow, ['구분'], sort_by='시총',
                                            src=(f"무리 = {_gsel} · 네이버 금융·야후({_sd.get('asof', '-')})" if _gcodes is not None
                                                 else f"업종 = {'SEC SIC 분류' if _usd else '한국 표준산업분류(KRX)'}"),
