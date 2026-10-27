@@ -5775,20 +5775,22 @@ def _tab_analysis():
                         _ai_geo = (_seg_ai or {}).get('regions') if _ai_ok else None
                         _ai_cus = (_seg_ai or {}).get('customers') if _ai_ok else None
                         _rg_rows, _rg_src = [], ''
+                        _ai_src = re.sub(r'^\[출처:\s*|\]$', '', str((_seg_ai or {}).get('source') or '공시 원문'))
+                        _ai_asof = (re.findall(r'(\d{4}-?\d{2}-?\d{2})', _ai_src) or [None])[-1]
                         if _geo:
                             _rg_rows = [{'지역': r['name'], '매출': r['revenue'], '비중(%)': r['pct']} for r in _geo['regions']]
                             _rg_src = (f"SEC XBRL 원본 · {_geo['start']}~{_geo['end']}"
                                        + (f" · 합계 검산 {_geo['check_pct']:+.1f}%(겹치는 지역 구분이면 100% 넘음)" if _geo.get('check_pct') is not None else ''))
                         elif _ai_geo:
                             _rg_rows = [{'지역': r.get('name'), '매출': r.get('revenue'), '비중(%)': r.get('pct')} for r in _ai_geo if r.get('name')]
-                            _rg_src = f"{(_seg_ai or {}).get('source') or '공시 원문'} → AI 추출(원문 대조 권장)"
+                            _rg_src = f"{_ai_src} → AI 추출(원문 대조 권장)"
                         _cu_rows, _cu_src = [], ''
                         if _cus:
                             _cu_rows = [{'고객': r['name'], '매출 비중(%)': r['pct'], '비고': '공시상 익명' if re.match(r'Customer [A-Z]', r['name']) else ''} for r in _cus]
                             _cu_src = "SEC XBRL 원본(매출 집중도 공시)"
                         elif _ai_cus:
                             _cu_rows = [{'고객': r.get('name'), '매출 비중(%)': r.get('pct'), '비고': r.get('note') or ''} for r in _ai_cus if r.get('name')]
-                            _cu_src = f"{(_seg_ai or {}).get('source') or '공시 원문'} → AI 추출(원문 대조 권장)"
+                            _cu_src = f"{_ai_src} → AI 추출(원문 대조 권장)"
                         if _rg_rows or _cu_rows:
                             _gc1_, _gc2_ = st.columns(2, gap='large')
                             with _gc1_:
@@ -5798,13 +5800,13 @@ def _tab_analysis():
                                     _ru = (('조원', 1e12) if _rmax >= 1e12 else ('억원', 1e8)) if is_kr_sym else (('$B', 1e9) if _rmax >= 1e9 else ('$M', 1e6))
                                     _rdf = pd.DataFrame([{'지역': r['지역'], f"매출({_ru[0]})": (r['매출'] / _ru[1]) if r['매출'] else None,
                                                           '비중(%)': r['비중(%)']} for r in _rg_rows])
-                                    st.dataframe(_rdf, filters=False, color=False, src=_rg_src, asof=None)
+                                    st.dataframe(_rdf, filters=False, color=False, src=_rg_src, asof=(_geo['end'] if _geo else _ai_asof))
                                 else:
                                     st.caption("공시에 지역별 매출 구분이 없다.")
                             with _gc2_:
                                 st.markdown("**👥 주요 고객(매출처)**")
                                 if _cu_rows:
-                                    st.dataframe(pd.DataFrame(_cu_rows), filters=False, color=False, src=_cu_src, asof=None)
+                                    st.dataframe(pd.DataFrame(_cu_rows), filters=False, color=False, src=_cu_src, asof=(_sxg or {}).get('period_end') if _cus else _ai_asof)
                                 else:
                                     st.caption("공시에 주요 고객 비중이 없다(10% 넘는 고객이 없으면 미국은 공시 의무 없음).")
                             st.caption("미국은 매출 10% 이상 고객만 공시 의무가 있고 이름은 대부분 'Customer A'처럼 익명이다. "

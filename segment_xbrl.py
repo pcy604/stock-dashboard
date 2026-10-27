@@ -207,9 +207,11 @@ def _geo(facts, bucket) -> dict | None:
             continue
         tot = (rows.get('__total__') or (None, None))[1]
         regs.sort(key=lambda x: -x[1])
+        _names = [geo_name(m) for m, _ in regs]
+        _nonus_split = any(n not in ('미국', '미국 외') for n in _names) and '미국 외' in _names
         any_v = next(iter(rows.values()))
         return {'basis': b, 'start': any_v[2].isoformat(), 'end': any_v[3].isoformat(), 'total': tot,
-                'regions': [{'member': m, 'name': geo_name(m), 'revenue': v, 'pct': (v / tot * 100) if tot else None} for m, v in regs],
+                'regions': [{'member': m, 'name': ('기타 국가' if _nonus_split and geo_name(m) == '미국 외' else geo_name(m)), 'revenue': v, 'pct': (v / tot * 100) if tot else None} for m, v in regs],
                 'check_pct': (sum(v for _, v in regs) / tot - 1) * 100 if tot else None}
     return None
 
