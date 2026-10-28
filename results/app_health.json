@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T15:51:10Z",
+ "at": "2026-10-28T01:12:48Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
@@ -7,7 +7,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 3664,
+   "text_len": 4002,
    "samples": [],
    "finished": true
   },
@@ -16,7 +16,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 3721,
+   "text_len": 4231,
    "samples": [],
    "finished": true
   },
@@ -52,21 +52,19 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 13014,
+   "text_len": 13225,
    "samples": [],
    "finished": true
   },
   {
    "page": "종목 분석 ?sym=005930",
-   "ok": false,
+   "ok": true,
    "exceptions": 0,
-   "error_words": [
-    "AttributeError"
-   ],
-   "text_len": 14911,
+   "error_words": [],
+   "text_len": 15340,
    "samples": [],
    "finished": true
   }
  ],
- "ok": false
+ "ok": true
 }
