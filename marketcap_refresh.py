@@ -495,10 +495,8 @@ def quote(sym):
     """가격 캐시가 없을 때(=GitHub Actions) 최근 종가만 가볍게 받는다.
     data/leaders_cache 는 저장소에 없으므로 CI 에서는 이 경로를 탄다.
 
-    ⚠️ 2026-10-28 — 10-20 이후 이 직접 호출(urllib → query2 v8 chart)이 러너에서 전부 실패했다
-       (px_date 최대 10-19 고정 → 계약 검사가 시총 파일을 매일 되돌림, 5일 정지 경보).
-       같은 실행의 perf_run·canslim_us 는 FinanceDataReader 로 실패 0~0.4% 였다.
-       그래서 직접 호출이 실패하면 FDR 로 한 번 더 받는다."""
+    2026-10-28 — 직접 호출이 실패하면 FinanceDataReader 로 한 번 더 받는다(같은 러너에서 perf_run 이 쓰는 경로).
+       ※ 10-28 시총 정지의 원인은 이 호출이 아니었다(600/600 성공) — need 구성의 순서 편향이었다(아래 build)."""
     px, d = _quote_yahoo(sym)
     if px:
         _QSRC["yahoo"] += 1
@@ -687,9 +685,16 @@ def cmd_build(net_price=False):
             #   600종 안에 못 들어 하루 더 빠졌다. 성공한 종목은 이어받기로 빠지므로 굶는 글자는 없다.
             _sz = {x: float(sh[x].shares.iloc[-1]) if x in sh and len(sh[x]) else 0.0 for x in unknown}
             unknown = sorted(unknown, key=lambda x: (min(fails.get(x, [0])[0], 3), -_sz[x]))
-            need = (unknown + known[off:] + known[:off])[:MAX_FETCH]
+            # ⚠️ 2026-10-28 — 네 번째 조용한 고장. '신규 우선'이라 600칸을 매일 unknown 이 다 먹었다.
+            #   그런데 unknown 상위는 시세는 잘 받히지만(10-28 실측 600/600 성공) 뒤의 _drop_untrustworthy 가
+            #   **600행 전부** 버리는 외국·우선주·워런트·ETF 였다 → 결과 파일에 안 남으니 내일도 unknown →
+            #   매일 같은 쓰레기만 받고, 이미 아는 4,673종은 10-19 이후 한 번도 새로 안 받았다.
+            #   px_date 최대 10-19 고정 → 계약 검사가 파일을 되돌림 → '미국 시총 정지' 경보.
+            #   고친다: unknown 은 하루 1/4 까지만, 나머지는 아는 종목 회전(약 10일에 한 바퀴).
+            _nu = min(len(unknown), MAX_FETCH // 4)
+            need = (unknown[:_nu] + known[off:] + known[:off])[:MAX_FETCH]
             print(f"가격 캐시 없는 {len(unknown) + len(known):,}종 중 {len(need)}종을 받는다 "
-                  f"(신규 {min(len(unknown), MAX_FETCH)}종 우선 · 이어받기 {len(carry):,}종)",
+                  f"(신규 {_nu}종 · 아는 종목 회전 {len(need) - _nu}종 · 이어받기 {len(carry):,}종)",
                   flush=True)
         else:
             print(f"가격 캐시 없는 {len(need)}종 시세 조회 (이어받기 {len(carry):,}종)", flush=True)
