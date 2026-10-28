@@ -97,3 +97,4 @@ results/guru_chart_latest.png
 data/_fundq_ci.db
 executor/ledger.json.tmp
 data/fw_v13y.parquet
+data/research/marcap/
