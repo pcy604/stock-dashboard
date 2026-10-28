@@ -1951,6 +1951,49 @@ with t_core, guard('주도주 교집합'):
                                         'MDD(%)': st.column_config.NumberColumn(format='%.1f'),
                                         '수익÷낙폭': st.column_config.NumberColumn(format='%.2f')})
 
+    # ── 📐 RS 변화·가속 + 이익 단계별 흑자전환 (2026-10-28 사전 등록) ──
+    _rt = load_json(Path('results/rs_accel_turn.json')) or {}
+    with st.expander("📐 RS 변화·가속 vs 수준 · 이익 단계별(매출총이익→영업이익→순이익) 흑자전환", expanded=False):
+        if not _rt.get('rs'):
+            st.info("결과를 만드는 중입니다(GitHub 서버 research-rs 작업).")
+        else:
+            _sps = _rt['spy']
+            _vn = {'base': 'RS 수준 ≥80(현행)', 'dRS': 'RS 순위 개선 폭', 'acc': '가격 가속', 'line': 'RS선 신고가', 'mix': '수준+개선 혼합'}
+            _rows = []
+            for _k, _v in _rt['rs'].items():
+                _sy, _vv = _k.split('|')
+                for _kk, _r in _v['ks'].items():
+                    _rows.append({'체계': f"위성 {_sy}", '변형': _vn[_vv], 'k(주)': int(_kk) if _vv != 'base' else None,
+                                  'CAGR(%)': _r['CAGR'], 'MDD(%)': _r['MDD'], '수익÷낙폭': _r['Calmar'],
+                                  '매수 시 52주고점대비(%)': _r.get('entry_vs_hi52'), '거래': _r.get('trades'),
+                                  '판정': '기준' if _v['passed'] is None else ('✅' if _v['passed'] else '❌')})
+            st.caption(f"진입 = 교집합 펀더멘털 × 각 문턱 · 체계는 위성 A·B 그대로 · k = 변화를 재는 기간(13·26·52주 모두 SPY 초과해야 합격) · "
+                       f"SPY {_sps['CAGR']}%/{_sps['MDD']}% · 근거: Gettleman·Marks(2005), Chen·Yu(2013), 오닐 RS선")
+            _tsrc('research/rs_accel_turn.py (GitHub Actions research-rs, 기준 사전 커밋)', path='results/rs_accel_turn.json')
+            st.dataframe(pd.DataFrame(_rows), use_container_width=True, hide_index=True, color=False,
+                         column_config={'CAGR(%)': st.column_config.NumberColumn(format='%.1f'), 'MDD(%)': st.column_config.NumberColumn(format='%.1f'),
+                                        '수익÷낙폭': st.column_config.NumberColumn(format='%.2f'),
+                                        '매수 시 52주고점대비(%)': st.column_config.NumberColumn(format='%.1f')})
+            st.markdown("**이익 단계별 흑자전환** — 분기 흑자 & 전년 같은 분기 적자, 다음 주 종가 매수 · 조정 EBITDA 는 비GAAP·감가상각 데이터 없음으로 제외")
+            _tr = []
+            for _c, _v in _rt['turn'].items():
+                for _h in ('13', '26', '52'):
+                    _b = _v['by_h'][_h]
+                    _tr.append({'흑자전환 항목': _v['name'], '사건 수': _v['events'], '보유(주)': int(_h), '평균(%)': _b['mean'], '중앙(%)': _b['median'],
+                                'SPY 대비 초과(%p)': _b['excess_vs_spy'], '2배 이상(%)': _b['p2x'], '전 종목 중앙(%)': _b['base_median']})
+            _tsrc('research/rs_accel_turn.py', path='results/rs_accel_turn.json')
+            st.dataframe(pd.DataFrame(_tr), use_container_width=True, hide_index=True,
+                         column_config={c: st.column_config.NumberColumn(format='%.1f') for c in ('평균(%)', '중앙(%)', 'SPY 대비 초과(%p)', '전 종목 중앙(%)')})
+            _pr = [{'흑자전환 항목': _v['name'], '조건': _cn, 'CAGR(%)': _p['CAGR'], 'MDD(%)': _p['MDD'], '수익÷낙폭': _p['Calmar']}
+                   for _v in _rt['turn'].values() for _cn, _p in (('흑자전환만', _v['port_any']), ('흑자전환 × RS≥80', _v['port_rs80']))]
+            _tsrc('research/rs_accel_turn.py', path='results/rs_accel_turn.json')
+            st.dataframe(pd.DataFrame(_pr), use_container_width=True, hide_index=True, filters=False, color=False,
+                         column_config={'CAGR(%)': st.column_config.NumberColumn(format='%.1f'), 'MDD(%)': st.column_config.NumberColumn(format='%.1f'),
+                                        '수익÷낙폭': st.column_config.NumberColumn(format='%.2f')})
+            _lg = _rt.get('turn_lag_q') or {}
+            st.caption("순서(같은 종목, 분기 수 중앙): " + " · ".join(f"{k} {v['median']}분기(같은 분기 {v['same_q']}%, n={v['n']:,})" for k, v in _lg.items())
+                       + " · 포트폴리오는 위성 A 체계(20칸·래칫·재돌파 재매수·냉각 4주)")
+
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
     st.caption("기간 상승률 상위 + 주봉 신호 · 향후 2개월 계절성. 실적(매출·영업익 YoY)·PER·RS 는 오른쪽 공통 열.")
