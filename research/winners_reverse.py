@@ -49,13 +49,17 @@ def rs_rank(px, liq):
 
 
 def macro_regimes(idx, spy):
-    m = pd.read_parquet(os.path.join(ROOT, "data", "macro_hist.parquet"))
-    m = m.reindex(idx.union(m.index)).ffill().reindex(idx)
+    # ⚠️ 2026-10-28: 하이일드 스프레드(BAMLH0A0HYM2)는 FRED 라이선스로 최근 3년만 제공 → macro_hist 에서 2014~2022 가 비어 있었다.
+    #    전 기간이 있는 신용 스프레드 대리 BAA10Y(무디스 Baa − 10년물, 1986~) 로 바꾼다.
+    f = pd.read_parquet(os.path.join(ROOT, "data", "research", "macro_long_fred.parquet"))
+    f = f[f.sid.isin(["BAA10Y", "FEDFUNDS", "VIXCLS"])].pivot_table(index="date", columns="sid", values="v")
+    f.index = pd.to_datetime(f.index)
+    m = f.reindex(f.index.union(idx)).ffill().reindex(idx)
     spw = spy.reindex(idx).ffill()
-    hy = m["BAMLH0A0HYM2"]; ff = m["FEDFUNDS"]; vix = m["VIXCLS"]
+    cs = m["BAA10Y"]; ff = m["FEDFUNDS"]; vix = m["VIXCLS"]
     return {
-        "하이일드 스프레드 26주 축소": hy - hy.shift(26) < 0,
-        "하이일드 스프레드 26주 확대": hy - hy.shift(26) > 0,
+        "신용 스프레드(Baa) 26주 축소": cs - cs.shift(26) < -0.05,
+        "신용 스프레드(Baa) 26주 확대": cs - cs.shift(26) > 0.05,
         "기준금리 26주 인하": ff - ff.shift(26) < -0.1,
         "기준금리 26주 인상": ff - ff.shift(26) > 0.1,
         "SPY 40주선 위": spw > spw.rolling(40, min_periods=30).mean(),
