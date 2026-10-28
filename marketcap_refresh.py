@@ -680,6 +680,10 @@ def cmd_build(net_price=False):
         _save_fails(fails)
         got = sum(1 for s in need if s in prices)
         print(f"  시세 성공 {got}/{len(need)} · 실패 기억 {len(fails):,}종", flush=True)
+        # 2026-10-28 — 10-20 이후 시세가 하나도 안 들어와(px_date 최대 10-19) 계약 검사가 파일을 되돌렸는데,
+        #   이 줄이 일반 로그에만 있어 원인을 못 봤다. 절반 넘게 실패하면 주석(::error)으로 올려 실행 요약에 보이게 한다.
+        if need and got < len(need) * 0.5:
+            print(f"::error title=미국 시세 수집 실패::{got}/{len(need)}종만 성공 — Yahoo 가 이 러너를 막았을 수 있다", flush=True)
 
     mc_rows, ts_rows = [], []
     for sym, d in sh.items():
