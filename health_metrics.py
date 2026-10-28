@@ -113,7 +113,7 @@ METRICS = [
     ('marketcap_syms', '시총 산출 종목(종가1개면 됨)', lambda: _csv_rows('data/us_marketcap.csv'), 1500, False),
     ('shares_rows',    'SEC 주식수 행수',   lambda: _csv_rows('data/us_shares.csv'), 100000, False),
     ('accel_universe', '이익가속 유니버스', _accel_universe, 1000, False),
-    ('accel_last_week', '이익가속 최신 주차', _accel_last_week, None, True),
+    ('accel_last_week', '이익가속 최신 주차', _accel_last_week, None, False),  # 주 1회 값 — 매일 보면 수~금마다 '정체' 오경보. 정지는 data_freshness(leaders_accel) 가 본다
     ('prices_syms',    '가격 이력 보유(13년 주봉)', _prices_syms, 1000, False),
     ('prices_last',    'prices 최신 주차',  _prices_last, None, True),
     ('screener_total', '주봉 신호 종목 수', lambda: _json('results/screener_latest.json', 'total'), None, True),
@@ -171,10 +171,25 @@ def append(rec):
                     encoding='utf-8')
 
 
+# 2026-10-28 — daily-refresh 는 10-14 부터 market.db 를 복원 직후 지운다(캐시 축출 방지용 읽기만).
+#   그래서 이 러너에선 DB 기반 3지표가 매번 0/None → '내용 지표 이상'이 매일 울리는 구조적 오경보였다.
+#   DB 가 없는 러너에선 이 3개를 '측정 불가'로 빼고, DB 가 있는 weekly-accel 에서만 판정한다.
+DB_KEYS = {'collect_rate', 'prices_syms', 'prices_last'}
+
+
+def _has_db():
+    import os
+    p = 'data/market.db'
+    return os.path.exists(p) and os.path.getsize(p) > 1_000_000
+
+
 def judge(cur, hist):
     """고장 문구 목록. 빈 리스트면 정상."""
     bad = []
+    skip = set() if _has_db() else DB_KEYS
     for key, label, _fn, lo, stall in METRICS:
+        if key in skip:
+            continue
         v = cur.get(key)
         if v is None:
             bad.append(f"{label}: 값을 못 읽었다 — 생산자가 죽었거나 형식이 바뀌었다")

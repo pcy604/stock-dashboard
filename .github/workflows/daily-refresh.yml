@@ -98,7 +98,7 @@ jobs:
       #   바뀌지 않으므로 월요일에만 돌린다.
       - name: 수집 유니버스 갱신 (SEC public float · 월요일만)
         run: |
-          if [ "$(date -u +%u)" = "1" ] || [ ! -f data/us_float.csv ]; then
+          if [ "$(TZ=Asia/Seoul date +%u)" = "1" ] || [ ! -f data/us_float.csv ]; then
             python sec_float.py
           else
             echo "월요일 아님 + 파일 있음 — 스킵"
@@ -159,7 +159,7 @@ jobs:
 
       - name: 컨센서스 시계열 스냅샷 (월요일만 — 리비전 모멘텀 재료)
         run: |
-          if [ "$(date -u +%u)" = "1" ]; then python consensus_snapshot.py; else echo "월요일 아님 — 스킵"; fi
+          if [ "$(TZ=Asia/Seoul date +%u)" = "1" ]; then python consensus_snapshot.py; else echo "월요일 아님 — 스킵"; fi
         continue-on-error: true
 
       - name: 파이프라인 신선도 검사 (정지 시 텔레그램 경보)
