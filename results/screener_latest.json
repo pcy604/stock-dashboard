@@ -1,13 +1,13 @@
 {
   "date": "2026-10-28",
-  "total": 349,
+  "total": 347,
   "stocks": [
     {
       "market": "KR",
       "sym": "033780",
       "name": "KT&G",
       "marcap": 19381412135200,
-      "pct_change": -3.39,
+      "pct_change": -3.34,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -27,32 +27,10 @@
     },
     {
       "market": "KR",
-      "sym": "018880",
-      "name": "한온시스템",
-      "marcap": 3781736195270,
-      "pct_change": -0.39,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -35.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
       "sym": "425420",
       "name": "티에프이",
       "marcap": 940855192200,
-      "pct_change": 25.86,
+      "pct_change": 22.57,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -65,7 +43,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 3.3,
+      "dist_52w": 0.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -74,7 +52,7 @@
       "sym": "092870",
       "name": "엑시콘",
       "marcap": 756946226000,
-      "pct_change": 21.25,
+      "pct_change": 26.0,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -87,7 +65,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 8.1,
+      "dist_52w": 12.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -96,7 +74,7 @@
       "sym": "064290",
       "name": "인텍플러스",
       "marcap": 750006410600,
-      "pct_change": 9.68,
+      "pct_change": 9.86,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -109,7 +87,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -0.5,
+      "dist_52w": -0.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -118,7 +96,7 @@
       "sym": "079940",
       "name": "가비아",
       "marcap": 538169428400,
-      "pct_change": 29.01,
+      "pct_change": 28.5,
       "signals": [
         "52주신고가",
         "RSI/MACD"
@@ -131,7 +109,7 @@
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": 5.8,
+      "dist_52w": 5.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -140,7 +118,7 @@
       "sym": "290550",
       "name": "디케이티",
       "marcap": 512031488000,
-      "pct_change": 19.91,
+      "pct_change": 18.54,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -153,7 +131,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -25.0,
+      "dist_52w": -25.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -162,7 +140,7 @@
       "sym": "376300",
       "name": "디어유",
       "marcap": 479515801200,
-      "pct_change": 0.73,
+      "pct_change": -0.98,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -175,7 +153,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -55.1,
+      "dist_52w": -55.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -184,73 +162,7 @@
       "sym": "012030",
       "name": "DB",
       "marcap": 478793960540,
-      "pct_change": 12.9,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -2.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "145720",
-      "name": "덴티움",
-      "marcap": 334606970800,
-      "pct_change": 0.38,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -34.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "134380",
-      "name": "미원화학",
-      "marcap": 244338674800,
-      "pct_change": -0.09,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -27.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "351320",
-      "name": "넥사다이내믹스",
-      "marcap": 234005978300,
-      "pct_change": 11.47,
+      "pct_change": 12.22,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -269,10 +181,33 @@
     },
     {
       "market": "KR",
-      "sym": "138360",
-      "name": "앤로보틱스",
-      "marcap": 190903436780,
-      "pct_change": 36.88,
+      "sym": "097520",
+      "name": "엠씨넥스",
+      "marcap": 373262175000,
+      "pct_change": 15.0,
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -35.6,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "145720",
+      "name": "덴티움",
+      "marcap": 334606970800,
+      "pct_change": 0.63,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -285,7 +220,51 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -53.7,
+      "dist_52w": -33.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "094360",
+      "name": "칩스앤미디어",
+      "marcap": 253059996900,
+      "pct_change": 3.28,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -42.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "134380",
+      "name": "미원화학",
+      "marcap": 244338674800,
+      "pct_change": 1.34,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -26.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -294,7 +273,7 @@
       "sym": "069510",
       "name": "에스텍",
       "marcap": 157649500000,
-      "pct_change": -2.96,
+      "pct_change": -3.13,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -307,29 +286,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -15.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "419050",
-      "name": "삼기에너지솔루션즈",
-      "marcap": 140130788000,
-      "pct_change": 8.97,
-      "signals": [
-        "52주신고가",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": 1.5,
+      "dist_52w": -15.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -338,7 +295,7 @@
       "sym": "105740",
       "name": "디케이락",
       "marcap": 112565438910,
-      "pct_change": -0.32,
+      "pct_change": 2.75,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -351,7 +308,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -2.9,
+      "dist_52w": 0.1,
       "vol_ratio": null,
       "sector": "기타"
     },
