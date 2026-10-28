@@ -488,9 +488,43 @@ def _save_fails(f):
         print(f"[WARN] quote_fail.json 저장 실패: {e}", flush=True)
 
 
+_QSRC = {"yahoo": 0, "fdr": 0}
+
+
 def quote(sym):
     """가격 캐시가 없을 때(=GitHub Actions) 최근 종가만 가볍게 받는다.
-    data/leaders_cache 는 저장소에 없으므로 CI 에서는 이 경로를 탄다."""
+    data/leaders_cache 는 저장소에 없으므로 CI 에서는 이 경로를 탄다.
+
+    ⚠️ 2026-10-28 — 10-20 이후 이 직접 호출(urllib → query2 v8 chart)이 러너에서 전부 실패했다
+       (px_date 최대 10-19 고정 → 계약 검사가 시총 파일을 매일 되돌림, 5일 정지 경보).
+       같은 실행의 perf_run·canslim_us 는 FinanceDataReader 로 실패 0~0.4% 였다.
+       그래서 직접 호출이 실패하면 FDR 로 한 번 더 받는다."""
+    px, d = _quote_yahoo(sym)
+    if px:
+        _QSRC["yahoo"] += 1
+        return px, d
+    px, d = _quote_fdr(sym)
+    if px:
+        _QSRC["fdr"] += 1
+    return px, d
+
+
+def _quote_fdr(sym):
+    try:
+        import FinanceDataReader as fdr
+        start = (pd.Timestamp.today() - pd.Timedelta(days=14)).strftime("%Y-%m-%d")
+        df = fdr.DataReader(sym.replace(".", "-"), start)
+        if df is None or not len(df) or "Close" not in df:
+            return None, None
+        cl = df["Close"].dropna()
+        if not len(cl):
+            return None, None
+        return float(cl.iloc[-1]), str(pd.Timestamp(cl.index[-1]).date())
+    except Exception:
+        return None, None
+
+
+def _quote_yahoo(sym):
     try:
         raw = get(f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
                   f"?range=10d&interval=1d", YUA, tries=2)
@@ -679,7 +713,7 @@ def cmd_build(net_price=False):
                     fails[s] = [fails.get(s, [0])[0] + 1, today]
         _save_fails(fails)
         got = sum(1 for s in need if s in prices)
-        print(f"  시세 성공 {got}/{len(need)} · 실패 기억 {len(fails):,}종", flush=True)
+        print(f"  시세 성공 {got}/{len(need)} (야후 직접 {_QSRC['yahoo']} · FDR {_QSRC['fdr']}) · 실패 기억 {len(fails):,}종", flush=True)
         # 2026-10-28 — 10-20 이후 시세가 하나도 안 들어와(px_date 최대 10-19) 계약 검사가 파일을 되돌렸는데,
         #   이 줄이 일반 로그에만 있어 원인을 못 봤다. 절반 넘게 실패하면 주석(::error)으로 올려 실행 요약에 보이게 한다.
         if need and got < len(need) * 0.5:
