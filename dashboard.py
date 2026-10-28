@@ -1994,6 +1994,65 @@ with t_core, guard('주도주 교집합'):
             st.caption("순서(같은 종목, 분기 수 중앙): " + " · ".join(f"{k} {v['median']}분기(같은 분기 {v['same_q']}%, n={v['n']:,})" for k, v in _lg.items())
                        + " · 포트폴리오는 위성 A 체계(20칸·래칫·재돌파 재매수·냉각 4주)")
 
+    # ── 🔭 최근 5년 TOP300 역분석 (2026-10-28 차니 설계: 필요조건 → 충분조건 → 언제 꽉 쥐나) ──
+    _wr = load_json(Path('results/winners_reverse.json')) or {}
+    with st.expander("🔭 최근 5년 상승률 TOP300 역분석 — 필요조건 · 충분조건 · 언제 꽉 쥐나", expanded=False):
+        _mk = {k: v for k, v in (_wr.get('markets') or {}).items() if 'error' not in v}
+        if not _mk:
+            st.info("결과를 만드는 중입니다(GitHub 서버 research-rs 작업).")
+        else:
+            st.caption("승자 = 창 시작 주 유동성 통과 종목 중 5년 수익률 상위 300(상폐 포함) · 점화 = 창 안 가장 큰 상승의 저점 주 · "
+                       "필요조건 = 점화 ±13주 안에 그 특징이 있던 승자 비율 · 충분조건 = 평소 그 특징이 있을 때 이후 52주 2배 확률 ÷ 전체 확률(리프트). "
+                       "**필요조건이 높아도 평소에 흔하면 리프트 ≈ 1 = 가려내는 힘 없음.**")
+            _sel = st.radio("시장", list(_mk), horizontal=True, key="wr_mk", format_func=lambda k: {'US': '🇺🇸 미국', 'KR': '🇰🇷 한국'}.get(k, k))
+            _r = _mk[_sel]
+            _m = st.columns(4)
+            _m[0].metric("창", f"{_r['window'][0][:7]} ~ {_r['window'][1][:7]}", f"대상 {_r['eligible']:,}종", delta_color="off")
+            _m[1].metric("승자 5년 수익 중앙", f"{_r['winner_total_median']:,.0f}%", f"{_r['n_winners']}종", delta_color="off")
+            _m[2].metric("평소 52주 2배 확률", f"{_r['base_p2x']}%", f"52주 수익 중앙 {_r['base_med52']}%", delta_color="off")
+            _h = _r['hold']
+            _m[3].metric("상승 도중 최대 낙폭(중앙)", f"{_h['run_dd']['median']:.0f}%", f"하위 10% {_h['run_dd']['worst10']:.0f}%", delta_color="off")
+            st.markdown("**① 필요조건 vs ② 충분조건**")
+            _tsrc('research/winners_reverse.py (GitHub Actions research-rs)', path='results/winners_reverse.json')
+            st.dataframe(pd.DataFrame([{'특징': f['feat'], '승자 점화 ±13주 보유(%)': f['need_near'], '승자 점화 주 보유(%)': f['need_at'],
+                                        '평소 보유(%)': f['prevalence'], '이후 52주 2배 확률(%)': f['p2x'], '리프트(배)': f['lift'],
+                                        '이후 52주 중앙(%)': f['med52'], '표본': f['n']} for f in _r['features']]),
+                         use_container_width=True, hide_index=True, color=False,
+                         column_config={c: st.column_config.NumberColumn(format='%.1f') for c in
+                                        ('승자 점화 ±13주 보유(%)', '승자 점화 주 보유(%)', '평소 보유(%)', '이후 52주 2배 확률(%)', '이후 52주 중앙(%)')}
+                         | {'리프트(배)': st.column_config.NumberColumn(format='%.2f')})
+            st.markdown("**특징 두 개 조합 — 리프트 상위**(표본 500 이상)")
+            _tsrc('research/winners_reverse.py', path='results/winners_reverse.json')
+            st.dataframe(pd.DataFrame([{'조합': c['feat'], '승자 보유(%)': c['need_near'], '2배 확률(%)': c['p2x'], '리프트(배)': c['lift'],
+                                        '이후 52주 중앙(%)': c['med52'], '표본': c['n']} for c in _r['combos']]),
+                         use_container_width=True, hide_index=True, color=False,
+                         column_config={'리프트(배)': st.column_config.NumberColumn(format='%.2f')})
+            st.markdown("**③ 급등은 언제 시작됐나** — 점화 주의 국면 vs 창 전체 주의 국면")
+            _tsrc('research/winners_reverse.py', path='results/winners_reverse.json')
+            st.dataframe(pd.DataFrame([{'국면': m['regime'], '점화 주 비율(%)': m['at_ignition'], '평소 비율(%)': m['all_weeks'],
+                                        '몰림(배)': round(m['at_ignition'] / m['all_weeks'], 2) if m['all_weeks'] else None} for m in _r['macro']]),
+                         use_container_width=True, hide_index=True, filters=False, color=False)
+            _q = _r.get('ignition_by_q') or {}
+            if _q:
+                _fq = go.Figure(go.Bar(x=list(_q), y=list(_q.values()), marker_color='#0e5a6b',
+                                       hovertemplate='%{x}<br>점화 %{y}종<extra></extra>'))
+                _fq.update_layout(height=260, margin=dict(l=8, r=8, t=34, b=8), title="분기별 점화 종목 수")
+                st.plotly_chart(_fq, use_container_width=True)
+            st.markdown("**④ 언제 꽉 쥐나**")
+            _m = st.columns(4)
+            _m[0].metric("점화→고점 기간(중앙)", f"{_h['run_wk']['median']:.0f}주", f"상승 중앙 +{_h['run_gain_median']:,.0f}%", delta_color="off")
+            _m[1].metric("고점 -20% 손절에 털린 승자", f"{_h['stopped_out']['20']:.0f}%", "다시 오르기 전에 팔린 비율", delta_color="off")
+            _m[2].metric("고점 -30% 손절", f"{_h['stopped_out']['30']:.0f}%", delta_color="off")
+            _m[3].metric("고점 -40% 손절", f"{_h['stopped_out']['40']:.0f}%", delta_color="off")
+            _sh = _h['share_by_13w_mean']
+            _fs = go.Figure(go.Bar(x=[f"{i*13+1}~{(i+1)*13}주" for i in range(len(_sh))], y=_sh, marker_color='#0e5a6b',
+                                   hovertemplate='%{x}<br>상승 몫 %{y:.1f}%<extra></extra>'))
+            _fs.update_yaxes(title='점화 후 상승 몫(%, 평균)')
+            _fs.update_layout(height=260, margin=dict(l=8, r=8, t=34, b=8), title="점화 후 13주 단위 상승 몫 — 상승은 어디에 몰리나")
+            st.plotly_chart(_fs, use_container_width=True)
+            if _r.get('note'):
+                st.caption(_r['note'])
+
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
     st.caption("기간 상승률 상위 + 주봉 신호 · 향후 2개월 계절성. 실적(매출·영업익 YoY)·PER·RS 는 오른쪽 공통 열.")
