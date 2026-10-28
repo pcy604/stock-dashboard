@@ -1,5 +1,5 @@
 {
- "run": "2026-10-28 02:48",
+ "run": "2026-10-28 03:16",
  "top": 300,
  "window_weeks": 260,
  "markets": {
@@ -260,24 +260,24 @@
    ],
    "macro": [
     {
-     "regime": "하이일드 스프레드 26주 축소",
-     "at_ignition": 0.3,
-     "all_weeks": 38.3
+     "regime": "신용 스프레드(Baa) 26주 축소",
+     "at_ignition": 37.0,
+     "all_weeks": 52.9
     },
     {
-     "regime": "하이일드 스프레드 26주 확대",
-     "at_ignition": 0.7,
-     "all_weeks": 14.2
+     "regime": "신용 스프레드(Baa) 26주 확대",
+     "at_ignition": 58.0,
+     "all_weeks": 31.8
     },
     {
      "regime": "기준금리 26주 인하",
      "at_ignition": 0.7,
-     "all_weeks": 31.4
+     "all_weeks": 31.8
     },
     {
      "regime": "기준금리 26주 인상",
-     "at_ignition": 68.0,
-     "all_weeks": 38.3
+     "at_ignition": 68.7,
+     "all_weeks": 41.0
     },
     {
      "regime": "SPY 40주선 위",
@@ -286,8 +286,8 @@
     },
     {
      "regime": "VIX 25 이상",
-     "at_ignition": 63.0,
-     "all_weeks": 13.8
+     "at_ignition": 59.3,
+     "all_weeks": 15.3
     }
    ],
    "hold": {
@@ -3303,24 +3303,24 @@
    ],
    "macro": [
     {
-     "regime": "하이일드 스프레드 26주 축소",
-     "at_ignition": 22.2,
-     "all_weeks": 38.7
+     "regime": "신용 스프레드(Baa) 26주 축소",
+     "at_ignition": 46.8,
+     "all_weeks": 52.9
     },
     {
-     "regime": "하이일드 스프레드 26주 확대",
-     "at_ignition": 12.1,
-     "all_weeks": 14.2
+     "regime": "신용 스프레드(Baa) 26주 확대",
+     "at_ignition": 43.1,
+     "all_weeks": 31.8
     },
     {
      "regime": "기준금리 26주 인하",
-     "at_ignition": 27.9,
-     "all_weeks": 31.4
+     "at_ignition": 28.3,
+     "all_weeks": 31.8
     },
     {
      "regime": "기준금리 26주 인상",
-     "at_ignition": 51.5,
-     "all_weeks": 38.3
+     "at_ignition": 52.9,
+     "all_weeks": 41.4
     },
     {
      "regime": "SPY 40주선 위",
@@ -3330,7 +3330,7 @@
     {
      "regime": "VIX 25 이상",
      "at_ignition": 41.4,
-     "all_weeks": 13.8
+     "all_weeks": 15.3
     },
     {
      "regime": "한국 시총합 40주선 위",
@@ -6077,5 +6077,5 @@
    "note": "한국 재무는 공시일 미보유 → 분기말 +45일(4분기 +90일)에 알게 된 것으로 가정 · 시세 FinanceData/marcap(상폐 포함)"
   }
  },
- "secs": 41
+ "secs": 43
 }
