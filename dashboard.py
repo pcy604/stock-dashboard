@@ -2980,9 +2980,10 @@ def _h52_ai(week: str, mkt: str, payload: str) -> str:
 
 
 with t_52, guard('52주 신고가'):
-    st.caption("주봉 기준 — '경신'은 그 주 **고가**가 직전 52주 고가를 넘은 것. 장중 실시간이 아니라 매일 06시(KST) 갱신. "
-               "커버: 한국 시총 1,000억+ · 미국 $3억+.")
     _p52 = load_json(PERF_JSON) or {}
+    _asof52 = str(_p52.get('date') or '')[:10]          # 2026-10-31: 고정 '06시' 문구 대신 실제 데이터 기준일
+    st.caption(f"주봉 기준 — '경신'은 그 주 **고가**가 직전 52주 고가를 넘은 것. **데이터 기준일 {_asof52 or '-'}** "
+               "(매일 자동 갱신, 실제 반영은 오전 10시 전후). 커버: 한국 시총 1,000억+ · 미국 $3억+.")
     _s52 = _p52.get('stocks') or []
     _has_d = any(x.get('dist52') is not None for x in _s52)
     _has_nh = any('nh' in x for x in _s52)
@@ -3019,11 +3020,14 @@ with t_52, guard('52주 신고가'):
                 _sel = _last
             _fw = go.Figure()
             _op = [1.0 if w == _sel else 0.45 for w in _wl]
+            # 진행 중인 주 = 데이터 기준일이 그 주 금요일보다 앞 → 빗금으로 구분(완결 주와 같은 키로 비교하지 않게)
+            _live = bool(_asof52) and _asof52 < _wl[-1]
+            _pat = dict(shape=['/' if (i == len(_wl) - 1 and _live) else '' for i in range(len(_wl))], solidity=0.45)
             if _mk52 != "US":
-                _fw.add_trace(go.Bar(x=_weeks, y=_kr_n, name='🇰🇷 한국', marker=dict(color='#2453C8', opacity=_op),
+                _fw.add_trace(go.Bar(x=_weeks, y=_kr_n, name='🇰🇷 한국', marker=dict(color='#2453C8', opacity=_op, pattern=_pat),
                                      hovertemplate='%{x|%Y-%m-%d} 주 · 한국 %{y}종<extra></extra>'))
             if _mk52 != "KR":
-                _fw.add_trace(go.Bar(x=_weeks, y=_us_n, name='🇺🇸 미국', marker=dict(color='#7C8AA5', opacity=_op),
+                _fw.add_trace(go.Bar(x=_weeks, y=_us_n, name='🇺🇸 미국', marker=dict(color='#7C8AA5', opacity=_op, pattern=_pat),
                                      hovertemplate='%{x|%Y-%m-%d} 주 · 미국 %{y}종<extra></extra>'))
             _fw.update_layout(barmode='stack', height=240, margin=dict(l=8, r=8, t=8, b=8), bargap=0.25,
                               legend=dict(orientation='h', y=1.12, x=0, yanchor='bottom'),
@@ -3042,7 +3046,7 @@ with t_52, guard('52주 신고가'):
             _tot = [a + b for a, b in zip(_kr_n, _us_n)]
             _avg = sum(_tot[-13:]) / 13
             st.caption(f"최근 13주 평균 {_avg:.0f}종/주 · 최대 {max(_tot)}종({_wl[_tot.index(max(_tot))]}) · "
-                       f"이번 주({_last}, 진행 중일 수 있음) {_tot[-1]}종. 숫자가 늘면 시장 폭이 넓어지는 것 — "
+                       f"이번 주({_last}{f', **진행 중 · {_asof52}까지** — 빗금 막대' if _live else ', 완결'}) {_tot[-1]}종. 숫자가 늘면 시장 폭이 넓어지는 것 — "
                        "지수만 오르고 신고가 종목이 줄면 소수 대형주 장세. ⚠️ 지금 커버 명단 기준이라 그 사이 상장폐지된 종목은 빠져 있다.")
 
             # ── ② 선택한 주의 신고가 종목 ──────────────────────────
