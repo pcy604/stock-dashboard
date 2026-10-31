@@ -1,0 +1,108 @@
+# 관점 합의 가중 배분 (2026-10-31) — research/consensus_alloc.py · 사전 등록 research/consensus_alloc_prereg_2026-10-31.md
+# research-rs 와 같은 방식: market.db·v13y 캐시를 읽기만 한다. 결과 JSON 1개만 커밋.
+name: research-consensus
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'research/consensus_alloc.py'
+      - '.github/workflows/research-consensus.yml'
+permissions:
+  contents: write
+concurrency:
+  group: leaders-cache
+  cancel-in-progress: false
+jobs:
+  consensus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/market.db
+          key: marketdb-none
+          restore-keys: |
+            marketdb-
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-none
+          restore-keys: |
+            leaders-cache-
+      - name: 캐시 상태
+        run: |
+          echo "::notice title=캐시::leaders_cache $(ls data/leaders_cache | wc -l) 파일 · ek_ $(ls data/leaders_cache/ek_*.csv 2>/dev/null | wc -l) · dy_ $(ls data/leaders_cache/dy_*.csv 2>/dev/null | wc -l) · dy_SPY $(test -f data/leaders_cache/dy_SPY.csv && echo 있음 || echo 없음)"
+          python - <<'PY'
+          import sqlite3
+          c = sqlite3.connect('data/market.db')
+          v = c.execute("SELECT factor_ver, COUNT(DISTINCT sym), MIN(as_of), MAX(as_of) FROM factor_weekly GROUP BY factor_ver").fetchall()
+          s = c.execute("SELECT COUNT(*), MIN(date), MAX(date) FROM prices WHERE sym='SPY'").fetchone()
+          print(f"::notice title=market.db::factor_weekly {v} · SPY 주봉 {s}")
+          ver = 'v13y' if any(r[0] == 'v13y' for r in v) else 'v1'
+          open('/tmp/ver', 'w').write(ver)
+          PY
+      # 2026-10-24 — CI DB 에는 v1(2018~)만 있다. 장기판 v13y(2014-02-24~)는 이 러너 안에서 쌓는다(48분).
+      #   market.db 캐시는 다시 저장하지 않는다(주간 파이프라인 무영향). 대신 v13y 행만 parquet 로 따로 캐시해
+      #   다음 연구 실행이 48분을 건너뛴다. 가격 이력이 2013 이전까지 없으면 이유를 남기고 v1 로 진행.
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/fw_v13y.parquet
+          key: fw-v13y-none
+          restore-keys: |
+            fw-v13y-
+      - name: 장기판 v13y 준비
+        id: v13y
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import os, sqlite3, pandas as pd
+          c = sqlite3.connect('data/market.db')
+          n, old = c.execute("SELECT COUNT(DISTINCT sym), SUM(m < '2013-03-01') FROM (SELECT sym, MIN(date) m FROM prices GROUP BY sym)").fetchone()
+          spy = c.execute("SELECT MIN(date) FROM prices WHERE sym='SPY'").fetchone()[0]
+          print(f"::notice title=가격 이력 깊이::{old}/{n}종이 2013-03 이전부터 · SPY {spy}~")
+          open('/tmp/deep', 'w').write('1' if old and old / n > 0.3 and spy and spy < '2013-03-01' else '0')
+          have = c.execute("SELECT COUNT(*) FROM factor_weekly WHERE factor_ver='v13y'").fetchone()[0]
+          if not have and os.path.exists('data/fw_v13y.parquet'):
+              f = pd.read_parquet('data/fw_v13y.parquet')
+              last_v1 = c.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver='v1'").fetchone()[0]
+              if (pd.Timestamp(str(last_v1)[:10]) - pd.Timestamp(str(f.as_of.max())[:10])).days <= 56:   # 8주 이내면 사용(연구용, 48분 재생성 방지)
+                  f.to_sql('factor_weekly', c, if_exists='append', index=False); c.commit()
+                  print(f"::notice title=v13y 캐시 사용::{len(f):,}행 · 최신 {str(f.as_of.max())[:10]}")
+                  open('/tmp/ver', 'w').write('v13y'); open('/tmp/fresh', 'w').write('0')
+              else:
+                  print(f"v13y 캐시가 낡음({str(f.as_of.max())[:10]} < {last_v1}) → 다시 쌓는다")
+          PY
+          if [ "$(cat /tmp/ver)" != "v13y" ] && [ "$(cat /tmp/deep)" = "1" ]; then
+            FACTOR_VER=v13y python leaders_build.py build 2014-02-24 && echo v13y > /tmp/ver && echo 1 > /tmp/fresh
+            python -c "import sqlite3,pandas as pd; pd.read_sql(\"SELECT * FROM factor_weekly WHERE factor_ver='v13y'\", sqlite3.connect('data/market.db')).to_parquet('data/fw_v13y.parquet')"
+          fi
+          echo "::notice title=백테스트 시계열::$(cat /tmp/ver)"
+      - uses: actions/cache/save@v4
+        if: always()
+        continue-on-error: true
+        with:
+          path: data/fw_v13y.parquet
+          key: fw-v13y-${{ github.run_id }}
+      - name: 관점 합의 가중 배분
+        run: FACTOR_VER=$(cat /tmp/ver) python research/consensus_alloc.py
+      - name: 결과 커밋
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add results/consensus_alloc.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "auto: 관점 합의 가중 배분 $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
