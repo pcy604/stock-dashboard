@@ -16,7 +16,7 @@
   lock_be    : 최고 수익이 이 % 를 넘으면 손절선 ≥ 진입가(본전 보장). 0 = 끔
   min_hold   : 진입 후 이 주수 동안은 사다리(고점 대비) 손절을 쓰지 않는다(초기 손절은 살아 있음) — '최소보유 바닥'
   scale_out  : [수익%, 매도 비율] — 처음 그 수익에 닿으면 보유분의 비율만큼 한 번 익절. 비율 0 = 끔
-  reentry    : 'none' | 'nh52' | 'prev_peak'(청산 때 고점 재돌파)  — 청산 후 다시 살지
+  reentry    : 'none' | 'nh52' | 'prev_peak'(청산 때 고점 재돌파) | 'sell_px'(판 가격 재돌파 — 차니 10-31)  — 청산 후 다시 살지
   cooldown   : 청산 후 재진입 금지 주수
   delay      : 0 | 1
   cost       : 편도 비용 %
@@ -42,6 +42,11 @@ PRESETS = {
     '고점 -20% · 신고가 재진입': dict(init_stop=20, ladder=[[0, 20]], reentry='nh52', cooldown=4),
     '래칫 조이기 · 신고가 재진입': dict(init_stop=20, ladder=[[30, 25], [100, 20], [200, 15]], reentry='nh52', cooldown=4),
     '최소보유 26주 · 고점 -35% · 재진입': dict(init_stop=35, ladder=[[0, 35]], min_hold=26, reentry='nh52', cooldown=4),
+    # 차니안 (10-31): 진입가 −10% 손절 → 오르면 고점 대비 손절, 판 가격을 다시 넘으면 바로 재매수
+    '차니안 고정 −10%·판값 재매수':  dict(init_stop=10, ladder=[[0, 10]], reentry='sell_px', cooldown=0),
+    '차니안 고정 −20%·판값 재매수':  dict(init_stop=10, ladder=[[0, 20]], reentry='sell_px', cooldown=0),
+    '차니안 고정 −30%·판값 재매수':  dict(init_stop=10, ladder=[[0, 30]], reentry='sell_px', cooldown=0),
+    '차니안 넓히기 −10→−20→−30·판값 재매수': dict(init_stop=10, ladder=[[0, 10], [50, 20], [100, 30]], reentry='sell_px', cooldown=0),
 }
 ENTRIES = {'start': '창 첫 주 매수', 'nh52': '52주 신고가 돌파 시 매수', 'ma30': '30주선 위·상승 시 매수'}
 
@@ -111,7 +116,7 @@ def simulate(close, start, p):
                 if kind == 'sell':
                     trades.append(dict(i0=pos['i0'], i1=i, buy=pos['entry'], sell=px, ret=px / pos['entry'] - 1,
                                        why=pend[2], peak=pos['peak']))
-                    last_exit = (i, pos['peak']); pos = None; sh = 0.0
+                    last_exit = (i, pos['peak'], px); pos = None; sh = 0.0
             pend = None
         # ② 보유 중: 고점·손절선 갱신 → 손절 판정
         if pos is not None:
@@ -145,6 +150,8 @@ def simulate(close, start, p):
                     ok = _entry_ok('nh52', c, i, hi52, ma30, ma30_prev)
                 elif p['reentry'] == 'prev_peak':
                     ok = px > last_exit[1]
+                elif p['reentry'] == 'sell_px':
+                    ok = px > last_exit[2]
             if ok:
                 first = False
                 pend = ('buy', i, '진입')

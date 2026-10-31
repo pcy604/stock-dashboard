@@ -62,7 +62,7 @@ def render(mkt_sel: str, tsrc):
         pass
 
     # ── ① 프리셋 결과(연구 실행분) ──────────────────────────
-    st.markdown("##### 📋 미리 잰 규칙 14종 — 창 첫 주 매수 기준")
+    st.markdown("##### 📋 미리 잰 규칙 18종 — 창 첫 주 매수 기준")
     _ent0 = st.segmented_control("진입", list(R.ENTRIES)[:2], default='start', key='rat_ent0',
                                  format_func=lambda k: R.ENTRIES[k]) or 'start'
     rows = []
@@ -107,8 +107,8 @@ def render(mkt_sel: str, tsrc):
         d1, d2, d3, d4 = st.columns(4)
         so_g = d1.number_input("부분 익절: 수익 +% (0=끔)", 0.0, 2000.0, float(base['scale_out'][0]), 10.0, key=f'rat_sg_{pre}')
         so_f = d2.number_input("부분 익절: 매도 비율(%)", 0.0, 100.0, float(base['scale_out'][1]) * 100, 10.0, key=f'rat_sf_{pre}')
-        rent = d3.selectbox("청산 후 재진입", ['none', 'nh52', 'prev_peak'], index=['none', 'nh52', 'prev_peak'].index(base['reentry']),
-                            format_func={'none': '안 함', 'nh52': '52주 신고가 돌파', 'prev_peak': '청산 때 고점 재돌파'}.get, key=f'rat_r_{pre}')
+        rent = d3.selectbox("청산 후 재진입", ['none', 'nh52', 'prev_peak', 'sell_px'], index=['none', 'nh52', 'prev_peak', 'sell_px'].index(base['reentry']),
+                            format_func={'none': '안 함', 'nh52': '52주 신고가 돌파', 'prev_peak': '청산 때 고점 재돌파', 'sell_px': '판 가격 재돌파'}.get, key=f'rat_r_{pre}')
         cd = d4.number_input("재진입 냉각(주)", 0, 52, int(base['cooldown']), 1, key=f'rat_c_{pre}')
         go_ = st.form_submit_button("▶ 백테스트", type='primary')
     lad = lad.dropna()
