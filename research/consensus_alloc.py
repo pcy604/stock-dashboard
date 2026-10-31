@@ -197,7 +197,8 @@ def main():
                    prereg="research/consensus_alloc_prereg_2026-10-31.md", overlap_jaccard=J, votes_fwd13=F,
                    results=res, verdict=verdict, curves=eq,
                    note="미국 v13y · 4주 리밸런싱 · 1주 지연 · 편도 0.3% · 상폐 뒤 수익 0(충격 1% 버전 별도)"),
-              open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+              open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1,
+              default=lambda o: o.item() if hasattr(o, "item") else str(o))   # numpy bool 이 JSON 을 중간에 끊었다(10-31 1차)
     print(f"끝 {time.time()-t0:.0f}s")
 
 
