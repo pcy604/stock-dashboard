@@ -453,6 +453,14 @@ def _():
     age = _age(d.get('asof'))
     return not bad and not low and age <= 14, f"기준 {d.get('asof')}({age}일) · 표본 부족 {bad or '없음'} · 승자 중앙<2배 {low or '없음'}"
 
+
+@check('관점 합의 배분', '결과 JSON 이 끝까지 저장됐고(판정 포함) 평가 구간이 10년 이상인가')
+def _():
+    d = _j('results/consensus_alloc.json')
+    w = d.get('window') or ['', '']
+    yrs = (pd.Timestamp(w[1]) - pd.Timestamp(w[0])).days / 365.25 if all(w) else 0
+    return bool(d.get('verdict')) and yrs >= 10, f"구간 {w[0]}~{w[1]}({yrs:.1f}년) · 판정 {'있음' if d.get('verdict') else '없음'}"
+
 def main():
     strict = '--strict' in sys.argv
     res = run()
