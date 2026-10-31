@@ -1,0 +1,297 @@
+{
+ "asof": "2026-10-31",
+ "window": [
+  "2015-02-23",
+  "2026-10-26"
+ ],
+ "prereg": "research/consensus_alloc_prereg_2026-10-31.md",
+ "overlap_jaccard": {
+  "모멘텀×주도주": 0.307,
+  "섹터 대장×모멘텀": 0.261,
+  "섹터 대장×주도주": 0.213,
+  "투자회수×모멘텀": 0.003,
+  "투자회수×섹터 대장": 0.006,
+  "투자회수×주도주": 0.005
+ },
+ "votes_fwd13": {
+  "1": {
+   "mean": 4.17,
+   "median": 1.12,
+   "n": 6457
+  },
+  "2": {
+   "mean": 6.95,
+   "median": -0.07,
+   "n": 1757
+  },
+  "3": {
+   "mean": 10.89,
+   "median": 1.24,
+   "n": 643
+  }
+ },
+ "results": {
+  "E|N10|cap-": {
+   "CAGR": 11.2,
+   "MDD": -52.5,
+   "Sharpe": 0.49,
+   "Calmar": 0.21,
+   "worst_yr": -14.6,
+   "beat_yrs": "6/12",
+   "y14_19": 8.8
+  },
+  "C|N10|cap8": {
+   "CAGR": 14.9,
+   "MDD": -50.2,
+   "Sharpe": 0.57,
+   "Calmar": 0.3,
+   "worst_yr": -14.0,
+   "beat_yrs": "7/12",
+   "y14_19": 13.2
+  },
+  "C|N10|cap10": {
+   "CAGR": 14.9,
+   "MDD": -50.2,
+   "Sharpe": 0.57,
+   "Calmar": 0.3,
+   "worst_yr": -13.8,
+   "beat_yrs": "7/12",
+   "y14_19": 13.2
+  },
+  "C|N10|cap15": {
+   "CAGR": 14.9,
+   "MDD": -50.2,
+   "Sharpe": 0.57,
+   "Calmar": 0.3,
+   "worst_yr": -13.8,
+   "beat_yrs": "7/12",
+   "y14_19": 13.2
+  },
+  "C2|N10|cap8": {
+   "CAGR": 15.4,
+   "MDD": -54.2,
+   "Sharpe": 0.57,
+   "Calmar": 0.28,
+   "worst_yr": -12.5,
+   "beat_yrs": "5/12",
+   "y14_19": 13.8
+  },
+  "C2|N10|cap10": {
+   "CAGR": 16.8,
+   "MDD": -51.7,
+   "Sharpe": 0.6,
+   "Calmar": 0.32,
+   "worst_yr": -12.9,
+   "beat_yrs": "5/12",
+   "y14_19": 15.8
+  },
+  "C2|N10|cap15": {
+   "CAGR": 19.1,
+   "MDD": -51.9,
+   "Sharpe": 0.64,
+   "Calmar": 0.37,
+   "worst_yr": -14.0,
+   "beat_yrs": "7/12",
+   "y14_19": 18.6
+  },
+  "E|N20|cap-": {
+   "CAGR": 13.6,
+   "MDD": -49.8,
+   "Sharpe": 0.58,
+   "Calmar": 0.27,
+   "worst_yr": -14.7,
+   "beat_yrs": "5/12",
+   "y14_19": 8.5
+  },
+  "E|N20|cap-|shock1": {
+   "CAGR": 12.4,
+   "MDD": -50.5,
+   "Sharpe": 0.55,
+   "Calmar": 0.25,
+   "worst_yr": -15.5,
+   "beat_yrs": "5/12",
+   "y14_19": 7.4
+  },
+  "C|N20|cap8": {
+   "CAGR": 14.6,
+   "MDD": -50.0,
+   "Sharpe": 0.59,
+   "Calmar": 0.29,
+   "worst_yr": -13.3,
+   "beat_yrs": "5/12",
+   "y14_19": 10.0
+  },
+  "C|N20|cap10": {
+   "CAGR": 14.6,
+   "MDD": -50.0,
+   "Sharpe": 0.59,
+   "Calmar": 0.29,
+   "worst_yr": -13.3,
+   "beat_yrs": "5/12",
+   "y14_19": 10.0
+  },
+  "C|N20|cap10|shock1": {
+   "CAGR": 13.5,
+   "MDD": -50.8,
+   "Sharpe": 0.56,
+   "Calmar": 0.27,
+   "worst_yr": -14.2,
+   "beat_yrs": "4/12",
+   "y14_19": 8.9
+  },
+  "C|N20|cap15": {
+   "CAGR": 14.6,
+   "MDD": -50.0,
+   "Sharpe": 0.59,
+   "Calmar": 0.29,
+   "worst_yr": -13.3,
+   "beat_yrs": "5/12",
+   "y14_19": 10.0
+  },
+  "C2|N20|cap8": {
+   "CAGR": 16.4,
+   "MDD": -50.9,
+   "Sharpe": 0.61,
+   "Calmar": 0.32,
+   "worst_yr": -11.4,
+   "beat_yrs": "6/12",
+   "y14_19": 12.2
+  },
+  "C2|N20|cap10": {
+   "CAGR": 16.5,
+   "MDD": -50.9,
+   "Sharpe": 0.62,
+   "Calmar": 0.32,
+   "worst_yr": -10.2,
+   "beat_yrs": "6/12",
+   "y14_19": 12.4
+  },
+  "C2|N20|cap10|shock1": {
+   "CAGR": 15.4,
+   "MDD": -51.7,
+   "Sharpe": 0.59,
+   "Calmar": 0.3,
+   "worst_yr": -11.0,
+   "beat_yrs": "6/12",
+   "y14_19": 11.2
+  },
+  "C2|N20|cap15": {
+   "CAGR": 16.6,
+   "MDD": -50.9,
+   "Sharpe": 0.62,
+   "Calmar": 0.33,
+   "worst_yr": -9.2,
+   "beat_yrs": "6/12",
+   "y14_19": 12.4
+  },
+  "E|N30|cap-": {
+   "CAGR": 13.1,
+   "MDD": -47.6,
+   "Sharpe": 0.59,
+   "Calmar": 0.28,
+   "worst_yr": -14.9,
+   "beat_yrs": "6/12",
+   "y14_19": 9.8
+  },
+  "C|N30|cap8": {
+   "CAGR": 14.0,
+   "MDD": -47.4,
+   "Sharpe": 0.6,
+   "Calmar": 0.3,
+   "worst_yr": -14.0,
+   "beat_yrs": "6/12",
+   "y14_19": 10.9
+  },
+  "C|N30|cap10": {
+   "CAGR": 14.0,
+   "MDD": -47.4,
+   "Sharpe": 0.6,
+   "Calmar": 0.3,
+   "worst_yr": -14.0,
+   "beat_yrs": "6/12",
+   "y14_19": 10.9
+  },
+  "C|N30|cap15": {
+   "CAGR": 14.0,
+   "MDD": -47.4,
+   "Sharpe": 0.6,
+   "Calmar": 0.3,
+   "worst_yr": -14.0,
+   "beat_yrs": "6/12",
+   "y14_19": 10.9
+  },
+  "C2|N30|cap8": {
+   "CAGR": 15.5,
+   "MDD": -48.7,
+   "Sharpe": 0.61,
+   "Calmar": 0.32,
+   "worst_yr": -10.8,
+   "beat_yrs": "6/12",
+   "y14_19": 12.7
+  },
+  "C2|N30|cap10": {
+   "CAGR": 15.5,
+   "MDD": -48.7,
+   "Sharpe": 0.61,
+   "Calmar": 0.32,
+   "worst_yr": -10.6,
+   "beat_yrs": "6/12",
+   "y14_19": 12.7
+  },
+  "C2|N30|cap15": {
+   "CAGR": 15.5,
+   "MDD": -48.7,
+   "Sharpe": 0.61,
+   "Calmar": 0.32,
+   "worst_yr": -10.6,
+   "beat_yrs": "6/12",
+   "y14_19": 12.7
+  },
+  "단독|투자회수": {
+   "CAGR": 9.0,
+   "MDD": -62.6,
+   "Sharpe": 0.46,
+   "Calmar": 0.14,
+   "worst_yr": -15.8,
+   "beat_yrs": "5/12",
+   "y14_19": 7.2
+  },
+  "단독|섹터 대장": {
+   "CAGR": 10.9,
+   "MDD": -54.1,
+   "Sharpe": 0.47,
+   "Calmar": 0.2,
+   "worst_yr": -14.5,
+   "beat_yrs": "5/12",
+   "y14_19": 6.5
+  },
+  "단독|모멘텀": {
+   "CAGR": 10.1,
+   "MDD": -70.9,
+   "Sharpe": 0.44,
+   "Calmar": 0.14,
+   "worst_yr": -13.2,
+   "beat_yrs": "5/12",
+   "y14_19": 8.8
+  },
+  "단독|주도주": {
+   "CAGR": 20.9,
+   "MDD": -50.2,
+   "Sharpe": 0.69,
+   "Calmar": 0.42,
+   "worst_yr": -13.3,
+   "beat_yrs": "8/12",
+   "y14_19": 15.0
+  },
+  "SPY": {
+   "CAGR": 13.5,
+   "MDD": -31.8,
+   "Sharpe": 0.85,
+   "Calmar": 0.43,
+   "worst_yr": -16.6,
+   "y14_19": 11.4
+  }
+ },
+ "verdict": {
+  "C": {
+   "c1_cagr_sharpe": 
