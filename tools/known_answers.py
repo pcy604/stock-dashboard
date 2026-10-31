@@ -441,6 +441,18 @@ def run():
     return out
 
 
+
+# ───────────────────────── 종목별 익절 래칫 (2026-10-31) ─────────────────────────
+@check('익절 래칫', '미국·한국 각각 승자100·대조100 표본이 있고, 승자 중앙 상승이 2배 이상인가(정의상 참)')
+def _():
+    d = _j('results/stock_ratchet.json')
+    info, res = d.get('info', {}), d.get('results', {})
+    bad = [f"{m}|{g}" for m in ('US', 'KR') for g in ('승자100', '대조100')
+           if ((res.get(f"{m}|{g}|start") or {}).get('매수보유') or {}).get('n') != 100]
+    low = [m for m in ('US', 'KR') if (info.get(m) or {}).get('winner_med', 0) < 2]
+    age = _age(d.get('asof'))
+    return not bad and not low and age <= 14, f"기준 {d.get('asof')}({age}일) · 표본 부족 {bad or '없음'} · 승자 중앙<2배 {low or '없음'}"
+
 def main():
     strict = '--strict' in sys.argv
     res = run()

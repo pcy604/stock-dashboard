@@ -1,0 +1,60 @@
+# 종목별 익절 래칫 — 최근 5년 TOP100(미국·한국) + 대조 100 (2026-10-31) — research/stock_ratchet.py
+# market.db(미국 주봉)는 git 밖 → weekly-accel 이 저장한 캐시를 **읽기만** 한다. 한국은 FinanceData/marcap.
+# 결과: results/stock_ratchet_px.parquet(화면 🪜 익절 래칫이 사용자 규칙을 다시 돌리는 가격 표본) · stock_ratchet.json
+name: research-ratchet
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * 6'        # 매주 토 12:17 KST — 창을 한 주씩 민다
+  push:
+    branches: [main]
+    paths:
+      - 'research/stock_ratchet.py'
+      - 'stock_rules.py'
+      - '.github/workflows/research-ratchet.yml'
+permissions:
+  contents: write
+concurrency:
+  group: research-ratchet
+  cancel-in-progress: true
+jobs:
+  ratchet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/market.db
+          key: marketdb-none
+          restore-keys: |
+            marketdb-
+      - name: 종목별 래칫 백테스트
+        run: python research/stock_ratchet.py
+      - name: 미국 표본 확인
+        run: |
+          python - <<'PY'
+          import json
+          i = json.load(open('results/stock_ratchet.json', encoding='utf-8'))['info']
+          for m, v in i.items():
+              print(f"::notice title={m}::{v}")
+          if 'error' in i.get('US', {}):
+              raise SystemExit('미국 표본 실패 — market.db 캐시 확인')
+          PY
+      - name: 결과 커밋
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add results/stock_ratchet.json results/stock_ratchet_px.parquet 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "auto: 종목별 익절 래칫 $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
