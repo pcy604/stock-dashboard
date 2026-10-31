@@ -72,7 +72,7 @@ def kr():
     parts = []
     for f in sorted(glob.glob(os.path.join(dd, "marcap-*.parquet")))[-8:]:
         x = pd.read_parquet(f)
-        parts.append(x[[k for k in ("Code", "Name", "Date", "Close", "Amount", "Marcap", "Market", "MarketId") if k in x.columns]])
+        parts.append(x[[k for k in ("Code", "Name", "Date", "Close", "Amount", "Marcap", "Stocks", "Market", "MarketId") if k in x.columns]])
     d = pd.concat(parts)
     if "MarketId" in d.columns:
         d = d[d.MarketId.isin(["STK", "KSQ"])]
@@ -80,6 +80,16 @@ def kr():
     d = d[d.Close > 0].drop_duplicates(["Code", "Date"], keep="last")
     names = d.sort_values("Date").groupby("Code").Name.last().to_dict()
     C = d.pivot(index="Date", columns="Code", values="Close")
+    # 2026-10-31: marcap 은 수정주가가 아니다 — 액면분할일이 −80% 폭락으로 보여 손절이 가짜로 걸렸다.
+    #   상장주식수가 1.5배+ 늘고(병합은 0.67배−) 가격이 그 역수 근처로 움직인 날을 분할로 보고 과거 가격을 보정.
+    if "Stocks" in d.columns:
+        St = d.pivot(index="Date", columns="Code", values="Stocks").reindex_like(C)
+        sr, pr = St / St.shift(1), C / C.shift(1)
+        x = pr * sr
+        sp = (((sr >= 1.5) | (sr <= 0.67)) & (x >= 0.7) & (x <= 1.3)).fillna(False)
+        step = sr.where(sp, 1.0).fillna(1.0)
+        fac = step[::-1].cumprod()[::-1].shift(-1).fillna(1.0)       # 그날 이후 분할 비율의 곱
+        C = C / fac
     Am = d.pivot(index="Date", columns="Code", values="Amount").rolling(20, min_periods=15).mean()
     Mc = d.pivot(index="Date", columns="Code", values="Marcap")
     last = C.apply(lambda s: s.last_valid_index())

@@ -461,6 +461,15 @@ def _():
     yrs = (pd.Timestamp(w[1]) - pd.Timestamp(w[0])).days / 365.25 if all(w) else 0
     return bool(d.get('verdict')) and yrs >= 10, f"구간 {w[0]}~{w[1]}({yrs:.1f}년) · 판정 {'있음' if d.get('verdict') else '없음'}"
 
+
+@check('매매 실험실', '일봉 표본이 미국·한국 각 150종 이상이고, 30조합 결과가 다 있는가')
+def _():
+    i = _j('results/trade_px_info.json')
+    d = _j('results/trade_lab.json')
+    n = {m: (i.get(m) or {}).get('n', 0) for m in ('US', 'KR')}
+    k = len(d.get('results') or {})
+    return all(v >= 150 for v in n.values()) and k == 30, f"일봉 종목 {n} · 조합 {k}/30 · 분할 보정 {(i.get('KR') or {}).get('splits_fixed')}건"
+
 def main():
     strict = '--strict' in sys.argv
     res = run()

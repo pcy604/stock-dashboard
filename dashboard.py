@@ -1385,7 +1385,7 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     with _g_mom:
         t_gain, t_52 = st.tabs(["상승 상위", "52주 신고가"])
     with _g_core:
-        t_core, tab3, t_rat = st.tabs(["교집합 후보", "CANSLIM", "🪜 익절 래칫"])
+        t_core, tab3, t_rat, t_trd = st.tabs(["교집합 후보", "CANSLIM", "🪜 익절 래칫", "🎮 매매 실험실"])
     with _g_fund:
         t_lead, t_turn, t_value = st.tabs(["이익가속", "흑자전환", "가치 발굴 (KR)"])
 
@@ -2974,6 +2974,14 @@ with t_rat, guard('익절 래칫'):
     import ui_ratchet as _uir
     _uir = _fresh_module(_uir)
     _uir.render(_GMKT, _tsrc)
+
+
+# ── 🎮 매매 실험실 (2026-10-31) — 종목 게임 × 지수 게임, 일봉·스탑 체결. 코드는 ui_trade.py ─────────────
+with t_trd, guard('매매 실험실'):
+    _lazy(tab_screen)
+    import ui_trade as _uit
+    _uit = _fresh_module(_uit)
+    _uit.render(_GMKT, _tsrc)
 
 
 # ── 📈 52주 신고가 (2026-10-14 · 2026-10-19 주간 그래프·연속 경신·AI 공통점) ─────────────
