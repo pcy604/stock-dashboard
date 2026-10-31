@@ -40,6 +40,17 @@ from contextlib import contextmanager
 st.set_page_config(page_title="Stock Dashboard", page_icon="📈", layout="wide")
 
 
+class _LazySkip(Exception):
+    """닫힌 메인 탭의 블록을 건너뛸 때 쓰는 신호 — guard 가 조용히 삼킨다(2026-10-31 활성 탭만 계산)."""
+
+
+def _lazy(tab):
+    """st.tabs(on_change='rerun') 의 탭은 .open 으로 열림 여부를 안다. 닫혀 있으면(False) 그 블록 계산을 건너뛴다.
+    None(알 수 없음)이면 그대로 그린다 — 10-24 메모리 초과 다운의 근본 대책: 5개 메인 탭을 매번 다 계산하지 않는다."""
+    if getattr(tab, 'open', None) is False:
+        raise _LazySkip
+
+
 @contextmanager
 def guard(section: str):
     """섹션 격리. Streamlit은 스크립트를 위→아래로 한 번에 실행하므로 한 탭에서
@@ -47,6 +58,8 @@ def guard(section: str):
     KeyError로 5개 탭이 백지가 된 사고). 탭마다 이 가드를 씌워 고장을 국소화한다."""
     try:
         yield
+    except _LazySkip:
+        pass
     except Exception as e:
         st.error(f"⚠️ **{section}** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다.")
         st.caption(f"`{type(e).__name__}: {e}`")
@@ -1524,6 +1537,7 @@ def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=
     return df
 
 with _cand_slot, guard('후보 바구니'):
+    _lazy(tab_screen)
     _cand_panel()
 
 # ════════════════════════════════════════════════════════════════════
@@ -1534,6 +1548,7 @@ with _cand_slot, guard('후보 바구니'):
 # 정의: RS 강도 상위 20% × (이번 주 이익가속 또는 최근 흑자전환). 52주 신고가 '전에' 걸리게 하려는 것.
 # ⚠️ 검증 전이다 — research/rs_accel_bt.py(CI research-rs) 결과가 합격일 때만 '규칙'으로 승격한다.
 with t_core, guard('주도주 교집합'):
+    _lazy(tab_screen)
     _rj = load_json(Path('results/returns.json')) or {}
     _acj = load_json(Path('results/leaders_accel.json')) or {}
     _taj = load_json(Path('results/turnaround_latest.json')) or {}
@@ -2055,6 +2070,7 @@ with t_core, guard('주도주 교집합'):
 
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with t_gain, guard('상승 상위'):
+    _lazy(tab_screen)
     st.caption("기간 상승률 상위 + 주봉 신호 · 향후 2개월 계절성. 실적(매출·영업익 YoY)·PER·RS 는 오른쪽 공통 열.")
     _retj = load_json(Path('results/returns.json'))
     _perf = load_json(PERF_JSON) or {}
@@ -2143,6 +2159,7 @@ _LEAD_US = _GMKT != "KR"
 _LEAD_KR = _GMKT != "US"
 
 with t_lead, guard('주도주'):
+    _lazy(tab_screen)
     if _LEAD_US and _LEAD_KR:
         st.caption("🇺🇸 미국 이익 가속 신호 목록입니다. 한국 규칙(KR-U6 / KR-P1)은 상폐 포함 백테스트에서 기각돼 "
                    "맨 아래 🗄️ 기각된 규칙으로 옮겼습니다(원칙 v1.2).")
@@ -2658,6 +2675,7 @@ with t_lead:
                           value=False, key="show_rejected")
 if _LEAD_KR and _show_rej:
     with t_lead, guard('주도주 KR'):
+        _lazy(tab_screen)
         st.markdown("##### 🇰🇷 한국 — KR-U6 / KR-P1 · 기각 · 관찰 기록")
         # 2026-10-20: 원칙 v1.2(10-14)에서 KR 위성은 기각됐는데 화면은 매수 후보처럼 보였다 → 맨 위에 못 박는다.
         st.warning(
@@ -2896,6 +2914,7 @@ if _LEAD_KR and _show_rej:
     # 백테스트는 '지금 시점에서 과거를 다시 계산'이라 생존편향·데이터 개정·규칙
     # 사후조정이 섞인다. 원장은 '신호를 낸 그날 이후'만 쌓아 그 오염이 안 들어온다.
     with t_lead, guard('주도주 KR 포워드 원장'):
+        _lazy(tab_screen)
         _kp = load_json(Path('results/leaders_kr_paper.json'))
         st.divider()
         st.markdown("#### 📒 포워드 원장 — 신호를 낸 뒤 실제로 어떻게 됐나")
@@ -2951,6 +2970,7 @@ if _LEAD_KR and _show_rej:
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
 # ── 🪜 익절 래칫 (2026-10-31) — 종목별 매매 규칙 실험실. 코드는 ui_ratchet.py ─────────────
 with t_rat, guard('익절 래칫'):
+    _lazy(tab_screen)
     import ui_ratchet as _uir
     _uir = _fresh_module(_uir)
     _uir.render(_GMKT, _tsrc)
@@ -2987,6 +3007,7 @@ def _h52_ai(week: str, mkt: str, payload: str) -> str:
 
 
 with t_52, guard('52주 신고가'):
+    _lazy(tab_screen)
     _p52 = load_json(PERF_JSON) or {}
     _asof52 = str(_p52.get('date') or '')[:10]          # 2026-10-31: 고정 '06시' 문구 대신 실제 데이터 기준일
     st.caption(f"주봉 기준 — '경신'은 그 주 **고가**가 직전 52주 고가를 넘은 것. **데이터 기준일 {_asof52 or '-'}** "
@@ -3187,6 +3208,7 @@ with t_52, guard('52주 신고가'):
 
 
 with t_value, guard('가치 발굴'):
+    _lazy(tab_screen)
     st.caption(data_stamp('results/value_kr.json'))
     st.caption("💎 공식 재무(DART·네이버)로 '싸고(저PER·저PBR) 돈 잘 버는(ROE·영업익 성장)' 한국 종목 — 가격이 아니라 가치 기준. "
                "PER 은 오른쪽 공통 열(지금 시총 ÷ 최근 4분기 순이익)로 거른다.")
@@ -3267,6 +3289,7 @@ with t_value, guard('가치 발굴'):
 
 # ════════════════════════════════════════════════════════════════════
 with tab3, guard('CANSLIM'):
+    _lazy(tab_screen)
     # 2026-10-15 — 탭 자체 KR/US 라디오 폐지 → 상단 공통 시장 필터. '전체'면 두 시장을 한 표에.
     #   RS(L) 은 **각 시장 안의 백분위**라서 시장을 섞어도 '그 시장에서 상위 몇 %'로 읽으면 된다.
     _CS_SETS = [(m, p) for m, p in (('KR', CANSLIM_JSON), ('US', Path('results/canslim_us_latest.json')))
@@ -4100,6 +4123,7 @@ def _macro_rules_section(V, _RG):
 
 
 with tab4, guard('매크로'):
+    _lazy(tab4)
     st.header("🌍 매크로")
     st.caption("돈은 어디로 흐르고, 경기는 어디로 가나 — 두 축을 보고, 욕심을 얼마나 부릴지 정한다. "
                "시세 3시간 · FRED 1시간 캐시 · 지표마다 관측일을 따로 적는다(월간 지표는 1~2개월 늦다).")
@@ -7440,7 +7464,8 @@ def _tab_analysis():
             st.caption("예: TSLA · NVDA · 005930(삼성전자) · 000660(SK하이닉스)")
 
 
-with tab7:
+with tab7, guard('종목 분석'):
+    _lazy(tab7)
     _tab_analysis()
 
 
@@ -7553,6 +7578,7 @@ def _marcap_join() -> dict:
 #    필요하면 맨 아래 '복사용 JSON' 을 repo 의 data/portfolio.json 에 넣는다.
 # ════════════════════════════════════════════════════════════════════
 with tab_pf, guard('포트폴리오 가드레일'):
+    _lazy(tab_pf)
     import guardrail as _gr
     import access as _acc
     # 2026-10-21 — 로그인 + 테스트 명단 통과해야 아래가 열린다(공개 사이트라 남의 화면에 보이면 안 된다)
@@ -7831,6 +7857,7 @@ with tab_pf, guard('포트폴리오 가드레일'):
 # 올려 정지하면 보이게 한다.
 # ════════════════════════════════════════════════════════════════════
 with t_turn, guard('흑자전환'):
+    _lazy(tab_screen)
     _ta = load_json(Path('results/turnaround_latest.json')) or {}
     _tas = _ta.get('stocks') or []
     st.markdown("#### 🔄 흑자전환 — 적자에서 돌아서는 구간을 찾는다")
@@ -8142,12 +8169,15 @@ with guard('이번 주 판정'):
 with _status_slot, guard('상단 배지'):
     _status_bar(_VERDICT)
 with tab_home, guard('종합 — 판정'):
+    _lazy(tab_home)
     st.caption("월요일 아침 이 화면 하나 — ① 판정 ② 할 일 ③ 시황. 판정은 verdict.py 한 곳에서 계산하고 모든 탭이 같은 값을 읽는다.")
     _home_verdict(_VERDICT)
 with tab_home, guard('종합 — 할 일'):
+    _lazy(tab_home)
     _home_todo(_VERDICT)
 
 with tab_rep, guard('시황 리포트'):
+    _lazy(tab_home)
     st.subheader("③ 시황 리포트")
     _rep = load_json(Path('results/market_report.json')) or {}
     st.caption("매일 06시(KST) 일간 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
