@@ -53,6 +53,16 @@ def us():
     d["acc"] = d["ACC"]
     for k in ("open", "high", "low"):
         d[k] = d[k].fillna(d["close"])
+    # 2026-11-01 가격 정합 — 역분할 보정이 깨진 초소형주(MLMC·BQST·COSG 등)가 주간 ×20~×3,000 으로 튀어
+    #   '시총 상위'로 잡히고 할로윈 예시가 ×3,061 이 됐다. ① $1 미만 행 제외 ② 주간 ×5 초과·÷5 미만 급변 행은
+    #   그 종목을 통째로 뺀다.
+    d = d[d.close >= 1].sort_values(["sym", "date"]).copy()
+    r = d.groupby("sym").close.transform(lambda s: s / s.shift(1))
+    bad = (r > 5) | (r < 0.2)
+    #   급변 행만 비우면 앞뒤 가격 수준 차이(보정 실패)가 그대로 수익으로 잡힌다 → 그런 종목은 통째로 뺀다(수 종목, 영향 미미).
+    bad_syms = sorted(d.loc[bad, "sym"].unique())
+    d = d[~d.sym.isin(bad_syms)]
+    print(f"[US] 주간 ×5↑·÷5↓ 급변 {int(bad.sum())}칸 → {len(bad_syms)}종 제외 {bad_syms[:20]} · $1 미만 행 제외")
     print(f"[US] {ver} {d.date.min().date()}~{d.date.max().date()} · {d.sym.nunique():,}종 · {len(d):,}행")
     return _f32(d)
 

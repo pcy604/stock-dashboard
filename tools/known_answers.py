@@ -484,6 +484,13 @@ def _():
     bad = [m for m in ('US', 'KR') if (i.get(m) or {}).get('rows', 0) < 100_000 or _age((i.get(m) or {}).get('end')) > 21]
     return not bad, ' · '.join(f"{m} {(i.get(m) or {}).get('rows', 0):,}행 ~{(i.get(m) or {}).get('end', '-')}" for m in ('US', 'KR')) + (f" · 문제 {bad}" if bad else '')
 
+
+@check('퀀트 백테스트', '실전 시범 계획표가 이번 주 것인가(토요일 생성, 8일 이내) — live/plan_latest.json')
+def _():
+    d = _j('live/plan_latest.json')
+    n = sum(len((v or {}).get('buys') or []) for v in (d.get('sleeves') or {}).values())
+    return _age(d.get('made')) <= 8, f"작성 {d.get('made')}({_age(d.get('made'))}일) · 신규 매수 {n}건"
+
 def main():
     strict = '--strict' in sys.argv
     res = run()
