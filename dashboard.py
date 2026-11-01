@@ -1179,7 +1179,7 @@ _OB_HERO = """
 _OB_STEPS = [
     ("🏠 종합", "이번 주, 들어가도 되나?", "코어 ON/OFF · 목표 현금비중 · 이번 주 할 일을 한 장에.", 5),
     ("🌍 매크로", "왜 그렇게 판정했나?", "글로벌 돈의 흐름과 경기 국면. 사계절·달걀 위 현재 위치.", 7),
-    ("🔎 종목 발굴", "그럼 뭘 살까?", "이익이 가속하는 주도주 후보. 신호 목록이지 포트폴리오가 아닙니다.", 7),
+    ("🔎 종목 발굴", "그럼 뭘 살까?", "교집합 후보 — 가격 강도 상위이면서 이익이 가속하거나 흑자로 돌아선 종목. 신호 목록이지 포트폴리오가 아닙니다.", 7),
     ("🔍 종목 분석", "이 종목, 진짜 맞나?", "코드 입력(NVDA · 005930) → 차트 · 재무 3표 · 멀티플 · AI 요약.", 6),
     ("🛡️ 내 포트폴리오", "내 계좌는 원칙대로인가?", "보유 종목을 손절선 · 비중 원칙에 대 봅니다. 비밀번호로만 열립니다.", 5),
 ]
@@ -1366,9 +1366,9 @@ tab_lab = _mt[5] if _IS_LAB else None
 if _IS_LAB:
     with tab_lab:
         st.caption("🔬 **연구실 — 소유자만 보입니다.** 검증 중이거나 기각된 연구 · 퀀트 백테스트. 결론이 난 것만 다른 탭으로 옮깁니다.")
-        t_lab, t_win, t_old = st.tabs(["🧪 퀀트 백테스트", "🔭 대박주 역분석", "📚 지난 연구"])
+        t_tools, t_lab, t_win, t_old = st.tabs(["🗂 발굴 도구", "🧪 퀀트 백테스트", "🔭 대박주 역분석", "📚 지난 연구"])
 else:
-    t_lab = t_win = t_old = None
+    t_tools = t_lab = t_win = t_old = None
 
 
 def _lab_enter(tab):
@@ -1400,16 +1400,22 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     # 2026-10-23 재편(차니): 종목 발굴 = '매수 관점의 보물찾기'. 왼쪽 = 가격이 먼저 말하는 것,
     #   가운데 = 둘이 겹치는 결론, 오른쪽 = 숫자(펀더멘털)가 먼저 말하는 것. 그룹 3개 × 하위 탭.
     #   핸들 이름(t_gain·t_52·t_lead·tab3·t_turn·t_value)은 아래 블록들이 그대로 쓰므로 바꾸지 않는다.
-    st.caption("🔥 모멘텀 = 시장이 먼저 고른 종목 · 🚀 주도주 = 모멘텀 × 펀더멘털 교집합(결론) "
-               "· 💎 펀더멘털 = 숫자가 먼저 좋아진 종목 — 시장 필터는 위 하나로 전 서브탭 공통")
+    # 2026-11-01 차니: 공개 화면은 '교집합 후보' 하나만. 나머지 발굴 도구(상승 상위·52주 신고가·CANSLIM·이익가속·흑자전환·가치 발굴)는
+    #   🔬 연구실 → 🗂 발굴 도구로(소유자만). 핸들 이름은 그대로 두고, 공개 시점엔 None → 각 블록이 _lab_enter 로 건너뛴다.
+    st.caption("🚀 교집합 후보 = RS(가격 강도) 상위 × 이익 가속 또는 흑자전환 — 시장이 먼저 고르고 숫자가 뒷받침하는 종목")
     _cand_slot = st.container()           # 📌 후보 바구니 — 공통 표 함수가 정의된 뒤 채운다
-    _g_mom, _g_core, _g_fund = st.tabs(["🔥 모멘텀", "🚀 주도주", "💎 펀더멘털"])
-    with _g_mom:
-        t_gain, t_52 = st.tabs(["상승 상위", "52주 신고가"])
-    with _g_core:
-        t_core, tab3 = st.tabs(["교집합 후보", "CANSLIM"])
-    with _g_fund:
-        t_lead, t_turn, t_value = st.tabs(["이익가속", "흑자전환", "가치 발굴 (KR)"])
+    t_core = st.container()
+t_gain = t_52 = tab3 = t_lead = t_turn = t_value = None
+if _IS_LAB:
+    with t_tools:
+        st.caption("🗂 발굴 도구 — 공개 화면에서 내린 탐색용 목록(교집합 후보의 재료). 시장 선택은 🔎 종목 발굴 상단과 공통.")
+        _g_mom, _g_core, _g_fund = st.tabs(["🔥 모멘텀", "🏆 CANSLIM", "💎 펀더멘털"])
+        with _g_mom:
+            t_gain, t_52 = st.tabs(["상승 상위", "52주 신고가"])
+        with _g_core:
+            tab3 = st.container()
+        with _g_fund:
+            t_lead, t_turn, t_value = st.tabs(["이익가속", "흑자전환", "가치 발굴 (KR)"])
 
 # 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
 try:
@@ -2118,8 +2124,8 @@ with (t_win or st.empty()), guard('연구실 — 역분석'):
                 st.caption(_r['note'])
 
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
-with t_gain, guard('상승 상위'):
-    _lazy(tab_screen)
+with (t_gain or st.empty()), guard('상승 상위'):
+    _lab_enter(t_gain)
     st.caption("기간 상승률 상위 + 주봉 신호 · 향후 2개월 계절성. 실적(매출·영업익 YoY)·PER·RS 는 오른쪽 공통 열.")
     _retj = load_json(Path('results/returns.json'))
     _perf = load_json(PERF_JSON) or {}
@@ -2207,8 +2213,8 @@ with t_gain, guard('상승 상위'):
 _LEAD_US = _GMKT != "KR"
 _LEAD_KR = _GMKT != "US"
 
-with t_lead, guard('주도주'):
-    _lazy(tab_screen)
+with (t_lead or st.empty()), guard('주도주'):
+    _lab_enter(t_lead)
     if _LEAD_US and _LEAD_KR:
         st.caption("🇺🇸 미국 이익 가속 신호 목록입니다. 한국 규칙(KR-U6 / KR-P1)은 상폐 포함 백테스트에서 기각돼 "
                    "맨 아래 🗄️ 기각된 규칙으로 옮겼습니다(원칙 v1.2).")
@@ -3066,8 +3072,8 @@ def _h52_ai(week: str, mkt: str, payload: str) -> str:
     return text
 
 
-with t_52, guard('52주 신고가'):
-    _lazy(tab_screen)
+with (t_52 or st.empty()), guard('52주 신고가'):
+    _lab_enter(t_52)
     _p52 = load_json(PERF_JSON) or {}
     _asof52 = str(_p52.get('date') or '')[:10]          # 2026-10-31: 고정 '06시' 문구 대신 실제 데이터 기준일
     st.caption(f"주봉 기준 — '경신'은 그 주 **고가**가 직전 52주 고가를 넘은 것. **데이터 기준일 {_asof52 or '-'}** "
@@ -3268,8 +3274,8 @@ with t_52, guard('52주 신고가'):
                "실적이 받쳐주는지(오른쪽 매출·영업익 YoY 열)를 보고 🚀 주도주 → CANSLIM · 🔍 종목 분석으로 이어서 보세요.")
 
 
-with t_value, guard('가치 발굴'):
-    _lazy(tab_screen)
+with (t_value or st.empty()), guard('가치 발굴'):
+    _lab_enter(t_value)
     st.caption(data_stamp('results/value_kr.json'))
     st.caption("💎 공식 재무(DART·네이버)로 '싸고(저PER·저PBR) 돈 잘 버는(ROE·영업익 성장)' 한국 종목 — 가격이 아니라 가치 기준. "
                "PER 은 오른쪽 공통 열(지금 시총 ÷ 최근 4분기 순이익)로 거른다.")
@@ -3349,8 +3355,8 @@ with t_value, guard('가치 발굴'):
 
 
 # ════════════════════════════════════════════════════════════════════
-with tab3, guard('CANSLIM'):
-    _lazy(tab_screen)
+with (tab3 or st.empty()), guard('CANSLIM'):
+    _lab_enter(tab3)
     # 2026-10-15 — 탭 자체 KR/US 라디오 폐지 → 상단 공통 시장 필터. '전체'면 두 시장을 한 표에.
     #   RS(L) 은 **각 시장 안의 백분위**라서 시장을 섞어도 '그 시장에서 상위 몇 %'로 읽으면 된다.
     _CS_SETS = [(m, p) for m, p in (('KR', CANSLIM_JSON), ('US', Path('results/canslim_us_latest.json')))
@@ -7939,8 +7945,8 @@ with tab_pf, guard('포트폴리오 가드레일'):
 # 지금은 어느 워크플로도 이걸 돌리지 않는다. 화면을 붙이면서 레지스트리에도
 # 올려 정지하면 보이게 한다.
 # ════════════════════════════════════════════════════════════════════
-with t_turn, guard('흑자전환'):
-    _lazy(tab_screen)
+with (t_turn or st.empty()), guard('흑자전환'):
+    _lab_enter(t_turn)
     _ta = load_json(Path('results/turnaround_latest.json')) or {}
     _tas = _ta.get('stocks') or []
     st.markdown("#### 🔄 흑자전환 — 적자에서 돌아서는 구간을 찾는다")
