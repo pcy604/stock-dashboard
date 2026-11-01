@@ -48,16 +48,26 @@ _LIQ = {'US': 1e9, 'KR': 1e11}
 @st.cache_resource(show_spinner=False, ttl=3600 * 12)
 def _panel(m):
     loc = f'results/quant_panel_{m}.parquet'
-    cols = ['sym', 'name', 'date', *Q.BASE_COLS]           # 시장·업종 문자열 열은 안 읽는다(메모리)
     if os.path.exists(loc):
-        df = pd.read_parquet(loc, columns=cols)
+        df = pd.read_parquet(loc)
     else:
         with urllib.request.urlopen(REL.format(m=m), timeout=60) as r:
-            df = pd.read_parquet(io.BytesIO(r.read()), columns=cols)
+            df = pd.read_parquet(io.BytesIO(r.read()))
+    df = df.drop(columns=[c for c in ('market',) if c in df.columns])   # 안 쓰는 문자열 열(메모리)
     df['date'] = pd.to_datetime(df['date'])
     P = Q.Panel(df)
     del df
     gc.collect()
+    try:                                                # 읽기에 쓴 빈 메모리를 OS 에 돌려줌 — Arrow 풀(mimalloc)이 약 300MB 를 쥐고 있었다
+        import pyarrow as pa
+        pa.default_memory_pool().release_unused()
+    except Exception:
+        pass
+    try:                                                # 리눅스 malloc 빈 칸 반환
+        import ctypes
+        ctypes.CDLL('libc.so.6').malloc_trim(0)
+    except Exception:
+        pass
     return P
 
 
@@ -87,35 +97,96 @@ def _fill(spec, m):
     return s
 
 
+_MUL = {'marcap': (1e8, 1e9), 'turnover': (1e8, 1e6)}      # 화면 단위 → 원·달러 (KR 억원 · US $B / $M)
+
+
+def _mul(base, m):
+    return _MUL[base][0 if m == 'KR' else 1] if base in _MUL else 1.0
+
+
 def _fields_df(filters, m):
     rows = []
     for f in filters:
         k = f['field']; base, _, n = k.partition(':')
         lab = next(o for o, kk in _FKEY.items() if kk.split(':')[0] == base)
-        v = f['value']; v1, v2 = (v if isinstance(v, list) else [v, None])
-        if base == 'marcap':
-            div = 1e8 if m == 'KR' else 1e9
-            v1 = v1 / div if isinstance(v1, (int, float)) else v1
-            v2 = v2 / div if isinstance(v2, (int, float)) else v2
-        rows.append({'지표': lab, 'n': int(n) if n else None, '조건': f['op'], '값': v1, '값2': v2})
-    return pd.DataFrame(rows or [{'지표': _FOPT[0], 'n': None, '조건': '>=', '값': 0.0, '값2': None}])
+        v = f['value']
+        txt = v if isinstance(v, str) else None
+        v1, v2 = (v if isinstance(v, list) else [v, None]) if txt is None else (None, None)
+        d = _mul(base, m)
+        v1 = v1 / d if isinstance(v1, (int, float)) else v1
+        v2 = v2 / d if isinstance(v2, (int, float)) else v2
+        rows.append({'지표': lab, 'n': n or None, '조건': f['op'], '값': v1, '값2': v2, '글자': txt})
+    return pd.DataFrame(rows or [{'지표': _FOPT[0], 'n': None, '조건': '>=', '값': 0.0, '값2': None, '글자': None}],
+                        columns=['지표', 'n', '조건', '값', '값2', '글자'])
+
+
+def _ok(v):
+    return v is not None and not (isinstance(v, float) and np.isnan(v)) and str(v) != ''
 
 
 def _fields_from(df, m):
     out = []
     for r in df.dropna(subset=['지표']).to_dict('records'):
-        k = _FKEY[r['지표']]
+        k = _FKEY[r['지표']]; base = k.split(':')[0]
         if ':' in k:
-            k = f"{k.split(':')[0]}:{int(r.get('n') or 20)}"
-        v1, v2 = r.get('값'), r.get('값2')
-        if v1 is None or (isinstance(v1, float) and np.isnan(v1)):
-            continue
-        if k == 'marcap':
-            mul = 1e8 if m == 'KR' else 1e9
-            v1 = v1 * mul; v2 = v2 * mul if v2 is not None and not (isinstance(v2, float) and np.isnan(v2)) else v2
+            dflt = '10-40' if base == 'ma_x' else '20'
+            n = str(r.get('n') or dflt).strip().replace('.0', '')
+            k = f"{base}:{n}"
         op = r.get('조건') or '>='
-        out.append(dict(field=k, op=op, value=[float(v1), float(v2)] if op == 'between' and v2 is not None and v2 == v2 else float(v1)))
+        if op == 'contains':
+            if _ok(r.get('글자')):
+                out.append(dict(field=k, op=op, value=str(r['글자'])))
+            continue
+        v1, v2 = r.get('값'), r.get('값2')
+        if not _ok(v1):
+            continue
+        mul = _mul(base, m)
+        if op == 'between' and _ok(v2):
+            out.append(dict(field=k, op=op, value=[float(v1) * mul, float(v2) * mul]))
+        else:
+            out.append(dict(field=k, op=op if op != 'between' else '>=', value=float(v1) * mul))
     return out
+
+
+def _nl_box(m):
+    """🤖 말로 쓰기 — Gemini 가 명세를 만들고 quant_nl.validate 가 다시 검사. 세션당 15회."""
+    import quant_nl as N
+    with st.container(border=True):
+        st.markdown("**🤖 전략을 말로 쓰기** — 쓰면 아래 설정 표가 채워집니다. 엔진이 못 하는 조건은 빼고 따로 알려 드립니다.")
+        txt = st.text_area('전략', key='qb_nl_txt', height=90, label_visibility='collapsed',
+                           placeholder='예) 시총 3천억 이상이고 RS 80 이상인데, 흑자전환했거나 PER 15 이하인 종목을 RS 순으로 15개. '
+                                       '처음엔 절반만 사고 +20% 오르면 나머지 매수. 손절 −12%, 50% 오르면 고점 대비 −20%로 손절선 올림. '
+                                       '20일선 깨지거나 MACD 약세 전환하면 매도. 코스피가 200일선 아래면 주식 30%만.')
+        c1, c2 = st.columns([1, 3])
+        used = st.session_state.get('qb_nl_n', 0)
+        if c1.button('🤖 명세 만들기', type='primary', disabled=not txt.strip() or used >= 15, key='qb_nl_go'):
+            key = ''
+            try:
+                key = st.secrets.get('GEMINI_KEY', '')
+            except Exception:
+                pass
+            key = key or os.environ.get('GEMINI_KEY', '')
+            if not key:
+                st.error('AI 키(GEMINI_KEY)가 설정돼 있지 않습니다.')
+            else:
+                with st.spinner('AI 가 명세로 바꾸는 중…'):
+                    try:
+                        spec, notes, dropped, _raw = N.to_spec(txt, m, key)
+                        st.session_state['qb_nl'] = dict(spec=spec, notes=notes, dropped=dropped, text=txt, m=m)
+                        st.session_state['qb_nl_n'] = used + 1
+                    except Exception as e:
+                        st.error(f'변환 실패: {type(e).__name__}: {str(e)[:200]}')
+        c2.caption(f'이번 접속에서 {used}/15회 사용 · AI 는 설정만 만들고, 실행은 아래 같은 엔진이 합니다. 결과 설정은 반드시 눈으로 확인하세요.')
+        nl = st.session_state.get('qb_nl')
+        if nl and nl.get('m') == m:
+            if nl['dropped']:
+                st.warning('**빼고 실행합니다 (데이터·기능 없음):** ' + ' · '.join(map(str, nl['dropped'])))
+            if nl['notes']:
+                st.caption('ℹ️ ' + ' · '.join(map(str, nl['notes'])))
+            if st.button('✖ 말로 만든 설정 지우기', key='qb_nl_clear'):
+                st.session_state.pop('qb_nl', None); st.rerun()
+            return nl['spec']
+    return None
 
 
 def render(mkt_sel: str, tsrc):
@@ -126,6 +197,7 @@ def render(mkt_sel: str, tsrc):
     m = mk[0] if len(mk) == 1 else st.segmented_control('이 백테스트의 시장(상단이 전체라서)', mk, default='US', key='qb_m',
                                                         format_func=_MK.get) or 'US'
 
+    nl_spec = _nl_box(m)
     pc, jc = st.columns([2, 1])
     pname = pc.selectbox('예시 전략 불러오기 — 여기서 시작해 아래를 고치세요', list(PRESETS), key='qb_preset')
     base = Q.merged(_fill(PRESETS[pname], m))
@@ -136,6 +208,9 @@ def render(mkt_sel: str, tsrc):
                 base = Q.merged(json.loads(raw)); st.caption('✅ 붙여 넣은 명세 사용 중')
             except Exception as e:
                 st.error(f'JSON 오류: {e}')
+    if nl_spec:
+        base = Q.merged(nl_spec)
+        pc.caption('🤖 말로 만든 설정을 쓰는 중 — 예시 전략 선택은 무시됩니다')
     K = f"{pname}|{m}|{hash(json.dumps(base, sort_keys=True)) % 10**8}"
 
     with st.form(f'qb_form_{K}'):
@@ -144,16 +219,22 @@ def render(mkt_sel: str, tsrc):
         start = a1.date_input('시작', pd.Timestamp(base['start']).date(), min_value=pd.Timestamp('2014-06-01').date())
         reb = a2.number_input('리밸런싱 주기(주)', 1, 26, int(base['rebalance']))
         mxp = a3.number_input('최대 보유 종목 수', 1, 100, int(base['max_pos']))
-        st.markdown(f"**② 종목 필터** — 모든 조건을 만족하는 종목만 후보 (시총 단위: {'억원' if m == 'KR' else '$B'} · n = 주 수)")
-        fdf = st.data_editor(_fields_df(base['filters'], m), num_rows='dynamic', hide_index=True, use_container_width=True,
+        st.markdown(f"**② 종목 필터** — 행 번호(맨 왼쪽, 1부터)로 아래 결합식을 씁니다 · 시총 {'억원' if m == 'KR' else '$B'} · "
+                    f"거래대금 {'억원' if m == 'KR' else '$M'} · n = 주 수(이평 정배열은 '10-40')")
+        _fd = _fields_df(base['filters'], m)
+        _fd.index = range(1, len(_fd) + 1)
+        fdf = st.data_editor(_fd, num_rows='dynamic', hide_index=False, use_container_width=True,
                              column_config={'지표': st.column_config.SelectboxColumn(options=_FOPT, required=True, width='large'),
-                                            'n': st.column_config.NumberColumn(help='n주선·n주 수익률 같은 지표의 n', min_value=1, max_value=260),
+                                            'n': st.column_config.TextColumn(help='n주선·n주 수익률의 n. 이평 정배열은 "단기-장기"(예 10-40)'),
                                             '조건': st.column_config.SelectboxColumn(options=Q.OPS, required=True),
-                                            '값': st.column_config.NumberColumn(), '값2': st.column_config.NumberColumn(help='between 일 때 상한')})
+                                            '값': st.column_config.NumberColumn(), '값2': st.column_config.NumberColumn(help='between 일 때 상한'),
+                                            '글자': st.column_config.TextColumn(help='contains(업종 포함) 일 때 — 쉼표로 여러 개 = 또는')})
+        lgc = st.text_input('조건 결합식 — 비우면 모두 AND. 예: 1 AND 2 AND (3 OR 4) · NOT 5', value=base.get('logic') or '',
+                            placeholder='1 AND 2 AND (3 OR 4)')
         r1, r2, r3 = st.columns(3)
         rk_lab = next(o for o, kk in _FKEY.items() if kk.split(':')[0] == base['rank']['field'].split(':')[0])
         rk = r1.selectbox('③ 순위 매기는 지표', _FOPT, index=_FOPT.index(rk_lab))
-        rk_n = r2.number_input('순위 지표의 n(해당 시)', 1, 260, int(base['rank']['field'].split(':')[1]) if ':' in base['rank']['field'] else 13)
+        rk_n = r2.text_input('순위 지표의 n(해당 시)', base['rank']['field'].split(':')[1] if ':' in base['rank']['field'] else '13')
         rk_d = r3.radio('방향', ['큰 값 먼저', '작은 값 먼저'], index=0 if base['rank'].get('desc', True) else 1, horizontal=True)
 
         st.markdown("**④ 비중 (요구 2·3)** — 종목 비중의 합 = 주식 비중, 나머지 = 현금")
@@ -223,8 +304,19 @@ def render(mkt_sel: str, tsrc):
                      op=r.get('조건') or '<', value=float(r['값']) if ok(r.get('값')) else 0.0)
         sigs.append(d)
     rkk = _FKEY[rk]
-    spec = dict(market=m, start=str(start), rebalance=int(reb), max_pos=int(mxp), filters=_fields_from(fdf, m),
-                rank=dict(field=rkk if ':' not in rkk else f"{rkk.split(':')[0]}:{int(rk_n)}", desc=rk_d == '큰 값 먼저'),
+    fdf = fdf.reset_index(drop=True)
+    _filt = _fields_from(fdf, m)
+    try:
+        Q.parse_logic(lgc, len(_filt))
+        import re as _re
+        _used = {int(x) for x in _re.findall(r'\d+', lgc)} if lgc.strip() else set(range(1, len(_filt) + 1))
+        _unused = [i for i in range(1, len(_filt) + 1) if i not in _used]
+        st.caption(f"적용 조건: {lgc.strip() or '모두 AND'}" + (f" · ⚠️ 결합식에 없는 조건 {_unused}번은 쓰이지 않습니다" if _unused else ''))
+    except Exception as e:
+        st.error(f'조건 결합식 오류 → 모두 AND 로 실행합니다: {e}')
+        lgc = ''
+    spec = dict(market=m, start=str(start), rebalance=int(reb), max_pos=int(mxp), filters=_filt, logic=lgc,
+                rank=dict(field=rkk if ':' not in rkk else f"{rkk.split(':')[0]}:{str(rk_n).strip() or '13'}", desc=rk_d == '큰 값 먼저'),
                 weight=wt, max_w=mxw / 100,
                 exposure=dict(base=bse / 100, index=ixs, ma=int(ma), below=blw / 100, months=sorted(mon) or list(range(1, 13))),
                 entry=dict(init=ini / 100, pyramid=[[float(a), float(b) / 100] for a, b in pyr.dropna().values.tolist()]),

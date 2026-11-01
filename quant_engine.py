@@ -6,6 +6,7 @@
 명세 예 (기본값은 DEFAULT_SPEC):
   market 'US'|'KR' · start/end 'YYYY-MM-DD' · rebalance 4(주) · max_pos 20
   filters  [{'field':'marcap','op':'>=','value':1e9}, {'field':'ma_gap:40','op':'>','value':0}, {'field':'per','op':'between','value':[0,25]}]
+  logic    '1 AND (2 OR 3)' — 조건 번호(1부터)를 AND·OR·NOT·괄호로. 비우면 모두 AND
   rank     {'field':'rs','desc':True}
   weight   'equal'|'rank'|'mcap'|'inv_vol' · max_w 0.15 (종목 상한 X — 넘으면 리밸런싱 때 덜어냄 = 익절)
   exposure {'base':1.0, 'index':'SPX', 'ma':40, 'below':0.3, 'months':[1..12]}   (요구 1 — 주식 비중; 이평 아래·달력 밖이면 줄임)
@@ -40,7 +41,21 @@ FIELDS = {
     'vol_x:n':   ('거래량 배수', '배', '이번 주 거래량 ÷ 직전 n주 평균'),
     'rsi:n':     ('RSI', '0~100', 'n주 RSI'),
     'macd_hist': ('MACD 오실레이터', '', '12/26/9 주봉'),
+    # 2026-11-01 확장 — '다룰 수 있는 데이터 전부'
+    'close':     ('주가', '현지 통화', '그 주 종가'),
+    'turnover:n': ('거래대금(n주 평균)', '억원/$M', '주간 거래대금(종가×거래량)의 n주 평균'),
+    'vol:n':     ('변동성', '%(연)', 'n주 주간 수익률 표준편차 × √52'),
+    'ma_x:n':    ('이평 정배열(단기÷장기)', '%', 'n = "단기-장기" (예 10-40). 단기 이평 ÷ 장기 이평 − 1 (양수 = 골든크로스 상태)'),
+    'opm':       ('영업이익률', '%', 'TTM 영업이익 ÷ TTM 매출 (미국은 최근 분기)'),
+    'gpm':       ('매출총이익률', '%', '미국만'),
+    'rev_qoq':   ('매출 QoQ', '%', '직전 분기 대비 (미국만)'),
+    'roe':       ('ROE', '%', 'TTM 순이익 ÷ 자본총계 (한국만)'),
+    'debt':      ('부채비율', '%', '부채 ÷ 자본 (한국만)'),
+    'month':     ('달(월)', '1~12', '그 주가 몇 월인가 — 할로윈·연말 효과 같은 날짜 규칙'),
+    'sector':    ('업종', '글자', '업종 이름 — 조건 contains(포함) 로 사용'),
 }
+_BASE = ('open', 'high', 'low', 'close', 'volume', 'marcap', 'per', 'pbr', 'psr', 'rev_yoy', 'op_yoy', 'op_turn', 'acc',
+         'opm', 'gpm', 'rev_qoq', 'roe', 'debt')
 EXIT_SIGNALS = {
     'ma_break':  ('n주선 이탈', 'n', '종가가 n주 이평 아래로 내려온 주'),
     'rsi_down':  ('RSI 매도', 'n,level', 'RSI(n)가 level 위에서 아래로 꺾인 주'),
@@ -50,11 +65,11 @@ EXIT_SIGNALS = {
     'field':     ('펀더멘털·지표 조건', 'field,op,value', '예: 영업이익 YoY < 0, PER > 60'),
     'rank_out':  ('순위 이탈', 'm', '순위 필드로 상위 m 밖으로 밀림(리밸런싱 주에만)'),
 }
-OPS = ['>=', '<=', '>', '<', '==', 'between']
+OPS = ['>=', '<=', '>', '<', '==', '!=', 'between', 'contains']
 
 DEFAULT_SPEC = dict(
     market='US', start='2015-01-01', end=None, rebalance=4, max_pos=20,
-    filters=[dict(field='marcap', op='>=', value=1e9)],
+    filters=[dict(field='marcap', op='>=', value=1e9)], logic='',
     rank=dict(field='rs', desc=True),
     weight='equal', max_w=0.10,
     exposure=dict(base=1.0, index='', ma=40, below=0.0, months=list(range(1, 13))),
@@ -75,27 +90,30 @@ def merged(spec):
 
 
 # ── 지표 계산 (행 = 주, 열 = 종목) ──────────────────────────────────────
-BASE_COLS = ('open', 'high', 'low', 'close', 'volume', 'marcap', 'per', 'pbr', 'psr', 'rev_yoy', 'op_yoy', 'op_turn', 'acc')
-_MAX_DERIVED = 24        # 파생 행렬 캐시 상한(종목×주 float32 ≈ 6~8MB 씩) — 무한 증가가 배포 앱 메모리 초과 원인(2026-11-01)
+_MAX_DERIVED = 24        # 파생 행렬 캐시 상한(LRU) — 무한 증가가 배포 앱 메모리 초과 원인(2026-11-01)
 
 
 class Panel:
-    """긴 표(종목·주 행)를 받자마자 넓은 float32 행렬로 바꾸고 긴 표는 버린다.
-    2026-11-01 메모리 초과 수정: 긴 표(문자열 열 포함 시장당 300~400MB)를 계속 들고 있던 것 + 파생 행렬 무한 캐시가 원인."""
+    """긴 표를 받자마자 넓은 float32 행렬로 바꾸고 긴 표는 버린다(2026-11-01 메모리 초과 수정: 상주 1.3GB → 0.47GB)."""
 
     def __init__(self, df):
-        df = df[[c for c in ('sym', 'name', 'date') + BASE_COLS if c in df.columns]]
         self.names = df.drop_duplicates('sym', keep='last').set_index('sym')['name'].to_dict() if 'name' in df.columns else {}
-        cols = [c for c in BASE_COLS if c in df.columns]
-        w = (df.drop_duplicates(['date', 'sym'], keep='last').set_index(['date', 'sym'])[cols]
-             .astype('float32').unstack('sym').sort_index())
-        self.dates = pd.DatetimeIndex(w.index)
         self.syms = pd.Index(sorted(df['sym'].unique()))
-        self._base = {c: w[c].reindex(columns=self.syms) for c in cols}
-        del w
+        self._sector = (df.drop_duplicates('sym', keep='last').set_index('sym')['sector'].reindex(self.syms).fillna('').astype(str)
+                        if 'sector' in df.columns else pd.Series('', index=self.syms))
+        cols = [c for c in _BASE if c in df.columns and not df[c].isna().all()]
+        self.dates = pd.DatetimeIndex(sorted(df['date'].unique()))
+        ri = self.dates.get_indexer(df['date']); ci = self.syms.get_indexer(df['sym'])   # 칸 위치를 한 번만 계산
+        self._base = {}
+        for c in cols:                                  # 열 하나씩 채움 → 일시 메모리도 행렬 1개분(나중 행이 이김 = keep last)
+            a = np.full((len(self.dates), len(self.syms)), np.nan, dtype='float32')
+            a[ri, ci] = df[c].to_numpy(dtype='float32', na_value=np.nan)
+            self._base[c] = pd.DataFrame(a, index=self.dates, columns=self.syms)
         self._m = {}
 
     def base(self, col):
+        if col not in self._base:                       # 이 시장에 없는 데이터 → 조건은 전부 거짓
+            self._base[col] = pd.DataFrame(np.float32(np.nan), index=self.dates, columns=self.syms)
         return self._base[col]
 
     def get(self, key):
@@ -103,10 +121,20 @@ class Panel:
             self._m[key] = self._m.pop(key)                 # 최근 사용을 뒤로(LRU)
             return self._m[key]
         name, _, p = key.partition(':')
-        n = int(float(p)) if p else None
+        n = int(float(p)) if p and '-' not in p else None
         c = self.base('close')
-        if name in ('open', 'high', 'low', 'close', 'volume', 'marcap', 'per', 'pbr', 'psr', 'rev_yoy', 'op_yoy', 'op_turn', 'acc'):
+        if name in _BASE:
             return self.base(name)
+        if name == 'sector':
+            sec = self._sector
+            v = pd.DataFrame(np.tile(sec.values, (len(self.dates), 1)), index=self.dates, columns=self.syms)
+            self._m[key] = v
+            return v
+        if name == 'month':
+            mm = (self.dates + pd.Timedelta(days=4)).month.values.astype(float)
+            v = pd.DataFrame(np.repeat(mm[:, None], len(self.syms), axis=1), index=self.dates, columns=self.syms)
+            self._m[key] = v
+            return v
         if name == 'ret':
             v = (c / c.shift(n) - 1) * 100
         elif name == 'ma':
@@ -128,6 +156,13 @@ class Panel:
         elif name == 'macd_hist':
             m = c.ewm(span=12, adjust=False).mean() - c.ewm(span=26, adjust=False).mean()
             v = m - m.ewm(span=9, adjust=False).mean()
+        elif name == 'turnover':
+            v = (c * self.base('volume')).rolling(n, min_periods=max(1, n // 2)).mean()
+        elif name == 'vol':
+            v = (c / c.shift(1) - 1).rolling(n, min_periods=max(4, n // 2)).std() * np.sqrt(52) * 100
+        elif name == 'ma_x':
+            a_, b_ = (int(x) for x in p.split('-'))
+            v = (self.get(f'ma:{a_}') / self.get(f'ma:{b_}') - 1) * 100
         elif name == 'rs':
             r = {k: c / c.shift(k) - 1 for k in (13, 26, 39, 52)}
             sc = 0.4 * r[13] + 0.2 * r[26] + 0.2 * r[39] + 0.2 * r[52]
@@ -142,10 +177,39 @@ class Panel:
 
 
 def _cond(M, op, val):
+    if op == 'contains':
+        terms = [t.strip() for t in str(val).split(',') if t.strip()]
+        return M.apply(lambda col: col.astype(str).str.contains('|'.join(map(__import__('re').escape, terms)), case=False, na=False)) \
+            if terms else M.astype(bool) & False
     if op == 'between':
         lo, hi = val
         return (M >= lo) & (M <= hi)
-    return {'>=': M >= val, '<=': M <= val, '>': M > val, '<': M < val, '==': M == val}[op]
+    return {'>=': M >= val, '<=': M <= val, '>': M > val, '<': M < val, '==': M == val, '!=': M != val}[op]
+
+
+def parse_logic(expr, n):
+    """'1 AND (2 OR 3) AND NOT 4' → 파이썬 식(c[0] & (c[1] | c[2]) & ~c[3]). 빈 값·'모두'면 전부 AND.
+    숫자·AND·OR·NOT·괄호 외 글자가 있거나 없는 번호를 쓰면 ValueError — eval 전에 검증한다."""
+    import re
+    e = (expr or '').strip()
+    if not e or e in ('모두', '모두 AND', 'ALL'):
+        return ' & '.join(f'c[{i}]' for i in range(n)) or 'True'
+    e = e.upper().replace('그리고', ' AND ').replace('또는', ' OR ').replace('아님', ' NOT ').replace('&', ' AND ').replace('|', ' OR ')
+    toks = re.findall(r'\d+|AND|OR|NOT|\(|\)|\S', e)
+    out = []
+    for t in toks:
+        if t.isdigit():
+            k = int(t)
+            if not 1 <= k <= n:
+                raise ValueError(f'조건 {k}번이 없습니다 (1~{n})')
+            out.append(f'c[{k - 1}]')
+        elif t in ('AND', 'OR', 'NOT', '(', ')'):
+            out.append({'AND': '&', 'OR': '|', 'NOT': '~'}.get(t, t))
+        else:
+            raise ValueError(f"결합식에 쓸 수 없는 글자: '{t}' — 숫자·AND·OR·NOT·괄호만")
+    py = ' '.join(out)
+    compile(py, '<logic>', 'eval')                       # 괄호 짝 등 문법 확인
+    return py
 
 
 def _exit_matrix(P, sig):
@@ -179,9 +243,9 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
     t1 = len(dates) if not S.get('end') else int(np.searchsorted(dates, pd.Timestamp(S['end']), side='right'))
     O, H, L, C = (P.base(k).values for k in ('open', 'high', 'low', 'close'))
     O = np.where(np.isfinite(O), O, C)
-    ok = np.ones(C.shape, bool)
-    for f in S['filters']:
-        ok &= _cond(P.get(f['field']), f['op'], f['value']).fillna(False).values
+    conds = [np.asarray(_cond(P.get(f['field']), f['op'], f['value']).fillna(False).values, bool) for f in S['filters']]
+    ok = eval(parse_logic(S.get('logic', ''), len(conds)), {'__builtins__': {}}, {'c': conds, 'True': np.ones(C.shape, bool)}) \
+        if conds else np.ones(C.shape, bool)
     rk = P.get(S['rank']['field']).values
     rk = rk if S['rank'].get('desc', True) else -rk
     sigs = []
