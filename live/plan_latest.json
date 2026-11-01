@@ -26,27 +26,16 @@
   "cap": 0.3,
   "stop": 0.2,
   "kr_min_mc": 100000000000.0,
-  "rs_min": 80
+  "rs_min": 80,
+  "ma_days": 50
  },
  "sleeves": {
   "US": {
    "equity_krw": 1000000,
    "cash_krw": 1000000,
-   "cash_after_krw": 399998,
+   "cash_after_krw": 399985,
    "target_krw": 200000,
    "buys": [
-    {
-     "sym": "AXTI",
-     "name": "AXT INC",
-     "why": "이익가속+흑자전환",
-     "rs": 99,
-     "ref_px": 64.38,
-     "qty": 1.3996,
-     "amount_local": 90.11,
-     "krw": 120003,
-     "add_trigger": 70.82,
-     "stop": 51.5
-    },
     {
      "sym": "CDNA",
      "name": "CareDx, Inc.",
@@ -56,44 +45,61 @@
      "qty": 1.2492,
      "amount_local": 90.1,
      "krw": 119990,
+     "gap50": 45.9,
      "add_trigger": 79.34,
      "stop": 57.7
     },
     {
-     "sym": "AGL",
-     "name": "Agilon Health",
+     "sym": "CVI",
+     "name": "CVR ENERGY INC",
      "why": "이익가속+흑자전환",
-     "rs": 98,
-     "ref_px": 91.0,
-     "qty": 0.9902,
+     "rs": 97,
+     "ref_px": 57.07,
+     "qty": 1.5789,
      "amount_local": 90.11,
      "krw": 120003,
-     "add_trigger": 100.1,
-     "stop": 72.8
+     "gap50": 11.6,
+     "add_trigger": 62.78,
+     "stop": 45.66
     },
     {
-     "sym": "ETON",
-     "name": "Eton Pharmaceuticals, Inc.",
+     "sym": "HZO",
+     "name": "MARINEMAX INC",
      "why": "이익가속+흑자전환",
-     "rs": 98,
-     "ref_px": 51.8,
-     "qty": 1.7395,
+     "rs": 95,
+     "ref_px": 52.5,
+     "qty": 1.7163,
      "amount_local": 90.11,
      "krw": 120003,
-     "add_trigger": 56.98,
-     "stop": 41.44
+     "gap50": 0.8,
+     "add_trigger": 57.75,
+     "stop": 42.0
     },
     {
-     "sym": "MXL",
-     "name": "MAXLINEAR, INC",
+     "sym": "LFST",
+     "name": "LifeStance Health Group, Inc.",
      "why": "이익가속+흑자전환",
-     "rs": 98,
-     "ref_px": 75.14,
-     "qty": 1.1992,
+     "rs": 95,
+     "ref_px": 13.39,
+     "qty": 6.7295,
      "amount_local": 90.11,
      "krw": 120003,
-     "add_trigger": 82.65,
-     "stop": 60.11
+     "gap50": 7.4,
+     "add_trigger": 14.73,
+     "stop": 10.71
+    },
+    {
+     "sym": "GKOS",
+     "name": "GLAUKOS Corp",
+     "why": "이익가속+흑자전환",
+     "rs": 93,
+     "ref_px": 181.43,
+     "qty": 0.4967,
+     "amount_local": 90.12,
+     "krw": 120016,
+     "gap50": 37.1,
+     "add_trigger": 199.57,
+     "stop": 145.14
     }
    ],
    "adds": [],
@@ -102,33 +108,9 @@
    "skipped": [],
    "candidates_top": [
     {
-     "sym": "AXTI",
-     "name": "AXT INC",
-     "rs": 99,
-     "why": "이익가속+흑자전환"
-    },
-    {
      "sym": "CDNA",
      "name": "CareDx, Inc.",
      "rs": 99,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "AGL",
-     "name": "Agilon Health",
-     "rs": 98,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "ETON",
-     "name": "Eton Pharmaceuticals, Inc.",
-     "rs": 98,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "MXL",
-     "name": "MAXLINEAR, INC",
-     "rs": 98,
      "why": "이익가속+흑자전환"
     },
     {
@@ -138,27 +120,51 @@
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "LITE",
-     "name": "Lumentum Holdings Inc.",
-     "rs": 97,
+     "sym": "HZO",
+     "name": "MARINEMAX INC",
+     "rs": 95,
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "CRSR",
-     "name": "Corsair Gaming, Inc.",
-     "rs": 96,
+     "sym": "LFST",
+     "name": "LifeStance Health Group, Inc.",
+     "rs": 95,
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "DK",
-     "name": "Delek US Holdings, Inc.",
-     "rs": 96,
+     "sym": "GKOS",
+     "name": "GLAUKOS Corp",
+     "rs": 93,
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "PUBM",
-     "name": "PubMatic, Inc.",
-     "rs": 96,
+     "sym": "WTI",
+     "name": "W&T OFFSHORE INC",
+     "rs": 93,
+     "why": "이익가속+흑자전환"
+    },
+    {
+     "sym": "AVTR",
+     "name": "Avantor, Inc.",
+     "rs": 92,
+     "why": "이익가속+흑자전환"
+    },
+    {
+     "sym": "FNKO",
+     "name": "Funko, Inc.",
+     "rs": 92,
+     "why": "이익가속+흑자전환"
+    },
+    {
+     "sym": "TALO",
+     "name": "TALOS ENERGY INC.",
+     "rs": 91,
+     "why": "이익가속+흑자전환"
+    },
+    {
+     "sym": "CHRD",
+     "name": "Chord Energy Corp",
+     "rs": 89,
      "why": "이익가속+흑자전환"
     }
    ]
@@ -181,12 +187,6 @@
      "why": "흑자전환"
     },
     {
-     "sym": "010170",
-     "name": "대한광통신",
-     "rs": 98,
-     "why": "흑자전환"
-    },
-    {
      "sym": "046970",
      "name": "우리로",
      "rs": 98,
@@ -205,33 +205,39 @@
      "why": "흑자전환"
     },
     {
-     "sym": "006110",
-     "name": "삼아알미늄",
-     "rs": 97,
-     "why": "흑자전환"
-    },
-    {
      "sym": "092190",
      "name": "서울바이오시스",
      "rs": 96,
      "why": "흑자전환"
     },
     {
-     "sym": "024840",
-     "name": "KBI메탈",
-     "rs": 95,
-     "why": "흑자전환"
-    },
-    {
-     "sym": "317400",
-     "name": "자이에스앤디",
-     "rs": 94,
-     "why": "흑자전환"
-    },
-    {
      "sym": "356680",
      "name": "엑스게이트",
      "rs": 94,
+     "why": "흑자전환"
+    },
+    {
+     "sym": "078350",
+     "name": "한양디지텍",
+     "rs": 93,
+     "why": "흑자전환"
+    },
+    {
+     "sym": "006400",
+     "name": "삼성SDI",
+     "rs": 92,
+     "why": "흑자전환"
+    },
+    {
+     "sym": "457190",
+     "name": "이수스페셜티케미컬",
+     "rs": 83,
+     "why": "흑자전환"
+    },
+    {
+     "sym": "010170",
+     "name": "대한광통신",
+     "rs": 98,
      "why": "흑자전환"
     }
    ]
