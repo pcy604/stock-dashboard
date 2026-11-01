@@ -33,7 +33,8 @@
   "stop": 0.2,
   "kr_min_mc": 100000000000.0,
   "rs_min": 80,
-  "ma_days": 50
+  "ma_days": 50,
+  "ma_weeks": 5
  },
  "sleeves": {
   "US": {
@@ -51,7 +52,7 @@
      "qty": 1.2492,
      "amount_local": 90.1,
      "krw": 119990,
-     "gap50": 45.9,
+     "gap50": 24.4,
      "add_trigger": 79.34,
      "stop": 57.7
     },
@@ -64,7 +65,7 @@
      "qty": 1.5789,
      "amount_local": 90.11,
      "krw": 120003,
-     "gap50": 11.6,
+     "gap50": 0.4,
      "add_trigger": 62.78,
      "stop": 45.66
     },
@@ -77,7 +78,7 @@
      "qty": 1.7163,
      "amount_local": 90.11,
      "krw": 120003,
-     "gap50": 0.8,
+     "gap50": 0.5,
      "add_trigger": 57.75,
      "stop": 42.0
     },
@@ -90,7 +91,7 @@
      "qty": 6.7295,
      "amount_local": 90.11,
      "krw": 120003,
-     "gap50": 7.4,
+     "gap50": 7.5,
      "add_trigger": 14.73,
      "stop": 10.71
     },
@@ -103,7 +104,7 @@
      "qty": 0.4967,
      "amount_local": 90.12,
      "krw": 120016,
-     "gap50": 37.1,
+     "gap50": 30.4,
      "add_trigger": 199.57,
      "stop": 145.14
     }
@@ -115,62 +116,62 @@
     {
      "sym": "AXTI",
      "name": "AXT INC",
-     "why": "50일선 아래(-16.9%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-12.0%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "AGL",
      "name": "Agilon Health",
-     "why": "50일선 아래(-3.4%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-0.4%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "ETON",
      "name": "Eton Pharmaceuticals, Inc.",
-     "why": "50일선 아래(-6.8%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-0.8%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "MXL",
      "name": "MAXLINEAR, INC",
-     "why": "50일선 아래(-12.6%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-16.6%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "LITE",
      "name": "Lumentum Holdings Inc.",
-     "why": "50일선 아래(-8.9%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-8.8%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "CRSR",
      "name": "Corsair Gaming, Inc.",
-     "why": "50일선 아래(-3.6%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-5.3%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "DK",
      "name": "Delek US Holdings, Inc.",
-     "why": "50일선 아래(-0.6%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-1.5%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "PUBM",
      "name": "PubMatic, Inc.",
-     "why": "50일선 아래(-8.6%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-8.5%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "APPS",
      "name": "Digital Turbine, Inc.",
-     "why": "50일선 아래(-17.4%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-11.1%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "AMD",
      "name": "ADVANCED MICRO DEVICES INC",
-     "why": "50일선 아래(-7.9%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-9.6%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "DDOG",
      "name": "Datadog, Inc.",
-     "why": "50일선 아래(-6.4%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-11.1%) — RS 는 높지만 최근 추세 꺾임"
     },
     {
      "sym": "VREX",
      "name": "Varex Imaging Corp",
-     "why": "50일선 아래(-0.2%) — RS 는 높지만 최근 추세 꺾임"
+     "why": "5주선 아래(-0.0%) — RS 는 높지만 최근 추세 꺾임"
     }
    ],
    "candidates_top": [
