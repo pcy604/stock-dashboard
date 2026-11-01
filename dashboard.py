@@ -1385,7 +1385,7 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     with _g_mom:
         t_gain, t_52 = st.tabs(["상승 상위", "52주 신고가"])
     with _g_core:
-        t_core, tab3, t_rat, t_trd = st.tabs(["교집합 후보", "CANSLIM", "🪜 익절 래칫", "🎮 매매 실험실"])
+        t_core, tab3, t_lab = st.tabs(["교집합 후보", "CANSLIM", "🧪 전략 실험실"])
     with _g_fund:
         t_lead, t_turn, t_value = st.tabs(["이익가속", "흑자전환", "가치 발굴 (KR)"])
 
@@ -2971,20 +2971,13 @@ if _LEAD_KR and _show_rej:
 
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
-# ── 🪜 익절 래칫 (2026-10-31) — 종목별 매매 규칙 실험실. 코드는 ui_ratchet.py ─────────────
-with t_rat, guard('익절 래칫'):
+# ── 🧪 전략 실험실 (2026-11-01) — 🪜 익절 래칫 + 🎮 매매 실험실 통합(차니: 너무 복잡). 코드 ui_lab.py · 엔진 quant_lab.py ─────
+#   옛 화면 모듈(ui_ratchet·ui_trade)과 엔진(stock_rules·trade_rules)은 연구 스크립트가 쓰므로 남겨 둔다.
+with t_lab, guard('전략 실험실'):
     _lazy(tab_screen)
-    import ui_ratchet as _uir
-    _uir = _fresh_module(_uir)
-    _uir.render(_GMKT, _tsrc)
-
-
-# ── 🎮 매매 실험실 (2026-10-31) — 종목 게임 × 지수 게임, 일봉·스탑 체결. 코드는 ui_trade.py ─────────────
-with t_trd, guard('매매 실험실'):
-    _lazy(tab_screen)
-    import ui_trade as _uit
-    _uit = _fresh_module(_uit)
-    _uit.render(_GMKT, _tsrc)
+    import ui_lab as _uil
+    _uil = _fresh_module(_uil)
+    _uil.render(_GMKT, _tsrc)
 
 
 # ── 📈 52주 신고가 (2026-10-14 · 2026-10-19 주간 그래프·연속 경신·AI 공통점) ─────────────
