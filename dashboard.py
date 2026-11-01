@@ -1352,8 +1352,30 @@ _VERDICT = {}
 
 # 2026-10-21 탭 재편 — 톱다운 의사결정 순서: 이번 주 판정·할 일·시황(종합) → 왜(매크로) → 무엇을(발굴)
 #   → 이게 맞나(분석) → 내 계좌(포트폴리오). 📰 시황 리포트는 매일 읽는 요약이라 종합으로 흡수했다.
-tab_home, tab4, tab_screen, tab7, tab_pf = st.tabs(key='main_tab', on_change='rerun', tabs=[
-    "🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"])
+# 2026-11-01 차니 — 검증 중인 연구 화면은 신규 사용자를 헷갈리게 한다 → '🔬 연구실' 탭으로 모으고 소유자에게만 보인다.
+#   판정은 access.is_owner()(구글 로그인 이메일 == secrets access.owner_email). 로그인 설정이 없는 로컬·헤드리스 점검은 LAB_OPEN=1.
+try:
+    import access as _acc_lab
+    _IS_LAB = _acc_lab.is_owner() or os.environ.get('LAB_OPEN') == '1'
+except Exception:
+    _IS_LAB = os.environ.get('LAB_OPEN') == '1'
+_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"] + (["🔬 연구실"] if _IS_LAB else [])
+_mt = st.tabs(key='main_tab', on_change='rerun', tabs=_MAIN_TABS)
+tab_home, tab4, tab_screen, tab7, tab_pf = _mt[:5]
+tab_lab = _mt[5] if _IS_LAB else None
+if _IS_LAB:
+    with tab_lab:
+        st.caption("🔬 **연구실 — 소유자만 보입니다.** 검증 중이거나 기각된 연구 · 퀀트 백테스트. 결론이 난 것만 다른 탭으로 옮깁니다.")
+        t_lab, t_win, t_old = st.tabs(["🧪 퀀트 백테스트", "🔭 대박주 역분석", "📚 지난 연구"])
+else:
+    t_lab = t_win = t_old = None
+
+
+def _lab_enter(tab):
+    """연구실 블록 진입 — 소유자가 아니거나 연구실 탭이 닫혀 있으면 건너뛴다."""
+    if tab is None or not _IS_LAB:
+        raise _LazySkip
+    _lazy(tab_lab)
 tab_rep = tab_home
 try:
     import access as _acc0
@@ -1385,7 +1407,7 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     with _g_mom:
         t_gain, t_52 = st.tabs(["상승 상위", "52주 신고가"])
     with _g_core:
-        t_core, tab3, t_lab = st.tabs(["교집합 후보", "CANSLIM", "🧪 퀀트 백테스트"])
+        t_core, tab3 = st.tabs(["교집합 후보", "CANSLIM"])
     with _g_fund:
         t_lead, t_turn, t_value = st.tabs(["이익가속", "흑자전환", "가치 발굴 (KR)"])
 
@@ -1599,6 +1621,14 @@ with t_core, guard('주도주 교집합'):
         else:
             st.info("조건을 모두 통과한 종목이 없습니다 — RS 하한을 낮춰 보세요.")
 
+# ── 📚 지난 연구 (2026-11-01 연구실로 이동 — 원래 교집합 후보 아래 접힌 칸들) ──
+with (t_old or st.empty()), guard('연구실 — 지난 연구'):
+    _lab_enter(t_old)
+    _rj = load_json(Path('results/returns.json')) or {}
+    _acj = load_json(Path('results/leaders_accel.json')) or {}
+    _taj = load_json(Path('results/turnaround_latest.json')) or {}
+    _bt = load_json(Path('results/rs_accel_bt.json')) or {}
+    _btv = ((_bt.get('variants') or {}).get('rs80_fund') or {})
     # ── 🔬 백테스트 상세 (2026-10-24 차니 요청) — 판정 숫자가 어떻게 나왔는지 100에서부터 따라가게 ──
     _dt = load_json(Path('results/rs_accel_detail.json')) or {}
     with st.expander("🔬 백테스트 상세 — 100으로 시작하면 실제로 무슨 일이 있었나", expanded=False):
@@ -2012,9 +2042,12 @@ with t_core, guard('주도주 교집합'):
             st.caption("순서(같은 종목, 분기 수 중앙): " + " · ".join(f"{k} {v['median']}분기(같은 분기 {v['same_q']}%, n={v['n']:,})" for k, v in _lg.items())
                        + " · 포트폴리오는 위성 A 체계(20칸·래칫·재돌파 재매수·냉각 4주)")
 
+# ── 🔭 대박주 역분석 (2026-11-01 연구실로 이동) ──
+with (t_win or st.empty()), guard('연구실 — 역분석'):
+    _lab_enter(t_win)
     # ── 🔭 최근 5년 TOP300 역분석 (2026-10-28 차니 설계: 필요조건 → 충분조건 → 언제 꽉 쥐나) ──
     _wr = load_json(Path('results/winners_reverse.json')) or {}
-    with st.expander("🔭 최근 5년 상승률 TOP300 역분석 — 필요조건 · 충분조건 · 언제 꽉 쥐나", expanded=False):
+    with st.expander("🔭 최근 5년 상승률 TOP300 역분석 — 필요조건 · 충분조건 · 언제 꽉 쥐나 · 승자 목록", expanded=True):
         _mk = {k: v for k, v in (_wr.get('markets') or {}).items() if 'error' not in v}
         if not _mk:
             st.info("결과를 만드는 중입니다(GitHub 서버 research-rs 작업).")
@@ -2986,8 +3019,8 @@ if _LEAD_KR and _show_rej:
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
 # ── 🧪 전략 실험실 (2026-11-01) — 🪜 익절 래칫 + 🎮 매매 실험실 통합(차니: 너무 복잡). 코드 ui_lab.py · 엔진 quant_lab.py ─────
 #   옛 화면 모듈(ui_ratchet·ui_trade)과 엔진(stock_rules·trade_rules)은 연구 스크립트가 쓰므로 남겨 둔다.
-with t_lab, guard('전략 실험실'):
-    _lazy(tab_screen)
+with (t_lab or st.empty()), guard('전략 실험실'):
+    _lab_enter(t_lab)
     # 2026-11-01 차니 요구 1~8 — 포트폴리오 단위 퀀트 백테스트(ui_quant · quant_engine)가 기본, 종목 하나 실험은 옆 칸
     _lab_mode = st.segmented_control('', ['📊 포트폴리오 백테스트', '🔍 종목 하나 전략'], default='📊 포트폴리오 백테스트',
                                      key='lab_mode', label_visibility='collapsed') or '📊 포트폴리오 백테스트'
