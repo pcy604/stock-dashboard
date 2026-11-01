@@ -53,15 +53,25 @@ def index_ok():
     out = {}
     try:
         ix = pd.read_parquet(os.path.join(ROOT, 'results', 'trade_idx.parquet'))
-        for m, k in (('US', 'SPX'), ('KR', 'KOSPI')):
+        # v1.2(2026-11-01 차니): 한국은 종목이 속한 시장 지수로 — 코스닥 종목은 코스닥 200일선, 코스피 종목은 코스피 200일선
+        for m, k in (('US', 'SPX'), ('KR', 'KOSPI'), ('KQ', 'KOSDAQ')):
             s = ix[k].dropna()
             ma = s.rolling(200).mean()
             out[m] = dict(ok=bool(s.iloc[-1] > ma.iloc[-1]), last=round(float(s.iloc[-1]), 1), ma200=round(float(ma.iloc[-1]), 1),
                           date=str(s.index[-1])[:10])
     except Exception as e:
-        for m in ('US', 'KR'):
+        for m in ('US', 'KR', 'KQ'):
             out[m] = dict(ok=True, note=f'지수 자료 없음({type(e).__name__}) — 신규 매수 허용으로 둠')
     return out
+
+
+def kr_board():
+    """코드 → 'KR'(코스피) | 'KQ'(코스닥). data/krx_listing_last.csv(매일 갱신)"""
+    try:
+        d = pd.read_csv(os.path.join(ROOT, 'data', 'krx_listing_last.csv'), dtype={'Code': str}, usecols=['Code', 'MarketId'])
+        return {c.zfill(6): ('KQ' if mi == 'KSQ' else 'KR') for c, mi in zip(d.Code, d.MarketId)}
+    except Exception:
+        return {}
 
 
 def candidates(fx):
@@ -134,14 +144,19 @@ def plan():
             stop = max(p.get('stop', p['avg'] * (1 - RULE['stop'])), peak * (1 - RULE['stop']))
             stops.append(dict(sym=sym, name=p.get('name', sym), stop=round(stop, 2), peak=round(peak, 2)))
             w = p['shares'] * p['last_px'] * (fx if m == 'US' else 1) / equity
-            if not p.get('added') and IX[m]['ok']:
+            if not p.get('added') and (IX['US']['ok'] if m == 'US' else IX[kr_board().get(sym, 'KR')]['ok']):
                 adds.append(dict(sym=sym, name=p.get('name', sym), trigger=round(p['first_px'] * (1 + RULE['add_at']), 2),
                                  krw=round(target * RULE['add'])))
             if w > RULE['cap']:
                 trims.append(dict(sym=sym, name=p.get('name', sym), now_w=round(w * 100, 1), to_w=RULE['cap'] * 100))
         free = RULE['slots'] - len(pos)
-        if IX[m]['ok'] and free > 0:
+        BOARD = kr_board() if m == 'KR' else {}
+        gate = (lambda sym: IX['US']['ok']) if m == 'US' else (lambda sym: IX[BOARD.get(sym, 'KR')]['ok'])
+        if free > 0:
             for c in C[m]:
+                if not gate(c['sym']):
+                    bd = '코스닥' if BOARD.get(c['sym']) == 'KQ' else '코스피'
+                    skipped.append(dict(sym=c['sym'], name=c['name'], why=f"{bd} 200일선 아래 — 신규 중지")); continue
                 if c.get('_excluded'):
                     skipped.append(dict(sym=c['sym'], name=c['name'], why=f"50일선 아래({c.get('gap50')}%) — RS 는 높지만 최근 추세 꺾임")); continue
                 if len(buys) >= free:
@@ -179,8 +194,10 @@ def render(P):
     for m, S in P['sleeves'].items():
         cur = '$' if m == 'US' else ''
         ix = P['index'][m]
+        ixs = [('S&P500', P['index']['US'])] if m == 'US' else [('코스피', P['index']['KR']), ('코스닥', P['index'].get('KQ', {}))]
         L.append(f"\n{flag[m]} 슬리브 — 자산 {S['equity_krw']:,}원 · 종목당 목표 {S['target_krw']:,}원 · 첫 매수 60%")
-        L.append(f"  지수 200일선: {'위 → 신규 가능' if ix.get('ok') else '아래 → 신규·불타기 중지'}" + (f" ({ix.get('last')} vs {ix.get('ma200')}, {ix.get('date')})" if 'last' in ix else ''))
+        for nm, x in ixs:
+            L.append(f"  {nm} 200일선: {'위 → 신규 가능' if x.get('ok') else '아래 → 그 시장 종목 신규·불타기 중지'}" + (f" ({x.get('last')} vs {x.get('ma200')}, {x.get('date')})" if 'last' in x else ''))
         if S['buys']:
             L.append("  🟢 월요일 시가 매수:")
             for b in S['buys']:
