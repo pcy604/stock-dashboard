@@ -470,6 +470,13 @@ def _():
     k = len(d.get('results') or {})
     return all(v >= 150 for v in n.values()) and k == 30, f"일봉 종목 {n} · 조합 {k}/30 · 분할 보정 {(i.get('KR') or {}).get('splits_fixed')}건"
 
+
+@check('52주 신고가', '52주 고점대비가 전부 0 이하인가 (고점은 이번 주 포함 — 양수면 정의 오류)')
+def _():
+    d = _j('results/perf_latest.json')
+    pos = [x['sym'] for x in d.get('stocks', []) if isinstance(x.get('dist52'), (int, float)) and x['dist52'] > 0.001]
+    return not pos, f"양수 {len(pos)}종 {pos[:5]}"
+
 def main():
     strict = '--strict' in sys.argv
     res = run()
