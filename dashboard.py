@@ -2717,14 +2717,16 @@ with t_lead, guard('주도주'):
 
 # ── 🗄️ 기각된 규칙 (2026-10-26 차니 결정) — 기각된 규칙은 지우지 않고(성적이 나쁜 신호도 남긴다는 원칙) 한곳으로 모으되,
 #   기본은 접어 둔다. 켜야 그린다(계산도 그때만).
-with t_lead:
+_show_rej = False
+with (t_old or st.empty()), guard('연구실 — 기각된 규칙'):
+    _lab_enter(t_old)
     st.divider()
-    st.markdown("#### 🗄️ 기각된 규칙")
+    st.markdown("#### 🗄️ 기각된 규칙 (2026-11-01 🚀 주도주에서 이동)")
     _show_rej = st.toggle("한국 KR-U6 / KR-P1 — 상폐 포함 백테스트에서 KOSPI 에 져서 기각(원칙 v1.2) · 관찰 기록 보기",
                           value=False, key="show_rejected")
 if _LEAD_KR and _show_rej:
-    with t_lead, guard('주도주 KR'):
-        _lazy(tab_screen)
+    with (t_old or st.empty()), guard('연구실 — 주도주 KR'):
+        _lab_enter(t_old)
         st.markdown("##### 🇰🇷 한국 — KR-U6 / KR-P1 · 기각 · 관찰 기록")
         # 2026-10-20: 원칙 v1.2(10-14)에서 KR 위성은 기각됐는데 화면은 매수 후보처럼 보였다 → 맨 위에 못 박는다.
         st.warning(
@@ -2742,7 +2744,7 @@ if _LEAD_KR and _show_rej:
                  "KR-P1 = 52주 신고가 기반 자체 규칙.")
 
     if st.session_state.get('kr_rule', '🇺🇸').startswith('🇺🇸'):
-      with t_lead, guard('주도주 KR-U6'):
+      with (t_old or st.empty()), guard('연구실 — 주도주 KR-U6'):
         st.caption(data_stamp('results/leaders_kr6.json'))
         _u6 = load_json(Path('results/leaders_kr6.json'))
         if not _u6:
@@ -2821,7 +2823,7 @@ if _LEAD_KR and _show_rej:
                 for c in _u6.get('caveats', []):
                     st.markdown(f"- {c}")
     else:
-      with t_lead, guard('주도주 KR-P1'):
+      with (t_old or st.empty()), guard('연구실 — 주도주 KR-P1'):
         st.caption(data_stamp('results/leaders_kr.json'))
         _kr = load_json(Path('results/leaders_kr.json'))
         if not _kr:
@@ -2962,8 +2964,8 @@ if _LEAD_KR and _show_rej:
     # ── 포워드 원장 (두 규칙 공통) ──────────────────────────────────
     # 백테스트는 '지금 시점에서 과거를 다시 계산'이라 생존편향·데이터 개정·규칙
     # 사후조정이 섞인다. 원장은 '신호를 낸 그날 이후'만 쌓아 그 오염이 안 들어온다.
-    with t_lead, guard('주도주 KR 포워드 원장'):
-        _lazy(tab_screen)
+    with (t_old or st.empty()), guard('연구실 — 주도주 KR 포워드 원장'):
+        _lab_enter(t_old)
         _kp = load_json(Path('results/leaders_kr_paper.json'))
         st.divider()
         st.markdown("#### 📒 포워드 원장 — 신호를 낸 뒤 실제로 어떻게 됐나")
@@ -7329,8 +7331,11 @@ def _tab_analysis():
                 # ── 🎯 매매 판단 — 규칙 계산 (2026-10-23) ─────────────────────────
                 #   목표가(컨센서스·역사적 PER·PEG) · 다운사이드(정류장 통계) · 손절 참고선 · 매수/관망/탈출 판정 · 비중.
                 #   계산은 trade_plan.py(테스트 있음). 원칙 v1: 위성은 가격 손절 대신 크기(총자산 1.5%)로 위험 관리.
-                with _SEC['plan']:
+                with _SEC['plan'] if _IS_LAB else st.empty():
                     try:
+                        if not _IS_LAB:      # 2026-11-01 미검증 규칙 계산 → 🔬 연구실 권한(소유자)에게만. 공개 화면엔 그리지 않는다
+                            raise _LazySkip
+                        st.caption("🔬 **연구실 기능** — 검증 전 규칙 계산(소유자에게만 보임)")
                         import trade_plan as _tp
                         import html as _hx
                         _LP = locals()
@@ -7518,6 +7523,8 @@ def _tab_analysis():
                                        "AI 판단이 아니라 같은 입력이면 같은 답이 나오는 규칙이다 — 포트 전체(섹터 쏠림·현금)는 🛡️ 내 포트폴리오 탭에서.")
                         st.caption("⚠️ 전부 공개 데이터와 정해진 규칙으로 계산한 참고값이며 투자 권유가 아니다. 판정·확률은 과거 빈도이고, "
                                    "모든 투자 판단과 책임은 이용자에게 있다.")
+                    except _LazySkip:
+                        pass
                     except Exception as _e_plan:
                         st.caption(f"`매매 판단 계산 실패: {type(_e_plan).__name__}: {str(_e_plan)[:120]}`")
 
