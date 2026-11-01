@@ -116,11 +116,14 @@ def analyze_one(sym, name, marcap, market):
         #   고점은 직전 52주 '주봉 고가'(장중 고가 포함), 거리는 이번 주 종가 기준.
         #   이번 주 고가가 직전 52주 고가를 넘었으면 '신고가 경신'.
         try:
-            _hi = float(wdf['High'].iloc[-53:-1].max())
-            _dist = (curr / _hi - 1) * 100 if _hi > 0 else None
+            _prev_hi = float(wdf['High'].iloc[-53:-1].max())        # 직전 52주(이번 주 제외) — 경신 판정용
+            # 2026-11-01 — 거리는 **이번 주를 포함한** 52주 고가로 잰다. 직전 52주만 쓰면 신고가 종목이
+            #   +9.9%(티에프이)처럼 '고점보다 위'로 나왔다. 종가 ≤ 그 주 고가이므로 이제 항상 0 이하.
+            _hi = max(_prev_hi, float(wdf['High'].iloc[-1]))
+            _dist = min(0.0, (curr / _hi - 1) * 100) if _hi > 0 else None
             # 상장 1년 미만은 '상장 후 최고가'를 신고가로 본다(2026-10-20 사용자 결정 — 신규 상장주가 빠지면 안 된다).
             #   단 상장 8주 미만은 매주가 신고가라 의미가 없어 빼고, 화면에는 🆕 로 구분한다.
-            _new = bool(float(wdf['High'].iloc[-1]) > _hi) if (_hi > 0 and len(wdf) >= 9) else False
+            _new = bool(float(wdf['High'].iloc[-1]) > _prev_hi) if (_prev_hi > 0 and len(wdf) >= 9) else False
             _wk_since = None
             _hh = wdf['High'].iloc[-53:]
             if len(_hh):

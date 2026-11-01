@@ -37,8 +37,8 @@ from pandas.io.formats.style import Styler
 GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
-MIN_ROWS_FOR_FILTER = 8
-API_VERSION = 7          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 7: tkey 인자(2026-10-26)
+MIN_ROWS_FOR_FILTER = 3          # 2026-11-01 8→3: 정렬(No. 재번호)을 거의 모든 표에서 쓰게
+API_VERSION = 8          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 8: 서버 정렬·No. 재번호(2026-11-01)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -176,6 +176,10 @@ def apply_colors(sty: Styler, df: pd.DataFrame) -> Styler:
     return sty
 
 
+_NO_HELP = ("행 번호. 🔎 필터·정렬에서 정렬하면 1부터 다시 매깁니다. 머리글을 눌러 정렬하면 번호가 행을 따라 움직입니다"
+            "(브라우저 안 정렬이라 서버가 알 수 없음).")
+
+
 # ── 필터 ──────────────────────────────────────────────────────────
 def _filter_ui(st, df: pd.DataFrame, key: str):
     """(필터된 df, 숨길 열 목록) 을 돌려준다. 위젯은 popover 안에 둔다."""
@@ -187,8 +191,9 @@ def _filter_ui(st, df: pd.DataFrame, key: str):
             if isinstance(k, str) and k.startswith(key + '|'):
                 del ss[k]
 
-    n_act = len(ss.get(f'{key}|cols') or []) + bool(ss.get(f'{key}|q')) + bool(ss.get(f'{key}|hide'))
-    label = '🔎 필터' + (f' · {n_act}개 적용' if n_act else '')
+    _srt = ss.get(f'{key}|sort') or '기본 순서'
+    n_act = len(ss.get(f'{key}|cols') or []) + bool(ss.get(f'{key}|q')) + bool(ss.get(f'{key}|hide')) + (_srt != '기본 순서')
+    label = '🔎 필터·정렬' + (f' · {n_act}개 적용' if n_act else '')
     mask = pd.Series(True, index=df.index)
     with st.popover(label):
         q = st.text_input('검색 — 글자 열 전체에서 (쉼표로 여러 개 = 또는)', key=f'{key}|q',
@@ -217,6 +222,11 @@ def _filter_ui(st, df: pd.DataFrame, key: str):
                     if t:
                         mask &= vals.str.contains(re.escape(t), case=False, na=False)
         hide = st.multiselect('숨길 열', cols, key=f'{key}|hide')
+        # 2026-11-01 정렬 — 머리글 클릭 정렬은 브라우저 안에서만 일어나 No. 가 행을 따라 섞인다(Streamlit 한계).
+        #   여기서 고르면 서버에서 정렬하고 No. 를 1부터 다시 매긴다.
+        _sc1, _sc2 = st.columns([3, 2])
+        sort_col = _sc1.selectbox('정렬 기준 (No. 가 1부터 다시)', ['기본 순서'] + [c for c in cols if c != 'No.'], key=f'{key}|sort')
+        sort_desc = _sc2.radio('방향', ['내림차순', '오름차순'], horizontal=True, key=f'{key}|dir') == '내림차순'
         st.button('↺ 초기화', key=f'{key}|reset', on_click=_reset)
     if q:
         terms = [t.strip() for t in q.split(',') if t.strip()]
@@ -225,13 +235,26 @@ def _filter_ui(st, df: pd.DataFrame, key: str):
     out = df[mask.values]
     if len(out) != len(df):
         st.caption(f'🔎 필터 적용 — {len(out):,} / {len(df):,}행')
-    return out, hide, mask.values
+    order = None
+    if sort_col != '기본 순서' and sort_col in df.columns:
+        import numpy as np
+        raw = df[sort_col]
+        num = numeric_view(raw)
+        use_num = num.notna().sum() >= max(1, 0.5 * raw.notna().sum())
+        k = (num if use_num else raw.astype(str).where(raw.notna()))
+        k = k[mask.values]
+        pos = np.flatnonzero(mask.values)
+        srt = k.reset_index(drop=True).sort_values(ascending=not sort_desc, na_position='last', kind='stable').index.values
+        order = pos[srt]                          # 결측('-')은 방향과 관계없이 맨 아래
+    return out, hide, mask.values, order
 
 
 def _restyle(sty: Styler, keep) -> Styler:
-    """Styler 의 행을 걸러낸 새 Styler. 포맷 함수는 위치(행,열) 키라서 위치를 다시 매핑한다."""
+    """Styler 의 행을 걸러낸(또는 keep 이 위치 배열이면 그 순서로 재배열한) 새 Styler.
+    포맷 함수는 위치(행,열) 키라서 위치를 다시 매핑한다."""
     import numpy as np
-    pos = np.flatnonzero(keep)
+    keep = np.asarray(keep)
+    pos = keep if keep.dtype.kind in 'iu' else np.flatnonzero(keep)
     new = type(sty)(sty.data.iloc[pos])
     remap = {int(old): i for i, old in enumerate(pos)}
     new._display_funcs.update({(remap[r], c): f for (r, c), f in sty._display_funcs.items()
@@ -792,7 +815,7 @@ def install(st):
             if isinstance(kw.get('column_config'), dict):
                 kw['column_config'] = strip_fmt_units(
                     {ren.get(k, k): v for k, v in kw['column_config'].items()})
-                kw['column_config'].setdefault('No.', st.column_config.NumberColumn('No.', format='%d'))
+                kw['column_config'].setdefault('No.', st.column_config.NumberColumn('No.', format='%d', help=_NO_HELP))
             if kw.get('column_order'):
                 kw['column_order'] = ['No.'] + [ren.get(c, c) for c in kw['column_order'] if c != 'No.']
 
@@ -805,7 +828,7 @@ def install(st):
                              if c < len(sty.data.columns)}
             cfg = kw.get('column_config') if isinstance(kw.get('column_config'), dict) else None
             if cfg is None:
-                cfg = {'No.': st.column_config.NumberColumn('No.', format='%d')}
+                cfg = {'No.': st.column_config.NumberColumn('No.', format='%d', help=_NO_HELP)}
             for c in df.columns:
                 if c in cfg or c in _sty_cols or c == 'No.':
                     continue
@@ -824,12 +847,14 @@ def install(st):
             key = f'{base}#{seen[base]}'
             use_f = filters if filters is not None else len(df) >= MIN_ROWS_FOR_FILTER
             if use_f and not kw.get('on_select'):
-                _, hide, keep = _filter_ui(st, df, key)
-                if not keep.all():
+                _, hide, keep, order = _filter_ui(st, df, key)
+                if order is not None or not keep.all():
+                    import numpy as np
+                    pos = order if order is not None else np.flatnonzero(keep)
                     if sty is not None:
-                        sty = _restyle(sty, keep)
+                        sty = _restyle(sty, pos)
                         sty.data['No.'] = range(1, len(sty.data) + 1)
-                    df = df[keep].copy()
+                    df = df.iloc[pos].copy()
                     df['No.'] = range(1, len(df) + 1)
                 if hide:
                     order = kw.get('column_order') or list(df.columns)

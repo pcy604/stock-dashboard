@@ -1572,6 +1572,8 @@ with t_core, guard('주도주 교집합'):
     else:
         _acc = {r['sym']: r for r in (_acj.get('acc_now') or [])}
         _tas = {r['sym']: r for r in (_taj.get('stocks') or []) if r.get('status') == '흑자전환완료'}
+        # 2026-11-01 — 매출 가속은 흑자전환 종목도 잴 수 있다(이익 성장률만 정의되지 않는다). 이익 가속 신호가 없으면 분기 재무에서.
+        _fsn = (load_json(Path('results/fund_snapshot.json')) or {}).get('stocks') or {}
         _rsmin = st.slider("RS 하한", 50, 95, 80, 5, key="core_rs")
         _rows = []
         for sym, r in _CMB[_CMB.RS >= _rsmin].iterrows():
@@ -1580,7 +1582,7 @@ with t_core, guard('주도주 교집합'):
                 continue
             _rows.append({'코드': sym, '종목': r['종목'],
                           '근거': ' + '.join(x for x, y in (('이익 가속 중', _a), ('흑자전환', _t)) if y),
-                          '이익가속(%p)': (_a or {}).get('oia'), '매출가속(%p)': (_a or {}).get('rva'),
+                          '이익가속(%p)': (_a or {}).get('oia'), '매출가속(%p)': (_a or {}).get('rva') if (_a or {}).get('rva') is not None else (_fsn.get(sym) or {}).get('rev_acc'),
                           '_n': 2 if (_a and _t) else 1, '_rs': r['RS']})
         _rows.sort(key=lambda x: (-x['_n'], -x['_rs']))
         _c = st.columns(3)
@@ -1591,7 +1593,8 @@ with t_core, guard('주도주 교집합'):
             _std_table(pd.DataFrame(_rows), ['근거', '이익가속(%p)', '매출가속(%p)'],
                        src='leaders_accel.json(이익 가속 중) · turnaround_latest.json(흑자전환)',
                        path='results/returns.json',
-                       note="정렬: 근거 2개 → RS 높은 순")
+                       note="정렬: 근거 2개 → RS 높은 순 · 흑자전환 종목은 전년 같은 분기 영업이익이 적자라 **이익 성장률·이익 가속·영업익YoY 는 "
+                            "정의되지 않아 '-'** (부호가 바뀌면 %가 뜻을 잃음). 매출가속 = 이번 분기 매출 YoY − 직전 분기 매출 YoY")
             _cand_register(_rows, 'core')
         else:
             st.info("조건을 모두 통과한 종목이 없습니다 — RS 하한을 낮춰 보세요.")
@@ -3156,6 +3159,7 @@ with t_52, guard('52주 신고가'):
         if _mk52 != "전체" and x.get('market') != _mk52:
             continue
         d = x.get('dist52')
+        d = min(0.0, d) if isinstance(d, (int, float)) else d     # 2026-11-01 정의상 0 이하(옛 산출물 보정)
         if _has_d:
             if d is None or d < _rng:
                 continue
@@ -6148,7 +6152,7 @@ def _tab_analysis():
                         _op = [r.get('op_income') for r in _off]
 
                         def _grow_score(cur, base, yrs):
-                            """min(25, 성장률% − 5). 체슬리 C·A 방식. base 적자면 흑자전환 처리."""
+                            """clip(성장률% − 5, −10, 25). 체슬리 C·A 방식. base 적자면 흑자전환 처리."""
                             if cur is None or base is None:
                                 return None
                             if base <= 0:
@@ -6162,7 +6166,9 @@ def _tab_analysis():
                             if cur is None or cur <= 0:
                                 return -10.0
                             g = ((cur / base) ** (1 / yrs) - 1) * 100
-                            return round(min(25.0, g - 5), 1)
+                            # 2026-11-01 — 하한 누락: 이익이 크게 줄면 C·A 한 항목이 −80점 이하로 떨어져 총점을 왜곡했다.
+                            #   적자 전환·불명(위)과 같은 최저점 −10 으로 막는다(항목 범위 −10 ~ 25).
+                            return round(max(-10.0, min(25.0, g - 5)), 1)
 
                         _nb = min(3, len(_op) - 1)
                         _A = _grow_score(_op[0], _op[_nb], _nb)          # A: 영업이익 3년 CAGR
@@ -6206,7 +6212,7 @@ def _tab_analysis():
                         _grade = ('S' if _total >= 90 else 'A' if _total >= 70 else 'B' if _total >= 50
                                   else 'C' if _total >= 30 else 'D')
 
-                        _ca.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 max 25)")
+                        _ca.metric("총점", f"{_total:.0f}", help="C+A+N+S+L+I (각 최대 25 · C·A 최저 −10)")
                         _cb.metric("등급", _grade, help="S 90+ · A 70+ · B 50+ · C 30+ · D")
                         _cmk.metric("M 시장 국면", _Mlabel or '—', help="verdict.core_switch — KR=코스피, US=S&P500 200일선")
                         with _cl:

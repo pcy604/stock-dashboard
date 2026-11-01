@@ -102,7 +102,9 @@ def build(usdkrw: float) -> tuple[pd.DataFrame, dict]:
 
     pj = _j('results/perf_latest.json')
     perf = {str(r['sym']): r for r in (pj.get('stocks') or [])}
-    out['52주고점대비(%)'] = [(perf.get(s) or {}).get('dist52') for s in out.index]
+    # 2026-11-01: 옛 산출물은 직전 52주 고가로 재서 신고가 종목이 + 로 나왔다 — 정의상 0 이하(다음 갱신부터 원천 수정)
+    out['52주고점대비(%)'] = [(lambda v: min(0.0, v) if isinstance(v, (int, float)) else v)((perf.get(s) or {}).get('dist52'))
+                            for s in out.index]
 
     fj = _j('results/fund_snapshot.json')
     fs = fj.get('stocks') or {}

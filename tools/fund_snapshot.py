@@ -7,7 +7,7 @@
   US : data/leaders_cache/fq_*.csv (weekly-accel 이 SEC EDGAR 로 갱신 — 러너에만 있다)
 
 결과 results/fund_snapshot.json
-  {date, n_kr, n_us, stocks: {sym: {market, q_end, rev_yoy, op_yoy, op_turn, ttm_rev, ttm_op, ttm_ni}}}
+  {date, n_kr, n_us, stocks: {sym: {market, q_end, rev_yoy, rev_acc, op_yoy, op_turn, ttm_rev, ttm_op, ttm_ni}}}
   · 금액은 원값(KR 원 · US 달러). PER·PSR 은 화면이 '지금 시총 ÷ TTM' 으로 계산한다.
   · 전년 같은 분기 값이 0 이하이면 YoY 는 비운다(부호가 바뀌면 % 가 뜻을 잃는다) — op_turn 으로 따로 표시.
   · 분기가 빠진 종목(간격 100일 초과)은 싣지 않는다. 없는 숫자를 만들지 않는다.
@@ -37,8 +37,10 @@ def _row(ends, rev, op, ni):
     if any((pd.Timestamp(a) - pd.Timestamp(b)).days > 100 for a, b in zip(ends[:5], ends[1:5])):
         return None
 
-    def _yoy(x):
-        a, b = x[0], x[4]
+    def _yoy(x, k=0):
+        if len(x) < k + 5:
+            return None
+        a, b = x[k], x[k + 4]
         if a is None or b is None or pd.isna(a) or pd.isna(b) or b <= 0:
             return None
         return round((a / b - 1) * 100, 1)
@@ -51,7 +53,12 @@ def _row(ends, rev, op, ni):
     turn = None
     if o0 is not None and o4 is not None and not pd.isna(o0) and not pd.isna(o4):
         turn = '흑자전환' if (o0 > 0 >= o4) else '적자전환' if (o0 <= 0 < o4) else None
-    return dict(q_end=str(pd.Timestamp(ends[0]).date()), rev_yoy=_yoy(rev), op_yoy=_yoy(op), op_turn=turn,
+    # 2026-11-01 매출 가속(%p) = 이번 분기 매출 YoY − 직전 분기 매출 YoY. 흑자전환 종목은 이익 성장률이 정의되지 않아도
+    #   매출 가속은 잴 수 있다(교집합 표에서 '-'로 비던 것). 직전 분기가 100일 넘게 떨어지면 비운다.
+    rv0, rv1 = _yoy(rev), _yoy(rev, 1)
+    ok1 = len(ends) >= 6 and (pd.Timestamp(ends[4]) - pd.Timestamp(ends[5])).days <= 100
+    rev_acc = round(rv0 - rv1, 1) if (rv0 is not None and rv1 is not None and ok1) else None
+    return dict(q_end=str(pd.Timestamp(ends[0]).date()), rev_yoy=rv0, rev_acc=rev_acc, op_yoy=_yoy(op), op_turn=turn,
                 ttm_rev=_ttm(rev), ttm_op=_ttm(op), ttm_ni=_ttm(ni))
 
 
