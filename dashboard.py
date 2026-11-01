@@ -1385,7 +1385,7 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     with _g_mom:
         t_gain, t_52 = st.tabs(["상승 상위", "52주 신고가"])
     with _g_core:
-        t_core, tab3, t_lab = st.tabs(["교집합 후보", "CANSLIM", "🧪 전략 실험실"])
+        t_core, tab3, t_lab = st.tabs(["교집합 후보", "CANSLIM", "🧪 퀀트 백테스트"])
     with _g_fund:
         t_lead, t_turn, t_value = st.tabs(["이익가속", "흑자전환", "가치 발굴 (KR)"])
 
@@ -2975,9 +2975,17 @@ if _LEAD_KR and _show_rej:
 #   옛 화면 모듈(ui_ratchet·ui_trade)과 엔진(stock_rules·trade_rules)은 연구 스크립트가 쓰므로 남겨 둔다.
 with t_lab, guard('전략 실험실'):
     _lazy(tab_screen)
-    import ui_lab as _uil
-    _uil = _fresh_module(_uil)
-    _uil.render(_GMKT, _tsrc)
+    # 2026-11-01 차니 요구 1~8 — 포트폴리오 단위 퀀트 백테스트(ui_quant · quant_engine)가 기본, 종목 하나 실험은 옆 칸
+    _lab_mode = st.segmented_control('', ['📊 포트폴리오 백테스트', '🔍 종목 하나 전략'], default='📊 포트폴리오 백테스트',
+                                     key='lab_mode', label_visibility='collapsed') or '📊 포트폴리오 백테스트'
+    if _lab_mode.startswith('📊'):
+        import ui_quant as _uiq
+        _uiq = _fresh_module(_uiq)
+        _uiq.render(_GMKT, _tsrc)
+    else:
+        import ui_lab as _uil
+        _uil = _fresh_module(_uil)
+        _uil.render(_GMKT, _tsrc)
 
 
 # ── 📈 52주 신고가 (2026-10-14 · 2026-10-19 주간 그래프·연속 경신·AI 공통점) ─────────────
@@ -7793,10 +7801,25 @@ with tab_pf, guard('포트폴리오 가드레일'):
                 _vi = _res.get('violations') or []
                 st.session_state['pf_eval'] = dict(grade=_res.get('grade'), n=len(_pos), n_vi=len(_vi),
                                                    top=[v.get('msg') for v in _vi[:3]])   # 🏠 종합 '할 일'이 읽는다
-                _m1, _m2, _m3 = st.columns(3)
+                _m1, _m2, _m3, _m4 = st.columns(4)
                 _m1.metric('원칙 준수 등급', _res.get('grade', '—'))
                 _m2.metric('보유 종목', f"{len(_pos)}종")
                 _m3.metric('위반', f"{len(_vi)}건")
+                # 2026-11-01 차니 요청 — 내 포트폴리오 PER. 종목 PER 의 평균이 아니라 '내 돈 1원이 버는 이익'의 역수:
+                #   PER_pf = 1 ÷ Σ(평가비중 × 이익수익률), 이익수익률 = TTM 순이익 ÷ 시총(적자면 음수로 반영). ETF·재무 없는 종목은 빼고 커버율 표시.
+                try:
+                    _ey = _CMB['_ey'] if '_ey' in _CMB else pd.Series(dtype=float)
+                    _tv = sum(p_['value'] for p_ in _pos)
+                    _cov = [(p_['value'], _ey.get(str(p_['sym']).split('.')[0])) for p_ in _pos]
+                    _cov = [(v, e) for v, e in _cov if e is not None and pd.notna(e)]
+                    _cv = sum(v for v, _ in _cov)
+                    _wey = sum(v * e for v, e in _cov) / _cv if _cv else None
+                    _m4.metric('내 포트폴리오 PER', (f"{1 / _wey:.1f}배" if _wey and _wey > 0 else '적자(이익 합 < 0)') if _wey is not None else '-',
+                               f"재무 커버 {(_cv / _tv * 100) if _tv else 0:.0f}% (평가액 기준)", delta_color='off',
+                               help='1 ÷ Σ(평가비중 × TTM 순이익/시총). 적자 종목은 이익을 깎는 쪽으로 반영. '
+                                    'ETF·재무 없는 종목은 계산에서 빠지고 커버율에 드러납니다. 출처: fund_snapshot.json(TTM 순이익)·returns.json(시총)')
+                except Exception as _e:
+                    _m4.metric('내 포트폴리오 PER', '-', f'계산 실패: {type(_e).__name__}', delta_color='off')
 
                 if _vi:
                     st.markdown('#### 조치가 필요한 항목')

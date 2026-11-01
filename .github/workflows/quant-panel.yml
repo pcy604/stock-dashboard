@@ -1,0 +1,73 @@
+# 🧮 퀀트 백테스트 주봉 패널 (2026-11-01) — research/quant_panel.py → GitHub Release 'quant-panel'
+# 패널이 수십 MB 라 git 에 커밋하지 않는다(매주 쌓이면 저장소가 불어난다). 화면(ui_quant.py)이 Release 에서 받는다.
+# 미국: market.db 캐시(읽기만) + 장기판 v13y 캐시가 있으면 2014~, 없으면 v1(2018~). 한국: FinanceData/marcap(상폐 포함).
+name: quant-panel
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 4 * * 6'        # 매주 토 13:41 KST (weekly-accel 뒤)
+  push:
+    branches: [main]
+    paths:
+      - 'research/quant_panel.py'
+      - '.github/workflows/quant-panel.yml'
+permissions:
+  contents: write
+concurrency:
+  group: quant-panel
+  cancel-in-progress: true
+jobs:
+  panel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/market.db
+          key: marketdb-none
+          restore-keys: |
+            marketdb-
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/fw_v13y.parquet
+          key: fw-v13y-none
+          restore-keys: |
+            fw-v13y-
+      - name: 장기판 v13y 붙이기(있으면)
+        run: |
+          python - <<'PY'
+          import os, sqlite3, pandas as pd
+          ver = 'v1'
+          if os.path.exists('data/fw_v13y.parquet') and os.path.exists('data/market.db'):
+              c = sqlite3.connect('data/market.db')
+              if not c.execute("SELECT COUNT(*) FROM factor_weekly WHERE factor_ver='v13y'").fetchone()[0]:
+                  pd.read_parquet('data/fw_v13y.parquet').to_sql('factor_weekly', c, if_exists='append', index=False); c.commit()
+              ver = 'v13y'
+          open('/tmp/ver', 'w').write(ver)
+          print(f"::notice title=미국 시계열::{ver}")
+          PY
+      - name: 패널 만들기
+        run: FACTOR_VER=$(cat /tmp/ver) python research/quant_panel.py
+      - name: Release 에 올리기
+        run: |
+          ls -la results/quant_panel_*.parquet
+          gh release view quant-panel >/dev/null 2>&1 || gh release create quant-panel --title "퀀트 백테스트 패널" --notes "ui_quant.py 가 읽는 주봉 패널. 매주 자동 갱신(quant-panel 워크플로)." --latest=false
+          gh release upload quant-panel results/quant_panel_US.parquet results/quant_panel_KR.parquet --clobber
+      - name: 정보 커밋
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add results/quant_panel_info.json
+          git diff --cached --quiet && exit 0
+          git commit -m "auto: 퀀트 패널 $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done

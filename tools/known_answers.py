@@ -477,6 +477,13 @@ def _():
     pos = [x['sym'] for x in d.get('stocks', []) if isinstance(x.get('dist52'), (int, float)) and x['dist52'] > 0.001]
     return not pos, f"양수 {len(pos)}종 {pos[:5]}"
 
+
+@check('퀀트 백테스트', '주봉 패널이 미국·한국 각 10만 행 이상이고 최신 주가 3주 이내인가 (Release quant-panel)')
+def _():
+    i = _j('results/quant_panel_info.json')
+    bad = [m for m in ('US', 'KR') if (i.get(m) or {}).get('rows', 0) < 100_000 or _age((i.get(m) or {}).get('end')) > 21]
+    return not bad, ' · '.join(f"{m} {(i.get(m) or {}).get('rows', 0):,}행 ~{(i.get(m) or {}).get('end', '-')}" for m in ('US', 'KR')) + (f" · 문제 {bad}" if bad else '')
+
 def main():
     strict = '--strict' in sys.argv
     res = run()

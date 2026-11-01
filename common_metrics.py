@@ -112,6 +112,7 @@ def build(usdkrw: float) -> tuple[pd.DataFrame, dict]:
     out['영업익YoY(%)'] = [(fs.get(s) or {}).get('op_yoy') for s in out.index]
     ni = pd.Series([(fs.get(s) or {}).get('ttm_ni') for s in out.index], index=out.index, dtype=float)
     out['PER(배)'] = (mc / ni).where(ni > 0).round(1)
+    out['_ey'] = (ni / mc).where(mc > 0)     # 이익수익률(적자면 음수) — 포트폴리오 PER = 1 ÷ Σ비중×이익수익률 (2026-11-01)
 
     sec = _sector_map()
     out['업종'] = [(sec.get(s) or None) for s in out.index]
