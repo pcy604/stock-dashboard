@@ -2068,6 +2068,19 @@ with t_core, guard('주도주 교집합'):
             _fs.update_yaxes(title='점화 후 상승 몫(%, 평균)')
             _fs.update_layout(height=260, margin=dict(l=8, r=8, t=34, b=8), title="점화 후 13주 단위 상승 몫 — 상승은 어디에 몰리나")
             st.plotly_chart(_fs, use_container_width=True)
+            # 2026-11-01 차니 "수익률 top 종목들 어딨어?" — 분석에 쓴 승자 목록 자체를 보여 준다
+            st.markdown(f"**⑤ 승자 목록 — 최근 5년 상승률 상위 {len(_r.get('winners') or [])}종**")
+            _wl = pd.DataFrame(_r.get('winners') or [])
+            if len(_wl):
+                _wl['종목'] = [(_CMB['종목'].get(str(x)) if '종목' in _CMB else None) or str(x) for x in _wl.sym]
+                _wl = _wl.rename(columns={'sym': '코드', 'total': '5년 수익률(%)', 't0': '점화 주', 'peak': '고점 주',
+                                          'run_gain': '점화→고점 상승(%)', 'run_wk': '점화→고점(주)', 'run_dd': '도중 최대 낙폭(%)'})
+                _wl = _wl[['종목', '코드', '5년 수익률(%)', '점화 주', '고점 주', '점화→고점 상승(%)', '점화→고점(주)', '도중 최대 낙폭(%)']]
+                _tsrc('research/winners_reverse.py', path='results/winners_reverse.json')
+                st.dataframe(_wl, use_container_width=True, hide_index=True, height=420,
+                             column_config={c: st.column_config.NumberColumn(format='%,.0f') for c in ['5년 수익률(%)', '점화→고점 상승(%)', '점화→고점(주)', '도중 최대 낙폭(%)']})
+                st.caption("점화 주 = 5년 안에서 가장 큰 상승이 시작된 저점 주 · 도중 최대 낙폭 = 점화→고점 사이 고점 대비 가장 깊이 빠진 폭. "
+                           "종목명이 코드로 보이면 지금 커버 명단에 없는 종목(상장폐지 등)")
             if _r.get('note'):
                 st.caption(_r['note'])
 
