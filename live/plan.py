@@ -20,7 +20,8 @@ LEDGER = os.path.join(ROOT, 'live', 'ledger.json')
 OUT_J = os.path.join(ROOT, 'live', 'plan_latest.json')
 OUT_M = os.path.join(ROOT, 'live', 'plan_latest.md')
 
-RULE = dict(slots=5, first=0.60, add_at=0.10, add=0.40, cap=0.30, stop=0.20, kr_min_mc=1e11, rs_min=80)
+RULE = dict(slots=5, first=0.60, add_at=0.10, add=0.40, cap=0.30, stop=0.20, kr_min_mc=1e11, rs_min=80,
+            ma_days=50)   # v1.1(2026-11-01): 종가가 50일선(≈10주선) 위인 종목만 — 지난 1년 대박 후 최근 무너지는 종목 배제(차니 지적·AXTI)
 START = {'US': 1_000_000, 'KR': 1_000_000}          # 원화. 매달 +50만씩(원장 deposits 로 기록)
 
 
@@ -84,7 +85,34 @@ def candidates(fx):
                            n=len(why), dist52=(perf.get(sym) or {}).get('dist52')))
     for m in out:
         out[m].sort(key=lambda x: (-x['n'], -x['rs']))
+        out[m] = trend_ok(out[m][:40], m)
     return out
+
+
+def _hist(sym, m):
+    import yfinance as yf
+    for t in ([sym] if m == 'US' else [f'{sym}.KS', f'{sym}.KQ']):
+        try:
+            h = yf.Ticker(t).history(period='1y', auto_adjust=True)['Close'].dropna()
+            if len(h) >= RULE['ma_days']:
+                return h
+        except Exception:
+            pass
+    return None
+
+
+def trend_ok(cands, m):
+    """v1.1 — 최근 추세 확인: 종가 > 50일 이평. 가격을 못 받으면 '확인 불가'로 빼고 건너뜀 목록에 남긴다(있는 척하지 않는다)."""
+    keep = []
+    for c in cands:
+        h = _hist(c['sym'], m)
+        if h is None:
+            c['trend'] = '확인 불가'; continue
+        ma = float(h.rolling(RULE['ma_days']).mean().iloc[-1]); last = float(h.iloc[-1])
+        c['ma50'] = round(ma, 2); c['gap50'] = round((last / ma - 1) * 100, 1)
+        c['trend'] = 'OK' if last > ma else '50일선 아래'
+        keep.append(c)
+    return [c for c in keep if c['trend'] == 'OK'] + [dict(c, _excluded=True) for c in keep if c['trend'] != 'OK']
 
 
 def plan():
@@ -114,6 +142,8 @@ def plan():
         free = RULE['slots'] - len(pos)
         if IX[m]['ok'] and free > 0:
             for c in C[m]:
+                if c.get('_excluded'):
+                    skipped.append(dict(sym=c['sym'], name=c['name'], why=f"50일선 아래({c.get('gap50')}%) — RS 는 높지만 최근 추세 꺾임")); continue
                 if len(buys) >= free:
                     break
                 if c['sym'] in pos:
@@ -132,7 +162,7 @@ def plan():
                 spent = amt_local * (fx if m == 'US' else 1)
                 cash -= spent
                 buys.append(dict(sym=c['sym'], name=c['name'], why=c['why'], rs=round(c['rs']), ref_px=c['price'], qty=qty,
-                                 amount_local=amt_local, krw=round(spent), add_trigger=round(c['price'] * (1 + RULE['add_at']), 2),
+                                 amount_local=amt_local, krw=round(spent), gap50=c.get('gap50'), add_trigger=round(c['price'] * (1 + RULE['add_at']), 2),
                                  stop=round(c['price'] * (1 - RULE['stop']), 2)))
         P['sleeves'][m] = dict(equity_krw=round(equity), cash_krw=round(S['cash_krw']), cash_after_krw=round(cash), target_krw=round(target),
                                buys=buys, adds=adds, stops=stops, trims=trims, skipped=skipped,
@@ -156,14 +186,14 @@ def render(P):
             for b in S['buys']:
                 q = f"{b['qty']}주" if m == 'US' else f"{b['qty']:,}주"
                 L.append(f"   · {b['name']} ({b['sym']}) {q} ≈ {cur}{b['amount_local']:,.2f} ({b['krw']:,}원) · {b['why']} RS{b['rs']}"
-                         f" | 불타기 조건 {cur}{b['add_trigger']:,}↑ · 손절 스탑 {cur}{b['stop']:,}↓ (체결가 기준으로 다시 계산)")
+                         f" · 50일선 {b.get('gap50'):+}%" + f" | 불타기 조건 {cur}{b['add_trigger']:,}↑ · 손절 스탑 {cur}{b['stop']:,}↓ (체결가 기준으로 다시 계산)")
         for a in S['adds']:
             L.append(f"  🔥 불타기 조건주문: {a['name']} {a['trigger']}↑ 닿으면 {a['krw']:,}원 추가")
         for s in S['stops']:
             L.append(f"  🛑 손절 스탑: {s['name']} {s['stop']} (보유 중 최고 {s['peak']})")
         for t in S['trims']:
             L.append(f"  ✂️ 상한 초과 덜기: {t['name']} {t['now_w']}% → {t['to_w']:.0f}%")
-        for k in S['skipped'][:5]:
+        for k in S['skipped'][:8]:
             L.append(f"  ⏭ 건너뜀: {k['name']} — {k['why']}")
         L.append(f"  남는 현금 ≈ {S['cash_after_krw']:,}원")
     L.append("\n규칙: live/PREREG_2026-11.md · 체결하면 체결가·수량·환율을 알려 주세요(원장 기록).")
