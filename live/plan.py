@@ -20,7 +20,7 @@ LEDGER = os.path.join(ROOT, 'live', 'ledger.json')
 OUT_J = os.path.join(ROOT, 'live', 'plan_latest.json')
 OUT_M = os.path.join(ROOT, 'live', 'plan_latest.md')
 
-RULE = dict(slots=5, first=0.60, add_at=0.10, add=0.40, cap=0.30, stop=0.20, kr_min_mc=1e11, rs_min=80,
+RULE = dict(slots=5, first=0.60, add_at=0.10, add=0.40, cap=0.30, stop=0.20, kr_min_mc=1e11, us_min_mc=3e8, rs_min=80, kr_ix_weeks=5,
             ma_days=50, ma_weeks=5)   # v1.3(2026-11-01): 주봉 종가 > 5주선 — 10주(50일)선은 4개 검증 중 2개에서 악화, 5주선만 4/4 낙폭 개선(live/CHANGES.md)
 START = {'US': 1_000_000, 'KR': 1_000_000}          # 원화. 매달 +50만씩(원장 deposits 로 기록)
 
@@ -56,9 +56,12 @@ def index_ok():
         # v1.2(2026-11-01 차니): 한국은 종목이 속한 시장 지수로 — 코스닥 종목은 코스닥 200일선, 코스피 종목은 코스피 200일선
         for m, k in (('US', 'SPX'), ('KR', 'KOSPI'), ('KQ', 'KOSDAQ')):
             s = ix[k].dropna()
-            ma = s.rolling(200).mean()
+            if m == 'US':
+                ma, lbl = s.rolling(200).mean(), '200일선'
+            else:   # v1.4(2026-11-01 차니): 한국 지수 게이트 = 주봉 5주선(백테스트 수익÷낙폭 0.58→0.67)
+                s = s.resample('W-FRI').last().dropna(); ma, lbl = s.rolling(RULE['kr_ix_weeks']).mean(), f"{RULE['kr_ix_weeks']}주선"
             out[m] = dict(ok=bool(s.iloc[-1] > ma.iloc[-1]), last=round(float(s.iloc[-1]), 1), ma200=round(float(ma.iloc[-1]), 1),
-                          date=str(s.index[-1])[:10])
+                          lbl=lbl, date=str(s.index[-1])[:10])
     except Exception as e:
         for m in ('US', 'KR', 'KQ'):
             out[m] = dict(ok=True, note=f'지수 자료 없음({type(e).__name__}) — 신규 매수 허용으로 둠')
@@ -86,7 +89,7 @@ def candidates(fx):
         why = [w for w, ok in (('이익가속', sym in acc and m == 'US'), ('흑자전환', sym in ta)) if ok]
         if not why or m not in out:
             continue
-        if m == 'KR' and not (r.get('_mc_local') or 0) >= RULE['kr_min_mc']:
+        if not (r.get('_mc_local') or 0) >= RULE['kr_min_mc' if m == 'KR' else 'us_min_mc']:   # v1.4: 미국도 시총 $3억↑(백테스트와 동일)
             continue
         px = (perf.get(sym) or {}).get('curr_price')
         if not px:
@@ -157,7 +160,7 @@ def plan():
             for c in C[m]:
                 if not gate(c['sym']):
                     bd = '코스닥' if BOARD.get(c['sym']) == 'KQ' else '코스피'
-                    skipped.append(dict(sym=c['sym'], name=c['name'], why=f"{bd} 200일선 아래 — 신규 중지")); continue
+                    skipped.append(dict(sym=c['sym'], name=c['name'], why=f"{bd} {IX[BOARD.get(c['sym'], 'KR')].get('lbl', '200일선')} 아래 — 신규 중지")); continue
                 if c.get('_excluded'):
                     skipped.append(dict(sym=c['sym'], name=c['name'], why=f"5주선 아래({c.get('gap50')}%) — RS 는 높지만 최근 추세 꺾임")); continue
                 if len(buys) >= free:
@@ -198,7 +201,7 @@ def render(P):
         ixs = [('S&P500', P['index']['US'])] if m == 'US' else [('코스피', P['index']['KR']), ('코스닥', P['index'].get('KQ', {}))]
         L.append(f"\n{flag[m]} 슬리브 — 자산 {S['equity_krw']:,}원 · 종목당 목표 {S['target_krw']:,}원 · 첫 매수 60%")
         for nm, x in ixs:
-            L.append(f"  {nm} 200일선: {'위 → 신규 가능' if x.get('ok') else '아래 → 그 시장 종목 신규·불타기 중지'}" + (f" ({x.get('last')} vs {x.get('ma200')}, {x.get('date')})" if 'last' in x else ''))
+            L.append(f"  {nm} {x.get('lbl', '200일선')}: {'위 → 신규 가능' if x.get('ok') else '아래 → 그 시장 종목 신규·불타기 중지'}" + (f" ({x.get('last')} vs {x.get('ma200')}, {x.get('date')})" if 'last' in x else ''))
         if S['buys']:
             L.append("  🟢 월요일 시가 매수:")
             for b in S['buys']:
