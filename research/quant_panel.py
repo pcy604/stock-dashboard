@@ -16,11 +16,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 OUT = os.path.join(ROOT, "results")
 COLS = ["sym", "name", "market", "date", "open", "high", "low", "close", "volume", "marcap",
-        "per", "pbr", "psr", "rev_yoy", "op_yoy", "op_turn", "acc", "sector"]
+        "per", "pbr", "psr", "rev_yoy", "op_yoy", "op_turn", "acc", "sector",
+        "opm", "gpm", "rev_qoq", "roe", "debt"]       # 2026-11-01 확장 — 시장에 없는 열은 빈 값
 
 
 def _f32(d):
-    for c in ("open", "high", "low", "close", "volume", "marcap", "per", "pbr", "psr", "rev_yoy", "op_yoy"):
+    for c in ("open", "high", "low", "close", "volume", "marcap", "per", "pbr", "psr", "rev_yoy", "op_yoy",
+              "opm", "gpm", "rev_qoq", "roe", "debt"):
+        if c not in d:
+            d[c] = np.nan
         d[c] = pd.to_numeric(d[c], errors="coerce").astype("float32")
     for c in ("op_turn", "acc"):
         d[c] = pd.to_numeric(d[c], errors="coerce").fillna(0).astype("int8")
@@ -33,7 +37,7 @@ def us():
     import leaders_accel as A
     d = A.load()                                         # ACC 계산 포함
     c = sqlite3.connect(os.path.join(ROOT, "data", "market.db"))
-    extra = pd.read_sql(f"SELECT as_of, sym, sector, pbr, op_turn, op_income FROM factor_weekly WHERE factor_ver='{ver}'", c)
+    extra = pd.read_sql(f"SELECT as_of, sym, sector, pbr, op_turn, op_income, rev_qoq FROM factor_weekly WHERE factor_ver='{ver}'", c)
     extra["as_of"] = pd.to_datetime(extra.as_of)
     d = d.merge(extra, on=["as_of", "sym"], how="left", suffixes=("", "_x"))
     px = pd.read_sql("SELECT sym, date, open, high, low, volume FROM prices WHERE market='US'", c)
@@ -98,12 +102,15 @@ def kr():
     o4 = g.op_income.shift(4)
     q["op_yoy"] = np.where(o4 > 0, (q.op_income / o4 - 1) * 100, np.nan)
     q["op_turn"] = ((q.op_income > 0) & (o4 <= 0)).astype(int)
-    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn"]].sort_values("known")
+    q["opm"] = (q.ttm_op_income / q.ttm_revenue * 100).where(q.ttm_revenue > 0)
+    q["debt"] = (q.liabilities / q.equity * 100).where(q.equity > 0)
+    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn", "opm", "debt"]].sort_values("known")
     w = w.sort_values("date")
     w = pd.merge_asof(w, q, left_on="date", right_on="known", by="sym", direction="backward")
     w["per"] = (w.marcap / w.ttm_net_income).where(w.ttm_net_income > 0)
     w["pbr"] = (w.marcap / w.equity).where(w.equity > 0)
     w["psr"] = (w.marcap / w.ttm_revenue).where(w.ttm_revenue > 0)
+    w["roe"] = (w.ttm_net_income / w.equity * 100).where(w.equity > 0)
     w["market"] = "KR"; w["acc"] = 0
     try:
         sec = json.load(open(os.path.join(ROOT, "data", "sectors.json"), encoding="utf-8"))

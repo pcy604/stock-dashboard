@@ -52,3 +52,33 @@ def test_calendar_months_off_means_cash():
 def test_fields_dist_hi_never_positive():
     P = _panel({'A': list(np.linspace(100, 200, 60)), 'B': list(np.linspace(200, 100, 60))})
     assert (P.get('dist_hi:52').max().max() <= 0)
+
+
+def test_logic_or_and_not():
+    P = _panel({'A': list(np.linspace(100, 200, 30)), 'B': list(np.linspace(200, 100, 30))})
+    c = [np.zeros((2, 2), bool), np.ones((2, 2), bool), np.ones((2, 2), bool)]
+    assert eval(Q.parse_logic('1 OR 2', 3), {'__builtins__': {}}, {'c': c}).all()
+    assert not eval(Q.parse_logic('1 AND 2', 3), {'__builtins__': {}}, {'c': c}).any()
+    assert not eval(Q.parse_logic('NOT 2', 3), {'__builtins__': {}}, {'c': c}).any()
+    for bad in ('1 AND 9', 'open(1)', '1 AND (2'):
+        try:
+            Q.parse_logic(bad, 3); assert False, bad
+        except (ValueError, SyntaxError):
+            pass
+    # 오르는 A 만: ret:4 > 0 OR (없는 조건) — OR 로 B 가 섞이지 않는지
+    r = Q.run(P, dict(BASE, max_pos=2, max_w=0.5, filters=[dict(field='ret:4', op='>', value=0), dict(field='per', op='>', value=99)],
+                     logic='1 OR 2'))
+    assert set(r['trades'].코드) == {'A'}
+
+
+def test_nl_validate_drops_unknown_and_remaps_logic():
+    import quant_nl as N
+    raw = dict(filters=[dict(field='marcap', op='>=', value=1e11), dict(field='foreign_flow', op='>', value=0),
+                        dict(field='rs', op='>=', value=80), dict(field='per', op='between', value=[0, 15])],
+               logic='1 AND (3 OR 4)', exit=dict(stop=12, signals=[dict(type='macd_neg'), dict(type='news_bad')]),
+               unsupported=['외국인 수급'])
+    spec, notes, dropped = N.validate(raw)
+    assert [f['field'] for f in spec['filters']] == ['marcap', 'rs', 'per']
+    assert spec['logic'] == '1 AND (2 OR 3)'
+    assert any('foreign_flow' in d for d in dropped) and any('news_bad' in str(d) for d in dropped)
+    assert spec['exit']['signals'] == [dict(type='macd_neg')]
