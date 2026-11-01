@@ -122,7 +122,7 @@ def trend_ok(cands, m):
         c['ma50'] = round(ma, 2); c['gap50'] = round((last / ma - 1) * 100, 1)
         c['trend'] = 'OK' if last > ma else '50일선 아래'
         keep.append(c)
-    return [c for c in keep if c['trend'] == 'OK'] + [dict(c, _excluded=True) for c in keep if c['trend'] != 'OK']
+    return [c if c['trend'] == 'OK' else dict(c, _excluded=True) for c in keep]   # 순서 유지 → 매수 자리를 뺏길 뻔한 종목만 건너뜀에 뜬다
 
 
 def plan():
