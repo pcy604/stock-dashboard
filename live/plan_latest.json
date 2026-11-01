@@ -111,12 +111,97 @@
    "adds": [],
    "stops": [],
    "trims": [],
-   "skipped": [],
+   "skipped": [
+    {
+     "sym": "AXTI",
+     "name": "AXT INC",
+     "why": "50일선 아래(-16.9%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "AGL",
+     "name": "Agilon Health",
+     "why": "50일선 아래(-3.4%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "ETON",
+     "name": "Eton Pharmaceuticals, Inc.",
+     "why": "50일선 아래(-6.8%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "MXL",
+     "name": "MAXLINEAR, INC",
+     "why": "50일선 아래(-12.6%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "LITE",
+     "name": "Lumentum Holdings Inc.",
+     "why": "50일선 아래(-8.9%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "CRSR",
+     "name": "Corsair Gaming, Inc.",
+     "why": "50일선 아래(-3.6%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "DK",
+     "name": "Delek US Holdings, Inc.",
+     "why": "50일선 아래(-0.6%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "PUBM",
+     "name": "PubMatic, Inc.",
+     "why": "50일선 아래(-8.6%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "APPS",
+     "name": "Digital Turbine, Inc.",
+     "why": "50일선 아래(-17.4%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "AMD",
+     "name": "ADVANCED MICRO DEVICES INC",
+     "why": "50일선 아래(-7.9%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "DDOG",
+     "name": "Datadog, Inc.",
+     "why": "50일선 아래(-6.4%) — RS 는 높지만 최근 추세 꺾임"
+    },
+    {
+     "sym": "VREX",
+     "name": "Varex Imaging Corp",
+     "why": "50일선 아래(-0.2%) — RS 는 높지만 최근 추세 꺾임"
+    }
+   ],
    "candidates_top": [
+    {
+     "sym": "AXTI",
+     "name": "AXT INC",
+     "rs": 99,
+     "why": "이익가속+흑자전환"
+    },
     {
      "sym": "CDNA",
      "name": "CareDx, Inc.",
      "rs": 99,
+     "why": "이익가속+흑자전환"
+    },
+    {
+     "sym": "AGL",
+     "name": "Agilon Health",
+     "rs": 98,
+     "why": "이익가속+흑자전환"
+    },
+    {
+     "sym": "ETON",
+     "name": "Eton Pharmaceuticals, Inc.",
+     "rs": 98,
+     "why": "이익가속+흑자전환"
+    },
+    {
+     "sym": "MXL",
+     "name": "MAXLINEAR, INC",
+     "rs": 98,
      "why": "이익가속+흑자전환"
     },
     {
@@ -126,51 +211,27 @@
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "HZO",
-     "name": "MARINEMAX INC",
-     "rs": 95,
+     "sym": "LITE",
+     "name": "Lumentum Holdings Inc.",
+     "rs": 97,
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "LFST",
-     "name": "LifeStance Health Group, Inc.",
-     "rs": 95,
+     "sym": "CRSR",
+     "name": "Corsair Gaming, Inc.",
+     "rs": 96,
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "GKOS",
-     "name": "GLAUKOS Corp",
-     "rs": 93,
+     "sym": "DK",
+     "name": "Delek US Holdings, Inc.",
+     "rs": 96,
      "why": "이익가속+흑자전환"
     },
     {
-     "sym": "WTI",
-     "name": "W&T OFFSHORE INC",
-     "rs": 93,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "AVTR",
-     "name": "Avantor, Inc.",
-     "rs": 92,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "FNKO",
-     "name": "Funko, Inc.",
-     "rs": 92,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "TALO",
-     "name": "TALOS ENERGY INC.",
-     "rs": 91,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "CHRD",
-     "name": "Chord Energy Corp",
-     "rs": 89,
+     "sym": "PUBM",
+     "name": "PubMatic, Inc.",
+     "rs": 96,
      "why": "이익가속+흑자전환"
     }
    ]
@@ -191,6 +252,11 @@
      "why": "코스닥 200일선 아래 — 신규 중지"
     },
     {
+     "sym": "010170",
+     "name": "대한광통신",
+     "why": "코스닥 200일선 아래 — 신규 중지"
+    },
+    {
      "sym": "046970",
      "name": "우리로",
      "why": "코스닥 200일선 아래 — 신규 중지"
@@ -206,39 +272,14 @@
      "why": "코스닥 200일선 아래 — 신규 중지"
     },
     {
-     "sym": "092190",
-     "name": "서울바이오시스",
-     "why": "코스닥 200일선 아래 — 신규 중지"
-    },
-    {
-     "sym": "356680",
-     "name": "엑스게이트",
-     "why": "코스닥 200일선 아래 — 신규 중지"
-    },
-    {
-     "sym": "078350",
-     "name": "한양디지텍",
-     "why": "코스닥 200일선 아래 — 신규 중지"
-    },
-    {
-     "sym": "006400",
-     "name": "삼성SDI",
-     "why": "코스피 200일선 아래 — 신규 중지"
-    },
-    {
-     "sym": "457190",
-     "name": "이수스페셜티케미컬",
-     "why": "코스피 200일선 아래 — 신규 중지"
-    },
-    {
-     "sym": "010170",
-     "name": "대한광통신",
-     "why": "코스닥 200일선 아래 — 신규 중지"
-    },
-    {
      "sym": "006110",
      "name": "삼아알미늄",
      "why": "코스피 200일선 아래 — 신규 중지"
+    },
+    {
+     "sym": "092190",
+     "name": "서울바이오시스",
+     "why": "코스닥 200일선 아래 — 신규 중지"
     },
     {
      "sym": "024840",
@@ -251,9 +292,24 @@
      "why": "코스피 200일선 아래 — 신규 중지"
     },
     {
+     "sym": "356680",
+     "name": "엑스게이트",
+     "why": "코스닥 200일선 아래 — 신규 중지"
+    },
+    {
      "sym": "446540",
      "name": "메가터치",
      "why": "코스닥 200일선 아래 — 신규 중지"
+    },
+    {
+     "sym": "078350",
+     "name": "한양디지텍",
+     "why": "코스닥 200일선 아래 — 신규 중지"
+    },
+    {
+     "sym": "006400",
+     "name": "삼성SDI",
+     "why": "코스피 200일선 아래 — 신규 중지"
     },
     {
      "sym": "131970",
@@ -314,6 +370,11 @@
      "sym": "008060",
      "name": "대덕",
      "why": "코스피 200일선 아래 — 신규 중지"
+    },
+    {
+     "sym": "457190",
+     "name": "이수스페셜티케미컬",
+     "why": "코스피 200일선 아래 — 신규 중지"
     }
    ],
    "candidates_top": [
@@ -321,6 +382,12 @@
      "sym": "159010",
      "name": "아스플로",
      "rs": 99,
+     "why": "흑자전환"
+    },
+    {
+     "sym": "010170",
+     "name": "대한광통신",
+     "rs": 98,
      "why": "흑자전환"
     },
     {
@@ -342,39 +409,33 @@
      "why": "흑자전환"
     },
     {
+     "sym": "006110",
+     "name": "삼아알미늄",
+     "rs": 97,
+     "why": "흑자전환"
+    },
+    {
      "sym": "092190",
      "name": "서울바이오시스",
      "rs": 96,
      "why": "흑자전환"
     },
     {
-     "sym": "356680",
-     "name": "엑스게이트",
+     "sym": "024840",
+     "name": "KBI메탈",
+     "rs": 95,
+     "why": "흑자전환"
+    },
+    {
+     "sym": "317400",
+     "name": "자이에스앤디",
      "rs": 94,
      "why": "흑자전환"
     },
     {
-     "sym": "078350",
-     "name": "한양디지텍",
-     "rs": 93,
-     "why": "흑자전환"
-    },
-    {
-     "sym": "006400",
-     "name": "삼성SDI",
-     "rs": 92,
-     "why": "흑자전환"
-    },
-    {
-     "sym": "457190",
-     "name": "이수스페셜티케미컬",
-     "rs": 83,
-     "why": "흑자전환"
-    },
-    {
-     "sym": "010170",
-     "name": "대한광통신",
-     "rs": 98,
+     "sym": "356680",
+     "name": "엑스게이트",
+     "rs": 94,
      "why": "흑자전환"
     }
    ]
