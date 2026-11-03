@@ -22,7 +22,7 @@ OUT_M = os.path.join(ROOT, 'live', 'plan_latest.md')
 
 RULE = dict(slots=5, first=0.60, add_at=0.10, add=0.40, cap=0.30, stop=0.20, kr_min_mc=1e11, us_min_mc=3e8, rs_min=80, kr_ix_weeks=5,
             ma_days=50, ma_weeks=5)   # v1.3(2026-11-01): 주봉 종가 > 5주선 — 10주(50일)선은 4개 검증 중 2개에서 악화, 5주선만 4/4 낙폭 개선(live/CHANGES.md)
-START = {'US': 1_000_000, 'KR': 1_000_000}          # 원화. 매달 +50만씩(원장 deposits 로 기록)
+START = {'US': 300_000, 'KR': 0}                  # v1.5(2026-11-03): 첫 입금 30만원 전부 미국 · 2026-12부터 매달 100만(50/50), 원장 deposits 로 기록
 
 
 def _j(p):

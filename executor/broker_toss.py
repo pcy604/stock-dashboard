@@ -1,4 +1,4 @@
-"""토스증권 Open API — 지금은 **읽기 전용**(계좌·보유·현금). 실주문은 P2 에서.
+"""토스증권 Open API — 조회(TossReader) + 주문(TossTrader, 기본 모의).
 
 확인된 사양(2026-10, 원칙 v1 §8 + 공개 가이드 대조):
   · 토큰  POST /oauth2/token  form(grant_type=client_credentials, client_id, client_secret)
@@ -154,6 +154,45 @@ class TossReader:
         return snap
 
 
-class TossBroker:
-    def __init__(self, *a, **k):
-        raise NotImplementedError("주문은 P2(소액 실전) 단계에서 구현 — 지금은 TossReader(조회)만")
+class TossTrader(TossReader):
+    """주문 클라이언트 (2026-11-03). **live=False 면 POST 를 절대 보내지 않는다** — 보낼 요청만 돌려준다.
+
+    사양(공개 가이드 대조, 공식 문서로 첫 실주문 전 재확인):
+      POST /api/v1/orders  JSON{symbol, side BUY|SELL, orderType MARKET|LIMIT, price?, quantity | orderAmount(미국 USD 금액),
+                                timeInForce DAY, clientOrderId}  — 숫자는 전부 문자열
+      GET  /api/v1/orders/{orderId}  → 체결 내역 포함 · POST /api/v1/orders/{orderId}/cancel
+    """
+
+    def __init__(self, client_id, client_secret, live=False, **k):
+        super().__init__(client_id, client_secret, **k)
+        self.live = bool(live)
+        self.sent = []          # 보냈거나(실전) 보낼 뻔한(모의) 요청 기록
+
+    @staticmethod
+    def body(symbol, side, client_order_id, quantity=None, amount_usd=None, order_type="MARKET", price=None):
+        if (quantity is None) == (amount_usd is None):
+            raise TossError("quantity 와 amount_usd 중 정확히 하나만")
+        b = {"symbol": str(symbol), "side": side, "orderType": order_type, "timeInForce": "DAY",
+             "clientOrderId": str(client_order_id)[:64]}
+        if quantity is not None:
+            b["quantity"] = f"{float(quantity):.6f}".rstrip("0").rstrip(".")
+        else:
+            b["orderAmount"] = f"{float(amount_usd):.2f}"
+        if order_type == "LIMIT":
+            b["price"] = f"{float(price):.4f}".rstrip("0").rstrip(".")
+        return b
+
+    def place(self, account_seq, **kw):
+        b = self.body(**kw)
+        self.sent.append(b)
+        if not self.live:
+            return {"orderId": None, "dry_run": True, "body": b}
+        h = {"Authorization": f"Bearer {self.token()}", "X-Tossinvest-Account": str(account_seq),
+             "Content-Type": "application/json"}
+        r = self.s.post(BASE + "/api/v1/orders", headers=h, json=b, timeout=15)
+        if r.status_code not in (200, 201):
+            raise TossError(self._why(r, f"주문 {b['side']} {b['symbol']}"))
+        return (r.json() or {}).get("result") or {}
+
+    def order(self, account_seq, order_id):
+        return self._get(f"/api/v1/orders/{order_id}", account=account_seq, what="주문 상세") or {}

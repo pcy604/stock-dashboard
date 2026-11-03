@@ -1,0 +1,5 @@
+{
+ "live": false,
+ "_doc": "true 로 바꾸고 노트북 환경변수 LIVE_TRADING=ON 이어야 실주문. 바꾼 날짜·이유는 live/CHANGES.md 에",
+ "changed": "2026-11-03"
+}
