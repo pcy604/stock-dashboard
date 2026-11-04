@@ -28,6 +28,12 @@ _SOPT = {f"{v[0]} ({k})": k for k, v in Q.EXIT_SIGNALS.items()}
 _WT = {'equal': '동일 비중', 'rank': '순위 가중(1등 더 많이)', 'mcap': '시총 가중', 'inv_vol': '변동성 역가중(덜 흔들리는 종목 더 많이)'}
 
 PRESETS = {
+    '🟢 지금 실전 규칙 (교집합 5종목)': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
+                                              dict(field='op_turn', op='==', value=1), dict(field='ma_gap:5', op='>', value=0)],
+                                     rank=dict(field='rs', desc=True), rebalance=1, max_pos=5, max_w=0.30,
+                                     entry=dict(init=0.6, pyramid=[[10, 0.4]]),
+                                     exposure=dict(index='IDX', ma=5, below=0.0, mode='entry'),
+                                     exit=dict(stop=0, trail=[[0, 20]], cooldown=2, signals=[])),
     'RS 상위 회전 (모멘텀)': dict(filters=[dict(field='marcap', op='>=', value='LIQ')], rank=dict(field='rs', desc=True)),
     '주도주: RS≥80 × 흑자전환': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
                                             dict(field='op_turn', op='==', value=1)], rank=dict(field='rs', desc=True),
@@ -91,6 +97,8 @@ def _run(m, spec_json):
 
 def _fill(spec, m):
     s = json.loads(json.dumps(spec))
+    if (s.get('exposure') or {}).get('index') == 'IDX':
+        s['exposure']['index'] = _IDX[m][0]
     for f in s.get('filters', []):
         if f.get('value') == 'LIQ':
             f['value'] = _LIQ[m]
@@ -189,20 +197,69 @@ def _nl_box(m):
     return None
 
 
-def render(mkt_sel: str, tsrc):
-    st.markdown("#### 🧪 퀀트 백테스트 — 고르는 법 · 담는 비중 · 불타기 · 탈출을 직접 조합")
-    st.caption("주봉 기준(5주선 ≈ 25일선). 매주 종가로 판단 → 다음 주 시가에 매매, 손절·래칫만 주중 스탑. 편도 0.3%. "
-               "재무는 그 주에 알 수 있던 값만(미국 공시일 · 한국 분기말 +45/90일). 상장폐지 종목 포함(마지막 가격에 정리).")
-    mk = [m for m in (['US', 'KR'] if mkt_sel == '전체' else [mkt_sel])]
-    m = mk[0] if len(mk) == 1 else st.segmented_control('이 백테스트의 시장(상단이 전체라서)', mk, default='US', key='qb_m',
-                                                        format_func=_MK.get) or 'US'
+_DESC = {
+    '🟢 지금 실전 규칙 (교집합 5종목)': 'RS 80↑ × 영업 흑자전환 × 5주선 위, RS 순 5종목 · 첫 매수 60%, +10% 불타기 · 고점 −20% 손절 · 지수 5주선 아래면 신규 중지 — 토스 실전 시범과 같은 규칙',
+    'RS 상위 회전 (모멘텀)': '최근 많이 오른(RS 높은) 종목을 정기적으로 갈아탐',
+    '주도주: RS≥80 × 흑자전환': 'RS 80↑ × 흑자전환, 20주선 이탈·이익 급감 때 매도',
+    '저PER 가치 + 이평 위': 'PER 0~12 중 40주선 위 종목, PER 낮은 순',
+    '할로윈 (11~4월만 주식)': '대형주를 11~4월에만 보유',
+    '차니식: 반만 사고 불타기 + 래칫': 'RS 80↑ · 절반 매수 후 +20·40% 불타기 · 오를수록 손절선 상향',
+}
+_STOPS = {0: '끔', 10: '−10%', 15: '−15%', 20: '−20%', 25: '−25%', 30: '−30%'}
 
-    nl_spec = _nl_box(m)
-    pc, jc = st.columns([2, 1])
-    pname = pc.selectbox('예시 전략 불러오기 — 여기서 시작해 아래를 고치세요', list(PRESETS), key='qb_preset')
+
+def _easy(m):
+    """쉬운 모드 — 고를 것 5개. 나머지는 고른 전략 그대로."""
+    c = st.columns([3, 1, 1, 1, 1])
+    pname = c[0].selectbox('전략', list(PRESETS), key='qb_easy_p')
     base = Q.merged(_fill(PRESETS[pname], m))
-    with jc.popover('📋 명세 붙여넣기'):
-        raw = st.text_area('JSON (아래 "명세 보기"에서 복사한 것)', key='qb_json_in', height=160)
+    y0 = max(2015, pd.Timestamp(base['start']).year)
+    yr = c[1].selectbox('시작 연도', list(range(2015, 2026)), index=list(range(2015, 2026)).index(min(y0, 2025)), key=f'qb_easy_y|{pname}')
+    npos = c[2].selectbox('종목 수', [3, 5, 10, 20, 30], index=[3, 5, 10, 20, 30].index(min([3, 5, 10, 20, 30], key=lambda v: abs(v - base['max_pos']))),
+                          key=f'qb_easy_n|{pname}')
+    tr = base['exit'].get('trail') or []
+    cur = int(tr[0][1]) if len(tr) == 1 and float(tr[0][0]) == 0 else (int(base['exit'].get('stop') or 0) if not tr else None)
+    opts = list(_STOPS) + ([] if cur in _STOPS else ['preset'])
+    stp = c[3].selectbox('손절 (고점 대비)', opts, index=opts.index(cur if cur in _STOPS else 'preset'),
+                         format_func=lambda v: _STOPS.get(v, '전략 기본'), key=f'qb_easy_s|{pname}',
+                         help='보유 중 최고가에서 이만큼 빠지면 판다(손절선은 올라가기만)')
+    ix_on = c[4].toggle('지수 약하면 현금', value=bool(base['exposure'].get('index')), key=f'qb_easy_i|{pname}',
+                        help=f"{_IDXN[_IDX[m][0]]}이(가) 이평선 아래면 주식을 사지 않음(한국 5주선 · 미국 40주선≈200일선)")
+    st.caption('ℹ️ ' + _DESC.get(pname, ''))
+    base['start'] = f'{yr}-01-01'
+    base['max_pos'] = int(npos)
+    base['max_w'] = max(float(base['max_w']), round(1 / npos, 4))
+    if stp != 'preset':
+        base['exit'].update(stop=0, trail=[[0, stp]] if stp else [])
+    if ix_on:
+        base['exposure'].update(index=base['exposure'].get('index') or _IDX[m][0],
+                                ma=int(base['exposure'].get('ma') or (5 if m == 'KR' else 40)), below=0.0)
+    else:
+        base['exposure'].update(index='')
+    return pname, base
+
+
+def _verdict(S, bmn):
+    dc, dm = S['CAGR'] - S.get('BM_CAGR', 0), S['MDD'] - S.get('BM_MDD', 0)    # MDD 는 음수 — 클수록(0에 가까울수록) 좋음
+    if dc >= 0 and dm >= 0:
+        v = f"✅ **{bmn}보다 수익도 높고 낙폭도 작았습니다**"
+    elif dc >= 0:
+        v = f"⚠️ **수익은 {bmn}보다 높지만 낙폭이 더 컸습니다** — 버틸 수 있는 하락인지 보세요"
+    elif dm >= 0:
+        v = f"🛡️ **수익은 {bmn}보다 낮지만 낙폭은 작았습니다**"
+    else:
+        v = f"❌ **수익·낙폭 모두 {bmn}보다 나빴습니다**"
+    n = S.get('매도건수', 0) or 0
+    if n < 30:
+        v += f" · 매도 {n}건뿐이라 우연일 수 있음"
+    return v
+
+
+def _advanced(m, base, pname):
+    """⚙️ 고급 — 모든 규칙을 표·숫자로 직접 조합(말로 쓰기 · 명세 붙여넣기 포함)."""
+    nl_spec = _nl_box(m)
+    with st.popover('📋 명세 붙여넣기'):
+        raw = st.text_area('JSON (결과 아래 "명세 보기"에서 복사한 것)', key='qb_json_in', height=160)
         if raw.strip():
             try:
                 base = Q.merged(json.loads(raw)); st.caption('✅ 붙여 넣은 명세 사용 중')
@@ -210,9 +267,8 @@ def render(mkt_sel: str, tsrc):
                 st.error(f'JSON 오류: {e}')
     if nl_spec:
         base = Q.merged(nl_spec)
-        pc.caption('🤖 말로 만든 설정을 쓰는 중 — 예시 전략 선택은 무시됩니다')
+        st.caption('🤖 말로 만든 설정을 쓰는 중 — 위 전략 선택은 무시됩니다')
     K = f"{pname}|{m}|{hash(json.dumps(base, sort_keys=True)) % 10**8}"
-
     with st.form(f'qb_form_{K}'):
         st.markdown("**① 기간 · 리밸런싱**")
         a1, a2, a3 = st.columns(3)
@@ -278,7 +334,7 @@ def render(mkt_sel: str, tsrc):
                              column_config={'신호': st.column_config.SelectboxColumn(options=list(_SOPT), required=True, width='large'),
                                             '지표': st.column_config.SelectboxColumn(options=_FOPT),
                                             '조건': st.column_config.SelectboxColumn(options=['<', '>', '<=', '>=', '=='])})
-        go_ = st.form_submit_button('▶ 백테스트 실행', type='primary')
+        go_ = st.form_submit_button('▶ 이 설정으로 실행', type='primary')
 
     # 화면 값 → 명세
     sigs = []
@@ -323,8 +379,19 @@ def render(mkt_sel: str, tsrc):
                 exit=dict(stop=stp, trail=[[float(a), float(b)] for a, b in trl.dropna().values.tolist()], min_hold=int(mh),
                           cooldown=int(cd), signals=sigs),
                 cost=0.003)
-    with st.expander('🧾 명세 보기 (복사해 두면 그대로 다시 불러올 수 있음)'):
-        st.code(json.dumps(spec, ensure_ascii=False), language='json')
+    return spec
+
+
+def render(mkt_sel: str, tsrc):
+    st.markdown("#### 🧪 퀀트 백테스트")
+    st.caption("전략을 고르면 바로 계산합니다. 주봉 종가로 판단 → 다음 주 시가 매매 · 손절은 주중 스탑 · 편도 0.3% · 상장폐지 종목 포함.")
+    mk = [m for m in (['US', 'KR'] if mkt_sel == '전체' else [mkt_sel])]
+    m = mk[0] if len(mk) == 1 else st.segmented_control('시장', mk, default='KR', key='qb_m', format_func=_MK.get) or 'KR'
+    pname, base = _easy(m)
+    if st.toggle('⚙️ 직접 조합 (고급 — 필터·결합식·불타기·래칫·탈출 신호·말로 쓰기)', key='qb_adv'):
+        spec = _advanced(m, base, pname)
+    else:
+        spec = base
 
     try:
         with st.spinner(f'{_MK[m]} 패널 불러와 계산 중… (처음 한 번은 수십 초)'):
@@ -340,18 +407,12 @@ def render(mkt_sel: str, tsrc):
 
     # ── 결과 ──
     bmn = _IDXN[_IDX[m][0]]
-    k1, k2, k3, k4, k5 = st.columns(5)
+    st.markdown(_verdict(S, bmn))
+    k1, k2, k3, k4 = st.columns(4)
     k1.metric('연 수익률(CAGR)', f"{S['CAGR']:.1f}%", f"{S['CAGR'] - S.get('BM_CAGR', 0):+.1f}%p vs {bmn}")
     k2.metric('최대 낙폭(MDD)', f"{S['MDD']:.1f}%", f"{S['MDD'] - S.get('BM_MDD', 0):+.1f}%p vs {bmn}")
     k3.metric('샤프', f"{S['Sharpe']:.2f}" if S.get('Sharpe') is not None else '-', f"수익÷낙폭 {S['Calmar']:.2f}" if S.get('Calmar') else None, delta_color='off')
     k4.metric('승률 · 손익비', f"{S.get('승률') or 0:.0f}% · {S.get('손익비') or 0:.2f}", f"매도 {S.get('매도건수', 0):,}건", delta_color='off')
-    if len(Hd) and Hd.PER.notna().any():
-        h = Hd.dropna(subset=['PER']); ey = (h.비중 / h.PER).sum() / h.비중.sum()
-        k5.metric('지금 보유 PER (요구 6)', f"{1 / ey:.1f}배" if ey > 0 else '-', f"재무 커버 {h.비중.sum() / max(Hd.비중.sum(), 1e-9) * 100:.0f}%", delta_color='off',
-                  help='1 ÷ Σ(비중 × 1/PER). 적자 종목(PER 없음)은 제외')
-    else:
-        k5.metric('지금 보유 PER (요구 6)', '-')
-
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=eq.index, y=eq.values * 100, name='전략', line=dict(color='#D9363E', width=2)))
     if bm is not None:
@@ -362,6 +423,18 @@ def render(mkt_sel: str, tsrc):
                       yaxis=dict(type='log', title='100에서 시작'), yaxis2=dict(overlaying='y', side='right', range=[0, 300], showgrid=False, title=None))
     st.plotly_chart(fig, use_container_width=True)
 
+    with st.expander('📅 연도별 수익'):
+        _yearly(eq, bm, bmn, m, tsrc)
+    with st.expander(f"📜 매매 내역 · 매도 {S.get('매도건수', 0):,}건"):
+        _trades(T, eq, m, tsrc)
+    with st.expander('📦 마지막 주 보유'):
+        _holdings(Hd, eq, tsrc)
+    with st.expander('🧾 명세 보기 (복사해 두면 고급 → 명세 붙여넣기로 되살림)'):
+        st.code(json.dumps(spec, ensure_ascii=False), language='json')
+    st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 숫자가 부풀려집니다 — 다른 시작 연도·이웃 값에서도 비슷한지 확인하세요.')
+
+
+def _yearly(eq, bm, bmn, m, tsrc):
     yr = pd.DataFrame({'전략(%)': eq.resample('YE').last().pct_change() * 100})
     yr.iloc[0, 0] = (eq.resample('YE').last().iloc[0] / eq.iloc[0] - 1) * 100
     if bm is not None:
@@ -372,7 +445,9 @@ def render(mkt_sel: str, tsrc):
     st.dataframe(yr.reset_index(drop=True), hide_index=True, use_container_width=True, filters=False,
                  column_config={'연도': st.column_config.NumberColumn(format='%d')})
 
-    st.markdown('##### 📜 매매 내역 (요구 8) — 모든 매수·불타기·덜기·매도와 사유')
+
+
+def _trades(T, eq, m, tsrc):
     if len(T):
         TT = T.copy(); TT['날짜'] = pd.to_datetime(TT['날짜']).dt.date
         TT = TT.rename(columns={'날짜': '체결 주(월)'})
@@ -382,12 +457,13 @@ def render(mkt_sel: str, tsrc):
         st.download_button('⬇ 매매 내역 CSV', TT.to_csv(index=False).encode('utf-8-sig'), f'trades_{m}.csv', 'text/csv')
         why = T[T.구분 == '매도'].groupby('사유').수익률.agg(['count', 'median']).sort_values('count', ascending=False)
         st.caption('매도 사유별: ' + ' · '.join(f"{i} {int(c)}건(중앙 {md:+.0f}%)" for i, (c, md) in why.iterrows()))
-    st.markdown('##### 📦 마지막 주 보유')
-    if len(Hd):
-        tsrc('quant_engine.py (화면에서 계산)', asof=str(eq.index[-1].date()))
-        st.dataframe(Hd.rename(columns={'비중': '비중(%)', '수익률': '수익률(%)', '고점대비': '고점대비(%)', '불타기': '불타기(회)', 'PER': 'PER(배)'}),
-                     hide_index=True, use_container_width=True)
+
+
+def _holdings(Hd, eq, tsrc):
+    if len(Hd) and Hd.PER.notna().any():
+        h = Hd.dropna(subset=['PER']); ey = (h.비중 / h.PER).sum() / h.비중.sum()
+        st.metric('지금 보유 PER (요구 6)', f"{1 / ey:.1f}배" if ey > 0 else '-', f"재무 커버 {h.비중.sum() / max(Hd.비중.sum(), 1e-9) * 100:.0f}%", delta_color='off',
+                  help='1 ÷ Σ(비중 × 1/PER). 적자 종목(PER 없음)은 제외')
     else:
-        st.caption('보유 없음(현금)')
-    st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 그 숫자는 부풀려집니다(과최적화) — '
-               '마음에 드는 설정은 다른 시작일·이웃 값에서도 비슷한지 확인하세요.')
+        st.metric('지금 보유 PER (요구 6)', '-')
+

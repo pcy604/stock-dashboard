@@ -9,7 +9,8 @@
   logic    '1 AND (2 OR 3)' — 조건 번호(1부터)를 AND·OR·NOT·괄호로. 비우면 모두 AND
   rank     {'field':'rs','desc':True}
   weight   'equal'|'rank'|'mcap'|'inv_vol' · max_w 0.15 (종목 상한 X — 넘으면 리밸런싱 때 덜어냄 = 익절)
-  exposure {'base':1.0, 'index':'SPX', 'ma':40, 'below':0.3, 'months':[1..12]}   (요구 1 — 주식 비중; 이평 아래·달력 밖이면 줄임)
+  exposure {'base':1.0, 'index':'SPX', 'ma':40, 'below':0.3, 'months':[1..12], 'mode':'scale'|'entry'}   (요구 1 — 주식 비중; 이평 아래·달력 밖이면 줄임.
+           mode='entry' 면 줄이지 않고 신규·불타기만 막는다 = 실전 규칙)
   entry    {'init':0.5, 'pyramid':[[20,0.25],[40,0.25]]}   (요구 3 — 첫 매수는 목표 비중의 init, +n% 마다 목표의 x 만큼 추가, 목표 = 상한)
   exit     {'stop':15, 'trail':[[0,25],[50,20],[100,15]], 'min_hold':0, 'cooldown':4,
             'signals':[{'type':'ma_break','n':5}, {'type':'rsi_down','n':14,'level':70}, ...]}   (요구 4·5)
@@ -355,7 +356,10 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 if M[t, j]:
                     pend.append(('sell', j, None, nm)); sold.add(j); break
         tgt_e = expo[t]
-        if tgt_e <= 0 and pos:                                       # 노출 0 → 전부 정리
+        entry_only = ex.get('mode') == 'entry'                       # 2026-11-04: 실전 규칙 — 지수 약세면 신규·불타기만 중지, 보유분은 손절대로
+        if entry_only:
+            pass
+        elif tgt_e <= 0 and pos:                                       # 노출 0 → 전부 정리
             for j in pos:
                 if j not in sold:
                     pend.append(('sell', j, None, '노출 0 (지수·달력)')); sold.add(j)
