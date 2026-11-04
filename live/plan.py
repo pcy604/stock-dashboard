@@ -22,7 +22,8 @@ OUT_M = os.path.join(ROOT, 'live', 'plan_latest.md')
 
 RULE = dict(slots=5, first=0.60, add_at=0.10, add=0.40, cap=0.30, stop=0.20, kr_min_mc=1e11, us_min_mc=3e8, rs_min=80, kr_ix_weeks=5,
             ma_days=50, ma_weeks=5)   # v1.3(2026-11-01): 주봉 종가 > 5주선 — 10주(50일)선은 4개 검증 중 2개에서 악화, 5주선만 4/4 낙폭 개선(live/CHANGES.md)
-START = {'US': 300_000, 'KR': 0}                  # v1.5(2026-11-03): 첫 입금 30만원 전부 미국 · 2026-12부터 매달 100만(50/50), 원장 deposits 로 기록
+START = {'US': 0, 'KR': 300_000}                  # v1.7(2026-11-04): 한국 단독 — 첫 입금 30만 · 2026-12부터 매달 100만 전부 한국
+SLEEVES = ('KR',)                                  # v1.7: 미국 슬리브 중단(환전·세금 단순화). 다시 열면 ('US', 'KR')
 
 
 def _j(p):
@@ -136,7 +137,7 @@ def plan():
     IX = index_ok()
     P = dict(made=str(date.today()), price_basis=_j('results/perf_latest.json').get('date'), rs_basis=_j('results/returns.json').get('date'),
              usdkrw=fx, usdkrw_date=fx_date, index=IX, rule=RULE, sleeves={})
-    for m in ('US', 'KR'):
+    for m in SLEEVES:
         S = L[m]
         pos = S['positions']
         equity = S['cash_krw'] + sum(p['shares'] * p['last_px'] * (fx if m == 'US' else 1) for p in pos.values())
@@ -217,7 +218,7 @@ def render(P):
         for k in S['skipped'][:8]:
             L.append(f"  ⏭ 건너뜀: {k['name']} — {k['why']}")
         L.append(f"  남는 현금 ≈ {S['cash_after_krw']:,}원")
-    L.append("\n규칙: live/PREREG_2026-11.md · 체결하면 체결가·수량·환율을 알려 주세요(원장 기록).")
+    L.append("\n규칙: live/PREREG_2026-11.md · 주문은 봇(live/bot.py)이 낸다 — 사람이 토스 앱에서 직접 매매하면 '규칙 밖 거래'로 기록된다.")
     return '\n'.join(L)
 
 
