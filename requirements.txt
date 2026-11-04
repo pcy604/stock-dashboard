@@ -14,3 +14,4 @@ youtube-transcript-api>=1.0
 matplotlib>=3.7
 cryptography>=42
 Authlib>=1.3.2
+streamlit-aggrid==1.2.1.post2

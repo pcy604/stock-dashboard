@@ -99,3 +99,27 @@ def test_auto_widths_fit_container_text_first():
     for c in ('매출($B)', '부문 GPM(%)', 'No.'):
         assert fit[c]['width'] == wide[c]['width']
     assert fit['주요제품']['width'] < wide['주요제품']['width']
+
+
+# ── AgGrid 경로 (2026-11-04) — 화면 없이 확인할 수 있는 부분 ──
+def test_grid_frame_colors_travel_with_rows():
+    import table_ui as T
+    df = pd.DataFrame({'No.': [1, 2, 3], '종목': ['가', '나', '다'], '1개월(%)': [10.0, -20.0, None], '시총(억원)': [1.0, 2.0, 3.0]})
+    data, bgs = T.grid_frame(df)
+    assert list(bgs) == ['1개월(%)'], bgs                    # 수준 열(시총)은 칠하지 않는다 — st.dataframe 경로와 같은 규칙
+    col = data[bgs['1개월(%)']]
+    assert col[0].startswith('rgba(22,163,74') and col[1].startswith('rgba(220,38,38') and col[2] == ''
+    assert not T.grid_frame(df, color=False)[1]
+
+
+def test_grid_fmt_spec():
+    import table_ui as T
+    assert T._fmt_spec({'type_config': {'format': '%,.1f'}}) == (1, True)
+    assert T._fmt_spec({'type_config': {'format': '%d'}}) == (0, False)
+    assert T._fmt_spec({'type_config': {'format': 'localized'}}) == (None, True)
+    assert T._fmt_spec(None) == (None, True)
+
+
+def test_grid_constants_do_not_shadow_table_heights():
+    import table_ui as T
+    assert (T.HEAD_PX, T.ROW_PX) == (31, 31)                   # 그리드 상수가 기존 표 높이를 바꾸지 않는다

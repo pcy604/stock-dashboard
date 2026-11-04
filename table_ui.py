@@ -38,7 +38,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 3          # 2026-11-01 8→3: 정렬(No. 재번호)을 거의 모든 표에서 쓰게
-API_VERSION = 8          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 8: 서버 정렬·No. 재번호(2026-11-01)
+API_VERSION = 9          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -776,6 +776,124 @@ def begin_run(st):
     st.session_state['_tbl_src'] = (None, None)
 
 
+# ── AgGrid 경로 (2026-11-04) ───────────────────────────────────────
+# 왜: st.dataframe 의 머리글 클릭 정렬은 브라우저 안에서만 일어나 'No.' 가 행을 따라 움직인다(Streamlit 1.66 에
+#   고정 행번호 옵션 없음 — 직접 확인). AgGrid 는 No. 를 '화면 순서'(rowIndex+1)로 그려 어떤 정렬에도 1부터.
+# 규격은 st.dataframe 경로와 같다: 같은 normalize·필터·부호 색(color_plan)·소수 자리·'-' 결측·종목 클릭 이동.
+GRID_ON = os.environ.get('TABLE_GRID', '1') != '0'      # 끄기 스위치: 환경변수 TABLE_GRID=0 → 전부 st.dataframe
+G_ROW, G_HEAD = 31, 33          # 그리드 전용(위 HEAD_PX·ROW_PX 와 이름을 겹치지 않게 — 겹치면 기존 표 높이가 바뀐다)
+_FONT = "'Pretendard','Pretendard Variable',-apple-system,'Segoe UI','Malgun Gothic',system-ui,sans-serif"
+
+
+def _fmt_spec(cfg_v) -> tuple:
+    """column_config 항목 → (소수 자리, 쉼표). 모르면 (None, True) = 값대로 최대 1자리."""
+    fmt = ''
+    if isinstance(cfg_v, dict):
+        fmt = str((cfg_v.get('type_config') or {}).get('format') or '')
+    if not fmt or fmt == 'localized':
+        return None, True
+    m = re.search(r'\.(\d)f', fmt)
+    dp = int(m.group(1)) if m else 0
+    return dp, ',' in fmt
+
+
+def grid_frame(df: pd.DataFrame, color=True):
+    """AgGrid 에 넘길 표 + 숨은 배경색 열. 테스트 가능하게 화면과 분리했다.
+    반환 (data, {열: 숨은 색 열 이름}). 색은 apply_colors 와 같은 _bg 를 쓴다(정렬해도 행과 함께 움직임)."""
+    data = df.reset_index(drop=True).copy()
+    bgs = {}
+    if color:
+        for i, (c, (ctr, scale)) in enumerate(color_plan(df).items()):
+            def _one(x, ctr=ctr, scale=scale):
+                v = _parse(x) if not isinstance(x, (int, float)) or isinstance(x, bool) else float(x)
+                if v != v:
+                    ws = _word_sign(x)
+                    return _bg(ws * scale, scale) if ws else ''
+                return _bg(v - ctr, scale)
+            name = f'__bg{i}'
+            data[name] = df[c].reset_index(drop=True).map(_one).str.replace('background-color: ', '', regex=False)
+            bgs[c] = name
+    return data, bgs
+
+
+def render_grid(st, df: pd.DataFrame, cfg: dict, key: str, height: int, color=True):
+    from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
+
+    data, bgs = grid_frame(df, color)
+    if 'No.' in data.columns:
+        data['No.'] = range(1, len(data) + 1)
+    gb = GridOptionsBuilder.from_dataframe(data)
+    gb.configure_default_column(sortable=True, resizable=True, filter=False, suppressMovable=True,
+                                suppressHeaderMenuButton=True, suppressHeaderFilterButton=True,
+                                cellStyle={'fontVariantNumeric': 'tabular-nums'})
+    for c in data.columns:
+        if str(c).startswith('__bg'):
+            gb.configure_column(c, hide=True)
+    if 'No.' in data.columns:
+        gb.configure_column('No.', headerName='No.', pinned='left', sortable=False, width=58, maxWidth=70,
+                            type=[], filter=False, cellClass='ag-right-aligned-cell',
+                            headerClass='ag-right-aligned-header',
+                            valueGetter=JsCode('function(p){return p.node.rowIndex + 1;}'),
+                            headerTooltip='화면 순서 번호 — 머리글을 눌러 정렬해도 1부터 다시 셉니다')
+    for c in df.columns:
+        if c == 'No.':
+            continue
+        # 폭 = 머리글·값 중 가장 긴 표시 폭(한글 2칸) — 내용 맞춤. 종목명이 '…'으로 잘리던 것(실측)
+        _w = max([_dw(str(c))] + [_fmt_len(v) for v in df[c].head(200)])
+        opts = {'width': int(min(360, 7.4 * _w + 30)), 'minWidth': 56}
+        if pd.api.types.is_numeric_dtype(df[c]):
+            dp, comma = _fmt_spec(cfg.get(c))
+            if _yearish(df[c]):
+                dp, comma = 0, False
+            js_dp = 'null' if dp is None else str(dp)
+            opts.update(type=['numericColumn'], valueFormatter=JsCode(
+                "function(p){var v=p.value; if(v===null||v===undefined||Number.isNaN(v)) return '-';"
+                f"var d={js_dp}; if(d===null) d=(Math.abs(v)%1===0)?0:1;"
+                f"var s=Number(v).toLocaleString('ko-KR',{{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:{'true' if comma else 'false'}}});"
+                "return s;}"))
+        else:
+            opts['valueFormatter'] = JsCode("function(p){var v=p.value; return (v===null||v===undefined||v==='')?'-':v;}")
+        if c in bgs:
+            opts['cellStyle'] = JsCode(
+                f"function(p){{var b=p.data['{bgs[c]}']; return b?{{backgroundColor:b,fontVariantNumeric:'tabular-nums'}}"
+                ":{fontVariantNumeric:'tabular-nums'};}")
+        if c in ('종목', '코드') and NAV['fn']:
+            opts['headerTooltip'] = '클릭하면 종목 분석으로 이동'
+            opts['cellStyle'] = opts.get('cellStyle') or {'cursor': 'pointer', 'fontVariantNumeric': 'tabular-nums'}
+        gb.configure_column(c, **opts)
+    nav = NAV['fn'] and '코드' in data.columns
+    if nav:
+        gb.configure_selection('single')
+    go = gb.build()
+    go.update(suppressFieldDotNotation=True, rowHeight=G_ROW, headerHeight=G_HEAD, animateRows=False,
+              suppressCellFocus=False, ensureDomOrder=True,
+              # 열 폭 = 내용에 맞춤(st.dataframe 경로의 auto_widths 와 같은 의도 — 종목명이 '…'으로 잘렸다, 실측)
+              # 정렬·필터 뒤 No. 를 다시 계산 — valueGetter 는 처음 그릴 때만 돌아 번호가 행을 따라갔다(실측 1,3,5,2,4)
+              onSortChanged=JsCode("function(e){e.api.refreshCells({columns:['No.'],force:true});}"),
+              onFilterChanged=JsCode("function(e){e.api.refreshCells({columns:['No.'],force:true});}"))
+    if nav:   # 행 클릭 = 선택(이 AG Grid 버전은 클릭 선택이 기본 꺼짐 — 실측) → 종목 분석으로
+        go['rowSelection'] = {'mode': 'singleRow', 'enableClickSelection': True, 'checkboxes': False}
+    h = G_HEAD + G_ROW * min(len(data), 25) + 4 if len(data) <= 25 else int(height)
+    resp = AgGrid(data, gridOptions=go, height=h, allow_unsafe_jscode=True, theme='streamlit', key=key,
+                  update_on=['selectionChanged'] if nav else [], show_toolbar=False, show_search=False,
+                  show_download_button=False,
+                  custom_css={'#gridToolBar': {'display': 'none !important'},
+                              '.ag-root-wrapper': {'font-family': _FONT + ' !important', 'font-size': '14px !important',
+                                                   'border-radius': '6px !important'},
+                              '.ag-cell, .ag-header-cell': {'font-size': '14px !important'},
+                              '.ag-header': {'background-color': '#F7F8FA !important'},
+                              '.ag-header-cell-text': {'font-weight': '600 !important'}})
+    if nav:
+        sel = getattr(resp, 'selected_rows', None)
+        if sel is not None and len(sel):
+            code = str((sel.iloc[0] if hasattr(sel, 'iloc') else sel[0]).get('코드') or '')
+            mark = st.session_state.get(key + '|last')
+            if code and code not in ('nan', 'None') and code != mark:
+                st.session_state[key + '|last'] = code
+                NAV['fn'](code)
+    return resp
+
+
 def install(st):
     """st.dataframe 을 감싼다. 한 번만 감싸고(재실행·다중 세션에서 겹치지 않게),
     세션별 상태는 session_state 에만 둔다(모듈 전역 금지 — 세션 간 공유된다)."""
@@ -787,7 +905,9 @@ def install(st):
     orig = st._main.dataframe
     _patch_blocks()
 
-    def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, footer=True, tkey=None, **kw):
+    def dataframe(data=None, *a, filters=None, color=True, src=None, asof=None, footer=True, tkey=None, grid=False, **kw):
+        # grid=True: AgGrid 로 그린다(2026-11-04) — 머리글 클릭 정렬에도 No. 가 1부터 고정. 표 하나씩 옮긴다(카나리).
+        kw['_grid'] = bool(grid) and GRID_ON
         # tkey: 공통 함수(dashboard._std_table)가 대신 부를 때 호출 자리를 키로 넘긴다 — 안 주면 모든 표가
         #   같은 줄 번호 키를 써서 필터 위젯 키가 겹친다(2026-10-26 DuplicateElementKey)
         # footer=False: 바로 아래 이어지는 표(한 묶음)가 출처를 대신 단다 — 같은 줄이 두 번 뜨지 않게
@@ -798,6 +918,7 @@ def install(st):
                 _footer(st, src, asof)
 
     def _dataframe(data=None, *a, filters=None, color=True, _tkey=None, **kw):
+        _grid = kw.pop('_grid', False)
         try:
             sty = data if isinstance(data, Styler) else None
             df = sty.data if sty is not None else data
@@ -909,6 +1030,12 @@ def install(st):
                     if isinstance(cc.get(c), dict):
                         cc[c] = dict(cc[c], help='클릭하면 종목 분석으로 이동')
 
+            if _grid:
+                try:
+                    return render_grid(st, df, kw.get('column_config') or {}, key + '|grid',
+                                       kw.get('height') or fit_height(min(len(df), 25)), color=color)
+                except Exception as _ge:      # 그리드 실패 → 기존 표로(화면을 죽이지 않는다)
+                    print(f'[table_ui] AgGrid 실패 → st.dataframe: {type(_ge).__name__}: {_ge}', file=sys.stderr)
             if color:
                 if sty is None:
                     sty = df.style

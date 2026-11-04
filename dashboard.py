@@ -1540,7 +1540,7 @@ def _cand_panel():
 
 
 def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=None,
-               column_config=None, styler=None, note=None):
+               column_config=None, styler=None, note=None, grid=False):
     """탭의 종목 목록을 표준 뼈대로 그린다. rows = DataFrame(코드 + 탭 고유 열, 선택: 종목)."""
     if not isinstance(rows, pd.DataFrame):
         rows = pd.DataFrame(rows)
@@ -1554,7 +1554,9 @@ def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=
         _tsrc(src + ' · ' + _cm.source_label(_CMM), path=path)
     import sys as _sys
     _fr = _sys._getframe(1)                       # 부른 자리(줄 번호)가 표의 필터 키 — 서브탭마다 달라야 한다
-    if getattr(st, '_tbl_ver', 0) >= 7:
+    if getattr(st, '_tbl_ver', 0) >= 9:
+        st.dataframe(df, hide_index=True, column_config=cfg, tkey=f'std:{_fr.f_lineno}', grid=grid)
+    elif getattr(st, '_tbl_ver', 0) >= 7:
         st.dataframe(df, hide_index=True, column_config=cfg, tkey=f'std:{_fr.f_lineno}')
     else:                                          # 옛 래퍼가 메모리에 남은 프로세스 — tkey 를 모른다
         st.dataframe(df, hide_index=True, column_config=cfg, key=f'std_{_fr.f_lineno}')
@@ -1620,7 +1622,7 @@ with t_core, guard('주도주 교집합'):
         if _rows:
             _std_table(pd.DataFrame(_rows), ['근거', '이익가속(%p)', '매출가속(%p)'],
                        src='leaders_accel.json(이익 가속 중) · turnaround_latest.json(흑자전환)',
-                       path='results/returns.json',
+                       path='results/returns.json', grid=True,
                        note="정렬: 근거 2개 → RS 높은 순 · 흑자전환 종목은 전년 같은 분기 영업이익이 적자라 **이익 성장률·이익 가속·영업익YoY 는 "
                             "정의되지 않아 '-'** (부호가 바뀌면 %가 뜻을 잃음). 매출가속 = 이번 분기 매출 YoY − 직전 분기 매출 YoY")
             _cand_register(_rows, 'core')
