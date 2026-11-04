@@ -7691,6 +7691,92 @@ with tab_pf, guard('포트폴리오 가드레일'):
                     st.warning(f'저장된 포트폴리오를 불러오지 못했습니다: {str(_e)[:80]}')
             return []
 
+        # ── 📒 실전 원장 (2026-11-04) — 목적함수(원화 TSR·MDD vs 지수)를 재는 첫 화면. 소유자 계좌라 소유자만 ──
+        #   입력은 봇이 커밋하는 live/ledger.json(입금)·live/trades.jsonl(체결)뿐 — 사람이 따로 적지 않는다.
+        #   비교 = 같은 날 같은 돈을 KODEX 200(069500)에 넣은 가상 계좌. 수익률은 시간가중(TWR).
+        if _acc.is_owner():
+            st.markdown("### 📒 실전 원장 — 토스 한국 슬리브")
+            try:
+                import sys as _sys
+                _lpdir = str(Path(__file__).resolve().parent / 'live')
+                if _lpdir not in _sys.path:
+                    _sys.path.insert(0, _lpdir)
+                import perf as _lp
+
+                @st.cache_data(ttl=3600, max_entries=4, show_spinner=False)
+                def _lp_px(syms: tuple, start: str):
+                    import yfinance as _yf
+                    _out = {}
+                    for _s in syms:
+                        for _t in (f"{_s}.KS", f"{_s}.KQ"):
+                            try:
+                                _h = _yf.Ticker(_t).history(start=start, auto_adjust=False)['Close'].dropna()
+                                if len(_h):
+                                    _h.index = pd.DatetimeIndex([d.date() for d in _h.index])
+                                    _out[_s] = _h; break
+                            except Exception:
+                                pass
+                    return pd.DataFrame(_out)
+
+                _dep, _tr = _lp.load('KR')
+                if not _dep:
+                    st.info('아직 입금 기록이 없습니다 — live/ledger.json 의 deposits 가 비어 있습니다.')
+                else:
+                    _st0 = min(d for d, _ in _dep)
+                    _pxall = _lp_px(tuple([_lp.BENCH] + _lp.syms_needed(_tr)), _st0)
+                    if _lp.BENCH not in _pxall:
+                        st.warning('KODEX 200 가격을 받지 못했습니다 — 잠시 뒤 새로고침.')
+                    else:
+                        _df = _lp.build(_dep, _tr, _pxall.drop(columns=[_lp.BENCH]), _pxall[_lp.BENCH])
+                        _s, _me, _bm = _lp.summary(_df)
+                        import html as _hx
+
+                        def _kc(label, value, sub, tone):
+                            return (f'<div class="mo-kpi {tone}"><span class="l">{_hx.escape(label)}</span>'
+                                    f'<span class="v">{_hx.escape(value)}</span><span class="s">{_hx.escape(sub)}</span></div>')
+                        _tone = lambda x: 'good' if x > 0 else 'bad' if x < 0 else 'na'
+                        _cards = [
+                            _kc('내 수익률(TWR)', f"{_s['twr'] * 100:+.1f}%",
+                                f"손익 {_s['pnl']:+,.0f}원 · 평가 {_s['nav']:,.0f}원", _tone(_s['twr'])),
+                            _kc('KODEX 200 같은 입금', f"{_s['bench_twr'] * 100:+.1f}%",
+                                f"손익 {_s['bench_pnl']:+,.0f}원", _tone(_s['bench_twr'])),
+                            _kc('지수 대비', f"{_s['excess'] * 100:+.1f}%p",
+                                '같은 날 같은 돈 기준', _tone(_s['excess'])),
+                            _kc('최대 낙폭', f"{_s['mdd'] * 100:.1f}%",
+                                f"KODEX 200 {_s['bench_mdd'] * 100:.1f}% · 예산 −20%",
+                                'bad' if _s['mdd'] <= -0.20 else 'mid' if _s['mdd'] <= -0.10 else 'good'),
+                        ]
+                        st.markdown(f'<div class="mo-kpis">{"".join(_cards)}</div>', unsafe_allow_html=True)
+                        _yr = (f" · 연환산 {_s['cagr'] * 100:+.1f}% vs {_s['bench_cagr'] * 100:+.1f}%"
+                               if 'cagr' in _s else ' · 연환산은 기록 1년 이후에 표시')
+                        st.caption(f"기간 {_s['start']} ~ {_s['end']}({_s['days']}일) · 누적 입금 {_s['invested']:,.0f}원 · "
+                                   f"현금 비중 {_s['cash_share'] * 100:.0f}% · 체결 {len(_tr)}건{_yr}")
+                        if len(_me) > 1:
+                            _f = go.Figure()
+                            _f.add_trace(go.Scatter(x=_me.index, y=_me.values * 100, mode='lines', name='내 계좌',
+                                                    line=dict(color='#0e5a6b', width=1.8),
+                                                    hovertemplate='%{x|%Y-%m-%d}<br>내 계좌 %{y:,.1f}<extra></extra>'))
+                            _f.add_trace(go.Scatter(x=_bm.index, y=_bm.values * 100, mode='lines', name='KODEX 200',
+                                                    line=dict(color='#9ca3af', width=1.4),
+                                                    hovertemplate='%{x|%Y-%m-%d}<br>KODEX 200 %{y:,.1f}<extra></extra>'))
+                            _f.update_yaxes(title='시간가중 수익(시작 100)')
+                            _f.update_layout(height=320, margin=dict(l=8, r=8, t=34, b=8), hovermode='x unified',
+                                             title='내 계좌 vs KODEX 200 — 입금 시점 효과를 뺀 운용 성과',
+                                             legend=dict(orientation='h', yanchor='bottom', y=1.0, xanchor='right', x=1))
+                            st.plotly_chart(_f, use_container_width=True)
+                        if _tr:
+                            _tdf = pd.DataFrame(_tr).reindex(columns=['day', 'sym', 'name', 'side', 'qty', 'px', 'fee', 'why'])
+                            _tdf.columns = ['날짜', '코드', '종목', '구분', '수량', '체결가', '수수료', '사유']
+                            _tdf['구분'] = _tdf['구분'].map({'BUY': '매수', 'SELL': '매도'}).fillna(_tdf['구분'])
+                            _tdf = _tdf.iloc[::-1].reset_index(drop=True)
+                            _tdf.insert(0, 'No.', range(1, len(_tdf) + 1))
+                            st.dataframe(_tdf, hide_index=True, use_container_width=True)
+                        else:
+                            st.caption('아직 체결이 없습니다 — 지수 5주선 아래라 규칙대로 현금 대기 중이면 정상입니다.')
+            except Exception as _lpe:
+                st.caption(f"`실전 원장 계산 실패: {type(_lpe).__name__}: {str(_lpe)[:120]}`")
+            st.divider()
+
         st.markdown("### 🛡️ 원칙 가드레일")
         st.caption("**2026-06-23 정립한 원칙을 코드가 강제합니다.** "
                    "종목당 매입 20% 상한 · 평가 40% 초과 시 30%로 트림 · "
