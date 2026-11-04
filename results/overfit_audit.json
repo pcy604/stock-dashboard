@@ -1,0 +1,167 @@
+{
+ "prereg": "research/overfit_prereg_2026-11-04.md",
+ "experiments": {
+  "robust_rs": {
+   "title": "RS 강건성 (RS 3 × 슬롯 3 × 청산 16)",
+   "n": 144,
+   "weeks": 626,
+   "run": "2026-10-28 02:58",
+   "excess": {
+    "family_sr_pos_share": 0.826,
+    "family_sr_median": 0.035,
+    "family_avg_psr": 0.8524,
+    "best_key": "w|10|t25",
+    "best_meta": {
+     "CAGR": 28.4,
+     "MDD": -39.9,
+     "Sharpe": 0.86
+    },
+    "sr": 0.0825,
+    "sr0": 0.0732,
+    "n_trials": 144,
+    "psr0": 0.9811,
+    "dsr": 0.5924,
+    "pbo": 0.5839,
+    "splits": 12870,
+    "blocks": 16,
+    "logit_median": -0.264,
+    "oos_sr_best_median": 0.0272,
+    "oos_sr_best_neg": 0.1958,
+    "is_oos_slope": -0.828,
+    "verdict": "❌ 과적합 의심"
+   },
+   "absolute": {
+    "family_sr_pos_share": 1.0,
+    "family_sr_median": 0.0844,
+    "family_avg_psr": 0.9904,
+    "best_key": "w|10|t25",
+    "best_meta": {
+     "CAGR": 28.4,
+     "MDD": -39.9,
+     "Sharpe": 0.86
+    },
+    "sr": 0.1198,
+    "sr0": 0.0443,
+    "n_trials": 144,
+    "psr0": 0.9986,
+    "dsr": 0.9699,
+    "pbo": 0.513,
+    "splits": 12870,
+    "blocks": 16,
+    "logit_median": -0.069,
+    "oos_sr_best_median": 0.0792,
+    "oos_sr_best_neg": 0.007,
+    "is_oos_slope": -0.801,
+    "verdict": "❌ 과적합 의심"
+   }
+  },
+  "loss_cut_grid": {
+   "title": "래칫·재매수·냉각·불타기",
+   "n": 810,
+   "weeks": 626,
+   "run": "2026-10-28 03:04",
+   "excess": {
+    "family_sr_pos_share": 0.943,
+    "family_sr_median": 0.0351,
+    "family_avg_psr": 0.8551,
+    "best_key": "10|15|25|none|4|p20",
+    "best_meta": {
+     "CAGR": 34.0,
+     "MDD": -41.9,
+     "Sharpe": 0.94
+    },
+    "sr": 0.0913,
+    "sr0": 0.0643,
+    "n_trials": 810,
+    "psr0": 0.9894,
+    "dsr": 0.7525,
+    "pbo": 0.5775,
+    "splits": 12870,
+    "blocks": 16,
+    "logit_median": -0.275,
+    "oos_sr_best_median": 0.0284,
+    "oos_sr_best_neg": 0.2243,
+    "is_oos_slope": -1.01,
+    "verdict": "❌ 과적합 의심"
+   },
+   "absolute": {
+    "family_sr_pos_share": 1.0,
+    "family_sr_median": 0.0909,
+    "family_avg_psr": 0.9935,
+    "best_key": "10|15|15|rb30|4|p20",
+    "best_meta": {
+     "CAGR": 32.4,
+     "MDD": -39.6,
+     "Sharpe": 0.95
+    },
+    "sr": 0.1312,
+    "sr0": 0.0489,
+    "n_trials": 810,
+    "psr0": 0.9996,
+    "dsr": 0.9824,
+    "pbo": 0.658,
+    "splits": 12870,
+    "blocks": 16,
+    "logit_median": -0.597,
+    "oos_sr_best_median": 0.0809,
+    "oos_sr_best_neg": 0.0174,
+    "is_oos_slope": -0.997,
+    "verdict": "❌ 과적합 의심"
+   }
+  },
+  "pyramid_grid": {
+   "title": "불타기 재검증",
+   "n": 168,
+   "weeks": 626,
+   "run": "2026-10-28 03:12",
+   "excess": {
+    "family_sr_pos_share": 1.0,
+    "family_sr_median": 0.0542,
+    "family_avg_psr": 0.934,
+    "best_key": "cur10|cash|30_0.5_40",
+    "best_meta": {
+     "CAGR": 26.2,
+     "MDD": -55.1,
+     "Sharpe": 0.82
+    },
+    "sr": 0.074,
+    "sr0": 0.0296,
+    "n_trials": 168,
+    "psr0": 0.9687,
+    "dsr": 0.8681,
+    "pbo": 0.9171,
+    "splits": 12870,
+    "blocks": 16,
+    "logit_median": -1.435,
+    "oos_sr_best_median": 0.0351,
+    "oos_sr_best_neg": 0.1188,
+    "is_oos_slope": -0.903,
+    "verdict": "❌ 과적합 의심"
+   },
+   "absolute": {
+    "family_sr_pos_share": 1.0,
+    "family_sr_median": 0.102,
+    "family_avg_psr": 0.9961,
+    "best_key": "dd20|cash|50_1.0_40",
+    "best_meta": {
+     "CAGR": 23.6,
+     "MDD": -34.1,
+     "Sharpe": 0.89
+    },
+    "sr": 0.124,
+    "sr0": 0.0266,
+    "n_trials": 168,
+    "psr0": 0.999,
+    "dsr": 0.9922,
+    "pbo": 0.7723,
+    "splits": 12870,
+    "blocks": 16,
+    "logit_median": -0.984,
+    "oos_sr_best_median": 0.0899,
+    "oos_sr_best_neg": 0.0012,
+    "is_oos_slope": -0.896,
+    "verdict": "❌ 과적합 의심"
+   }
+  }
+ }
+}
