@@ -1,6 +1,6 @@
 {
- "made": "2026-11-03",
- "price_basis": "2026-11-03",
+ "made": "2026-11-04",
+ "price_basis": "2026-11-04",
  "rs_basis": "2026-11-02",
  "usdkrw": 1331.739990234375,
  "usdkrw_date": "2026-10-19",
@@ -42,176 +42,11 @@
   "ma_weeks": 5
  },
  "sleeves": {
-  "US": {
+  "KR": {
    "equity_krw": 300000,
    "cash_krw": 300000,
-   "cash_after_krw": 120002,
+   "cash_after_krw": 300000,
    "target_krw": 60000,
-   "buys": [
-    {
-     "sym": "AGL",
-     "name": "Agilon Health",
-     "why": "이익가속+흑자전환",
-     "rs": 99,
-     "ref_px": 86.63,
-     "qty": 0.312,
-     "amount_local": 27.03,
-     "krw": 35997,
-     "gap50": 1.0,
-     "add_trigger": 95.29,
-     "stop": 69.3
-    },
-    {
-     "sym": "CDNA",
-     "name": "CareDx, Inc.",
-     "why": "이익가속+흑자전환",
-     "rs": 99,
-     "ref_px": 85.88,
-     "qty": 0.3148,
-     "amount_local": 27.04,
-     "krw": 36010,
-     "gap50": 16.0,
-     "add_trigger": 94.47,
-     "stop": 68.7
-    },
-    {
-     "sym": "GDYN",
-     "name": "GRID DYNAMICS HOLDINGS, INC.",
-     "why": "이익가속+흑자전환",
-     "rs": 97,
-     "ref_px": 13.69,
-     "qty": 1.9746,
-     "amount_local": 27.03,
-     "krw": 35997,
-     "gap50": 33.1,
-     "add_trigger": 15.06,
-     "stop": 10.95
-    },
-    {
-     "sym": "GKOS",
-     "name": "GLAUKOS Corp",
-     "why": "이익가속+흑자전환",
-     "rs": 97,
-     "ref_px": 238.61,
-     "qty": 0.1133,
-     "amount_local": 27.03,
-     "krw": 35997,
-     "gap50": 21.0,
-     "add_trigger": 262.47,
-     "stop": 190.89
-    },
-    {
-     "sym": "LFST",
-     "name": "LifeStance Health Group, Inc.",
-     "why": "이익가속+흑자전환",
-     "rs": 97,
-     "ref_px": 13.26,
-     "qty": 2.0386,
-     "amount_local": 27.03,
-     "krw": 35997,
-     "gap50": 4.0,
-     "add_trigger": 14.59,
-     "stop": 10.61
-    }
-   ],
-   "adds": [],
-   "stops": [],
-   "trims": [],
-   "skipped": [
-    {
-     "sym": "AXTI",
-     "name": "AXT INC",
-     "why": "5주선 아래(-12.4%) — RS 는 높지만 최근 추세 꺾임"
-    },
-    {
-     "sym": "ETON",
-     "name": "Eton Pharmaceuticals, Inc.",
-     "why": "5주선 아래(-1.7%) — RS 는 높지만 최근 추세 꺾임"
-    },
-    {
-     "sym": "MXL",
-     "name": "MAXLINEAR, INC",
-     "why": "5주선 아래(-14.8%) — RS 는 높지만 최근 추세 꺾임"
-    },
-    {
-     "sym": "CVI",
-     "name": "CVR ENERGY INC",
-     "why": "5주선 아래(-4.2%) — RS 는 높지만 최근 추세 꺾임"
-    },
-    {
-     "sym": "LITE",
-     "name": "Lumentum Holdings Inc.",
-     "why": "5주선 아래(-18.7%) — RS 는 높지만 최근 추세 꺾임"
-    }
-   ],
-   "candidates_top": [
-    {
-     "sym": "AGL",
-     "name": "Agilon Health",
-     "rs": 99,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "CDNA",
-     "name": "CareDx, Inc.",
-     "rs": 99,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "AXTI",
-     "name": "AXT INC",
-     "rs": 98,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "ETON",
-     "name": "Eton Pharmaceuticals, Inc.",
-     "rs": 98,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "MXL",
-     "name": "MAXLINEAR, INC",
-     "rs": 98,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "CVI",
-     "name": "CVR ENERGY INC",
-     "rs": 97,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "GDYN",
-     "name": "GRID DYNAMICS HOLDINGS, INC.",
-     "rs": 97,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "GKOS",
-     "name": "GLAUKOS Corp",
-     "rs": 97,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "LFST",
-     "name": "LifeStance Health Group, Inc.",
-     "rs": 97,
-     "why": "이익가속+흑자전환"
-    },
-    {
-     "sym": "LITE",
-     "name": "Lumentum Holdings Inc.",
-     "rs": 97,
-     "why": "이익가속+흑자전환"
-    }
-   ]
-  },
-  "KR": {
-   "equity_krw": 0,
-   "cash_krw": 0,
-   "cash_after_krw": 0,
-   "target_krw": 0,
    "buys": [],
    "adds": [],
    "stops": [],
