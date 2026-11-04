@@ -6,6 +6,8 @@ set DIR=C:\Users\lg\Desktop\stock_screener
 set LIVE_TRADING=OFF
 cd /d %DIR%
 git pull --rebase origin main
-"%PYTHON%" live\bot.py --send >> data\live_bot.log 2>&1
-git add live\ledger.json live\trades.jsonl live\violations.jsonl 2>nul
+"%PYTHON%" live\bot.py --send > live\bot_last.txt 2>&1
+type live\bot_last.txt >> data\live_bot.log
+rem bot_last.txt = 상시 점검(Claude)이 노트북이 돌았는지 확인하는 흔적
+git add live\bot_last.txt live\ledger.json live\trades.jsonl live\violations.jsonl 2>nul
 git diff --cached --quiet || (git commit -m "auto: 주문 봇 원장 %date%" && git push origin main)
