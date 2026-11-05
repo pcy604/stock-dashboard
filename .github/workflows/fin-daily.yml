@@ -1,0 +1,102 @@
+# 재무를 '공식 제출 다음 날' 반영 (2026-11-05 차니 "공식 제출한 시점부터")
+#   미국: SEC 일별 색인에서 최근 5영업일 10-Q·10-K 제출 회사만 분기재무 다시 받기(tools/us_fq_daily.py)
+#   한국: 정기보고서 마감 달(3·5·8·11월)은 매일 KR 분기재무 + 실제 제출일(DART 가 닿으면) — 그 외는 주간 갱신에 맡김
+#   → 흑자전환·공통 재무 스냅샷 다시 만들기(화면·토요일 계획표가 읽는 것)
+# 캐시: CLAUDE.md 규칙대로 restore + save(always) — weekly-accel 과 같은 leaders-cache prefix 를 쓴다.
+name: fin-daily
+
+on:
+  schedule:
+    - cron: '23 22 * * 0-4'      # 일~목 22:23 UTC = 월~금 07:23 KST (미국 전날 제출분까지)
+  workflow_dispatch:
+    inputs:
+      kr:
+        description: '한국 분기재무도 갱신 (마감 달이 아니어도)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: read
+  checks: read
+
+concurrency:
+  group: fin-daily
+  cancel-in-progress: false
+
+jobs:
+  fin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+
+      - name: 재무 캐시 복원 (US fq_)
+        uses: actions/cache/restore@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-${{ github.run_id }}
+          restore-keys: |
+            leaders-cache-
+
+      - name: 미국 — 최근 10-Q·10-K 제출 회사 분기재무
+        id: us
+        run: python tools/us_fq_daily.py 5
+
+      - name: 한국 — 마감 달이면 분기재무·제출일
+        id: kr
+        env:
+          DART_KEY: ${{ secrets.DART_KEY }}
+        run: |
+          M=$(date -u +%-m)
+          if [ "${{ inputs.kr }}" = "true" ] || [ "$M" = "3" ] || [ "$M" = "5" ] || [ "$M" = "8" ] || [ "$M" = "11" ]; then
+            python tools/refresh_kr_fundq.py
+          else
+            echo "마감 달 아님($M월) — 주간 갱신에 맡김"
+          fi
+
+      - name: 흑자전환 · 공통 재무 스냅샷
+        run: |
+          python turnaround_run.py
+          python tools/fund_snapshot.py
+
+      - name: 산출물 계약 검사 (위반분 되돌림)
+        run: python output_contracts.py --guard
+
+      - name: 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f results/turnaround_latest.json results/fund_snapshot.json 2>/dev/null || true
+          git add -f data/kr_fundamentals_q.parquet data/kr_universe.parquet data/kr_filing_dates.parquet 2>/dev/null || true
+          git add data/kr_nondec.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
+          git commit -m "auto: 재무 일일 반영 $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do git push origin main && exit 0; git pull --rebase -X theirs origin main || git rebase --abort; sleep 5; done
+          echo "::error::push 3회 실패"; exit 1
+
+      - name: 재무 캐시 저장
+        if: always() && steps.us.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: data/leaders_cache
+          key: leaders-cache-${{ github.run_id }}
+
+      - name: 실패 시 텔레그램
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python tools/notify_ci_failure.py
+        continue-on-error: true

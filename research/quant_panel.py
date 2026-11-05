@@ -103,7 +103,10 @@ def kr():
     q = pd.read_parquet(os.path.join(ROOT, "data", "kr_fundamentals_q.parquet"))
     q["sym"] = q.sym.astype(str).str.zfill(6)
     q["end"] = pd.to_datetime(q.year.astype(int).astype(str) + "-" + (q.q.astype(int) * 3).astype(str) + "-01") + pd.offsets.MonthEnd(0)
-    q["known"] = q.end + pd.to_timedelta(np.where(q.q == 4, 90, 45), unit="D")
+    # 2026-11-05: 실제 DART 제출일(다음 날)부터 — 없으면 분기말 +45일(4분기 90일) 가정
+    from tools.kr_filing_dates import known as _known
+    q["known"], _real = _known(q.sym, q.year, q.q)
+    print(f"[KR] 재무 공시일: 실제 제출일 {_real.mean():.0%} · 가정 {1 - _real.mean():.0%}", flush=True)
     q = q.sort_values(["sym", "end"])
     g = q.groupby("sym")
     for k in ("revenue", "op_income", "net_income"):

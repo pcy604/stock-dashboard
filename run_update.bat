@@ -81,11 +81,20 @@ rem DART 가 해외 서버(GitHub Actions·Streamlit Cloud)의 연결을 받지 
 rem tools\refresh_kr_fundq.py 는 결과가 기존보다 나쁘면 쓰지 않는다(행 95%%·순이익 채움 80%% 미만 거부).
 rem PC 가 꺼져 있던 주는 건너뛴다 - 화면 재무표는 네이버 기업분석으로 따로 돈다(kr_fin_naver.py).
 for /f %%d in ('powershell -NoProfile -Command "[int][DateTime]::Now.DayOfWeek"') do set DOW=%%d
-if "%DOW%"=="1" (
-    echo [+] KR 분기재무 갱신 - DART, 월요일...
+rem 2026-11-05 - 정기보고서 마감 달(3·5·8·11월)은 매일: 공식 제출 다음 날 반영 + 실제 제출일(kr_filing_dates) 기록
+for /f %%m in ('powershell -NoProfile -Command "[DateTime]::Now.Month"') do set MON=%%m
+set KRSEASON=0
+if "%DOW%"=="1" set KRSEASON=1
+if "%MON%"=="3" set KRSEASON=1
+if "%MON%"=="5" set KRSEASON=1
+if "%MON%"=="8" set KRSEASON=1
+if "%MON%"=="11" set KRSEASON=1
+if "%KRSEASON%"=="1" (
+    echo [+] KR 분기재무 갱신 - DART...
     %PYTHON% tools\refresh_kr_fundq.py
     git add data/kr_fundamentals_q.parquet 2>nul
     git add data/kr_universe.parquet 2>nul
+    git add -f data/kr_filing_dates.parquet 2>nul
     git diff --staged --quiet || (
         git commit -m "auto: KR quarterly fundamentals (PC, DART)"
         git push origin main || (

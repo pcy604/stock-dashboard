@@ -103,6 +103,12 @@ def main():
         cur = cur.drop(columns=[c for c in bal if c in cur.columns]).merge(
             old[["sym", "year", "q"] + bal], on=["sym", "year", "q"], how="left")
         cur.to_parquet(E.OUT, index=False)
+    # 2026-11-05 — 실제 제출일(백테스트·신호가 공시된 날부터 쓰게). 실패해도 재무 갱신은 살린다.
+    try:
+        from tools import kr_filing_dates
+        kr_filing_dates.main()
+    except Exception as e:
+        print(f"::warning title=KR 제출일::{type(e).__name__}: {str(e)[:200]}", flush=True)
     # 2026-10-19 — DART 가 닿아도 대차 잔액(자산·부채·자본)은 DART 적재 스키마에 없다.
     #   네이버로 그 열과 빈칸만 채운다(DART 값은 덮지 않음). 네이버 경로가 매주 실제로 돌아
     #   DART 가 다시 막혔을 때 처음 써 보는 코드가 되지 않게 하는 효과도 있다.

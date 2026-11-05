@@ -79,3 +79,25 @@ def test_multiclass_shares_fall_back_to_weighted_average(monkeypatch):
     rows = M._pull_shares('CMCSA', '0001166691')
     assert rows and rows[0]['shares'] == 3.7e9
     assert calls[0].startswith('EntityCommonStockSharesOutstanding')
+
+
+def test_kr_known_uses_real_filing_date(tmp_path, monkeypatch):
+    """한국 재무를 '실제 DART 제출일 다음 날'부터 — 없으면 분기말 +45/90일 (2026-11-05)."""
+    import pandas as pd
+    import tools.kr_filing_dates as F
+    p = tmp_path / 'kr_filing_dates.parquet'
+    pd.DataFrame({'sym': ['005930'], 'year': [2026], 'q': [2], 'filed': ['2026-08-11']}).to_parquet(p)
+    monkeypatch.setattr(F, 'OUT', p)
+    d, real = F.known(['005930', '005930', '000660'], [2026, 2025, 2025], [2, 4, 3])
+    assert str(d[0].date()) == '2026-08-12' and real[0]          # 제출일 다음 날
+    assert str(d[1].date()) == '2026-03-31' and not real[1]      # 4분기 가정 90일
+    assert str(d[2].date()) == '2025-11-14' and not real[2]      # 1~3분기 가정 45일
+
+
+def test_kr_filing_report_name_parse():
+    import tools.kr_filing_dates as F
+    assert F.parse('[기재정정]분기보고서 (2026.09)') == (2026, 3)
+    assert F.parse('사업보고서 (2025.12)') == (2025, 4)
+    assert F.parse('반기보고서 (2026.06)') == (2026, 2)
+    assert F.parse('사업보고서 (2026.03)') == (2026, 1)   # 3월 결산 사업보고서도 3월 = 1분기로(분기 재무에선 비12월 결산 제외)
+    assert F.parse('주요사항보고서') is None

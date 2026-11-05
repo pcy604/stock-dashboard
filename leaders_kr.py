@@ -141,8 +141,13 @@ def earnings_map() -> dict:
     q = q.copy()
     q['qend'] = pd.to_datetime(q['year'].astype(str) + q['q'].map(qend))
     # 4분기(사업보고서)는 법정 기한이 90일이라 더 늦게 나온다
-    q['available_from'] = q['qend'] + pd.to_timedelta(
-        [90 if x == 4 else LAG_DAYS for x in q['q']], unit='D')
+    # 2026-11-05: 실제 DART 제출일(다음 날)이 있으면 그날부터, 없으면 분기말 + LAG_DAYS(4분기 90일)
+    try:
+        from tools.kr_filing_dates import known as _known
+        q['available_from'], _ = _known(q['sym'], q['year'], q['q'], lag=(LAG_DAYS, 90))
+    except Exception:
+        q['available_from'] = q['qend'] + pd.to_timedelta(
+            [90 if x == 4 else LAG_DAYS for x in q['q']], unit='D')
     out = {}
     for sym, g in q.groupby('sym'):
         g = g.sort_values('available_from')[['available_from', 'op_turn', 'op_yoy']]
