@@ -55,8 +55,11 @@ jobs:
         id: us
         run: python tools/us_fq_daily.py 5
 
+      # 한국 단계가 길어져도(DART 가 반쯤 응답) 미국·스냅샷은 반영되게 — 시간 상한 + 실패해도 계속
       - name: 한국 — 마감 달이면 분기재무·제출일
         id: kr
+        timeout-minutes: 40
+        continue-on-error: true
         env:
           DART_KEY: ${{ secrets.DART_KEY }}
         run: |
