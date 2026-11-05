@@ -9,13 +9,15 @@
   logic    '1 AND (2 OR 3)' — 조건 번호(1부터)를 AND·OR·NOT·괄호로. 비우면 모두 AND
   rank     {'field':'rs','desc':True}
   weight   'equal'|'rank'|'mcap'|'inv_vol' · max_w 0.15 (종목 상한 X — 넘으면 리밸런싱 때 덜어냄 = 익절)
-  exposure {'base':1.0, 'index':'SPX', 'ma':40, 'below':0.3, 'months':[1..12], 'mode':'scale'|'entry'}   (요구 1 — 주식 비중; 이평 아래·달력 밖이면 줄임.
-           mode='entry' 면 줄이지 않고 신규·불타기만 막는다 = 실전 규칙)
+  exposure {'base':1.0, 'index':'SPX', 'ma':40, 'below':0.3, 'months':[1..12], 'mode':'scale'|'entry', 'daily':False}
+           (요구 1 — 주식 비중; 이평 아래·달력 밖이면 줄임. mode='entry' 면 줄이지 않고 신규·불타기만 막는다 = 실전 규칙.
+           daily=True + index_px_daily 주면 ma 를 '일봉 n일선'으로(2026-11-06, '지수 5일선 이탈여부'). 평소엔 '주')
   entry    {'init':0.5, 'pyramid':[[20,0.25],[40,0.25]]}   (요구 3 — 첫 매수는 목표 비중의 init, +n% 마다 목표의 x 만큼 추가, 목표 = 상한)
   exit     {'stop':15, 'trail':[[0,25],[50,20],[100,15]], 'min_hold':0, 'cooldown':4,
             'signals':[{'type':'ma_break','n':5}, {'type':'rsi_down','n':14,'level':70}, ...],
-            'daily':False}   (요구 4·5. daily=True — 매수·탈출 '신호'는 그대로 주봉, **손절·래칫 체결가만**
-            일봉으로 더 정확히(그 주 안에 스탑을 처음 건드린 날의 가격). 데이터 못 받으면 조용히 주봉으로 폴백)
+            'daily':False}   (요구 4·5. daily=True — 매수·리밸런싱·순위는 그대로 주봉, **보유 종목의 고점·래칫·
+            손절과 ma_break 신호만** 그 종목 일봉으로(2026-11-06, '5일선이랑 고점대비 하락폭'): 고점을 그 주
+            날짜별로 쫓고, ma_break 의 n 은 '일'이 된다. 데이터 못 받으면 조용히 주봉 근사로 폴백)
   cost 0.003
 체결: 주봉(날짜 = 그 주 월요일). 판정은 그 주 종가 → 다음 주 시가 체결. 손절·래칫만 주중 스탑(저가가 선 아래면 그 선에, 갭이면 시가).
 고점 = 보유 중 최고 **종가**. 상장폐지·패널 이탈(가격 끊김)은 마지막 종가에 정리.
@@ -245,12 +247,15 @@ def _exit_matrix(P, sig):
     return None                                         # rank_out 은 리밸런싱 때 따로
 
 
-def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = None, entry_block=None):
+def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = None, entry_block=None,
+        index_px_daily: pd.Series = None):
     """반환 dict(equity, bench, exposure, trades(DataFrame), holdings(DataFrame), stats, last_pf)
 
     entry_block: (날짜 × 종목) bool 행렬 — True 면 그 주 그 종목은 신규·불타기 금지(보유분은 그대로).
       2026-11-05: 지수 게이트를 '소속 시장'별로(코스피 종목 = 코스피 5주선, 코스닥 종목 = 코스닥 5주선) — 실전 규칙과 같게.
-      market_block() 으로 만든다."""
+      market_block() 으로 만든다.
+    index_px_daily: exposure.daily=True 일 때 쓰는 지수의 **일봉** 종가(리샘플 없이). exposure.ma 는 이때 '일'이
+      된다(평소엔 '주'). 2026-11-06 — '지수 5일선 이탈여부'는 주봉 5주선과 다른 질문이라 주봉으로 근사하면 안 된다."""
     S = merged(spec)
     P = panel
     dates = P.dates
@@ -267,17 +272,17 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
     for sg in S['exit']['signals']:
         M = _exit_matrix(P, sg)
         if M is not None:
-            sigs.append((EXIT_SIGNALS[sg['type']][0] + (f" {sg.get('n', '')}".rstrip() if sg['type'] == 'ma_break' else ''), M.fillna(False).values))
+            sigs.append((EXIT_SIGNALS[sg['type']][0] + (f" {sg.get('n', '')}".rstrip() if sg['type'] == 'ma_break' else ''), M.fillna(False).values, sg))
     rank_out = [s for s in S['exit']['signals'] if s.get('type') == 'rank_out']
     vol = P.get('ret:1').rolling(26, min_periods=8).std().values if S['weight'] == 'inv_vol' else None
     mc = P.base('marcap').values
 
-    # ── 손절·래칫만 일봉으로(요구, 2026-11-06) — 매수·신호·탈출 '신호'는 전부 주봉 그대로.
-    #   주봉 저가로 거는 지금 체크(아래 ②)는 '그 주 안에 스탑을 건드렸는가'는 이미 정확하다
-    #   (주봉 저가 = 그 주 일봉 저가의 최솟값). 다만 체결가는 '주 시가 or 스탑가' 로 낙관적으로
-    #   근사해 왔다 — 실제로 어느 요일에 건드렸는지를 보면 더 나쁜(더 현실적인) 체결가가 나올 수 있다.
-    #   그래서 바꾸는 건 '건드렸는지'가 아니라 '얼마에 팔렸는지' 뿐. 일봉을 못 받으면 조용히
-    #   기존 주봉 방식으로 되돌아간다(백테스트가 외부 서버 때문에 통째로 죽으면 안 된다).
+    # ── 일봉으로 보는 것 2026-11-06(사용자 요청: "5일선이랑 고점대비 하락폭만") ──
+    #   ① 보유 종목의 고점·래칫·손절 — 주봉 종가 1번/주 대신 그 주 날짜별로 고점을 갱신하고
+    #      스탑을 건드린 첫 날의 실제 가격으로 판다(_daily_walk).
+    #   ② ma_break 탈출 신호 — daily=True 면 n 은 '일'(평소엔 '주'), 그 주 안 어느 날이든 교차하면 신호.
+    #   매수·리밸런싱·순위는 전부 주봉 그대로. 일봉을 못 받으면 조용히 주봉 근사로 되돌아간다
+    #   (백테스트가 외부 서버 때문에 통째로 죽으면 안 된다).
     daily_exit = bool(S['exit'].get('daily'))
     _dcache, _dfail = {}, set()
 
@@ -291,26 +296,60 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
         _dcache[j] = d
         return d
 
-    def _stop_fill(t, j, stop):
-        """그 주(dates[t]~+6일) 안에서 일봉 저가가 스탑을 건드린 첫 날의 체결가. 못 구하면 None."""
+    def _daily_walk(t, j, p):
+        """그 주(dates[t]~+6일) 날짜별로 고점·래칫을 갱신하며 스탑에 걸리는지 본다.
+        반환 (closed, price) — 일봉이 없으면 (False, None): 호출부가 기존 주봉 방식을 쓰라는 신호.
+        걸리지 않고 끝나도 p['peak']·p['stop'] 은 이미 (일봉 기준으로) 갱신돼 있다."""
         if not daily_exit:
-            return None
+            return False, None
+        d = _daily_df(j)
+        if d is None:
+            return False, None
+        wk = d.loc[(d.index >= dates[t]) & (d.index < dates[t] + pd.Timedelta(days=7))]
+        if not len(wk):
+            return False, None
+        for _, row in wk.iterrows():
+            if pd.isna(row['Close']):
+                continue
+            p['peak'] = max(p['peak'], float(row['Close']))
+            g = p['peak'] / p['entry'] - 1
+            if t - p['t0'] >= int(S['exit'].get('min_hold', 0)):
+                for th, trl in tr_l:
+                    if g * 100 >= th:
+                        p['stop'] = max(p['stop'], p['peak'] * (1 - trl / 100))
+            if p['stop'] and pd.notna(row['Low']) and row['Low'] <= p['stop']:
+                px = min(row['Open'], p['stop']) if pd.notna(row['Open']) else p['stop']
+                return True, float(px)
+        return False, None
+
+    def _ma_break_daily(t, j, n):
+        """daily=True 일 때 ma_break 를 '일봉 n일선'으로. 그 주 안 어느 날이든 교차하면 True.
+        데이터·역사 부족하면 None(호출부가 주봉 판정을 쓰라는 신호)."""
         d = _daily_df(j)
         if d is None:
             return None
-        wk = d.loc[(d.index >= dates[t]) & (d.index < dates[t] + pd.Timedelta(days=7))]
-        hit = wk[wk['Low'] <= stop]
-        if not len(hit):
+        wk_end = dates[t] + pd.Timedelta(days=7)
+        sub = d.loc[d.index < wk_end]
+        if len(sub) < n + 2:
             return None
-        row = hit.iloc[0]
-        return float(min(row['Open'], stop)) if pd.notna(row['Open']) else float(stop)
+        ma = sub['Close'].rolling(int(n), min_periods=int(n)).mean()
+        broke = (sub['Close'] < ma) & (sub['Close'].shift(1) >= ma.shift(1))
+        hit = broke.loc[sub.index >= dates[t]]
+        return bool(hit.any()) if len(hit) else False
 
-    # 노출(요구 1): 지수 이평 · 달력
+    # 노출(요구 1): 지수 이평 · 달력. exposure.daily=True·index_px_daily 있으면 '일봉 n일선'으로(요구 2026-11-06).
     ex = S['exposure']
     expo = np.full(len(dates), float(ex.get('base', 1.0)))
-    if ex.get('index') and index_px is not None and ex.get('ma'):
-        ix = index_px.reindex(dates, method='ffill')
-        below = (ix < ix.rolling(int(ex['ma']), min_periods=int(ex['ma'])).mean()).fillna(False).values
+    if ex.get('index') and ex.get('ma'):
+        if ex.get('daily') and index_px_daily is not None:
+            ixd = index_px_daily
+            below_d = (ixd < ixd.rolling(int(ex['ma']), min_periods=int(ex['ma'])).mean()).fillna(False)
+            below = below_d.reindex(dates, method='ffill').fillna(False).values
+        elif index_px is not None:
+            ix = index_px.reindex(dates, method='ffill')
+            below = (ix < ix.rolling(int(ex['ma']), min_periods=int(ex['ma'])).mean()).fillna(False).values
+        else:
+            below = np.zeros(len(dates), bool)
         expo = np.where(below, expo * float(ex.get('below', 0.0)), expo)
     months = set(ex.get('months') or range(1, 13))
     fri = dates + pd.Timedelta(days=4)
@@ -365,17 +404,19 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                         pos[j]['stop'] = px * (1 - float(S['exit']['stop']) / 100)
                 log(t, j, '매수' if kind == 'buy' else '불타기', px, amt / E, why)
         pend = []
-        # ② 주중 스탑(손절·래칫) — 건드렸는지는 주봉 저가로(①), 체결가만 일봉 있으면 그걸로(②)
+        # ② 주중 스탑(손절·래칫) — 일봉 있으면 날짜별로 고점까지 다시 쫓는다(_daily_walk), 없으면 주봉 근사
         for j in list(pos):
             p = pos[j]
-            if p['stop'] and np.isfinite(L[t, j]) and L[t, j] <= p['stop'] and t - p['t0'] >= 0:
-                dpx = _stop_fill(t, j, p['stop'])
-                px = dpx if dpx is not None else (min(O[t, j], p['stop']) if np.isfinite(O[t, j]) else p['stop'])
+            closed, dpx = _daily_walk(t, j, p)
+            if not closed and dpx is None and p['stop'] and np.isfinite(L[t, j]) and L[t, j] <= p['stop'] and t - p['t0'] >= 0:
+                closed, dpx = True, (min(O[t, j], p['stop']) if np.isfinite(O[t, j]) else p['stop'])
+            if closed:
+                px = dpx
                 amt = p['u'] * px; cash += amt * (1 - cost)
                 why = '손절(스탑)' if p['peak'] <= p['entry'] * 1.0001 or not tr_l else '래칫(스탑)'
                 log(t, j, '매도', px, amt / max(val(t), 1e-12), why, px / p['avg'] - 1)
                 pos.pop(j); cool[j] = t + int(S['exit'].get('cooldown', 0))
-        # ③ 종가: 고점·래칫 갱신, 패널 이탈 정리
+        # ③ 종가: 고점·래칫 갱신(①이 일봉으로 이미 했으면 여기선 더 큰 값이 없어 그대로 — 안전), 패널 이탈 정리
         for j in list(pos):
             p = pos[j]
             if np.isfinite(C[t, j]):
@@ -400,8 +441,14 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
         for j, p in pos.items():                                     # 청산 신호(요구 5)
             if t - p['t0'] < int(S['exit'].get('min_hold', 0)):
                 continue
-            for nm, M in sigs:
-                if M[t, j]:
+            for nm, M, sg in sigs:
+                trig = bool(M[t, j])
+                if daily_exit and sg.get('type') == 'ma_break':      # 2026-11-06: n 을 '일'로(주봉 교차보다 민감)
+                    db = _ma_break_daily(t, j, int(sg.get('n', 5)))
+                    if db is not None:
+                        trig = db
+                        nm = f"{int(sg.get('n', 5))}일선 이탈"       # 일봉으로 판정했을 때만 라벨도 '일'로(정직)
+                if trig:
                     pend.append(('sell', j, None, nm)); sold.add(j); break
         tgt_e = expo[t]
         entry_only = ex.get('mode') == 'entry'                       # 2026-11-04: 실전 규칙 — 지수 약세면 신규·불타기만 중지, 보유분은 손절대로

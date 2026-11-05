@@ -97,6 +97,14 @@ def _index(name):
     return s.resample('W-MON', label='left', closed='left').last()
 
 
+@st.cache_data(ttl=3600 * 12, show_spinner=False)
+def _index_daily(name):
+    """지수 일봉 종가 — exposure.daily=True 일 때(요구: '지수 5일선 이탈여부'). 리샘플 없이 그대로."""
+    s = pd.read_parquet('data/research/macro_long_px.parquet')[name].dropna()
+    s.index = pd.to_datetime(s.index)
+    return s
+
+
 @st.cache_data(ttl=3600, show_spinner=False, max_entries=4)
 def _run(m, spec_json):
     spec = json.loads(spec_json)
@@ -130,7 +138,8 @@ def _run(m, spec_json):
         r = Q.run(P, spec, bench_px=_index(bm), entry_block=blk)
         r['note'] = pre
         return r
-    r = Q.run(P, spec, index_px=_index(ixn) if ixn else None, bench_px=_index(bm))
+    ixd = _index_daily(ixn) if ixn and ex.get('daily') else None
+    r = Q.run(P, spec, index_px=_index(ixn) if ixn else None, bench_px=_index(bm), index_px_daily=ixd)
     r['note'] = pre
     return r
 
@@ -350,8 +359,11 @@ def _advanced(m, base, pname):
         bse = e1.number_input('평소 주식 비중(%)', 0.0, 100.0, float(ex.get('base', 1.0)) * 100, 5.0)
         ixo = [''] + _IDX[m]
         ixs = e2.selectbox('기준 지수', ixo, index=ixo.index(ex.get('index') or '') if (ex.get('index') or '') in ixo else 0, format_func=_IDXN.get)
-        ma = e3.number_input('지수 n주선', 2, 200, int(ex.get('ma') or 40))
+        ma = e3.number_input('지수 n주선(일봉 토글 켜면 n일선)', 2, 200, int(ex.get('ma') or 40))
         blw = e4.number_input('지수가 그 아래면 주식 비중(평소 대비 %)', 0.0, 100.0, float(ex.get('below', 0.0)) * 100, 10.0)
+        ix_daily = st.toggle('지수 이탈을 일봉 n일선으로 (기본은 n주선)', value=bool(ex.get('daily')), disabled=ixs == 'MKT',
+                             help='"지수 5일선 이탈여부"처럼 주봉보다 빨리 반응해야 할 때. 소속 시장(MKT) 게이트는 이미 자체 n(기본 5)이 '
+                                  '있어 이 토글과 무관합니다.')
         mon = st.multiselect('주식을 들고 있을 달 (할로윈 = 11~4월)', list(range(1, 13)), default=ex.get('months') or list(range(1, 13)),
                              format_func=lambda x: f'{x}월')
 
@@ -361,9 +373,10 @@ def _advanced(m, base, pname):
         stp = x1.number_input('손절: 진입가 대비 −y%(0=끔)', 0.0, 90.0, float(xe.get('stop') or 0), 1.0)
         mh = x2.number_input('최소 보유(주) — 이 기간엔 래칫·신호 무시', 0, 156, int(xe.get('min_hold') or 0))
         cd = x3.number_input('판 뒤 다시 사지 않는 기간(주)', 0, 52, int(xe.get('cooldown') or 0))
-        daily_ex = st.toggle('손절·래칫 체결가를 일봉으로 (매수·신호는 그대로 주봉)', value=bool(xe.get('daily')),
-                             help='그 주 안에 스탑을 처음 건드린 날의 가격을 쓴다(지금은 주 시가나 스탑가로 근사). '
-                                  '종목마다 외부에서 일봉을 새로 받아 와 **처음 돌리면 느리다**(이후 캐시). 못 받으면 조용히 주봉으로.')
+        daily_ex = st.toggle('고점·손절·래칫·ma_break 를 일봉으로 (매수·리밸런싱은 그대로 주봉)', value=bool(xe.get('daily')),
+                             help='보유 중 고점을 그 주 날짜별로 쫓고, 스탑을 건드린 날의 실제 가격으로 판다("고점대비 하락폭"). '
+                                  '탈출 신호의 ma_break 는 n 이 "일"이 된다("5일선"). 종목마다 외부에서 일봉을 새로 받아 와 '
+                                  '**처음 돌리면 느리다**(이후 캐시). 못 받으면 조용히 주봉 근사로.')
         st.caption('래칫: 진입 후 최고 수익이 +a% 를 넘으면 손절선을 고점 대비 −b% 로 끌어올린다')
         trl = st.data_editor(pd.DataFrame(xe.get('trail') or [], columns=['최고 수익(%) 이상', '고점 대비(−%)']),
                              num_rows='dynamic', hide_index=True, use_container_width=True)
@@ -419,7 +432,8 @@ def _advanced(m, base, pname):
     spec = dict(market=m, start=str(start), rebalance=int(reb), max_pos=int(mxp), filters=_filt, logic=lgc,
                 rank=dict(field=rkk if ':' not in rkk else f"{rkk.split(':')[0]}:{str(rk_n).strip() or '13'}", desc=rk_d == '큰 값 먼저'),
                 weight=wt, max_w=mxw / 100,
-                exposure=dict(base=bse / 100, index=ixs, ma=int(ma), below=blw / 100, months=sorted(mon) or list(range(1, 13))),
+                exposure=dict(base=bse / 100, index=ixs, ma=int(ma), below=blw / 100, months=sorted(mon) or list(range(1, 13)),
+                              daily=bool(ix_daily)),
                 entry=dict(init=ini / 100, pyramid=[[float(a), float(b) / 100] for a, b in pyr.dropna().values.tolist()]),
                 exit=dict(stop=stp, trail=[[float(a), float(b)] for a, b in trl.dropna().values.tolist()], min_hold=int(mh),
                           cooldown=int(cd), signals=sigs, daily=bool(daily_ex)),
