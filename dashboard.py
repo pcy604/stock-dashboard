@@ -4733,9 +4733,52 @@ def _unified_cached(sym, is_kr, freq):
     else:
         import edgar_client
         rows = edgar_client.statements(sym, freq, 6)
+        if freq == 'quarter':
+            rows = _us_fresh_quarter(sym, rows)
     if not rows:
         raise RuntimeError('empty statements')
     return rows
+
+
+def _us_fresh_quarter(sym, rows):
+    """EDGAR 재무(XBRL)는 10-Q 가 나와야 들어온다 — 실적 발표(8-K 보도자료)와 10-Q 사이 1~3주 공백.
+    2026-11-05 차니: 'AXTI 지난주 실적 발표했는데 왜 반영 안 돼 있냐'(EDGAR 최신 2026-06, 3Q 보도자료는 10-30 경).
+    → 야후 분기 손익이 EDGAR 보다 새 분기를 가지고 있으면 그 분기만 맨 앞에 붙인다(손익 5항목만, 대차·현금흐름은 '-').
+    10-Q 가 나오면 EDGAR 값이 같은 분기를 차지하므로 자동으로 사라진다. 행에 src 를 남겨 화면에 출처를 밝힌다."""
+    try:
+        import yfinance as _yf
+        q = _yf.Ticker(sym).quarterly_income_stmt
+        if q is None or q.empty:
+            return rows
+        last = str((rows[0] or {}).get('period') or '') if rows else ''
+        add = []
+        for col in sorted(q.columns, reverse=True):
+            per = pd.Timestamp(col).strftime('%Y-%m')
+            # 52/53주 회계연도는 분기말이 달 경계를 넘나든다(09-27 vs 10-01) — 마지막 EDGAR 분기보다 40일 넘게 뒤일 때만 새 분기
+            if last and pd.Timestamp(col) <= pd.Timestamp(last + '-01') + pd.offsets.MonthEnd(0) + pd.Timedelta(days=40):
+                break
+            c = q[col]
+
+            def _g(*names):
+                for n in names:
+                    if n in c.index and pd.notna(c[n]):
+                        return float(c[n])
+                return None
+            rev = _g('Total Revenue', 'Operating Revenue')
+            if rev is None:
+                continue
+            gp = _g('Gross Profit')
+            cogs = _g('Cost Of Revenue')
+            add.append({'period': per, 'revenue': rev, 'gross': gp if gp is not None else (rev - cogs if cogs is not None else None),
+                        'sga': _g('Selling General And Administration'), 'op_income': _g('Operating Income', 'Total Operating Income As Reported'),
+                        'net_income': _g('Net Income', 'Net Income Common Stockholders'), 'eps': _g('Diluted EPS', 'Basic EPS'),
+                        'assets': None, 'liabilities': None, 'equity': None, 'op_cf': None, 'inv_cf': None, 'fin_cf': None,
+                        'capex': None, 'src': 'Yahoo(실적 발표 기준 · 10-Q 제출 전)'})
+            if len(add) >= 2:
+                break
+        return add + list(rows or [])
+    except Exception:
+        return rows
 
 
 def unified_statements(sym, is_kr, freq):
@@ -5691,6 +5734,10 @@ def _tab_analysis():
                         _fin_all = (not IS_MOBILE) or st.toggle("전체 기간 보기", value=False, key=f"fin_all_{sym8_clean}")
                         _stm = unified_statements(sym8_clean, is_kr_sym, 'annual' if _freq == "연간" else 'quarter')
                         _stored = None                 # 저장본으로 대신 그렸으면 그 갱신일
+                        _ysrc = [r['period'] for r in (_stm or []) if r.get('src')]
+                        if _ysrc:
+                            st.caption(f"ℹ️ {', '.join(_ysrc)} 분기는 실적 발표 직후라 SEC 10-Q 전 — 손익은 Yahoo 값, 대차·현금흐름은 '-' "
+                                       "(10-Q 가 나오면 공시 값으로 바뀝니다).")
                         if not _stm and is_kr_sym:
                             _stm, _stored = kr_stored_statements(sym8_clean, 'annual' if _freq == "연간" else 'quarter')
                             if _stm:
@@ -6172,6 +6219,8 @@ def _tab_analysis():
                             st.markdown(f"###### 🧱 분기 구조 — {_frow.get('period', '')}")
                             _sank.update_layout(height=320, margin=dict(t=34))
                             st.plotly_chart(_sank, use_container_width=True)
+                            if _frow.get('src'):
+                                st.caption(f"ℹ️ {_frow['period']} 분기는 {_frow['src']} — SEC 10-Q 가 나오면 공시 값으로 바뀝니다.")
                             st.caption(f"{_frow.get('period','')} 분기 · 단위 {_uu}{'원' if is_kr_sym else '$'} · "
                                        "파랑=남은 이익(%는 매출 대비 마진) · 빨강=차감 · 초록=가산(영업외수익 등). "
                                        "위 버튼으로 최근 4개 분기를 바꿔 본다.")
