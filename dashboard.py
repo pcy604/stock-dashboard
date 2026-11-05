@@ -730,7 +730,7 @@ if not hasattr(_ac_dil, 'summarize_dilution'):   # 클라우드가 옛 모듈을
     import importlib as _il0
     _ac_dil = _il0.reload(_ac_dil)
 import table_ui as _tui
-_TUI_REQ = 10   # table_ui 를 고치면 그 API_VERSION 으로 같이 올린다 — 2026-11-05: 7 로 두어 v9 모듈이 메모리에 남아 전 표 AgGrid 가 안 먹었다(실화면)
+_TUI_REQ = 11   # table_ui 를 고치면 그 API_VERSION 으로 같이 올린다 — 2026-11-05: 7 로 두어 v9 모듈이 메모리에 남아 전 표 AgGrid 가 안 먹었다(실화면)
 if getattr(_tui, 'API_VERSION', 0) < _TUI_REQ:   # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
     import importlib as _il
     _tui = _il.reload(_tui)
@@ -3976,9 +3976,17 @@ def _macro_v2_top(_PX, _RG):
         tiles.append(('하이일드 스프레드', f"{float(hy.iloc[-1]):.2f}%", f"최근 {max(1, len(hy) // 250)}년 하위 {p}%", p < 50,
                       '낮을수록 신용 평온(=탐욕 쪽). FRED가 ICE 지수를 최근 3년치만 제공한다'))
     vx, v3 = S['VIXCLS'], S['VXVCLS']
+    _vsrc = 'FRED'
+    try:                                   # 2026-11-06 — FRED VIX 는 하루 늦다(11-05 VIX 26.6 이 16.6 으로 보였다) → 더 최근인 쪽
+        _P = _alert_px()
+        _yv, _y3 = _P['^VIX'][0], _P['^VIX3M'][0]
+        if len(_yv) and len(_y3) and (not len(vx) or _yv.index[-1] > vx.index[-1]):
+            vx, v3, _vsrc = _yv, _y3.reindex(_yv.index).ffill(), _P['^VIX'][1]
+    except Exception:
+        pass
     if len(vx) and len(v3):
         r = float(vx.iloc[-1]) / float(v3.iloc[-1])
-        tiles.append(('VIX ÷ VIX3M', f"{r:.2f}", f"VIX {float(vx.iloc[-1]):.1f}", r <= 1,
+        tiles.append(('VIX ÷ VIX3M', f"{r:.2f}", f"VIX {float(vx.iloc[-1]):.1f} · {vx.index[-1]:%m-%d} {_vsrc}", r <= 1,
                       '1 초과 = 단기 공포가 3개월 공포보다 큼(패닉). 1 미만 = 평시'))
     bt = _mf._clean(closes.get('BTC-USD')) if closes else pd.Series(dtype=float)
     if len(bt) >= 200:
@@ -3990,7 +3998,7 @@ def _macro_v2_top(_PX, _RG):
         for c, (lab, val, dl, good, hp) in zip(cols, tiles):
             # 좋음/나쁨으로 색을 정한다 — 숫자 부호가 아니라 뜻으로(금리↓ = 좋음)
             c.metric(lab, val, dl, delta_color=('normal' if good else 'inverse'), delta_arrow='off', help=hp)
-        st.caption("출처: FRED (WALCL·WTREGEN·RRPONTSYD·DFII10·BAMLH0A0HYM2·VIXCLS·VXVCLS), Yahoo (DX-Y.NYB·BTC-USD) · "
+        st.caption("출처: FRED (WALCL·WTREGEN·RRPONTSYD·DFII10·BAMLH0A0HYM2·VIXCLS·VXVCLS — VIX 는 Yahoo ^VIX·^VIX3M 이 더 최근이면 그쪽), Yahoo (DX-Y.NYB·BTC-USD) · "
                    f"마지막 갱신: {', '.join(sorted({s.index[-1].strftime('%Y-%m-%d') for k, s in S.items() if k in ('WALCL', 'DFII10', 'VIXCLS') and len(s)}))} 관측 · "
                    "변화 칸 색 = 초록 좋음 / 빨강 나쁨(뜻 기준)")
 
@@ -4179,6 +4187,131 @@ def _macro_detail_charts():
                        ". 일본·중국 M2는 무료 공개 계열이 2017~2023년에 끊겨 뺐다(예전 차트의 끊긴 선이 그것). 순유동성(Fed−TGA−역레포)은 축 1 카드에 있다.")
 
 
+# ── 실전 판정 · 당일 경보 (2026-11-06 차니 승인 — 매크로 탭 진단 56점 후속) ─────────────
+#   진단: 탭 맨 위가 '검증 안 된 4계절'이었고, 실제 돈(토스·한국 단독)을 움직이는 규칙(소속 시장 주봉 5주선)은
+#   탭 어디에도 없었다. 코스피가 고점 −37.6% 일 때 탭은 '실적장세·평소대로'였다. → 맨 위에 실전 규칙과 당일 경보.
+_ALERT_SYMS = {'^KS11': 'KOSPI', '^KQ11': 'KOSDAQ', '^GSPC': 'SPX', '^VIX': 'VIX', '^VIX3M': 'VIX3M', 'KRW=X': 'USDKRW'}
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _alert_px_cached():
+    d = yf.download(list(_ALERT_SYMS), period='2y', auto_adjust=True, progress=False, threads=True)
+    c = d['Close'] if isinstance(d.columns, pd.MultiIndex) else d
+    out = {s: c[s].dropna() for s in _ALERT_SYMS if s in c.columns}
+    if sum(len(v) > 30 for v in out.values()) < 3:
+        raise RuntimeError('경보 시세 대부분 실패')
+    return out
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _alert_px_file():
+    """커밋된 일봉(data/research/macro_long_px.parquet, 매일 CI 갱신) — Yahoo 가 막혀도 판정이 비지 않게."""
+    try:
+        px = pd.read_parquet(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'research', 'macro_long_px.parquet'))
+        return {s: px[c].dropna() for s, c in _ALERT_SYMS.items() if c in px.columns}
+    except Exception:
+        return {}
+
+
+def _alert_px():
+    """{Yahoo 심볼: (종가 Series, 출처)} — 실시간(Yahoo)과 커밋 파일 중 더 최근 날짜까지 있는 쪽."""
+    live = {}
+    if not _recently_failed('alert_px'):
+        try:
+            live = _alert_px_cached()
+        except Exception:
+            _mark_failed('alert_px')
+    fb = _alert_px_file()
+    out = {}
+    for s in _ALERT_SYMS:
+        a, b = _V._clean(live.get(s)), _V._clean(fb.get(s))
+        if len(a) and (not len(b) or a.index[-1] >= b.index[-1]):
+            out[s] = (a, 'Yahoo')
+        elif len(b):
+            out[s] = (b, '커밋 파일')
+        else:
+            out[s] = (pd.Series(dtype=float), '-')
+    return out
+
+
+def _macro_live_top():
+    P = _alert_px()
+    st.subheader("실전 판정 — 지금 돈을 움직이는 규칙")
+    st.caption("실전 시범(토스·한국 단독)은 종목이 속한 시장(코스피/코스닥)의 **주봉 종가가 5주선 위일 때만** 신규 매수·불타기를 한다(live/PREREG v1.4). "
+               "코어 스위치(S&P500 200일선)는 원칙 v1의 자산배분 규칙. 비중을 바꾸는 것은 이 카드들뿐이다.")
+    kg, qg = _V.weekly_gate(P['^KS11'][0]), _V.weekly_gate(P['^KQ11'][0])
+    spy = fetch_index_history('SPY', 400)
+    sw = _V.core_switch(spy.iloc[:, 0]) if not spy.empty else {}
+    _sw_src = 'SPY'
+    if not sw:                              # FDR 이 막히면 S&P500 지수(Yahoo/커밋 파일)로 — 판정 불가보다 낫다
+        sw, _sw_src = _V.core_switch(P['^GSPC'][0]), f"S&P500 지수({P['^GSPC'][1]})" 
+    try:
+        plan = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'plan_latest.json'), encoding='utf-8'))
+    except Exception:
+        plan = {}
+    pix = plan.get('index') or {}
+
+    def _gate_card(col, lab, g, key):
+        if not g:
+            col.metric(lab, '판정 불가', None, help='지수 일봉을 받지 못했다(Yahoo·커밋 파일 모두 실패).')
+            return
+        hp = (f"{g['week']} 주봉 종가 {g['close']:,.1f} · 5주선 {g['ma']:,.1f}. "
+              + (f"이번 주 진행 중 {g['live_gap']:+.1f}% ({'위' if g['live_on'] else '아래'}) — 금요일 종가에 확정된다. " if g.get('partial') else '')
+              + f"봇 계획표({plan.get('made', '-')})는 {pix.get(key, {}).get('date', '-')} 주봉으로 "
+              + ('ON' if (pix.get(key) or {}).get('ok') else 'OFF') + ' 이었다.')
+        col.metric(lab, 'ON' if g['on'] else 'OFF', f"{g['gap']:+.1f}% (5주선 대비)", delta_color='normal', help=hp)
+
+    c1, c2, c3, c4 = st.columns(4)
+    _gate_card(c1, '코스피 · 주봉 5주선', kg, 'KR')
+    _gate_card(c2, '코스닥 · 주봉 5주선', qg, 'KQ')
+    c3.metric('S&P500 · 200일선 (코어)', '판정 불가' if not sw else ('ON' if sw['on'] else 'OFF'),
+              None if not sw else f"{sw['gap']:+.1f}% (200일선 대비)", delta_color='normal',
+              help=f"{_sw_src} 종가가 200일 이평 위면 코어 보유, 아래면 현금 — 원칙 v1.3 §3. 상단 배지와 같은 계산(verdict.core_switch)." + (f" 기준일 {sw.get('date')}." if sw else ''))
+    kr_ok, kq_ok = (pix.get('KR') or {}).get('ok'), (pix.get('KQ') or {}).get('ok')
+    _pv = ('신규 중지' if kr_ok is False and kq_ok is False else ('신규 가능' if kr_ok and kq_ok else '시장별로 다름')) if pix else '계획표 없음'
+    c4.metric('봇 계획표 · 이번 주', _pv, f"{plan.get('made', '-')} 작성", delta_color='off', delta_arrow='off',
+              help='live/plan_latest.json — 매주 토 18:23 KST 에 금요일 주봉으로 다시 만든다. 봇(live/bot.py)은 이 표만 따른다.')
+    _mis = [n for n, g, k in (('코스피', kg, 'KR'), ('코스닥', qg, 'KQ'))
+            if g and pix.get(k) and pix[k].get('date') == g['week'] and bool(pix[k].get('ok')) != bool(g['on'])]
+    if _mis:
+        st.caption(f"⚠️ {'·'.join(_mis)}: 같은 주봉인데 계획표와 이 화면의 판정이 다르다 — 계산 불일치, 확인 필요.")
+
+    # ── 🚨 당일 경보 — 참고
+    st.markdown("##### 🚨 당일 경보 — 참고 (비중 규칙 아님)")
+    vx, v3 = P['^VIX'][0], P['^VIX3M'][0]
+    a1, a2, a3, a4 = st.columns(4)
+    if len(vx) and len(v3):
+        r = float(vx.iloc[-1]) / float(v3.reindex(vx.index).ffill().iloc[-1])
+        w = '역전 — 단기 공포' if r > 1 else ('경계' if r > 0.9 else '평시')
+        a1.metric('VIX ÷ VIX3M', f"{r:.2f}", w, delta_color=('inverse' if r > 0.9 else 'normal'), delta_arrow='off',
+                  help=f"VIX {float(vx.iloc[-1]):.1f} ÷ VIX3M {float(v3.iloc[-1]):.1f} ({vx.index[-1]:%Y-%m-%d}). "
+                       "1 초과 = 1개월 공포가 3개월 공포보다 큼(패닉 구간). 0.9~1 경계.")
+    else:
+        a1.metric('VIX ÷ VIX3M', '-', None)
+    for col, lab, sym in ((a2, '코스피 · 52주 고점 대비', '^KS11'), (a3, '코스닥 · 52주 고점 대비', '^KQ11')):
+        dd = _V.drawdown52(P[sym][0])
+        if not dd:
+            col.metric(lab, '-', None)
+            continue
+        w = '약세장 (−20% 이하)' if dd['dd'] <= -20 else ('조정 (−10% 이하)' if dd['dd'] <= -10 else '정상 범위')
+        col.metric(lab, f"{dd['dd']:+.1f}%", w, delta_color=('inverse' if dd['dd'] <= -10 else 'normal'), delta_arrow='off',
+                   help=f"고점 {dd['peak']:,.1f} ({dd['peak_date']}) → 지금 {dd['close']:,.1f} ({dd['date']}).")
+    fx = P['KRW=X'][0]
+    if len(fx) > 22:
+        m1 = (float(fx.iloc[-1]) / float(fx.iloc[-22]) - 1) * 100
+        a4.metric('원/달러', f"{float(fx.iloc[-1]):,.0f}", f"{m1:+.1f}% (1개월)", delta_color='inverse',
+                  help=f"{fx.index[-1]:%Y-%m-%d}. 오르면 원화 약세 — 1개월 +3% 이상은 외국인 이탈 압력으로 본다. "
+                       f"200일선 이격 {_mf.ma_gap(fx):+.1f}%.")
+    else:
+        a4.metric('원/달러', '-', None)
+    sdd = _V.drawdown52(P['^GSPC'][0])
+    _src = sorted({f"{s} {P[s][1]} {P[s][0].index[-1]:%m-%d}" for s in _ALERT_SYMS if len(P[s][0])})
+    st.caption((f"S&P500 52주 고점 대비 {sdd['dd']:+.1f}% · " if sdd else '')
+               + "경보는 백테스트로 검증된 규칙이 아니다 — 매크로 신호 9종을 덧씌운 검증에서 살아남은 것이 없다(아래 욕심 조절 원칙). "
+               "그래서 비중을 바꾸지 않고 '지금 비가 오는지'만 알린다. 출처: " + ' · '.join(_src)
+               + " (Yahoo 는 장중 값 포함, 커밋 파일은 전일 종가)")
+
+
 def _macro_rules_section(V, _RG):
     """④ 욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다."""
     st.subheader("욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다")
@@ -4212,6 +4345,9 @@ with tab4, guard('매크로'):
     st.header("🌍 매크로")
     st.caption("돈은 어디로 흐르고, 경기는 어디로 가나 — 두 축을 보고, 욕심을 얼마나 부릴지 정한다. "
                "시세 3시간 · FRED 1시간 캐시 · 지표마다 관측일을 따로 적는다(월간 지표는 1~2개월 늦다).")
+
+    with guard('매크로 · 실전 판정'):
+        _macro_live_top()
 
     with st.spinner("사이클 지표 수집 중..."):
         _MI = macro_inputs()

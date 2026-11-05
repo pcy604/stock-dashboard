@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from datetime import datetime, timedelta, date
 
 import pandas as pd
@@ -79,6 +80,37 @@ def core_switch(closes, n: int = MA_DAYS) -> dict:
                 mom12=round((cur / float(c.iloc[-252]) - 1) * 100, 1) if len(c) >= 252 else None)
 
 
+def weekly_gate(closes, weeks: int = 5, today=None) -> dict:
+    """실전 시범 한국 지수 게이트(live/PREREG v1.4) — 주봉(금요일) 종가 > 5주 이평이면 ON.
+    live/plan.index_ok 와 같은 계산(W-FRI 마지막 종가 · rolling(weeks)) — tests/test_verdict 가 둘을 대조한다.
+    확정 = 끝난 주 기준(봇이 토요일 계획표에 쓰는 값) · 진행 중 = 이번 주 지금까지(금요일 종가에 확정)."""
+    c = _clean(closes)
+    if len(c) < weeks * 5 + 10:
+        return {}
+    w = c.resample('W-FRI').last().dropna()
+    ma = w.rolling(weeks).mean()
+    now = pd.Timestamp(today or datetime.now()).normalize()
+    partial = bool(now <= w.index[-1])                 # 이번 주 금요일이 아직 안 지났으면 마지막 막대는 진행 중
+    i = -2 if partial and len(w) > weeks else -1
+    cur, m = float(w.iloc[i]), float(ma.iloc[i])
+    out = dict(on=cur > m, close=round(cur, 2), ma=round(m, 2), gap=round((cur / m - 1) * 100, 2),
+               week=w.index[i].strftime('%Y-%m-%d'), weeks=weeks, partial=partial, date=c.index[-1].strftime('%Y-%m-%d'))
+    if partial:
+        lc, lm = float(w.iloc[-1]), float(ma.iloc[-1])
+        out.update(live_on=lc > lm, live_gap=round((lc / lm - 1) * 100, 2))
+    return out
+
+
+def drawdown52(closes) -> dict:
+    """52주(252거래일) 고점 대비 낙폭(%) — 당일 경보용(참고, 비중 규칙 아님)."""
+    c = _clean(closes)
+    if len(c) < 60:
+        return {}
+    t = c.tail(252)
+    return dict(dd=round((float(c.iloc[-1]) / float(t.max()) - 1) * 100, 1), peak=round(float(t.max()), 2),
+                peak_date=t.idxmax().strftime('%Y-%m-%d'), close=round(float(c.iloc[-1]), 2), date=c.index[-1].strftime('%Y-%m-%d'))
+
+
 def as_price_state(sw: dict) -> dict:
     """옛 macro_price_state() 모양(spx·ma200·above_ma) — 국면 판정(macro_regime)이 이 키를 쓴다."""
     if not sw:
@@ -94,15 +126,24 @@ def market_dir(sw: dict) -> str:
 
 
 def daily_closes(sym: str, days: int = 420) -> pd.Series:
-    """배치용 일봉 종가. 1순위 FinanceDataReader(화면과 같은 소스) → 2순위 Yahoo v8."""
+    """배치용 일봉 종가. FinanceDataReader(화면과 같은 소스)와 Yahoo v8 중 **더 최근 날짜까지 있는 쪽**.
+    2026-11-06 — FDR 이 하루 늦게 갱신돼 macro.json 이 11-05 실행에도 11-03 기준으로 남았다(화면 배지는 실시간이라 +0.4%,
+    파일은 +3.4%). 같은 날짜면 FDR 우선."""
+    fd = pd.Series(dtype=float)
     try:
         import FinanceDataReader as fdr
         df = fdr.DataReader(sym, (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d'))
-        s = _clean(df['Close'])
-        if len(s) > MA_DAYS:
-            return s
+        fd = _clean(df['Close'])
     except Exception:
         pass
+    yh = _yahoo_closes(sym)
+    ok = [s for s in (fd, yh) if len(s) > MA_DAYS]
+    if not ok:
+        return fd if len(fd) >= len(yh) else yh
+    return max(ok, key=lambda s: s.index[-1])           # max 는 같으면 앞(FDR)을 고른다
+
+
+def _yahoo_closes(sym: str) -> pd.Series:
     try:
         import urllib.request
         ysym = {'KS11': '^KS11', 'KQ11': '^KQ11'}.get(sym, sym)
@@ -110,7 +151,11 @@ def daily_closes(sym: str, days: int = 420) -> pd.Series:
         r = json.loads(urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'}),
                                               timeout=20).read())['chart']['result'][0]
         q = r['indicators']['quote'][0]['close']
-        return _clean(pd.Series(q, index=pd.to_datetime(r['timestamp'], unit='s')))
+        s = pd.Series(q, index=pd.to_datetime(r['timestamp'], unit='s'))
+        reg = ((r.get('meta') or {}).get('currentTradingPeriod') or {}).get('regular') or {}
+        if reg.get('start') and reg.get('end') and reg['start'] <= time.time() < reg['end'] and r['timestamp'][-1] >= reg['start']:
+            s = s.iloc[:-1]                              # 장중 막대(아직 종가 아님)는 뺀다 — CI 는 한국 장중에 돈다
+        return _clean(s)
     except Exception:
         return pd.Series(dtype=float)
 
@@ -152,8 +197,9 @@ def macro_inputs(fetch_fred):
     ur = fetch_fred('UNRATE', 40)
     if ur:
         d['unrate'] = ur[-1][1]
-        lo12 = min(v for _, v in ur[-12:]) if len(ur) >= 12 else ur[-1][1]
-        d['sahm'] = round(ur[-1][1] - lo12, 2)            # 삼의 법칙 근사(12개월 최저 대비)
+        import macro_flow as _mf                          # 2026-11-06 — 삼의 법칙 정의 하나로(macro_flow.sahm_series)
+        _s = _mf.sahm_series(pd.Series([v for _, v in ur], index=pd.to_datetime([t for t, _ in ur])))
+        d['sahm'] = round(float(_s.iloc[-1]), 2) if len(_s) and _s.iloc[-1] == _s.iloc[-1] else None
     m2 = fetch_fred('M2SL', 26)
     if m2 and len(m2) >= 13:
         d['m2_yoy'] = round((m2[-1][1] / m2[-13][1] - 1) * 100, 2)

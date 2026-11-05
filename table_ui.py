@@ -39,7 +39,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 3          # 2026-11-01 8→3: 정렬(No. 재번호)을 거의 모든 표에서 쓰게
-API_VERSION = 10          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
+API_VERSION = 11          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -625,8 +625,10 @@ def _patch_blocks():
         return
     _orig = _DG._block
 
-    def _block(self, block_proto=None, dg_type=None):
-        dg = _orig(self, block_proto, dg_type)
+    def _block(self, block_proto=None, dg_type=None, *args, **kwargs):
+        # 2026-11-06 — Streamlit 1.67 이 _block 에 agent_props 인자를 추가해 옛 서명이 앱 전체를 죽였다
+        #   (requirements 는 >=1.66 → 클라우드가 다시 설치하면 1.67). 모르는 인자는 그대로 넘긴다.
+        dg = _orig(self, block_proto, dg_type, *args, **kwargs)
         try:
             if block_proto is not None and block_proto.WhichOneof('type') == 'column':
                 dg._mo_frac = float(block_proto.column.weight) or 1.0

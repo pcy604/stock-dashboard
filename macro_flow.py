@@ -107,6 +107,15 @@ def chg(s: pd.Series, k: int) -> float:
     return float(s.iloc[-1] - s.iloc[-1 - k]) if len(s) > k else np.nan
 
 
+def sahm_series(ur: pd.Series) -> pd.Series:
+    """삼의 법칙 지표 — 실업률 3개월 평균 − '직전 12개월' 3개월 평균의 최저(%p). 0.50 이상이면 발동.
+    2026-11-06 단일화: 예전엔 정의가 셋(1개월 값 − 12개월 최저 / 이것 / 현재 포함 최저)이라
+    국면 판정·전이 감시판·경기 표가 서로 다른 답을 낼 수 있었다. 이제 이 함수 하나만 쓴다."""
+    u = pd.to_numeric(pd.Series(ur), errors='coerce').dropna()
+    u3 = u.rolling(3).mean()
+    return u3 - u3.shift(1).rolling(12, min_periods=6).min()
+
+
 def net_liquidity(walcl: pd.Series, tga: pd.Series, rrp: pd.Series) -> pd.Series:
     """순유동성(십억 달러) = 연준 총자산(WALCL, 백만) − 재무부 일반계정(WTREGEN, 백만) − 역레포(RRPONTSYD, 십억).
     ⚠️ 단위가 계열마다 다르다(FRED 표기 확인 2026-10-20: WALCL·WTREGEN 은 백만 달러, RRPONTSYD 는 십억 달러).
@@ -178,8 +187,7 @@ def econ_rows(S: dict) -> list[dict]:
     add('동행', '비농업 고용 (3개월 평균)', v, '{:+,.0f}K', '월 증가 인원', _st(v, 50, 100), '+50K 이하 경고 · +100K 이하 중립', pe)
     ur = S.get('UNRATE', pd.Series(dtype=float))
     if len(ur) >= 15:
-        u3 = ur.rolling(3).mean()
-        sahm = float(u3.iloc[-1] - u3.iloc[-13:-1].min())
+        sahm = float(sahm_series(ur).iloc[-1])
         add('동행', '실업률 · 삼의 법칙', float(ur.iloc[-1]), '{:.1f}%', f'삼 지표 {sahm:+.2f}%p (0.50 발동)',
             _st(sahm, 0.5, 0.3, higher_is_bad=True), '삼 지표 0.50 이상 경고 · 0.30 이상 중립', ur)
     else:
@@ -374,7 +382,7 @@ def regime_history(fed: pd.Series, ip: pd.Series, ur: pd.Series, px: pd.Series, 
         return s.reindex(me.index, method='ffill')
     f = m(fed); fed6 = f - f.shift(6)
     ipy = m((ip / ip.shift(12) - 1) * 100)
-    u = m(ur); sahm = u - u.rolling(12, min_periods=6).min()
+    sahm = m(sahm_series(ur))          # 2026-11-06 — 화면·판정과 같은 정의(sahm_series)
     rate = np.where(fed6 <= -0.25, '하락', np.where(fed6 >= 0.25, '상승', '횡보'))
     growth = np.where(ipy >= 1.0, '개선', np.where(ipy <= -1.0, '악화', '횡보'))
     growth = np.where(sahm >= 0.5, '악화', growth)
