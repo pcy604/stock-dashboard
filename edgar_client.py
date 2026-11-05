@@ -19,7 +19,7 @@ from pathlib import Path
 DATA = Path('data')
 _CIK_CACHE = DATA / 'edgar_cik.json'
 # 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
-API_VERSION = 3
+API_VERSION = 4   # 4: earnings_release_quarter(8-K 보도자료 손익, 2026-11-06)
 # SEC는 연락처 포함 User-Agent 요구 (없으면 403)
 UA = {'User-Agent': 'stock-screener research pcy604604@gmail.com',
       'Accept-Encoding': 'gzip, deflate'}
@@ -521,3 +521,131 @@ def form4_transactions(ticker, days=365, limit=30, workers=6):
     out = [row for x in res if x for row in x]
     out.sort(key=lambda x: x['date'] or '', reverse=True)
     return out
+
+
+# ── 실적 발표(8-K Item 2.02 · EX-99.1 보도자료) 손익 — 10-Q 전 공백 메우기 (2026-11-06) ──
+# 왜: XBRL(companyfacts)은 10-Q 가 제출돼야 새 분기가 생긴다(발표 후 1~3주). 그 사이 회사는 같은 날 8-K 에
+#   보도자료를 SEC 에 올린다. Yahoo 는 클라우드에서 429 로 자주 막혀(dashboard 4575행 기록) SEC 원문을 1순위로 쓴다.
+# 보도자료는 XBRL 이 아니라 HTML 표 — 머리글 이름으로 행을 찾고, '이번 분기' = 행의 첫 숫자 칸(관행: 당기 3개월이 맨 앞).
+#   잘못 읽을 위험은 단위·부호·열 순서 → 직전 분기 매출 대비 0.2~5배가 아니면 버린다(없는 값을 있는 척하지 않는다).
+import re as _re
+
+_LBL = {
+    'revenue': ('total net revenue', 'total revenues', 'total revenue', 'net revenues', 'net revenue', 'revenues',
+                'revenue', 'net sales', 'total net sales', 'sales'),
+    'cogs': ('cost of revenues', 'cost of revenue', 'cost of sales', 'cost of goods sold', 'total cost of revenue'),
+    'gross': ('gross profit', 'gross margin'),
+    'sga': ('selling, general and administrative', 'selling, general, and administrative', 'general and administrative'),
+    'op_income': ('income (loss) from operations', '(loss) income from operations', 'loss from operations',
+                  'income from operations', 'operating income (loss)', 'operating (loss) income', 'operating income',
+                  'operating loss'),
+    'net_income': ('net income (loss) attributable to', 'net (loss) income attributable to', 'net loss attributable to',
+                   'net income attributable to', 'net income (loss)', 'net (loss) income', 'net loss', 'net income'),
+}
+
+
+def _num(cell):
+    """'$ 1,234' · '(56)' · '—' → float | None. 퍼센트 칸은 숫자로 보지 않는다."""
+    t = str(cell).strip().replace('\xa0', ' ')
+    if not t or t.lower() == 'nan' or '%' in t:
+        return None
+    neg = '(' in t and ')' in t
+    t = _re.sub(r'[$,()\s]', '', t)
+    if t in ('', '-', '—', '–'):
+        return None
+    try:
+        v = float(t)
+    except ValueError:
+        return None
+    return -v if neg else v
+
+
+def _label_key(label):
+    l = _re.sub(r'\s+', ' ', str(label).lower()).strip().rstrip(':')
+    if not l or 'per share' in l or 'margin %' in l or 'noncontrolling' in l or '%' in l:
+        return None
+    for k, names in _LBL.items():
+        for n in names:
+            if l == n or (l.startswith(n) and k in ('net_income', 'op_income', 'sga')):
+                return k
+    return None
+
+
+def parse_release(html, prev_revenue=None):
+    """보도자료 HTML → {revenue,gross,sga,op_income,net_income,eps} (원 단위 USD) 또는 None.
+    표 고르기: 매출 행 + (매출총이익|영업손익) 행이 같이 있는 첫 표. 단위는 본문 'in thousands/millions' 와
+    직전 분기 매출 대비 크기로 정한다."""
+    import pandas as pd
+    from io import StringIO
+    try:
+        tabs = pd.read_html(StringIO(html))
+    except Exception:
+        return None
+    low = _re.sub(r'<[^>]+>', ' ', html).lower()
+    for t in tabs:
+        got, eps = {}, None
+        for _, row in t.astype(str).iterrows():
+            cells = list(row.values)
+            label = next((c for c in cells if c and c.lower() != 'nan' and _num(c) is None), '')
+            nums = [v for v in (_num(c) for c in cells) if v is not None]
+            if not nums:
+                continue
+            k = _label_key(label)
+            if k and k not in got:
+                got[k] = nums[0]
+            ll = str(label).lower()
+            if eps is None and 'diluted' in ll and abs(nums[0]) < 1000:
+                eps = nums[0]
+        if 'revenue' not in got or not ({'gross', 'op_income'} & set(got)):
+            continue
+        scales = [1e3, 1e6, 1.0]
+        if 'in millions' in low and 'in thousands' not in low:
+            scales = [1e6, 1e3, 1.0]
+        scale = None
+        for sc in scales:
+            if prev_revenue is None or prev_revenue <= 0 or 0.2 <= got['revenue'] * sc / prev_revenue <= 5:
+                scale = sc
+                break
+        if scale is None or got['revenue'] <= 0:
+            return None
+        out = {k: v * scale for k, v in got.items()}
+        if 'gross' not in out and 'cogs' in out:
+            out['gross'] = out['revenue'] - abs(out['cogs'])
+        if out.get('gross') is not None and out['gross'] > out['revenue'] * 1.0001:
+            return None
+        out['eps'] = eps
+        return out
+    return None
+
+
+def earnings_release_quarter(ticker, last_period, prev_revenue=None, max_docs=3):
+    """last_period('YYYY-MM', EDGAR 마지막 분기) 다음 분기의 8-K 보도자료 손익. (row|None, 이유 문자열)."""
+    import pandas as pd
+    cik = cik_map().get(ticker.upper())
+    if not cik:
+        return None, 'CIK 없음'
+    q_end = pd.Timestamp(last_period + '-01') + pd.offsets.MonthEnd(0) + pd.offsets.MonthEnd(3)
+    j = _get(f"https://data.sec.gov/submissions/CIK{cik}.json").json()
+    r = j.get('filings', {}).get('recent', {})
+    items = r.get('items') or [''] * len(r.get('form', []))
+    for i, f in enumerate(r.get('form', [])):
+        if f not in ('8-K', '8-K/A') or '2.02' not in str(items[i]):
+            continue
+        fd = pd.Timestamp(r['filingDate'][i])
+        if fd <= q_end + pd.Timedelta(days=5):
+            return None, f'분기말({q_end:%Y-%m-%d}) 뒤 실적 8-K 없음'
+        if fd > q_end + pd.Timedelta(days=120):
+            continue
+        acc = r['accessionNumber'][i].replace('-', '')
+        base = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{acc}/"
+        names = [x.get('name', '') for x in _get(base + 'index.json').json().get('directory', {}).get('item', [])]
+        docs = [n for n in names if n.lower().endswith(('.htm', '.html')) and n != r['primaryDocument'][i]
+                and 'index' not in n.lower()]
+        docs.sort(key=lambda n: (0 if _re.search(r'99', n) else 1, n))
+        for d in docs[:max_docs]:
+            p = parse_release(_get(base + d).text, prev_revenue)
+            if p:
+                p.update(period=f'{q_end:%Y-%m}', filed=r['filingDate'][i], url=base + d)
+                return p, 'ok'
+        return None, f'8-K({r["filingDate"][i]}) 보도자료 손익표를 못 읽음'
+    return None, '실적 8-K(Item 2.02) 없음'

@@ -4741,21 +4741,40 @@ def _unified_cached(sym, is_kr, freq):
 
 
 def _us_fresh_quarter(sym, rows):
-    """EDGAR 재무(XBRL)는 10-Q 가 나와야 들어온다 — 실적 발표(8-K 보도자료)와 10-Q 사이 1~3주 공백.
-    2026-11-05 차니: 'AXTI 지난주 실적 발표했는데 왜 반영 안 돼 있냐'(EDGAR 최신 2026-06, 3Q 보도자료는 10-30 경).
-    → 야후 분기 손익이 EDGAR 보다 새 분기를 가지고 있으면 그 분기만 맨 앞에 붙인다(손익 5항목만, 대차·현금흐름은 '-').
-    10-Q 가 나오면 EDGAR 값이 같은 분기를 차지하므로 자동으로 사라진다. 행에 src 를 남겨 화면에 출처를 밝힌다."""
+    """EDGAR 재무(XBRL)는 10-Q 가 나와야 들어온다 — 실적 발표와 10-Q 사이 1~3주 공백.
+    2026-11-05 차니: 'AXTI 지난주 실적 발표했는데 왜 반영 안 돼 있냐'(EDGAR 최신 2026-06).
+    2026-11-06 차니 실화면: 97d0fd9(Yahoo 보충) 뒤에도 2026-06 — Yahoo 는 클라우드에서 429 가 잦고 실패를 조용히 삼켰다.
+    → ① SEC 8-K 보도자료(edgar_client.earnings_release_quarter) ② Yahoo 분기 손익 순서. 손익만, 대차·현금흐름 '-'.
+    10-Q 가 나오면 EDGAR 값이 같은 분기를 차지해 자동으로 사라진다. 보충 실패 사유는 rows[0]['fresh_note'] 로 화면에 남긴다."""
+    if not rows:
+        return rows
+    last = str((rows[0] or {}).get('period') or '')
+    if not last:
+        return rows
+    q_end = pd.Timestamp(last + '-01') + pd.offsets.MonthEnd(0)
+    if pd.Timestamp.today() < q_end + pd.offsets.MonthEnd(3) + pd.Timedelta(days=10):
+        return rows                                   # 다음 분기가 아직 안 끝났다 — 공백이 아니다
+    blank = {'assets': None, 'liabilities': None, 'equity': None, 'op_cf': None, 'inv_cf': None, 'fin_cf': None, 'capex': None}
+    notes = []
+    try:
+        import edgar_client as _ec
+        _ec.set_interactive(True)
+        r, why = _ec.earnings_release_quarter(sym, last, rows[0].get('revenue'))
+        if r:
+            return [{'period': r['period'], 'revenue': r['revenue'], 'gross': r.get('gross'), 'sga': r.get('sga'),
+                     'op_income': r.get('op_income'), 'net_income': r.get('net_income'), 'eps': r.get('eps'), **blank,
+                     'src': f"SEC 8-K 실적 보도자료({r['filed']} 제출 · 10-Q 전)"}] + list(rows)
+        notes.append(f'SEC 8-K: {why}')
+    except Exception as e:
+        notes.append(f'SEC 8-K: {type(e).__name__}')
     try:
         import yfinance as _yf
         q = _yf.Ticker(sym).quarterly_income_stmt
         if q is None or q.empty:
-            return rows
-        last = str((rows[0] or {}).get('period') or '') if rows else ''
-        add = []
+            raise ValueError('빈 응답')
         for col in sorted(q.columns, reverse=True):
-            per = pd.Timestamp(col).strftime('%Y-%m')
-            # 52/53주 회계연도는 분기말이 달 경계를 넘나든다(09-27 vs 10-01) — 마지막 EDGAR 분기보다 40일 넘게 뒤일 때만 새 분기
-            if last and pd.Timestamp(col) <= pd.Timestamp(last + '-01') + pd.offsets.MonthEnd(0) + pd.Timedelta(days=40):
+            # 52/53주 회계연도는 분기말이 달 경계를 넘나든다 — 마지막 EDGAR 분기보다 40일 넘게 뒤일 때만 새 분기
+            if pd.Timestamp(col) <= q_end + pd.Timedelta(days=40):
                 break
             c = q[col]
 
@@ -4769,16 +4788,18 @@ def _us_fresh_quarter(sym, rows):
                 continue
             gp = _g('Gross Profit')
             cogs = _g('Cost Of Revenue')
-            add.append({'period': per, 'revenue': rev, 'gross': gp if gp is not None else (rev - cogs if cogs is not None else None),
-                        'sga': _g('Selling General And Administration'), 'op_income': _g('Operating Income', 'Total Operating Income As Reported'),
-                        'net_income': _g('Net Income', 'Net Income Common Stockholders'), 'eps': _g('Diluted EPS', 'Basic EPS'),
-                        'assets': None, 'liabilities': None, 'equity': None, 'op_cf': None, 'inv_cf': None, 'fin_cf': None,
-                        'capex': None, 'src': 'Yahoo(실적 발표 기준 · 10-Q 제출 전)'})
-            if len(add) >= 2:
-                break
-        return add + list(rows or [])
-    except Exception:
-        return rows
+            return [{'period': pd.Timestamp(col).strftime('%Y-%m'), 'revenue': rev,
+                     'gross': gp if gp is not None else (rev - cogs if cogs is not None else None),
+                     'sga': _g('Selling General And Administration'),
+                     'op_income': _g('Operating Income', 'Total Operating Income As Reported'),
+                     'net_income': _g('Net Income', 'Net Income Common Stockholders'), 'eps': _g('Diluted EPS', 'Basic EPS'),
+                     **blank, 'src': 'Yahoo(실적 발표 기준 · 10-Q 제출 전)'}] + list(rows)
+        notes.append('Yahoo: 새 분기 없음')
+    except Exception as e:
+        notes.append(f'Yahoo: {type(e).__name__} {str(e)[:40]}')
+    rows = list(rows)
+    rows[0] = dict(rows[0], fresh_note=' · '.join(notes))
+    return rows
 
 
 def unified_statements(sym, is_kr, freq):
@@ -5736,8 +5757,13 @@ def _tab_analysis():
                         _stored = None                 # 저장본으로 대신 그렸으면 그 갱신일
                         _ysrc = [r['period'] for r in (_stm or []) if r.get('src')]
                         if _ysrc:
-                            st.caption(f"ℹ️ {', '.join(_ysrc)} 분기는 실적 발표 직후라 SEC 10-Q 전 — 손익은 Yahoo 값, 대차·현금흐름은 '-' "
+                            _ys = next((r['src'] for r in _stm if r.get('src')), '')
+                            st.caption(f"ℹ️ {', '.join(_ysrc)} 분기는 실적 발표 직후라 SEC 10-Q 전 — 손익은 {_ys}, 대차·현금흐름은 '-' "
                                        "(10-Q 가 나오면 공시 값으로 바뀝니다).")
+                        elif _stm and _stm[0].get('fresh_note'):
+                            # 다음 분기가 끝난 지 10일+인데 새 분기를 못 붙였다 — 이유를 숨기지 않는다(97d0fd9 은 조용히 실패했다)
+                            st.caption(f"`최신 분기 보충 실패({_stm[0]['period']} 다음 분기): {_stm[0]['fresh_note']}` "
+                                       "— 10-Q 가 SEC 에 들어오면 자동으로 채워집니다.")
                         if not _stm and is_kr_sym:
                             _stm, _stored = kr_stored_statements(sym8_clean, 'annual' if _freq == "연간" else 'quarter')
                             if _stm:
