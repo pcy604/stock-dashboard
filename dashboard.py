@@ -985,6 +985,15 @@ if st.query_params.get('diag') == 'fin':
             _rf, _er = [], f'{type(_e).__name__}: {_e}'
         _txt = [' | '.join(_keys)] + [' | '.join(str(r.get(k)) for k in _keys) for r in _rf]
         st.code(f'[{_fq}] {time.time() - _t0:.1f}s err={_er}\n' + '\n'.join(_txt))
+        if not _kr and _fq == 'quarter' and _rf:      # 2026-11-06: 화면의 '10-Q 전 최신 분기' 보충(SEC 8-K 보도자료)도 이 서버에서 직접 시도
+            _t1 = time.time()
+            try:
+                _rel, _why = _ec.earnings_release_quarter(_sym, str(_rf[0].get('period')), _rf[0].get('revenue'))
+            except Exception as _e:
+                _rel, _why = None, f'{type(_e).__name__}: {_e}'
+            st.code(f"[8-K 보충] {time.time() - _t1:.1f}s edgar_client v{getattr(_ec, 'API_VERSION', '?')} 결과={_why}\n"
+                    + (' | '.join(f'{k}={_rel.get(k)}' for k in ('period', 'revenue', 'gross', 'op_income', 'net_income', 'eps', 'filed', 'url'))
+                       if _rel else '-'))
     st.json({'dart_client.health()': _dc.health() if _dc else None, 'dart_client 로드 오류': _DC_ERR})
     st.stop()
 
