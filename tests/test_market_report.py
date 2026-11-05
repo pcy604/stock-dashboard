@@ -13,6 +13,7 @@ assert len(M.drop_open_bar(s, "^KS11", datetime(2026, 10, 21, 7, 5, tzinfo=timez
 # 미국: 뉴욕 10-21 12:00(=16:00 UTC) 장중 → 버림, 10-21 21:30 UTC(=17:30 뉴욕) → 유지
 assert len(M.drop_open_bar(s, "^GSPC", datetime(2026, 10, 21, 16, 0, tzinfo=timezone.utc))) == 2
 assert len(M.drop_open_bar(s, "^GSPC", datetime(2026, 10, 21, 21, 30, tzinfo=timezone.utc))) == 3
+assert len(M.drop_open_bar(s, "^GSPC", datetime(2026, 10, 21, 20, 10, tzinfo=timezone.utc))) == 3, "서머타임 마감 +10분이면 오늘 봉 유지"
 # 미국 장 시작 전(뉴욕 날짜가 아직 10-20) 이면 마지막 봉이 '오늘'이 아니라서 유지
 assert len(M.drop_open_bar(s, "^GSPC", datetime(2026, 10, 21, 2, 0, tzinfo=timezone.utc))) == 3
 # 환율은 24시간 — 그대로
