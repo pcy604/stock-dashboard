@@ -93,3 +93,11 @@ def test_finds_item_202_8k_after_quarter_end(monkeypatch):
     # 분기말 뒤 실적 8-K 가 아직 없으면(가장 최근 2.02 가 7월) 이유를 돌려준다
     r2, why2 = E.earnings_release_quarter('AXTI', '2026-09', 52e6)
     assert r2 is None and '없음' in why2
+
+
+def test_dashboard_reloads_current_edgar_client():
+    # 대시보드가 다시 읽는 기준 버전이 모듈 버전보다 낮으면 클라우드가 옛 모듈을 계속 쓴다(11-05 table_ui 사고와 같은 함정)
+    import re
+    src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dashboard.py'), encoding='utf-8').read()
+    req = int(re.search(r"getattr\(_ec, 'API_VERSION', 0\) < (\d+)", src).group(1))
+    assert req == E.API_VERSION

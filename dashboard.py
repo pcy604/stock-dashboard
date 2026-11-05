@@ -814,7 +814,7 @@ try:
     import importlib                            # 처음 본 프로세스인데 옛 모듈인 경우(위 시각 비교가 못 잡음)
     if getattr(_dc, 'API_VERSION', 0) < 4:
         _dc = importlib.reload(_dc)
-    if getattr(_ec, 'API_VERSION', 0) < 3:
+    if getattr(_ec, 'API_VERSION', 0) < 4:      # 4: earnings_release_quarter — edgar_client 를 올리면 같이 올린다(11-05 table_ui 사고)
         _ec = importlib.reload(_ec)
     _dc.set_interactive(True)
     _ec.set_interactive(True)
