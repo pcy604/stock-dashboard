@@ -99,3 +99,6 @@
 
 없는 데이터를 있는 척하지 않는다. 추정 불가 항목은 `-`, 소스 한계는 화면 캡션에 명시.
 성적이 나쁜 신호를 화면에서 지우지 않는다.
+
+## 프로젝트 스킬 (2026-11-06)
+`.claude/skills/` 에 외부 스킬 13개 — 목록·사용 시점·원본은 `.claude/skills/README.md`. 특히 완료 보고 전 `verification-before-completion`, 버그엔 `systematic-debugging` 을 먼저 따른다.
