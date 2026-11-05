@@ -140,3 +140,13 @@ def test_grid_frame_dates_as_text():
     import table_ui as T
     data, _ = T.grid_frame(pd.DataFrame({'날짜': pd.to_datetime(['2026-11-05'])}), color=False)
     assert data['날짜'].tolist() == ['2026-11-05']
+
+
+def test_dashboard_requires_current_table_ui():
+    """대시보드가 요구하는 table_ui 버전 = 현재 버전. 낮으면 클라우드가 옛 모듈을 계속 쓴다(2026-11-05 실화면)."""
+    import re
+    from pathlib import Path
+    import table_ui as T
+    src = (Path(__file__).resolve().parents[1] / 'dashboard.py').read_text(encoding='utf-8')
+    req = int(re.search(r'^_TUI_REQ = (\d+)', src, re.M).group(1))
+    assert req == T.API_VERSION

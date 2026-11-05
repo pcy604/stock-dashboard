@@ -730,7 +730,8 @@ if not hasattr(_ac_dil, 'summarize_dilution'):   # 클라우드가 옛 모듈을
     import importlib as _il0
     _ac_dil = _il0.reload(_ac_dil)
 import table_ui as _tui
-if getattr(_tui, 'API_VERSION', 0) < 7:          # (7 = tkey·시총 두 단위, 2026-10-26) 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
+_TUI_REQ = 10   # table_ui 를 고치면 그 API_VERSION 으로 같이 올린다 — 2026-11-05: 7 로 두어 v9 모듈이 메모리에 남아 전 표 AgGrid 가 안 먹었다(실화면)
+if getattr(_tui, 'API_VERSION', 0) < _TUI_REQ:   # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
     import importlib as _il
     _tui = _il.reload(_tui)
 _tui.install(st)
@@ -1555,7 +1556,8 @@ def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=
     import sys as _sys
     _fr = _sys._getframe(1)                       # 부른 자리(줄 번호)가 표의 필터 키 — 서브탭마다 달라야 한다
     if getattr(st, '_tbl_ver', 0) >= 9:
-        st.dataframe(df, hide_index=True, column_config=cfg, tkey=f'std:{_fr.f_lineno}', grid=grid)
+        st.dataframe(df, hide_index=True, column_config=cfg, tkey=f'std:{_fr.f_lineno}',
+                     grid=True if grid is None else grid)   # 옛 래퍼(v9)는 None 을 '끔'으로 읽는다
     elif getattr(st, '_tbl_ver', 0) >= 7:
         st.dataframe(df, hide_index=True, column_config=cfg, tkey=f'std:{_fr.f_lineno}')
     else:                                          # 옛 래퍼가 메모리에 남은 프로세스 — tkey 를 모른다
