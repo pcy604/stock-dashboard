@@ -82,3 +82,19 @@ def test_nl_validate_drops_unknown_and_remaps_logic():
     assert spec['logic'] == '1 AND (2 OR 3)'
     assert any('foreign_flow' in d for d in dropped) and any('news_bad' in str(d) for d in dropped)
     assert spec['exit']['signals'] == [dict(type='macd_neg')]
+
+
+def test_market_block_by_own_market():
+    """소속 시장 지수 게이트 — 코스닥만 5주선 아래면 코스닥 종목만 막는다(2026-11-05)."""
+    import numpy as np
+    import pandas as pd
+    import quant_engine as Q
+    d = pd.date_range('2024-01-01', periods=8, freq='W-MON')
+    long = pd.DataFrame([(s, t, 10.0) for s in ('A', 'B') for t in d], columns=['sym', 'date', 'close'])
+    P = Q.Panel(long)
+    sm = pd.DataFrame([(s, t, 'KOSPI' if s == 'A' else 'KOSDAQ') for s in ('A', 'B') for t in d], columns=['sym', 'date', 'market'])
+    up = pd.Series(np.arange(1, 9, dtype=float), index=d)
+    down = pd.Series(np.arange(8, 0, -1, dtype=float), index=d)
+    blk = Q.market_block(P, sm, {'KOSPI': up, 'KOSDAQ': down}, ma=5)
+    assert not blk[:, 0].any()                 # 코스피 종목: 지수 상승 → 안 막음
+    assert blk[4:, 1].all() and not blk[:4, 1].any()   # 코스닥 종목: 5주 쌓인 뒤부터 막음

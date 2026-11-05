@@ -235,8 +235,12 @@ def _exit_matrix(P, sig):
     return None                                         # rank_out 은 리밸런싱 때 따로
 
 
-def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = None):
-    """반환 dict(equity, bench, exposure, trades(DataFrame), holdings(DataFrame), stats, last_pf)"""
+def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = None, entry_block=None):
+    """반환 dict(equity, bench, exposure, trades(DataFrame), holdings(DataFrame), stats, last_pf)
+
+    entry_block: (날짜 × 종목) bool 행렬 — True 면 그 주 그 종목은 신규·불타기 금지(보유분은 그대로).
+      2026-11-05: 지수 게이트를 '소속 시장'별로(코스피 종목 = 코스피 5주선, 코스닥 종목 = 코스닥 5주선) — 실전 규칙과 같게.
+      market_block() 으로 만든다."""
     S = merged(spec)
     P = panel
     dates = P.dates
@@ -373,7 +377,7 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 continue
             g = C[t, j] / p['entry'] - 1
             w_now = p['u'] * C[t, j] / E
-            if p['adds'] < len(pyr) and g * 100 >= pyr[p['adds']][0] and tgt_e > 0:
+            if p['adds'] < len(pyr) and g * 100 >= pyr[p['adds']][0] and tgt_e > 0 and not (entry_block is not None and entry_block[t, j]):
                 add = min(pyr[p['adds']][1] * p.get('tw', max_w), max_w - w_now)
                 if add > 0.001:
                     pend.append(('add', j, add, f"불타기 +{pyr[p['adds']][0]:.0f}%"))
@@ -394,7 +398,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 if want > 0.2 * p['iw'] * tgt_e:
                     pend.append(('add', j, want, '노출 복원'))
             free = max_pos - (len(pos) - len(sold))
-            new = [j for j in order if j not in pos and cool.get(j, -1) <= t][:max(0, free)]
+            new = [j for j in order if j not in pos and cool.get(j, -1) <= t
+                   and not (entry_block is not None and entry_block[t, j])][:max(0, free)]
             if new:
                 n_all = len(pos) - len(sold) + len(new)
                 if S['weight'] == 'rank':
@@ -435,6 +440,20 @@ def _holdings(P, pos, C, t, E):
                          평단=p['avg'], 현재가=px, 수익률=(px / p['avg'] - 1) * 100, 고점대비=(px / p['peak'] - 1) * 100,
                          손절선=p['stop'] or None, 불타기=p['adds'], PER=per[t, j] if np.isfinite(per[t, j]) else None))
     return pd.DataFrame(rows).sort_values('비중', ascending=False) if rows else pd.DataFrame()
+
+
+def market_block(panel: Panel, sym_market: pd.DataFrame, index_by_market: dict, ma: int = 5):
+    """소속 시장 지수 게이트 행렬. sym_market: 열 sym·date·market(주마다 — 이전 상장도 반영), index_by_market: {시장: 주봉 종가}.
+    시장 이름이 index_by_market 에 없으면(코넥스 등) 막지 않는다. 지수가 이평 아래면 True(막음)."""
+    D, S = panel.dates, panel.syms
+    m = sym_market.pivot_table(index='date', columns='sym', values='market', aggfunc='last')
+    m = m.reindex(index=D, columns=S).ffill().bfill()
+    out = np.zeros((len(D), len(S)), bool)
+    for mk, px in index_by_market.items():
+        ix = px.reindex(D, method='ffill')
+        below = (ix < ix.rolling(int(ma), min_periods=int(ma)).mean()).fillna(False).values
+        out |= below[:, None] & (m.values == mk)
+    return out
 
 
 def stats(eq, bench=None, T=None):

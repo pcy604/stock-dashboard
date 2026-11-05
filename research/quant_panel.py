@@ -96,7 +96,7 @@ def kr():
     d["week"] = d.Date - pd.to_timedelta(d.Date.dt.weekday, unit="D")      # 월요일 라벨
     w = d.groupby(["Code", "week"]).agg(name=("Name", "last"), open=("Open", "first"), high=("High", "max"), low=("Low", "min"),
                                         close=("Close", "last"), volume=("Volume", "sum"), marcap=("Marcap", "last"),
-                                        last_day=("Date", "last")).reset_index()
+                                        mid=("MarketId", "last"), last_day=("Date", "last")).reset_index()
     w = w.rename(columns={"Code": "sym", "week": "date"})
     w = w[w.marcap >= 5e10]
     # 재무: 공시일 없음 → 분기말 + 45일(4분기 90일)에 알게 된 것으로
@@ -121,7 +121,8 @@ def kr():
     w["pbr"] = (w.marcap / w.equity).where(w.equity > 0)
     w["psr"] = (w.marcap / w.ttm_revenue).where(w.ttm_revenue > 0)
     w["roe"] = (w.ttm_net_income / w.equity * 100).where(w.equity > 0)
-    w["market"] = "KR"; w["acc"] = 0
+    # 2026-11-05: 'KR' 대신 그 주의 소속 시장 — 퀀트 엔진 지수 게이트를 실전 규칙처럼 소속 시장별로(코스닥 종목 = 코스닥 5주선)
+    w["market"] = w.pop("mid").map({"STK": "KOSPI", "KSQ": "KOSDAQ"}).fillna("KR"); w["acc"] = 0
     try:
         sec = json.load(open(os.path.join(ROOT, "data", "sectors.json"), encoding="utf-8"))
     except Exception:

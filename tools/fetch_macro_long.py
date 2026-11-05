@@ -39,7 +39,7 @@ FRED = [
 ]
 
 PX = {  # 이름: Yahoo 심볼
-    "SPX": "^GSPC", "SPXTR": "^SP500TR", "NDX": "^IXIC", "KOSPI": "^KS11",
+    "SPX": "^GSPC", "SPXTR": "^SP500TR", "NDX": "^IXIC", "KOSPI": "^KS11", "KOSDAQ": "^KQ11",
     "TLT": "TLT", "IEF": "IEF", "GLD": "GLD", "GOLD_F": "GC=F", "COPPER_F": "HG=F", "WTI_F": "CL=F",
     "DXY": "DX-Y.NYB", "BTC": "BTC-USD", "VIX": "^VIX", "VIX3M": "^VIX3M", "HYG": "HYG",
     "USDKRW": "KRW=X",

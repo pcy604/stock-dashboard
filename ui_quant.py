@@ -19,8 +19,11 @@ import quant_engine as Q
 
 REL = 'https://github.com/pcy604/stock-dashboard/releases/download/quant-panel/quant_panel_{m}.parquet'
 _MK = {'US': '🇺🇸 미국', 'KR': '🇰🇷 한국'}
-_IDX = {'US': ['SPX', 'NDX'], 'KR': ['KOSPI']}
-_IDXN = {'SPX': 'S&P500', 'NDX': '나스닥100', 'KOSPI': '코스피', '': '없음'}
+_IDX = {'US': ['SPX', 'NDX'], 'KR': ['MKT', 'KOSPI']}   # 첫 번째 = 기본 지수 게이트
+KR_FIN_START = '2018-06-01'   # 한국 분기 재무 2017Q1~ → 전년 동분기 비교는 2018Q1(공시 +45일) 부터
+_BM = {'US': 'SPX', 'KR': 'KOSPI'}                        # 비교 지수(게이트와 별개)
+# MKT(2026-11-05) = 소속 시장 지수 — 코스피 종목은 코스피, 코스닥 종목은 코스닥 5주선. 실전 규칙(live/plan.py)과 같다.
+_IDXN = {'SPX': 'S&P500', 'NDX': '나스닥100', 'KOSPI': '코스피', 'MKT': '소속 시장(코스피·코스닥)', '': '없음'}
 # 필드 선택지: '이름 (키)' — :n 이 붙은 것은 n 칸을 쓴다
 _FOPT = [f"{v[0]} ({k.split(':')[0]})" for k, v in Q.FIELDS.items()]
 _FKEY = {f"{v[0]} ({k.split(':')[0]})": k for k, v in Q.FIELDS.items()}
@@ -59,9 +62,14 @@ def _panel(m):
     else:
         with urllib.request.urlopen(REL.format(m=m), timeout=60) as r:
             df = pd.read_parquet(io.BytesIO(r.read()))
-    df = df.drop(columns=[c for c in ('market',) if c in df.columns])   # 안 쓰는 문자열 열(메모리)
     df['date'] = pd.to_datetime(df['date'])
+    sm = None
+    if 'market' in df.columns and df['market'].isin(['KOSPI', 'KOSDAQ']).any():   # 주마다 소속 시장(이전 상장 반영) — 작은 표만 남긴다
+        sm = df.loc[df['market'].isin(['KOSPI', 'KOSDAQ']), ['sym', 'date', 'market']].copy()
+        sm['market'] = sm['market'].astype('category')
+    df = df.drop(columns=[c for c in ('market',) if c in df.columns])   # 문자열 열(메모리)
     P = Q.Panel(df)
+    P.sym_market = sm
     del df
     gc.collect()
     try:                                                # 읽기에 쓴 빈 메모리를 OS 에 돌려줌 — Arrow 풀(mimalloc)이 약 300MB 를 쥐고 있었다
@@ -88,10 +96,37 @@ def _index(name):
 def _run(m, spec_json):
     spec = json.loads(spec_json)
     P = _panel(m)
+    pre = ''
+    # 2026-11-05 — 한국 분기 재무(흑자전환·이익 증가율·PER)는 2017년부터라 쓸 수 있는 신호가 2018-05 부터 생긴다.
+    #   그 전 구간을 넣으면 몇 년치 현금 대기가 연 수익률을 깎는다(실전 규칙 2015~ 20.3% = 실제론 2018-08 첫 매매).
+    _fin = {'op_turn', 'op_yoy', 'rev_yoy', 'per', 'pbr', 'psr', 'roe', 'opm', 'debt', 'rev_qoq', 'gpm'}
+    if m == 'KR' and any(f.get('field', '').split(':')[0] in _fin for f in spec.get('filters', [])) \
+            and pd.Timestamp(spec.get('start') or '2000-01-01') < pd.Timestamp(KR_FIN_START):
+        spec['start'] = KR_FIN_START
+        pre = f'ℹ️ 한국 재무 조건은 {KR_FIN_START[:7]}부터 계산할 수 있어 시작을 그때로 옮겼습니다(그 전엔 신호 0건). '
     ex = spec.get('exposure') or {}
     ixn = ex.get('index') or ''
-    bm = _IDX[m][0]
+    bm = _BM[m]
+    note = ''
+    if ixn == 'MKT':
+        blk = None
+        try:
+            if getattr(P, 'sym_market', None) is not None:
+                blk = Q.market_block(P, P.sym_market, {'KOSPI': _index('KOSPI'), 'KOSDAQ': _index('KOSDAQ')}, int(ex.get('ma') or 5))
+        except Exception as e:
+            note = f'{type(e).__name__}'
+        if blk is None:      # 패널에 소속 시장이 없거나 코스닥 지수가 없음 → 코스피 하나로(화면에 밝힌다)
+            spec['exposure']['index'] = 'KOSPI'
+            r = Q.run(P, spec, index_px=_index('KOSPI'), bench_px=_index(bm))
+            r['note'] = pre + '⚠️ 소속 시장 자료가 아직 없어 코스닥 종목도 코스피 5주선으로 계산했습니다' + (f' ({note})' if note else '') + \
+                        ' — 실전 규칙(소속 시장별)과 다릅니다.'
+            return r
+        spec['exposure']['index'] = ''
+        r = Q.run(P, spec, bench_px=_index(bm), entry_block=blk)
+        r['note'] = pre
+        return r
     r = Q.run(P, spec, index_px=_index(ixn) if ixn else None, bench_px=_index(bm))
+    r['note'] = pre
     return r
 
 
@@ -406,7 +441,9 @@ def render(mkt_sel: str, tsrc):
         return
 
     # ── 결과 ──
-    bmn = _IDXN[_IDX[m][0]]
+    bmn = _IDXN[_BM[m]]
+    if r.get('note'):
+        st.caption(r['note'])
     st.markdown(_verdict(S, bmn))
     k1, k2, k3, k4 = st.columns(4)
     k1.metric('연 수익률(CAGR)', f"{S['CAGR']:.1f}%", f"{S['CAGR'] - S.get('BM_CAGR', 0):+.1f}%p vs {bmn}")
