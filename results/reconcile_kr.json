@@ -1,43 +1,43 @@
 {
- "generated": "2026-11-04",
- "asof": "2026-11-03",
+ "generated": "2026-11-05",
+ "asof": "2026-10-30",
  "intraday": true,
  "checks": {
   "perf_price": {
-   "n": 1198,
-   "ok": 958,
-   "rate": 0.8,
+   "n": 1203,
+   "ok": 547,
+   "rate": 0.455,
    "threshold": 0.9,
    "pass_": null,
    "note": "현재가 3% 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "perf_52w": {
-   "n": 1198,
-   "ok": 1193,
-   "rate": 0.996,
+   "n": 1203,
+   "ok": 1195,
+   "rate": 0.993,
    "threshold": 0.9,
    "pass_": true,
    "note": "52주 신고가 -3% 판정 일치"
   },
   "canslim_N": {
-   "n": 56,
-   "ok": 39,
-   "rate": 0.696,
+   "n": 63,
+   "ok": 24,
+   "rate": 0.381,
    "threshold": 0.9,
    "pass_": null,
    "note": "N 거리 1.5%p 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "canslim_RS": {
-   "n": 56,
-   "ok": 51,
-   "rate": 0.911,
+   "n": 63,
+   "ok": 38,
+   "rate": 0.603,
    "threshold": 0.85,
-   "pass_": true,
+   "pass_": false,
    "note": "RS ±10 이내"
   },
   "coverage": {
-   "n": 626,
-   "ok": 607,
+   "n": 627,
+   "ok": 608,
    "rate": 0.97,
    "threshold": 0.8,
    "pass_": true,
@@ -45,14 +45,14 @@
   },
   "perf_52w_count": {
    "n": 5,
-   "ok": 7,
-   "rate": 1.4,
+   "ok": 9,
+   "rate": 1.8,
    "threshold": 0.3,
    "pass_": true,
    "note": "앱/원천 신고가 근접 종목 수 비 (0.3~3배 · 주봉 vs 일봉 차 허용)"
   }
  },
  "source_52w_near": 5,
- "app_52w_near": 7,
- "ok": true
+ "app_52w_near": 9,
+ "ok": false
 }
