@@ -123,3 +123,20 @@ def test_grid_fmt_spec():
 def test_grid_constants_do_not_shadow_table_heights():
     import table_ui as T
     assert (T.HEAD_PX, T.ROW_PX) == (31, 31)                   # 그리드 상수가 기존 표 높이를 바꾸지 않는다
+
+
+def test_grid_fmt_full_keeps_sign_and_suffix():
+    import table_ui as T
+    f = T._fmt_full({'type_config': {'format': '%+.1f'}})
+    assert (f['dp'], f['plus'], f['pre'], f['suf']) == (1, True, '', '')
+    f = T._fmt_full({'type_config': {'format': '%.0f%%'}})
+    assert (f['dp'], f['plus'], f['suf']) == (0, False, '%')
+    assert T._fmt_full({'type_config': {'format': '%,d'}})['comma'] is True
+    assert T._fmt_full(None)['dp'] is None
+
+
+def test_grid_frame_dates_as_text():
+    import pandas as pd
+    import table_ui as T
+    data, _ = T.grid_frame(pd.DataFrame({'날짜': pd.to_datetime(['2026-11-05'])}), color=False)
+    assert data['날짜'].tolist() == ['2026-11-05']

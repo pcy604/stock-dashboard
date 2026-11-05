@@ -1540,7 +1540,7 @@ def _cand_panel():
 
 
 def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=None,
-               column_config=None, styler=None, note=None, grid=False):
+               column_config=None, styler=None, note=None, grid=None):
     """탭의 종목 목록을 표준 뼈대로 그린다. rows = DataFrame(코드 + 탭 고유 열, 선택: 종목)."""
     if not isinstance(rows, pd.DataFrame):
         rows = pd.DataFrame(rows)
@@ -7707,27 +7707,44 @@ with tab_pf, guard('포트폴리오 가드레일'):
 
                 @st.cache_data(ttl=3600, max_entries=4, show_spinner=False)
                 def _lp_px(syms: tuple, start: str):
-                    import yfinance as _yf
-                    _out = {}
+                    # 2026-11-05 — 네이버(FinanceDataReader) 먼저, 야후는 보조. 화면에 '300,000원'이 안 보인 일(원인 미확정:
+                    #   클라우드에서 야후가 069500 을 못 준 경우 이 블록 전체가 경고 한 줄로 끝난다). 시도 내역을 같이 돌려준다.
+                    _out, _why = {}, []
                     for _s in syms:
-                        for _t in (f"{_s}.KS", f"{_s}.KQ"):
-                            try:
+                        try:
+                            import FinanceDataReader as _fdr
+                            _h = _fdr.DataReader(_s, start)['Close'].dropna()
+                            if len(_h):
+                                _h.index = pd.DatetimeIndex([pd.Timestamp(d).date() for d in _h.index])
+                                _out[_s] = _h.astype(float)
+                                continue
+                            _why.append(f'{_s} 네이버 0행')
+                        except Exception as _e:
+                            _why.append(f'{_s} 네이버 {type(_e).__name__}')
+                        try:
+                            import yfinance as _yf
+                            for _t in (f"{_s}.KS", f"{_s}.KQ"):
                                 _h = _yf.Ticker(_t).history(start=start, auto_adjust=False)['Close'].dropna()
                                 if len(_h):
                                     _h.index = pd.DatetimeIndex([d.date() for d in _h.index])
                                     _out[_s] = _h; break
-                            except Exception:
-                                pass
-                    return pd.DataFrame(_out)
+                            else:
+                                _why.append(f'{_s} 야후 0행')
+                        except Exception as _e:
+                            _why.append(f'{_s} 야후 {type(_e).__name__}')
+                    return pd.DataFrame(_out), _why
 
                 _dep, _tr = _lp.load('KR')
                 if not _dep:
                     st.info('아직 입금 기록이 없습니다 — live/ledger.json 의 deposits 가 비어 있습니다.')
                 else:
                     _st0 = min(d for d, _ in _dep)
-                    _pxall = _lp_px(tuple([_lp.BENCH] + _lp.syms_needed(_tr)), _st0)
+                    _pxall, _pxwhy = _lp_px(tuple([_lp.BENCH] + _lp.syms_needed(_tr)), _st0)
                     if _lp.BENCH not in _pxall:
-                        st.warning('KODEX 200 가격을 받지 못했습니다 — 잠시 뒤 새로고침.')
+                        _lp_px.clear()          # 실패를 한 시간 캐시하지 않는다
+                        st.warning(f"KODEX 200 가격을 받지 못했습니다 — 잠시 뒤 새로고침. "
+                                   f"(누적 입금 {sum(a for _, a in _dep):,.0f}원 · 체결 {len(_tr)}건은 기록돼 있음)")
+                        st.caption(f"`실전 원장 가격 실패: {' · '.join(_pxwhy)[:200]}`")
                     else:
                         _df = _lp.build(_dep, _tr, _pxall.drop(columns=[_lp.BENCH]), _pxall[_lp.BENCH])
                         _s, _me, _bm = _lp.summary(_df)
