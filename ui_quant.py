@@ -45,6 +45,11 @@ PRESETS = {
                                      dict(field='ma_gap:40', op='>', value=0)], rank=dict(field='per', desc=False)),
     '할로윈 (11~4월만 주식)': dict(filters=[dict(field='marcap', op='>=', value='LIQ')], rank=dict(field='marcap', desc=True),
                                 exposure=dict(months=[11, 12, 1, 2, 3, 4])),
+    '예시: PER 10~30 × RS 80+ (지수 5주선 아래면 비중 축소)': dict(
+        filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='per', op='between', value=[10, 30]),
+                 dict(field='rs', op='>=', value=80)],
+        rank=dict(field='rs', desc=True),
+        exposure=dict(index='IDX', ma=5, below=0.3)),
     '차니식: 반만 사고 불타기 + 래칫': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80)],
                                     rank=dict(field='rs', desc=True), max_w=0.15,
                                     entry=dict(init=0.5, pyramid=[[20, 0.25], [40, 0.25]]),
@@ -238,6 +243,8 @@ _DESC = {
     '주도주: RS≥80 × 흑자전환': 'RS 80↑ × 흑자전환, 20주선 이탈·이익 급감 때 매도',
     '저PER 가치 + 이평 위': 'PER 0~12 중 40주선 위 종목, PER 낮은 순',
     '할로윈 (11~4월만 주식)': '대형주를 11~4월에만 보유',
+    '예시: PER 10~30 × RS 80+ (지수 5주선 아래면 비중 축소)': 'PER 10~30 이고 RS 80 이상인 종목을 RS 순으로 — '
+        '지수(코스피/S&P500)가 5주선 아래면 평소 비중의 30%만. "원하는 지표 몇 개 고르고 범위 정하기"의 예시',
     '차니식: 반만 사고 불타기 + 래칫': 'RS 80↑ · 절반 매수 후 +20·40% 불타기 · 오를수록 손절선 상향',
 }
 _STOPS = {0: '끔', 10: '−10%', 15: '−15%', 20: '−20%', 25: '−25%', 30: '−30%'}
@@ -354,6 +361,9 @@ def _advanced(m, base, pname):
         stp = x1.number_input('손절: 진입가 대비 −y%(0=끔)', 0.0, 90.0, float(xe.get('stop') or 0), 1.0)
         mh = x2.number_input('최소 보유(주) — 이 기간엔 래칫·신호 무시', 0, 156, int(xe.get('min_hold') or 0))
         cd = x3.number_input('판 뒤 다시 사지 않는 기간(주)', 0, 52, int(xe.get('cooldown') or 0))
+        daily_ex = st.toggle('손절·래칫 체결가를 일봉으로 (매수·신호는 그대로 주봉)', value=bool(xe.get('daily')),
+                             help='그 주 안에 스탑을 처음 건드린 날의 가격을 쓴다(지금은 주 시가나 스탑가로 근사). '
+                                  '종목마다 외부에서 일봉을 새로 받아 와 **처음 돌리면 느리다**(이후 캐시). 못 받으면 조용히 주봉으로.')
         st.caption('래칫: 진입 후 최고 수익이 +a% 를 넘으면 손절선을 고점 대비 −b% 로 끌어올린다')
         trl = st.data_editor(pd.DataFrame(xe.get('trail') or [], columns=['최고 수익(%) 이상', '고점 대비(−%)']),
                              num_rows='dynamic', hide_index=True, use_container_width=True)
@@ -412,7 +422,7 @@ def _advanced(m, base, pname):
                 exposure=dict(base=bse / 100, index=ixs, ma=int(ma), below=blw / 100, months=sorted(mon) or list(range(1, 13))),
                 entry=dict(init=ini / 100, pyramid=[[float(a), float(b) / 100] for a, b in pyr.dropna().values.tolist()]),
                 exit=dict(stop=stp, trail=[[float(a), float(b)] for a, b in trl.dropna().values.tolist()], min_hold=int(mh),
-                          cooldown=int(cd), signals=sigs),
+                          cooldown=int(cd), signals=sigs, daily=bool(daily_ex)),
                 cost=0.003)
     return spec
 

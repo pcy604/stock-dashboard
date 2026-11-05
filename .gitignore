@@ -22,6 +22,10 @@ data/portfolio_toss.enc
 data/market.db
 data/market.db-shm
 data/market.db-wal
+# 2026-11-06: 일봉 캐시(quant_engine exit.daily 전용) — 외부에서 다시 받을 수 있다
+data/daily_cache.db
+data/daily_cache.db-shm
+data/daily_cache.db-wal
 
 # 캐시/결과 (대용량, 재생성 가능)
 data/price_cache/

@@ -3034,16 +3034,21 @@ if _LEAD_KR and _show_rej:
 with (t_lab or st.empty()), guard('전략 실험실'):
     _lab_enter(t_lab)
     # 2026-11-01 차니 요구 1~8 — 포트폴리오 단위 퀀트 백테스트(ui_quant · quant_engine)가 기본, 종목 하나 실험은 옆 칸
-    _lab_mode = st.segmented_control('', ['📊 포트폴리오 백테스트', '🔍 종목 하나 전략'], default='📊 포트폴리오 백테스트',
-                                     key='lab_mode', label_visibility='collapsed') or '📊 포트폴리오 백테스트'
+    # 2026-11-06 — 사이클 비교(ui_cycle) 추가: 반도체처럼 오르내림이 반복되는 종목을 D-day 정렬해 비교
+    _lab_mode = st.segmented_control('', ['📊 포트폴리오 백테스트', '🔍 종목 하나 전략', '📈 사이클 비교'],
+                                     default='📊 포트폴리오 백테스트', key='lab_mode', label_visibility='collapsed') or '📊 포트폴리오 백테스트'
     if _lab_mode.startswith('📊'):
         import ui_quant as _uiq
         _uiq = _fresh_module(_uiq)
         _uiq.render(_GMKT, _tsrc)
-    else:
+    elif _lab_mode.startswith('🔍'):
         import ui_lab as _uil
         _uil = _fresh_module(_uil)
         _uil.render(_GMKT, _tsrc)
+    else:
+        import ui_cycle as _uic
+        _uic = _fresh_module(_uic)
+        _uic.render(_GMKT, _tsrc)
 
 
 # ── 📈 52주 신고가 (2026-10-14 · 2026-10-19 주간 그래프·연속 경신·AI 공통점) ─────────────

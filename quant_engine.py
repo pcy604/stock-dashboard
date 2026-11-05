@@ -13,7 +13,9 @@
            mode='entry' 면 줄이지 않고 신규·불타기만 막는다 = 실전 규칙)
   entry    {'init':0.5, 'pyramid':[[20,0.25],[40,0.25]]}   (요구 3 — 첫 매수는 목표 비중의 init, +n% 마다 목표의 x 만큼 추가, 목표 = 상한)
   exit     {'stop':15, 'trail':[[0,25],[50,20],[100,15]], 'min_hold':0, 'cooldown':4,
-            'signals':[{'type':'ma_break','n':5}, {'type':'rsi_down','n':14,'level':70}, ...]}   (요구 4·5)
+            'signals':[{'type':'ma_break','n':5}, {'type':'rsi_down','n':14,'level':70}, ...],
+            'daily':False}   (요구 4·5. daily=True — 매수·탈출 '신호'는 그대로 주봉, **손절·래칫 체결가만**
+            일봉으로 더 정확히(그 주 안에 스탑을 처음 건드린 날의 가격). 데이터 못 받으면 조용히 주봉으로 폴백)
   cost 0.003
 체결: 주봉(날짜 = 그 주 월요일). 판정은 그 주 종가 → 다음 주 시가 체결. 손절·래칫만 주중 스탑(저가가 선 아래면 그 선에, 갭이면 시가).
 고점 = 보유 중 최고 **종가**. 상장폐지·패널 이탈(가격 끊김)은 마지막 종가에 정리.
@@ -52,6 +54,10 @@ FIELDS = {
     'rev_qoq':   ('매출 QoQ', '%', '직전 분기 대비 (미국만)'),
     'roe':       ('ROE', '%', 'TTM 순이익 ÷ 자본총계 (한국만)'),
     'debt':      ('부채비율', '%', '부채 ÷ 자본 (한국만)'),
+    # 2026-11-06 — 순이익 YoY(＝'EPS 증가율'로 많이들 부르는 것)는 패널에 따로 안 들어 있다.
+    # per = 시총÷TTM순이익으로 패널이 만들어져 있어(quant_panel.py) 역산이 정확하다 — 근사가 아니다.
+    # 단 주식수(유상증자·자사주)는 안 보여 '진짜 1주당' 증가율과는 다를 수 있고, 적자(PER 없음)면 공백이다.
+    'ni_yoy':    ('순이익 YoY', '%', 'TTM 순이익(시총÷PER로 역산)의 1년 전 대비 — 적자(PER 없음)면 공백. 주식수 변화는 못 반영'),
     'month':     ('달(월)', '1~12', '그 주가 몇 월인가 — 할로윈·연말 효과 같은 날짜 규칙'),
     'sector':    ('업종', '글자', '업종 이름 — 조건 contains(포함) 로 사용'),
 }
@@ -168,6 +174,10 @@ class Panel:
             r = {k: c / c.shift(k) - 1 for k in (13, 26, 39, 52)}
             sc = 0.4 * r[13] + 0.2 * r[26] + 0.2 * r[39] + 0.2 * r[52]
             v = sc.rank(axis=1, pct=True) * 99
+        elif name == 'ni_yoy':
+            per = self.base('per')
+            ni = self.base('marcap') / per.where(per > 0)
+            v = (ni / ni.shift(52) - 1) * 100
         else:
             raise KeyError(f'모르는 필드: {key}')
         v = v.astype('float32')
@@ -262,6 +272,39 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
     vol = P.get('ret:1').rolling(26, min_periods=8).std().values if S['weight'] == 'inv_vol' else None
     mc = P.base('marcap').values
 
+    # ── 손절·래칫만 일봉으로(요구, 2026-11-06) — 매수·신호·탈출 '신호'는 전부 주봉 그대로.
+    #   주봉 저가로 거는 지금 체크(아래 ②)는 '그 주 안에 스탑을 건드렸는가'는 이미 정확하다
+    #   (주봉 저가 = 그 주 일봉 저가의 최솟값). 다만 체결가는 '주 시가 or 스탑가' 로 낙관적으로
+    #   근사해 왔다 — 실제로 어느 요일에 건드렸는지를 보면 더 나쁜(더 현실적인) 체결가가 나올 수 있다.
+    #   그래서 바꾸는 건 '건드렸는지'가 아니라 '얼마에 팔렸는지' 뿐. 일봉을 못 받으면 조용히
+    #   기존 주봉 방식으로 되돌아간다(백테스트가 외부 서버 때문에 통째로 죽으면 안 된다).
+    daily_exit = bool(S['exit'].get('daily'))
+    _dcache, _dfail = {}, set()
+
+    def _daily_df(j):
+        if j in _dcache or j in _dfail:
+            return _dcache.get(j)
+        import daily_store
+        d = daily_store.get(P.syms[j], S['market'], str(dates[t0].date()), str(dates[min(t1, len(dates) - 1)].date()))
+        if d is None or not len(d):
+            _dfail.add(j); return None
+        _dcache[j] = d
+        return d
+
+    def _stop_fill(t, j, stop):
+        """그 주(dates[t]~+6일) 안에서 일봉 저가가 스탑을 건드린 첫 날의 체결가. 못 구하면 None."""
+        if not daily_exit:
+            return None
+        d = _daily_df(j)
+        if d is None:
+            return None
+        wk = d.loc[(d.index >= dates[t]) & (d.index < dates[t] + pd.Timedelta(days=7))]
+        hit = wk[wk['Low'] <= stop]
+        if not len(hit):
+            return None
+        row = hit.iloc[0]
+        return float(min(row['Open'], stop)) if pd.notna(row['Open']) else float(stop)
+
     # 노출(요구 1): 지수 이평 · 달력
     ex = S['exposure']
     expo = np.full(len(dates), float(ex.get('base', 1.0)))
@@ -322,11 +365,12 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                         pos[j]['stop'] = px * (1 - float(S['exit']['stop']) / 100)
                 log(t, j, '매수' if kind == 'buy' else '불타기', px, amt / E, why)
         pend = []
-        # ② 주중 스탑(손절·래칫)
+        # ② 주중 스탑(손절·래칫) — 건드렸는지는 주봉 저가로(①), 체결가만 일봉 있으면 그걸로(②)
         for j in list(pos):
             p = pos[j]
             if p['stop'] and np.isfinite(L[t, j]) and L[t, j] <= p['stop'] and t - p['t0'] >= 0:
-                px = min(O[t, j], p['stop']) if np.isfinite(O[t, j]) else p['stop']
+                dpx = _stop_fill(t, j, p['stop'])
+                px = dpx if dpx is not None else (min(O[t, j], p['stop']) if np.isfinite(O[t, j]) else p['stop'])
                 amt = p['u'] * px; cash += amt * (1 - cost)
                 why = '손절(스탑)' if p['peak'] <= p['entry'] * 1.0001 or not tr_l else '래칫(스탑)'
                 log(t, j, '매도', px, amt / max(val(t), 1e-12), why, px / p['avg'] - 1)
