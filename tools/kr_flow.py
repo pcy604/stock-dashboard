@@ -140,11 +140,28 @@ def investor(mk: str, days: int = 95, prev: list | None = None) -> list[dict]:
     return _dedup(rows)
 
 
-def deposit(pages: int = 8) -> list[dict]:
+def deposit(pages: int = 6) -> list[dict]:
+    """증시자금동향 — stock.naver.com JSON(2026-11-06: 옛 PC 표는 화면에서 그려 빈 표만 온다). 단위 억원."""
     rows = []
     for p in range(1, pages + 1):
         try:
-            rows += parse_deposit(_get('https://finance.naver.com/sise/sise_deposit.naver', dict(page=p)))
+            r = requests.get('https://stock.naver.com/api/domestic/market/trendDeposit',
+                             params=dict(page=p, pageSize=20), headers=UA, timeout=12)
+            r.raise_for_status()
+            j = r.json()
+            j = j.get('result', j.get('datas', j)) if isinstance(j, dict) else j
+            new = 0
+            for x in (j or []):
+                bd = str(x.get('bizdate') or '')
+                if len(bd) < 8:
+                    continue
+                d = f'{bd[:4]}-{bd[4:6]}-{bd[6:8]}'
+                if any(r_['date'] == d for r_ in rows):
+                    continue
+                rows.append(dict(date=d, 고객예탁금=_num(x.get('customerDeposit')), 신용잔고=_num(x.get('creditLoan'))))
+                new += 1
+            if not new:
+                break
         except Exception as e:
             ERR[f'deposit p{p}'] = f'{type(e).__name__}: {e}'[:120]
             break
@@ -185,7 +202,7 @@ def main() -> int:
         dep = old['deposit']                     # 자금동향 실패 시 지난 값 유지(요약에 날짜가 그대로 보인다)
     ok = sum(len(v) > 10 for v in inv.values()) + (len(dep) > 10)
     v = dict(generated=datetime.now(KST).strftime('%Y-%m-%d %H:%M KST'),
-             src='네이버 증권 — 투자자별 순매수(m.stock.naver.com/api/index/*/trend) · 증시자금동향(finance.naver.com/sise/sise_deposit), 단위 억원',
+             src='네이버 증권 — 투자자별 순매수(m.stock.naver.com/api/index/*/trend) · 증시자금동향(stock.naver.com/api/domestic/market/trendDeposit), 단위 억원',
              investor=inv, deposit=dep, summary=summarize(inv, dep), err=ERR)
     print(f"투자자 코스피 {len(inv['KOSPI'])}일 · 코스닥 {len(inv['KOSDAQ'])}일 · 자금동향 {len(dep)}일 · 실패 {ERR}")
     if inv['KOSPI'] and inv['KOSDAQ'] and inv['KOSPI'][-1]['외국인'] == inv['KOSDAQ'][-1]['외국인']:
