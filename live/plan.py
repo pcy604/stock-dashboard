@@ -10,7 +10,7 @@ import json
 import math
 import os
 import sys
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
 
@@ -130,10 +130,39 @@ def trend_ok(cands, m):
     return [c if c['trend'] == 'OK' else dict(c, _excluded=True) for c in keep]   # 순서 유지 → 매수 자리를 뺏길 뻔한 종목만 건너뜀에 뜬다
 
 
+SNAP = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rs_snap.jsonl')
+
+
+def rs_shadow(C, today: str) -> dict:
+    """그림자 기록(2026-11-06) — 'RS 상승 중만' 필터는 사전 기준 불합격이라 규칙에 넣지 않는다.
+    대신 매주 후보 RS 를 쌓고, 4주(±3일) 전 기록이 있으면 변화를 표시만 한다(포워드 관찰용). 실패는 계획에 영향 없음."""
+    try:
+        rows = [dict(date=today, m=m, sym=c['sym'], rs=round(c['rs'], 1)) for m in C for c in C[m]]
+        old = []
+        if os.path.exists(SNAP):
+            old = [json.loads(x) for x in open(SNAP, encoding='utf-8') if x.strip()]
+        old = [r for r in old if r.get('date') != today] + rows
+        cut = str(date.fromisoformat(today) - timedelta(days=200))
+        old = [r for r in old if r['date'] >= cut]
+        with open(SNAP, 'w', encoding='utf-8') as f:
+            f.writelines(json.dumps(r, ensure_ascii=False) + '\n' for r in old)
+        t = date.fromisoformat(today)
+        prev = [r for r in old if 25 <= (t - date.fromisoformat(r['date'])).days <= 31]
+        if not prev:
+            return {}
+        d0 = max(r['date'] for r in prev)
+        base = {(r['m'], r['sym']): r['rs'] for r in prev if r['date'] == d0}
+        return {(r['m'], r['sym']): round(r['rs'] - base[(r['m'], r['sym'])], 1) for r in rows if (r['m'], r['sym']) in base}
+    except Exception as e:
+        print(f'rs_shadow 실패(계획 영향 없음): {type(e).__name__}: {e}')
+        return {}
+
+
 def plan():
     fx, fx_date = usdkrw()
     L = ledger()
     C = candidates(fx)
+    SH = rs_shadow(C, str(date.today()))
     IX = index_ok()
     P = dict(made=str(date.today()), price_basis=_j('results/perf_latest.json').get('date'), rs_basis=_j('results/returns.json').get('date'),
              usdkrw=fx, usdkrw_date=fx_date, index=IX, rule=RULE, sleeves={})
@@ -186,7 +215,8 @@ def plan():
                                  stop=round(c['price'] * (1 - RULE['stop']), 2)))
         P['sleeves'][m] = dict(equity_krw=round(equity), cash_krw=round(S['cash_krw']), cash_after_krw=round(cash), target_krw=round(target),
                                buys=buys, adds=adds, stops=stops, trims=trims, skipped=skipped,
-                               candidates_top=[dict(sym=c['sym'], name=c['name'], rs=round(c['rs']), why=c['why']) for c in C[m][:10]])
+                               candidates_top=[dict(sym=c['sym'], name=c['name'], rs=round(c['rs']), why=c['why'],
+                                                   rs_chg4=SH.get((m, c['sym']))) for c in C[m][:10]])
     json.dump(P, open(OUT_J, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     md = render(P)
     open(OUT_M, 'w', encoding='utf-8').write(md)

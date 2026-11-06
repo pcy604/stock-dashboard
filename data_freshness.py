@@ -247,6 +247,9 @@ SOURCES = [
     #   같이 감시한다. 09-16 자 종목 0개인 채로 아무도 모르고 있었다.
     # 2026-10-21 — 이번 주 판정 단일 출처. 멈추면 상단 배지·🏠 종합이 라이브 계산으로 넘어가고
     #   시황 리포트·주간 포트폴리오·executor 는 낡은 판정을 읽는다.
+    dict(path='results/kr_flow.json', label='한국 수급 (외국인·신용잔고)',
+         cycle='평일 17:47 KST', max_age=5, producer='tools/kr_flow.py',
+         job='kr-flow', used_by='🌍 매크로 · 🇰🇷 한국 블록', getter=_key('generated')),
     dict(path='results/macro.json', label='이번 주 판정 (코어 200일선 스위치)',
          cycle='매일 06:00', max_age=5, producer='verdict.py',
          job='daily-refresh · verdict(수동)', used_by='상단 배지 · 🏠 종합 · 📰 시황 리포트 · executor',

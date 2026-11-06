@@ -183,11 +183,13 @@ def summarize(inv: list[dict], dep: list[dict]) -> dict:
     k = [(r['date'], r['고객예탁금']) for r in dep if r.get('고객예탁금') is not None]
     if c:
         v = [x for _, x in c]
-        s['credit'] = dict(date=c[-1][0], v=v[-1], chg20=(v[-1] / v[-21] - 1) * 100 if len(v) > 20 else None,
-                           peak=max(v), from_peak=(v[-1] / max(v) - 1) * 100)
+        w = min(20, len(v) - 1)                    # API 가 최근 20일만 준다 → 매일 쌓기 전엔 있는 만큼(win 에 적는다)
+        s['credit'] = dict(date=c[-1][0], v=v[-1], chg20=(v[-1] / v[-1 - w] - 1) * 100 if w >= 10 else None, win=w,
+                           peak=max(v), peak_date=c[v.index(max(v))][0], from_peak=(v[-1] / max(v) - 1) * 100, n=len(v))
     if k:
         v = [x for _, x in k]
-        s['deposit'] = dict(date=k[-1][0], v=v[-1], chg20=(v[-1] / v[-21] - 1) * 100 if len(v) > 20 else None)
+        w = min(20, len(v) - 1)
+        s['deposit'] = dict(date=k[-1][0], v=v[-1], chg20=(v[-1] / v[-1 - w] - 1) * 100 if w >= 10 else None, win=w)
     if c and k:
         s['credit_ratio'] = c[-1][1] / k[-1][1] * 100      # 신용잔고 ÷ 예탁금(%) — 빚 비중
     return s
@@ -201,8 +203,7 @@ def main() -> int:
         pass
     inv = {mk: investor(mk, prev=(old.get('investor') or {}).get(mk)) for mk in ('KOSPI', 'KOSDAQ')}
     dep = deposit()
-    if not dep and old.get('deposit'):
-        dep = old['deposit']                     # 자금동향 실패 시 지난 값 유지(요약에 날짜가 그대로 보인다)
+    dep = _dedup(list(old.get('deposit') or []) + dep)[-400:]    # API 는 최근 20일뿐 → 매일 이어 붙여 쌓는다
     ok = sum(len(v) > 10 for v in inv.values()) + (len(dep) > 10)
     v = dict(generated=datetime.now(KST).strftime('%Y-%m-%d %H:%M KST'),
              src='네이버 증권 — 투자자별 순매수(m.stock.naver.com/api/index/*/trend) · 증시자금동향(stock.naver.com/api/domestic/market/trendDeposit), 단위 억원',

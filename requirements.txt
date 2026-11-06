@@ -1,4 +1,4 @@
-streamlit>=1.66
+streamlit>=1.67,<1.68   # 2026-11-06 상한 고정 — 1.67 의 새 인자로 앱 전체가 죽은 적 있다(table_ui._patch_blocks). 올릴 때는 헤드리스 점검 후
 pandas>=2.2,<3.0
 numpy>=1.24
 requests>=2.31

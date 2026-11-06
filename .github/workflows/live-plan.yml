@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add live/plan_latest.json live/plan_latest.md
+          git add live/plan_latest.json live/plan_latest.md live/rs_snap.jsonl
           git diff --cached --quiet && exit 0
           git commit -m "auto: 실전 시범 다음 주 계획 $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done

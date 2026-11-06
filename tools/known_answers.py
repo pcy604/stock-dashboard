@@ -352,6 +352,19 @@ def _():
     return bool(d.get('fred_ok')), f"fred_ok {d.get('fred_ok')} · 경기 {(d.get('econ') or {}).get('word')} · 사유 {next(iter(err.values()), '기록 없음(구버전 산출물)')}"
 
 
+@check('한국 수급', '코스피·코스닥 외국인 순매수가 40일 이상 있고 두 시장 값이 다르며, 신용잔고가 5~60조원·예탁금 30~200조원인가')
+def _():
+    d = _j('results/kr_flow.json')
+    inv, dep = d.get('investor') or {}, d.get('deposit') or []
+    kp, kq = inv.get('KOSPI') or [], inv.get('KOSDAQ') or []
+    if len(kp) < 40 or len(kq) < 40 or not dep:
+        return False, f"코스피 {len(kp)}일 · 코스닥 {len(kq)}일 · 자금동향 {len(dep)}일"
+    same = [a['외국인'] for a in kp[-10:]] == [b['외국인'] for b in kq[-10:]]
+    c, k = dep[-1].get('신용잔고') or 0, dep[-1].get('고객예탁금') or 0
+    ok = not same and 5e4 <= c <= 6e5 and 3e5 <= k <= 2e6 and _age(kp[-1]['date']) <= 5
+    return ok, f"{kp[-1]['date']} 외국인 코스피 {kp[-1]['외국인']:+,.0f}억 · 신용 {c / 1e4:,.1f}조 · 예탁금 {k / 1e4:,.1f}조"
+
+
 @check('이번 주 판정', 'SPY 가 200일선 대비 ±40% 안이고, ON/OFF 가 이격 부호와 맞고, 목표 비중 합이 100인가')
 def _():
     d = _j('results/macro.json')

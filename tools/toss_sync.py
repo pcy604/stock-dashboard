@@ -7,7 +7,7 @@
   그리고 키에 조회 전용 권한이 없어 client_secret 이 새면 주문까지 가능하다 —
   키는 이 PC 의 data/.toss_* (gitignore) 에만 둔다.
 
-흐름  run_update.bat(매일 06:40 KST) → 이 스크립트 → .enc 봉인 → 공개키로 감싼 .vault → 커밋·푸시 → 사이트가 개인키(Supabase)+비밀번호로 해제
+흐름  run_update.bat(노트북 작업 StockScreener_Daily, 노트북 시각 매일 06:00) → 이 스크립트 → .enc 봉인 → 공개키로 감싼 .vault → 커밋·푸시 → 사이트가 개인키(Supabase)+비밀번호로 해제
       (2026-10-26 전까지는 .enc 를 공개 git 에 커밋했다 — 오프라인 대입 위험으로 중단)
 
   python tools/toss_sync.py --setup    처음 한 번: 키·비밀번호 입력(화면에 안 보임) 후 저장, 바로 동기화

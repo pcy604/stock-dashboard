@@ -4020,54 +4020,42 @@ def _macro_v2_top(_PX, _RG):
     return dict(core_on=core_on, gap200=gap200, c1=c1, dxy_gap=dxy_gap, dxy_13=dxy_13, G=G)
 
 
-def _regime_history_panel():
-    """국면 이력 — 지금 쓰는 4계절 판정 규칙을 지난 10년에 그대로 적용해 S&P500 위에 칠한다(2026-10-21).
-    판정이 그럴듯한지 눈으로 검산하는 용도다. 월간 지표는 발표 시차 1개월을 반영한다."""
+def _regime_history_panel(h):
+    """국면 이력 — 4계절 v2 상태 기계를 과거에 그대로 적용해 S&P500 위에 칠한다(2026-11-06 v2).
+    월간 지표는 발표 시차 1개월 반영. 그림은 최근 10년, 표는 1955년부터 전부."""
+    import macro_season as _ms
     import macro_svg as _msv
-    with st.spinner("국면 이력 계산 중..."):
-        fed = _mf.to_series(fetch_fred('FEDFUNDS', 170))
-        ip = _mf.to_series(fetch_fred('INDPRO', 170))
-        ur = _mf.to_series(fetch_fred('UNRATE', 170))
-        spx = fetch_index_history('SPY', 4300)
-    if spx.empty or fed.empty or ip.empty:
-        st.info("국면 이력에 필요한 시계열(FRED·지수)을 받지 못했습니다.")
+    if h is None or h.empty:
+        st.info("국면 이력에 필요한 장기 시계열(data/research/macro_long_*.parquet)을 읽지 못했습니다.")
         return
-    h = _mf.regime_history(fed, ip, ur, spx.iloc[:, 0])
-    if h.empty:
-        st.info("국면 이력을 계산할 만큼 자료가 쌓이지 않았습니다.")
-        return
+    v = h[h.index >= h.index[-1] - pd.DateOffset(years=10)]
+    v = v[v['phase'].notna()]
     fig = go.Figure()
-    seg_start = h.index[0]; cur = h['phase'].iloc[0]
-    bounds = []
-    for dt, ph in h['phase'].items():
-        if ph != cur:
-            bounds.append((seg_start, dt, cur)); seg_start, cur = dt, ph
-    bounds.append((seg_start, h.index[-1] + pd.offsets.MonthEnd(0), cur))
-    for x0, x1, ph in bounds:
-        fig.add_vrect(x0=x0 - pd.offsets.MonthBegin(1), x1=x1, fillcolor=_msv.SEASON_COLOR[ph], opacity=0.13,
-                      line_width=0, layer='below')
-    fig.add_trace(go.Scatter(x=h.index, y=h['close'], mode='lines', name='S&P500(SPY)', line=dict(width=2, color='#16181D'),
-                             customdata=[SEASONS[p]['name'] for p in h['phase']],
-                             hovertemplate='%{x|%Y-%m} · %{customdata}<br>%{y:,.1f}<extra></extra>'))
-    for k in _msv.SEASON_ORDER:          # 범례용
+    grp = (v['phase'] != v['phase'].shift()).cumsum()
+    for _, g in v.groupby(grp):
+        fig.add_vrect(x0=g.index[0] - pd.offsets.MonthBegin(1), x1=g.index[-1], fillcolor=_msv.SEASON_COLOR[g['phase'].iloc[0]],
+                      opacity=0.13, line_width=0, layer='below')
+    fig.add_trace(go.Scatter(x=v.index, y=v['close'], mode='lines', name='S&P500', line=dict(width=2, color='#16181D'),
+                             customdata=[f"{SEASONS[p]['name']} {m}개월째 · {st_}" for p, m, st_ in zip(v['phase'], v['months'], v['stage'])],
+                             hovertemplate='%{x|%Y-%m} · %{customdata}<br>%{y:,.0f}<extra></extra>'))
+    for k in _msv.SEASON_ORDER:
         fig.add_trace(go.Scatter(x=[None], y=[None], mode='markers', name=f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}",
                                  marker=dict(size=12, symbol='square', color=_msv.SEASON_COLOR[k], opacity=.45)))
     fig.update_layout(height=360, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
-                      legend=dict(orientation='h', y=1.1, x=0), yaxis=dict(type='log', title='SPY (로그)'))
+                      legend=dict(orientation='h', y=1.1, x=0), yaxis=dict(type='log', title='S&P500 (로그)'))
     st.plotly_chart(fig, use_container_width=True, key='mac_pc_3325')
-    fw = _mf.regime_forward(h, 3)
-    if len(fw):
-        fw.index = [f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}" for k in fw.index]
-        fw = fw.reset_index().rename(columns={'index': '국면'})
-        st.dataframe(fw, filters=False,
-                     src=f"FRED(FEDFUNDS·INDPRO·UNRATE, 발표 시차 1개월) · FinanceDataReader(SPY) · {h.index[0]:%Y-%m}~{h.index[-1]:%Y-%m} 월말",
-                     asof=f"{h.index[-1]:%Y-%m-%d}",
-                     column_config={'개월 수': st.column_config.NumberColumn('개월 수', format='%d'),
-                                    '다음 3개월 평균(%)': st.column_config.NumberColumn('다음 3개월 평균(%)', format='%+.1f'),
-                                    '다음 3개월 상승 비율(%)': st.column_config.NumberColumn('다음 3개월 상승 비율(%)', format='%.0f')})
-    st.caption("배경색 = 그 달 판정 국면, 선 = S&P500. 같은 규칙을 과거에 그대로 적용했다(미래 값 미사용). "
-               "표의 '다음 3개월'은 국면 판정 뒤 지수가 실제로 어떻게 움직였나 — 10년·개월 수가 작아 통계적 결론이 아니라 검산용이다. "
-               "비중 규칙의 근거는 아래 '욕심 조절 원칙'(1988~2026 검증)이다.")
+    fw = _ms.forward(h)
+    fw['계절'] = [f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}" for k in fw['계절']]
+    _md = _ms.median_months(h)
+    fw.insert(3, '중앙 지속(개월)', [_md.get(k) for k in _ms.ORDER])
+    st.dataframe(fw, filters=False,
+                 src=f"FRED(FEDFUNDS·INDPRO·UNRATE·CPIAUCSL, 발표 시차 1개월) · S&P500 가격지수(Yahoo) · {h.index[0]:%Y-%m}~{h.index[-1]:%Y-%m} 월말 · macro_season.py",
+                 asof=f"{h.index[-1]:%Y-%m-%d}",
+                 column_config={c: st.column_config.NumberColumn(c, format=('%+.1f' if '평균' in c else '%.0f'))
+                                for c in fw.columns if c != '계절'})
+    st.caption("배경색 = 그 달 계절, 선 = S&P500(배당 제외). 같은 규칙을 과거에 그대로 적용했다(미래 값 미사용). "
+               "표는 1955년부터 — **네 계절 모두 그 뒤 평균 수익이 플러스**다. 즉 이 지도는 '피할 때'를 알려주는 예보가 아니다. "
+               "겨울(역실적) 뒤 12개월이 오히려 가장 좋았다 — 우라가미가 말한 '겨울에 실탄을 준비하라'와 같은 방향. 비중 규칙의 근거는 아래 '욕심 조절 원칙'.")
 
 
 @st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
@@ -4205,7 +4193,7 @@ def _alert_px_cached():
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def _alert_px_file():
-    """커밋된 일봉(data/research/macro_long_px.parquet, 매일 CI 갱신) — Yahoo 가 막혀도 판정이 비지 않게."""
+    """커밋된 일봉(data/research/macro_long_px.parquet, macro-long 평일 07:53 KST 갱신) — Yahoo 가 막혀도 판정이 비지 않게."""
     try:
         px = pd.read_parquet(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'research', 'macro_long_px.parquet'))
         return {s: px[c].dropna() for s, c in _ALERT_SYMS.items() if c in px.columns}
@@ -4312,6 +4300,150 @@ def _macro_live_top():
                + " (Yahoo 는 장중 값 포함, 커밋 파일은 전일 종가)")
 
 
+# ── 🇰🇷 한국 블록 (2026-11-06 매크로 개편 4) — 실제 돈은 한국에 있다 ─────────────────────
+def _kr_flow_file():
+    try:
+        return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', 'kr_flow.json'), encoding='utf-8'))
+    except Exception:
+        return {}
+
+
+def _macro_kr_block():
+    st.subheader("🇰🇷 한국 — 돈이 들어오나, 빚이 쌓이나")
+    st.caption("외국인 수급 · 신용잔고(빚) · 수출 · 원화. 참고 지표 — 비중을 바꾸지 않는다(검증 전). "
+               "한국 폭락(2026-06~)을 앞서 보여주는지 관찰하려고 둔다.")
+    K = _kr_flow_file()
+    sm = K.get('summary') or {}
+    c1, c2, c3, c4 = st.columns(4)
+    for col, mk, lab in ((c1, 'KOSPI', '외국인 · 코스피 20일'), (c2, 'KOSDAQ', '외국인 · 코스닥 20일')):
+        x = sm.get(mk)
+        if not x:
+            col.metric(lab, '-', None, help='results/kr_flow.json 없음 — kr-flow 워크플로 수집 대기')
+            continue
+        col.metric(lab, f"{x['d20'] / 1e4:+,.2f}조원", f"5일 {x['d5']:+,.0f}억원", delta_color='normal',
+                   help=f"{x['date']} 기준 외국인 순매수 합계. 1일 {x['d1']:+,.0f}억 · 60일 {x['d60'] / 1e4:+,.2f}조원. "
+                        "20일 누적이 크게 마이너스면 외국인 이탈(원화 약세와 같이 오면 더 무겁게 본다).")
+    cr = sm.get('credit')
+    if cr:
+        c3.metric('신용잔고 (빚)', f"{cr['v'] / 1e4:,.1f}조원",
+                  ('-' if cr['chg20'] is None else f"{cr.get('win', 20)}영업일 {cr['chg20']:+.1f}%"), delta_color='inverse',
+                  help=f"{cr['date']} 기준(이틀가량 늦게 발표). 수집 구간({cr.get('n', '-')}일) 고점 {cr['peak'] / 1e4:,.1f}조원({cr.get('peak_date', '-')}) 대비 {cr['from_peak']:+.1f}%. "
+                       + (f"고객예탁금 대비 {sm['credit_ratio']:.0f}%. " if sm.get('credit_ratio') else '')
+                       + "빚이 빠르게 늘면 과열, 급감하면 반대매매(강제 청산)가 지나간 것으로 본다.")
+    else:
+        c3.metric('신용잔고 (빚)', '-', None)
+    ex = _mf.to_series(fetch_fred('XTEXVA01KRM667S', 26))
+    if len(ex) >= 13:
+        y = (float(ex.iloc[-1]) / float(ex.iloc[-13]) - 1) * 100
+        y3 = float((ex.iloc[-3:].sum() / ex.iloc[-15:-12].sum() - 1) * 100) if len(ex) >= 15 else None
+        c4.metric('수출 YoY', f"{y:+.1f}%", None if y3 is None else f"3개월 합 {y3:+.1f}%", delta_color='normal',
+                  help=f"{ex.index[-1]:%Y-%m} 관측(OECD·FRED XTEXVA01KRM667S, 달러 기준, 1~2개월 늦음). 한국 이익의 선행 지표.")
+    else:
+        c4.metric('수출 YoY', '-', None)
+    rows = []
+    for mk in ('KOSPI', 'KOSDAQ'):
+        for r in (K.get('investor') or {}).get(mk, []):
+            if r.get('외국인') is not None:
+                rows.append((r['date'], mk, r['외국인']))
+    if rows:
+        df = pd.DataFrame(rows, columns=['date', 'mk', 'v'])
+        df['date'] = pd.to_datetime(df['date'])
+        fig = go.Figure()
+        for mk, colr in (('KOSPI', '#2a78d6'), ('KOSDAQ', '#eb6834')):
+            d = df[df['mk'] == mk].set_index('date')['v'].sort_index()
+            if len(d):
+                fig.add_trace(go.Scatter(x=d.index, y=d.cumsum() / 1e4, mode='lines', name=f"{mk} 외국인 누적",
+                                         line=dict(width=2, color=colr), hovertemplate='%{x|%m-%d} %{y:+,.2f}조원<extra></extra>'))
+        fig.add_hline(y=0, line_color='#c3c2b7', line_width=1)
+        fig.update_layout(height=260, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
+                          legend=dict(orientation='h', y=1.12, x=0), yaxis_title='누적 순매수(조원)')
+        st.plotly_chart(fig, use_container_width=True, key='mac_kr_flow')
+    st.caption(f"출처: {K.get('src', '네이버 금융')} · OECD/FRED(수출) · 마지막 갱신: {K.get('generated', '⚠️ 미수집')}"
+               + (f" · 수집 실패 {len(K['err'])}건" if K.get('err') else ''))
+
+
+@st.cache_data(ttl=3 * 3600, show_spinner=False)
+def _season_cached():
+    import macro_season as _ms
+    spx = None
+    try:
+        spx = _alert_px()['^GSPC'][0]
+    except Exception:
+        pass
+    return _ms.current(fetch_fred, spx)
+
+
+def _season_now():
+    try:
+        return _season_cached()
+    except Exception as e:
+        st.caption(f"`4계절 v2 계산 실패: {type(e).__name__}: {e}`")
+        return pd.DataFrame(), {}
+
+
+def _season_card(sn, h):
+    import macro_season as _ms
+    if not sn:
+        st.info("4계절을 판정하지 못했습니다(장기 시계열 없음).")
+        return
+    S, N = SEASONS[sn['phase']], SEASONS[sn['next']]
+    _SCOL = {'FIN': '#16a34a', 'EARN': '#ca8a04', 'RFIN': '#ea580c', 'RERN': '#2563eb'}
+    c = _SCOL[sn['phase']]
+    pos = sn['pos'] if sn['pos'] is not None else 0
+    miss = [x['name'] for x in sn['conds'][sn['next']] if not x['ok']]
+    _med_txt = '-' if sn['median'] is None else '%.0f개월' % sn['median']
+    st.markdown(
+        f"<div style='background:#ffffff;border:1px solid #e8e8e4;border-left:6px solid {c};border-radius:12px;padding:16px 20px;margin-bottom:10px'>"
+        f"<div style='font-size:24px;font-weight:800;color:{c};line-height:1.25'>{S['emoji']} {S['name']}"
+        f"<span style='font-size:14px;font-weight:600;color:#6b7280'>&nbsp;&nbsp;{S['sub']}</span></div>"
+        f"<div style='font-size:13.5px;color:#374151;margin-top:6px'>{sn['since']}부터 <b>{sn['months']}개월째</b> · "
+        f"이 계절의 과거 중앙 지속 {_med_txt} · "
+        f"계절 안 위치 <b>{pos}/100 ({sn['stage']})</b></div>"
+        f"<div style='position:relative;height:8px;background:#f1f0eb;border-radius:4px;margin:10px 0 4px'>"
+        f"<div style='position:absolute;left:0;top:0;bottom:0;width:{pos}%;background:{c};border-radius:4px'></div>"
+        f"<div style='position:absolute;left:33%;top:-3px;bottom:-3px;width:1px;background:#c3c2b7'></div>"
+        f"<div style='position:absolute;left:66%;top:-3px;bottom:-3px;width:1px;background:#c3c2b7'></div></div>"
+        f"<div style='display:flex;justify-content:space-between;font-size:11px;color:#898781'><span>초입</span><span>중반</span><span>후반</span></div>"
+        f"<div style='font-size:13.5px;color:#374151;margin-top:10px'>다음 계절 <b>{N['emoji']} {N['name']}</b> 조건 "
+        f"<b>{sn['next_n']}/3</b> 충족" + (f" — 남은 조건: <b>{' · '.join(miss)}</b>" if miss else " — <b>전환 대기</b>(다음 달도 충족되면 확정)")
+        + "</div></div>", unsafe_allow_html=True)
+    cl, cr = st.columns([1, 1], gap='medium')
+    with cl:
+        st.markdown("##### 계절별 진입 조건 — 지금 충족 여부")
+        t = pd.DataFrame([{'계절': f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}",
+                           '조건 ①': ('✅ ' if x[0]['ok'] else '⬜ ') + x[0]['name'],
+                           '조건 ②': ('✅ ' if x[1]['ok'] else '⬜ ') + x[1]['name'],
+                           '조건 ③': ('✅ ' if x[2]['ok'] else '⬜ ') + x[2]['name'],
+                           '충족(개)': sn['n'][k],
+                           '상태': '지금' if k == sn['phase'] else ('다음' if k == sn['next'] else '')}
+                          for k in _ms.ORDER for x in [sn['conds'][k]]])
+        st.dataframe(t, filters=False, color=False, src='macro_season.py (FRED · S&P500)', asof=sn['asof'] + ' 월말(진행 중 달 포함)',
+                     column_config={'충족(개)': st.column_config.NumberColumn('충족(개)', format='%d')})
+    with cr:
+        st.markdown("##### 경계선 — 축마다 지금 값과 임계")
+        t2 = pd.DataFrame([{'축': x['axis'], '지금': x['val'], '판정': x['word'], '경계': x['edge']} for x in sn['lines']])
+        st.dataframe(t2, filters=False, color=False, src='FRED(FEDFUNDS·INDPRO·UNRATE·CPIAUCSL) · S&P500', asof=sn['asof'])
+        st.caption("물가 축(2026-11-06 추가): 과열이면 금리가 아직 안 올라도 '긴축'으로 센다 — 연준은 물가를 늦게 따라간다.")
+    with st.expander("4계절 정의 v2 — 진입 조건 · 전환 규칙 · 위치 계산 (2026-11-06)"):
+        st.markdown(
+            "**축** (월말, 월간 지표는 발표 시차 1개월)  \n"
+            "· 금리: Fed 기준금리 6개월 변화 ≤ −0.25%p 하락 / ≥ +0.25%p 상승  \n"
+            "· 실적: 산업생산 YoY ≥ +1% 개선 / ≤ −1% 악화 (삼의 법칙 ≥ 0.5 이면 악화)  \n"
+            "· 주가: S&P500 월말 종가가 200일선 위 **그리고** 12개월 수익 + → 상승  \n"
+            "· 물가: CPI YoY ≥ 3.5%, 또는 ≥ 3.0% 이면서 3개월 +0.3%p 이상 → 과열\n\n"
+            "**진입 조건** (3개 모두)  \n"
+            "🌱 금융장세: 금리 하락 · 물가 과열 아님 · 주가 상승  \n"
+            "☀️ 실적장세: 실적 개선 · 주가 상승 · 금리 하락 끝  \n"
+            "🍂 역금융장세: 긴축(금리 상승 또는 물가 과열) · 주가 하락 · 실적 악화 아님  \n"
+            "❄️ 역실적장세: 실적 악화 · 주가 하락 · 긴축 끝\n\n"
+            "**전환** — 🌱→☀️→🍂→❄️→🌱 순서. 다음 계절 조건이 **2개월 연속** 충족되면 넘어간다. "
+            "순서를 건너뛰는 이동은 **3개월 연속**일 때만. 아무것도 안 맞으면 지금 계절에 머문다.\n\n"
+            "**위치(0~100)** = 50 × min(경과 개월 ÷ 과거 중앙 지속, 1) + 50 × (다음 계절 조건 충족 수 ÷ 3). "
+            "0~33 초입 · 34~66 중반 · 67~100 후반.\n\n"
+            "**v1과 차이** — v1은 달마다 점수 1위를 골라 1955~2026 동안 161번 바뀌었고 그중 53번이 한 달짜리였다. "
+            "v2는 69번. 물가를 보지 않던 v1은 CPI 4% 에서도 '실적장세 확신'이었다.")
+
+
 def _macro_rules_section(V, _RG):
     """④ 욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다."""
     st.subheader("욕심 조절 원칙 — 백테스트로 검증한 것만 비중에 쓴다")
@@ -4349,34 +4481,25 @@ with tab4, guard('매크로'):
     with guard('매크로 · 실전 판정'):
         _macro_live_top()
 
+    with guard('매크로 · 한국'):
+        _macro_kr_block()
+
     with st.spinner("사이클 지표 수집 중..."):
         _MI = macro_inputs()
         _PX = macro_price_state()
     _RG = macro_regime(_MI, _PX)
+    _SH, _SN = _season_now()
+    if _SN.get('phase'):                     # 2026-11-06 — 4계절은 상태 기계 v2 하나(verdict.build 와 같은 함수)
+        _RG['phase'] = _SN['phase']
     _S = SEASONS[_RG['phase']]
 
-    # ── 결론 먼저 (2026-10-21 사용자 피드백) — 지금 국면 → 이번 주 판정 → 근거(두 축) 순서
-    st.subheader("지금 국면")
-    st.caption("두 축(돈의 흐름 · 경제)이 만나는 곳. 지도는 '어디쯤인가'를 보여줄 뿐, 비중은 아래 검증된 원칙이 정한다.")
+    _MV = _macro_v2_top(_PX, _RG)
 
-    # ── ① 국면 대형 카드 ──────────────────────────────────────────
-    _SCOL = {'FIN': '#16a34a', 'EARN': '#ca8a04', 'RFIN': '#ea580c', 'RERN': '#2563eb'}
-    _SBG  = {'FIN': '#f0fdf4', 'EARN': '#fefce8', 'RFIN': '#fff7ed', 'RERN': '#eff6ff'}
-    _c, _bg = _SCOL[_RG['phase']], _SBG[_RG['phase']]
-    _conf_txt = ('확신 높음' if _RG['conf'] >= 2 else
-                 ('경계선 — ' + SEASONS[_RG['second']]['name'] + '과 혼재' if _RG['conf'] == 0 else '보통'))
-    st.markdown(
-        f"<div style='background:{_bg};border:1px solid {_c}44;border-left:6px solid {_c};"
-        f"border-radius:12px;padding:18px 22px;margin-bottom:10px'>"
-        f"<div style='font-size:26px;font-weight:800;color:{_c};line-height:1.25'>"
-        f"{_S['emoji']} {_S['name']}<span style='font-size:14px;font-weight:600;color:#6b7280'>"
-        f"&nbsp;&nbsp;{_S['sub']}&nbsp;·&nbsp;{_conf_txt}</span></div>"
-        f"<div style='font-size:14px;color:#374151;margin-top:8px'>{_S['desc']}</div>"
-        f"<div style='font-size:12.5px;color:#6b7280;margin-top:10px'>"
-        f"판정 근거 — 금리 <b>{_RG['rate_dir']}</b>(6개월 {_MI.get('fed_6m','-')}%p) &nbsp;·&nbsp; "
-        f"실적 <b>{_RG['growth']}</b>(산업생산 YoY {_MI.get('ip_yoy','-')}%) &nbsp;·&nbsp; "
-        f"주가 <b>{_RG['px_dir']}</b>(200일선 {'위' if _PX.get('above_ma') else '아래'})</div>"
-        f"</div>", unsafe_allow_html=True)
+    # ── 국면 지도 — 참고 (2026-11-06 개편 6: 검증 안 된 지도는 근거 아래로)
+    st.subheader("국면 지도 — 참고 (비중 규칙 아님)")
+    st.caption("지금 사이클의 어디쯤인가 · 무엇이 바뀌면 다음 계절로 넘어가나. 비중은 맨 위 실전 판정만 정한다.")
+    with guard('매크로 · 4계절'):
+        _season_card(_SN, _SH)
 
     # st.success/st.error 는 '성공/실패' 알림으로 읽히므로 쓰지 않는다.
     # 색 면적도 줄인다 — 큰 색 블록이 나란히 서면 화면이 소리를 지른다.
@@ -4396,14 +4519,13 @@ with tab4, guard('매크로'):
     #    막스 시계추는 뺐다 — 1988~2026 검증에서 '탐욕'이 매도 근거가 못 됐고(욕심 조절 원칙 C7),
     #    위험 심리는 축 1의 하이일드 스프레드·VIX 기간구조 카드가 이미 보여준다.
     import macro_svg as _msv
-    _conf_s = ('확신 높음' if _RG['conf'] >= 2 else ('경계선' if _RG['conf'] == 0 else '확신 보통'))
+    _conf_s = (f"{_SN['months']}개월째 · {_SN['stage']}" if _SN else ('확신 높음' if _RG['conf'] >= 2 else ('경계선' if _RG['conf'] == 0 else '확신 보통')))
     _D1, _D2 = st.columns(2, gap='medium')
     with _D1.container(border=True):
         st.markdown("##### 🗓️ 우라가미 4계절 — 지금 무슨 장인가")
-        st.markdown(_msv.season_wheel(_RG['phase'], _RG['scores'], SEASONS, _conf_s), unsafe_allow_html=True)
+        st.markdown(_msv.season_wheel(_RG['phase'], ({k: f"조건 {v}/3" for k, v in _SN['n'].items()} if _SN else _RG['scores']), SEASONS, _conf_s), unsafe_allow_html=True)
         st.caption(f"시계 방향으로 돈다: 금융장세(봄) → 실적장세(여름) → 역금융장세(가을) → 역실적장세(겨울). "
-                   f"점수 = 금리 방향·실적 방향·주가 추세 3축 부합도. 1·2위 차이가 확신도"
-                   + (f" — 지금은 {SEASONS[_RG['second']]['name']}와 혼재." if _RG['conf'] == 0 else "."))
+                   "칸 아래 숫자 = 그 계절 진입 조건 3개 중 지금 충족된 수(정의는 위 '정의 v2').")
     with _D2.container(border=True):
         st.markdown("##### 🥚 코스톨라니 달걀 — 무슨 자산을 들 때인가")
         _ei = _RG['egg_i']
@@ -4419,14 +4541,15 @@ with tab4, guard('매크로'):
             st.caption(f"{EGG[_ei][1]} — {EGG[_ei][2]} (금리 {_MI.get('fed','-')}%, 10년 분포의 {_MI.get('fed_pct','-')}% 지점, "
                        f"6개월 {_MI.get('fed_6m','-')}%p)")
 
-    _MV = _macro_v2_top(_PX, _RG)
+
+
 
     # ── 국면 이력 · 궤적 · 전이 감시판
     st.subheader("국면은 어떻게 흘러왔나")
     _tb0, _tb1, _tb2 = st.tabs(['🗓️ 국면 이력 — S&P500 위에 그린 10년', '🌀 사이클 궤적 — 지난 2년',
                                 '🚨 전이 감시판 — 무엇이 바뀌면 넘어가나'])
     with _tb0:
-        _regime_history_panel()
+        _regime_history_panel(_SH)
     with _tb1:
         # ── ③ 사이클 궤적 ────────────────────────────────────────────
         _ip_h, _ff_h = _MI.get('ip_hist'), _MI.get('fed_hist')
@@ -6791,33 +6914,18 @@ def _tab_analysis():
                                             for c in _ms.MONTHS})
                                 cfg['연간'] = st.column_config.NumberColumn('연간', format='%.1f', width=74)
                                 return cfg
-                            _yb = 'font-weight:800'   # 연간 열 강조(표 격자는 캔버스라 테두리 CSS 는 안 먹는다 — 굵기로)
+                            # 2026-11-06 — Styler 표 → AgGrid(머리글 정렬·No. 1부터). 색은 table_ui 가 부호로 칠한다.
+                            #   승률은 부호에 뜻이 없어(항상 +) 따로 떼어 색 없이 둔다(표 규칙: 부호에 뜻이 있는 열만 칠한다).
                             _tsrc('FinanceDataReader(일봉 주가)', live=True)
-                            st.dataframe(_mraw.style.map(lambda v: _yb, subset=['연간']),
-                                         column_config=_mcfg('연도'), filters=False, footer=False)
-
-                            # 요약(전체·홀수해·짝수해) — 굵게, 승률은 50% 기준으로 색
-                            _msc = _msum[_msum['구분'].str.endswith('평균')][_ms.COLS].abs().stack()
-                            _msc = float(_msc.quantile(.9)) if len(_msc) else 1.0
-
-                            def _mrow(r):
-                                _win = str(r.get('구분', '')).endswith('승률')
-                                out = []
-                                for c in r.index:
-                                    css = 'font-weight:800' if c == '연간' else 'font-weight:700'
-                                    if c == '구분':
-                                        css += ';background-color:rgba(51,65,85,0.08)'   # 요약 라벨 열 — RAW 연도 열과 구분
-                                    v = r[c]
-                                    if c in _ms.COLS and pd.notna(v):
-                                        bg = _tui._bg(float(v) - 50, 40) if _win else _tui._bg(float(v), _msc or 1.0)
-                                        if bg:
-                                            css += ';' + bg
-                                    out.append(css)
-                                return pd.Series(out, index=r.index)
-                            st.dataframe(_msum.style.apply(_mrow, axis=1),
-                                         column_config=_mcfg('구분'), filters=False, color=False)
+                            st.dataframe(_mraw, column_config=_mcfg('연도'), filters=False, footer=False)
+                            _mavg = _msum[_msum['구분'].str.endswith('평균')].reset_index(drop=True)
+                            _mwin = _msum[_msum['구분'].str.endswith('승률')].reset_index(drop=True)
+                            if len(_mavg):
+                                st.dataframe(_mavg, column_config=_mcfg('구분'), filters=False)
+                            if len(_mwin):
+                                st.dataframe(_mwin, column_config=_mcfg('구분'), filters=False, color=False)
                             st.caption("연도×월 수익률(%) — 위는 연도별 RAW(오래된 해→최근 해), 아래는 요약. "
-                                       "**평균**=월별 계절성, **승률**=그 달(연간은 그 해)이 오른 비율(%) · 50% 기준 색. "
+                                       "**평균**=월별 계절성(+ 초록 / − 빨강), **승률**=그 달(연간은 그 해)이 오른 비율(%, 50 이 반반). "
                                        "홀수해/짝수해는 대선·중간선거 주기 같은 격년 패턴 확인용. "
                                        "연간=전년 말 대비(올해는 연초 대비 YTD). ⚠️ 표본 적으면 우연 — 해가 많을수록 믿을 만.")
                         else:
@@ -8039,7 +8147,7 @@ with tab_pf, guard('포트폴리오 가드레일'):
             with st.container(border=True):
                 _tz_c1, _tz_c2 = st.columns([3, 1])
                 _tz_c1.markdown(f"**🔐 토스 계좌 연동** · 자료 기준 {_tz_head.get('asof') or '-'} "
-                                "(노트북이 매일 06:40 KST 갱신)")
+                                "(노트북 작업 StockScreener_Daily — 노트북 시각 매일 06:00 실행)")
                 if st.session_state.get('pf_toss'):
                     if _tz_c2.button('🔒 잠그기', key='pf_toss_lock', use_container_width=True):
                         for _k in ('pf_toss', 'pf_rows', 'pf_cap', 'pf_src'):
