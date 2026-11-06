@@ -244,14 +244,22 @@ def _():
 
 @check('기간 수익률', '삼성전자 12개월 수익률이 상장목록 종가와 맞물리는가 (가격 시계열 정합)')
 def _():
-    _, s = _stocks('results/returns.json')
+    # 2026-11-06 — 예전엔 returns.json 시총 ↔ '오늘' 상장목록 시총을 비교했다. returns.json 은 주 1회
+    #   (weekly-profile) 라 그 사이 주가가 10% 넘게 움직이면(삼성 11-02→11-06 -13%) 데이터가 멀쩡해도 실패했다.
+    #   같은 실행(screen_precompute)이 만든 mdd.json 의 '시계열 마지막 종가' × 상장주식수 가
+    #   returns.json 시총과 10% 안에서 맞는지로 본다 — 시계열 단위·수정주가 오류는 그대로 잡힌다.
+    d_r, s = _stocks('results/returns.json')
+    d_m, m = _stocks('results/mdd.json')
     k = pd.read_csv(os.path.join(BASE, 'data/krx_listing_last.csv'), dtype={'Code': str})
     r = s.get('005930', {}).get('ret_12m')
     mc_r = s.get('005930', {}).get('marcap')
-    mc_k = k.loc[k.Code == '005930', 'Marcap']
-    # 두 파일의 시총이 10% 안에서 맞으면 같은 날 가격 기준이다. 12M 수익률은 -90%~+1000% 범위.
-    same = len(mc_k) and mc_r and abs(mc_r / float(mc_k.iloc[0]) - 1) < 0.10
-    return bool(r is not None and -90 < r < 1000 and same), f"12M {r}% · 시총 일치 {bool(same)}"
+    px = m.get('005930', {}).get('price')
+    sh = k.loc[k.Code == '005930', 'Stocks']
+    same_run = d_r.get('date') == d_m.get('date')
+    implied = float(px) * float(sh.iloc[0]) if (px and len(sh)) else None
+    same = bool(same_run and implied and mc_r and abs(mc_r / implied - 1) < 0.10)
+    return bool(r is not None and -90 < r < 1000 and same), \
+        f"12M {r}% · 시계열 종가×주식수 vs 시총 {('%+.1f%%' % ((mc_r / implied - 1) * 100)) if implied and mc_r else '-'} · 기준일 {d_r.get('date')}"
 
 
 @check('52주 신고가', '주간 신고가 이력(nh)이 월간 성과 종목의 90% 이상에 실려 있는가')

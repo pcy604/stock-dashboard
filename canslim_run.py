@@ -448,10 +448,14 @@ def build_report(hits, m_ok, m_dir):
         for h in sorted(hits, key=lambda x: -(x.get('rs_pct') or 0)):
             cap = h['marcap'] // 100_000_000
             cap_str = f"{cap/10000:.1f}조" if cap >= 10000 else f"{cap:,}억"
-            c_s = f"{h['c_growth_pct']:+.0f}%" if h.get('c_growth_pct') is not None else "?"
-            a_s = (f"{h['a_growth_y1']:+.0f}%/{h['a_growth_y2']:+.0f}%"
+            # C/A 는 '흑자전환'·'적자전환' 같은 문자열일 수 있다(2026-11-06 ValueError 로 daily-refresh 실패)
+            def _f(v, u):
+                if v is None: return "?"
+                return f"{v:+.0f}{u}" if isinstance(v, (int, float)) else str(v)
+            c_s = _f(h.get('c_growth_pct'), "%")
+            a_s = (f"{_f(h['a_growth_y1'], '%')}/{_f(h['a_growth_y2'], '%')}"
                    if h.get('a_growth_y1') is not None and h.get('a_growth_y2') is not None else "?")
-            i_s = f"{h['i_inst_pct']:+.0f}억" if h.get('i_inst_pct') is not None else "?"
+            i_s = _f(h.get('i_inst_pct'), "억")
             lines.append(
                 f"{cap_str:>8}  {h.get('rs_pct',0):>4.0f}p  "
                 f"{h.get('n_dist_pct',0):+5.1f}%  "
