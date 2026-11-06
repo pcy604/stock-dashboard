@@ -3,6 +3,11 @@
 name: kr-flow
 on:
   workflow_dispatch:
+    inputs:
+      probe:
+        description: '수집 경로 진단만'
+        type: boolean
+        default: false
   schedule:
     - cron: '47 8 * * 1-5'      # 월~금 17:47 KST
 permissions:
@@ -19,8 +24,12 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
-      - run: pip install pandas requests lxml beautifulsoup4 html5lib
+      - run: pip install pandas requests lxml beautifulsoup4 html5lib pykrx
+      - name: 진단
+        if: ${{ inputs.probe }}
+        run: python tools/kr_flow_probe.py
       - name: 수집
+        if: ${{ !inputs.probe }}
         run: python tools/kr_flow.py
       - name: 커밋 & 푸시
         run: |
