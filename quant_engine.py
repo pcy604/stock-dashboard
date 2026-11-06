@@ -40,6 +40,8 @@ FIELDS = {
     'acc':       ('이익 가속', '0/1', '매출·영업이익 성장률 동시 가속 (미국만)'),
     'rs':        ('RS 상대강도', '0~99', '0.4×13주+0.2×26·39·52주 수익률의 시장 내 백분위'),
     'ret:n':     ('n주 수익률', '%', '종가 기준'),
+    'rs_chg:n':  ('RS 방향(n주 변화)', '점', '지금 RS − n주 전 RS. 양수 = 상대강도가 올라가는 중'),
+    'rs_vec:n':  ('RS 벡터(위치+속도)', '점', 'RS + (RS − n주 전 RS) — 높고 빠르게 오르는 종목이 위'),
     'ma_gap:n':  ('n주선 대비 괴리', '%', '종가 ÷ n주 이평 − 1 (양수 = 이평 위)'),
     'dist_hi:n': ('n주 고점 대비', '%', '종가 ÷ n주 최고가 − 1 (0 = 신고가, 항상 0 이하)'),
     'nh:n':      ('n주 신고가', '0/1', '종가가 n주 최고 종가'),
@@ -176,6 +178,12 @@ class Panel:
             r = {k: c / c.shift(k) - 1 for k in (13, 26, 39, 52)}
             sc = 0.4 * r[13] + 0.2 * r[26] + 0.2 * r[39] + 0.2 * r[52]
             v = sc.rank(axis=1, pct=True) * 99
+        elif name == 'rs_chg':                      # 2026-11-06 차니: RS 의 방향(속도) — 지금 RS − n주 전 RS (백분위 점수 차)
+            rs = self.get('rs')
+            v = rs - rs.shift(n)
+        elif name == 'rs_vec':                      # RS 위치 + 속도(벡터 합): RS + (RS − n주 전 RS)
+            rs = self.get('rs')
+            v = rs + (rs - rs.shift(n))
         elif name == 'ni_yoy':
             per = self.base('per')
             ni = self.base('marcap') / per.where(per > 0)
