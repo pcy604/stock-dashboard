@@ -105,17 +105,38 @@ def _dedup(rows: list[dict]) -> list[dict]:
     return [m[k] for k in sorted(m)]
 
 
-def investor(sosok: str, pages: int = 8) -> list[dict]:
-    """sosok: '01' 코스피 · '02' 코스닥. 한 쪽 10영업일 안팎 — 8쪽 ≈ 3~4개월."""
-    biz = datetime.now(KST).strftime('%Y%m%d')
+def investor_day(mk: str, d: str) -> dict | None:
+    """네이버 증권 모바일 API — 그날 개인·외국인·기관 순매수(억원). mk: KOSPI | KOSDAQ, d: YYYYMMDD.
+    2026-11-06: 옛 PC 페이지(investorDealTrendDay)는 '더 이상 제공되지 않습니다'(410)."""
+    r = requests.get(f'https://m.stock.naver.com/api/index/{mk}/trend', params=dict(bizdate=d), headers=UA, timeout=12)
+    r.raise_for_status()
+    j = r.json()
+    j = j[0] if isinstance(j, list) and j else j
+    bd = str(j.get('bizdate') or '')
+    if not j or bd[:8] != d:                    # 휴장일이면 다른 날을 돌려준다 → 버린다
+        return None
+    return dict(date=f'{bd[:4]}-{bd[4:6]}-{bd[6:8]}', 개인=_num(j.get('personalValue')),
+                외국인=_num(j.get('foreignValue')), 기관=_num(j.get('institutionalValue')))
+
+
+def investor(mk: str, days: int = 95, prev: list | None = None) -> list[dict]:
+    """최근 days 일(달력) — 이미 받은 날은 다시 받지 않는다(최근 5일은 정정될 수 있어 다시)."""
+    have = {r['date']: r for r in (prev or [])}
+    today = datetime.now(KST).date()
     rows = []
-    for p in range(1, pages + 1):
+    for i in range(days):
+        dt = today - timedelta(days=i)
+        if dt.weekday() >= 5:
+            continue
+        iso = dt.isoformat()
+        if iso in have and i > 5:
+            rows.append(have[iso]); continue
         try:
-            rows += parse_investor(_get('https://finance.naver.com/sise/investorDealTrendDay.naver',
-                                        dict(bizdate=biz, sosok=sosok, page=p)))
+            x = investor_day(mk, dt.strftime('%Y%m%d'))
+            if x:
+                rows.append(x)
         except Exception as e:
-            ERR[f'investor{sosok}p{p}'] = f'{type(e).__name__}: {e}'[:120]
-            break
+            ERR[f'{mk} {iso}'] = f'{type(e).__name__}: {e}'[:120]
     return _dedup(rows)
 
 
@@ -153,14 +174,21 @@ def summarize(inv: list[dict], dep: list[dict]) -> dict:
 
 
 def main() -> int:
-    inv = {'KOSPI': investor('01'), 'KOSDAQ': investor('02')}
+    old = {}
+    try:
+        old = json.load(open(OUT, encoding='utf-8'))
+    except Exception:
+        pass
+    inv = {mk: investor(mk, prev=(old.get('investor') or {}).get(mk)) for mk in ('KOSPI', 'KOSDAQ')}
     dep = deposit()
+    if not dep and old.get('deposit'):
+        dep = old['deposit']                     # 자금동향 실패 시 지난 값 유지(요약에 날짜가 그대로 보인다)
     ok = sum(len(v) > 10 for v in inv.values()) + (len(dep) > 10)
     v = dict(generated=datetime.now(KST).strftime('%Y-%m-%d %H:%M KST'),
-             src='네이버 금융 — 투자자별 매매동향(sise/investorDealTrendDay) · 증시자금동향(sise/sise_deposit), 단위 억원',
+             src='네이버 증권 — 투자자별 순매수(m.stock.naver.com/api/index/*/trend) · 증시자금동향(finance.naver.com/sise/sise_deposit), 단위 억원',
              investor=inv, deposit=dep, summary=summarize(inv, dep), err=ERR)
     print(f"투자자 코스피 {len(inv['KOSPI'])}일 · 코스닥 {len(inv['KOSDAQ'])}일 · 자금동향 {len(dep)}일 · 실패 {ERR}")
-    if inv['KOSPI'] and inv['KOSDAQ'] and inv['KOSPI'][-1] == inv['KOSDAQ'][-1]:
+    if inv['KOSPI'] and inv['KOSDAQ'] and inv['KOSPI'][-1]['외국인'] == inv['KOSDAQ'][-1]['외국인']:
         print('::error::코스피와 코스닥 수급이 같다 — sosok 매개변수가 무시됐을 수 있다')
         return 1
     if ok < 2:
