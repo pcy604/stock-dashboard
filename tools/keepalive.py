@@ -18,6 +18,15 @@ import sys
 
 from playwright.async_api import async_playwright
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import build_info  # noqa: E402  — 2026-11-06 배포 정지 감지(화면 빌드 = GitHub main?)
+
+
+def _main_commits(n=300):
+    import subprocess
+    out = subprocess.run(['git', 'log', f'-{n}', '--format=%H %ct', 'HEAD'], capture_output=True, text=True).stdout
+    return [tuple(l.split()) for l in out.splitlines() if l.strip()]
+
 URL = (sys.argv[1] if len(sys.argv) > 1 else
        'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/').rstrip('/') + '/'
 APP = URL + '~/+/'          # Cloud 래퍼(iframe) 없이 앱 본체
@@ -81,6 +90,16 @@ async def main():
         try:
             await pg.goto(APP, timeout=120000)
             await _settle(pg)
+            # 2026-11-06 — 배포 빌드가 main 을 따라오는가(10-31~11-05 배포 정지를 이 점검이 7/7 초록으로 놓쳤다)
+            try:
+                txt = await pg.locator('[data-testid="stMain"], section.main, body').first.inner_text(timeout=15000)
+                dep = build_info.parse_stamp(txt)
+                v = build_info.lag_verdict(dep, _main_commits(), dt.datetime.now(dt.timezone.utc).timestamp())
+                r = {'page': '배포 빌드 = main', 'ok': v['ok'], 'deployed': dep, **{k: v[k] for k in v if k != 'ok'}}
+            except Exception as e:
+                r = {'page': '배포 빌드 = main', 'ok': False, 'error': f'빌드 표시 읽기 실패: {e}'[:300]}
+            out['checks'].append(r)
+            print(('✅' if r['ok'] else '❌'), r['page'], r.get('why') or r.get('error', ''))
             for t in TABS:
                 try:
                     await pg.get_by_role('tab', name=t).first.click(timeout=20000)

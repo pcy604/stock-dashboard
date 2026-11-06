@@ -8356,8 +8356,27 @@ def _known_answers():
     return _ka.run()
 
 
+@st.cache_data(ttl=900, show_spinner=False)
+def _gh_main_commits():
+    """GitHub main 최근 커밋 [(sha, epoch)] — 운영자 화면에서만(무인증 시간당 60회 한도, 15분 캐시)."""
+    import requests as _rq
+    r = _rq.get('https://api.github.com/repos/pcy604/stock-dashboard/commits', params={'sha': 'main', 'per_page': 50},
+                timeout=6, headers={'Accept': 'application/vnd.github+json'})
+    r.raise_for_status()
+    return [(c['sha'], int(pd.Timestamp(c['commit']['committer']['date']).timestamp())) for c in r.json()]
+
+
 if _ADMIN:
     st.divider()
+    with guard('배포 빌드 대조'):
+        import build_info as _bi
+        _lb = _bi.local_build()
+        try:
+            _v = _bi.lag_verdict(_lb, _gh_main_commits(), datetime.now().timestamp())
+        except Exception as _e:
+            _v = dict(ok=None, why=f'GitHub 조회 실패 ({type(_e).__name__}) — keepalive 가 3시간마다 대신 확인')
+        _msg = f"🚀 배포 빌드 {(_lb.get('sha') or '-')[:7]} ({_lb.get('at', '-')} UTC) — {_v['why']}"
+        (st.success if _v['ok'] else st.info if _v['ok'] is None else st.error)(_msg)
     with st.expander("⚙️ 설정 — Finnhub API 키 · 전체 새로고침", expanded=False):
         _KEY_FILE = Path('data/.finnhub_key')
         if 'fh_key' not in st.session_state:
@@ -8676,3 +8695,9 @@ st.caption(
     "**이해상충** · 운영자는 화면에 나온 종목을 보유하고 있을 수 있습니다. "
     "점수·신호는 운영자의 보유 여부와 무관하게 모든 종목에 같은 규칙으로 계산되며, 규칙을 바꾸면 변경 이력에 남깁니다."
 )
+# 2026-11-06 — 배포가 10-31 에 멈춘 채 일주일을 몰랐다. 이 줄을 keepalive 가 GitHub main 과 대조한다(build_info).
+try:
+    import build_info as _bi
+    st.caption(_bi.stamp(_bi.local_build()))
+except Exception as _e:
+    st.caption(f"`배포 빌드 확인 실패: {type(_e).__name__}`")

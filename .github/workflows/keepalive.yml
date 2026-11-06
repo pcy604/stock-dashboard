@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 300            # 2026-11-06 배포 빌드가 main 몇 커밋 뒤인지 보려면 이력이 필요
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -40,4 +42,4 @@ jobs:
         run: |
           [ -n "$TELEGRAM_TOKEN" ] || exit 0
           curl -s "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" -d chat_id="$TELEGRAM_CHAT_ID" \
-            --data-urlencode text="🔴 대시보드 실화면 점검 실패 — 결과: https://github.com/${{ github.repository }}/blob/app-health/results/app_health.json" >/dev/null
+            --data-urlencode text="🔴 대시보드 실화면 점검 실패(배포 정지면 share.streamlit.io → ⋮ → Reboot) — 결과: https://github.com/${{ github.repository }}/blob/app-health/results/app_health.json" >/dev/null
