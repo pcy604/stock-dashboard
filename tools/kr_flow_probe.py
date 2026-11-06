@@ -1,21 +1,26 @@
-"""kr_flow 수집 경로 진단(일회성) — 2차."""
-import io, requests, pandas as pd
-UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126 Safari/537.36', 'Referer': 'https://finance.naver.com/'}
-def get(u, enc):
-    r = requests.get(u, headers=UA, timeout=12); r.encoding = enc; return r
-for u, enc in [('https://finance.naver.com/sise/investorDealTrendDay.nhn?bizdate=20261106&sosok=01&page=2', 'euc-kr'),
-               ('https://finance.naver.com/sise/investorDealTrendDay.nhn?bizdate=20261106&sosok=02&page=1', 'euc-kr'),
-               ('https://finance.naver.com/sise/sise_deposit.naver?page=1', 'utf-8'),
-               ('https://finance.naver.com/sise/sise_deposit.nhn?page=1', 'euc-kr')]:
-    r = get(u, enc); print('==', r.status_code, u, len(r.text))
+"""kr_flow 수집 경로 진단(일회성) — 3차: 증시자금동향 데이터 API 찾기."""
+import re, requests
+UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126 Safari/537.36', 'Referer': 'https://finance.naver.com/sise/sise_deposit.naver'}
+r = requests.get('https://finance.naver.com/sise/sise_deposit.naver', headers=UA, timeout=12); r.encoding = 'utf-8'
+t = r.text
+print('apis', sorted(set(re.findall(r'["\'](/[a-zA-Z0-9_\-/]*api[a-zA-Z0-9_\-/]*)', t)))[:40])
+print('urls', sorted(set(re.findall(r'https?://[a-zA-Z0-9.\-]+/[a-zA-Z0-9_\-/]*(?:api|deposit)[a-zA-Z0-9_\-/]*', t)))[:40])
+js = sorted(set(re.findall(r'/_next/static/chunks/[^"\']+\.js', t)))
+print('chunks', len(js))
+for j in js:
     try:
-        for t in pd.read_html(io.StringIO(r.text)):
-            print('  table', t.shape); print(t.dropna(how='all').head(6).to_string()[:1500])
+        c = requests.get('https://finance.naver.com' + j if j.startswith('/') else j, headers=UA, timeout=10).text
+    except Exception:
+        try:
+            c = requests.get('https://ssl.pstatic.net/imgstock/fn/real/pc' + j, headers=UA, timeout=10).text
+        except Exception:
+            continue
+    for m in set(re.findall(r'["`\'][^"`\']{0,80}(?:eposit|redit)[^"`\']{0,80}["`\']', c)):
+        print('  ', j[-40:], m[:170])
+for u in ['https://finance.naver.com/api/sise/deposit?page=1', 'https://finance.naver.com/api/sise/deposits?page=1',
+          'https://m.stock.naver.com/api/sise/deposit', 'https://m.stock.naver.com/front-api/sise/deposit',
+          'https://finance.naver.com/front-api/sise/deposit?page=1', 'https://finance.naver.com/front-api/sise/deposit']:
+    try:
+        x = requests.get(u, headers=UA, timeout=10); print('==', x.status_code, u, x.text[:250])
     except Exception as e:
-        print('  read_html', e)
-for u in ['https://m.stock.naver.com/api/index/KOSDAQ/trend', 'https://m.stock.naver.com/api/index/KOSPI/trend?pageSize=20&page=1',
-          'https://m.stock.naver.com/api/index/KOSPI/trend?bizdate=20261105']:
-    r = get(u, 'utf-8'); print('==', r.status_code, u); print(r.text[:300])
-r = get('https://finance.naver.com/sise/sise_deposit.naver?page=1', 'utf-8')
-import re
-i = r.text.find('신용잔고'); print('deposit ctx', r.text[i-200:i+1500].replace('\n', ' ') if i >= 0 else 'none')
+        print('== ERR', u, e)
