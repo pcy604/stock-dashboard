@@ -1,58 +1,58 @@
 {
- "generated": "2026-11-05",
- "asof": "2026-10-30",
+ "generated": "2026-11-06",
+ "asof": "2026-11-04",
  "intraday": true,
  "checks": {
   "perf_price": {
-   "n": 1203,
-   "ok": 547,
-   "rate": 0.455,
+   "n": 1188,
+   "ok": 292,
+   "rate": 0.246,
    "threshold": 0.9,
    "pass_": null,
    "note": "현재가 3% 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "perf_52w": {
-   "n": 1203,
-   "ok": 1195,
-   "rate": 0.993,
+   "n": 1188,
+   "ok": 1181,
+   "rate": 0.994,
    "threshold": 0.9,
    "pass_": true,
    "note": "52주 신고가 -3% 판정 일치"
   },
   "canslim_N": {
-   "n": 63,
-   "ok": 24,
-   "rate": 0.381,
+   "n": 48,
+   "ok": 18,
+   "rate": 0.375,
    "threshold": 0.9,
    "pass_": null,
    "note": "N 거리 1.5%p 이내 · 장중 실행이라 판정 생략(참고값)"
   },
   "canslim_RS": {
-   "n": 63,
-   "ok": 38,
-   "rate": 0.603,
+   "n": 48,
+   "ok": 22,
+   "rate": 0.458,
    "threshold": 0.85,
    "pass_": false,
    "note": "RS ±10 이내"
   },
   "coverage": {
-   "n": 627,
-   "ok": 608,
-   "rate": 0.97,
+   "n": 631,
+   "ok": 609,
+   "rate": 0.965,
    "threshold": 0.8,
    "pass_": true,
    "note": "원천 시총 3,000억+ 중 perf 에 있는 비율"
   },
   "perf_52w_count": {
-   "n": 5,
-   "ok": 9,
-   "rate": 1.8,
+   "n": 7,
+   "ok": 4,
+   "rate": 0.57,
    "threshold": 0.3,
    "pass_": true,
    "note": "앱/원천 신고가 근접 종목 수 비 (0.3~3배 · 주봉 vs 일봉 차 허용)"
   }
  },
- "source_52w_near": 5,
- "app_52w_near": 9,
+ "source_52w_near": 7,
+ "app_52w_near": 4,
  "ok": false
 }
