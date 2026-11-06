@@ -149,7 +149,10 @@ def deposit(pages: int = 6) -> list[dict]:
                              params=dict(page=p, pageSize=20), headers=UA, timeout=12)
             r.raise_for_status()
             j = r.json()
-            j = j.get('result', j.get('datas', j)) if isinstance(j, dict) else j
+            if isinstance(j, dict):                # 감싼 키 이름에 기대지 않는다 — 첫 번째 목록 값
+                j = j if 'bizdate' in j else next((v for v in j.values() if isinstance(v, list)), [j])
+            if isinstance(j, dict):
+                j = [j]
             new = 0
             for x in (j or []):
                 bd = str(x.get('bizdate') or '')
