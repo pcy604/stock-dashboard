@@ -29,6 +29,10 @@ def _arc(cx, cy, r0, r1, a0, a1):
             f"L{x2:.1f},{y2:.1f} A{r0},{r0} 0 {large} 0 {x3:.1f},{y3:.1f} Z")
 
 
+def _lab(v):
+    return v if isinstance(v, str) else f"{v}점"
+
+
 def season_wheel(phase: str, scores: dict, seasons: dict, conf_txt: str = '', width: int = 360) -> str:
     """우라가미 4계절 바퀴. phase = 현재 국면 키, scores = {키: 점수}, seasons = SEASONS(이름·이모지)."""
     cx, cy, r0, r1 = 180, 150, 66, 124
@@ -48,7 +52,7 @@ def season_wheel(phase: str, scores: dict, seasons: dict, conf_txt: str = '', wi
         parts.append(f"<text x='{lx:.1f}' y='{ly - 4:.1f}' text-anchor='middle' style='font-size:{13 if on else 12}px;"
                      f"font-weight:{800 if on else 600};fill:{tc}'>{s['emoji']} {html.escape(s['name'])}</text>")
         parts.append(f"<text x='{lx:.1f}' y='{ly + 13:.1f}' text-anchor='middle' style='font-size:11px;"
-                     f"fill:{tc};opacity:.85'>{scores.get(k, '-')}점</text>")
+                     f"fill:{tc};opacity:.85'>{_lab(scores.get(k, '-'))}</text>")
     # 회전 방향 화살표 (바깥 고리)
     for b in (270, 0, 90, 180):
         x, y = _pt(cx, cy, r1 + 14, b)

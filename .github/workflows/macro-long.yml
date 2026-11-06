@@ -1,8 +1,10 @@
-# 매크로 장기 시계열(백테스트용) 수집 — 수동 실행 또는 macro-* 브랜치에서 수집 스크립트가 바뀔 때
+# 매크로 장기 시계열 수집 — 평일 매일 · 수동 실행 또는 macro-* 브랜치에서 수집 스크립트가 바뀔 때
 name: macro-long
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '53 22 * * 0-4'     # 월~금 07:53 KST — 4계절 v2(macro_season)·당일 경보 폴백이 이 파일을 쓴다(2026-11-06 매일로)
   push:
     branches: ['macro-*']
     paths: ['tools/fetch_macro_long.py', '.github/workflows/macro-long.yml']

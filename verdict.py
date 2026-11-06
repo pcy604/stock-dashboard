@@ -390,6 +390,14 @@ def build(spy=None, kospi=None, fetch=None, closes=None) -> dict:
     kw = core_switch(daily_closes(KR_SYM) if kospi is None else kospi)
     d = macro_inputs(fetch)
     rg = macro_regime(d, as_price_state(sw)) if sw else {}
+    sn = {}
+    try:                                   # 2026-11-06 — 4계절은 상태 기계 v2(macro_season) 하나로
+        import macro_season as ms
+        sn = ms.current(fetch)[1]
+        if rg and sn.get('phase'):
+            rg['phase'] = sn['phase']
+    except Exception as e:
+        FRED_ERR['season'] = f'{type(e).__name__}: {e}'[:120]
     S = {}
     import macro_flow as mf
     for k, n in MO_FRED.items():
@@ -403,7 +411,9 @@ def build(spy=None, kospi=None, fetch=None, closes=None) -> dict:
         core=sw, kr_core=kw, alloc=alloc(sw.get('on') if sw else None),
         canslim_m=dict(US=market_dir(sw), KR=market_dir(kw)),
         phase=dict(key=rg.get('phase'), name=ph['name'] if ph else None, emoji=ph['emoji'] if ph else None,
-                   conf=rg.get('conf'), rate_dir=rg.get('rate_dir'), growth=rg.get('growth')) if rg else {},
+                   conf=rg.get('conf'), rate_dir=rg.get('rate_dir'), growth=rg.get('growth'),
+                   ver='v2', months=sn.get('months'), since=sn.get('since'), pos=sn.get('pos'), stage=sn.get('stage'),
+                   next=sn.get('next'), next_n=sn.get('next_n'), infl=sn.get('infl')) if rg else {},
         greed=dict(word=ax['G']['word'], n=ax['G']['n'], ref=ax['G']['ref']),
         flow=dict(ax['flow'], nl13=_r(ax['nl13'], 1)),
         econ=dict(word=ax['ew'], sub=ax['esub']),
