@@ -4407,7 +4407,8 @@ def _season_card(sn, h):
         f"<div style='font-size:13.5px;color:#374151;margin-top:10px'>다음 계절 <b>{N['emoji']} {N['name']}</b> 조건 "
         f"<b>{sn['next_n']}/3</b> 충족" + (f" — 남은 조건: <b>{' · '.join(miss)}</b>" if miss else " — <b>전환 대기</b>(다음 달도 충족되면 확정)")
         + "</div></div>", unsafe_allow_html=True)
-    cl, cr = st.columns([1, 1], gap='medium')
+    import contextlib
+    cl = cr = contextlib.nullcontext()          # 반쪽 폭이면 조건 글자가 잘린다(11-06 실화면) → 전체 폭으로 위아래
     with cl:
         st.markdown("##### 계절별 진입 조건 — 지금 충족 여부")
         t = pd.DataFrame([{'계절': f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}",
