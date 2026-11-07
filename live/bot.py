@@ -7,7 +7,9 @@
 
 왜 노트북(또는 고정 IP 서버)에서만 도는가: 토스 Open API 는 허용 IP 에서만 응답한다(broker_toss.py 주석).
 
-평일 바르샤바 02:30 = 10:30 KST(서머타임 중 09:30) 한 번 — 연중 한국장 안:
+실행 시각(2026-11-07): 작업 스케줄러가 평일 02:30·10:30(노트북 현지 시각) 두 번 깨우고, 봇은 **한국장 안(평일 09:05~15:10 KST)일 때만** 움직인다.
+  폴란드면 02:30 = 10:30 KST, 한국이면 10:30 KST 가 장 안 — 노트북이 어느 나라에 있든 하루 한 번. 장 밖이면 기록만 남기고 끝(--force 로 무시).
+순서:
   ① 대조   토스 국내 보유 ↔ 원장. 원장 종목 수량이 다르면 = 규칙 밖 거래 → live/violations.jsonl·경보·이번 실행 중단
   ② 손절   전날 종가 ≤ 손절선(보유 중 최고 종가 −20%, 올라가기만) → 전량 시장가 매도
   ③ 불타기 전날 종가 ≥ 첫 매수가 +10% · 소속 시장(코스피/코스닥) 주봉 5주선 위 · 아직 안 했으면 → 목표 비중 40% 만큼 정수 주
@@ -309,7 +311,17 @@ def _done(msg, send, L, save):
     return text
 
 
+def in_kr_session(now=None) -> bool:
+    """평일 09:05~15:10 KST — 시가 단일가·장 마감 동시호가를 피한 정규장 안. 공휴일은 가격 자료가 걸러낸다."""
+    now = now or datetime.now(KST)
+    return now.weekday() < 5 and (9, 5) <= (now.hour, now.minute) <= (15, 10)
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    ap = argparse.ArgumentParser(); ap.add_argument("--send", action="store_true")
-    run(ap.parse_args().send)
+    ap = argparse.ArgumentParser(); ap.add_argument("--send", action="store_true"); ap.add_argument("--force", action="store_true")
+    a = ap.parse_args()
+    if not a.force and not in_kr_session():
+        print(f"장 밖 {datetime.now(KST):%Y-%m-%d %H:%M} KST — 건너뜀(노트북은 살아 있음)")
+        sys.exit(0)
+    run(a.send)
