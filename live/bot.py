@@ -27,6 +27,7 @@ LEDGER, PLAN, SWITCH = LIVE / "ledger.json", LIVE / "plan_latest.json", LIVE / "
 TRADES, VIOL = LIVE / "trades.jsonl", LIVE / "violations.jsonl"
 M = "KR"                                                # v1.7 한국 단독
 SLOTS, FIRST, STOP, ADD_AT, ADD, CAP = 5, 0.60, 0.20, 0.10, 0.40, 0.35   # PREREG · 1회 주문 상한 = 슬리브 35%
+TRIM_CAP = 0.30   # v1.8(2026-11-07): 종목 비중이 30%×1.05 를 넘으면 30% 까지 덜어낸다(주 1회) — 계획표 표시만 되던 구멍. 목표 20% 까지 덜기는 검증 불합격
 COOL_DAYS = 14
 KST = timezone(timedelta(hours=9))
 
@@ -117,6 +118,13 @@ def decide(L, plan, closes, bmap, today=None):
             else:
                 orders.append(dict(sym=sym, name=p.get("name"), side="BUY", quantity=q, px=c,
                                    why=f"불타기: 종가 {c:,.0f} ≥ 첫 매수가 +10% {p['first_px'] * (1 + ADD_AT):,.0f}", cid=f"{sym}-{p['opened']}-ADD"))
+        elif equity > 0 and p["shares"] * c / equity > TRIM_CAP * 1.05:
+            q = math.floor((p["shares"] * c - TRIM_CAP * equity) / c)
+            if 1 <= q < p["shares"]:
+                yw = date.fromisoformat(d).isocalendar()
+                orders.append(dict(sym=sym, name=p.get("name"), side="SELL", quantity=q, px=c, trim=True,
+                                   why=f"상한 덜기: 비중 {p['shares'] * c / equity * 100:.0f}% > {TRIM_CAP * 100:.0f}% → {TRIM_CAP * 100:.0f}%",
+                                   cid=f"{yw[0]}W{yw[1]:02d}-{sym}-TRIM"))
 
     made = plan.get("made")
     fresh = bool(made) and (today - date.fromisoformat(made)) <= timedelta(days=7)
@@ -194,6 +202,9 @@ def apply_fill(L, o, q, px, fee, day):
             P[o["sym"]] = dict(name=o.get("name") or o["sym"], shares=q, avg=px, first_px=px, peak=px, stop=px * (1 - STOP),
                                added=False, last_px=px, opened=day)
         S["cash_krw"] -= q * px + fee
+    elif o.get("trim") and q < P[o["sym"]]["shares"]:           # 상한 덜기 — 일부만 판다(손절선·고점은 그대로)
+        P[o["sym"]]["shares"] -= q
+        S["cash_krw"] += q * px - fee
     else:
         P.pop(o["sym"])
         S["cash_krw"] += q * px - fee

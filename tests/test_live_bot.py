@@ -86,3 +86,30 @@ def test_switch_needs_both(monkeypatch, tmp_path):
     assert not B.is_live()
     monkeypatch.setenv("LIVE_TRADING", "ON")
     assert B.is_live()
+
+
+def test_trim_over_cap_to_30pct_partial_and_weekly(monkeypatch, tmp_path):
+    # v1.8(2026-11-07): 비중 30%×1.05 초과 → 30%까지 일부 매도, 주 1회(cid 에 ISO 주), 손절·고점은 그대로
+    pos = {"000002": P(shares=20, avg=10000, first_px=10000, peak=20000, stop=16000, added=True)}
+    L = L0(pos, cash=200000)                       # 20주×20,000 = 40만 / 자산 60만 = 66.7%
+    o, _, eq = B.decide(L, PLAN, {"000002": (20000.0, "2026-11-13")}, BM, today=D)
+    t = [x for x in o if x["cid"].endswith("TRIM")][0]
+    assert t["side"] == "SELL" and t["quantity"] == 11 and "2026W46" in t["cid"]   # 40만 − 18만 = 22만 → 11주
+    monkeypatch.setattr(B, "TRADES", tmp_path / "t.jsonl")
+    B.apply_fill(L, t, 11, 20000.0, 0.0, "2026-11-13")
+    p = L["KR"]["positions"]["000002"]
+    assert p["shares"] == 9 and p["stop"] == 16000 and L["KR"]["cash_krw"] == 420000
+    assert "000002" not in (L.get("cooldown") or {})
+
+
+def test_no_trim_at_cap():
+    pos = {"000002": P(shares=6, peak=15000, stop=12000)}              # 9만 / 30만 = 30% — 덜지 않음
+    o, _, _ = B.decide(L0(pos, cash=210000), PLAN, {"000002": (15000.0, "2026-11-13")}, BM, today=D)
+    assert not [x for x in o if x["cid"].endswith("TRIM")]
+
+
+def test_market_hours_guard():
+    from datetime import datetime
+    assert B.in_kr_session(datetime(2026, 11, 9, 10, 30, tzinfo=B.KST))
+    assert not B.in_kr_session(datetime(2026, 11, 9, 2, 30, tzinfo=B.KST))
+    assert not B.in_kr_session(datetime(2026, 11, 7, 10, 30, tzinfo=B.KST))   # 토요일
