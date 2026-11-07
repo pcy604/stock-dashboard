@@ -115,9 +115,10 @@ def kr():
     o4 = g.op_income.shift(4)
     q["op_yoy"] = np.where(o4 > 0, (q.op_income / o4 - 1) * 100, np.nan)
     q["op_turn"] = ((q.op_income > 0) & (o4 <= 0)).astype(int)
+    q["acc"] = kr_acc(q)                       # 2026-11-07: 한국도 이익가속(대시보드 leaders_accel 과 같은 정의)
     q["opm"] = (q.ttm_op_income / q.ttm_revenue * 100).where(q.ttm_revenue > 0)
     q["debt"] = (q.liabilities / q.equity * 100).where(q.equity > 0)
-    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn", "opm", "debt"]].sort_values("known")
+    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn", "acc", "opm", "debt"]].sort_values("known")
     w = w.sort_values("date")
     w = pd.merge_asof(w, q, left_on="date", right_on="known", by="sym", direction="backward")
     w["per"] = (w.marcap / w.ttm_net_income).where(w.ttm_net_income > 0)
@@ -125,7 +126,8 @@ def kr():
     w["psr"] = (w.marcap / w.ttm_revenue).where(w.ttm_revenue > 0)
     w["roe"] = (w.ttm_net_income / w.equity * 100).where(w.equity > 0)
     # 2026-11-05: 'KR' 대신 그 주의 소속 시장 — 퀀트 엔진 지수 게이트를 실전 규칙처럼 소속 시장별로(코스닥 종목 = 코스닥 5주선)
-    w["market"] = w.pop("mid").map({"STK": "KOSPI", "KSQ": "KOSDAQ"}).fillna("KR"); w["acc"] = 0
+    w["market"] = w.pop("mid").map({"STK": "KOSPI", "KSQ": "KOSDAQ"}).fillna("KR")
+    w["acc"] = w["acc"].fillna(0).astype(int)
     try:
         sec = json.load(open(os.path.join(ROOT, "data", "sectors.json"), encoding="utf-8"))
     except Exception:
@@ -133,6 +135,23 @@ def kr():
     w["sector"] = w.sym.map(sec)
     print(f"[KR] {w.date.min().date()}~{w.date.max().date()} · {w.sym.nunique():,}종 · {len(w):,}행")
     return _f32(w)
+
+
+KR_MIN_QREV = 1e10     # 분기 매출 100억원 — 이 아래는 이익가속이 발산(미국 $10M 과 같은 취지)
+MAX_OIA = 10.0
+
+
+def kr_acc(q: pd.DataFrame) -> pd.Series:
+    """한국 이익가속(0/1) — leaders_accel.py 와 같은 정의(2026-11-07, 실전 v1.8 후보 '이익가속 OR 흑자전환' 검증용).
+    q: sym·분기 순으로 정렬된 분기표(revenue, op_income). 매출 성장률·이익 성장률(영업익 증가 ÷ |매출|)이 직전 분기보다 둘 다 빨라짐."""
+    g = q.groupby("sym")
+    r4, o4 = g.revenue.shift(4), g.op_income.shift(4)
+    rv = pd.Series(np.where(r4 > 0, (q.revenue / r4 - 1) * 100, np.nan), index=q.index)
+    rev = q.revenue.where(q.revenue.abs() >= KR_MIN_QREV)
+    oi = ((q.op_income - o4) / rev.abs()).replace([np.inf, -np.inf], np.nan)
+    rv_a = rv - rv.groupby(q.sym).shift(1)
+    oi_a = oi - oi.groupby(q.sym).shift(1)
+    return ((rv_a > 0) & (oi_a > 0) & (oi_a.abs() <= MAX_OIA)).astype(int)
 
 
 def main(markets=("US", "KR")):

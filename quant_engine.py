@@ -9,6 +9,8 @@
   logic    '1 AND (2 OR 3)' — 조건 번호(1부터)를 AND·OR·NOT·괄호로. 비우면 모두 AND
   rank     {'field':'rs','desc':True}
   weight   'equal'|'rank'|'mcap'|'inv_vol' · max_w 0.15 (종목 상한 X — 넘으면 리밸런싱 때 덜어냄 = 익절)
+  trim     'cap'(기본, 상한까지만 덜기) | 'target'(그 종목 목표 비중까지 덜기) | 'none'(덜지 않음)   (2026-11-07 v1.8 후보 검증)
+  max_new  리밸런싱 한 번에 새로 사는 종목 수 상한(기본 없음 = 빈자리 전부)                        (2026-11-07 v1.8 후보 검증)
   exposure {'base':1.0, 'index':'SPX', 'ma':40, 'below':0.3, 'months':[1..12], 'mode':'scale'|'entry', 'daily':False}
            (요구 1 — 주식 비중; 이평 아래·달력 밖이면 줄임. mode='entry' 면 줄이지 않고 신규·불타기만 막는다 = 실전 규칙.
            daily=True + index_px_daily 주면 ma 를 '일봉 n일선'으로(2026-11-06, '지수 5일선 이탈여부'). 평소엔 '주')
@@ -82,7 +84,7 @@ DEFAULT_SPEC = dict(
     market='US', start='2015-01-01', end=None, rebalance=4, max_pos=20,
     filters=[dict(field='marcap', op='>=', value=1e9)], logic='',
     rank=dict(field='rs', desc=True),
-    weight='equal', max_w=0.10,
+    weight='equal', max_w=0.10, trim='cap', max_new=None,
     exposure=dict(base=1.0, index='', ma=40, below=0.0, months=list(range(1, 13))),
     entry=dict(init=1.0, pyramid=[]),
     exit=dict(stop=0, trail=[], min_hold=0, cooldown=0, signals=[dict(type='rank_out', m=40)]),
@@ -480,8 +482,9 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 add = min(pyr[p['adds']][1] * p.get('tw', max_w), max_w - w_now)
                 if add > 0.001:
                     pend.append(('add', j, add, f"불타기 +{pyr[p['adds']][0]:.0f}%"))
-            elif w_now > max_w * 1.05:                               # 상한 초과 → 덜기(익절)
-                pend.append(('trim', j, max_w, f'상한 {max_w * 100:.0f}% 초과 익절'))
+            elif w_now > max_w * 1.05 and S.get('trim', 'cap') != 'none':   # 상한 초과 → 덜기(익절)
+                to = p.get('tw', max_w) if S.get('trim') == 'target' else max_w
+                pend.append(('trim', j, to, f'상한 {max_w * 100:.0f}% 초과 → {to * 100:.0f}% 익절'))
         if (t - t0) % int(S['rebalance']) == 0 and tgt_e > 0:        # 리밸런싱: 신규 편입
             cand = np.where(ok[t] & np.isfinite(rk[t]) & np.isfinite(C[t]))[0]
             order = cand[np.argsort(-rk[t, cand])]
@@ -499,6 +502,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
             free = max_pos - (len(pos) - len(sold))
             new = [j for j in order if j not in pos and cool.get(j, -1) <= t
                    and not (entry_block is not None and entry_block[t, j])][:max(0, free)]
+            if S.get('max_new'):
+                new = new[:int(S['max_new'])]
             if new:
                 n_all = len(pos) - len(sold) + len(new)
                 if S['weight'] == 'rank':
