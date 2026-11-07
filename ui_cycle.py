@@ -72,21 +72,25 @@ def render(mkt_sel: str, tsrc):
         lo, hi = close.index.min().date(), close.index.max().date()
         st.session_state[key] = pd.DataFrame([{'라벨': '구간 1', '시작일': lo, '종료일': hi}])
 
+    lo_d, hi_d = close.index.min().date(), close.index.max().date()
     with st.container(border=True):
         st.caption('🤖 자동 채우기 — 종목분석 탭 "낙폭 회차"와 같은 정의(고점 대비 X% 이상 빠진 구간)로 '
                    '하락(고점→저점)·회복(저점→고점) 구간을 한 번에 채웁니다. 채운 뒤에도 아래 표에서 직접 수정·추가할 수 있습니다.')
-        ac1, ac2, ac3 = st.columns([1.3, 2, 1])
-        _mopt = [12, 24, 36, 60, 120, 240, '전체']
-        amon = ac1.selectbox('기간', _mopt, index=len(_mopt) - 1, key=f'cyc_auto_m|{sym}',
-                             format_func=lambda v: '전체' if v == '전체' else f'{v}개월')
-        athr = ac2.slider('MDD 기준(%)', 5, 70, 30, 5, key=f'cyc_auto_x|{sym}')
-        if ac3.button('⬇ 채우기', key=f'cyc_auto_go|{sym}', use_container_width=True):
-            auto = C.auto_rows(close, 0 if amon == '전체' else int(amon), float(athr))
-            if len(auto):
-                st.session_state[key] = auto
+        ac1, ac2, ac3, ac4 = st.columns([1.3, 1.3, 1.3, 1])
+        a_start = ac1.date_input('시작일', lo_d, min_value=lo_d, max_value=hi_d, key=f'cyc_auto_s|{sym}')
+        a_end = ac2.date_input('종료일', hi_d, min_value=lo_d, max_value=hi_d, key=f'cyc_auto_e|{sym}')
+        athr = ac3.slider('MDD 기준(%)', 5, 70, 30, 5, key=f'cyc_auto_x|{sym}')
+        if ac4.button('⬇ 채우기', key=f'cyc_auto_go|{sym}', use_container_width=True):
+            if a_start >= a_end:
+                st.warning('시작일이 종료일보다 앞서야 합니다.')
             else:
-                st.warning(f'{int(athr)}% 이상 빠진 구간이 없습니다 — 기준을 낮춰보세요.')
-            st.rerun()
+                window = close.loc[pd.Timestamp(a_start):pd.Timestamp(a_end)]
+                auto = C.auto_rows(window, 0, float(athr))
+                if len(auto):
+                    st.session_state[key] = auto
+                else:
+                    st.warning(f'{int(athr)}% 이상 빠진 구간이 없습니다 — 기준을 낮추거나 기간을 넓혀보세요.')
+                st.rerun()
 
     rows = st.data_editor(st.session_state[key], num_rows='dynamic', hide_index=True, use_container_width=True,
                           key=f'cyc_editor|{sym}',
@@ -108,15 +112,23 @@ def render(mkt_sel: str, tsrc):
         st.info('유효한 구간이 없습니다. 표에서 시작일 < 종료일로 넣어 주세요.')
         return
 
-    fig = go.Figure()
-    for s in segs:
-        fig.add_trace(go.Scatter(x=list(s['series'].index), y=s['series'].values,
-                                 name=f"{s['label']} ({s['start']}~{s['end']}, {s['direction']})",
-                                 line=dict(color=_GREEN if s['direction'] == '상승' else _RED, width=1.8)))
-    fig.add_hline(y=0, line=dict(color='#999', width=1, dash='dot'))
-    fig.update_layout(height=380, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=-0.18, yanchor='top'),
-                      xaxis=dict(title='경과(거래일)'), yaxis=dict(title='시작일 대비(%)'))
-    st.plotly_chart(fig, use_container_width=True)
+    # 2026-11-07 — 하락·상승을 한 차트에 겹치면 서로 가려 모양 비교가 어렵다는 지적 → 따로 그린다.
+    cdn, cup = st.columns(2)
+    for col, dirn, color, title in ((cdn, '하락', _RED, '📉 하락 구간 (고점 → 저점)'), (cup, '상승', _GREEN, '📈 상승 구간 (저점 → 고점)')):
+        with col:
+            st.caption(title)
+            sub = [s for s in segs if s['direction'] == dirn]
+            if not sub:
+                st.caption('— 없음 —')
+                continue
+            fig = go.Figure()
+            for s in sub:
+                fig.add_trace(go.Scatter(x=list(s['series'].index), y=s['series'].values,
+                                         name=f"{s['label']} ({s['start']}~{s['end']})", line=dict(color=color, width=1.8)))
+            fig.add_hline(y=0, line=dict(color='#999', width=1, dash='dot'))
+            fig.update_layout(height=360, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=-0.22, yanchor='top', font=dict(size=10)),
+                              xaxis=dict(title='경과(거래일)'), yaxis=dict(title='시작일 대비(%)'))
+            st.plotly_chart(fig, use_container_width=True)
 
     tsrc('cycle_compare.py (화면에서 계산)', asof=str(close.index[-1].date()))
     st.dataframe(C.detail_table(segs), hide_index=True, use_container_width=True, filters=False)

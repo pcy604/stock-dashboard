@@ -36,6 +36,7 @@ from plotly.subplots import make_subplots
 from pathlib import Path
 from datetime import datetime, timedelta
 from contextlib import contextmanager
+import date_picker as _dpk       # 2026-11-07: '프리셋+직접' 기간 선택 공용(기존 매크로탭 패턴을 함수로 뽑음)
 
 st.set_page_config(page_title="Stock Dashboard", page_icon="📈", layout="wide")
 
@@ -2674,7 +2675,7 @@ with (t_lead or st.empty()), guard('주도주'):
                 st.markdown("#### 📆 기간별 신호 경과 — 그때 걸린 종목이 지금 어떻게 됐나")
                 _rc1, _rc2 = st.columns([2, 3])
                 _span = _rc1.selectbox(
-                    "기간", ["이번 달", "최근 3개월", "상반기", "하반기", "올해", "직전 연도"],
+                    "기간", ["이번 달", "최근 3개월", "상반기", "하반기", "올해", "직전 연도", "직접"],
                     key="roster_span")
                 _sw = _rc2.selectbox("정렬", ["수익률 높은 순", "수익률 낮은 순",
                                             "신호 많은 순", "최근 신호 순"], key="roster_sort")
@@ -2690,8 +2691,13 @@ with (t_lead or st.empty()), guard('주도주'):
                     _lo, _hi = pd.Timestamp(_y, 7, 1), pd.Timestamp(_y, 12, 31)
                 elif _span == "올해":
                     _lo, _hi = pd.Timestamp(_y, 1, 1), _today
-                else:
+                elif _span == "직전 연도":
                     _lo, _hi = pd.Timestamp(_y - 1, 1, 1), pd.Timestamp(_y - 1, 12, 31)
+                else:   # 2026-11-07 — 프리셋만 있으면 원하는 구간을 못 짚는다는 지적 → '직접'
+                    _rd1, _rd2 = st.columns(2)
+                    _rs_ = _rd1.date_input('시작일', value=(_today - pd.Timedelta(days=365)).date(), key='roster_span_s')
+                    _re_ = _rd2.date_input('종료일', value=_today.date(), key='roster_span_e')
+                    _lo, _hi = pd.Timestamp(_rs_), pd.Timestamp(_re_)
 
                 _rs = [x for x in _ac['roster']
                        if x.get('first') and _lo <= pd.Timestamp(x['first']) <= _hi]
@@ -4105,9 +4111,11 @@ def _macro_detail_charts():
     ② 끊긴 FRED 계열 교체 — PBoC(2023-11 중단)·유로존/일본/중국 M2(2017~2023 중단)·BoK 할인율(IMF)
        → 일본·한국은 익일물 콜금리(OECD, 매월), 영국 SONIA, 유로존 M2 는 ECB Data Portal, 유동성은 G3 중앙은행 총자산."""
     with st.expander("📊 상세 지표 차트 — 정책금리 · 장기금리 · 수익률곡선 · 물가 · 유동성"):
-        yrs = {'2년': 2, '5년': 5, '10년': 10}[st.segmented_control('기간', ['2년', '5년', '10년'], default='5년', key='det_rng') or '5년']
-        cut = pd.Timestamp.now() - pd.DateOffset(years=yrs)
-        _cut = lambda x: x[x.index >= cut] if len(x) else x
+        # 2026-11-07 — '2·5·10년'만 있으면 원하는 구간을 못 짚는다는 지적 → '직접'(date_picker.py 공용) 추가
+        _mstart, _mend = _dpk.period_range('기간', {'2년': 730, '5년': 1826, '10년': 3652, '20년': 7305, '전체': None},
+                                           key='det_rng', lo=pd.Timestamp('1960-01-01').date(), hi=pd.Timestamp.today().date(), default='5년')
+        _mstart, _mend = pd.Timestamp(_mstart), pd.Timestamp(_mend)
+        _cut = lambda x: x[(x.index >= _mstart) & (x.index <= _mend)] if len(x) else x
         F = lambda sid, n: _cut(_mf.to_series(fetch_fred(sid, n)))
         t1, t2, t3, t4, t5 = st.tabs(['🏦 정책금리', '📈 10년 국채', '📉 수익률곡선', '🔥 물가', '💧 유동성'])
         with t1, st.spinner("금리 로딩..."):
@@ -4164,7 +4172,7 @@ def _macro_detail_charts():
             st.markdown("**G3 중앙은행 총자산** — 돈을 찍어 푸는 규모(달러 환산)")
             st.plotly_chart(fig, use_container_width=True, key='mac_pc_3445')
             m2u = _mf.to_series(fetch_fred('M2SL', 140)); m2u = (m2u / m2u.shift(12) - 1) * 100
-            m2e = _ecb_series('BSI/M.U2.Y.V.M20.X.I.U2.2300.Z01.A', f"{cut:%Y-%m}")
+            m2e = _ecb_series('BSI/M.U2.Y.V.M20.X.I.U2.2300.Z01.A', f"{_mstart:%Y-%m}")
             S = {'미국 M2': _cut(m2u).dropna(), '유로존 M2': _cut(m2e)}
             fig2 = _det_fig(S, 'YoY %', height=260, yfmt='.1f')
             fig2.add_hline(y=0, line_color='rgba(120,124,134,.6)', line_width=1)
@@ -6744,10 +6752,11 @@ def _tab_analysis():
                     _cc1, _cc2, _cc3 = st.columns([1, 1.4, 1.4])
                     _bar = _cc1.segmented_control("봉", ['일봉', '주봉', '월봉'], default='주봉',
                                                   key=f"bar_{sym8_clean}") or '주봉'
-                    _per_opts = ['6개월', '1년', '3년', '5년', '10년', '전체']
-                    _per = _cc2.segmented_control("기간", _per_opts,
-                                                  default={'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar],
-                                                  key=f"per_{sym8_clean}_{_bar}") or '3년'
+                    # 2026-11-07 — 프리셋만 있으면 원하는 구간을 못 짚는다는 지적 → '직접'(날짜 두 칸) 추가(date_picker.py 공용)
+                    _per_opts = {'6개월': 182, '1년': 365, '3년': 1095, '5년': 1826, '10년': 3652, '전체': None}
+                    _plo, _phi = (hist.index.min().date(), hist.index.max().date()) if len(hist) else (datetime.today().date(), datetime.today().date())
+                    _pstart, _pend = _dpk.period_range("기간", _per_opts, key=f"per_{sym8_clean}_{_bar}", lo=_plo, hi=_phi,
+                                                       default={'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar])
                     _ind = _cc3.pills("보조지표", ['RSI', 'MACD', '낙폭(MDD)'], selection_mode='multi',
                                       default=[], key=f"ind_{sym8_clean}") or []
                     _rule = {'일봉': None, '주봉': 'W-FRI', '월봉': 'ME'}[_bar]
@@ -6765,9 +6774,8 @@ def _tab_analysis():
                     _ma_s = [(lab, _full['Close'].rolling(n).mean()) for n, lab in _mas]   # 지표는 전체로 계산 후 자른다(앞부분 공백 방지)
                     _rsi_s = _rsi(_full['Close']); _macd_s = _macd(_full['Close'])
                     _ddd_s = (_full['Close'] / _full['Close'].cummax() - 1) * 100
-                    _mo = {'6개월': 6, '1년': 12, '3년': 36, '5년': 60, '10년': 120}.get(_per)
-                    if _mo and len(_full):
-                        disp = _full[_full.index >= _full.index[-1] - pd.DateOffset(months=_mo)]
+                    if len(_full):
+                        disp = _full[(_full.index >= pd.Timestamp(_pstart)) & (_full.index <= pd.Timestamp(_pend))]
                     _cut = lambda x: x.loc[disp.index[0]:] if len(disp) else x
                     _dcl = disp['Close']
                     _rows = ['price', 'vol'] + [x for x in ('RSI', 'MACD', '낙폭(MDD)') if x in _ind]
@@ -7168,12 +7176,16 @@ def _tab_analysis():
 
                 # ── 📉 낙폭 회차 ─────────────────────────────────────────
                 with _SEC['price']:
-                    st.markdown("#### 📉 낙폭 회차 — 최근 N개월 동안 고점 대비 X% 이상 빠진 횟수")
-                    _dc1, _dc2, _ = st.columns([1.2, 2.2, 4])
-                    _dd_m = _dc1.selectbox("기간(개월)", [6, 12, 24, 36, 60, 120], index=1, key=f"dd_m_{sym8_clean}")
+                    st.markdown("#### 📉 낙폭 회차 — 기간 안에서 고점 대비 X% 이상 빠진 횟수")
+                    _dc1, _dc2 = st.columns([2.6, 1.4])
+                    with _dc1:
+                        _dlo, _dhi = _cl.index.min().date(), _cl.index.max().date()
+                        _dstart, _dend = _dpk.period_range("기간", {'6개월': 182, '1년': 365, '2년': 730, '3년': 1095, '5년': 1826, '10년': 3652, '전체': None},
+                                                           key=f"dd_m_{sym8_clean}", lo=_dlo, hi=_dhi, default='1년')
                     _dd_x = _dc2.slider("하락 기준(%)", 5, 60, 20, 5, key=f"dd_x_{sym8_clean}")
-                    _eps = _sx.drawdown_episodes(_cl, _dd_m, _dd_x)
-                    _dds = _sx.drawdown_series(_cl[_cl.index >= _cl.index.max() - pd.DateOffset(months=_dd_m)])
+                    _cl_w = _cl[(_cl.index >= pd.Timestamp(_dstart)) & (_cl.index <= pd.Timestamp(_dend))]
+                    _eps = _sx.drawdown_episodes(_cl_w, 1200, _dd_x)
+                    _dds = _sx.drawdown_series(_cl_w)
                     _rec = [e['days_to_recover'] for e in _eps if e['days_to_recover'] is not None]
                     _m1, _m2, _m3, _m4, _m5 = st.columns(5)
                     _m1.metric("횟수", f"{len(_eps)}회")
@@ -7284,12 +7296,12 @@ def _tab_analysis():
                     # 2026-10-21 — 기간은 사용자가 고른다. 고를 수 있는 끝 = 가진 재무 데이터의 시작(종목마다 다르다).
                     _band_all = _sx.multiple_band(_cl, _shn, _qf, None) if _shn else None
                     _bstart = (_band_all or {}).get('start')
-                    _ymax = max(1, int(((_cl.index.max() - _bstart).days) // 365)) if _bstart is not None else 10
-                    _yopts = [y for y in (1, 2, 3, 5, 7, 10, 15) if y < _ymax] + [None]
-                    _by = st.radio("기간", _yopts, index=_yopts.index(5) if 5 in _yopts else len(_yopts) - 1,
-                                   horizontal=True, key=f"band_y_{sym8_clean}",
-                                   format_func=lambda y: f"{y}년" if y else (f"전체({_bstart:%Y.%m}~)" if _bstart is not None else "전체"))
-                    _band = (_band_all if _by is None else _sx.multiple_band(_cl, _shn, _qf, _by)) if _shn else None
+                    # 2026-11-07 — 1/2/3/5/7/10/15년 버튼만 있으면 원하는 구간을 못 짚는다는 지적 → '직접' 추가(date_picker.py 공용)
+                    _blo = _bstart.date() if _bstart is not None else _cl.index.min().date()
+                    _bstart_sel, _bend_sel = _dpk.period_range("기간", {'1년': 365, '2년': 730, '3년': 1095, '5년': 1826, '7년': 2557, '10년': 3652, '전체': None},
+                                                               key=f"band_y_{sym8_clean}", lo=_blo, hi=_cl.index.max().date(), default='5년')
+                    _cl_band = _cl[(_cl.index >= pd.Timestamp(_bstart_sel)) & (_cl.index <= pd.Timestamp(_bend_sel))]
+                    _band = _sx.multiple_band(_cl_band, _shn, _qf, None) if _shn else None
                     _bm = (_band or {}).get('main')
                     if _qf is not None and not _qf.empty:
                         _q0, _q1 = _qf.index.min(), _qf.index.max()
