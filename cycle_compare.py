@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 import daily_store
+import stock_extras as _sx     # 종목분석 탭의 '낙폭 회차'와 같은 정의(drawdown_episodes) — 여기서 새로 만들지 않는다
 
 
 def load_close(sym: str, market: str, start: str = '2000-01-01', end: str = None):
@@ -45,6 +46,25 @@ def build_segment(close: pd.Series, label: str, start, end):
     ret = float(norm.iloc[-1])
     return dict(label=str(label) or '구간', start=seg.index[0].date(), end=seg.index[-1].date(),
                 days=len(seg) - 1, ret=round(ret, 1), direction='상승' if ret >= 0 else '하락', series=norm)
+
+
+def auto_rows(close: pd.Series, months: int, thresh: float) -> pd.DataFrame:
+    """수동 구간 입력이 귀찮다는 요청(2026-11-07) — 종목분석 탭 '낙폭 회차'(stock_extras.drawdown_episodes)와
+    똑같은 정의로 'MDD thresh% 이상' 회차를 찾아 하락(고점→저점)·회복(저점→고점) 두 구간씩 표에 미리 채운다.
+    months<=0 이면 전체 기간. 회복 전(진행 중)이면 종료일을 마지막 가격일로 두고 라벨에 표시."""
+    if close is None or not len(close):
+        return pd.DataFrame(columns=['라벨', '시작일', '종료일'])
+    eps = _sx.drawdown_episodes(close, months if months and months > 0 else 1200, thresh)
+    last = close.dropna().index.max()
+    rows = []
+    for i, e in enumerate(eps, 1):
+        rows.append({'라벨': f"하락 {i} ({e['depth']:.0f}%)", '시작일': pd.Timestamp(e['peak_date']).date(),
+                     '종료일': pd.Timestamp(e['trough_date']).date()})
+        rec = e.get('recover_date')
+        rows.append({'라벨': f"회복 {i}" + ('' if rec else ' (진행중)'),
+                     '시작일': pd.Timestamp(e['trough_date']).date(),
+                     '종료일': (pd.Timestamp(rec) if rec else last).date()})
+    return pd.DataFrame(rows, columns=['라벨', '시작일', '종료일'])
 
 
 def summarize(segments: list[dict]) -> pd.DataFrame:

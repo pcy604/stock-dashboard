@@ -71,6 +71,23 @@ def render(mkt_sel: str, tsrc):
     if key not in st.session_state:
         lo, hi = close.index.min().date(), close.index.max().date()
         st.session_state[key] = pd.DataFrame([{'라벨': '구간 1', '시작일': lo, '종료일': hi}])
+
+    with st.container(border=True):
+        st.caption('🤖 자동 채우기 — 종목분석 탭 "낙폭 회차"와 같은 정의(고점 대비 X% 이상 빠진 구간)로 '
+                   '하락(고점→저점)·회복(저점→고점) 구간을 한 번에 채웁니다. 채운 뒤에도 아래 표에서 직접 수정·추가할 수 있습니다.')
+        ac1, ac2, ac3 = st.columns([1.3, 2, 1])
+        _mopt = [12, 24, 36, 60, 120, 240, '전체']
+        amon = ac1.selectbox('기간', _mopt, index=len(_mopt) - 1, key=f'cyc_auto_m|{sym}',
+                             format_func=lambda v: '전체' if v == '전체' else f'{v}개월')
+        athr = ac2.slider('MDD 기준(%)', 5, 70, 30, 5, key=f'cyc_auto_x|{sym}')
+        if ac3.button('⬇ 채우기', key=f'cyc_auto_go|{sym}', use_container_width=True):
+            auto = C.auto_rows(close, 0 if amon == '전체' else int(amon), float(athr))
+            if len(auto):
+                st.session_state[key] = auto
+            else:
+                st.warning(f'{int(athr)}% 이상 빠진 구간이 없습니다 — 기준을 낮춰보세요.')
+            st.rerun()
+
     rows = st.data_editor(st.session_state[key], num_rows='dynamic', hide_index=True, use_container_width=True,
                           key=f'cyc_editor|{sym}',
                           column_config={'라벨': st.column_config.TextColumn(width='medium'),
