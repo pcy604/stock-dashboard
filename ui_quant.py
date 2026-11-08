@@ -265,16 +265,16 @@ def _easy(m):
     c = st.columns([3, 1, 1, 1, 1])
     pname = c[0].selectbox('전략', list(PRESETS), key='qb_easy_p')
     base = Q.merged(_fill(PRESETS[pname], m))
-    y0 = max(2015, pd.Timestamp(base['start']).year)
-    yr = c[1].selectbox('시작 연도', list(range(2015, 2026)), index=list(range(2015, 2026)).index(min(y0, 2025)), key=f'qb_easy_y|{pname}')
-    npos = c[2].selectbox('종목 수', [3, 5, 10, 20, 30], index=[3, 5, 10, 20, 30].index(min([3, 5, 10, 20, 30], key=lambda v: abs(v - base['max_pos']))),
-                          key=f'qb_easy_n|{pname}')
+    # 2026-11-08 차니 "목록으로 하드코딩하지 말고 숫자를 치게" — 숫자 선택은 전부 직접 입력(number_input)
+    y_max = pd.Timestamp.today().year
+    y0 = min(max(2014, pd.Timestamp(base['start']).year), y_max)
+    yr = c[1].number_input('시작 연도', 2014, y_max, int(y0), 1, key=f'qb_easy_y|{pname}', help='2014~ (한국 재무 조건은 2018-06부터 자동)')
+    npos = c[2].number_input('종목 수', 1, 100, int(base['max_pos']), 1, key=f'qb_easy_n|{pname}')
     tr = base['exit'].get('trail') or []
     cur = int(tr[0][1]) if len(tr) == 1 and float(tr[0][0]) == 0 else (int(base['exit'].get('stop') or 0) if not tr else None)
-    opts = list(_STOPS) + ([] if cur in _STOPS else ['preset'])
-    stp = c[3].selectbox('손절 (고점 대비)', opts, index=opts.index(cur if cur in _STOPS else 'preset'),
-                         format_func=lambda v: _STOPS.get(v, '전략 기본'), key=f'qb_easy_s|{pname}',
-                         help='보유 중 최고가에서 이만큼 빠지면 판다(손절선은 올라가기만)')
+    stp = c[3].number_input('손절 (고점 대비 −%)', 0, 90, cur, 1, key=f'qb_easy_s|{pname}', placeholder='전략 기본',
+                            help='보유 중 최고가에서 이만큼 빠지면 판다(손절선은 올라가기만) · 0 = 끔 · 비우면 전략 기본(단계별 래칫)')
+    stp = 'preset' if stp is None else int(stp)
     ix_on = c[4].toggle('지수 약하면 현금', value=bool(base['exposure'].get('index')), key=f'qb_easy_i|{pname}',
                         help=f"{_IDXN[_IDX[m][0]]}이(가) 이평선 아래면 주식을 사지 않음(한국 5주선 · 미국 40주선≈200일선)")
     st.caption('ℹ️ ' + _DESC.get(pname, ''))
@@ -292,6 +292,14 @@ def _easy(m):
 
 
 _BIN = {'op_turn', 'acc', 'nh'}          # 0/1 지표
+# 2026-11-08 차니 — 지표 고르기를 관점별로(밸류에이션·펀더멘털·시장). 엔진에 새 지표가 생기면 '시장'에 자동으로 붙는다.
+_GROUPS = {
+    '💰 밸류에이션': ['per', 'pbr', 'psr', 'marcap', 'close'],
+    '🏭 펀더멘털': ['rev_yoy', 'rev_qoq', 'op_yoy', 'op_turn', 'acc', 'oi_g', 'ni_yoy', 'opm', 'gpm', 'roe', 'debt'],
+    '📈 시장 (가격·수급·업종)': ['rs', 'rs_chg', 'rs_vec', 'ret', 'ma_gap', 'ma_x', 'dist_hi', 'nh', 'rsi', 'macd_hist', 'vol_x',
+                         'turnover', 'vol', 'sector'],
+}
+_MONTH = 'month'                          # 필터가 아니라 '투자할 달'(exposure.months)로 다룬다
 _NUM_N = {'ret': 13, 'rs_chg': 4, 'rs_vec': 4, 'ma_gap': 5, 'dist_hi': 52, 'nh': 52, 'vol_x': 20, 'rsi': 14, 'turnover': 4, 'vol': 26, 'ma_x': '10-40'}
 
 
@@ -316,9 +324,22 @@ def _filter_bar(m, base, pname):
     K = f"qb_fb|{pname}|{m}"
     with st.container(border=True):
         st.markdown("**📐 종목 필터** — 쓸 지표를 고르고 범위를 넣으세요. 비운 칸 = 제한 없음")
-        sel = st.multiselect('지표', [bk[b] for b in bk], default=[bk[b] for b in orig if b in bk], key=f'{K}|sel',
-                             format_func=lambda k: f"{Q.FIELDS[k][0]}" + (f" ({_unit(k.split(':')[0], m)})" if _unit(k.split(':')[0], m) else ''),
-                             label_visibility='collapsed', placeholder='지표 추가 — PER · PBR · PSR · ROE · RS · 매출 YoY · 흑자전환 · 이평 괴리 · 신고가 · 업종 …')
+        grp = {g: [bk[b] for b in bs if b in bk] for g, bs in _GROUPS.items()}
+        _seen = {k for v in grp.values() for k in v} | {bk.get(_MONTH)}
+        grp['📈 시장 (가격·수급·업종)'] += [k for k in keys if k not in _seen]
+        ck = lambda k: f"{K}|ck|{k.split(':')[0]}"
+        for k in keys:                                          # 처음 한 번: 전략 필터를 체크해 둔다
+            if ck(k) not in st.session_state:
+                st.session_state[ck(k)] = k.split(':')[0] in orig
+        _nm = lambda k: Q.FIELDS[k][0] + (f" ({_unit(k.split(':')[0], m)})" if _unit(k.split(':')[0], m) else '')
+        n_on = sum(1 for v in grp.values() for k in v if st.session_state.get(ck(k)))
+        with st.popover(f"➕ 지표 고르기 · {n_on}개 선택", use_container_width=True):
+            gc = st.columns(len(grp))
+            for col, (g, ks) in zip(gc, grp.items()):
+                col.markdown(f"**{g}**")
+                for k in ks:
+                    col.checkbox(_nm(k), key=ck(k), help=Q.FIELDS[k][2])
+        sel = [k for ks in grp.values() for k in ks if st.session_state.get(ck(k))]
         out, txt, pos = [], [], {}      # pos: 화면 번호 → 실제 조건 번호(범위 빈 칸은 빠지므로)
         cols = st.columns(3)
         for i, k in enumerate(sel, 1):
@@ -397,8 +418,21 @@ def _filter_bar(m, base, pname):
                 logic = ''
         st.caption('적용: ' + (f"{logic} · " if logic else ('모두 AND · ' if len(out) > 1 else '')) + (' · '.join(txt) if txt else '필터 없음(전 종목)') +
                    (' · ⚠️ 범위가 빈 지표는 번호에서 빠집니다' if len(out) < len(sel) else ''))
+        # 📅 투자할 달 — '달(월)'은 종목 조건이 아니라 '언제 주식을 들고 있나'(할로윈 등). 고른 달에만 보유, 나머지 달은 현금.
+        ex0 = base.get('exposure') or {}
+        mo0 = ex0.get('months') or list(range(1, 13))
+        mf = orig.get(_MONTH)                                       # 말로 쓰기 등에서 온 달 필터 → 달 선택으로 옮김
+        if mf and mf.get('op') == 'between' and isinstance(mf.get('value'), list):
+            a_, b_ = int(mf['value'][0]), int(mf['value'][1])
+            mo0 = [x for x in range(1, 13) if (a_ <= x <= b_ if a_ <= b_ else (x >= a_ or x <= b_))]
+        mos = st.pills('📅 투자할 달 — 고른 달에만 주식 보유, 나머지는 현금', list(range(1, 13)), selection_mode='multi', default=mo0,
+                       format_func=lambda x: f'{x}월', key=f'{K}|months')
+        mos = sorted(mos) or list(range(1, 13))
+        if len(mos) < 12:
+            st.caption('📅 ' + ' · '.join(f'{x}월' for x in mos) + '에만 보유 (' + ', '.join(f'{x}월' for x in range(1, 13) if x not in mos) + ' 현금)')
     base = json.loads(json.dumps(base))
     base['filters'], base['logic'] = out, logic
+    base.setdefault('exposure', {})['months'] = mos
     return base
 
 

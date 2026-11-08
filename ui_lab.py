@@ -88,11 +88,10 @@ def render(mkt_sel: str, tsrc):
         st.caption(sd['desc'])
         p = {}
         for pk, lab, lo, hi, dv, stp in sd['params']:
-            p[pk] = st.slider(lab, lo, hi, dv, stp, key=f'lab_{key}_{pk}')
+            p[pk] = st.number_input(lab, lo, hi, dv, stp, key=f'lab_{key}_{pk}', help=f'{lo}~{hi}')   # 2026-11-08 직접 입력
     with c2:
         st.markdown("**② 지수 필터 (선택)** — 지수가 약하면 쉬기")
-        idx_ma = st.select_slider("지수가 이 이동평균 아래면 보유하지 않음", [0, 20, 50, 100, 200], value=0, key='lab_ix',
-                                  format_func=lambda v: '끔' if v == 0 else f'{v}일선')
+        idx_ma = st.number_input("지수가 이 n일선 아래면 보유하지 않음 (0 = 끔)", 0, 300, 0, 5, key='lab_ix')
         ixm = {m: Q.INDEX_OF[m] for m in mkts}
         if idx_ma:
             cols = st.columns(len(mkts))
@@ -101,8 +100,7 @@ def render(mkt_sel: str, tsrc):
         st.markdown("**③ 안전장치 (선택)** — 고점에서 이만큼 빠지면 손절")
         stop = 0
         if key != 'trail':
-            stop = st.select_slider("보유 중 최고가 대비", [0, 10, 15, 20, 25, 30, 40], value=0, key='lab_stop',
-                                    format_func=lambda v: '끔' if v == 0 else f'−{v}%')
+            stop = st.number_input("보유 중 최고가 대비 −% (0 = 끔)", 0, 90, 0, 1, key='lab_stop')
         else:
             st.caption("이 전략은 손절 자체가 규칙이라 안전장치가 따로 없습니다.")
 
