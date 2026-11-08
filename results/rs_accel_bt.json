@@ -1,12 +1,12 @@
 {
- "run": "2026-10-28 02:52",
+ "run": "2026-11-08 15:04",
  "factor_ver": "v13y",
  "period": [
   "2014-10-27",
-  "2026-10-19"
+  "2026-10-26"
  ],
  "eval_start_reason": "첫 신호가 가능한 주부터(이익가속 5분기·RS 52주 이력 필요)",
- "universe": 2552,
+ "universe": 2553,
  "SPY": {
   "CAGR": 13.6,
   "MDD": -31.8,
@@ -14,32 +14,32 @@
  },
  "variants": {
   "star": {
-   "CAGR": 10.55,
-   "p10": 9.200000000000001,
-   "MDD": -42.349999999999994,
-   "Sharpe": 0.5549999999999999,
-   "y14_19": 10.55,
-   "signals_per_week": 13.7,
+   "CAGR": 11.0,
+   "p10": 6.55,
+   "MDD": -41.8,
+   "Sharpe": 0.565,
+   "y14_19": 11.0,
+   "signals_per_week": 13.8,
    "overlap_star": 1.0
   },
   "acc": {
-   "CAGR": 11.85,
-   "p10": 8.32,
-   "MDD": -34.5,
-   "Sharpe": 0.6799999999999999,
-   "y14_19": 11.35,
-   "signals_per_week": 317.9,
+   "CAGR": 12.45,
+   "p10": 8.9,
+   "MDD": -34.0,
+   "Sharpe": 0.7050000000000001,
+   "y14_19": 10.65,
+   "signals_per_week": 318.2,
    "overlap_star": 0.043
   },
   "rs80_acc": {
-   "CAGR": 11.45,
-   "p10": 9.93,
-   "MDD": -32.95,
-   "Sharpe": 0.65,
-   "y14_19": 9.6,
-   "signals_per_week": 76.0,
+   "CAGR": 11.15,
+   "p10": 8.5,
+   "MDD": -33.05,
+   "Sharpe": 0.63,
+   "y14_19": 9.7,
+   "signals_per_week": 76.1,
    "overlap_star": 0.083,
-   "shock1": 10.5,
+   "shock1": 11.350000000000001,
    "verdict": {
     "beats_star": true,
     "p10_beats_star": false,
@@ -50,32 +50,32 @@
    }
   },
   "rs90_acc": {
-   "CAGR": 13.5,
-   "p10": 12.57,
-   "MDD": -34.75,
-   "Sharpe": 0.685,
-   "y14_19": 13.45,
+   "CAGR": 16.05,
+   "p10": 13.97,
+   "MDD": -34.35,
+   "Sharpe": 0.765,
+   "y14_19": 13.25,
    "signals_per_week": 36.7,
    "overlap_star": 0.115,
-   "shock1": 12.850000000000001,
+   "shock1": 12.3,
    "verdict": {
     "beats_star": true,
     "p10_beats_star": true,
-    "beats_spy": false,
+    "beats_spy": true,
     "y14_19_beats_spy": true,
     "shock_beats_spy": false,
     "pass": false
    }
   },
   "rs80_fund": {
-   "CAGR": 12.65,
-   "p10": 9.99,
-   "MDD": -32.7,
-   "Sharpe": 0.6950000000000001,
-   "y14_19": 11.25,
-   "signals_per_week": 87.1,
+   "CAGR": 11.350000000000001,
+   "p10": 9.37,
+   "MDD": -32.900000000000006,
+   "Sharpe": 0.645,
+   "y14_19": 10.55,
+   "signals_per_week": 87.2,
    "overlap_star": 0.072,
-   "shock1": 12.25,
+   "shock1": 10.65,
    "verdict": {
     "beats_star": true,
     "p10_beats_star": false,
@@ -86,23 +86,23 @@
    }
   },
   "rs80": {
-   "CAGR": 9.75,
-   "p10": 7.95,
-   "MDD": -35.3,
-   "Sharpe": 0.58,
-   "y14_19": 9.55,
-   "signals_per_week": 272.1,
+   "CAGR": 9.55,
+   "p10": 8.149999999999999,
+   "MDD": -36.3,
+   "Sharpe": 0.5700000000000001,
+   "y14_19": 8.95,
+   "signals_per_week": 272.3,
    "overlap_star": 0.023
   },
   "ta": {
-   "CAGR": 12.05,
-   "p10": 9.18,
-   "MDD": -37.75,
+   "CAGR": 11.899999999999999,
+   "p10": 11.01,
+   "MDD": -38.7,
    "Sharpe": 0.625,
-   "y14_19": 8.2,
-   "signals_per_week": 67.4,
+   "y14_19": 7.699999999999999,
+   "signals_per_week": 67.6,
    "overlap_star": 0.031
   }
  },
- "secs": 81
+ "secs": 58
 }

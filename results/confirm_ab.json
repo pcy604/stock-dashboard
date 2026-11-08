@@ -1,9 +1,9 @@
 {
- "run": "2026-10-28 03:14",
+ "run": "2026-11-08 15:19",
  "factor_ver": "v13y",
  "period": [
   "2014-10-27",
-  "2026-10-19"
+  "2026-10-26"
  ],
  "spy": {
   "CAGR": 13.6,
@@ -15,7 +15,7 @@
  "cands": {
   "A": {
    "center": {
-    "CAGR": 18.0,
+    "CAGR": 17.9,
     "MDD": -26.3,
     "Calmar": 0.68,
     "Sharpe": 0.77
@@ -40,15 +40,15 @@
      "Sharpe": 0.77
     },
     "냉각 6주": {
-     "CAGR": 14.0,
+     "CAGR": 13.9,
      "MDD": -30.6,
-     "Calmar": 0.46,
+     "Calmar": 0.45,
      "Sharpe": 0.66
     },
     "고점 -12%": {
-     "CAGR": 15.3,
+     "CAGR": 15.2,
      "MDD": -28.1,
-     "Calmar": 0.55,
+     "Calmar": 0.54,
      "Sharpe": 0.7
     },
     "고점 -18%": {
@@ -58,13 +58,13 @@
      "Sharpe": 0.64
     },
     "초기 -12%": {
-     "CAGR": 21.0,
+     "CAGR": 20.9,
      "MDD": -24.5,
-     "Calmar": 0.86,
+     "Calmar": 0.85,
      "Sharpe": 0.87
     },
     "초기 -18%": {
-     "CAGR": 18.0,
+     "CAGR": 17.9,
      "MDD": -26.3,
      "Calmar": 0.68,
      "Sharpe": 0.77
@@ -72,41 +72,41 @@
    },
    "nb_ok": 8,
    "nb_n": 8,
-   "shock1": 17.6,
+   "shock1": 17.3,
    "rs": {
     "w": {
-     "CAGR": 18.0,
+     "CAGR": 17.9,
      "MDD": -26.3,
      "Calmar": 0.68,
      "Sharpe": 0.77
     },
     "r13": {
-     "CAGR": 12.1,
+     "CAGR": 12.0,
      "MDD": -27.7,
-     "Calmar": 0.44,
-     "Sharpe": 0.62
+     "Calmar": 0.43,
+     "Sharpe": 0.61
     },
     "m121": {
-     "CAGR": 15.6,
-     "MDD": -29.7,
-     "Calmar": 0.53,
-     "Sharpe": 0.69
+     "CAGR": 16.7,
+     "MDD": -30.1,
+     "Calmar": 0.56,
+     "Sharpe": 0.73
     }
    },
    "random": {
-    "median": 10.350000000000001,
-    "p10": 8.41,
+    "median": 10.7,
+    "p10": 9.13,
     "all": [
      7.6,
-     8.5,
-     8.9,
-     9.4,
-     9.8,
-     10.9,
-     10.9,
-     11.2,
-     13.7,
-     14.5
+     9.3,
+     9.7,
+     10.0,
+     10.7,
+     10.7,
+     11.1,
+     11.6,
+     12.2,
+     13.4
     ]
    },
    "criteria": {
@@ -120,63 +120,63 @@
   },
   "B": {
    "center": {
-    "CAGR": 24.2,
+    "CAGR": 24.1,
     "MDD": -33.0,
     "Calmar": 0.73,
     "Sharpe": 0.88
    },
    "neighbors": {
     "냉각 2주": {
-     "CAGR": 19.8,
-     "MDD": -41.6,
-     "Calmar": 0.48,
-     "Sharpe": 0.77
+     "CAGR": 23.0,
+     "MDD": -32.9,
+     "Calmar": 0.7,
+     "Sharpe": 0.87
     },
     "냉각 3주": {
-     "CAGR": 23.9,
+     "CAGR": 23.6,
      "MDD": -30.3,
-     "Calmar": 0.79,
-     "Sharpe": 0.89
+     "Calmar": 0.78,
+     "Sharpe": 0.88
     },
     "냉각 5주": {
-     "CAGR": 17.1,
+     "CAGR": 17.2,
      "MDD": -41.2,
-     "Calmar": 0.41,
-     "Sharpe": 0.69
+     "Calmar": 0.42,
+     "Sharpe": 0.7
     },
     "냉각 6주": {
-     "CAGR": 21.0,
+     "CAGR": 20.7,
      "MDD": -31.7,
-     "Calmar": 0.66,
-     "Sharpe": 0.83
+     "Calmar": 0.65,
+     "Sharpe": 0.82
     },
     "고점 -12%": {
-     "CAGR": 19.0,
+     "CAGR": 18.9,
      "MDD": -37.4,
      "Calmar": 0.51,
      "Sharpe": 0.77
     },
     "고점 -18%": {
-     "CAGR": 16.7,
+     "CAGR": 16.9,
      "MDD": -33.4,
-     "Calmar": 0.5,
-     "Sharpe": 0.67
+     "Calmar": 0.51,
+     "Sharpe": 0.68
     },
     "초기 -12%": {
-     "CAGR": 14.7,
+     "CAGR": 14.9,
      "MDD": -37.2,
      "Calmar": 0.4,
-     "Sharpe": 0.63
+     "Sharpe": 0.64
     },
     "초기 -18%": {
-     "CAGR": 24.2,
+     "CAGR": 24.1,
      "MDD": -33.0,
      "Calmar": 0.73,
      "Sharpe": 0.88
     },
     "불타기 +25%": {
-     "CAGR": 19.5,
-     "MDD": -36.7,
+     "CAGR": 19.4,
+     "MDD": -36.8,
      "Calmar": 0.53,
      "Sharpe": 0.77
     },
@@ -193,58 +193,58 @@
      "Sharpe": 0.78
     },
     "추가 60%": {
-     "CAGR": 18.1,
+     "CAGR": 18.3,
      "MDD": -31.8,
      "Calmar": 0.57,
-     "Sharpe": 0.71
+     "Sharpe": 0.72
     }
    },
    "nb_ok": 10,
    "nb_n": 12,
-   "shock1": 19.6,
+   "shock1": 20.6,
    "rs": {
     "w": {
-     "CAGR": 24.2,
+     "CAGR": 24.1,
      "MDD": -33.0,
      "Calmar": 0.73,
      "Sharpe": 0.88
     },
     "r13": {
-     "CAGR": 9.9,
-     "MDD": -31.9,
-     "Calmar": 0.31,
-     "Sharpe": 0.51
+     "CAGR": 14.1,
+     "MDD": -29.0,
+     "Calmar": 0.49,
+     "Sharpe": 0.65
     },
     "m121": {
-     "CAGR": 22.3,
-     "MDD": -35.4,
-     "Calmar": 0.63,
-     "Sharpe": 0.83
+     "CAGR": 19.9,
+     "MDD": -32.4,
+     "Calmar": 0.62,
+     "Sharpe": 0.77
     }
    },
    "random": {
-    "median": 11.75,
-    "p10": 9.73,
+    "median": 9.8,
+    "p10": 9.290000000000001,
     "all": [
-     8.2,
+     8.3,
+     9.4,
+     9.4,
+     9.5,
+     9.7,
      9.9,
-     10.1,
-     11.3,
-     11.6,
      11.9,
-     13.6,
-     13.7,
-     13.7,
-     14.0
+     12.4,
+     13.1,
+     14.1
     ]
    },
    "criteria": {
     "① 중심 CAGR·Calmar > SPY": true,
     "② 이웃 70%↑ 유지": true,
     "③ 상폐충격 후 CAGR > SPY": true,
-    "④ RS 정의 3종 모두 > SPY": false
+    "④ RS 정의 3종 모두 > SPY": true
    },
-   "passed": false
+   "passed": true
   }
  },
  "blend": {
@@ -263,23 +263,23 @@
     "MDD": -19.2,
     "Calmar": 0.53,
     "Sharpe": 0.82,
-    "final": 320.3
+    "final": 319.9
    },
    {
     "w": 0.3,
     "CAGR": 11.3,
     "MDD": -18.8,
     "Calmar": 0.6,
-    "Sharpe": 0.84,
-    "final": 361.0
+    "Sharpe": 0.83,
+    "final": 360.3
    },
    {
     "w": 0.4,
-    "CAGR": 12.4,
+    "CAGR": 12.3,
     "MDD": -19.5,
-    "Calmar": 0.64,
+    "Calmar": 0.63,
     "Sharpe": 0.84,
-    "final": 404.7
+    "final": 403.8
    },
    {
     "w": 0.5,
@@ -287,23 +287,23 @@
     "MDD": -20.5,
     "Calmar": 0.65,
     "Sharpe": 0.83,
-    "final": 451.6
+    "final": 450.3
    },
    {
     "w": 0.7,
-    "CAGR": 15.4,
+    "CAGR": 15.3,
     "MDD": -22.6,
     "Calmar": 0.68,
     "Sharpe": 0.81,
-    "final": 554.2
+    "final": 551.9
    },
    {
     "w": 1.0,
-    "CAGR": 18.0,
+    "CAGR": 17.9,
     "MDD": -26.3,
     "Calmar": 0.68,
     "Sharpe": 0.77,
-    "final": 728.5
+    "final": 724.1
    }
   ],
   "B": [
@@ -317,19 +317,19 @@
    },
    {
     "w": 0.2,
-    "CAGR": 11.6,
+    "CAGR": 11.5,
     "MDD": -18.9,
     "Calmar": 0.61,
-    "Sharpe": 0.89,
-    "final": 370.7
+    "Sharpe": 0.88,
+    "final": 370.2
    },
    {
     "w": 0.3,
     "CAGR": 13.3,
     "MDD": -18.6,
-    "Calmar": 0.72,
+    "Calmar": 0.71,
     "Sharpe": 0.92,
-    "final": 447.1
+    "final": 446.2
    },
    {
     "w": 0.4,
@@ -337,15 +337,15 @@
     "MDD": -19.7,
     "Calmar": 0.76,
     "Sharpe": 0.93,
-    "final": 534.8
+    "final": 533.4
    },
    {
     "w": 0.5,
-    "CAGR": 16.7,
+    "CAGR": 16.6,
     "MDD": -20.9,
     "Calmar": 0.8,
-    "Sharpe": 0.93,
-    "final": 634.6
+    "Sharpe": 0.92,
+    "final": 632.5
    },
    {
     "w": 0.7,
@@ -353,15 +353,15 @@
     "MDD": -24.5,
     "Calmar": 0.81,
     "Sharpe": 0.91,
-    "final": 873.5
+    "final": 869.4
    },
    {
     "w": 1.0,
-    "CAGR": 24.2,
+    "CAGR": 24.1,
     "MDD": -33.0,
     "Calmar": 0.73,
     "Sharpe": 0.88,
-    "final": 1338.1
+    "final": 1328.9
    }
   ],
   "cur": [
@@ -376,50 +376,50 @@
    {
     "w": 0.2,
     "CAGR": 11.4,
-    "MDD": -17.6,
+    "MDD": -17.4,
     "Calmar": 0.65,
     "Sharpe": 0.85,
-    "final": 365.9
+    "final": 363.8
    },
    {
     "w": 0.3,
-    "CAGR": 13.1,
+    "CAGR": 13.0,
     "MDD": -19.7,
     "Calmar": 0.66,
-    "Sharpe": 0.87,
-    "final": 437.8
+    "Sharpe": 0.86,
+    "final": 434.1
    },
    {
     "w": 0.4,
-    "CAGR": 14.7,
+    "CAGR": 14.6,
     "MDD": -22.6,
     "Calmar": 0.65,
-    "Sharpe": 0.87,
-    "final": 519.0
+    "Sharpe": 0.86,
+    "final": 513.1
    },
    {
     "w": 0.5,
-    "CAGR": 16.3,
+    "CAGR": 16.1,
     "MDD": -25.5,
-    "Calmar": 0.64,
+    "Calmar": 0.63,
     "Sharpe": 0.86,
-    "final": 609.7
+    "final": 601.1
    },
    {
     "w": 0.7,
-    "CAGR": 19.2,
+    "CAGR": 19.0,
     "MDD": -31.1,
-    "Calmar": 0.62,
-    "Sharpe": 0.84,
-    "final": 819.6
+    "Calmar": 0.61,
+    "Sharpe": 0.83,
+    "final": 803.6
    },
    {
     "w": 1.0,
-    "CAGR": 23.0,
+    "CAGR": 22.7,
     "MDD": -39.2,
-    "Calmar": 0.59,
-    "Sharpe": 0.81,
-    "final": 1199.5
+    "Calmar": 0.58,
+    "Sharpe": 0.8,
+    "final": 1166.7
    }
   ]
  },
@@ -430,5 +430,5 @@
   "Calmar": 0.37,
   "worst_yr": -17.9
  },
- "secs": 54
+ "secs": 43
 }
