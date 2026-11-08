@@ -43,6 +43,22 @@ def us():
     px = pd.read_sql("SELECT sym, date, open, high, low, volume FROM prices WHERE market='US'", c)
     px["date"] = pd.to_datetime(px.date)
     d = d.rename(columns={"as_of": "date"}).merge(px, on=["sym", "date"], how="left")
+    # 2026-11-08 시총 정합(us_capfix) — 분할 직후 주식수 기준 어긋남(TSLA 2022-08 $281B·GOOGL 2022-07 $73B·PER 1.0)·
+    #   역분할 초소형주 부풀림(SLS 2017 $35.5B)·단위 ×1,000 오류·ADR 배수, 빈 시총 채움. PER·PBR·PSR 도 같은 배수.
+    import us_capfix
+    d = us_capfix.fix(d, ratios=("per", "pbr", "psr"))
+    print(f"[US] 시총 정합: 1.5배 넘게 고친 칸 {int((np.abs(np.log(d._capfix)) > np.log(1.5)).sum()):,} · "
+          f"{d.loc[np.abs(np.log(d._capfix)) > np.log(1.5), 'sym'].nunique()}종 · 회전율로 비운 칸 {int(d._capbad.sum()):,}"
+          f"({d.loc[d._capbad, 'sym'].nunique()}종)", flush=True)
+    _chk = {("TSLA", "2022-08-29"): (5e11, 1.5e12), ("GOOGL", "2022-07-11"): (8e11, 2.5e12), ("NVDA", "2023-01-02"): (2e11, 6e11),
+            ("AAPL", "2020-08-24"): (1.5e12, 2.8e12)}
+    for (s_, dt), (lo, hi) in _chk.items():
+        v = d.loc[(d.sym == s_) & (d.date == pd.Timestamp(dt)), "marcap"]
+        if len(v) and not (lo <= float(v.iloc[0]) <= hi):
+            raise SystemExit(f"[US] 시총 정답 점검 실패: {s_} {dt} = {float(v.iloc[0]) / 1e9:,.0f}B (기대 {lo / 1e9:,.0f}~{hi / 1e9:,.0f}B)")
+    # 거래 없는 주(거래량 0 — 비상장 리츠 IVT 처럼 호가만 멈춰 있는 값)는 체결할 수 없다 → 뺀다
+    d = d[~(d.volume == 0)]
+    d = d.drop(columns=["_capfix", "_capbad"])
     d = d[d.marcap >= 2e8].copy()
     # 영업이익 YoY: 같은 종목 4분기 전 값(분기 패널에서)
     q = d.dropna(subset=["period_end"]).drop_duplicates(["sym", "period_end"])[["sym", "period_end", "op_income"]].sort_values(["sym", "period_end"])

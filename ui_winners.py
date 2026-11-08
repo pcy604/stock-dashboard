@@ -32,7 +32,36 @@ def _bar(x, y, title, color, ytitle=None, h=230):
     return f
 
 
+def _when(r):
+    st.caption("저점(점화)은 지나고서야 압니다. 미국은 대부분 2022년 약세장 바닥이라 '저점 국면'은 그 해의 설명일 뿐입니다 — "
+               "판단에 쓸 수 있는 건 **돌파 주의 국면**입니다. 몰림(배) = 그 국면 비율 ÷ 평소 비율, 1 보다 크면 그 국면에 몰렸다는 뜻.")
+    Mc = pd.DataFrame(r['macro'])
+    has_bo = 'at_breakout' in Mc and Mc['at_breakout'].notna().any()
+    Mt = pd.DataFrame({'국면': Mc['regime'], '평소(%)': Mc['all_weeks'], '저점 주(%)': Mc['at_ignition']})
+    if has_bo:
+        Mt['돌파 주(%)'] = Mc['at_breakout']
+        Mt['돌파 몰림(배)'] = [round(b / a, 2) if a else None for a, b in zip(Mc['all_weeks'], Mc['at_breakout'])]
+    Mt['저점 몰림(배)'] = [round(b / a, 2) if a else None for a, b in zip(Mc['all_weeks'], Mc['at_ignition'])]
+    _TS[0]('research/winners_reverse.py', path=PATH)
+    st.dataframe(Mt, use_container_width=True, hide_index=True, filters=False, color=False,
+                 column_config={c: st.column_config.NumberColumn(format='%.2f') for c in Mt.columns if '몰림' in c})
+    c1, c2 = st.columns(2)
+    iq = r.get('ignition_by_q') or {}
+    bq = r.get('breakout_by_q') or {}
+    if iq:
+        c1.plotly_chart(_bar(iq, iq.values(), '분기별 저점(점화) 종목 수', '#7C8AA5'), use_container_width=True)
+    if bq:
+        c2.plotly_chart(_bar(bq, bq.values(), '분기별 52주 돌파 종목 수', _C1), use_container_width=True)
+    else:
+        c2.caption('돌파 분포 — 재계산 대기')
+
+
+
+_TS = [None]
+
+
 def render(mkt_sel: str, tsrc, name_of=None):
+    _TS[0] = tsrc
     st.markdown("#### 🔭 대박주 역분석 — 최근 5년 2배 이상 오른 종목은 무엇이 달랐고, 언제 샀어야 했나")
     D = _load()
     mk = {k: v for k, v in (D.get('markets') or {}).items() if 'error' not in v}
@@ -64,9 +93,9 @@ def render(mkt_sel: str, tsrc, name_of=None):
     k[3].metric("고점 −20% 손절에 털림", f"{h['stopped_out']['20']:.0f}%", f"상승 도중 최대 낙폭 중앙 {h['run_dd']['median']:.0f}%",
                 delta_color='off', help='점화→고점 사이 고점 대비 −20% 를 한 번이라도 찍고, 그 뒤 더 오른 승자 비율')
 
-    t1, t2, t3, t4 = st.tabs(["🏆 대박주 목록", "🧬 무엇이 달랐나", "⏱ 언제 샀어야 했나", "✊ 언제 꽉 쥐나"])
-
-    # ── ① 목록 ──
+    # 2026-11-08 차니 "탭 없이 드러내자" — 서브탭 4개 → 한 화면에 질문 순서대로
+    t1 = t2 = t3 = t4 = st.container()
+    st.markdown("##### 🏆 ① 누가 대박났나")
     with t1:
         W = pd.DataFrame(r.get('winners') or [])
         if not len(W):
@@ -89,58 +118,41 @@ def render(mkt_sel: str, tsrc, name_of=None):
                          column_config={cap: st.column_config.NumberColumn(format='%,.0f' if m == 'KR' else '%.1f'),
                                         **{c: st.column_config.NumberColumn(format='%,.0f') for c in
                                            ('5년 수익률(%)', '저점→고점(%)', '돌파→고점(%)', '돌파 뒤 남은 몫(%)', '저점→고점(주)', '도중 최대 낙폭(%)')}})
-            st.caption("시총 = 창 시작 주 · 저점 = 5년 안 가장 큰 상승의 출발점(지나고서야 앎) · 돌파 = 그 뒤 처음 직전 52주 최고 종가를 넘은 주(그 주에 앎) · "
+            st.caption("대상 = 창 시작 주에 이미 상장·유동성 통과한 종목(창 안 신규 상장은 빠짐 — 출발점이 없어서) · 시총 = 창 시작 주 · 저점 = 5년 안 가장 큰 상승의 출발점(지나고서야 앎) · 돌파 = 그 뒤 처음 직전 52주 최고 종가를 넘은 주(그 주에 앎) · "
                        "돌파 뒤 남은 몫 = 저점→고점 로그 상승 중 돌파 이후 비율 · ⇤ = 저점이 창 첫 주(그 전부터 오르던 중, 실제 출발은 더 앞)"
                        + (f" {r['n_edge']}종" if r.get('n_edge') is not None else '') + " · 상장폐지 종목 포함"
                        + (" · 한국은 분할·병합·감자를 이어 붙인 수정주가" if m == 'KR' and new else ''))
 
-    # ── ② 필요·충분 ──
+    # ── ② 언제 샀어야 했나 (차니 질문 순서: 목록 → 시점 → 특징 → 보유) ──
+    st.markdown("##### ⏱ ② 언제 샀어야 했나 — 저점이 아니라 '돌파한 주'")
+    _when(r)
+    # ── ③ 필요·충분 ──
+    st.markdown("##### 🧬 ③ 돌파한 주에 무엇이 달랐나")
     with t2:
-        st.caption("**필요조건** = 대박주가 그 특징을 갖고 있던 비율 · **리프트** = 평소 그 특징이 있을 때 이후 52주 2배 확률 ÷ 전체 확률. "
-                   "대박주 대부분이 가졌어도 평소에 흔하면 리프트 ≈ 1 = 미리 가려내는 힘이 없습니다. **돌파 주 보유**가 실제로 쓸 수 있는 숫자입니다.")
-        F = pd.DataFrame([{'특징': f['feat'], '돌파 주 보유(%)': f.get('need_bo'), '저점 ±13주 보유(%)': f['need_near'],
-                           '평소 보유(%)': f['prevalence'], '이후 52주 2배 확률(%)': f['p2x'], '리프트(배)': f['lift'],
-                           '이후 52주 중앙(%)': f['med52'], '표본(주·종목)': f['n']} for f in r['features']])
-        if F['돌파 주 보유(%)'].isna().all():
-            F = F.drop(columns=['돌파 주 보유(%)'])
+        st.caption("**리프트** = 아무 주에서든 그 특징이 있을 때 이후 52주 안에 2배가 될 확률 ÷ 평소 확률(전 종목·전 주) — 높을수록 미리 가려내는 힘. "
+                   "**대박주가 돌파 주에 보유** = 대박주가 52주 신고가를 뚫은 그 주에 그 특징을 갖고 있던 비율(필요조건). "
+                   "둘 다 높아야 쓸모 있습니다 — 대박주 대부분이 가졌어도 평소에 흔하면(리프트 ≈ 1) 거르는 힘이 없습니다.")
+        # 2026-11-08 점검: '저점 ±13주 보유'는 저점 뒤 13주 정보까지 섞여(사후) 판단에 못 씀 → 뺐다. 돌파 주 보유가 그 주에 알 수 있는 값.
+        F = pd.DataFrame([{'특징': f['feat'], '대박주가 돌파 주에 보유(%)': f.get('need_bo'), '평소 보유(%)': f['prevalence'],
+                           '이후 52주 2배 확률(%)': f['p2x'], '리프트(배)': f['lift'],
+                           '이후 52주 중앙(%)': f['med52'], '표본(주·종목)': f['n']} for f in r['features']]).sort_values('리프트(배)', ascending=False)
+        if F['대박주가 돌파 주에 보유(%)'].isna().all():
+            F = F.drop(columns=['대박주가 돌파 주에 보유(%)'])
         tsrc('research/winners_reverse.py', path=PATH)
         st.dataframe(F, use_container_width=True, hide_index=True, color=False,
                      column_config={c: st.column_config.NumberColumn(format='%.1f') for c in F.columns if c.endswith('(%)')}
                      | {'리프트(배)': st.column_config.NumberColumn(format='%.2f'), '표본(주·종목)': st.column_config.NumberColumn(format='%,d')})
         st.markdown("**특징 두 개 조합 — 리프트 상위** (표본 500 이상)")
         tsrc('research/winners_reverse.py', path=PATH)
-        st.dataframe(pd.DataFrame([{'조합': c['feat'], '대박주 보유(%)': c['need_near'], '이후 52주 2배 확률(%)': c['p2x'],
+        st.dataframe(pd.DataFrame([{'조합': c['feat'], '이후 52주 2배 확률(%)': c['p2x'],
                                     '리프트(배)': c['lift'], '이후 52주 중앙(%)': c['med52'], '표본(주·종목)': c['n']} for c in r['combos']]),
                      use_container_width=True, hide_index=True, color=False, height=300,
                      column_config={'리프트(배)': st.column_config.NumberColumn(format='%.2f'),
                                     '표본(주·종목)': st.column_config.NumberColumn(format='%,d')})
         st.caption("⚠️ 리프트 2배도 확률로는 10~20% — '이 특징이면 대박'이 아니라 '평소보다 몇 배 자주'입니다. 같은 5년을 보고 고른 특징이라 다른 시기 확인 전엔 가설입니다.")
 
-    # ── ③ 언제 사나 ──
-    with t3:
-        st.caption("저점(점화)은 지나고서야 압니다. 미국은 대부분 2022년 약세장 바닥이라 '저점 국면'은 그 해의 설명일 뿐입니다 — "
-                   "판단에 쓸 수 있는 건 **돌파 주의 국면**입니다. 몰림(배) = 그 국면 비율 ÷ 평소 비율, 1 보다 크면 그 국면에 몰렸다는 뜻.")
-        Mc = pd.DataFrame(r['macro'])
-        has_bo = 'at_breakout' in Mc and Mc['at_breakout'].notna().any()
-        Mt = pd.DataFrame({'국면': Mc['regime'], '평소(%)': Mc['all_weeks'], '저점 주(%)': Mc['at_ignition']})
-        if has_bo:
-            Mt['돌파 주(%)'] = Mc['at_breakout']
-            Mt['돌파 몰림(배)'] = [round(b / a, 2) if a else None for a, b in zip(Mc['all_weeks'], Mc['at_breakout'])]
-        Mt['저점 몰림(배)'] = [round(b / a, 2) if a else None for a, b in zip(Mc['all_weeks'], Mc['at_ignition'])]
-        tsrc('research/winners_reverse.py', path=PATH)
-        st.dataframe(Mt, use_container_width=True, hide_index=True, filters=False, color=False,
-                     column_config={c: st.column_config.NumberColumn(format='%.2f') for c in Mt.columns if '몰림' in c})
-        c1, c2 = st.columns(2)
-        iq = r.get('ignition_by_q') or {}
-        bq = r.get('breakout_by_q') or {}
-        if iq:
-            c1.plotly_chart(_bar(iq, iq.values(), '분기별 저점(점화) 종목 수', '#7C8AA5'), use_container_width=True)
-        if bq:
-            c2.plotly_chart(_bar(bq, bq.values(), '분기별 52주 돌파 종목 수', _C1), use_container_width=True)
-        else:
-            c2.caption('돌파 분포 — 재계산 대기')
-
     # ── ④ 꽉 쥐나 ──
+    st.markdown("##### ✊ ④ 산 뒤엔 얼마나 흔들렸나 — 언제 꽉 쥐나")
     with t4:
         s = h['stopped_out']
         q = st.columns(5)

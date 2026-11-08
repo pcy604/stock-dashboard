@@ -237,6 +237,13 @@ def us():
     px, _, spy, _, _ = S.load()
     d = A.load()
     M = A.matrices(d, ["adv_20d", "marcap", "ACC", "rev_yoy", "dopm", "dist_52w"])
+    # 2026-11-08 시총 정합(us_capfix): 분할 직후 주식수 기준 어긋남·역분할 부풀림·단위 오류·ADR, 빈 시총 채움(PLTR 2021-11 전 NULL)
+    import us_capfix
+    L = pd.DataFrame({"close": px.stack(dropna=False), "marcap": M["marcap"].reindex_like(px).stack(dropna=False),
+                      "dv": (M["adv_20d"].reindex_like(px) * 5).stack(dropna=False)})
+    L.index.names = ["date", "sym"]
+    L = us_capfix.fix(L.reset_index(), ratios=(), dollar_vol="dv")
+    M["marcap"] = L.pivot(index="date", columns="sym", values="marcap").reindex_like(px)
     liq = ((M["adv_20d"] >= A.MIN_ADV) & (M["marcap"] >= A.MIN_MC)).fillna(False)
     rs = rs_rank(px, liq)
     st2, st4, st1, st3 = stage_of(px)

@@ -21,9 +21,11 @@ REL = 'https://github.com/pcy604/stock-dashboard/releases/download/quant-panel/q
 _MK = {'US': '🇺🇸 미국', 'KR': '🇰🇷 한국'}
 _IDX = {'US': ['SPX', 'NDX'], 'KR': ['MKT', 'KOSPI']}   # 첫 번째 = 기본 지수 게이트
 KR_FIN_START = '2018-06-01'   # 한국 분기 재무 2017Q1~ → 전년 동분기 비교는 2018Q1(공시 +45일) 부터
-_BM = {'US': 'SPX', 'KR': 'KOSPI'}                        # 비교 지수(게이트와 별개)
+# 2026-11-08 점검: 미국 패널 종가는 배당 반영 수정주가(AAPL 2024-11 219.2 vs 원가격 ~222) → 가격지수 SPX 와 비교하면 전략이 연 1.5%p 안팎 공짜로 앞섬.
+#   비교 지수는 배당 포함 SPXTR. 한국은 패널(marcap 원가격·배당 미반영)과 코스피 가격지수가 같은 기준이라 그대로.
+_BM = {'US': 'SPXTR', 'KR': 'KOSPI'}                      # 비교 지수(게이트와 별개)
 # MKT(2026-11-05) = 소속 시장 지수 — 코스피 종목은 코스피, 코스닥 종목은 코스닥 5주선. 실전 규칙(live/plan.py)과 같다.
-_IDXN = {'SPX': 'S&P500', 'NDX': '나스닥100', 'KOSPI': '코스피', 'KOSDAQ': '코스닥', 'MKT': '소속 시장(코스피·코스닥)', '': '없음'}
+_IDXN = {'SPX': 'S&P500', 'SPXTR': 'S&P500(배당 포함)', 'NDX': '나스닥100', 'KOSPI': '코스피', 'KOSDAQ': '코스닥', 'MKT': '소속 시장(코스피·코스닥)', '': '없음'}
 # 필드 선택지: '이름 (키)' — :n 이 붙은 것은 n 칸을 쓴다
 _FOPT = [f"{v[0]} ({k.split(':')[0]})" for k, v in Q.FIELDS.items()]
 _FKEY = {f"{v[0]} ({k.split(':')[0]})": k for k, v in Q.FIELDS.items()}
@@ -31,6 +33,12 @@ _SOPT = {f"{v[0]} ({k})": k for k, v in Q.EXIT_SIGNALS.items()}
 _WT = {'equal': '동일 비중', 'rank': '순위 가중(1등 더 많이)', 'mcap': '시총 가중', 'inv_vol': '변동성 역가중(덜 흔들리는 종목 더 많이)'}
 
 PRESETS = {
+    # 2026-11-08 차니 "태초마을에서 — 처음부터 내가 지표를 조합" → 기본값. 조건은 유동성 하한(시총) 하나뿐, 손절·지수·불타기 없음.
+    '🌱 빈 전략 — 처음부터 직접 조합': dict(
+        filters=[dict(field='marcap', op='>=', value='LIQ')],
+        rank=dict(field='marcap', desc=True), rebalance=4, max_pos=20, weight='equal', max_w=0.10,
+        exposure=dict(index='', ma=40, below=0.0),
+        exit=dict(stop=0, trail=[], signals=[])),
     '🟢 지금 실전 규칙 (v1.9 · 교집합 10종목)': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
                                               dict(field='op_turn', op='==', value=1), dict(field='ma_gap:5', op='>', value=0)],
                                      rank=dict(field='rs', desc=True), rebalance=1, max_pos=10, max_w=0.30,
@@ -278,6 +286,8 @@ def _nl_box(m):
 
 
 _DESC = {
+    '🌱 빈 전략 — 처음부터 직접 조합': '아무 규칙 없는 출발점 — 시총 하한만 걸려 있습니다. 아래 📐 종목 필터에서 지표를 고르고, 순위 기준·리밸런싱·비중·손절을 정해 '
+        '직접 전략을 만드세요. 다 만든 전략은 맨 아래 🧾 명세를 복사해 두면 고급 → 명세 붙여넣기로 되살립니다.',
     '🟢 지금 실전 규칙 (v1.9 · 교집합 10종목)': 'RS 80↑ × 영업 흑자전환 × 5주선 위, RS 순 최대 10종목 · 첫 매수 50%, +10%·+20%에 25%씩 불타기 · 고점 −20% 손절 · RS 70 아래로 떨어지면 매도(주도주 탈락) · 소속 시장 5주선 아래면 신규 중지 — 토스 실전 시범 v1.9 와 같은 규칙',
     '실전 규칙 + 지수 10주선 이탈 시 현금 50% (2번 연속 회복 시 복귀)': '실전 규칙 그대로 + 지수(코스피/S&P500) 주봉이 10주선 아래로 마감하면 보유를 절반으로 덜고, '
         '10주선 위로 2주 연속 마감하면 원래 비중으로 — ⚠️ 사전 등록 검증에서 한국 불합격(낙폭 개선보다 수익 손실이 큼)',
@@ -294,22 +304,47 @@ _DESC = {
 _STOPS = {0: '끔', 10: '−10%', 15: '−15%', 20: '−20%', 25: '−25%', 30: '−30%'}
 
 
+_W = {'equal': '동일 비중', 'rank': '순위 가중', 'mcap': '시총 가중', 'inv_vol': '변동성 역가중'}
+
+
 def _easy(m):
-    """쉬운 모드 — 고를 것 5개. 나머지는 고른 전략 그대로."""
-    c = st.columns([3, 1, 1, 1, 1])
-    pname = c[0].selectbox('전략', list(PRESETS), key='qb_easy_p')
+    """쉬운 모드 — 출발점(빈 전략 또는 예시) + 뼈대 7개(시작·종목 수·순위·리밸런싱·비중·손절·지수). 2026-11-08 빈 전략이 기본."""
+    c0 = st.columns([3, 2])
+    pname = c0[0].selectbox('출발점 — 빈 전략에서 직접 만들거나 예시를 불러와 고치기', list(PRESETS), key='qb_easy_p')
     base = Q.merged(_fill(PRESETS[pname], m))
+    # 순위 기준 — '후보가 많을 때 무엇부터 사나'. 엔진 지표 전부(0/1·업종 제외)
+    rk_keys = [k for k in Q.FIELDS if k.split(':')[0] not in ('op_turn', 'acc', 'nh', 'sector', 'month')]
+    cur_rk = base['rank']['field']
+    cur_b = cur_rk.split(':')[0]
+    rk_k = next((k for k in rk_keys if k.split(':')[0] == cur_b), rk_keys[0])
+    r1, r2, r3 = c0[1].columns([2.2, 1, 1])
+    rkf = r1.selectbox('순위 기준 (무엇부터 살까)', rk_keys, index=rk_keys.index(rk_k), key=f'qb_easy_rk|{pname}',
+                       format_func=lambda k: Q.FIELDS[k][0])
+    rkn = None
+    if ':' in rkf:
+        rkn = r2.text_input('n', cur_rk.split(':')[1] if ':' in cur_rk and cur_b == rkf.split(':')[0] else str(_NUM_N.get(rkf.split(':')[0], 13)),
+                            key=f'qb_easy_rkn|{pname}')
+    desc = r3.radio('방향', [True, False], index=0 if base['rank'].get('desc', True) else 1, key=f'qb_easy_rkd|{pname}',
+                    format_func=lambda v: '높은 순' if v else '낮은 순')
+    base['rank'] = dict(field=(f"{rkf.split(':')[0]}:{(rkn or '').strip() or _NUM_N.get(rkf.split(':')[0], 13)}" if ':' in rkf else rkf), desc=bool(desc))
+    c = st.columns([1, 1, 1, 1.3, 1, 1.2])
+    rb = c[2].number_input('리밸런싱 (주마다)', 1, 52, int(base.get('rebalance') or 4), 1, key=f'qb_easy_rb|{pname}',
+                           help='몇 주마다 순위를 다시 매겨 갈아탈지 — 1 = 매주')
+    wopts = list(_W)
+    wt = c[3].selectbox('비중', wopts, index=wopts.index(base.get('weight', 'equal')) if base.get('weight', 'equal') in wopts else 0,
+                        format_func=_W.get, key=f'qb_easy_w|{pname}')
+    base['rebalance'], base['weight'] = int(rb), wt
     # 2026-11-08 차니 "목록으로 하드코딩하지 말고 숫자를 치게" — 숫자 선택은 전부 직접 입력(number_input)
     y_max = pd.Timestamp.today().year
     y0 = min(max(2014, pd.Timestamp(base['start']).year), y_max)
-    yr = c[1].number_input('시작 연도', 2014, y_max, int(y0), 1, key=f'qb_easy_y|{pname}', help='2014~ (한국 재무 조건은 2018-06부터 자동)')
-    npos = c[2].number_input('종목 수', 1, 100, int(base['max_pos']), 1, key=f'qb_easy_n|{pname}')
+    yr = c[0].number_input('시작 연도', 2014, y_max, int(y0), 1, key=f'qb_easy_y|{pname}', help='2014~ (한국 재무 조건은 2018-06부터 자동)')
+    npos = c[1].number_input('종목 수', 1, 100, int(base['max_pos']), 1, key=f'qb_easy_n|{pname}')
     tr = base['exit'].get('trail') or []
     cur = int(tr[0][1]) if len(tr) == 1 and float(tr[0][0]) == 0 else (int(base['exit'].get('stop') or 0) if not tr else None)
-    stp = c[3].number_input('손절 (고점 대비 −%)', 0, 90, cur, 1, key=f'qb_easy_s|{pname}', placeholder='전략 기본',
+    stp = c[4].number_input('손절 (고점 대비 −%)', 0, 90, cur, 1, key=f'qb_easy_s|{pname}', placeholder='전략 기본',
                             help='보유 중 최고가에서 이만큼 빠지면 판다(손절선은 올라가기만) · 0 = 끔 · 비우면 전략 기본(단계별 래칫)')
     stp = 'preset' if stp is None else int(stp)
-    ix_on = c[4].toggle('지수 약하면 현금', value=bool(base['exposure'].get('index')), key=f'qb_easy_i|{pname}',
+    ix_on = c[5].toggle('지수 약하면 현금', value=bool(base['exposure'].get('index')), key=f'qb_easy_i|{pname}',
                         help=f"{_IDXN[_IDX[m][0]]}이(가) 이평선 아래면 주식을 사지 않음(한국 5주선 · 미국 40주선≈200일선)")
     st.caption('ℹ️ ' + _DESC.get(pname, ''))
     base['start'] = f'{yr}-01-01'
