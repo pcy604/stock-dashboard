@@ -78,18 +78,16 @@ def kr():
                             f"https://raw.githubusercontent.com/FinanceData/marcap/master/data/marcap-{y}.parquet"], check=False)
     parts = []
     for f in sorted(glob.glob(os.path.join(dd, "marcap-*.parquet"))):
-        x = pd.read_parquet(f, columns=["Code", "Name", "Date", "Open", "High", "Low", "Close", "Volume", "Marcap", "Stocks", "MarketId"])
+        x = pd.read_parquet(f, columns=["Code", "Name", "Date", "Open", "High", "Low", "Close", "Volume", "Marcap", "Stocks", "ChangesRatio", "MarketId"])
         parts.append(x[x.MarketId.isin(["STK", "KSQ"])])
     d = pd.concat(parts)
     d["Date"] = pd.to_datetime(d.Date); d["Code"] = d.Code.astype(str).str.zfill(6)
     d = d[d.Close > 0].drop_duplicates(["Code", "Date"], keep="last").sort_values(["Code", "Date"])
-    # 액면분할·병합 보정(marcap 은 수정주가가 아님 — 2026-10-31 발견). 그날 이후 분할 비율의 곱으로 과거 가격을 나눈다.
-    sr = d.groupby("Code").Stocks.transform(lambda s: s / s.shift(1))
-    pr = d.groupby("Code").Close.transform(lambda s: s / s.shift(1))
-    x = pr * sr
-    sp = ((sr >= 1.5) | (sr <= 0.67)) & (x >= 0.7) & (x <= 1.3)
-    step = sr.where(sp, 1.0).fillna(1.0)
-    d["_f"] = step.groupby(d.Code).transform(lambda s: s[::-1].cumprod()[::-1].shift(-1).fillna(1.0))
+    # 수정주가(2026-11-08 kr_adjust): 10-31 보정은 '같은 날 주식수 변화'만 잡아 무상증자(주식수 반영 지연)를 놓쳤다
+    #   — 메가스터디 2018-06-18 원가격 −68.5%(KRX 등락률 −6.48%)가 '래칫 손절 −64.7%'로 기록되던 것. KRX 등락률 기준으로 바꾼다.
+    import kr_adjust
+    d = d.reset_index(drop=True)
+    d["_f"] = kr_adjust.factor(d).values
     for k in ("Open", "High", "Low", "Close"):
         d[k] = d[k] / d["_f"]
     d["Volume"] = d["Volume"] * d["_f"]

@@ -268,10 +268,10 @@ def kr():
     parts = []
     for f in sorted(glob.glob(os.path.join(dd, "marcap-*.parquet"))):
         try:
-            x = pd.read_parquet(f, columns=["Code", "Name", "Date", "Close", "Amount", "Marcap", "Stocks", "Market", "MarketId"])
+            x = pd.read_parquet(f, columns=["Code", "Name", "Date", "Close", "Amount", "Marcap", "Stocks", "ChangesRatio", "Market", "MarketId"])
         except Exception:
             x = pd.read_parquet(f)
-            x = x[[c for c in ("Code", "Name", "Date", "Close", "Amount", "Marcap", "Stocks", "Market", "MarketId") if c in x.columns]]
+            x = x[[c for c in ("Code", "Name", "Date", "Close", "Amount", "Marcap", "Stocks", "ChangesRatio", "Market", "MarketId") if c in x.columns]]
         parts.append(x)
     if not parts:
         raise RuntimeError("marcap 파일을 못 받았다")
@@ -285,13 +285,11 @@ def kr():
     C = d.pivot(index="Date", columns="Code", values="Close")
     # 2026-11-08 수정주가: marcap Close 는 원래 가격이라 분할·병합·감자가 가짜 급등락이 된다(제일바이오 +9,000%, 에코프로 −30%).
     #   주식수가 1.5배 넘게 바뀌고 가격이 그 반대 방향으로 그 70% 이상 움직인 날(유상증자는 여기 안 걸린다)은 가격비 × 주식수비(= 시총비)를 그날 수익률로.
-    if "Stocks" in d.columns:
-        Sx = d.pivot(index="Date", columns="Code", values="Stocks")
-        lc = np.log(C / C.shift(1)); ls = np.log(Sx / Sx.shift(1))
-        ev = (ls.abs() > np.log(1.5)) & (np.sign(lc) == -np.sign(ls)) & (lc.abs() >= 0.7 * ls.abs())   # 감자 정리매매처럼 덜 움직여도(제일바이오 300배 ↔ 주식 1/1500) 잡는다
-        print(f"  수정주가 보정 {int(ev.values.sum())}건", flush=True)
-        r = np.exp(lc.where(~ev, lc + ls)).fillna(1.0)
-        C = r.cumprod().where(C.notna())
+    # 수정주가 — kr_adjust(KRX 등락률 + 주식수 급변) 하나로. 무상증자처럼 주식수 반영이 늦는 경우까지(2026-11-08 2차)
+    import kr_adjust
+    d = d.sort_values(["Code", "Date"]).reset_index(drop=True)
+    d["Close"] = d.Close / kr_adjust.factor(d).values
+    C = d.pivot(index="Date", columns="Code", values="Close")
     names = d.groupby("Code").Name.last().to_dict() if "Name" in d.columns else {}
     Am = d.pivot(index="Date", columns="Code", values="Amount").rolling(20, min_periods=15).mean()
     Mc = d.pivot(index="Date", columns="Code", values="Marcap")

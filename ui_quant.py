@@ -730,7 +730,7 @@ def render(mkt_sel: str, tsrc):
                       yaxis=dict(type='log', title='100에서 시작'), yaxis2=dict(overlaying='y', side='right', range=[0, 300], showgrid=False, title=None))
     st.plotly_chart(fig, use_container_width=True)
 
-    with st.expander('📅 연도별 수익'):
+    with st.expander('📅 월별·연도별 수익', expanded=True):
         _yearly(eq, bm, bmn, m, tsrc)
     with st.expander(f"📜 매매 내역 · 매도 {S.get('매도건수', 0):,}건"):
         _trades(T, eq, m, tsrc)
@@ -741,28 +741,71 @@ def render(mkt_sel: str, tsrc):
     st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 숫자가 부풀려집니다 — 다른 시작 연도·이웃 값에서도 비슷한지 확인하세요.')
 
 
-def _yearly(eq, bm, bmn, m, tsrc):
-    yr = pd.DataFrame({'전략(%)': eq.resample('YE').last().pct_change() * 100})
-    yr.iloc[0, 0] = (eq.resample('YE').last().iloc[0] / eq.iloc[0] - 1) * 100
-    if bm is not None:
-        b = bm.resample('YE').last(); yr[f'{bmn}(%)'] = b.pct_change() * 100; yr.iloc[0, 1] = (b.iloc[0] / bm.iloc[0] - 1) * 100
-        yr['차이(%p)'] = yr['전략(%)'] - yr[f'{bmn}(%)']
-    yr.insert(0, '연도', yr.index.year)
-    tsrc(f'quant_engine.py · 패널 quant_panel_{m}', asof=str(eq.index[-1].date()))
-    st.dataframe(yr.reset_index(drop=True), hide_index=True, use_container_width=True, filters=False,
-                 column_config={'연도': st.column_config.NumberColumn(format='%d')})
+def _monthly_frame(eq):
+    """주봉 자산곡선 → monthly_stats 형식(연도×월 + 연간). 주 라벨(월요일) 값 = 그 주 마지막 거래일 종가라
+    금요일로 옮겨 달을 가른다(3/30 주 = 4/3 마감 → 4월). 첫 달도 빠지지 않게 시작 직전 값 1.0 을 둔다."""
+    import monthly_stats as MS
+    s = eq.copy()
+    s.index = pd.DatetimeIndex(s.index) + pd.Timedelta(days=4)
+    s = pd.concat([pd.Series([1.0 if abs(float(eq.iloc[0]) - 1) < 1e-9 else float(eq.iloc[0])],
+                             index=[s.index[0] - pd.Timedelta(days=7)]), s])
+    return MS.build(s, max_years=40)
 
+
+def _yearly(eq, bm, bmn, m, tsrc):
+    """2026-11-08 차니 — 연도별만이 아니라 월별로: 종목분석 탭 '📆 월별 상승률 통계'(monthly_stats)와 같은 표."""
+    import monthly_stats as MS
+    view = st.segmented_control('보기', ['전략', bmn, f'차이 (전략 − {bmn})'], default='전략', key=f'qb_mview|{m}',
+                                label_visibility='collapsed') or '전략'
+    raw_s, sum_s = _monthly_frame(eq)
+    raw_b, sum_b = _monthly_frame(bm / bm.iloc[0]) if bm is not None and len(bm) else (None, None)
+    if raw_s is None:
+        st.caption('기간이 1년 미만이라 월별 표를 만들 수 없습니다.')
+        return
+    if view == '전략':
+        raw, summ = raw_s, sum_s
+    elif view == bmn and raw_b is not None:
+        raw, summ = raw_b, sum_b
+    elif raw_b is not None:
+        a, b = raw_s.set_index('연도'), raw_b.set_index('연도')
+        raw = (a - b.reindex(a.index)).reset_index()
+        summ = None
+    else:
+        raw, summ = raw_s, sum_s
+
+    def cfg(first):
+        c = {first: st.column_config.TextColumn(first, width=70)}
+        c.update({k: st.column_config.NumberColumn(k, format='%.1f', width=54) for k in MS.MONTHS})
+        c['연간'] = st.column_config.NumberColumn('연간', format='%.1f', width=66)
+        return c
+    tsrc(f'quant_engine.py · 패널 quant_panel_{m} (화면에서 계산) · 단위 %' + (' · 차이 = %p' if view.startswith('차이') else ''),
+         asof=str(eq.index[-1].date()))
+    st.dataframe(raw, column_config=cfg('연도'), filters=False, footer=False)
+    if summ is not None and len(summ):
+        _avg = summ[summ['구분'].str.endswith('평균')].reset_index(drop=True)
+        _win = summ[summ['구분'].str.endswith('승률')].reset_index(drop=True)
+        tsrc(f'quant_engine.py · 패널 quant_panel_{m}', asof=str(eq.index[-1].date()))
+        st.dataframe(_avg, column_config=cfg('구분'), filters=False)
+        tsrc(f'quant_engine.py · 패널 quant_panel_{m}', asof=str(eq.index[-1].date()))
+        st.dataframe(_win, column_config=cfg('구분'), filters=False, color=False)
+    st.caption("칸 = 그 달 수익률(%), 연간 = 전년 말 대비(첫 해는 시작일부터, 올해는 연초부터). 주봉 자산곡선이라 달의 경계는 "
+               "그 주 마지막 거래일 기준(월말이 주 중간이면 며칠이 옆 달로 갈 수 있음). 승률 = 그 달이 오른 해의 비율.")
 
 
 def _trades(T, eq, m, tsrc):
     if len(T):
-        TT = T.copy(); TT['날짜'] = pd.to_datetime(TT['날짜']).dt.date
-        TT = TT.rename(columns={'날짜': '체결 주(월)'})
-        TT = TT.rename(columns={'가격': '가격(현지)', '금액비중': '금액(자산 대비 %)', '수익률': '수익률(%)'})
+        # 2026-11-08 — date 객체는 AgGrid 가 못 그려 칸이 비었다 → 글자로. 체결 = 그 주 첫 거래일 시가(주 라벨 = 월요일)
+        TT = T.copy()
+        _d = pd.to_datetime(TT['날짜'])
+        TT['날짜'] = _d.dt.strftime('%Y-%m-%d')
+        TT.insert(1, '연월', _d.dt.strftime('%Y-%m'))
+        TT = TT.rename(columns={'날짜': '체결 주(월요일)'})
+        TT = TT.rename(columns={'가격': '수정주가(현지)', '금액비중': '금액(자산 대비 %)', '수익률': '수익률(%)'})
         tsrc('quant_engine.py (화면에서 계산)', asof=str(eq.index[-1].date()))
         st.dataframe(TT.iloc[::-1].reset_index(drop=True), hide_index=True, use_container_width=True, height=380)
         st.download_button('⬇ 매매 내역 CSV', TT.to_csv(index=False).encode('utf-8-sig'), f'trades_{m}.csv', 'text/csv')
         why = T[T.구분 == '매도'].groupby('사유').수익률.agg(['count', 'median']).sort_values('count', ascending=False)
+        st.caption('수정주가 = 분할·병합·무상증자·감자를 반영해 과거 가격을 이어 붙인 값(한국은 KRX 등락률 기준) — 그 당시 화면 호가와 다를 수 있고, 수익률은 정확합니다.')
         st.caption('매도 사유별: ' + ' · '.join(f"{i} {int(c)}건(중앙 {md:+.0f}%)" for i, (c, md) in why.iterrows()))
 
 
