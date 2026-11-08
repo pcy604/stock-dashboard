@@ -69,6 +69,19 @@ def index_ok():
     return out
 
 
+def gate_override(today=None):
+    """live/switch.json 의 gate_override_until(YYYY-MM-DD) 까지 한국 지수 5주선 게이트를 끈다 — 기간·이유는 CHANGES.md 에.
+    종목별 5주선(trend_ok)·손절·불타기 규칙은 그대로."""
+    try:
+        sw = json.load(open(os.path.join(ROOT, 'live', 'switch.json'), encoding='utf-8'))
+        until = sw.get('gate_override_until')
+        if until and (today or date.today()) <= date.fromisoformat(until):
+            return f"오버라이드 ~{until}: {sw.get('gate_override_why', '')}"
+    except Exception:
+        pass
+    return None
+
+
 def kr_board():
     """코드 → 'KR'(코스피) | 'KQ'(코스닥). data/krx_listing_last.csv(매일 갱신)"""
     try:
@@ -169,6 +182,11 @@ def plan():
     C = candidates(fx)
     SH = rs_shadow(C, str(date.today()))
     IX = index_ok()
+    OV = gate_override()
+    if OV:                                                        # 차니 오버라이드: 한국 지수 게이트를 이 기간만 무시(실행 검증 목적)
+        for k in ('KR', 'KQ'):
+            if k in IX and not IX[k].get('ok'):
+                IX[k] = dict(IX[k], ok=True, override=OV)
     P = dict(made=str(date.today()), price_basis=_j('results/perf_latest.json').get('date'), rs_basis=_j('results/returns.json').get('date'),
              usdkrw=fx, usdkrw_date=fx_date, index=IX, rule=RULE, sleeves={})
     for m in SLEEVES:
@@ -243,7 +261,7 @@ def render(P):
         ixs = [('S&P500', P['index']['US'])] if m == 'US' else [('코스피', P['index']['KR']), ('코스닥', P['index'].get('KQ', {}))]
         L.append(f"\n{flag[m]} 슬리브 — 자산 {S['equity_krw']:,}원 · 종목당 목표 {S['target_krw']:,}원 · 첫 매수 50% → +10%·+20%에 25%씩")
         for nm, x in ixs:
-            L.append(f"  {nm} {x.get('lbl', '200일선')}: {'위 → 신규 가능' if x.get('ok') else '아래 → 그 시장 종목 신규·불타기 중지'}" + (f" ({x.get('last')} vs {x.get('ma200')}, {x.get('date')})" if 'last' in x else ''))
+            L.append(f"  {nm} {x.get('lbl', '200일선')}: {('⚠️ 아래지만 ' + x['override'] + ' → 신규 허용') if x.get('override') else ('위 → 신규 가능' if x.get('ok') else '아래 → 그 시장 종목 신규·불타기 중지')}" + (f" ({x.get('last')} vs {x.get('ma200')}, {x.get('date')})" if 'last' in x else ''))
         if S['buys']:
             L.append("  🟢 월요일 시가 매수:")
             for b in S['buys']:

@@ -1,5 +1,7 @@
 {
- "live": false,
+ "live": true,
  "_doc": "true 로 바꾸고 노트북 환경변수 LIVE_TRADING=ON 이어야 실주문. 바꾼 날짜·이유는 live/CHANGES.md 에",
- "changed": "2026-11-03"
+ "changed": "2026-11-09",
+ "gate_override_until": "2026-11-13",
+ "gate_override_why": "차니 결정 — 30만원으로 실주문이 실제로 도는지 확인(시장 저점 판단, 이번 주만 지수 게이트 무시)"
 }

@@ -148,3 +148,13 @@ def test_pre_limit_shrinks_quantity_to_cash():
     L = L0({}, cash=100000)
     ok, why = B.guard(o, L, PLAN, dict(equity_krw=1_000_000), cash_krw=100000)
     assert ok and ok[0]["quantity"] == 9 and not why                           # 99,500 ÷ 11,000 = 9주
+
+
+def test_gate_override_window(tmp_path, monkeypatch):
+    import importlib, json as _json, plan as Pl
+    from datetime import date as _d
+    sw = tmp_path / "live"; sw.mkdir()
+    (sw / "switch.json").write_text(_json.dumps({"gate_override_until": "2026-11-13", "gate_override_why": "t"}), encoding="utf-8")
+    monkeypatch.setattr(Pl, "ROOT", str(tmp_path))
+    assert Pl.gate_override(_d(2026, 11, 13)) and Pl.gate_override(_d(2026, 11, 9))
+    assert Pl.gate_override(_d(2026, 11, 14)) is None
