@@ -7,8 +7,12 @@
 
 왜 노트북(또는 고정 IP 서버)에서만 도는가: 토스 Open API 는 허용 IP 에서만 응답한다(broker_toss.py 주석).
 
-실행 시각(2026-11-07): 작업 스케줄러가 평일 02:30·10:30(노트북 현지 시각) 두 번 깨우고, 봇은 **한국장 안(평일 09:05~15:10 KST)일 때만** 움직인다.
-  폴란드면 02:30 = 10:30 KST, 한국이면 10:30 KST 가 장 안 — 노트북이 어느 나라에 있든 하루 한 번. 장 밖이면 기록만 남기고 끝(--force 로 무시).
+실행 시각(2026-11-09 개정 — 백테스트처럼 '시가'에 산다):
+  작업 스케줄러가 평일 00:40·01:10·08:40·09:10(노트북 현지 시각) 깨운다 → 한국에선 08:40·09:10, 폴란드(겨울)에선 00:40·01:10 이 KST 08:40·09:10.
+  ① 08:31~08:58 KST '시가 단일가' 창: 매도 = 시장가, 매수 = 전날 종가 +10% 지정가 → 둘 다 09:00 시가 한 가격으로 체결(백테스트 '다음 주 시가 체결'과 같음).
+     매수를 지정가로 두는 이유: 시장가 매수는 증권사가 상한가(+30%) 기준으로 현금을 묶어 소액 계좌에선 거부될 수 있고, +10% 넘는 갭은 쫓지 않는다.
+  ② 09:05~15:10 KST 정규장 창: 지난 실행의 체결 확인 + 시가 창에서 거부·누락된 주문만 시장가로 다시(clientOrderId 로 이중 주문 없음).
+  그 밖의 시각은 기록만 남기고 끝(--force 로 무시).
 순서:
   ① 대조   토스 국내 보유 ↔ 원장. 원장 종목 수량이 다르면 = 규칙 밖 거래 → live/violations.jsonl·경보·이번 실행 중단
   ② 손절   전날 종가 ≤ 손절선(보유 중 최고 종가 −20%, 올라가기만) → 전량 시장가 매도
@@ -31,6 +35,7 @@ ADD_STEPS = ((0.10, 0.25), (0.20, 0.25))                # v1.9: 첫 매수가 +1
 TRIM_CAP = 0.30   # v1.8(2026-11-07): 종목 비중이 30%×1.05 를 넘으면 30% 까지 덜어낸다(주 1회) — 계획표 표시만 되던 구멍. 목표 20% 까지 덜기는 검증 불합격
 COOL_DAYS = 14
 KST = timezone(timedelta(hours=9))
+PRE_LIMIT = 0.10                                        # 시가 단일가 매수 지정가 = 전날 종가 +10% (2026-11-09)
 
 
 def _load(p, default):
@@ -176,9 +181,11 @@ def guard(orders, L, plan, eq, cash_krw=None):
         if o["sym"] not in allow:
             why.append(f"{o['sym']} 계획표·원장에 없는 종목"); continue
         if o["side"] == "BUY":
-            amt = o["quantity"] * o["px"]
+            amt = o["quantity"] * o.get("lim", o["px"])          # 시가 창 지정가 매수는 지정가만큼 현금이 묶인다
             if amt > cap:
                 why.append(f"{o['sym']} 1회 주문 {amt:,.0f}원 > 상한 {cap:,.0f}원"); continue
+            if amt > left and "lim" in o and math.floor(left / o["lim"]) >= 1:   # 지정가 여유분 때문이면 수량만 줄인다
+                o["quantity"] = math.floor(left / o["lim"]); amt = o["quantity"] * o["lim"]
             if amt > left:
                 why.append(f"{o['sym']} 현금 부족({left:,.0f}원)"); continue
             left -= amt
@@ -239,12 +246,12 @@ def _keys():
     return rd("TOSS_CLIENT_ID", ".toss_client_id"), rd("TOSS_CLIENT_SECRET", ".toss_client_secret")
 
 
-def run(send=False):
+def run(send=False, phase="reg"):
     live = is_live()
     L = _load(LEDGER, None); plan = _load(PLAN, {})
     L.setdefault("done_ids", []); L.setdefault("pending", {})
     day = str(datetime.now(KST).date())
-    msg = [("🔴 실전" if live else "🧪 모의") + f" 주문 봇 {day} · 🇰🇷"]
+    msg = [("🔴 실전" if live else "🧪 모의") + f" 주문 봇 {day} · 🇰🇷 · " + ("시가 단일가 창" if phase == "pre" else "정규장")]
     cid, sec = _keys()
     T = acct = cash = None
     if cid and sec:
@@ -279,11 +286,18 @@ def run(send=False):
                 apply_fill(L, pd_["o"], q, px, fee, day)
                 L["done_ids"].append(c_id); L["pending"].pop(c_id)
                 msg.append(f"  ✅ 지난 주문 체결: {pd_['o']['side']} {pd_['o'].get('name')} {q:.0f}주 @ {px:,.0f}")
+            elif pd_.get("at") != day:                          # DAY 주문은 그날 끝나면 소멸 — 묶어 두지 않고 다음 판단으로
+                L["pending"].pop(c_id)
+                msg.append(f"  ⌛ 지난 주문 미체결 소멸: {pd_['o']['side']} {pd_['o'].get('name')} ({pd_['at']}) — 오늘 다시 판단")
 
     bmap = board()
     buys = [b["sym"] for b in ((plan.get("sleeves") or {}).get(M) or {}).get("buys", [])]
     closes = last_closes(sorted(set(L[M]["positions"]) | set(buys)))
     orders, notes, eq = decide(L, plan, closes, bmap)
+    if phase == "pre":
+        for o in orders:
+            if o["side"] == "BUY":
+                o["lim"] = limit_px(o["px"])
     orders, blocked = guard(orders, L, plan, eq, cash)
     if live:
         mark_peaks(L, closes)
@@ -293,16 +307,21 @@ def run(send=False):
         msg.append("  주문 없음")
     for o in orders:
         line = f"  {'🔵 매도' if o['side'] == 'SELL' else '🔴 매수'} {o.get('name') or o['sym']}({o['sym']}) {o['quantity']}주 ≈ {o['quantity'] * o['px']:,.0f}원 — {o['why']}"
+        if phase == "pre":
+            line += f" · 시가 체결({'지정가 ≤ ' + format(o['lim'], ',') + '원' if 'lim' in o else '시장가'})"
         if T is None:
             msg.append(line + " (모의)"); continue
         try:
-            r = T.place(acct, symbol=o["sym"], side=o["side"], client_order_id=o["cid"], quantity=o["quantity"])
+            kw = dict(order_type="LIMIT", price=o["lim"]) if "lim" in o else {}
+            r = T.place(acct, symbol=o["sym"], side=o["side"], client_order_id=o["cid"], quantity=o["quantity"], **kw)
         except Exception as e:
             msg.append(line + f" ⛔ 실패 {str(e)[:120]}"); continue
         if not live:
             msg.append(line + " (모의 — 보낼 요청 생성만)"); continue
         oid = r.get("orderId")
         L["pending"][o["cid"]] = dict(orderId=oid, o=o, at=day)
+        if phase == "pre":                                        # 09:00 시가에 체결 — 09:10 실행이 확인
+            msg.append(line + " ⏳ 시가 체결 대기"); continue
         for _ in range(10):                                       # 시장가라 대개 바로 체결
             time.sleep(3)
             q, px, fee = _fill(T.order(acct, oid))
@@ -334,17 +353,45 @@ def _done(msg, send, L, save):
     return text
 
 
-def in_kr_session(now=None) -> bool:
-    """평일 09:05~15:10 KST — 시가 단일가·장 마감 동시호가를 피한 정규장 안. 공휴일은 가격 자료가 걸러낸다."""
+def kr_phase(now=None):
+    """'pre' = 평일 08:31~08:58 KST 시가 단일가 접수(09:00 시가 한 가격 체결) · 'reg' = 09:05~15:10 정규장 · None = 그 밖.
+    공휴일은 가격 자료·토스가 걸러낸다."""
     now = now or datetime.now(KST)
-    return now.weekday() < 5 and (9, 5) <= (now.hour, now.minute) <= (15, 10)
+    if now.weekday() >= 5:
+        return None
+    hm = (now.hour, now.minute)
+    if (8, 31) <= hm <= (8, 58):
+        return "pre"
+    if (9, 5) <= hm <= (15, 10):
+        return "reg"
+    return None
+
+
+def in_kr_session(now=None) -> bool:
+    return kr_phase(now) is not None
+
+
+def tick(px: float) -> int:
+    """KRX 호가 단위(코스피·코스닥 공통, 2023-01-25~)."""
+    for lim, t in ((2000, 1), (5000, 5), (20000, 10), (50000, 50), (200000, 100), (500000, 500)):
+        if px < lim:
+            return t
+    return 1000
+
+
+def limit_px(prev_close: float, up: float = PRE_LIMIT) -> int:
+    """전날 종가 +up 을 호가 단위로 내림 — 상한가(+30%) 안이라 항상 유효."""
+    x = prev_close * (1 + up)
+    t = tick(x)
+    return int(math.floor(x / t) * t)
 
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(); ap.add_argument("--send", action="store_true"); ap.add_argument("--force", action="store_true")
     a = ap.parse_args()
-    if not a.force and not in_kr_session():
+    ph = kr_phase()
+    if not a.force and not ph:
         print(f"장 밖 {datetime.now(KST):%Y-%m-%d %H:%M} KST — 건너뜀(노트북은 살아 있음)")
         sys.exit(0)
-    run(a.send)
+    run(a.send, phase=ph or "reg")

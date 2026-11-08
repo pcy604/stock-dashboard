@@ -1,5 +1,6 @@
 # Laptop scheduled tasks (2026-11-07). Run once via setup_tasks.bat (as administrator).
-#   buza_live_bot        : weekdays 02:30 and 10:30 local time; bot itself acts only inside KRX hours (09:05-15:10 KST).
+#   buza_live_bot        : weekdays 00:40, 01:10, 08:40, 09:10 local time (2026-11-09). Korea: 08:40 = opening auction, 09:10 = check/retry.
+#                          Poland winter: 00:40/01:10 = 08:40/09:10 KST. Bot acts only 08:31-08:58 and 09:05-15:10 KST, else exits.
 #   StockScreener_Daily  : daily 06:00, Toss balance sync only.
 # Both: run when missed (StartWhenAvailable), wake the laptop, kill if stuck.
 $dir = 'C:\Users\lg\Desktop\stock_screener'
@@ -7,8 +8,10 @@ $days = 'Monday','Tuesday','Wednesday','Thursday','Friday'
 
 $a1 = New-ScheduledTaskAction -Execute "$dir\run_live_bot.bat" -WorkingDirectory $dir
 $t1 = @(
-  (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At '02:30'),
-  (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At '10:30')
+  (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At '00:40'),
+  (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At '01:10'),
+  (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At '08:40'),
+  (New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At '09:10')
 )
 $s1 = New-ScheduledTaskSettingsSet -WakeToRun -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
       -ExecutionTimeLimit (New-TimeSpan -Minutes 20) -MultipleInstances IgnoreNew

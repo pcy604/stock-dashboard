@@ -127,3 +127,24 @@ def test_rs_exit_sells_and_frees_slot():
     o, _, _ = B.decide(L0(pos, cash=3_000_000), plan, closes, BM, today=D)
     assert any(x["cid"].endswith("000100-RSOUT") and x["side"] == "SELL" for x in o)
     assert any(x["cid"].endswith("000001-BUY") for x in o)                     # 꽉 찬 10칸인데 1칸이 비어 신규
+
+
+def test_open_auction_phase_and_limit():
+    # 2026-11-09: 08:31~08:58 KST 시가 단일가 창('pre') → 09:00 시가 체결, 09:05~15:10 정규장('reg')
+    from datetime import datetime
+    k = lambda h, m, d=9: B.kr_phase(datetime(2026, 11, d, h, m, tzinfo=B.KST))
+    assert k(8, 40) == "pre" and k(8, 31) == "pre" and k(8, 58) == "pre"
+    assert k(8, 59) is None and k(9, 0) is None and k(9, 4) is None
+    assert k(9, 10) == "reg" and k(15, 10) == "reg" and k(15, 11) is None
+    assert k(8, 40, d=7) is None                                               # 토요일
+    assert B.tick(1999) == 1 and B.tick(4999) == 5 and B.tick(15000) == 10 and B.tick(49999) == 50
+    assert B.tick(150000) == 100 and B.tick(300000) == 500 and B.tick(600000) == 1000
+    assert B.limit_px(15000) == 16500 and B.limit_px(47000) == 51700           # 51,700: 5만 이상 → 100원 단위
+    assert B.limit_px(4800) == 5280 and B.limit_px(1234) == 1357
+
+
+def test_pre_limit_shrinks_quantity_to_cash():
+    o = [dict(sym="000001", side="BUY", quantity=10, px=10000.0, lim=11000, cid="x")]
+    L = L0({}, cash=100000)
+    ok, why = B.guard(o, L, PLAN, dict(equity_krw=1_000_000), cash_krw=100000)
+    assert ok and ok[0]["quantity"] == 9 and not why                           # 99,500 ÷ 11,000 = 9주
