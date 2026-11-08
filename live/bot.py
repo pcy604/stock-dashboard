@@ -26,7 +26,8 @@ LIVE = ROOT / "live"
 LEDGER, PLAN, SWITCH = LIVE / "ledger.json", LIVE / "plan_latest.json", LIVE / "switch.json"
 TRADES, VIOL = LIVE / "trades.jsonl", LIVE / "violations.jsonl"
 M = "KR"                                                # v1.7 한국 단독
-SLOTS, FIRST, STOP, ADD_AT, ADD, CAP = 5, 0.60, 0.20, 0.10, 0.40, 0.35   # PREREG · 1회 주문 상한 = 슬리브 35%
+SLOTS, FIRST, STOP, CAP = 10, 0.50, 0.20, 0.35          # v1.9(2026-11-08): 보유 10 · 첫 50% · 1회 주문 상한 = 슬리브 35%
+ADD_STEPS = ((0.10, 0.25), (0.20, 0.25))                # v1.9: 첫 매수가 +10%·+20%에 목표의 25%씩(각 1회)
 TRIM_CAP = 0.30   # v1.8(2026-11-07): 종목 비중이 30%×1.05 를 넘으면 30% 까지 덜어낸다(주 1회) — 계획표 표시만 되던 구멍. 목표 20% 까지 덜기는 검증 불합격
 COOL_DAYS = 14
 KST = timezone(timedelta(hours=9))
@@ -86,6 +87,11 @@ def reconcile(ledger_pos, toss_hold):
     return diff, sorted(s for s in t if s not in ledger_pos)
 
 
+def _adds(p) -> int:
+    """불타기 몇 차까지 했나 — v1.8 이전 원장('added' 참/거짓)도 읽는다."""
+    return int(p.get("adds", 1 if p.get("added") else 0))
+
+
 def gate_ok(plan, sym, bmap):
     ix = (plan.get("index") or {}).get(bmap.get(sym, "KR")) or {}
     return bool(ix.get("ok", False))
@@ -100,6 +106,9 @@ def decide(L, plan, closes, bmap, today=None):
     target = equity / SLOTS
     orders, notes = [], []
 
+    made = plan.get("made")
+    fresh = bool(made) and (today - date.fromisoformat(made)) <= timedelta(days=7)
+    rs_out = {x["sym"]: x.get("rs") for x in (P.get("exits") or [])} if fresh else {}
     for sym, p in S["positions"].items():
         if sym not in closes:
             notes.append(f"{p.get('name', sym)} 종가 못 받음 — 손절·불타기 판정 보류"); continue
@@ -109,15 +118,9 @@ def decide(L, plan, closes, bmap, today=None):
         if c <= stop:
             orders.append(dict(sym=sym, name=p.get("name"), side="SELL", quantity=int(p["shares"]), px=c,
                                why=f"손절: {d} 종가 {c:,.0f} ≤ 손절선 {stop:,.0f}(최고 {peak:,.0f})", cid=f"{d}-{sym}-STOP"))
-        elif not p.get("added") and c >= p["first_px"] * (1 + ADD_AT):
-            q = math.floor(target * ADD / c)
-            if not gate_ok(plan, sym, bmap):
-                notes.append(f"{p.get('name', sym)} 불타기 조건 충족 — 소속 시장 5주선 아래라 보류")
-            elif q < 1:
-                notes.append(f"{p.get('name', sym)} 불타기 배정 {target * ADD:,.0f}원 < 1주 {c:,.0f}원")
-            else:
-                orders.append(dict(sym=sym, name=p.get("name"), side="BUY", quantity=q, px=c,
-                                   why=f"불타기: 종가 {c:,.0f} ≥ 첫 매수가 +10% {p['first_px'] * (1 + ADD_AT):,.0f}", cid=f"{sym}-{p['opened']}-ADD"))
+        elif sym in rs_out:                                      # v1.9 주도주 탈락(계획표 RS < 70) → 전량 매도
+            orders.append(dict(sym=sym, name=p.get("name"), side="SELL", quantity=int(p["shares"]), px=c,
+                               why=f"주도주 탈락: RS {rs_out[sym]} < 70 (계획표 {plan.get('made')})", cid=f"{plan.get('made')}-{sym}-RSOUT"))
         elif equity > 0 and p["shares"] * c / equity > TRIM_CAP * 1.05:
             q = math.floor((p["shares"] * c - TRIM_CAP * equity) / c)
             if 1 <= q < p["shares"]:
@@ -125,10 +128,19 @@ def decide(L, plan, closes, bmap, today=None):
                 orders.append(dict(sym=sym, name=p.get("name"), side="SELL", quantity=q, px=c, trim=True,
                                    why=f"상한 덜기: 비중 {p['shares'] * c / equity * 100:.0f}% > {TRIM_CAP * 100:.0f}% → {TRIM_CAP * 100:.0f}%",
                                    cid=f"{yw[0]}W{yw[1]:02d}-{sym}-TRIM"))
+        elif _adds(p) < len(ADD_STEPS) and c >= p["first_px"] * (1 + ADD_STEPS[_adds(p)][0]):
+            at, f = ADD_STEPS[_adds(p)]
+            q = math.floor(min(target * f, TRIM_CAP * equity - p["shares"] * c) / c)   # 불타기로 상한 30% 를 넘지 않게
+            if not gate_ok(plan, sym, bmap):
+                notes.append(f"{p.get('name', sym)} 불타기 조건 충족 — 소속 시장 5주선 아래라 보류")
+            elif q < 1:
+                notes.append(f"{p.get('name', sym)} 불타기 배정 {target * f:,.0f}원 < 1주 {c:,.0f}원")
+            else:
+                orders.append(dict(sym=sym, name=p.get("name"), side="BUY", quantity=q, px=c,
+                                   why=f"불타기 {_adds(p) + 1}차: 종가 {c:,.0f} ≥ 첫 매수가 +{at * 100:.0f}% {p['first_px'] * (1 + at):,.0f}",
+                                   cid=f"{sym}-{p['opened']}-ADD{_adds(p) + 1}"))
 
-    made = plan.get("made")
-    fresh = bool(made) and (today - date.fromisoformat(made)) <= timedelta(days=7)
-    free = SLOTS - len(S["positions"])
+    free = SLOTS - len(S["positions"]) + sum(1 for s_ in S["positions"] if s_ in rs_out)
     if not fresh:
         notes.append(f"계획표 {made} — 7일 지나 신규 매수 없음(토요일 새 계획 대기)")
     else:
@@ -197,10 +209,10 @@ def apply_fill(L, o, q, px, fee, day):
         p = P.get(o["sym"])
         if p:                                                    # 불타기
             tot = p["shares"] + q
-            p.update(avg=(p["avg"] * p["shares"] + px * q) / tot, shares=tot, added=True)
+            p.update(avg=(p["avg"] * p["shares"] + px * q) / tot, shares=tot, adds=_adds(p) + 1, added=True)
         else:
             P[o["sym"]] = dict(name=o.get("name") or o["sym"], shares=q, avg=px, first_px=px, peak=px, stop=px * (1 - STOP),
-                               added=False, last_px=px, opened=day)
+                               added=False, adds=0, last_px=px, opened=day)
         S["cash_krw"] -= q * px + fee
     elif o.get("trim") and q < P[o["sym"]]["shares"]:           # 상한 덜기 — 일부만 판다(손절선·고점은 그대로)
         P[o["sym"]]["shares"] -= q

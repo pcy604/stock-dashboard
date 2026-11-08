@@ -29,7 +29,7 @@ def P(**k):
 def test_new_buy_integer_and_idempotent():
     L = L0()
     o, _, eq = B.decide(L, PLAN, {}, BM, today=D)
-    assert eq["target_krw"] == 60000 and o[0]["quantity"] == 3            # 36,000 / 10,000 → 3주
+    assert eq["target_krw"] == 30000 and o[0]["quantity"] == 1            # v1.9: 30만 ÷ 10 × 50% = 15,000 / 10,000 → 1주
     L["done_ids"].append(o[0]["cid"])
     assert B.decide(L, PLAN, {}, BM, today=D)[0] == []                    # 같은 주문 두 번 안 나감
 
@@ -51,10 +51,14 @@ def test_stop_uses_peak_not_entry():
 
 def test_pyramid_once_and_gated():
     pos = {"000002": P(added=False, peak=11000, stop=8800)}
-    o, _, _ = B.decide(L0(pos), PLAN, {"000002": (11000.0, "d")}, BM, today=date(2026, 11, 20))
-    assert o[0]["cid"].endswith("ADD") and o[0]["quantity"] >= 1
+    o, _, _ = B.decide(L0(pos, cash=3_000_000), PLAN, {"000002": (11000.0, "d")}, BM, today=date(2026, 11, 20))
+    a = [x for x in o if "ADD" in x["cid"]]
+    assert a[0]["cid"].endswith("ADD1") and a[0]["quantity"] >= 1             # v1.9: +10% 1차
+    o, _, _ = B.decide(L0({"000002": P(added=False, adds=1, peak=12000, stop=9600)}, cash=3_000_000), PLAN,
+                       {"000002": (11000.0, "d")}, BM, today=date(2026, 11, 20))
+    assert not [x for x in o if "ADD" in x["cid"]]                             # 2차는 +20% 부터
     p2 = dict(PLAN, index={"KR": {"ok": False}, "KQ": {"ok": True}})
-    assert B.decide(L0(pos), p2, {"000002": (11000.0, "d")}, BM, today=date(2026, 11, 20))[0] == []
+    assert not [x for x in B.decide(L0(pos, cash=3_000_000), p2, {"000002": (11000.0, "d")}, BM, today=date(2026, 11, 20))[0] if "ADD" in x["cid"]]
 
 
 def test_guard_blocks():
@@ -113,3 +117,13 @@ def test_market_hours_guard():
     assert B.in_kr_session(datetime(2026, 11, 9, 10, 30, tzinfo=B.KST))
     assert not B.in_kr_session(datetime(2026, 11, 9, 2, 30, tzinfo=B.KST))
     assert not B.in_kr_session(datetime(2026, 11, 7, 10, 30, tzinfo=B.KST))   # 토요일
+
+
+def test_rs_exit_sells_and_frees_slot():
+    # v1.9: 계획표 exits(RS < 70) → 전량 매도, 그 칸은 같은 날 신규로
+    pos = {f"00010{i}": P(name=f"X{i}") for i in range(10)}
+    plan = dict(PLAN, sleeves={"KR": dict(PLAN["sleeves"]["KR"], exits=[{"sym": "000100", "rs": 55}])})
+    closes = {k: (15000.0, "2026-11-13") for k in pos}
+    o, _, _ = B.decide(L0(pos, cash=3_000_000), plan, closes, BM, today=D)
+    assert any(x["cid"].endswith("000100-RSOUT") and x["side"] == "SELL" for x in o)
+    assert any(x["cid"].endswith("000001-BUY") for x in o)                     # 꽉 찬 10칸인데 1칸이 비어 신규
