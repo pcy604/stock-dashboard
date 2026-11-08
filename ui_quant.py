@@ -31,12 +31,13 @@ _SOPT = {f"{v[0]} ({k})": k for k, v in Q.EXIT_SIGNALS.items()}
 _WT = {'equal': '동일 비중', 'rank': '순위 가중(1등 더 많이)', 'mcap': '시총 가중', 'inv_vol': '변동성 역가중(덜 흔들리는 종목 더 많이)'}
 
 PRESETS = {
-    '🟢 지금 실전 규칙 (교집합 5종목)': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
+    '🟢 지금 실전 규칙 (v1.9 · 교집합 10종목)': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
                                               dict(field='op_turn', op='==', value=1), dict(field='ma_gap:5', op='>', value=0)],
-                                     rank=dict(field='rs', desc=True), rebalance=1, max_pos=5, max_w=0.30,
-                                     entry=dict(init=0.6, pyramid=[[10, 0.4]]),
+                                     rank=dict(field='rs', desc=True), rebalance=1, max_pos=10, max_w=0.30,
+                                     entry=dict(init=0.5, pyramid=[[10, 0.25], [20, 0.25]]),
                                      exposure=dict(index='IDX', ma=5, below=0.0, mode='entry'),
-                                     exit=dict(stop=0, trail=[[0, 20]], cooldown=2, signals=[])),
+                                     exit=dict(stop=0, trail=[[0, 20]], cooldown=2,
+                                               signals=[dict(type='field', field='rs', op='<', value=70)])),
     'RS 상위 회전 (모멘텀)': dict(filters=[dict(field='marcap', op='>=', value='LIQ')], rank=dict(field='rs', desc=True)),
     '주도주: RS≥80 × 흑자전환': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
                                             dict(field='op_turn', op='==', value=1)], rank=dict(field='rs', desc=True),
@@ -247,7 +248,7 @@ def _nl_box(m):
 
 
 _DESC = {
-    '🟢 지금 실전 규칙 (교집합 5종목)': 'RS 80↑ × 영업 흑자전환 × 5주선 위, RS 순 5종목 · 첫 매수 60%, +10% 불타기 · 고점 −20% 손절 · 지수 5주선 아래면 신규 중지 — 토스 실전 시범과 같은 규칙',
+    '🟢 지금 실전 규칙 (v1.9 · 교집합 10종목)': 'RS 80↑ × 영업 흑자전환 × 5주선 위, RS 순 최대 10종목 · 첫 매수 50%, +10%·+20%에 25%씩 불타기 · 고점 −20% 손절 · RS 70 아래로 떨어지면 매도(주도주 탈락) · 소속 시장 5주선 아래면 신규 중지 — 토스 실전 시범 v1.9 와 같은 규칙',
     'RS 상위 회전 (모멘텀)': '최근 많이 오른(RS 높은) 종목을 정기적으로 갈아탐',
     '주도주: RS≥80 × 흑자전환': 'RS 80↑ × 흑자전환, 20주선 이탈·이익 급감 때 매도',
     '저PER 가치 + 이평 위': 'PER 0~12 중 40주선 위 종목, PER 낮은 순',
