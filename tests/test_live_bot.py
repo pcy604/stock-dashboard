@@ -158,3 +158,9 @@ def test_gate_override_window(tmp_path, monkeypatch):
     monkeypatch.setattr(Pl, "ROOT", str(tmp_path))
     assert Pl.gate_override(_d(2026, 11, 13)) and Pl.gate_override(_d(2026, 11, 9))
     assert Pl.gate_override(_d(2026, 11, 14)) is None
+
+
+def test_naver_rows_parse():
+    x = '<chartdata symbol="010170"><item data="20261105|10500|11000|10400|10700|123" />\n<item data="20261106|10700|11200|10600|10860|456" /></chartdata>'
+    r = B._naver_rows(x)
+    assert r == [(date(2026, 11, 5), 10700.0), (date(2026, 11, 6), 10860.0)]

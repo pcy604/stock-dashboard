@@ -65,14 +65,42 @@ def board():
 
 
 # ── 시세 ───────────────────────────────────────────────────────────────
+def _naver_rows(xml: str):
+    """fchart.stock.naver.com 일봉 XML → [(date, close)] — <item data="YYYYMMDD|시|고|저|종|거래량" />"""
+    import re
+    out = []
+    for d, c in re.findall(r'data="(\d{8})\|[^|]*\|[^|]*\|[^|]*\|([0-9.]+)\|', xml or ""):
+        out.append((date(int(d[:4]), int(d[4:6]), int(d[6:])), float(c)))
+    return out
+
+
+def _naver_close(sym, today):
+    """네이버 일봉 — 한국 가격 1순위(2026-11-09: 노트북에서 yfinance 가 전 종목 'Expecting value' 로 실패)."""
+    import requests
+    r = requests.get("https://fchart.stock.naver.com/sise.nhn",
+                     params=dict(symbol=sym, timeframe="day", count=30, requestType=0),
+                     headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+    rows = [x for x in _naver_rows(r.text) if x[0] < today and x[1] > 0]
+    return (rows[-1][1], str(rows[-1][0])) if rows else None
+
+
 def last_closes(syms):
-    """확정된 마지막 일봉 종가(오늘 진행 중 봉 제외, KST). 못 받으면 그 종목은 빠진다 — 있는 척하지 않는다."""
+    """확정된 마지막 일봉 종가(오늘 진행 중 봉 제외, KST). 네이버 → yfinance 순. 못 받으면 그 종목은 빠진다 — 있는 척하지 않는다."""
     out = {}
     if not syms:
         return out
-    import yfinance as yf
     today = datetime.now(KST).date()
     for s in syms:
+        try:
+            v = _naver_close(s, today)
+            if v:
+                out[s] = v; continue
+        except Exception:
+            pass
+        try:
+            import yfinance as yf
+        except Exception:
+            continue
         for t in (f"{s}.KS", f"{s}.KQ"):
             try:
                 h = yf.Ticker(t).history(period="1mo", auto_adjust=False)["Close"].dropna()
