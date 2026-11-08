@@ -46,10 +46,8 @@ def _pick_symbol():
 
 
 def render(mkt_sel: str, tsrc):
-    st.markdown("#### 📈 사이클 비교")
-    st.caption("저점에서 고점까지(상승), 고점에서 저점까지(하락) — 차트를 보고 구간을 직접 정하면, "
-               "시작일을 0%로 맞춰 겹쳐 그리고 기간·수익률을 비교합니다. 일봉 기준.")
-
+    """단독 화면(검색창 포함) — 2026-11-08 부터 본 자리는 🔍 종목 분석 탭(render_for). 남겨 두는 건 연구 스크립트·점검용."""
+    st.markdown("#### 🔁 사이클 비교")
     sym = _pick_symbol()
     if not sym:
         st.info('종목을 검색하세요.')
@@ -59,84 +57,148 @@ def render(mkt_sel: str, tsrc):
     if close is None or len(close) < 10:
         st.error(f'{sym}({m}) 가격 데이터가 없습니다 — 코드를 확인하세요.')
         return
-    st.caption(f'**{sym}** ({"한국" if m == "KR" else "미국"})')
+    render_for(sym, close, tsrc, src='daily_store (FinanceDataReader 캐시)')
 
-    fig0 = go.Figure(go.Scatter(x=close.index, y=close.values, line=dict(color='#2453C8', width=1.3)))
-    fig0.update_layout(height=260, margin=dict(l=8, r=8, t=8, b=8), yaxis=dict(type='log', title='종가(로그)'))
-    st.plotly_chart(fig0, use_container_width=True)
-    tsrc('daily_store (FinanceDataReader 캐시)', asof=str(close.index[-1].date()))
-    st.caption('⬆️ 위 차트에서 저점·고점 날짜를 눈으로 확인한 뒤, 아래 표에 구간을 추가하세요(행 추가는 표 아래 ＋).')
 
-    key = f'cyc_rows|{sym}'
-    if key not in st.session_state:
-        lo, hi = close.index.min().date(), close.index.max().date()
-        st.session_state[key] = pd.DataFrame([{'라벨': '구간 1', '시작일': lo, '종료일': hi}])
+def _logticks(lo, hi):
+    """로그 축 눈금 — 1·2·5 단위에서 5~7개만(기본 눈금은 작은 칸마다 숫자를 찍어 겹친다)."""
+    import math
+    lo, hi = max(float(lo), 1e-9), max(float(hi), 1e-9)
+    v = [m * 10 ** e for e in range(int(math.floor(math.log10(lo))) - 1, int(math.ceil(math.log10(hi))) + 1) for m in (1, 2, 5)]
+    v = [x for x in v if lo * 0.9 <= x <= hi * 1.1]
+    while len(v) > 7:
+        v = v[::2]
+    return v
 
-    lo_d, hi_d = close.index.min().date(), close.index.max().date()
-    with st.container(border=True):
-        st.caption('🤖 자동 채우기 — 종목분석 탭 "낙폭 회차"와 같은 정의(고점 대비 X% 이상 빠진 구간)로 '
-                   '하락(고점→저점)·회복(저점→고점) 구간을 한 번에 채웁니다. 채운 뒤에도 아래 표에서 직접 수정·추가할 수 있습니다.')
-        ac1, ac2, ac3, ac4 = st.columns([1.3, 1.3, 1.3, 1])
-        a_start = ac1.date_input('시작일', lo_d, min_value=lo_d, max_value=hi_d, key=f'cyc_auto_s|{sym}')
-        a_end = ac2.date_input('종료일', hi_d, min_value=lo_d, max_value=hi_d, key=f'cyc_auto_e|{sym}')
-        athr = ac3.slider('MDD 기준(%)', 5, 70, 30, 5, key=f'cyc_auto_x|{sym}')
-        if ac4.button('⬇ 채우기', key=f'cyc_auto_go|{sym}', use_container_width=True):
-            if a_start >= a_end:
-                st.warning('시작일이 종료일보다 앞서야 합니다.')
-            else:
-                window = close.loc[pd.Timestamp(a_start):pd.Timestamp(a_end)]
-                auto = C.auto_rows(window, 0, float(athr))
-                if len(auto):
-                    st.session_state[key] = auto
-                else:
-                    st.warning(f'{int(athr)}% 이상 빠진 구간이 없습니다 — 기준을 낮추거나 기간을 넓혀보세요.')
-                st.rerun()
 
-    rows = st.data_editor(st.session_state[key], num_rows='dynamic', hide_index=True, use_container_width=True,
-                          key=f'cyc_editor|{sym}',
-                          column_config={'라벨': st.column_config.TextColumn(width='medium'),
-                                         '시작일': st.column_config.DateColumn(min_value=close.index.min().date(), max_value=close.index.max().date()),
-                                         '종료일': st.column_config.DateColumn(min_value=close.index.min().date(), max_value=close.index.max().date())})
-    st.session_state[key] = rows
+def _fmt(x):
+    return f"{x / 1e6:,.4g}M" if x >= 1e6 else (f"{x / 1e3:,.4g}K" if x >= 1e4 else f"{x:,.4g}")
 
+
+def _logaxis(lo, hi):
+    tv = _logticks(lo, hi)
+    return dict(type='log', title=None, tickvals=tv, ticktext=[_fmt(t) for t in tv], minor=dict(showgrid=False))
+
+
+_PER = {'3년': 3, '5년': 5, '10년': 10, '20년': 20}
+
+
+def _segments(close, rows):
     segs, skipped = [], 0
     for r in rows.dropna(subset=['시작일', '종료일']).to_dict('records'):
         s = C.build_segment(close, r.get('라벨'), r['시작일'], r['종료일'])
         if s:
+            s['live'] = '진행' in str(r.get('라벨') or '')
             segs.append(s)
         else:
             skipped += 1
+    return segs, skipped
+
+
+def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·yfinance(일봉 종가)'):
+    """🔍 종목 분석 탭 안 사이클 비교 (2026-11-08 고도화) — 검색한 종목의 일봉을 그대로 쓴다.
+
+    고도화: ① 자동 구간 = 지그재그 스윙(저점→다음 고점 / 고점→다음 저점, X% 되돌림이 나야 꼭짓점) — 슬라이더만 움직이면 다시 계산
+            ② 가격 차트에 구간을 색으로 깔아 무엇을 골랐는지 보이게 ③ 진행 중 구간을 굵게 + 과거 중앙 경로(점선)와 겹쳐
+            '지금 몇 번째 백분위인가'를 숫자로 ④ 직접 고치기는 토글(자동 결과를 표로 복사해 수정)."""
+    close = close.dropna()
+    close = close[close > 0]
+    if len(close) < 60:
+        st.caption('사이클 비교 — 가격 이력이 60일 미만이라 건너뜁니다.')
+        return
+    K = f"cyc2|{sym}"
+    c1, c2, c3 = st.columns([1.3, 1.6, 1.2])
+    yrs_all = max(1, (close.index[-1] - close.index[0]).days // 365)
+    per_opts = [k for k, v in _PER.items() if v <= yrs_all + 1] + ['전체']
+    per = c1.segmented_control('기간', per_opts, default='10년' if '10년' in per_opts else per_opts[-1], key=f'{K}|p') or per_opts[-1]
+    x = c2.slider('꼭짓점 기준 — 이만큼 되돌려야 고점·저점으로 인정(%)', 10, 60, 30, 5, key=f'{K}|x',
+                  help='작게 하면 작은 출렁임까지 사이클로 잘게 쪼개고, 크게 하면 큰 사이클만 남는다. 반도체 같은 경기민감주는 30~40% 권장')
+    manual = c3.toggle('✏️ 구간 직접 고치기', key=f'{K}|man', help='켜면 지금 자동 구간이 표로 복사되고, 그 표를 고친 대로 계산합니다')
+    cl = close if per == '전체' else close[close.index >= close.index[-1] - pd.DateOffset(years=_PER[per])]
+
+    auto = C.swing_rows(cl, float(x))
+    if manual:
+        ek = f'{K}|rows|{per}|{x}'
+        if ek not in st.session_state:
+            st.session_state[ek] = auto
+        rows = st.data_editor(st.session_state[ek], num_rows='dynamic', hide_index=True, use_container_width=True, key=f'{K}|ed|{per}|{x}',
+                              column_config={'라벨': st.column_config.TextColumn(width='medium', help="'진행' 이 들어간 라벨 = 진행 중 구간"),
+                                             '시작일': st.column_config.DateColumn(min_value=cl.index.min().date(), max_value=cl.index.max().date()),
+                                             '종료일': st.column_config.DateColumn(min_value=cl.index.min().date(), max_value=cl.index.max().date())})
+    else:
+        rows = auto
+    segs, skipped = _segments(cl, rows)
     if skipped:
-        st.caption(f'⚠️ {skipped}개 구간은 건너뜀 — 시작일이 종료일보다 늦거나, 구간 안에 거래일이 2일 미만입니다.')
+        st.caption(f'⚠️ {skipped}개 구간은 건너뜀 — 시작일이 종료일보다 늦거나 거래일이 2일 미만입니다.')
     if not segs:
-        st.info('유효한 구간이 없습니다. 표에서 시작일 < 종료일로 넣어 주세요.')
+        st.info(f'{int(x)}% 이상 되돌린 꼭짓점이 없습니다 — 기준을 낮추거나 기간을 넓혀 보세요.')
         return
 
-    # 2026-11-07 — 하락·상승을 한 차트에 겹치면 서로 가려 모양 비교가 어렵다는 지적 → 따로 그린다.
+    # ── 가격 + 구간 색 ──
+    fig0 = go.Figure(go.Scatter(x=cl.index, y=cl.values, line=dict(color='#2453C8', width=1.3), name='종가',
+                                hovertemplate='%{x|%Y-%m-%d}<br>%{y:,.0f}<extra></extra>'))
+    for s_ in segs:
+        fig0.add_vrect(x0=pd.Timestamp(s_['start']), x1=pd.Timestamp(s_['end']), line_width=0, layer='below',
+                       fillcolor=_GREEN if s_['direction'] == '상승' else _RED, opacity=0.16 if s_.get('live') else 0.08)
+    fig0.update_layout(height=240, margin=dict(l=56, r=8, t=8, b=24), showlegend=False,
+                       yaxis=_logaxis(cl.min(), cl.max()))
+    st.plotly_chart(fig0, use_container_width=True)
+
+    # ── 지금 위치 ──
+    live = next((s_ for s_ in segs if s_.get('live')), None)
+    if live:
+        w = C.where_now(segs, live)
+        k1, k2, k3 = st.columns(3)
+        k1.metric(f"지금 = {live['direction']} 구간", f"{live['days']}거래일째", f"{live['ret']:+.1f}% (꼭짓점 {live['start']} 부터)", delta_color='off')
+        if w:
+            k2.metric(f"과거 {live['direction']} {w['n']}회 중앙", f"{w['days_med']:.0f}거래일 · {w['ret_med']:+.0f}%",
+                      f"최장 {w['days_max']:.0f}일 · 최대 {w['ret_max']:+.0f}%", delta_color='off')
+            k3.metric("과거 대비 위치", f"기간 {w['days_pct']:.0f} · 폭 {w['ret_pct']:.0f} 백분위",
+                      '과거 중앙을 이미 넘음' if w['days_pct'] > 50 and w['ret_pct'] > 50 else
+                      ('과거 중앙보다 짧고 얕음' if w['days_pct'] <= 50 and w['ret_pct'] <= 50 else '기간·폭 중 하나만 중앙 넘음'),
+                      delta_color='off', help='과거 같은 방향(완료) 구간 중 지금보다 짧았던(얕았던) 비율. 표본이 3회 미만이면 참고만')
+        else:
+            k2.caption(f"과거 완료된 {live['direction']} 구간이 없어 비교할 수 없습니다.")
+
+    # ── 겹쳐 보기 ──
     cdn, cup = st.columns(2)
     for col, dirn, color, title in ((cdn, '하락', _RED, '📉 하락 구간 (고점 → 저점)'), (cup, '상승', _GREEN, '📈 상승 구간 (저점 → 고점)')):
         with col:
-            st.caption(title)
-            sub = [s for s in segs if s['direction'] == dirn]
+            sub = [s_ for s_ in segs if s_['direction'] == dirn]
+            st.caption(title + f" · {sum(1 for s_ in sub if not s_.get('live'))}회 · " + ('세로 = 시작=100(로그)' if dirn == '상승' else '세로 = 시작 대비 %')
+                       + ' · 가로 = 경과 거래일')
             if not sub:
                 st.caption('— 없음 —')
                 continue
             fig = go.Figure()
-            for s in sub:
-                fig.add_trace(go.Scatter(x=list(s['series'].index), y=s['series'].values,
-                                         name=f"{s['label']} ({s['start']}~{s['end']})", line=dict(color=color, width=1.8)))
-            fig.add_hline(y=0, line=dict(color='#999', width=1, dash='dot'))
-            fig.update_layout(height=360, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=-0.22, yanchor='top', font=dict(size=10)),
-                              xaxis=dict(title='경과(거래일)'), yaxis=dict(title='시작일 대비(%)'))
+            up = dirn == '상승'
+            tf = (lambda v: 100 + v) if up else (lambda v: v)          # 상승은 '시작=100' 로그 축 — 한 번의 초대형 상승이 나머지를 납작하게 누르지 않게
+            for s_ in sub:
+                lv = s_.get('live')
+                fig.add_trace(go.Scatter(x=list(s_['series'].index), y=tf(s_['series'].values),
+                                         name=f"{s_['label']} ({s_['start']}~)", opacity=1 if lv else 0.45,
+                                         line=dict(color='#111827' if lv else color, width=3 if lv else 1.4),
+                                         customdata=s_['series'].values,
+                                         hovertemplate='%{x}일째 %{customdata:+.1f}%<extra>' + s_['label'] + '</extra>'))
+            mp = C.median_path([s_ for s_ in sub if not s_.get('live')])
+            if mp is not None and len(mp) > 1:
+                fig.add_trace(go.Scatter(x=list(mp.index), y=tf(mp.values), name='과거 중앙', line=dict(color=color, width=2.2, dash='dot'),
+                                         customdata=mp.values, hovertemplate='%{x}일째 중앙 %{customdata:+.1f}%<extra></extra>'))
+            fig.add_hline(y=100 if up else 0, line=dict(color='#999', width=1, dash='dot'))
+            fig.update_layout(height=320, margin=dict(l=48, r=8, t=8, b=8), legend=dict(orientation='h', y=-0.16, yanchor='top', font=dict(size=10)),
+                              xaxis=dict(title=None), yaxis=(_logaxis(100 + min(float(s_['series'].min()) for s_ in sub), 100 + max(float(s_['series'].max()) for s_ in sub)) if up
+                                                            else dict(title=None, ticksuffix='%')))
             st.plotly_chart(fig, use_container_width=True)
 
-    tsrc('cycle_compare.py (화면에서 계산)', asof=str(close.index[-1].date()))
-    st.dataframe(C.detail_table(segs), hide_index=True, use_container_width=True, filters=False)
-
-    st.markdown("##### 방향별 통계")
-    tsrc('cycle_compare.py (화면에서 계산)', asof=str(close.index[-1].date()))
+    asof = str(cl.index[-1].date())
+    st.markdown("**방향별 통계** (진행 중 구간 제외)")
+    tsrc(src + ' · cycle_compare.py', asof=asof)
     summ = C.summarize(segs)
     if len(summ):
         st.dataframe(summ, hide_index=True, use_container_width=True, filters=False)
-    st.caption('⚠️ 구간은 사용자가 고른 것이라(사후 선택) 표본이 적을수록 우연일 수 있습니다. '
-               '같은 종목이라도 사이클 성격(메모리·파운드리·장비)이 다르면 직접 비교가 어긋날 수 있습니다.')
+    with st.expander(f'구간 목록 {len(segs)}개'):
+        tsrc(src + ' · cycle_compare.py', asof=asof)
+        st.dataframe(C.detail_table(segs), hide_index=True, use_container_width=True, filters=False)
+    st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림이 나온 고점·저점(지그재그) — 나중에야 확정되므로 진행 중 구간의 끝은 아직 모릅니다. "
+               "검은 굵은 선 = 지금, 점선 = 과거 완료 구간의 중앙 경로. 표본이 적으면(3회 미만) 우연일 수 있고, "
+               "같은 종목도 사이클 성격(메모리·파운드리·장비 등)이 바뀌면 직접 비교가 어긋납니다.")

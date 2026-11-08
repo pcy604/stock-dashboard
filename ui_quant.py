@@ -291,6 +291,117 @@ def _easy(m):
     return pname, base
 
 
+_BIN = {'op_turn', 'acc', 'nh'}          # 0/1 지표
+_NUM_N = {'ret': 13, 'rs_chg': 4, 'rs_vec': 4, 'ma_gap': 5, 'dist_hi': 52, 'nh': 52, 'vol_x': 20, 'rsi': 14, 'turnover': 4, 'vol': 26, 'ma_x': '10-40'}
+
+
+def _unit(base, m):
+    if base == 'marcap':
+        return '억원' if m == 'KR' else '$B'
+    if base == 'turnover':
+        return '억원' if m == 'KR' else '$M'
+    u = Q.FIELDS[next(k for k in Q.FIELDS if k.split(':')[0] == base)][1]
+    return u
+
+
+def _filter_bar(m, base, pname):
+    """📐 상단 필터 바 (2026-11-08 차니 "PER·PBR·RS 강도 등 쓸 수 있는 지표를 전부 취사선택") —
+    엔진이 아는 지표(quant_engine.FIELDS) 전부를 골라 범위를 넣는다. 고른 전략의 필터가 처음 값으로 깔린다.
+    값을 안 건드린 칸은 전략의 원래 조건(>·== 등)을 그대로 쓴다 — 프리셋 결과가 바뀌지 않게."""
+    keys = list(Q.FIELDS)
+    bk = {k.split(':')[0]: k for k in keys}
+    orig = {}
+    for f in base.get('filters') or []:
+        orig.setdefault(f['field'].split(':')[0], f)
+    K = f"qb_fb|{pname}|{m}"
+    with st.container(border=True):
+        st.markdown("**📐 종목 필터** — 쓸 지표를 고르고 범위를 넣으세요. 비운 칸 = 제한 없음")
+        sel = st.multiselect('지표', [bk[b] for b in bk], default=[bk[b] for b in orig if b in bk], key=f'{K}|sel',
+                             format_func=lambda k: f"{Q.FIELDS[k][0]}" + (f" ({_unit(k.split(':')[0], m)})" if _unit(k.split(':')[0], m) else ''),
+                             label_visibility='collapsed', placeholder='지표 추가 — PER · PBR · PSR · ROE · RS · 매출 YoY · 흑자전환 · 이평 괴리 · 신고가 · 업종 …')
+        out, txt, pos = [], [], {}      # pos: 화면 번호 → 실제 조건 번호(범위 빈 칸은 빠지므로)
+        cols = st.columns(3)
+        for i, k in enumerate(sel, 1):
+            b = k.split(':')[0]
+            o = orig.get(b)
+            d = _mul(b, m)
+            lab, _u, hlp = Q.FIELDS[k]
+            with cols[(i - 1) % 3].container(border=True):
+                st.markdown(f"**{i}. {lab}**" + (f" <span style='color:#7c8290;font-size:12px'>{_u if b not in _MUL else _unit(b, m)}</span>" if _u else ''),
+                            unsafe_allow_html=True, help=hlp)
+                n = None
+                if ':' in k:
+                    n0 = o['field'].split(':')[1] if o and ':' in o['field'] else str(_NUM_N.get(b, 20))
+                    n = st.text_input('n(주)', n0, key=f'{K}|{b}|n', help="n주 · 이평 정배열은 '단기-장기'")
+                fk = f"{b}:{str(n).strip() or _NUM_N.get(b, 20)}" if ':' in k else b
+                if b == 'sector':
+                    v0 = o['value'] if o and isinstance(o.get('value'), str) else ''
+                    v = st.text_input('포함(쉼표 = 또는)', v0, key=f'{K}|{b}|t', placeholder='반도체, 전기')
+                    if v.strip():
+                        out.append(dict(field=fk, op='contains', value=v.strip())); pos[i] = len(out); txt.append(f"{i}. 업종 ∋ {v.strip()}")
+                    continue
+                if b in _BIN:
+                    v0 = 0 if o and o.get('value') in (0, 0.0) and o.get('op') == '==' else 1
+                    v = st.radio('값', [1, 0], index=[1, 0].index(v0), horizontal=True, key=f'{K}|{b}|b',
+                                 format_func=lambda z: '예' if z == 1 else '아니오', label_visibility='collapsed')
+                    out.append(dict(field=fk, op='==', value=v)); pos[i] = len(out); txt.append(f"{i}. {lab} {'예' if v else '아니오'}")
+                    continue
+                lo0 = hi0 = None
+                if o:
+                    ov = o['value']
+                    if o['op'] == 'between' and isinstance(ov, list):
+                        lo0, hi0 = ov[0] / d, ov[1] / d
+                    elif o['op'] in ('>=', '>'):
+                        lo0 = ov / d
+                    elif o['op'] in ('<=', '<'):
+                        hi0 = ov / d
+                    elif o['op'] == '==':
+                        lo0 = hi0 = ov / d
+                c1, c2 = st.columns(2)
+                lo0 = None if lo0 is None else float(lo0)
+                hi0 = None if hi0 is None else float(hi0)
+                lo = c1.number_input('최소', value=lo0, key=f'{K}|{b}|lo', placeholder='제한 없음')
+                hi = c2.number_input('최대', value=hi0, key=f'{K}|{b}|hi', placeholder='제한 없음')
+                if o and lo == lo0 and hi == hi0 and o['field'] == fk:
+                    out.append(o)                                    # 안 건드림 → 전략 원래 조건 그대로
+                elif lo is not None and hi is not None:
+                    out.append(dict(field=fk, op='between', value=[float(min(lo, hi)) * d, float(max(lo, hi)) * d]))
+                elif lo is not None:
+                    out.append(dict(field=fk, op='>=', value=float(lo) * d))
+                elif hi is not None:
+                    out.append(dict(field=fk, op='<=', value=float(hi) * d))
+                else:
+                    st.caption('범위를 넣어야 적용됩니다')
+                    continue
+                pos[i] = len(out)
+                txt.append(f"{i}. {lab} " + (f"{lo:,.4g}~{hi:,.4g}" if lo is not None and hi is not None else
+                                             (f"≥ {lo:,.4g}" if lo is not None else f"≤ {hi:,.4g}")))
+        lg0 = base.get('logic') or ''
+        modes = ['모두 만족 (AND)', '하나라도 (OR)', '결합식 직접']
+        g1, g2 = st.columns([2, 3])
+        mode = g1.radio('결합', modes, index=2 if lg0 else 0, horizontal=True, key=f'{K}|mode', label_visibility='collapsed')
+        logic = ''
+        if mode == modes[1] and len(out) > 1:
+            logic = ' OR '.join(str(i) for i in range(1, len(out) + 1))
+        elif mode == modes[2]:
+            raw = g2.text_input('결합식 (위 칸 번호)', lg0, key=f'{K}|lg', placeholder='1 AND (2 OR 3) · NOT 4', label_visibility='collapsed')
+            import re as _re
+            bad = [int(z) for z in _re.findall(r'\d+', raw) if int(z) not in pos]
+            logic = _re.sub(r'\d+', lambda mm: str(pos.get(int(mm.group()), mm.group())), raw)
+            try:
+                if bad:
+                    raise ValueError(f'{bad}번 칸은 범위가 비었거나 없습니다')
+                Q.parse_logic(logic, len(out))
+            except Exception as e:
+                st.error(f'결합식 오류 → 모두 AND 로 실행: {e}')
+                logic = ''
+        st.caption('적용: ' + (f"{logic} · " if logic else ('모두 AND · ' if len(out) > 1 else '')) + (' · '.join(txt) if txt else '필터 없음(전 종목)') +
+                   (' · ⚠️ 범위가 빈 지표는 번호에서 빠집니다' if len(out) < len(sel) else ''))
+    base = json.loads(json.dumps(base))
+    base['filters'], base['logic'] = out, logic
+    return base
+
+
 def _verdict(S, bmn):
     dc, dm = S['CAGR'] - S.get('BM_CAGR', 0), S['MDD'] - S.get('BM_MDD', 0)    # MDD 는 음수 — 클수록(0에 가까울수록) 좋음
     if dc >= 0 and dm >= 0:
@@ -448,6 +559,10 @@ def render(mkt_sel: str, tsrc):
     mk = [m for m in (['US', 'KR'] if mkt_sel == '전체' else [mkt_sel])]
     m = mk[0] if len(mk) == 1 else st.segmented_control('시장', mk, default='KR', key='qb_m', format_func=_MK.get) or 'KR'
     pname, base = _easy(m)
+    if not st.session_state.get('qb_adv'):
+        base = _filter_bar(m, base, pname)
+    else:
+        st.caption('⚙️ 고급 모드 — 종목 필터는 아래 ② 표에서 고칩니다(상단 필터 바는 숨김).')
     if st.toggle('⚙️ 직접 조합 (고급 — 필터·결합식·불타기·래칫·탈출 신호·말로 쓰기)', key='qb_adv'):
         spec = _advanced(m, base, pname)
     else:

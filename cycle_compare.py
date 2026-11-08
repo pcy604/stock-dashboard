@@ -68,21 +68,113 @@ def auto_rows(close: pd.Series, months: int, thresh: float) -> pd.DataFrame:
 
 
 def summarize(segments: list[dict]) -> pd.DataFrame:
-    """구간 리스트 → 방향별(상승/하락) 구간수·평균·중앙값 기간(거래일)·수익률(%) 표."""
+    """구간 리스트 → 방향별(상승/하락) 구간수·평균·중앙값 기간(거래일)·수익률(%) 표. 진행 중 구간은 빼고 센다."""
     rows = []
     for d in ('상승', '하락'):
-        sub = [s for s in segments if s['direction'] == d]
+        sub = [s for s in segments if s['direction'] == d and not s.get('live')]
         if not sub:
             continue
         w = np.array([s['days'] for s in sub], float)
         r = np.array([s['ret'] for s in sub], float)
         rows.append({'방향': d, '구간수': len(sub),
                       '평균 기간(거래일)': round(float(w.mean()), 1), '중앙 기간(거래일)': round(float(np.median(w)), 1),
-                      '평균 수익률(%)': round(float(r.mean()), 1), '중앙 수익률(%)': round(float(np.median(r)), 1)})
+                      '평균 수익률(%)': round(float(r.mean()), 1), '중앙 수익률(%)': round(float(np.median(r)), 1),
+                      '최장(거래일)': int(w.max()), '가장 큰 폭(%)': round(float(r.max() if d == '상승' else r.min()), 1)})
     return pd.DataFrame(rows)
 
 
 def detail_table(segments: list[dict]) -> pd.DataFrame:
     return pd.DataFrame([{'라벨': s['label'], '시작': s['start'], '종료': s['end'],
-                          '기간(거래일)': s['days'], '수익률(%)': s['ret'], '방향': s['direction']}
+                          '기간(거래일)': s['days'], '수익률(%)': s['ret'], '방향': s['direction'] + (' · 진행 중' if s.get('live') else '')}
                          for s in segments])
+
+
+# ── 2026-11-08 고도화 (차니 "아주 맘에 든다, 좀만 더") ─────────────────────────────
+# ① 자동 구간을 '낙폭 회차(저점→옛 고점 회복)'가 아니라 **지그재그 스윙**으로: 저점→다음 고점(상승) · 고점→다음 저점(하락).
+#    옛 방식은 회복 구간이 '옛 고점을 되찾는 순간'에서 끊겨 실제 상승 사이클 길이·크기를 잘랐다.
+# ② 마지막 꼭짓점 → 오늘 = 진행 중 구간. 과거 같은 방향 구간 분포 안에서 지금이 어디쯤인지(백분위)를 잰다.
+
+def zigzag(close: pd.Series, pct: float):
+    """종가 지그재그 — pct% 이상 되돌림이 나야 꼭짓점으로 인정. 반환 [(날짜, 'H'|'L', 가격)] 오래된 순.
+    마지막 꼭짓점 뒤 진행 방향은 last_dir 로(1 상승 중 · -1 하락 중 · 0 판정 전)."""
+    c = close.dropna()
+    v, ix = c.values.astype(float), c.index
+    th = pct / 100.0
+    if len(v) < 3:
+        return [], 0
+    piv, trend = [], 0
+    hi = lo = 0
+    for i in range(1, len(v)):
+        if trend == 0:
+            if v[i] > v[hi]:
+                hi = i
+            if v[i] < v[lo]:
+                lo = i
+            if v[i] >= v[lo] * (1 + th) and lo < i:
+                piv.append(lo); trend = 1; hi = i
+            elif v[i] <= v[hi] * (1 - th) and hi < i:
+                piv.append(hi); trend = -1; lo = i
+        elif trend == 1:
+            if v[i] > v[hi]:
+                hi = i
+            elif v[i] <= v[hi] * (1 - th):
+                piv.append(hi); trend = -1; lo = i
+        else:
+            if v[i] < v[lo]:
+                lo = i
+            elif v[i] >= v[lo] * (1 + th):
+                piv.append(lo); trend = 1; hi = i
+    # 진행 중 방향의 극값까지는 아직 확정이 아니다 — 마지막 확정 꼭짓점까지만 꼭짓점으로 돌려준다
+    out = []
+    for k, i in enumerate(piv):
+        nxt = piv[k + 1] if k + 1 < len(piv) else None
+        typ = 'L' if (nxt is not None and v[nxt] > v[i]) or (nxt is None and trend == 1) else 'H'
+        out.append((ix[i], typ, float(v[i])))
+    return out, trend
+
+
+def swing_rows(close: pd.Series, pct: float) -> pd.DataFrame:
+    """지그재그 꼭짓점 사이를 구간 표로 — 마지막 꼭짓점 → 마지막 가격일은 '진행 중'."""
+    piv, trend = zigzag(close, pct)
+    rows, nu, nd = [], 0, 0
+    last = close.dropna().index.max()
+    for k in range(len(piv)):
+        d0, t0, p0 = piv[k]
+        if k + 1 < len(piv):
+            d1, _, p1 = piv[k + 1]
+            live = False
+        else:
+            d1, p1, live = last, float(close.dropna().iloc[-1]), True
+            if d1 <= d0:
+                break
+        up = t0 == 'L'
+        if up:
+            nu += 1
+        else:
+            nd += 1
+        lab = (f"상승 {nu}" if up else f"하락 {nd}") + (' (진행 중)' if live else '')
+        rows.append({'라벨': lab, '시작일': pd.Timestamp(d0).date(), '종료일': pd.Timestamp(d1).date()})
+    return pd.DataFrame(rows, columns=['라벨', '시작일', '종료일'])
+
+
+def median_path(segments: list[dict]):
+    """완료된 구간들의 경과일별 중앙 경로(구간 절반 이상이 살아 있는 날까지만)."""
+    if not segments:
+        return None
+    L = max(len(s['series']) for s in segments)
+    M = pd.DataFrame({i: s['series'].reindex(range(L)) for i, s in enumerate(segments)})
+    alive = M.notna().sum(axis=1)
+    med = M.median(axis=1)
+    return med[alive >= max(2, (len(segments) + 1) // 2)]
+
+
+def where_now(segments: list[dict], live: dict):
+    """진행 중 구간이 과거 같은 방향(완료) 구간들 사이 어디쯤인가 — 기간·크기 백분위와 중앙값."""
+    past = [s for s in segments if s['direction'] == live['direction'] and not s.get('live')]
+    if not past:
+        return None
+    dd = np.array([s['days'] for s in past], float)
+    rr = np.array([abs(s['ret']) for s in past], float)
+    return dict(n=len(past), days_med=float(np.median(dd)), ret_med=float(np.median(rr)) * (1 if live['direction'] == '상승' else -1),
+                days_pct=float((dd < live['days']).mean() * 100), ret_pct=float((rr < abs(live['ret'])).mean() * 100),
+                days_max=float(dd.max()), ret_max=float(rr.max()) * (1 if live['direction'] == '상승' else -1))

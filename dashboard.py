@@ -1377,16 +1377,19 @@ tab_lab = _mt[5] if _IS_LAB else None
 if _IS_LAB:
     with tab_lab:
         st.caption("🔬 **연구실 — 소유자만 보입니다.** 검증 중이거나 기각된 연구 · 퀀트 백테스트. 결론이 난 것만 다른 탭으로 옮깁니다.")
-        t_tools, t_lab, t_win, t_old = st.tabs(["🗂 발굴 도구", "🧪 퀀트 백테스트", "🔭 대박주 역분석", "📚 지난 연구"])
+        # 2026-11-08 차니 정리: 🗂 발굴 도구 → 🔎 종목 발굴 아래 '재료 목록'(소유자만) · 🔭 대박주 역분석 → 퀀트 백테스트 안
+        #   '🔬 개별 종목 심층 분석'(옛 '종목 하나 전략')으로 · 📈 사이클 비교 → 🔍 종목 분석 탭(검색한 종목 그대로).
+        t_lab, t_old = st.tabs(["🧪 퀀트 백테스트", "📚 지난 연구"])
 else:
-    t_tools = t_lab = t_win = t_old = None
+    t_lab = t_old = None
+_TOOL_IDS = set()          # 🔎 종목 발굴 안 재료 목록 핸들 — 지연 계산 기준이 연구실이 아니라 종목 발굴 탭
 
 
 def _lab_enter(tab):
     """연구실 블록 진입 — 소유자가 아니거나 연구실 탭이 닫혀 있으면 건너뛴다."""
     if tab is None or not _IS_LAB:
         raise _LazySkip
-    _lazy(tab_lab)
+    _lazy(tab_screen if id(tab) in _TOOL_IDS else tab_lab)
 tab_rep = tab_home
 try:
     import access as _acc0
@@ -1418,15 +1421,20 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     t_core = st.container()
 t_gain = t_52 = tab3 = t_lead = t_turn = t_value = None
 if _IS_LAB:
-    with t_tools:
-        st.caption("🗂 발굴 도구 — 공개 화면에서 내린 탐색용 목록(교집합 후보의 재료). 시장 선택은 🔎 종목 발굴 상단과 공통.")
-        _g_mom, _g_core, _g_fund = st.tabs(["🔥 모멘텀", "🏆 CANSLIM", "💎 펀더멘털"])
-        with _g_mom:
-            t_gain, t_52 = st.tabs(["상승 상위", "52주 신고가"])
-        with _g_core:
-            tab3 = st.container()
-        with _g_fund:
-            t_lead, t_turn, t_value = st.tabs(["이익가속", "흑자전환", "가치 발굴 (KR)"])
+    # 2026-11-08 차니 "발굴 도구는 종목 발굴이랑 뭐가 다르지?" — 다른 건 '재료'(교집합 이전 목록)라는 것뿐이고,
+    #   보는 이유도 '교집합에 왜 들어왔나/빠졌나' 확인이라 종목 발굴 아래가 제자리. 연구실 서브탭에서 내린다.
+    #   여섯 개를 다 그리면 메모리(10-24 다운)라 고른 하나만 계산 — 기본은 안 고름.
+    with tab_screen:
+        st.divider()
+        st.markdown("##### 🗂 재료 목록 · 소유자만")
+        st.caption("교집합 후보를 만드는 재료 — 가격이 먼저 말하는 목록(상승 상위·52주 신고가·CANSLIM)과 숫자가 먼저 말하는 목록(이익가속·흑자전환·가치). "
+                   "위 후보에 왜 들어왔는지·왜 빠졌는지 확인할 때 엽니다. 고른 목록 하나만 계산합니다.")
+        _TOOLS = ["🔥 상승 상위", "📈 52주 신고가", "🏆 CANSLIM", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
+        _tool = st.segmented_control('재료 목록', _TOOLS, default=None, key='tools_pick', label_visibility='collapsed')
+        if _tool:
+            _tc = st.container()
+            _TOOL_IDS.add(id(_tc))
+            t_gain, t_52, tab3, t_lead, t_turn, t_value = [(_tc if _tool == _t else None) for _t in _TOOLS]
 
 # 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
 try:
@@ -2062,80 +2070,7 @@ with (t_old or st.empty()), guard('연구실 — 지난 연구'):
             st.caption("순서(같은 종목, 분기 수 중앙): " + " · ".join(f"{k} {v['median']}분기(같은 분기 {v['same_q']}%, n={v['n']:,})" for k, v in _lg.items())
                        + " · 포트폴리오는 위성 A 체계(20칸·래칫·재돌파 재매수·냉각 4주)")
 
-# ── 🔭 대박주 역분석 (2026-11-01 연구실로 이동) ──
-with (t_win or st.empty()), guard('연구실 — 역분석'):
-    _lab_enter(t_win)
-    # ── 🔭 최근 5년 TOP300 역분석 (2026-10-28 차니 설계: 필요조건 → 충분조건 → 언제 꽉 쥐나) ──
-    _wr = load_json(Path('results/winners_reverse.json')) or {}
-    with st.expander("🔭 최근 5년 상승률 TOP300 역분석 — 필요조건 · 충분조건 · 언제 꽉 쥐나 · 승자 목록", expanded=True):
-        _mk = {k: v for k, v in (_wr.get('markets') or {}).items() if 'error' not in v}
-        if not _mk:
-            st.info("결과를 만드는 중입니다(GitHub 서버 research-rs 작업).")
-        else:
-            st.caption("승자 = 창 시작 주 유동성 통과 종목 중 5년 수익률 상위 300(상폐 포함) · 점화 = 창 안 가장 큰 상승의 저점 주 · "
-                       "필요조건 = 점화 ±13주 안에 그 특징이 있던 승자 비율 · 충분조건 = 평소 그 특징이 있을 때 이후 52주 2배 확률 ÷ 전체 확률(리프트). "
-                       "**필요조건이 높아도 평소에 흔하면 리프트 ≈ 1 = 가려내는 힘 없음.**")
-            _sel = st.radio("시장", list(_mk), horizontal=True, key="wr_mk", format_func=lambda k: {'US': '🇺🇸 미국', 'KR': '🇰🇷 한국'}.get(k, k))
-            _r = _mk[_sel]
-            _m = st.columns(4)
-            _m[0].metric("창", f"{_r['window'][0][:7]} ~ {_r['window'][1][:7]}", f"대상 {_r['eligible']:,}종", delta_color="off")
-            _m[1].metric("승자 5년 수익 중앙", f"{_r['winner_total_median']:,.0f}%", f"{_r['n_winners']}종", delta_color="off")
-            _m[2].metric("평소 52주 2배 확률", f"{_r['base_p2x']}%", f"52주 수익 중앙 {_r['base_med52']}%", delta_color="off")
-            _h = _r['hold']
-            _m[3].metric("상승 도중 최대 낙폭(중앙)", f"{_h['run_dd']['median']:.0f}%", f"하위 10% {_h['run_dd']['worst10']:.0f}%", delta_color="off")
-            st.markdown("**① 필요조건 vs ② 충분조건**")
-            _tsrc('research/winners_reverse.py (GitHub Actions research-rs)', path='results/winners_reverse.json')
-            st.dataframe(pd.DataFrame([{'특징': f['feat'], '승자 점화 ±13주 보유(%)': f['need_near'], '승자 점화 주 보유(%)': f['need_at'],
-                                        '평소 보유(%)': f['prevalence'], '이후 52주 2배 확률(%)': f['p2x'], '리프트(배)': f['lift'],
-                                        '이후 52주 중앙(%)': f['med52'], '표본': f['n']} for f in _r['features']]),
-                         use_container_width=True, hide_index=True, color=False,
-                         column_config={c: st.column_config.NumberColumn(format='%.1f') for c in
-                                        ('승자 점화 ±13주 보유(%)', '승자 점화 주 보유(%)', '평소 보유(%)', '이후 52주 2배 확률(%)', '이후 52주 중앙(%)')}
-                         | {'리프트(배)': st.column_config.NumberColumn(format='%.2f')})
-            st.markdown("**특징 두 개 조합 — 리프트 상위**(표본 500 이상)")
-            _tsrc('research/winners_reverse.py', path='results/winners_reverse.json')
-            st.dataframe(pd.DataFrame([{'조합': c['feat'], '승자 보유(%)': c['need_near'], '2배 확률(%)': c['p2x'], '리프트(배)': c['lift'],
-                                        '이후 52주 중앙(%)': c['med52'], '표본': c['n']} for c in _r['combos']]),
-                         use_container_width=True, hide_index=True, color=False,
-                         column_config={'리프트(배)': st.column_config.NumberColumn(format='%.2f')})
-            st.markdown("**③ 급등은 언제 시작됐나** — 점화 주의 국면 vs 창 전체 주의 국면")
-            _tsrc('research/winners_reverse.py', path='results/winners_reverse.json')
-            st.dataframe(pd.DataFrame([{'국면': m['regime'], '점화 주 비율(%)': m['at_ignition'], '평소 비율(%)': m['all_weeks'],
-                                        '몰림(배)': round(m['at_ignition'] / m['all_weeks'], 2) if m['all_weeks'] else None} for m in _r['macro']]),
-                         use_container_width=True, hide_index=True, filters=False, color=False)
-            _q = _r.get('ignition_by_q') or {}
-            if _q:
-                _fq = go.Figure(go.Bar(x=list(_q), y=list(_q.values()), marker_color='#0e5a6b',
-                                       hovertemplate='%{x}<br>점화 %{y}종<extra></extra>'))
-                _fq.update_layout(height=260, margin=dict(l=8, r=8, t=34, b=8), title="분기별 점화 종목 수")
-                st.plotly_chart(_fq, use_container_width=True)
-            st.markdown("**④ 언제 꽉 쥐나**")
-            _m = st.columns(4)
-            _m[0].metric("점화→고점 기간(중앙)", f"{_h['run_wk']['median']:.0f}주", f"상승 중앙 +{_h['run_gain_median']:,.0f}%", delta_color="off")
-            _m[1].metric("고점 -20% 손절에 털린 승자", f"{_h['stopped_out']['20']:.0f}%", "다시 오르기 전에 팔린 비율", delta_color="off")
-            _m[2].metric("고점 -30% 손절", f"{_h['stopped_out']['30']:.0f}%", delta_color="off")
-            _m[3].metric("고점 -40% 손절", f"{_h['stopped_out']['40']:.0f}%", delta_color="off")
-            _sh = _h['share_by_13w_mean']
-            _fs = go.Figure(go.Bar(x=[f"{i*13+1}~{(i+1)*13}주" for i in range(len(_sh))], y=_sh, marker_color='#0e5a6b',
-                                   hovertemplate='%{x}<br>상승 몫 %{y:.1f}%<extra></extra>'))
-            _fs.update_yaxes(title='점화 후 상승 몫(%, 평균)')
-            _fs.update_layout(height=260, margin=dict(l=8, r=8, t=34, b=8), title="점화 후 13주 단위 상승 몫 — 상승은 어디에 몰리나")
-            st.plotly_chart(_fs, use_container_width=True)
-            # 2026-11-01 차니 "수익률 top 종목들 어딨어?" — 분석에 쓴 승자 목록 자체를 보여 준다
-            st.markdown(f"**⑤ 승자 목록 — 최근 5년 상승률 상위 {len(_r.get('winners') or [])}종**")
-            _wl = pd.DataFrame(_r.get('winners') or [])
-            if len(_wl):
-                _wl['종목'] = [(_CMB['종목'].get(str(x)) if '종목' in _CMB else None) or str(x) for x in _wl.sym]
-                _wl = _wl.rename(columns={'sym': '코드', 'total': '5년 수익률(%)', 't0': '점화 주', 'peak': '고점 주',
-                                          'run_gain': '점화→고점 상승(%)', 'run_wk': '점화→고점(주)', 'run_dd': '도중 최대 낙폭(%)'})
-                _wl = _wl[['종목', '코드', '5년 수익률(%)', '점화 주', '고점 주', '점화→고점 상승(%)', '점화→고점(주)', '도중 최대 낙폭(%)']]
-                _tsrc('research/winners_reverse.py', path='results/winners_reverse.json')
-                st.dataframe(_wl, use_container_width=True, hide_index=True, height=420,
-                             column_config={c: st.column_config.NumberColumn(format='%,.0f') for c in ['5년 수익률(%)', '점화→고점 상승(%)', '점화→고점(주)', '도중 최대 낙폭(%)']})
-                st.caption("점화 주 = 5년 안에서 가장 큰 상승이 시작된 저점 주 · 도중 최대 낙폭 = 점화→고점 사이 고점 대비 가장 깊이 빠진 폭. "
-                           "종목명이 코드로 보이면 지금 커버 명단에 없는 종목(상장폐지 등)")
-            if _r.get('note'):
-                st.caption(_r['note'])
+# ── 🔭 대박주 역분석 → ui_winners.py (2026-11-08 재작성, 퀀트 백테스트 → 개별 종목 심층 분석 안) ──
 
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
 with (t_gain or st.empty()), guard('상승 상위'):
@@ -3049,21 +2984,24 @@ if _LEAD_KR and _show_rej:
 with (t_lab or st.empty()), guard('전략 실험실'):
     _lab_enter(t_lab)
     # 2026-11-01 차니 요구 1~8 — 포트폴리오 단위 퀀트 백테스트(ui_quant · quant_engine)가 기본, 종목 하나 실험은 옆 칸
-    # 2026-11-06 — 사이클 비교(ui_cycle) 추가: 반도체처럼 오르내림이 반복되는 종목을 D-day 정렬해 비교
-    _lab_mode = st.segmented_control('', ['📊 포트폴리오 백테스트', '🔍 종목 하나 전략', '📈 사이클 비교'],
-                                     default='📊 포트폴리오 백테스트', key='lab_mode', label_visibility='collapsed') or '📊 포트폴리오 백테스트'
+    # 2026-11-08 — '종목 하나 전략' → '🔬 개별 종목 심층 분석'(전략 시험 + 대박주 역분석). 사이클 비교는 🔍 종목 분석 탭으로.
+    _lab_mode = st.segmented_control('', ['📊 포트폴리오 백테스트', '🔬 개별 종목 심층 분석'],
+                                     default='📊 포트폴리오 백테스트', key='lab_mode2', label_visibility='collapsed') or '📊 포트폴리오 백테스트'
     if _lab_mode.startswith('📊'):
         import ui_quant as _uiq
         _uiq = _fresh_module(_uiq)
         _uiq.render(_GMKT, _tsrc)
-    elif _lab_mode.startswith('🔍'):
-        import ui_lab as _uil
-        _uil = _fresh_module(_uil)
-        _uil.render(_GMKT, _tsrc)
     else:
-        import ui_cycle as _uic
-        _uic = _fresh_module(_uic)
-        _uic.render(_GMKT, _tsrc)
+        _deep = st.segmented_control('', ['🔭 대박주 역분석', '🎯 전략 시험 (대박주 vs 평범한 종목)'], default='🔭 대박주 역분석',
+                                     key='lab_deep', label_visibility='collapsed') or '🔭 대박주 역분석'
+        if _deep.startswith('🔭'):
+            import ui_winners as _uiw
+            _uiw = _fresh_module(_uiw)
+            _uiw.render(_GMKT, _tsrc, name_of=lambda c: (_CMB['종목'].get(c) if '종목' in _CMB else None))
+        else:
+            import ui_lab as _uil
+            _uil = _fresh_module(_uil)
+            _uil.render(_GMKT, _tsrc)
 
 
 # ── 📈 52주 신고가 (2026-10-14 · 2026-10-19 주간 그래프·연속 경신·AI 공통점) ─────────────
@@ -7215,6 +7153,15 @@ def _tab_analysis():
                                "회복 전의 추가 하락은 같은 회차로 묶는다(따로 세면 횟수가 부풀려진다). "
                                "기간 시작 시점의 가격을 첫 고점으로 본다. 매매 원칙의 손절선(고점 대비 −20%)이 "
                                "이 종목에 얼마나 자주 걸렸을지를 보는 용도.")
+                    # ── 🔁 사이클 비교 (2026-11-08 연구실 → 여기로 · 고도화) — 검색한 종목 일봉(_cl, 최대 20년) 그대로 ──
+                    try:
+                        st.divider()
+                        st.markdown("#### 🔁 사이클 비교 — 이번 오르내림은 지난번들과 비교해 어디쯤인가")
+                        import ui_cycle as _uic
+                        _uic = _fresh_module(_uic)
+                        _uic.render_for(sym8_clean, _cl, _tsrc)
+                    except Exception as _e_cyc:
+                        st.caption(f"`사이클 비교 실패: {type(_e_cyc).__name__}: {_e_cyc}`")
 
                 # ── 📅 실적 발표 · 서프라이즈 ─────────────────────────────
                 _ed = _earn_data(sym8_clean, is_kr_sym)

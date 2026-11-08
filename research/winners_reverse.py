@@ -7,8 +7,16 @@
 시장: 미국(market.db factor_weekly v13y, SEC 공시일 기준 재무) · 한국(FinanceData/marcap 일별 — 상장폐지 포함, 분기 재무는
       data/kr_fundamentals_q.parquet 에 공시일이 없어 '분기말 + 45일(4분기 90일)'에 알게 된 것으로 둔다)
 창: 최근 5년(마지막 주 기준 260주). 시작 주에 유동성 통과(미국 시총 $0.3B·거래대금 $5M / 한국 시총 1,000억·거래대금 10억)인 종목만.
-승자 = 창 전체 수익률 상위 300(상폐 종목은 마지막 가격 → 자연히 하위).
+승자 = 창 전체 수익률 **+100%(2배) 이상** 중 상위 300(상폐 종목은 마지막 가격 → 자연히 하위).
 점화 시점 t0 = 창 안에서 '가장 큰 상승'(저점→고점, 로그 상승폭 최대)의 저점 주.
+돌파 시점 tb = t0 뒤 처음으로 직전 52주 최고 종가를 넘은 주(52주 신고가) — 저점은 지나고서야 알지만 돌파는 그 주에 안다.
+
+2026-11-08 재작성(차니 "데이터도 UI도 좀 그렇다"):
+  ① 한국 시세가 수정주가가 아니었다(marcap Close = 그날 원래 가격) → 무상감자·액면병합이 +9,000% 승자로(제일바이오),
+     액면분할이 −30% 패자로(에코프로) 둔갑. 주식수가 1.5배 넘게 바뀌고 가격이 그 반대로 움직인 날은 시총 비율을 수익률로 쓴다.
+  ② 한국 '상위 300'이 대상 1,151종의 26%라 5년 +5% 종목까지 '대박주'에 들어갔다 → 2배 이상만.
+  ③ 점화(저점)가 미국 266/300 이 2021Q4~2022Q4 = 약세장 바닥 그 자체 → 국면 표가 '2022년 바닥' 설명이 됐다.
+     행동 가능한 돌파 시점을 같이 잰다(특징·국면·돌파 뒤 남은 상승 몫).
 
 1) 필요조건: 각 특징이 승자에게 t0 시점(그리고 t0 ±13주 안)에 있었던 비율
 2) 충분조건: 창 안 모든 종목·주(유동성 통과)에서 그 특징이 있을 때 '이후 52주 2배 이상' 확률 ÷ 전체 확률(리프트), 이후 52주 중앙
@@ -29,6 +37,7 @@ sys.path.insert(0, os.path.join(ROOT, "research"))
 OUT = os.path.join(ROOT, "results", "winners_reverse.json")
 WIN = 260
 TOP = 300
+MIN_TOTAL = 1.0      # 5년 +100% 이상만 승자
 
 
 # ── 공통 분석 ──────────────────────────────────────────────────────────
@@ -67,14 +76,15 @@ def macro_regimes(idx, spy):
     }
 
 
-def analyze(px, liq, feats, macro, label):
+def analyze(px, liq, feats, macro, label, names=None, mcap=None):
     idx = px.index
     end = len(idx) - 1
     start = max(0, end - WIN)
     p0, p1 = px.iloc[start], px.ffill().iloc[end]
     elig = liq.iloc[start] & p0.notna()
     tot = (p1 / p0 - 1)[elig].dropna()
-    win = tot.sort_values(ascending=False).head(TOP)
+    win = tot[tot >= MIN_TOTAL].sort_values(ascending=False).head(TOP)
+    hi52 = px.rolling(52, min_periods=40).max().shift(1).values        # 직전 52주 최고 종가(이번 주 제외)
     P = px.values
     cols = list(px.columns)
     rows = []
@@ -102,6 +112,19 @@ def analyze(px, liq, feats, macro, label):
         for q in range(0, 104, 13):
             a, b = min(q, len(seg) - 1), min(q + 13, len(seg) - 1)
             shares.append(float(np.log(seg[b] / seg[a]) / lg * 100) if lg > 0 else 0.0)
+        # 돌파: 저점 뒤 처음으로 직전 52주 최고 종가 위 — 고점 전까지만
+        tb = None
+        for t in range(t0 + 1, tp + 1):
+            h = hi52[t, j]
+            if not np.isnan(h) and not np.isnan(P[t, j]) and P[t, j] > h:
+                tb = t; break
+        if tb is not None:
+            pb = P[tb, j]
+            bo = dict(bo=str(idx[tb].date()), low_to_bo=round(float(pb / seg[0] - 1) * 100, 1),
+                      bo_to_peak=round(float(seg[-1] / pb - 1) * 100, 1),
+                      left=round(float(np.log(seg[-1] / pb) / lg * 100), 1) if lg > 0 else None, bo_wk=int(tb - t0))
+        else:
+            bo = dict(bo=None, low_to_bo=None, bo_to_peak=None, left=None, bo_wk=None)
         stops = {}
         for x in (20, 25, 30, 40):
             pk = seg[0]; hit = False
@@ -112,13 +135,17 @@ def analyze(px, liq, feats, macro, label):
             stops[str(x)] = hit
         rec = dict(sym=s, total=round(float(g) * 100, 1), t0=str(idx[t0].date()), peak=str(idx[tp].date()),
                    run_gain=round(float(np.exp(best) - 1) * 100, 1), run_wk=int(tp - t0), run_dd=round(run_dd, 1),
-                   shares=[round(z, 1) for z in shares], stopped=stops)
+                   shares=[round(z, 1) for z in shares], stopped=stops, **bo,
+                   name=(names or {}).get(s), mc0=_mc0(mcap, idx[start], s),
+                   edge=bool(t0 <= start + 1))          # 저점이 창 첫 주 = 그 전부터 오르던 중(점화 시점이 창에 잘렸다)
         for fk, F in feats.items():
             fv = F.values[:, j]
             rec[f"at:{fk}"] = bool(fv[t0]) if t0 < len(fv) else False
             rec[f"near:{fk}"] = bool(np.nanmax(fv[max(0, t0 - 13):t0 + 14])) if t0 < len(fv) else False
+            rec[f"bo:{fk}"] = bool(fv[tb]) if tb is not None else None
         for mk, Mv in macro.items():
             rec[f"m:{mk}"] = bool(Mv.iloc[t0]) if t0 < len(Mv) and Mv.iloc[t0] == Mv.iloc[t0] else False
+            rec[f"mb:{mk}"] = (bool(Mv.iloc[tb]) if Mv.iloc[tb] == Mv.iloc[tb] else False) if tb is not None else None
         rows.append(rec)
     W = pd.DataFrame(rows)
     # 충분조건: 창 안 모든 유동성 통과 종목·주, 이후 52주
@@ -137,6 +164,7 @@ def analyze(px, liq, feats, macro, label):
         prev = float(Fm.values.sum()) / max(1, float(L.values.sum()))
         feat_tab.append(dict(feat=fk, need_at=round(float(W[f"at:{fk}"].mean()) * 100, 1),
                              need_near=round(float(W[f"near:{fk}"].mean()) * 100, 1),
+                             need_bo=_pct(W[f"bo:{fk}"]),
                              prevalence=round(prev * 100, 1), n=int(len(x)),
                              p2x=round(float((x >= 1).mean()) * 100, 2) if len(x) else None,
                              lift=round(float((x >= 1).mean()) / base_p2, 2) if len(x) and base_p2 else None,
@@ -157,7 +185,10 @@ def analyze(px, liq, feats, macro, label):
     mac = []
     for mk, Mv in macro.items():
         allw = Mv.iloc[start:end + 1].dropna()
+        if not len(allw) or not allw.astype(bool).any():      # 자료 없음(예: SPY 를 못 읽음) → 0% 로 보이지 않게 뺀다
+            continue
         mac.append(dict(regime=mk, at_ignition=round(float(W[f"m:{mk}"].mean()) * 100, 1),
+                        at_breakout=_pct(W[f"mb:{mk}"]),
                         all_weeks=round(float(allw.astype(float).mean()) * 100, 1)))
     sh = np.array(W.shares.tolist())
     hold = dict(run_wk=dict(median=float(W.run_wk.median()), p25=float(W.run_wk.quantile(.25)), p75=float(W.run_wk.quantile(.75))),
@@ -167,10 +198,34 @@ def analyze(px, liq, feats, macro, label):
                 share_by_13w_mean=[round(float(np.mean(sh[:, k])), 1) for k in range(sh.shape[1])],
                 stopped_out={k: round(float(np.mean([r[k] for r in W.stopped])) * 100, 1) for k in ("20", "25", "30", "40")})
     t0m = pd.to_datetime(W.t0).dt.to_period("Q").astype(str).value_counts().sort_index()
+    Wb = W.dropna(subset=["bo"])
+    tbm = pd.to_datetime(Wb.bo).dt.to_period("Q").astype(str).value_counts().sort_index() if len(Wb) else pd.Series(dtype=int)
+    hold["breakout"] = dict(n=int(len(Wb)), share=round(len(Wb) / max(1, len(W)) * 100, 1),
+                            wk_median=float(Wb.bo_wk.median()) if len(Wb) else None,
+                            low_to_bo_median=float(Wb.low_to_bo.median()) if len(Wb) else None,
+                            bo_to_peak_median=float(Wb.bo_to_peak.median()) if len(Wb) else None,
+                            left_median=float(Wb.left.median()) if len(Wb) else None)
     return dict(label=label, window=[str(idx[start].date()), str(idx[end].date())], eligible=int(elig.sum()), n_winners=len(W),
                 winner_total_median=float(W.total.median()), base_p2x=round(base_p2 * 100, 2), base_med52=round(base_med * 100, 1),
                 features=sorted(feat_tab, key=lambda r: -(r["lift"] or 0)), combos=combos, macro=mac, hold=hold,
-                ignition_by_q=t0m.to_dict(), winners=W[["sym", "total", "t0", "peak", "run_gain", "run_wk", "run_dd"]].to_dict("records"))
+                ignition_by_q=t0m.to_dict(), breakout_by_q=tbm.to_dict(), min_total=MIN_TOTAL * 100,
+                n_edge=int(W.edge.sum()),
+                winners=W[["sym", "name", "mc0", "edge", "total", "t0", "bo", "peak", "run_gain", "low_to_bo", "bo_to_peak", "left",
+                           "run_wk", "run_dd"]].replace({np.nan: None}).to_dict("records"))
+
+
+def _mc0(mcap, d, s):
+    """창 시작 주 시총 — 못 구하면 None(표에 '-')."""
+    try:
+        v = mcap.reindex([d], method="ffill")[s].iloc[0]
+        return float(v) if v == v else None
+    except Exception:
+        return None
+
+
+def _pct(s):
+    s = s.dropna()
+    return round(float(s.astype(float).mean()) * 100, 1) if len(s) else None
 
 
 # ── 미국 ───────────────────────────────────────────────────────────────
@@ -197,7 +252,7 @@ def us():
         "시총 $2B 미만": M["marcap"] < 2e9,
     }
     feats = {k: v.fillna(False).astype(bool) for k, v in feats.items()}
-    return analyze(px, liq, feats, macro_regimes(px.index, spy), "미국")
+    return analyze(px, liq, feats, macro_regimes(px.index, spy), "미국", mcap=M["marcap"])
 
 
 # ── 한국 ───────────────────────────────────────────────────────────────
@@ -213,10 +268,10 @@ def kr():
     parts = []
     for f in sorted(glob.glob(os.path.join(dd, "marcap-*.parquet"))):
         try:
-            x = pd.read_parquet(f, columns=["Code", "Date", "Close", "Amount", "Marcap", "Market", "MarketId"])
+            x = pd.read_parquet(f, columns=["Code", "Name", "Date", "Close", "Amount", "Marcap", "Stocks", "Market", "MarketId"])
         except Exception:
             x = pd.read_parquet(f)
-            x = x[[c for c in ("Code", "Date", "Close", "Amount", "Marcap", "Market", "MarketId") if c in x.columns]]
+            x = x[[c for c in ("Code", "Name", "Date", "Close", "Amount", "Marcap", "Stocks", "Market", "MarketId") if c in x.columns]]
         parts.append(x)
     if not parts:
         raise RuntimeError("marcap 파일을 못 받았다")
@@ -228,6 +283,16 @@ def kr():
     d["Date"] = pd.to_datetime(d.Date); d["Code"] = d.Code.astype(str).str.zfill(6)
     d = d[d.Close > 0].drop_duplicates(["Code", "Date"], keep="last")
     C = d.pivot(index="Date", columns="Code", values="Close")
+    # 2026-11-08 수정주가: marcap Close 는 원래 가격이라 분할·병합·감자가 가짜 급등락이 된다(제일바이오 +9,000%, 에코프로 −30%).
+    #   주식수가 1.5배 넘게 바뀌고 가격이 그 반대 방향으로 그 70% 이상 움직인 날(유상증자는 여기 안 걸린다)은 가격비 × 주식수비(= 시총비)를 그날 수익률로.
+    if "Stocks" in d.columns:
+        Sx = d.pivot(index="Date", columns="Code", values="Stocks")
+        lc = np.log(C / C.shift(1)); ls = np.log(Sx / Sx.shift(1))
+        ev = (ls.abs() > np.log(1.5)) & (np.sign(lc) == -np.sign(ls)) & (lc.abs() >= 0.7 * ls.abs())   # 감자 정리매매처럼 덜 움직여도(제일바이오 300배 ↔ 주식 1/1500) 잡는다
+        print(f"  수정주가 보정 {int(ev.values.sum())}건", flush=True)
+        r = np.exp(lc.where(~ev, lc + ls)).fillna(1.0)
+        C = r.cumprod().where(C.notna())
+    names = d.groupby("Code").Name.last().to_dict() if "Name" in d.columns else {}
     Am = d.pivot(index="Date", columns="Code", values="Amount").rolling(20, min_periods=15).mean()
     Mc = d.pivot(index="Date", columns="Code", values="Marcap")
     W = lambda z: z.resample("W-FRI").last()
@@ -265,7 +330,7 @@ def kr():
     # '그 주에 새로 알려진 분기' 표시: 공시 가정일이 속한 첫 주
     newq = pd.DataFrame(False, index=px.index, columns=px.columns)
     pos = {c: i for i, c in enumerate(px.columns)}
-    NV = newq.values
+    NV = np.zeros(newq.shape, dtype=bool)          # pandas 3 CoW: .values 는 읽기 전용
     for s_, av in zip(q.sym, q.avail):
         j = pos.get(s_)
         if j is None:
@@ -295,8 +360,9 @@ def kr():
     ks.index = ks.index - pd.Timedelta(days=4)
     ks = ks.reindex(px.index)
     macro["한국 시총합 40주선 위"] = ks > ks.rolling(40, min_periods=30).mean()
-    res = analyze(px, liq, feats, macro, "한국")
-    res["note"] = "한국 재무는 공시일 미보유 → 분기말 +45일(4분기 +90일)에 알게 된 것으로 가정 · 시세 FinanceData/marcap(상폐 포함)"
+    res = analyze(px, liq, feats, macro, "한국", names=names, mcap=mc)
+    res["note"] = ("한국 재무는 공시일 미보유 → 분기말 +45일(4분기 +90일)에 알게 된 것으로 가정 · 시세 FinanceData/marcap(상폐 포함) · "
+                   "수정주가는 주식수 급변일(분할·병합·감자)을 시총 비율로 이어 붙여 만듦")
     return res
 
 
