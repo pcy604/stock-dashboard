@@ -1,0 +1,170 @@
+{
+ "made": "2026-11-08",
+ "prereg": "research/live_v19_prereg_2026-11-08.md",
+ "panel_end": "2026-11-02",
+ "oi_g10_share": 5.08,
+ "results": {
+  "A": {
+   "cagr": 26.2,
+   "mdd": -39.9,
+   "p1": 27.0,
+   "p1_mdd": -28.7,
+   "p2": 25.6,
+   "p2_mdd": -39.9,
+   "calmar": 0.657,
+   "trades": 488
+  },
+  "S1_n10": {
+   "cagr": 24.5,
+   "mdd": -30.1,
+   "p1": 18.0,
+   "p1_mdd": -19.5,
+   "p2": 29.9,
+   "p2_mdd": -30.1,
+   "calmar": 0.814,
+   "trades": 849
+  },
+  "S1_n8": {
+   "cagr": 26.5,
+   "mdd": -32.6,
+   "p1": 22.0,
+   "p1_mdd": -21.9,
+   "p2": 30.1,
+   "p2_mdd": -32.6,
+   "calmar": 0.813,
+   "trades": 716
+  },
+  "S1_n12": {
+   "cagr": 20.7,
+   "mdd": -28.2,
+   "p1": 13.0,
+   "p1_mdd": -28.2,
+   "p2": 27.4,
+   "p2_mdd": -27.4,
+   "calmar": 0.734,
+   "trades": 1026
+  },
+  "S2_n10": {
+   "cagr": 22.7,
+   "mdd": -26.7,
+   "p1": 15.2,
+   "p1_mdd": -18.4,
+   "p2": 28.9,
+   "p2_mdd": -26.7,
+   "calmar": 0.85,
+   "trades": 953
+  },
+  "S2_n8": {
+   "cagr": 22.4,
+   "mdd": -28.3,
+   "p1": 18.7,
+   "p1_mdd": -20.8,
+   "p2": 25.2,
+   "p2_mdd": -28.3,
+   "calmar": 0.792,
+   "trades": 797
+  },
+  "S2_n12": {
+   "cagr": 20.3,
+   "mdd": -25.1,
+   "p1": 11.9,
+   "p1_mdd": -25.1,
+   "p2": 27.5,
+   "p2_mdd": -25.1,
+   "calmar": 0.809,
+   "trades": 1139
+  },
+  "S3_n10": {
+   "cagr": 21.2,
+   "mdd": -24.8,
+   "p1": 13.9,
+   "p1_mdd": -17.1,
+   "p2": 27.0,
+   "p2_mdd": -24.8,
+   "calmar": 0.855,
+   "trades": 950
+  },
+  "S3_n8": {
+   "cagr": 20.6,
+   "mdd": -27.2,
+   "p1": 17.4,
+   "p1_mdd": -19.9,
+   "p2": 23.0,
+   "p2_mdd": -27.2,
+   "calmar": 0.757,
+   "trades": 800
+  },
+  "S3_n12": {
+   "cagr": 17.9,
+   "mdd": -24.5,
+   "p1": 11.0,
+   "p1_mdd": -21.1,
+   "p2": 23.5,
+   "p2_mdd": -24.5,
+   "calmar": 0.731,
+   "trades": 1134
+  },
+  "OI10": {
+   "cagr": 39.1,
+   "mdd": -37.4,
+   "p1": 20.4,
+   "p1_mdd": -30.6,
+   "p2": 56.3,
+   "p2_mdd": -37.4,
+   "calmar": 1.045,
+   "trades": 535
+  },
+  "OI5": {
+   "cagr": 29.1,
+   "mdd": -38.2,
+   "p1": 2.0,
+   "p1_mdd": -38.2,
+   "p2": 54.5,
+   "p2_mdd": -32.5,
+   "calmar": 0.762,
+   "trades": 543
+  },
+  "OI20": {
+   "cagr": 20.3,
+   "mdd": -42.2,
+   "p1": 15.8,
+   "p1_mdd": -28.7,
+   "p2": 23.6,
+   "p2_mdd": -42.2,
+   "calmar": 0.481,
+   "trades": 507
+  }
+ },
+ "verdict": {
+  "Q4": {
+   "checks": {
+    "S1": {
+     "main": true,
+     "periods": false,
+     "neighbors": false
+    },
+    "S2": {
+     "main": false,
+     "periods": false,
+     "neighbors": false
+    },
+    "S3": {
+     "main": false,
+     "periods": false,
+     "neighbors": false
+    }
+   },
+   "adopt": null
+  },
+  "Q5": {
+   "base": "A",
+   "main": {
+    "10": true,
+    "5": true,
+    "20": false
+   },
+   "periods": false,
+   "adopt": false
+  }
+ }
+}
