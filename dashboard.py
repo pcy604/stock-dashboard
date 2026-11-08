@@ -731,7 +731,7 @@ if not hasattr(_ac_dil, 'summarize_dilution'):   # 클라우드가 옛 모듈을
     import importlib as _il0
     _ac_dil = _il0.reload(_ac_dil)
 import table_ui as _tui
-_TUI_REQ = 11   # table_ui 를 고치면 그 API_VERSION 으로 같이 올린다 — 2026-11-05: 7 로 두어 v9 모듈이 메모리에 남아 전 표 AgGrid 가 안 먹었다(실화면)
+_TUI_REQ = 12   # table_ui 를 고치면 그 API_VERSION 으로 같이 올린다 — 2026-11-05: 7 로 두어 v9 모듈이 메모리에 남아 전 표 AgGrid 가 안 먹었다(실화면)
 if getattr(_tui, 'API_VERSION', 0) < _TUI_REQ:   # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
     import importlib as _il
     _tui = _il.reload(_tui)
@@ -1387,9 +1387,14 @@ _TOOL_IDS = set()          # 🔎 종목 발굴 안 재료 목록 핸들 — 지
 
 def _lab_enter(tab):
     """연구실 블록 진입 — 소유자가 아니거나 연구실 탭이 닫혀 있으면 건너뛴다."""
-    if tab is None or not _IS_LAB:
+    if tab is None:
         raise _LazySkip
-    _lazy(tab_screen if id(tab) in _TOOL_IDS else tab_lab)
+    if id(tab) in _TOOL_IDS:                     # 2026-11-08 재료 목록은 공개(사실 목록) — 소유자 아니어도 연다
+        _lazy(tab_screen)
+        return
+    if not _IS_LAB:
+        raise _LazySkip
+    _lazy(tab_lab)
 tab_rep = tab_home
 try:
     import access as _acc0
@@ -1416,17 +1421,16 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     #   핸들 이름(t_gain·t_52·t_lead·tab3·t_turn·t_value)은 아래 블록들이 그대로 쓰므로 바꾸지 않는다.
     # 2026-11-01 차니: 공개 화면은 '교집합 후보' 하나만. 나머지 발굴 도구(상승 상위·52주 신고가·CANSLIM·이익가속·흑자전환·가치 발굴)는
     #   🔬 연구실 → 🗂 발굴 도구로(소유자만). 핸들 이름은 그대로 두고, 공개 시점엔 None → 각 블록이 _lab_enter 로 건너뛴다.
-    st.caption("🚀 교집합 후보 = RS(가격 강도) 상위 × 이익 가속 또는 흑자전환 — 시장이 먼저 고르고 숫자가 뒷받침하는 종목")
-    _cand_slot = st.container()           # 📌 후보 바구니 — 공통 표 함수가 정의된 뒤 채운다
+    # 2026-11-08 차니: 맨 위 = 실전 규칙 v1.9 후보, 그 아래 = 재료 목록(공개 — 가격·재무 사실 목록이라 숨길 이유 없음). 후보 바구니 제거.
     t_core = st.container()
 t_gain = t_52 = tab3 = t_lead = t_turn = t_value = None
-if _IS_LAB:
+if True:                                          # 2026-11-08 공개(옛: 소유자만)
     # 2026-11-08 차니 "발굴 도구는 종목 발굴이랑 뭐가 다르지?" — 다른 건 '재료'(교집합 이전 목록)라는 것뿐이고,
     #   보는 이유도 '교집합에 왜 들어왔나/빠졌나' 확인이라 종목 발굴 아래가 제자리. 연구실 서브탭에서 내린다.
     #   여섯 개를 다 그리면 메모리(10-24 다운)라 고른 하나만 계산 — 기본은 안 고름.
     with tab_screen:
         st.divider()
-        st.markdown("##### 🗂 재료 목록 · 소유자만")
+        st.markdown("##### 🗂 재료 목록")
         st.caption("교집합 후보를 만드는 재료 — 가격이 먼저 말하는 목록(상승 상위·52주 신고가·CANSLIM)과 숫자가 먼저 말하는 목록(이익가속·흑자전환·가치). "
                    "위 후보에 왜 들어왔는지·왜 빠졌는지 확인할 때 엽니다. 고른 목록 하나만 계산합니다.")
         _TOOLS = ["🔥 상승 상위", "📈 52주 신고가", "🏆 CANSLIM", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
@@ -1517,7 +1521,9 @@ def _cand_store_save(lst):
 
 
 def _cand_register(rows, key: str):
-    """표 아래 '📌 후보로 담기' — 어느 탭에서 담았는지(출처 탭)·담은 날을 같이 남긴다."""
+    """2026-11-08 차니 지시로 제거(후보 바구니·후보로 담기). 호출부가 여러 곳이라 함수는 남기고 바로 끝낸다."""
+    return
+    """(옛) 표 아래 '📌 후보로 담기'."""
     rows = [r for r in (rows.to_dict('records') if isinstance(rows, pd.DataFrame) else rows) if r.get('코드')]
     if not rows:
         return
@@ -1586,9 +1592,7 @@ def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=
     st.caption(cap + (f" · {note}" if note else ""))
     return df
 
-with _cand_slot, guard('후보 바구니'):
-    _lazy(tab_screen)
-    _cand_panel()
+# 2026-11-08 차니 '후보 바구니·후보로 담기 전부 지워' — _cand_register 는 아무것도 안 함
 
 # ════════════════════════════════════════════════════════════════════
 # 종목 발굴 서브탭 콘텐츠: 주도주(t_lead) · 계절성(t_seas) · MDD 바닥(t_mdd)
@@ -1598,56 +1602,59 @@ with _cand_slot, guard('후보 바구니'):
 # 정의: RS 강도 상위 20% × (이번 주 이익가속 또는 최근 흑자전환). 52주 신고가 '전에' 걸리게 하려는 것.
 # ⚠️ 검증 전이다 — research/rs_accel_bt.py(CI research-rs) 결과가 합격일 때만 '규칙'으로 승격한다.
 with t_core, guard('주도주 교집합'):
+    # 2026-11-08 차니 "종목 발굴 전략을 실제로 쓸 그 전략으로" — 화면 = 실전 규칙 v1.9 의 후보 정의 그대로(live/plan.py 와 같은 조건).
+    #   옛 '교집합 후보(RS≥80 × 이익가속/흑자전환, 백테스트 불합격 11.35%)' 는 내렸다.
     _lazy(tab_screen)
-    _rj = load_json(Path('results/returns.json')) or {}
-    _acj = load_json(Path('results/leaders_accel.json')) or {}
     _taj = load_json(Path('results/turnaround_latest.json')) or {}
-    _bt = load_json(Path('results/rs_accel_bt.json')) or {}
-    _btv = ((_bt.get('variants') or {}).get('rs80_fund') or {})
-    if _btv.get('verdict', {}).get('pass'):
-        st.success(f"✅ 백테스트 합격 ({_bt.get('factor_ver')} · {_bt.get('period', ['', ''])[0]}~) — "
-                   f"CAGR {_btv['CAGR']}% · MDD {_btv['MDD']}% · SPY {_bt['SPY']['CAGR']}%")
-    elif _btv:
-        st.warning(f"🧪 **백테스트 불합격 — 참고용 후보** ({_bt.get('factor_ver')} · {(_bt.get('period') or ['-'])[0]}~): 이 정의를 그대로 담으면 "
-                   f"CAGR {_btv.get('CAGR')}% · MDD {_btv.get('MDD')}% (SPY {(_bt.get('SPY') or {}).get('CAGR')}%). "
-                   "성적이 나쁜 신호도 지우지 않고 보여줍니다.")
-    else:
-        st.info("🧪 **검증 전 후보입니다.** RS × 이익가속/흑자전환 백테스트(전 종목·상폐 포함)가 끝나면 "
-                "이 자리에 합격/불합격이 표시됩니다. 그 전까지는 '살 종목'이 아니라 '볼 종목' 목록입니다.")
-    st.caption("**RS** = 3개월 40% · 6·9·12개월 각 20% 가중 수익률의 시장 내 백분위(99 = 최상위, 백테스트와 같은 식) · "
-               "**근거** = '이익 가속 중'(매출·영업이익 성장률 동시 가속, 주간 급등 조건 없음, 🇺🇸) 또는 "
-               "'흑자전환'(이번 분기 영업흑자 + 전년 같은 분기 영업적자, 🇰🇷🇺🇸) — 백테스트 rs80_fund 와 같은 정의")
-    if _CMB.empty:
+    _v19 = load_json(Path('results/v19_bt.json')) or {}
+    _plan = load_json(Path('live/plan_latest.json')) or {}
+    _pkr = ((_plan.get('sleeves') or {}).get('KR') or {})
+    _ix = _plan.get('index') or {}
+    if _v19:
+        st.success(f"🟢 **실전 규칙 v1.9 후보** — 백테스트(한국 {_v19.get('start', '')[:7]}~, 상폐 포함·수정주가·비용 0.3%) "
+                   f"연 {_v19['CAGR']:.2f}% · 최대 낙폭 {_v19['MDD']:.2f}% vs 코스피 {_v19['BM_CAGR']:.2f}% · {_v19['BM_MDD']:.2f}%. "
+                   "과거 성적이며 미래를 보장하지 않습니다.")
+    st.caption("**조건(전부)** = 한국 · 시총 1,000억원 이상 · **RS 80 이상**(3개월 40% · 6·9·12개월 각 20% 가중 수익률의 시장 내 백분위) · "
+               "**영업이익 흑자전환**(이번 분기 영업흑자 + 전년 같은 분기 영업적자) · **주봉 종가 > 5주선**. "
+               "**순서** = RS 높은 순, 위 10개가 이번 주 매수 대상. **매수는 소속 지수(코스피/코스닥) 주봉이 5주선 위일 때만.** "
+               "보유 중엔 고점 −20% 손절 · RS 70 아래로 떨어지면 매도 · 첫 매수 50% → +10%·+20%에 25%씩 불타기.")
+    _g = st.columns(3)
+    for _k, _lab, _col in (('KR', '코스피', _g[0]), ('KQ', '코스닥', _g[1])):
+        _x = _ix.get(_k) or {}
+        if _x:
+            _col.metric(f"{_lab} 5주선", '🟢 매수 가능' if _x.get('ok') else '🔴 신규 중지',
+                        f"{_x.get('last', 0):,.2f} vs 5주선 {_x.get('ma200', 0):,.2f} · {_x.get('date', '')}", delta_color='off')
+    if _GMKT == 'US':
+        st.info("v1.9 는 한국 전용입니다(2026-11-04 차니 결정 — 미국 슬리브 중단). 같은 규칙의 미국판은 퀀트 백테스트에서 S&P500(배당 포함)에 못 미쳤습니다.")
+    elif _CMB.empty:
         st.warning("기간 수익률 데이터 없음 — returns.json 갱신(weekly-profile) 후 다시 열어 주세요.")
     else:
-        _acc = {r['sym']: r for r in (_acj.get('acc_now') or [])}
-        _tas = {r['sym']: r for r in (_taj.get('stocks') or []) if r.get('status') == '흑자전환완료'}
-        # 2026-11-01 — 매출 가속은 흑자전환 종목도 잴 수 있다(이익 성장률만 정의되지 않는다). 이익 가속 신호가 없으면 분기 재무에서.
-        _fsn = (load_json(Path('results/fund_snapshot.json')) or {}).get('stocks') or {}
-        _rsmin = st.slider("RS 하한", 50, 95, 80, 5, key="core_rs")
+        _tas = {r['sym'] for r in (_taj.get('stocks') or []) if r.get('status') == '흑자전환완료'}
+        _trend_ok = {c['sym'] for c in (_pkr.get('candidates_top') or [])} | {c['sym'] for c in (_pkr.get('skipped') or [])
+                                                                              if '5주선 아래 — 신규 중지' in str(c.get('why'))}
         _rows = []
-        for sym, r in _CMB[_CMB.RS >= _rsmin].iterrows():
-            _a, _t = _acc.get(sym), _tas.get(sym)
-            if not (_a or _t) or (_GMKT != '전체' and r['시장'] != _GMKT):
+        for sym, r in _CMB[(_CMB.RS >= 80) & (_CMB['시장'] == 'KR')].iterrows():
+            if sym not in _tas or not ((r.get('_mc_local') or 0) >= 1e11):
                 continue
-            _rows.append({'코드': sym, '종목': r['종목'],
-                          '근거': ' + '.join(x for x, y in (('이익 가속 중', _a), ('흑자전환', _t)) if y),
-                          '이익가속(%p)': (_a or {}).get('oia'), '매출가속(%p)': (_a or {}).get('rva') if (_a or {}).get('rva') is not None else (_fsn.get(sym) or {}).get('rev_acc'),
-                          '_n': 2 if (_a and _t) else 1, '_rs': r['RS']})
-        _rows.sort(key=lambda x: (-x['_n'], -x['_rs']))
+            _rows.append({'코드': sym, '종목': r['종목'], '5주선 위': ('예' if sym in _trend_ok else '확인 전'), '_rs': r['RS']})
+        _rows.sort(key=lambda x: -x['_rs'])
+        _ok = [x for x in _rows if x['5주선 위'] == '예']
+        for n_, x in enumerate(_ok, 1):
+            x['이번 주'] = '매수 대상' if n_ <= 10 else '대기'
+        for x in _rows:
+            x.setdefault('이번 주', '추세 미확인')
         _c = st.columns(3)
-        _c[0].metric("교집합 후보", f"{len(_rows):,}종")
-        _c[1].metric("이익 가속 중 (🇺🇸)", f"{len(_acc):,}종" if _acc else "—")
-        _c[2].metric("흑자전환 (🇰🇷🇺🇸)", f"{len(_tas):,}종")
+        _c[0].metric("조건 통과", f"{len(_rows):,}종", "RS 80+ · 흑자전환 · 시총 1,000억+", delta_color='off')
+        _c[1].metric("5주선 위(봇 확인)", f"{len(_ok):,}종", f"계획표 {_plan.get('made', '-')}", delta_color='off')
+        _c[2].metric("이번 주 매수 대상", f"{min(10, len(_ok))}종", '지수 5주선 위일 때만 실제 매수', delta_color='off')
         if _rows:
-            _std_table(pd.DataFrame(_rows), ['근거', '이익가속(%p)', '매출가속(%p)'],
-                       src='leaders_accel.json(이익 가속 중) · turnaround_latest.json(흑자전환)',
+            _std_table(pd.DataFrame(_rows), ['이번 주', '5주선 위'],
+                       src='common_metrics(RS) · turnaround_latest.json(흑자전환) · live/plan_latest.json(5주선·지수)',
                        path='results/returns.json', grid=True,
-                       note="정렬: 근거 2개 → RS 높은 순 · 흑자전환 종목은 전년 같은 분기 영업이익이 적자라 **이익 성장률·이익 가속·영업익YoY 는 "
-                            "정의되지 않아 '-'** (부호가 바뀌면 %가 뜻을 잃음). 매출가속 = 이번 분기 매출 YoY − 직전 분기 매출 YoY")
-            _cand_register(_rows, 'core')
+                       note="'5주선 위'는 토요일 주간 계획표(live/plan.py)가 확인한 값 — 그 뒤 새로 들어온 종목은 '확인 전'. "
+                            "흑자전환 종목은 전년 같은 분기가 적자라 영업익YoY 가 정의되지 않아 '-'.")
         else:
-            st.info("조건을 모두 통과한 종목이 없습니다 — RS 하한을 낮춰 보세요.")
+            st.info("지금 조건을 모두 통과한 종목이 없습니다.")
 
 # ── 📚 지난 연구 (2026-11-01 연구실로 이동 — 원래 교집합 후보 아래 접힌 칸들) ──
 with (t_old or st.empty()), guard('연구실 — 지난 연구'):
@@ -4327,6 +4334,90 @@ def _season_now():
         return pd.DataFrame(), {}
 
 
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _season_kr_lens():
+    """🇰🇷 렌즈 — 같은 4계절 규칙에 주가 축만 코스피(금리·실적·물가는 미국 지표 그대로 — 한국판 월간 지표는 아직 없음)."""
+    import macro_season as _ms
+    L = _ms.load_long()
+    P = pd.read_parquet('data/research/macro_long_px.parquet')
+    L['px'] = P['KOSPI'].dropna()
+    return _ms.history(**L)
+
+
+def _season_why(sn, h):
+    """2026-11-08 차니 "왜 역금융장세가 아니고 왜 실적장세인지 사용자들이 궁금해할 것" — 숫자로 답한다.
+    + 재점검 결과: 우리 정의의 역금융장세는 '주가 하락'을 조건으로 요구해서 교과서(우라가미: 긴축이 시작되고 실적은 아직 좋은 때)보다 늦게 켜진다."""
+    import macro_season as _ms
+    if not sn or h is None or not len(h):
+        return
+    r = h.iloc[-1]
+    st.markdown("##### ❓ 왜 지금 이 계절인가 — 그리고 왜 다음 계절이 아닌가")
+    cur, nxt = SEASONS[sn['phase']], SEASONS[sn['next']]
+    def _ok(b):
+        return '✅' if b else '⬜'
+    _rate = f"Fed 기준금리 6개월 변화 {r['fed6']:+.2f}%p (상승 기준 +0.25%p · 하락 기준 −0.25%p)"
+    _ip = f"산업생산 YoY {r['ipy']:+.2f}% (개선 ≥ +1% · 악화 ≤ −1%) · 삼의 법칙 {r['sahm']:.2f} (≥ 0.5 이면 악화)"
+    _px = f"S&P500 200일선 대비 {r['gap200']:+.2f}% · 12개월 수익 {r['mom12']:+.2f}% (둘 다 + 여야 '상승')"
+    _cpi = f"CPI YoY {r['cpi']:.2f}% · 3개월 변화 {r['cpi3']:+.2f}%p (≥ 3.5%, 또는 ≥ 3.0% & +0.3%p 상승이면 '과열' = 긴축으로 셈)"
+    st.markdown(f"**지금 값** — {_rate}  \n{_ip}  \n{_px}  \n{_cpi}")
+    rows = []
+    for k in _ms.ORDER:
+        cs = sn['conds'][k]
+        rows.append({'계절': f"{SEASONS[k]['emoji']} {SEASONS[k]['name']}",
+                     '충족': f"{sn['n'][k]}/3",
+                     '조건': ' · '.join(f"{_ok(x['ok'])} {x['name']}" for x in cs)})
+    miss = [x['name'] for x in sn['conds'][sn['next']] if not x['ok']]
+    st.markdown(
+        f"- **{cur['emoji']} {cur['name']}인 이유** — 조건 3개({' · '.join(x['name'] for x in sn['conds'][sn['phase']])})가 "
+        f"{sn['since']}부터 충족돼 넘어왔고, 지금도 {sn['n'][sn['phase']]}/3 충족.\n"
+        f"- **{nxt['emoji']} {nxt['name']}으로 안 넘어간 이유** — {sn['next_n']}/3 충족, 남은 조건: **{' · '.join(miss) if miss else '없음(전환 대기)'}**"
+        + (f" — S&P500 이 200일선 아래로 마감하거나 12개월 수익이 마이너스가 되면 충족(지금 200일선 {r['gap200']:+.2f}%). "
+           "그 상태가 **2개월 연속**이면 전환." if '주가 하락' in miss else '.'))
+    # 재점검 — 교과서 정의와의 차이
+    tb_rfin = bool(r['c_tight']) and bool(r['c_not_ip_dn'])
+    st.info(
+        "🔎 **정의 재점검(2026-11-08)** — 우라가미의 역금융장세는 '긴축이 시작되고, 실적은 아직 좋은데, 주가가 금리에 눌려 떨어지는' 국면입니다. "
+        "우리 v2 정의는 여기에 **'주가 하락'(S&P500 200일선 아래 또는 12개월 수익 −)을 확인 조건**으로 걸어, 교과서보다 늦게(주가가 꺾인 뒤에) 켜집니다. "
+        + (f"**주가 조건을 빼면(교과서식) 지금은 이미 🍂 역금융장세 입구**입니다 — 긴축 ✅(물가 과열 {r['cpi']:.2f}%·금리 6개월 {r['fed6']:+.2f}%p) · 실적 견조 ✅. "
+           if tb_rfin else "주가 조건을 빼도(교과서식) 지금은 역금융 조건이 아닙니다. ")
+        + "주가 조건을 두는 이유는 오판을 줄이기 위해서지만(물가만 높고 시장은 오르는 해가 많았음), 그만큼 늦습니다 — 실전 비중은 이 지도가 아니라 지수 5주선이 정합니다.")
+    # 🇰🇷 렌즈
+    try:
+        hk = _season_kr_lens()
+        k0 = hk.iloc[-1]
+        sk = SEASONS[k0['phase']]
+        st.markdown(f"**🇰🇷 한국 렌즈(주가 축만 코스피)** — 지금 **{sk['emoji']} {sk['name']}** ({int(k0['months'])}개월째) · "
+                    f"코스피 200일선 대비 {k0['gap200']:+.2f}% · 12개월 {k0['mom12']:+.2f}% · "
+                    f"다음 {SEASONS[k0['next']]['emoji']} {SEASONS[k0['next']]['name']} 조건 {int(k0['next_n'] or 0)}/3. "
+                    "금리·실적·물가는 아직 미국 지표 — 한국 기준금리·산업생산·CPI 월간 시계열을 붙이면 완전한 한국판이 됩니다.")
+    except Exception as e:
+        st.caption(f"`한국 렌즈 계산 실패: {type(e).__name__}: {e}`")
+
+
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def _macro_score_cached(_h_last):
+    import macro_season as _ms, macro_timing as _mt
+    L = _ms.load_long()
+    return _mt.table(_ms.history(**L), _season_kr_lens())
+
+
+def _macro_scoreboard(h):
+    """2026-11-08 차니 "매크로 지표 활용 매매로 시장을 이기는 수익을 낼 수 있었는지" — 같은 지수를 신호 켜졌을 때만 들고 나머지 현금."""
+    st.markdown("##### 📊 이 탭의 신호로 사고팔았다면 — 시장을 이겼나")
+    T = _macro_score_cached(str(h.index[-1]) if h is not None and len(h) else '')
+    win = T[T['판정'].astype(str).str.startswith('✅')]
+    st.caption("같은 지수를 ① 그냥 들고 있기 ② 신호가 켜졌을 때만 들고 나머지는 현금. 신호 판정은 그 봉 종가, 체결은 다음 봉, 전환마다 비용 0.1%. "
+               "미국 = S&P500 배당 포함 · 현금 = 3개월 국채 / 한국 = 코스피 가격지수 · 현금 이자 0(보수적). "
+               f"**수익과 낙폭을 둘 다 이긴 신호: {', '.join(win['시장'] + ' ' + win['전략']) if len(win) else '없음'}.**")
+    st.dataframe(T[['시장', '전략', '판정', 'CAGR', 'MDD', '보유 대비 수익(%p)', '보유 대비 낙폭(%p)', 'Sharpe', '노출', '전환', '기간']]
+                 .rename(columns={'CAGR': '연 수익(%)', 'MDD': '최대 낙폭(%)', '노출': '주식 보유 기간(%)', '전환': '전환(회)'}),
+                 filters=False, src='macro_long_px(Yahoo: ^SP500TR·^KS11) · FRED TB3MS · macro_timing.py',
+                 asof=str(h.index[-1].date()) if h is not None and len(h) else None)
+    st.caption("읽는 법: 대부분의 신호는 **수익을 조금 내주고 낙폭을 크게 줄입니다**(보험료). 한국은 주봉 5·10주선이 수익도 이겼습니다 — "
+               "실전 v1.9 가 '소속 지수 5주선 아래면 신규 중지'를 쓰는 근거. 4계절은 전환이 적어(수십 번) 표본이 작고, "
+               "전환 시점 정보만 썼지만 정의 자체는 사후에 다듬은 것이라 실제 성적은 이보다 나쁠 수 있습니다.")
+
+
 def _season_card(sn, h):
     import macro_season as _ms
     if not sn:
@@ -4447,6 +4538,10 @@ with tab4, guard('매크로'):
     st.caption("지금 사이클의 어디쯤인가 · 무엇이 바뀌면 다음 계절로 넘어가나. 비중은 맨 위 실전 판정만 정한다.")
     with guard('매크로 · 4계절'):
         _season_card(_SN, _SH)
+    with guard('매크로 · 왜 이 계절인가'):
+        _season_why(_SN, _SH)
+    with guard('매크로 · 신호 성적'):
+        _macro_scoreboard(_SH)
 
     # st.success/st.error 는 '성공/실패' 알림으로 읽히므로 쓰지 않는다.
     # 색 면적도 줄인다 — 큰 색 블록이 나란히 서면 화면이 소리를 지른다.

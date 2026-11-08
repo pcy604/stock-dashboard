@@ -1,0 +1,15 @@
+{
+ "run": "2026-11-08",
+ "rule": "v1.9",
+ "market": "KR",
+ "start": "2018-06-04",
+ "end": "2026-11-02",
+ "CAGR": 20.85,
+ "MDD": -25.38,
+ "BM": "KOSPI",
+ "BM_CAGR": 10.51,
+ "BM_MDD": -38.69,
+ "sells": 359,
+ "win": 26.2,
+ "note": "퀀트 패널(수정주가 kr_adjust) · quant_engine · 주봉 체결 · 비용 0.3%"
+}

@@ -90,7 +90,7 @@ _RE = {'ma': '이평 위로 마감하면', 'confirm': '이평 위 k번 연속 �
 
 @st.cache_resource(show_spinner=False, ttl=3600 * 12)
 def _panel(m):
-    _ver = '2026-11-08 kr_adjust'      # 패널을 새로 빌드하면 이 글자를 바꾼다 — 함수 코드가 바뀌어야 배포 앱의 12시간 캐시가 버려진다
+    _ver = '2026-11-08 us_capfix'      # 패널을 새로 빌드하면 이 글자를 바꾼다 — 함수 코드가 바뀌어야 배포 앱의 12시간 캐시가 버려진다
     loc = f'results/quant_panel_{m}.parquet'
     if os.path.exists(loc):
         df = pd.read_parquet(loc)

@@ -39,7 +39,7 @@ GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
 MIN_ROWS_FOR_FILTER = 3          # 2026-11-01 8→3: 정렬(No. 재번호)을 거의 모든 표에서 쓰게
-API_VERSION = 11          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
+API_VERSION = 12          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -437,6 +437,10 @@ def normalize(df: pd.DataFrame):
     cap = next((c for c in df.columns if str(c).startswith('시총') or '시가총액' in str(c)), None)
     lead = ['No.'] + [c for c in ('종목', '코드', cap) if c is not None and c in df.columns]
     df = df[lead + [c for c in df.columns if c not in lead]]
+    # 2026-11-08 차니 "소수는 둘째 자리까지, 11.350000000000001 같은 무의미한 자릿수 없이" — 실수 열은 값 자체를 둘째 자리로 반올림
+    for c in df.columns:
+        if pd.api.types.is_float_dtype(df[c]):
+            df[c] = df[c].round(2)
     return df, ren, conv
 
 
@@ -751,8 +755,25 @@ def split_note(text: str, limit: int = NOTE_MAX):
     return head, rest
 
 
+# 2026-11-08 차니 — 글 속 숫자도 '11.350000000000001%' 같은 부동소수 자릿수 금지: 소수 셋째 자리 이상 숫자는 둘째 자리로.
+_LONGF = re.compile(r'(?<![\d.])(-?\d+\.\d{3,})(?![\d.])')
+
+
+def clean_num(t):
+    if not isinstance(t, str) or '.' not in t:
+        return t
+    return _LONGF.sub(lambda m: f"{float(m.group(1)):,.2f}".rstrip('0').rstrip('.'), t)
+
+
+def _text_patch(orig):
+    def f(body=None, *a, **kw):
+        return orig(clean_num(body), *a, **kw)
+    return f
+
+
 def _caption_patch(st, orig):
     def caption(body, *a, **kw):
+        body = clean_num(body)
         try:
             if a or set(kw) - {'unsafe_allow_html'} or not isinstance(body, str):
                 return orig(body, *a, **kw)
@@ -1109,5 +1130,7 @@ def install(st):
 
     st.dataframe = dataframe
     st.caption = _caption_patch(st, st._main.caption)
+    for _n in ('markdown', 'warning', 'info', 'success'):          # 2026-11-08 글 속 긴 소수 정리
+        setattr(st, _n, _text_patch(getattr(st._main, _n)))
     st._tbl_patched = True
     st._tbl_ver = API_VERSION
