@@ -14,6 +14,12 @@
   exposure {'base':1.0, 'index':'SPX', 'ma':40, 'below':0.3, 'months':[1..12], 'mode':'scale'|'entry', 'daily':False}
            (요구 1 — 주식 비중; 이평 아래·달력 밖이면 줄임. mode='entry' 면 줄이지 않고 신규·불타기만 막는다 = 실전 규칙.
            daily=True + index_px_daily 주면 ma 를 '일봉 n일선'으로(2026-11-06, '지수 5일선 이탈여부'). 평소엔 '주')
+  cash     {'index':'KOSPI', 'rule':'ma'|'stall', 'n':10, 'unit':'w'|'d', 'level':0.0, 'reentry':..., 'k':2, 'x':2.0, 'hi':52, 'm':10}
+           (2026-11-08 차니 — 지수 신호로 **현금 비중 확대**, 이탈·재진입을 따로 정한다. exposure 와 별개로 곱해진다)
+           rule='ma'    : 지수가 n(주|일)선 아래로 마감하면 주식 비중 × level. 재진입 reentry =
+                          'ma'(n선 위 마감) · 'confirm'(n선 위 k번 연속) · 'rising'(n선 위 + n선 기울기 상승) · 'band'(n선 × (1+x%) 위)
+           rule='stall' : 지수가 hi(주|일) 신고가를 낸 뒤 n(주|일) 동안 새 신고가가 없으면 × level. 재진입 =
+                          'new_high'(다시 hi 신고가) · 'ma'(m선 위 마감)
   entry    {'init':0.5, 'pyramid':[[20,0.25],[40,0.25]]}   (요구 3 — 첫 매수는 목표 비중의 init, +n% 마다 목표의 x 만큼 추가, 목표 = 상한)
   exit     {'stop':15, 'trail':[[0,25],[50,20],[100,15]], 'min_hold':0, 'cooldown':4,
             'signals':[{'type':'ma_break','n':5}, {'type':'rsi_down','n':14,'level':70}, ...],
@@ -258,9 +264,58 @@ def _exit_matrix(P, sig):
     return None                                         # rank_out 은 리밸런싱 때 따로
 
 
+def cash_state(px: pd.Series, c: dict) -> pd.Series:
+    """지수 종가(일 또는 주) → 그 봉 마감 기준 '현금 확대 중' bool. 상태 기계(이탈·재진입이 다른 규칙일 수 있어서).
+    그 봉 종가로 판정 → 엔진은 다음 주 시가에 체결(미래 정보 없음)."""
+    p = px.dropna().astype(float)
+    v = p.values
+    n = max(1, int(c.get('n') or 10))
+    rule, re_ = c.get('rule', 'ma'), c.get('reentry') or ('ma' if c.get('rule', 'ma') == 'ma' else 'new_high')
+    k, x = max(1, int(c.get('k') or 2)), float(c.get('x') or 0.0) / 100
+    ma = p.rolling(n, min_periods=n).mean().values
+    mm = p.rolling(int(c.get('m') or n), min_periods=int(c.get('m') or n)).mean().values
+    hh = p.rolling(int(c.get('hi') or 52), min_periods=int(c.get('hi') or 52)).max().values
+    out = np.zeros(len(v), bool)
+    cash, cnt, last_nh = False, 0, None
+    for i in range(len(v)):
+        if rule == 'stall':
+            nh = np.isfinite(hh[i]) and v[i] >= hh[i] - 1e-12
+            if nh:
+                last_nh = i
+            if not cash:
+                if last_nh is not None and i - last_nh == n:                  # 신고가 뒤 정확히 n봉째 = 정체 확정(한 번만)
+                    cash = True
+            else:
+                if (re_ == 'new_high' and nh) or (re_ == 'ma' and np.isfinite(mm[i]) and v[i] >= mm[i]):
+                    cash = False
+        else:
+            if not np.isfinite(ma[i]):
+                out[i] = cash
+                continue
+            if not cash:
+                if v[i] < ma[i]:
+                    cash, cnt = True, 0
+            else:
+                above = v[i] >= ma[i]
+                cnt = cnt + 1 if above else 0
+                if re_ == 'confirm':
+                    ok_ = cnt >= k
+                elif re_ == 'rising':
+                    ok_ = above and i > 0 and np.isfinite(ma[i - 1]) and ma[i] > ma[i - 1]
+                elif re_ == 'band':
+                    ok_ = v[i] >= ma[i] * (1 + x)
+                else:
+                    ok_ = above
+                if ok_:
+                    cash = False
+        out[i] = cash
+    return pd.Series(out, index=p.index)
+
+
 def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = None, entry_block=None,
-        index_px_daily: pd.Series = None):
-    """반환 dict(equity, bench, exposure, trades(DataFrame), holdings(DataFrame), stats, last_pf)
+        index_px_daily: pd.Series = None, cash_px: pd.Series = None):
+    """cash_px: spec.cash 용 지수 종가(cash.unit='w' 면 주봉, 'd' 면 일봉). 없으면 cash 무시.
+    반환 dict(equity, bench, exposure, trades(DataFrame), holdings(DataFrame), stats, last_pf)
 
     entry_block: (날짜 × 종목) bool 행렬 — True 면 그 주 그 종목은 신규·불타기 금지(보유분은 그대로).
       2026-11-05: 지수 게이트를 '소속 시장'별로(코스피 종목 = 코스피 5주선, 코스닥 종목 = 코스닥 5주선) — 실전 규칙과 같게.
@@ -362,6 +417,17 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
         else:
             below = np.zeros(len(dates), bool)
         expo = np.where(below, expo * float(ex.get('below', 0.0)), expo)
+    cs = S.get('cash') or {}
+    cash_on = np.zeros(len(dates), bool)
+    if cs.get('index') and cash_px is not None and len(cash_px):
+        st_ = cash_state(cash_px, cs)
+        if cs.get('unit', 'w') == 'd':                                 # 일봉 → 그 주 마지막 거래일 판정(다음 주 시가 체결)
+            wk = st_.groupby(st_.index.to_period('W-SUN')).last()
+            wk.index = wk.index.start_time
+            cash_on = wk.reindex(dates).ffill().fillna(False).astype(bool).values
+        else:
+            cash_on = st_.reindex(dates, method='ffill').fillna(False).astype(bool).values
+        expo = np.where(cash_on, expo * float(cs.get('level', 0.0)), expo)
     months = set(ex.get('months') or range(1, 13))
     fri = dates + pd.Timedelta(days=4)
     expo = np.where([m in months for m in fri.month], expo, 0.0)
@@ -463,7 +529,7 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                     pend.append(('sell', j, None, nm)); sold.add(j); break
         tgt_e = expo[t]
         entry_only = ex.get('mode') == 'entry'                       # 2026-11-04: 실전 규칙 — 지수 약세면 신규·불타기만 중지, 보유분은 손절대로
-        if entry_only:
+        if entry_only and not cash_on[t]:                             # cash 신호(현금 확대)는 entry 모드에서도 실제로 덜어낸다
             pass
         elif tgt_e <= 0 and pos:                                       # 노출 0 → 전부 정리
             for j in pos:

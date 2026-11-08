@@ -121,6 +121,13 @@ def _run(m, spec_json):
     ex = spec.get('exposure') or {}
     ixn = ex.get('index') or ''
     bm = _BM[m]
+    _cs = spec.get('cash') or {}
+    _cpx = None
+    if _cs.get('index'):
+        try:
+            _cpx = (_index_daily if _cs.get('unit') == 'd' else _index)(_cs['index'])
+        except Exception:
+            _cpx = None
     note = ''
     if ixn == 'MKT':
         blk = None
@@ -131,16 +138,16 @@ def _run(m, spec_json):
             note = f'{type(e).__name__}'
         if blk is None:      # 패널에 소속 시장이 없거나 코스닥 지수가 없음 → 코스피 하나로(화면에 밝힌다)
             spec['exposure']['index'] = 'KOSPI'
-            r = Q.run(P, spec, index_px=_index('KOSPI'), bench_px=_index(bm))
+            r = Q.run(P, spec, cash_px=_cpx, index_px=_index('KOSPI'), bench_px=_index(bm))
             r['note'] = pre + '⚠️ 소속 시장 자료가 아직 없어 코스닥 종목도 코스피 5주선으로 계산했습니다' + (f' ({note})' if note else '') + \
                         ' — 실전 규칙(소속 시장별)과 다릅니다.'
             return r
         spec['exposure']['index'] = ''
-        r = Q.run(P, spec, bench_px=_index(bm), entry_block=blk)
+        r = Q.run(P, spec, cash_px=_cpx, bench_px=_index(bm), entry_block=blk)
         r['note'] = pre
         return r
     ixd = _index_daily(ixn) if ixn and ex.get('daily') else None
-    r = Q.run(P, spec, index_px=_index(ixn) if ixn else None, bench_px=_index(bm), index_px_daily=ixd)
+    r = Q.run(P, spec, cash_px=_cpx, index_px=_index(ixn) if ixn else None, bench_px=_index(bm), index_px_daily=ixd)
     r['note'] = pre
     return r
 
