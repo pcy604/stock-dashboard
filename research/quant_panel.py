@@ -116,9 +116,10 @@ def kr():
     q["op_yoy"] = np.where(o4 > 0, (q.op_income / o4 - 1) * 100, np.nan)
     q["op_turn"] = ((q.op_income > 0) & (o4 <= 0)).astype(int)
     q["acc"] = kr_acc(q)                       # 2026-11-07: 한국도 이익가속(대시보드 leaders_accel 과 같은 정의)
+    q["oi_g"] = kr_oi_g(q)                     # 2026-11-08: 이익 개선폭(%p of 매출) — 적자 축소·흑자전환·급증
     q["opm"] = (q.ttm_op_income / q.ttm_revenue * 100).where(q.ttm_revenue > 0)
     q["debt"] = (q.liabilities / q.equity * 100).where(q.equity > 0)
-    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn", "acc", "opm", "debt"]].sort_values("known")
+    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn", "acc", "oi_g", "opm", "debt"]].sort_values("known")
     w = w.sort_values("date")
     w = pd.merge_asof(w, q, left_on="date", right_on="known", by="sym", direction="backward")
     w["per"] = (w.marcap / w.ttm_net_income).where(w.ttm_net_income > 0)
@@ -139,6 +140,14 @@ def kr():
 
 KR_MIN_QREV = 1e10     # 분기 매출 100억원 — 이 아래는 이익가속이 발산(미국 $10M 과 같은 취지)
 MAX_OIA = 10.0
+
+
+def kr_oi_g(q: pd.DataFrame) -> pd.Series:
+    """이익 개선폭(%p) = (영업익 − 전년 같은 분기 영업익) ÷ |매출| × 100. 적자 축소·흑자전환·이익 증가가 모두 + 로 같은 자로 잰다
+    (차니 2026-11-08: '적자 대폭 감소 · 이익 폭증 · 흑자전환' 셋 다 이익 개선). 분기 매출 100억원 미만은 빈값."""
+    o4 = q.groupby("sym").op_income.shift(4)
+    rev = q.revenue.where(q.revenue.abs() >= KR_MIN_QREV)
+    return ((q.op_income - o4) / rev.abs() * 100).replace([np.inf, -np.inf], np.nan)
 
 
 def kr_acc(q: pd.DataFrame) -> pd.Series:
