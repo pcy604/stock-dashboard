@@ -220,7 +220,7 @@ def plan():
                 if not gate(c['sym']):
                     bd = '코스닥' if BOARD.get(c['sym']) == 'KQ' else '코스피'
                     skipped.append(dict(sym=c['sym'], name=c['name'], why=f"{bd} {IX[BOARD.get(c['sym'], 'KR')].get('lbl', '200일선')} 아래 — 신규 중지")); continue
-                if c.get('_excluded'):
+                if c.get('_excluded') and not OV:                     # 오버라이드 주간엔 종목별 5주선도 무시(차니: 리스크 관리보다 실행 검증)
                     skipped.append(dict(sym=c['sym'], name=c['name'], why=f"5주선 아래({c.get('gap50')}%) — RS 는 높지만 최근 추세 꺾임")); continue
                 if len(buys) >= free:
                     break
