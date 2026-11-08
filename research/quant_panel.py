@@ -113,6 +113,11 @@ def kr():
                                         mid=("MarketId", "last"), last_day=("Date", "last")).reset_index()
     w = w.rename(columns={"Code": "sym", "week": "date"})
     w = w[w.marcap >= 5e10]
+    # 2026-11-08 정답 점검 — 수정주가가 깨지면 빌드 실패(메가스터디 무상증자·삼성 50:1 분할·에코프로 5:1 분할 주에 −30% 넘는 가짜 폭락이 없어야)
+    for s_, a_, b_ in (("072870", "2018-06-11", "2018-06-18"), ("005930", "2018-04-23", "2018-05-07"), ("086520", "2024-04-15", "2024-04-29")):
+        x_ = w[(w.sym == s_) & (w.date >= pd.Timestamp(a_)) & (w.date <= pd.Timestamp(b_))].sort_values("date")
+        if len(x_) >= 2 and float(x_.close.iloc[-1] / x_.close.iloc[0]) < 0.7:
+            raise SystemExit(f"[KR] 수정주가 정답 점검 실패: {s_} {a_}~{b_} {x_.close.iloc[0]:,.0f} → {x_.close.iloc[-1]:,.0f}")
     # 재무: 공시일 없음 → 분기말 + 45일(4분기 90일)에 알게 된 것으로
     q = pd.read_parquet(os.path.join(ROOT, "data", "kr_fundamentals_q.parquet"))
     q["sym"] = q.sym.astype(str).str.zfill(6)

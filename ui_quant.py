@@ -565,6 +565,32 @@ def _cash_box(m, base, pname):
     return base
 
 
+def _seg(e):
+    e = e.dropna()
+    if len(e) < 20:
+        return None, None
+    yrs = (e.index[-1] - e.index[0]).days / 365.25
+    return (float(e.iloc[-1] / e.iloc[0]) ** (1 / yrs) - 1) * 100 if yrs > 0 else None, float((e / e.cummax() - 1).min()) * 100
+
+
+def _halves(eq, bm, bmn, tsrc):
+    """2026-11-08 — 기간을 반으로 나눠도 이기나(워크포워드 대용). 한쪽 기간에서만 이기면 그 시절 운일 가능성이 크다."""
+    mid = eq.index[len(eq) // 2]
+    rows = []
+    for lab, a_, b_ in (('앞 절반', eq.index[0], mid), ('뒤 절반', mid, eq.index[-1])):
+        sc, sm = _seg(eq.loc[a_:b_])
+        bc, bm_ = _seg(bm.loc[a_:b_]) if bm is not None else (None, None)
+        if sc is None:
+            continue
+        rows.append({'구간': f"{lab} {a_:%Y-%m}~{b_:%Y-%m}", '전략 연 수익(%)': sc, f'{bmn} 연 수익(%)': bc,
+                     '차이(%p)': (sc - bc) if bc is not None else None, '전략 최대 낙폭(%)': sm, f'{bmn} 최대 낙폭(%)': bm_})
+    if len(rows) == 2:
+        both = all((r['차이(%p)'] or 0) > 0 for r in rows)
+        st.markdown(f"**기간 나눠 보기** — {'✅ 두 구간 모두 ' + bmn + ' 보다 높음' if both else '⚠️ 한 구간에서만 이김 — 그 시절 운일 수 있음' if any((r['차이(%p)'] or 0) > 0 for r in rows) else '❌ 두 구간 모두 못 이김'}")
+        tsrc('quant_engine.py (화면에서 계산)', asof=str(eq.index[-1].date()))
+        st.dataframe(pd.DataFrame(rows), filters=False)
+
+
 def _verdict(S, bmn):
     dc, dm = S['CAGR'] - S.get('BM_CAGR', 0), S['MDD'] - S.get('BM_MDD', 0)    # MDD 는 음수 — 클수록(0에 가까울수록) 좋음
     if dc >= 0 and dm >= 0:
@@ -765,6 +791,7 @@ def render(mkt_sel: str, tsrc):
     fig.update_layout(height=360, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=1.08, x=0),
                       yaxis=dict(type='log', title='100에서 시작'), yaxis2=dict(overlaying='y', side='right', range=[0, 300], showgrid=False, title=None))
     st.plotly_chart(fig, use_container_width=True)
+    _halves(eq, bm, bmn, tsrc)
 
     with st.expander('📅 월별·연도별 수익', expanded=True):
         _yearly(eq, bm, bmn, m, tsrc)
