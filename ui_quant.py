@@ -23,7 +23,7 @@ _IDX = {'US': ['SPX', 'NDX'], 'KR': ['MKT', 'KOSPI']}   # 첫 번째 = 기본 �
 KR_FIN_START = '2018-06-01'   # 한국 분기 재무 2017Q1~ → 전년 동분기 비교는 2018Q1(공시 +45일) 부터
 _BM = {'US': 'SPX', 'KR': 'KOSPI'}                        # 비교 지수(게이트와 별개)
 # MKT(2026-11-05) = 소속 시장 지수 — 코스피 종목은 코스피, 코스닥 종목은 코스닥 5주선. 실전 규칙(live/plan.py)과 같다.
-_IDXN = {'SPX': 'S&P500', 'NDX': '나스닥100', 'KOSPI': '코스피', 'MKT': '소속 시장(코스피·코스닥)', '': '없음'}
+_IDXN = {'SPX': 'S&P500', 'NDX': '나스닥100', 'KOSPI': '코스피', 'KOSDAQ': '코스닥', 'MKT': '소속 시장(코스피·코스닥)', '': '없음'}
 # 필드 선택지: '이름 (키)' — :n 이 붙은 것은 n 칸을 쓴다
 _FOPT = [f"{v[0]} ({k.split(':')[0]})" for k, v in Q.FIELDS.items()]
 _FKEY = {f"{v[0]} ({k.split(':')[0]})": k for k, v in Q.FIELDS.items()}
@@ -38,6 +38,23 @@ PRESETS = {
                                      exposure=dict(index='IDX', ma=5, below=0.0, mode='entry'),
                                      exit=dict(stop=0, trail=[[0, 20]], cooldown=2,
                                                signals=[dict(type='field', field='rs', op='<', value=70)])),
+    # 2026-11-08 차니 — 지수 신호 현금 확대(이탈·재진입). 사전 등록 검증(research/cash_gate_check.py): 한국 실전 규칙 기준 96조합 합격 0
+    '실전 규칙 + 지수 10주선 이탈 시 현금 50% (2번 연속 회복 시 복귀)': dict(
+        filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
+                 dict(field='op_turn', op='==', value=1), dict(field='ma_gap:5', op='>', value=0)],
+        rank=dict(field='rs', desc=True), rebalance=1, max_pos=10, max_w=0.30,
+        entry=dict(init=0.5, pyramid=[[10, 0.25], [20, 0.25]]),
+        exposure=dict(index='IDX', ma=5, below=0.0, mode='entry'),
+        exit=dict(stop=0, trail=[[0, 20]], cooldown=2, signals=[dict(type='field', field='rs', op='<', value=70)]),
+        cash=dict(index='IDX', rule='ma', unit='w', n=10, level=0.5, reentry='confirm', k=2)),
+    '실전 규칙 + 지수 신고가 13주 정체 시 현금 50% (신고가 재돌파 시 복귀)': dict(
+        filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
+                 dict(field='op_turn', op='==', value=1), dict(field='ma_gap:5', op='>', value=0)],
+        rank=dict(field='rs', desc=True), rebalance=1, max_pos=10, max_w=0.30,
+        entry=dict(init=0.5, pyramid=[[10, 0.25], [20, 0.25]]),
+        exposure=dict(index='IDX', ma=5, below=0.0, mode='entry'),
+        exit=dict(stop=0, trail=[[0, 20]], cooldown=2, signals=[dict(type='field', field='rs', op='<', value=70)]),
+        cash=dict(index='IDX', rule='stall', unit='w', n=13, hi=52, level=0.5, reentry='new_high')),
     'RS 상위 회전 (모멘텀)': dict(filters=[dict(field='marcap', op='>=', value='LIQ')], rank=dict(field='rs', desc=True)),
     '주도주: RS≥80 × 흑자전환': dict(filters=[dict(field='marcap', op='>=', value='LIQ'), dict(field='rs', op='>=', value=80),
                                             dict(field='op_turn', op='==', value=1)], rank=dict(field='rs', desc=True),
@@ -58,6 +75,9 @@ PRESETS = {
                                               signals=[dict(type='doji_vol', vol_x=2), dict(type='macd_neg')])),
 }
 _LIQ = {'US': 1e9, 'KR': 1e11}
+_CIX = {'KR': ['KOSPI', 'KOSDAQ'], 'US': ['SPX', 'NDX']}          # 현금 확대 신호용 지수(소속 시장 MKT 는 종목별이라 못 씀)
+_RE = {'ma': '이평 위로 마감하면', 'confirm': '이평 위 k번 연속 마감하면', 'rising': '이평 위 + 이평이 오르기 시작하면',
+       'band': '이평 × (1+x%) 위로 마감하면', 'new_high': '지수가 다시 신고가를 내면', 'm_ma': '지수가 m선 위로 마감하면'}
 
 
 @st.cache_resource(show_spinner=False, ttl=3600 * 12)
@@ -156,6 +176,8 @@ def _fill(spec, m):
     s = json.loads(json.dumps(spec))
     if (s.get('exposure') or {}).get('index') == 'IDX':
         s['exposure']['index'] = _IDX[m][0]
+    if (s.get('cash') or {}).get('index') == 'IDX':
+        s['cash']['index'] = _CIX[m][0]
     for f in s.get('filters', []):
         if f.get('value') == 'LIQ':
             f['value'] = _LIQ[m]
@@ -256,6 +278,10 @@ def _nl_box(m):
 
 _DESC = {
     '🟢 지금 실전 규칙 (v1.9 · 교집합 10종목)': 'RS 80↑ × 영업 흑자전환 × 5주선 위, RS 순 최대 10종목 · 첫 매수 50%, +10%·+20%에 25%씩 불타기 · 고점 −20% 손절 · RS 70 아래로 떨어지면 매도(주도주 탈락) · 소속 시장 5주선 아래면 신규 중지 — 토스 실전 시범 v1.9 와 같은 규칙',
+    '실전 규칙 + 지수 10주선 이탈 시 현금 50% (2번 연속 회복 시 복귀)': '실전 규칙 그대로 + 지수(코스피/S&P500) 주봉이 10주선 아래로 마감하면 보유를 절반으로 덜고, '
+        '10주선 위로 2주 연속 마감하면 원래 비중으로 — ⚠️ 사전 등록 검증에서 한국 불합격(낙폭 개선보다 수익 손실이 큼)',
+    '실전 규칙 + 지수 신고가 13주 정체 시 현금 50% (신고가 재돌파 시 복귀)': '실전 규칙 그대로 + 지수가 52주 신고가를 낸 뒤 13주 동안 새 신고가가 없으면 보유를 절반으로, '
+        '다시 신고가를 내면 원래 비중으로 — ⚠️ 사전 등록 검증에서 한국 불합격',
     'RS 상위 회전 (모멘텀)': '최근 많이 오른(RS 높은) 종목을 정기적으로 갈아탐',
     '주도주: RS≥80 × 흑자전환': 'RS 80↑ × 흑자전환, 20주선 이탈·이익 급감 때 매도',
     '저PER 가치 + 이평 위': 'PER 0~12 중 40주선 위 종목, PER 낮은 순',
@@ -443,6 +469,66 @@ def _filter_bar(m, base, pname):
     return base
 
 
+def _cash_box(m, base, pname):
+    """🏦 지수 신호 현금 확대 (2026-11-08 차니) — ① 지수 n일·n주선 이탈 ② 지수 신고가 뒤 n일·n주 정체. 재진입을 따로 고른다."""
+    cs0 = base.get('cash') or {}
+    K = f"qb_cash|{pname}|{m}"
+    with st.container(border=True):
+        on = st.toggle('🏦 지수 신호로 현금 비중 확대', value=bool(cs0.get('index')), key=f'{K}|on',
+                       help='지수가 약해지면 보유 종목을 같은 비율로 덜어 현금을 늘리고, 재진입 조건이 맞으면 원래 비중으로 되돌립니다. '
+                            '(실전 규칙의 "지수 5주선 아래면 신규 중지"와는 별개 — 이건 이미 산 것까지 덜어냄)')
+        if not on:
+            base = json.loads(json.dumps(base)); base.pop('cash', None)
+            return base
+        c = st.columns([1.2, 1, 0.8, 0.8, 1])
+        rule = c[0].radio('이탈 신호', ['ma', 'stall'], index=1 if cs0.get('rule') == 'stall' else 0, horizontal=True, key=f'{K}|rule',
+                          format_func=lambda v: '이평선 이탈' if v == 'ma' else '신고가 정체')
+        ixs = _CIX[m]
+        ix = c[1].selectbox('지수', ixs, index=ixs.index(cs0['index']) if cs0.get('index') in ixs else 0, key=f'{K}|ix', format_func=_IDXN.get)
+        unit = c[2].radio('단위', ['w', 'd'], index=1 if cs0.get('unit') == 'd' else 0, horizontal=True, key=f'{K}|u',
+                          format_func=lambda v: '주' if v == 'w' else '일')
+        u = '주' if unit == 'w' else '일'
+        n = c[3].number_input(f"n({u})", 1, 500, int(cs0.get('n') or (10 if unit == 'w' else 50)), 1, key=f'{K}|n',
+                              help='이평선 이탈: n선 · 신고가 정체: 신고가 뒤 n봉 동안 새 신고가 없음')
+        lv = c[4].number_input('그때 주식 비중(평소 대비 %)', 0, 100, int(round(float(cs0.get('level', 0.5)) * 100)), 5, key=f'{K}|lv',
+                               help='0 = 전부 현금, 50 = 보유를 절반으로')
+        cs = dict(index=ix, rule=rule, unit=unit, n=int(n), level=lv / 100)
+        r = st.columns([1.6, 1, 1])
+        if rule == 'ma':
+            opts = ['ma', 'confirm', 'rising', 'band']
+            re_ = r[0].selectbox('재진입', opts, index=opts.index(cs0.get('reentry')) if cs0.get('reentry') in opts else 0, key=f'{K}|re',
+                                 format_func=lambda v: _RE[v].replace('이평', f'{int(n)}{u}선'))
+            if re_ == 'confirm':
+                cs['k'] = int(r[1].number_input('k(번 연속)', 1, 60, int(cs0.get('k') or 2), 1, key=f'{K}|k'))
+            if re_ == 'band':
+                cs['x'] = float(r[1].number_input('x(%)', 0.0, 30.0, float(cs0.get('x') or 2.0), 0.5, key=f'{K}|x'))
+            txt = f"{_IDXN[ix]} {u}봉이 {int(n)}{u}선 아래로 마감 → 주식 {lv}% · " + _RE[re_].replace('이평', f'{int(n)}{u}선').replace('k번', f"{cs.get('k', 2)}번").replace('x%', f"{cs.get('x', 2)}%") + ' 복귀'
+        else:
+            hi = r[1].number_input(f"신고가 기준({u})", 10, 1000, int(cs0.get('hi') or (52 if unit == 'w' else 252)), 1, key=f'{K}|hi',
+                                   help='며칠(몇 주) 최고가를 신고가로 볼지 — 52주 = 252일')
+            opts = ['new_high', 'ma']
+            re_ = r[0].selectbox('재진입', opts, index=opts.index(cs0.get('reentry')) if cs0.get('reentry') in opts else 0, key=f'{K}|re',
+                                 format_func=lambda v: _RE['new_high'] if v == 'new_high' else _RE['m_ma'].replace('m선', f'm{u}선'))
+            cs['hi'] = int(hi)
+            if re_ == 'ma':
+                cs['m'] = int(r[2].number_input(f"m({u})", 2, 500, int(cs0.get('m') or (10 if unit == 'w' else 50)), 1, key=f'{K}|m'))
+            cs['reentry'] = re_
+            txt = (f"지수({_IDXN[ix]})가 {int(hi)}{u} 신고가를 낸 뒤 {int(n)}{u} 동안 새 신고가 없음 → 주식 {lv}% · "
+                   + ('다시 신고가를 내면' if re_ == 'new_high' else f"{cs.get('m')}{u}선 위로 마감하면") + ' 복귀')
+        cs['reentry'] = re_
+        st.caption('적용: ' + txt + ' · 판정은 그 봉 종가, 체결은 다음 주 시가')
+        try:
+            V = json.load(open('results/cash_gate_check.json', encoding='utf-8'))['markets'].get(m)
+            if V:
+                st.caption(f"🔬 사전 등록 검증({_MK[m]}, 실전 규칙 기준 {len(V['rows'])}조합): 합격 {V['n_pass']}개 "
+                           f"(기준 = 수익 하락 3%p 이내 + 낙폭 5%p 이상 개선 + 이웃 n 절반 합격) — research/cash_gate_check.py")
+        except Exception:
+            pass
+    base = json.loads(json.dumps(base))
+    base['cash'] = cs
+    return base
+
+
 def _verdict(S, bmn):
     dc, dm = S['CAGR'] - S.get('BM_CAGR', 0), S['MDD'] - S.get('BM_MDD', 0)    # MDD 는 음수 — 클수록(0에 가까울수록) 좋음
     if dc >= 0 and dm >= 0:
@@ -591,6 +677,8 @@ def _advanced(m, base, pname):
                 exit=dict(stop=stp, trail=[[float(a), float(b)] for a, b in trl.dropna().values.tolist()], min_hold=int(mh),
                           cooldown=int(cd), signals=sigs, daily=bool(daily_ex)),
                 cost=0.003)
+    if base.get('cash'):
+        spec['cash'] = base['cash']                                    # 🏦 현금 확대는 위 상자에서(고급 표 밖)
     return spec
 
 
@@ -604,6 +692,7 @@ def render(mkt_sel: str, tsrc):
         base = _filter_bar(m, base, pname)
     else:
         st.caption('⚙️ 고급 모드 — 종목 필터는 아래 ② 표에서 고칩니다(상단 필터 바는 숨김).')
+    base = _cash_box(m, base, pname)
     if st.toggle('⚙️ 직접 조합 (고급 — 필터·결합식·불타기·래칫·탈출 신호·말로 쓰기)', key='qb_adv'):
         spec = _advanced(m, base, pname)
     else:
