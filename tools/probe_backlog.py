@@ -96,9 +96,14 @@ def main():
             row['n_periodic'] = len(P)
             row['first_periodic'] = P[-1]['rcept_dt'] if P else None
             deep = s in FOCUS
-            pick = P if deep else P[:2]                   # 주도주 13종은 2018~ 전부, 나머지는 최근 2개
+            # 1차 실행이 40분 제한에 걸림(문서 수백 건) → 주도주 = 최근 2개 + 연 1회 사업보고서(2018~), 나머지 = 최근 1개
+            if deep:
+                yrs = [x for x in P if '사업보고서' in x['report_nm']]
+                pick = P[:2] + [x for x in yrs if x not in P[:2]][:8]
+            else:
+                pick = P[:1]
             hist = []
-            for x in pick[:36]:
+            for x in pick:
                 try:
                     b = backlog_from(doc_text(x['rcept_no']))
                 except Exception as e:
@@ -111,6 +116,9 @@ def main():
         except Exception as e:
             row['err'] = str(e)[:120]
         res.append(row)
+        os.makedirs('data/research', exist_ok=True)
+        json.dump(dict(run=time.strftime('%Y-%m-%d %H:%M'), partial=True, dart=D.health(), rows=res),
+                  open('data/research/probe_backlog.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
         print(s, row.get('name'), row.get('n_periodic'), len(row.get('contracts_2024_', [])), flush=True)
     def ok(h):
         return h.get('section') and h.get('total_raw')
@@ -122,7 +130,7 @@ def main():
         focus_hist_parse_rate={r['sym']: f"{sum(ok(h) for h in r['periodic'])}/{len(r['periodic'])}"
                                for r in res if r['sym'] in FOCUS and r.get('periodic')})
     os.makedirs('data/research', exist_ok=True)
-    json.dump(dict(run=time.strftime('%Y-%m-%d %H:%M'), summary=summ, rows=res),
+    json.dump(dict(run=time.strftime('%Y-%m-%d %H:%M'), summary=summ, dart=D.health(), rows=res),
               open('data/research/probe_backlog.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(json.dumps(summ, ensure_ascii=False, indent=1))
 
