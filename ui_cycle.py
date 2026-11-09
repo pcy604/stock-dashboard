@@ -15,6 +15,9 @@ import cycle_compare as C
 import sym_search as S
 
 _GREEN, _RED = '#16A34A', '#D9363E'
+# 구간별 색(2026-11-10 차니: 구간끼리 구분되게) — 서로 잘 갈리는 12색. 진행 중 구간은 검정 굵은 선, 과거 중앙은 방향색 점선.
+_PAL = ['#2563EB', '#DC2626', '#059669', '#D97706', '#7C3AED', '#DB2777', '#0891B2', '#65A30D',
+        '#EA580C', '#4F46E5', '#0D9488', '#A16207']
 
 
 def _pick_symbol():
@@ -160,35 +163,62 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         else:
             k2.caption(f"과거 완료된 {live['direction']} 구간이 없어 비교할 수 없습니다.")
 
-    # ── 겹쳐 보기 ──
-    cdn, cup = st.columns(2)
-    for col, dirn, color, title in ((cdn, '하락', _RED, '📉 하락 구간 (고점 → 저점)'), (cup, '상승', _GREEN, '📈 상승 구간 (저점 → 고점)')):
-        with col:
-            sub = [s_ for s_ in segs if s_['direction'] == dirn]
-            st.caption(title + f" · {sum(1 for s_ in sub if not s_.get('live'))}회 · " + ('세로 = 시작=100(로그)' if dirn == '상승' else '세로 = 시작 대비 %')
-                       + ' · 가로 = 경과 거래일')
-            if not sub:
-                st.caption('— 없음 —')
-                continue
-            fig = go.Figure()
-            up = dirn == '상승'
-            tf = (lambda v: 100 + v) if up else (lambda v: v)          # 상승은 '시작=100' 로그 축 — 한 번의 초대형 상승이 나머지를 납작하게 누르지 않게
-            for s_ in sub:
-                lv = s_.get('live')
-                fig.add_trace(go.Scatter(x=list(s_['series'].index), y=tf(s_['series'].values),
-                                         name=f"{s_['label']} ({s_['start']}~)", opacity=1 if lv else 0.45,
-                                         line=dict(color='#111827' if lv else color, width=3 if lv else 1.4),
-                                         customdata=s_['series'].values,
-                                         hovertemplate='%{x}일째 %{customdata:+.1f}%<extra>' + s_['label'] + '</extra>'))
+    # ── 낙폭 회차 요약 (2026-11-10 '📉 낙폭 회차' 섹션을 여기로 통합 — 같은 질문(얼마나 자주·깊이·오래)을 한 곳에서) ──
+    downs = [s_ for s_ in segs if s_['direction'] == '하락' and not s_.get('live')]
+    dd_now = float((cl.iloc[-1] / cl.cummax().iloc[-1] - 1) * 100)
+    recs = [s_['recover'] for s_ in downs if s_.get('recover') is not None]
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric(f"{int(x)}%+ 하락", f"{len(downs)}회")
+    m2.metric("평균 낙폭", f"{sum(s_['ret'] for s_ in downs) / len(downs):.1f}%" if downs else '-')
+    m3.metric("최대 낙폭", f"{min(s_['ret'] for s_ in downs):.1f}%" if downs else '-')
+    m4.metric("평균 회복", (f"{sum(recs) / len(recs):.0f}거래일" if recs else ('미회복' if downs else '-')),
+              (f"{len(downs) - len(recs)}회 아직 미회복" if downs and len(recs) < len(downs) else None), delta_color='off',
+              help='저점에서 그 하락이 시작된 고점 가격을 되찾기까지 걸린 거래일')
+    m5.metric("기간 고점 대비 지금", f"{dd_now:.1f}%")
+
+    # ── 구간 그림: 겹쳐 보기(같은 출발점) / 날짜순(MDD 차트) — 2026-11-10 차니 요구: 가로 전체 폭, 종료일 표기, 구간별 색 ──
+    view = st.segmented_control('보기', ['겹쳐 보기 — 같은 출발점', '날짜순 — 낙폭(MDD) 차트'],
+                                default='겹쳐 보기 — 같은 출발점', key=f'{K}|view') or '겹쳐 보기 — 같은 출발점'
+    by_date = view.startswith('날짜순')
+    for dirn, color, title in (('하락', _RED, '📉 하락 구간 (고점 → 저점)'), ('상승', _GREEN, '📈 상승 구간 (저점 → 고점)')):
+        sub = [s_ for s_ in segs if s_['direction'] == dirn]
+        up = dirn == '상승'
+        st.caption(title + f" · {sum(1 for s_ in sub if not s_.get('live'))}회 · "
+                   + ('세로 = 시작=100(로그)' if up else '세로 = 시작 고점 대비 %')
+                   + (' · 가로 = 날짜' if by_date else ' · 가로 = 경과 거래일'))
+        if not sub:
+            st.caption('— 없음 —')
+            continue
+        fig = go.Figure()
+        tf = (lambda v: 100 + v) if up else (lambda v: v)          # 상승은 '시작=100' 로그 축 — 초대형 상승 한 번이 나머지를 납작하게 누르지 않게
+        if by_date and not up:                                      # 바탕 = 기간 전체 낙폭(고점 대비) — 구간 밖 흐름도 보이게
+            ddall = (cl / cl.cummax() - 1) * 100
+            fig.add_trace(go.Scatter(x=ddall.index, y=ddall.values, fill='tozeroy', mode='lines', name='기간 고점 대비',
+                                     line=dict(color='rgba(120,120,120,0.35)', width=0.8), fillcolor='rgba(120,120,120,0.10)',
+                                     hovertemplate='%{x|%Y-%m-%d} 고점 대비 %{y:.1f}%<extra></extra>'))
+        for i, s_ in enumerate(sub):
+            lv = s_.get('live')
+            c_ = '#111827' if lv else _PAL[i % len(_PAL)]
+            nm = f"{s_['label']} ({s_['start']}~{'진행 중' if lv else s_['end']})".replace(' (진행 중) (', ' (')
+            xs = s_['dates'] if by_date else list(s_['series'].index)
+            hov = ('%{x|%Y-%m-%d} ' if by_date else '%{x}일째 ') + '%{customdata:+.1f}%<extra>' + s_['label'] + '</extra>'
+            fig.add_trace(go.Scatter(x=xs, y=tf(s_['series'].values), name=nm, mode='lines',
+                                     line=dict(color=c_, width=3 if lv else 1.6), customdata=s_['series'].values, hovertemplate=hov))
+        if not by_date:
             mp = C.median_path([s_ for s_ in sub if not s_.get('live')])
             if mp is not None and len(mp) > 1:
-                fig.add_trace(go.Scatter(x=list(mp.index), y=tf(mp.values), name='과거 중앙', line=dict(color=color, width=2.2, dash='dot'),
+                fig.add_trace(go.Scatter(x=list(mp.index), y=tf(mp.values), name='과거 중앙', line=dict(color='#6B7280', width=3, dash='dot'),
                                          customdata=mp.values, hovertemplate='%{x}일째 중앙 %{customdata:+.1f}%<extra></extra>'))
-            fig.add_hline(y=100 if up else 0, line=dict(color='#999', width=1, dash='dot'))
-            fig.update_layout(height=320, margin=dict(l=48, r=8, t=8, b=8), legend=dict(orientation='h', y=-0.16, yanchor='top', font=dict(size=10)),
-                              xaxis=dict(title=None), yaxis=(_logaxis(100 + min(float(s_['series'].min()) for s_ in sub), 100 + max(float(s_['series'].max()) for s_ in sub)) if up
-                                                            else dict(title=None, ticksuffix='%')))
-            st.plotly_chart(fig, use_container_width=True)
+        fig.add_hline(y=100 if up else 0, line=dict(color='#999', width=1, dash='dot'))
+        if not up and by_date:
+            fig.add_hline(y=-20, line=dict(color='#7c8290', width=1, dash='dot'), annotation_text='고점 −20% (손절선)',
+                          annotation_position='bottom right')
+        fig.update_layout(height=340, margin=dict(l=52, r=8, t=8, b=8),
+                          legend=dict(orientation='h', y=-0.12, yanchor='top', font=dict(size=10)),
+                          xaxis=dict(title=None),
+                          yaxis=(_logaxis(100 + min(float(s_['series'].min()) for s_ in sub), 100 + max(float(s_['series'].max()) for s_ in sub)) if up
+                                 else dict(title=None, ticksuffix='%')))
+        st.plotly_chart(fig, use_container_width=True)
 
     asof = str(cl.index[-1].date())
     st.markdown("**방향별 통계** (진행 중 구간 제외)")
@@ -200,5 +230,5 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         tsrc(src + ' · cycle_compare.py', asof=asof)
         st.dataframe(C.detail_table(segs), hide_index=True, use_container_width=True, filters=False)
     st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림이 나온 고점·저점(지그재그) — 나중에야 확정되므로 진행 중 구간의 끝은 아직 모릅니다. "
-               "검은 굵은 선 = 지금, 점선 = 과거 완료 구간의 중앙 경로. 표본이 적으면(3회 미만) 우연일 수 있고, "
+               "검은 굵은 선 = 지금, 회색 굵은 점선 = 과거 완료 구간의 중앙 경로. 날짜순 보기의 회색 바탕 = 기간 고점 대비 낙폭(MDD), 점선 = 손절선(고점 −20%). 표본이 적으면(3회 미만) 우연일 수 있고, "
                "같은 종목도 사이클 성격(메모리·파운드리·장비 등)이 바뀌면 직접 비교가 어긋납니다.")

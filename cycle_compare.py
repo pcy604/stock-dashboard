@@ -44,8 +44,15 @@ def build_segment(close: pd.Series, label: str, start, end):
     norm = (seg / base - 1) * 100
     norm.index = pd.RangeIndex(len(norm))           # x = 시작일로부터 경과 거래일
     ret = float(norm.iloc[-1])
+    # 2026-11-10 — dates: 날짜순(MDD 차트) 보기용 실제 날짜 · recover: 하락 구간이 시작 고점을 되찾기까지 거래일(낙폭 회차 통합)
+    rec = None
+    if ret < 0:
+        after = close.loc[close.index > seg.index[-1]]
+        hit = after[after >= base]
+        rec = int(len(after.loc[:hit.index[0]])) if len(hit) else None
     return dict(label=str(label) or '구간', start=seg.index[0].date(), end=seg.index[-1].date(),
-                days=len(seg) - 1, ret=round(ret, 1), direction='상승' if ret >= 0 else '하락', series=norm)
+                days=len(seg) - 1, ret=round(ret, 1), direction='상승' if ret >= 0 else '하락', series=norm,
+                dates=seg.index, recover=rec)
 
 
 def auto_rows(close: pd.Series, months: int, thresh: float) -> pd.DataFrame:
@@ -84,8 +91,11 @@ def summarize(segments: list[dict]) -> pd.DataFrame:
 
 
 def detail_table(segments: list[dict]) -> pd.DataFrame:
-    return pd.DataFrame([{'라벨': s['label'], '시작': s['start'], '종료': s['end'],
-                          '기간(거래일)': s['days'], '수익률(%)': s['ret'], '방향': s['direction'] + (' · 진행 중' if s.get('live') else '')}
+    # 2026-11-10 — 날짜를 문자열로: date 객체는 AgGrid 에서 '[object Object]' 로 보였다(차니 실화면)
+    return pd.DataFrame([{'라벨': s['label'], '시작': str(s['start']), '종료': ('진행 중' if s.get('live') else str(s['end'])),
+                          '기간(거래일)': s['days'], '수익률(%)': s['ret'],
+                          '회복까지(거래일)': (s.get('recover') if s['direction'] == '하락' and not s.get('live') else None),
+                          '방향': s['direction'] + (' · 진행 중' if s.get('live') else '')}
                          for s in segments])
 
 

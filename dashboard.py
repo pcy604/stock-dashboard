@@ -7286,51 +7286,12 @@ def _tab_analysis():
                 _mkt = 'KR' if is_kr_sym else 'US'
                 _cur_u = '원' if is_kr_sym else '$'
 
-                # ── 📉 낙폭 회차 ─────────────────────────────────────────
+                # ── 🔁 사이클 비교 + 낙폭 회차 (2026-11-10 통합 — 낙폭 회차는 사이클 비교 안 요약·날짜순 보기로) ──
                 with _SEC['price']:
-                    st.markdown("#### 📉 낙폭 회차 — 기간 안에서 고점 대비 X% 이상 빠진 횟수")
-                    _dc1, _dc2 = st.columns([2.6, 1.4])
-                    with _dc1:
-                        _dlo, _dhi = _cl.index.min().date(), _cl.index.max().date()
-                        _dstart, _dend = _dpk.period_range("기간", {'6개월': 182, '1년': 365, '2년': 730, '3년': 1095, '5년': 1826, '10년': 3652, '전체': None},
-                                                           key=f"dd_m_{sym8_clean}", lo=_dlo, hi=_dhi, default='1년')
-                    _dd_x = _dc2.slider("하락 기준(%)", 5, 60, 20, 5, key=f"dd_x_{sym8_clean}")
-                    _cl_w = _cl[(_cl.index >= pd.Timestamp(_dstart)) & (_cl.index <= pd.Timestamp(_dend))]
-                    _eps = _sx.drawdown_episodes(_cl_w, 1200, _dd_x)
-                    _dds = _sx.drawdown_series(_cl_w)
-                    _rec = [e['days_to_recover'] for e in _eps if e['days_to_recover'] is not None]
-                    _m1, _m2, _m3, _m4, _m5 = st.columns(5)
-                    _m1.metric("횟수", f"{len(_eps)}회")
-                    _m2.metric("평균 최대낙폭", f"{np.mean([e['depth'] for e in _eps]):.1f}%" if _eps else "-")
-                    _m3.metric("최대 낙폭", f"{min(e['depth'] for e in _eps):.1f}%" if _eps else "-")
-                    _m4.metric("평균 회복", f"{np.mean(_rec):.0f}일" if _rec else ("미회복" if _eps else "-"))
-                    _m5.metric("현재 고점대비", f"{_dds.iloc[-1]:.1f}%" if len(_dds) else "-")
-                    if len(_dds):
-                        _fdd = go.Figure(go.Scatter(x=_dds.index, y=_dds.values, fill='tozeroy', mode='lines',
-                                                    line=dict(color='#a03028', width=1),
-                                                    hovertemplate='%{x|%Y-%m-%d}<br>고점대비 %{y:.1f}%<extra></extra>'))
-                        _fdd.add_hline(y=-_dd_x, line_dash='dot', line_color='#7c8290',
-                                       annotation_text=f'−{_dd_x}%', annotation_position='right')
-                        _fdd.update_layout(height=230, margin=dict(l=8, r=8, t=10, b=8), yaxis_title='고점대비(%)',
-                                           showlegend=False)
-                        st.plotly_chart(_fdd, use_container_width=True)
-                    if _eps:
-                        _tsrc('FinanceDataReader·yfinance(일봉 종가) — 기간 내 고점 기준', live=True)
-                        st.dataframe(pd.DataFrame([{
-                            '고점일': str(e['peak_date'].date()), '저점일': str(e['trough_date'].date()),
-                            '최대낙폭(%)': round(e['depth'], 1),
-                            '고점까지(일)': (e['trough_date'] - e['peak_date']).days,
-                            '회복일': str(e['recover_date'].date()) if e['recover_date'] is not None else '미회복',
-                            '회복기간(일)': e['days_to_recover']} for e in reversed(_eps)]),
-                            filters=False, use_container_width=True)
-                    st.caption(f"한 회차 = 고점에서 {_dd_x}% 이상 빠진 순간부터 **그 고점을 되찾을 때까지**. "
-                               "회복 전의 추가 하락은 같은 회차로 묶는다(따로 세면 횟수가 부풀려진다). "
-                               "기간 시작 시점의 가격을 첫 고점으로 본다. 매매 원칙의 손절선(고점 대비 −20%)이 "
-                               "이 종목에 얼마나 자주 걸렸을지를 보는 용도.")
                     # ── 🔁 사이클 비교 (2026-11-08 연구실 → 여기로 · 고도화) — 검색한 종목 일봉(_cl, 최대 20년) 그대로 ──
                     try:
                         st.divider()
-                        st.markdown("#### 🔁 사이클 비교 — 이번 오르내림은 지난번들과 비교해 어디쯤인가")
+                        st.markdown("#### 🔁 사이클·낙폭 — 얼마나 자주, 깊이, 오래 오르내렸고 지금은 어디쯤인가")
                         import ui_cycle as _uic
                         _uic = _fresh_module(_uic)
                         _uic.render_for(sym8_clean, _cl, _tsrc)
