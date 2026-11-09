@@ -471,6 +471,9 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
     init = float(S['entry'].get('init', 1.0))
     max_w, max_pos = float(S['max_w']), int(S['max_pos'])
     cash, pos, cool, tws = 1.0, {}, {}, {}
+    rent = S['exit'].get('reentry') or {}          # {'k':1.0(%), 'weeks':26} — 스탑 매도가 × (1+k%) 매수 스탑, weeks 안에서만
+    reent = {}
+    sig_rb = S['exit'].get('sig_every') == 'rebalance'   # 탈출 신호를 리밸런싱 주에만 본다(월간 실험)
     pend = []            # (kind, j, frac_of_equity or None, reason) — 다음 주 시가
     eq_s, ex_s, trades = [], [], []
 
@@ -514,9 +517,36 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                         pos[j]['stop'] = px * (1 - float(S['exit']['stop']) / 100)
                 log(t, j, '매수' if kind == 'buy' else '불타기', px, amt / E, why)
         pend = []
+        # ①' 재진입 매수 스탑(2026-11-10): 지난주 이전에 스탑으로 판 종목이 이번 주 고가로 '판 가격 × (1+k%)'를 회복하면
+        #     그 가격(갭 상승이면 시가)에 판 때 비중만큼 다시 산다. 종목 수 상한·냉각·지수 게이트를 무시(=무조건), 현금 한도만.
+        fresh = set()
+        if rent:
+            for j in list(reent):
+                r_ = reent[j]
+                if j in pos or t - r_['t'] > int(rent.get('weeks', 26)):
+                    reent.pop(j); continue
+                if t <= r_['t'] or not np.isfinite(H[t, j]):
+                    continue
+                trig = r_['level'] * (1 + float(rent.get('k', 1.0)) / 100)
+                if H[t, j] >= trig:
+                    px = max(O[t, j], trig) if np.isfinite(O[t, j]) else trig
+                    Ev = val(t - 1)
+                    amt = min(min(r_['w'], max_w) * Ev, cash / (1 + cost))
+                    reent.pop(j)
+                    if amt <= Ev * 1e-4:
+                        continue
+                    cash -= amt * (1 + cost)
+                    pos[j] = dict(u=amt / px, avg=px, entry=px, peak=px, t0=t, adds=r_['adds'], stop=0.0, last=px, tw=r_['tw'],
+                                  iw=amt / Ev / max(expo[t - 1], 1e-9))
+                    if S['exit'].get('stop'):
+                        pos[j]['stop'] = px * (1 - float(S['exit']['stop']) / 100)
+                    fresh.add(j)
+                    log(t, j, '재매수', px, amt / Ev, f"손절가 회복 재진입(+{float(rent.get('k', 1.0)):.0f}%)")
         # ② 주중 스탑(손절·래칫) — 일봉 있으면 날짜별로 고점까지 다시 쫓는다(_daily_walk), 없으면 주봉 근사
         for j in list(pos):
             p = pos[j]
+            if j in fresh:                                           # 이번 주 재진입분은 주중 순서를 몰라 다음 주부터 스탑
+                continue
             closed, dpx = _daily_walk(t, j, p)
             if not closed and dpx is None and p['stop'] and np.isfinite(L[t, j]) and L[t, j] <= p['stop'] and t - p['t0'] >= 0:
                 closed, dpx = True, (min(O[t, j], p['stop']) if np.isfinite(O[t, j]) else p['stop'])
@@ -525,6 +555,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 amt = p['u'] * px; cash += amt * (1 - cost)
                 why = '손절(스탑)' if p['peak'] <= p['entry'] * 1.0001 or not tr_l else '래칫(스탑)'
                 log(t, j, '매도', px, amt / max(val(t), 1e-12), why, px / p['avg'] - 1)
+                if rent:                                             # 2026-11-10 차니: 손절가 회복하면 무조건 다시 산다
+                    reent[j] = dict(level=float(p['stop']), t=t, w=amt / max(val(t), 1e-12), adds=p['adds'], tw=p.get('tw', max_w))
                 pos.pop(j); cool[j] = t + int(S['exit'].get('cooldown', 0))
         # ③ 종가: 고점·래칫 갱신(①이 일봉으로 이미 했으면 여기선 더 큰 값이 없어 그대로 — 안전), 패널 이탈 정리
         for j in list(pos):
@@ -552,6 +584,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
         sold = set()
         for j, p in pos.items():                                     # 청산 신호(요구 5)
             if t - p['t0'] < int(S['exit'].get('min_hold', 0)):
+                continue
+            if sig_rb and (t - t0) % int(S['rebalance']) != 0:
                 continue
             for nm, M, sg in sigs:
                 trig = bool(M[t, j])
