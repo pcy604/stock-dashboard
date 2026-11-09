@@ -81,11 +81,17 @@ class TossReader:
         return f"{what} 실패 HTTP {r.status_code} {hint} · {r.text[:200]}"
 
     def _get(self, path, account=None, params=None, what=""):
+        import requests
         h = {"Authorization": f"Bearer {self.token()}"}
         if account is not None:
             h["X-Tossinvest-Account"] = str(account)
         for attempt in range(3):
-            r = self.s.get(BASE + path, headers=h, params=params, timeout=15)
+            try:                                            # 2026-11-09: 09:10 보유 조회 15초 타임아웃으로 봇 전체가 죽음 → 조회는 30초·3회
+                r = self.s.get(BASE + path, headers=h, params=params, timeout=30)
+            except requests.exceptions.RequestException as e:
+                if attempt < 2:
+                    time.sleep(3 * (attempt + 1)); continue
+                raise TossError(f"{what or path} 응답 없음({type(e).__name__}) — 3회 시도")
             if r.status_code == 429 and attempt < 2:
                 time.sleep(1.2 * (attempt + 1))
                 continue

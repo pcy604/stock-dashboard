@@ -144,3 +144,22 @@ def test_vault_v2_wrap_unwrap(tmp_path):
     with pytest.raises(Exception):
         pf_vault.unwrap(doc, other)                                                    # 다른 키로는 못 연다
     pf_vault._PRIV["k"] = None
+
+
+def test_get_retries_read_timeout_then_raises_tosserror(tmp_path, monkeypatch):
+    # 2026-11-09 실측: 보유 조회 ReadTimeout 이 TossError 가 아니라 봇 전체를 죽였다 → 3회 재시도 후 TossError
+    import requests
+    monkeypatch.setattr("time.sleep", lambda s: None)
+
+    class S(_S):
+        def get(self, url, **k):
+            self.calls.append((url, k))
+            if url.endswith("/api/v1/holdings"):
+                raise requests.exceptions.ReadTimeout("slow")
+            return self._pick(url, **k)
+
+    s = S(_routes())
+    r = TossReader("id", "sec", session=s, token_cache=tmp_path / "tok")
+    with pytest.raises(TossError, match="응답 없음"):
+        r.holdings(7)
+    assert sum(1 for u, _ in s.calls if u.endswith("/api/v1/holdings")) == 3

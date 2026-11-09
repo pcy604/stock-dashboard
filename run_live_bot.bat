@@ -13,4 +13,7 @@ git pull --rebase --autostash origin main
 type live\bot_last.txt >> data\live_bot.log
 rem bot_last.txt = 상시 점검(Claude)이 노트북이 돌았는지 확인하는 흔적
 git add live\bot_last.txt live\ledger.json live\trades.jsonl live\violations.jsonl 2>nul
-git diff --cached --quiet || (git commit -m "auto: 주문 봇 원장 %date%" && git push origin main)
+git diff --cached --quiet || git commit -m "auto: 주문 봇 원장 %date%"
+rem 2026-11-09: CI 자동 커밋이 앞서면 push 가 거부됐다 → 올리기 전에 받고, 실패하면 한 번 더
+git pull --rebase --autostash origin main
+git push origin main || (git pull --rebase --autostash origin main && git push origin main)

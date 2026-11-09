@@ -297,8 +297,8 @@ def run(send=False, phase="reg"):
                     _append(VIOL, dict(day=day, **d_, note="원장과 토스 수량 불일치 — 사람이 직접 매매했거나 미반영 체결"))
                 msg.append("  ⛔ 원장 ≠ 토스 → 이번 실행 중단: " + "; ".join(f"{d_['sym']} 원장 {d_['ledger']} / 토스 {d_['toss']}" for d_ in diff))
                 return _done(msg, send, L, save=False)
-        except TossError as e:
-            msg.append(f"  ⛔ 토스 연결 실패 — {str(e)[:160]}")
+        except Exception as e:                                   # TossError 외 네트워크 예외도 — 죽지 말고 보고하고 끝낸다
+            msg.append(f"  ⛔ 토스 연결 실패 — {type(e).__name__}: {str(e)[:160]}")
             if live:
                 return _done(msg, send, L, save=False)
             T = None
