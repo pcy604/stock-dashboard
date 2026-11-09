@@ -473,6 +473,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
     cash, pos, cool, tws = 1.0, {}, {}, {}
     rent = S['exit'].get('reentry') or {}          # {'k':1.0(%), 'weeks':26} — 스탑 매도가 × (1+k%) 매수 스탑, weeks 안에서만
     reent = {}
+    rsig = S['exit'].get('reentry_signal') or {}   # {'weeks':26} — 스탑으로 판 종목이 W주 안에 신호가 다시 뜨면 신규 후보보다 먼저 산다
+    rsig_t = {}
     sig_rb = S['exit'].get('sig_every') == 'rebalance'   # 탈출 신호를 리밸런싱 주에만 본다(월간 실험)
     pend = []            # (kind, j, frac_of_equity or None, reason) — 다음 주 시가
     eq_s, ex_s, trades = [], [], []
@@ -555,6 +557,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 amt = p['u'] * px; cash += amt * (1 - cost)
                 why = '손절(스탑)' if p['peak'] <= p['entry'] * 1.0001 or not tr_l else '래칫(스탑)'
                 log(t, j, '매도', px, amt / max(val(t), 1e-12), why, px / p['avg'] - 1)
+                if rsig:
+                    rsig_t[j] = t                                     # 신호 재진입 우선권(2026-11-10)
                 if rent:                                             # 2026-11-10 차니: 손절가 회복하면 무조건 다시 산다
                     reent[j] = dict(level=float(p['stop']), t=t, w=amt / max(val(t), 1e-12), adds=p['adds'], tw=p.get('tw', max_w))
                 pos.pop(j); cool[j] = t + int(S['exit'].get('cooldown', 0))
@@ -648,6 +652,10 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 if want > 0.2 * p['iw'] * tgt_e:
                     pend.append(('add', j, want, '노출 복원'))
             free = max_pos - (len(pos) - len(sold))
+            if rsig:
+                W_ = int(rsig.get('weeks', 26))
+                pri = [j for j in order if j in rsig_t and t - rsig_t[j] <= W_]
+                order = np.array(pri + [j for j in order if not (j in rsig_t and t - rsig_t[j] <= W_)], dtype=int) if len(pri) else order
             new = [j for j in order if j not in pos and cool.get(j, -1) <= t
                    and not (entry_block is not None and entry_block[t, j])][:max(0, free)]
             if S.get('max_new'):
