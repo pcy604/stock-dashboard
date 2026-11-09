@@ -5869,7 +5869,7 @@ def _an_v2_fill(L: dict):
             col = '_업종full' if '_업종full' in _CMB.columns else '업종'
             fam = {k: list(v.index.astype(str)) for k, v in _CMB.groupby(col)} if not _CMB.empty else {}
             glabel = str(_CMB.loc[sym, col]) if (not _CMB.empty and sym in _CMB.index) else None
-        gh = A2.group_heat(_CMB, fam, market=mkt)
+        gh = A2.group_heat(_CMB, fam, market=mkt, min_n=5)        # 3~4종 무리는 자기 자신이 중앙값을 좌우한다(000660 '반도체 대표주' 3종 실화면)
         grow = gh[gh['group'] == glabel] if glabel is not None and len(gh) else gh.iloc[0:0]
         gpct = float(grow['pct'].iloc[0]) if len(grow) else None
         vr = A2.volume_ratio(hist.get('Volume'))
@@ -5877,7 +5877,7 @@ def _an_v2_fill(L: dict):
         cards = [
             C('업종 온도 (같은 무리 RS 중앙값 순위)',
               (f"{glabel} · {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위" if len(grow) else (glabel or '업종 미상')),
-              (f"무리 RS 중앙 {grow['med_rs'].iloc[0]:.0f} · 상위 {gpct:.0f}% · {int(grow['n'].iloc[0])}종" if len(grow) else '비교할 무리가 3종 미만이거나 분류 없음'),
+              (f"무리 RS 중앙 {grow['med_rs'].iloc[0]:.0f} · 상위 {gpct:.0f}% · {int(grow['n'].iloc[0])}종" if len(grow) else '무리가 5종 미만이거나 분류 없음 — 아래 \'비교할 무리\'를 넓혀 보세요'),
               'na' if gpct is None else ('good' if gpct <= 30 else 'bad' if gpct >= 70 else 'mid')),
             C('종목 강도 (RS · 52주 고점)',
               (f"RS {rs:.0f}" if rs is not None else 'RS -') + (f" · 고점 대비 {h['dd']:+.1f}%" if h else ''),
@@ -5919,6 +5919,9 @@ def _an_v2_fill(L: dict):
                  C('사이클 위치 (자기 이익률 분포)', cyc['value'], cyc['sub'], cyc['tone']),
                  C('지금까지 (최근 분기 YoY)', past_val, f"{state or '-'} · 사이클 기업은 바닥에서 이 숫자가 가장 나쁘다", past_tone)]
         res['펀더멘털'] = fwd['tone'] if fwd['tone'] != 'na' else (cyc['tone'] if cyc.get('cyclical') else past_tone)
+        # 사이클 기업이 자기 이익률 분포의 천장권(80 백분위+)이면 '개선'이라 말하지 않는다 — 린치: 최대 이익·최저 P/E 에서 사면 반토막
+        if cyc.get('cyclical') and (cyc.get('pct') or 0) >= 80 and res['펀더멘털'] == 'good':
+            res['펀더멘털'], res['_cyc_peak'] = 'mid', True
         if '펀더멘털' in L['_AXH']:
             L['_AXH']['펀더멘털'].markdown(_an_cards(cards), unsafe_allow_html=True)
     except Exception as e:
@@ -5991,6 +5994,8 @@ def _an_v2_fill(L: dict):
     # ── 결론 (항상) ──
     try:
         fw = {'good': '좋아지는 회사', 'mid': '실적 신호가 엇갈림', 'bad': '나빠지는 회사', 'na': '실적 판단 불가'}[res.get('펀더멘털', 'na')]
+        if res.get('_cyc_peak'):
+            fw = '이익은 사이클 천장권(주의)'
         fl = {'good': '시장이 주목 중', 'mid': '시장 관심은 부분적', 'bad': '지금은 시장이 외면', 'na': '수급 판단 불가'}[res.get('수급', 'na')]
         cards = [C('🌊 수급·관심', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[res.get('수급', 'na')], fl, res.get('수급', 'na')),
                  C('🏭 펀더멘털 (앞으로 우선)', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[res.get('펀더멘털', 'na')], fw, res.get('펀더멘털', 'na')),
@@ -7839,7 +7844,7 @@ def _tab_analysis():
                             pass
                         _segs_ = _L.get('_segs') or []
                         _risk = _ac.risk_checks(
-                            price=float(price_now), high52=float(hist['High'].tail(252).max()),
+                            price=float(price_now), high52=float(hist['Close'].tail(252).max()),   # 2026-11-10 종가 기준 통일
                             band_rank=(_L.get('_bm') or {}).get('rank'), band_kind=(_L.get('_bm') or {}).get('kind', 'P/E'),
                             band_now=(_L.get('_bm') or {}).get('now'),
                             ttm_net_income=_vb_.get('ttm_net_income'),
