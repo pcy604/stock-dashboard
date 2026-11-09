@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-02",
+ "generated": "2026-11-09",
  "rule": "미국 규칙⑥ 원문 이식 — RS13>1.5 AND (흑자전환 OR 이익폭증) AND OPM>0, 시총 2.8조↑·거래대금 70억↑ · 고점대비 -30% 트레일링 · 재진입 허용",
  "params": {
   "rs_min": 1.5,
@@ -8,7 +8,7 @@
   "adv_min_eok": 70,
   "fx": 1400.0
  },
- "period": "2018-06-01 ~ 2026-11-02",
+ "period": "2018-06-01 ~ 2026-11-09",
  "backtest": {
   "trail20": {
    "US그대로": {
@@ -63,139 +63,91 @@
    }
   }
  },
- "n": 11,
+ "n": 7,
  "candidates": [
   {
-   "sym": "031980",
-   "name": "피에스케이홀딩스",
-   "entry_date": "2026-09-07",
-   "entry_px": 156000.0,
-   "close": 177800.0,
-   "ret": 14.0,
-   "stop": 154000.0,
-   "adv_eok": 429,
-   "marcap_jo": 3.83,
-   "days": 56
-  },
-  {
-   "sym": "000500",
-   "name": "가온전선",
-   "entry_date": "2026-11-02",
-   "entry_px": 238000.0,
-   "close": 238000.0,
-   "ret": 0.0,
-   "stop": 166600.0,
-   "adv_eok": 439,
-   "marcap_jo": 7.09,
-   "days": 0
-  },
-  {
-   "sym": "096770",
-   "name": "SK이노베이션",
-   "entry_date": "2026-09-02",
-   "entry_px": 131500.0,
-   "close": 130100.0,
-   "ret": -1.1,
-   "stop": 114730.0,
-   "adv_eok": 1218,
-   "marcap_jo": 21.99,
-   "days": 61
+   "sym": "018260",
+   "name": "삼성에스디에스",
+   "entry_date": "2026-09-28",
+   "entry_px": 218000.0,
+   "close": 221500.0,
+   "ret": 1.6,
+   "stop": 156450.0,
+   "adv_eok": 425,
+   "marcap_jo": 17.14,
+   "days": 42
   },
   {
    "sym": "021240",
    "name": "코웨이",
    "entry_date": "2026-09-16",
    "entry_px": 107600.0,
-   "close": 105400.0,
-   "ret": -2.0,
-   "stop": 76580.0,
-   "adv_eok": 187,
-   "marcap_jo": 7.46,
-   "days": 47
+   "close": 104500.0,
+   "ret": -2.9,
+   "stop": 77840.0,
+   "adv_eok": 190,
+   "marcap_jo": 7.4,
+   "days": 54
   },
   {
-   "sym": "028670",
-   "name": "팬오션",
-   "entry_date": "2026-09-03",
-   "entry_px": 5940.0,
-   "close": 5780.0,
-   "ret": -2.7,
-   "stop": 5061.0,
-   "adv_eok": 359,
-   "marcap_jo": 3.09,
-   "days": 60
-  },
-  {
-   "sym": "180640",
-   "name": "한진칼",
-   "entry_date": "2026-08-31",
-   "entry_px": 133000.0,
-   "close": 126600.0,
-   "ret": -4.8,
-   "stop": 104230.0,
-   "adv_eok": 77,
-   "marcap_jo": 8.45,
-   "days": 63
-  },
-  {
-   "sym": "018260",
-   "name": "삼성에스디에스",
-   "entry_date": "2026-09-28",
-   "entry_px": 218000.0,
-   "close": 205500.0,
-   "ret": -5.7,
-   "stop": 156450.0,
-   "adv_eok": 406,
-   "marcap_jo": 15.9,
-   "days": 35
-  },
-  {
-   "sym": "006400",
-   "name": "삼성SDI",
-   "entry_date": "2026-10-08",
-   "entry_px": 567000.0,
-   "close": 533000.0,
-   "ret": -6.0,
-   "stop": 417200.0,
-   "adv_eok": 3426,
-   "marcap_jo": 42.95,
-   "days": 25
+   "sym": "222800",
+   "name": "심텍",
+   "entry_date": "2026-11-03",
+   "entry_px": 118100.0,
+   "close": 101400.0,
+   "ret": -14.1,
+   "stop": 87430.0,
+   "adv_eok": 1140,
+   "marcap_jo": 3.96,
+   "days": 6
   },
   {
    "sym": "047050",
    "name": "포스코인터내셔널",
    "entry_date": "2026-09-28",
    "entry_px": 56900.0,
-   "close": 51050.0,
-   "ret": -10.3,
+   "close": 48150.0,
+   "ret": -15.4,
    "stop": 40810.0,
-   "adv_eok": 198,
-   "marcap_jo": 8.98,
-   "days": 35
+   "adv_eok": 181,
+   "marcap_jo": 8.47,
+   "days": 42
   },
   {
    "sym": "004020",
    "name": "현대제철",
    "entry_date": "2026-09-21",
    "entry_px": 35400.0,
-   "close": 28650.0,
-   "ret": -19.1,
+   "close": 28450.0,
+   "ret": -19.6,
    "stop": 24920.0,
-   "adv_eok": 124,
-   "marcap_jo": 3.82,
-   "days": 42
+   "adv_eok": 113,
+   "marcap_jo": 3.8,
+   "days": 49
   },
   {
-   "sym": "353200",
-   "name": "대덕전자",
+   "sym": "006400",
+   "name": "삼성SDI",
    "entry_date": "2026-10-08",
-   "entry_px": 157600.0,
-   "close": 117000.0,
+   "entry_px": 567000.0,
+   "close": 431000.0,
+   "ret": -24.0,
+   "stop": 417200.0,
+   "adv_eok": 3942,
+   "marcap_jo": 34.73,
+   "days": 32
+  },
+  {
+   "sym": "000500",
+   "name": "가온전선",
+   "entry_date": "2026-11-02",
+   "entry_px": 241500.0,
+   "close": 179200.0,
    "ret": -25.8,
-   "stop": 110320.0,
-   "adv_eok": 1523,
-   "marcap_jo": 5.78,
-   "days": 25
+   "stop": 170800.0,
+   "adv_eok": 344,
+   "marcap_jo": 5.34,
+   "days": 7
   }
  ],
  "caveats": [
