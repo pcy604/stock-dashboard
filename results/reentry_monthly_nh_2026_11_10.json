@@ -1,0 +1,197 @@
+{
+ "run": "2026-11-09 21:10",
+ "v19": {
+  "train": {
+   "cagr": 15.0,
+   "mdd": -21.9,
+   "calmar": 0.685,
+   "n": 454
+  },
+  "test": {
+   "cagr": 24.91,
+   "mdd": -24.84,
+   "calmar": 1.003,
+   "n": 578
+  },
+  "full": {
+   "cagr": 20.85,
+   "mdd": -25.38,
+   "calmar": 0.821,
+   "n": 1027
+  },
+  "winners": {
+   "bought": 23,
+   "net_loss": 12
+  }
+ },
+ "tests": {
+  "A_재진입": {
+   "main": {
+    "train": {
+     "cagr": 6.72,
+     "mdd": -38.91,
+     "calmar": 0.173,
+     "n": 581
+    },
+    "test": {
+     "cagr": 20.86,
+     "mdd": -39.78,
+     "calmar": 0.524,
+     "n": 744
+    },
+    "full": {
+     "cagr": 19.07,
+     "mdd": -39.47,
+     "calmar": 0.483,
+     "n": 1332
+    },
+    "winners": {
+     "bought": 15,
+     "net_loss": 5
+    }
+   },
+   "neighbors": {
+    "k0": {
+     "cagr": 8.2,
+     "mdd": -46.55,
+     "calmar": 0.176,
+     "n": 1344
+    },
+    "k2": {
+     "cagr": 20.69,
+     "mdd": -41.91,
+     "calmar": 0.494,
+     "n": 1306
+    },
+    "w13": {
+     "cagr": 18.57,
+     "mdd": -38.92,
+     "calmar": 0.477,
+     "n": 1307
+    },
+    "w52": {
+     "cagr": 17.86,
+     "mdd": -39.9,
+     "calmar": 0.448,
+     "n": 1342
+    }
+   },
+   "neighbors_calmar_median": 0.4625,
+   "checks": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": true,
+    "passed": false
+   }
+  },
+  "B_월간": {
+   "main": {
+    "train": {
+     "cagr": 13.94,
+     "mdd": -18.56,
+     "calmar": 0.751,
+     "n": 388
+    },
+    "test": {
+     "cagr": 14.03,
+     "mdd": -29.12,
+     "calmar": 0.482,
+     "n": 451
+    },
+    "full": {
+     "cagr": 19.24,
+     "mdd": -25.55,
+     "calmar": 0.753,
+     "n": 816
+    },
+    "winners": {
+     "bought": 20,
+     "net_loss": 12
+    }
+   },
+   "neighbors": {
+    "rb2": {
+     "cagr": 14.15,
+     "mdd": -35.39,
+     "calmar": 0.4,
+     "n": 966
+    },
+    "rb3": {
+     "cagr": 18.42,
+     "mdd": -41.13,
+     "calmar": 0.448,
+     "n": 877
+    },
+    "rb4_신호도4주": {
+     "cagr": 18.25,
+     "mdd": -25.54,
+     "calmar": 0.715,
+     "n": 813
+    }
+   },
+   "neighbors_calmar_median": 0.448,
+   "checks": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": true,
+    "passed": false
+   }
+  },
+  "C_52주신고가": {
+   "main": {
+    "train": {
+     "cagr": 23.01,
+     "mdd": -18.53,
+     "calmar": 1.241,
+     "n": 365
+    },
+    "test": {
+     "cagr": 26.35,
+     "mdd": -27.44,
+     "calmar": 0.96,
+     "n": 463
+    },
+    "full": {
+     "cagr": 27.93,
+     "mdd": -28.6,
+     "calmar": 0.977,
+     "n": 814
+    },
+    "winners": {
+     "bought": 20,
+     "net_loss": 9
+    }
+   },
+   "neighbors": {
+    "nh26": {
+     "cagr": 23.03,
+     "mdd": -35.96,
+     "calmar": 0.64,
+     "n": 875
+    },
+    "nh39": {
+     "cagr": 25.95,
+     "mdd": -31.56,
+     "calmar": 0.822,
+     "n": 860
+    },
+    "hi5": {
+     "cagr": 20.96,
+     "mdd": -23.15,
+     "calmar": 0.905,
+     "n": 613
+    }
+   },
+   "neighbors_calmar_median": 0.822,
+   "checks": {
+    "c1": false,
+    "c2": false,
+    "c3": true,
+    "c4": true,
+    "passed": false
+   }
+  }
+ }
+}
