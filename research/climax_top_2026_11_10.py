@@ -56,7 +56,7 @@ def run(sig, win):
 
 
 def sig(rule, x, action, mg=20, x2=10):
-    return dict(type='climax', rule=rule, x=x, action=action, min_gain=mg, x2=x2)
+    return dict(type='climax', rule=str(rule), x=float(x), action=str(action), min_gain=float(mg), x2=float(x2))
 
 
 def event_study(P, rule, x):

@@ -57,6 +57,62 @@ def _when(r):
 
 
 
+def _lessons(r, m):
+    """2026-11-10 차니 "여기서 무슨 인사이트를 도출한 건지 모르겠다" → 표 위에 '그래서 무엇을 배웠고 전략에 어떻게 쓰나'.
+    숫자는 전부 결과 JSON 에서 — 재계산되면 문장도 따라 바뀐다."""
+    F = {f['feat']: f for f in r.get('features') or []}
+    C = r.get('combos') or []
+    h = r.get('hold') or {}
+    bo = h.get('breakout') or {}
+    base = r.get('base_p2x')
+    lines = []
+    top = sorted(F.values(), key=lambda f: -f['lift'])[:2]
+    v19 = next((c for c in C if '흑자전환' in c['feat'] and 'RS 80' in c['feat']), None)
+    if top:
+        t = ' · '.join(f"{f['feat']}(×{f['lift']:.1f})" for f in top)
+        s1 = f"**무엇을 — ** 평소 아무 종목이 1년 안에 2배 될 확률 {base}%. 가장 잘 가려낸 특징은 {t}."
+        if v19:
+            s1 += (f" 실전 v1.9 의 재료 **흑자전환 + RS 80** 을 같이 가지면 {v19['p2x']:.1f}%(×{v19['lift']:.1f}) — "
+                   f"방향은 맞다. 단 그래도 {100 - v19['p2x']:.0f}%는 2배가 안 된다 → 한 종목에 걸지 말고 여러 장 + 손절.")
+        lo = F.get('52주 고점 -40% 이하')
+        if lo:
+            s1 += (f" '많이 빠진 종목(52주 고점 −40% 이하)'은 ×{lo['lift']:.2f} — "
+                   + ("바닥 줍기는 한국에선 오히려 불리." if lo['lift'] < 1 else "미국에선 반등 후보로 의미 있음(단 RS 80 과 같이일 때)."))
+        lines.append(s1)
+    if bo.get('left_median') is not None:
+        lines.append(f"**언제 — ** 저점은 지나고서야 안다. 저점 대비 이미 +{bo['low_to_bo_median']:.0f}% 오른 **52주 신고가 돌파 주**에 사도 "
+                     f"전체 상승의 {bo['left_median']:.0f}%가 남아 있었다 → 바닥을 맞히려 하지 말고 '강해진 걸 확인하고' 산다 "
+                     f"(v1.9 의 RS 80·5주선 위 = 돌파 쪽 매수, 그대로 유지).")
+    Mc = {x['regime']: x for x in r.get('macro') or []}
+    ix = Mc.get('한국 시총합 40주선 위') if m == 'KR' else Mc.get('SPY 40주선 위')
+    vx = Mc.get('VIX 25 이상')
+    if ix and ix.get('at_breakout') is not None:
+        lines.append(f"**시장 — ** 저점(점화)은 공포 속에서(VIX 25 이상 주 {vx['at_ignition']:.0f}% vs 평소 {vx['all_weeks']:.0f}%), "
+                     f"돌파는 시장이 살아난 뒤에(지수 40주선 위 {ix['at_breakout']:.0f}% vs 저점 때 {ix['at_ignition']:.0f}%) 왔다 "
+                     f"→ '지수가 선 아래면 신규 중지'(v1.9 지수 게이트)는 대박주를 놓치는 규칙이 아니다." if vx else
+                     f"**시장 — ** 돌파는 지수 40주선 위에서 {ix['at_breakout']:.0f}% → 지수 게이트는 대박주를 놓치는 규칙이 아니다.")
+    so = (h.get('stopped_out') or {}).get('20')
+    if so is not None:
+        lines.append(f"**보유 — ** 대박주도 가는 길에 중앙 {h['run_dd']['median']:.0f}% 빠졌고, 고점 −20% 손절이면 {so:.0f}%가 중간에 털렸다. "
+                     "그런데 포트폴리오 전체로는 −20% 가 −25·30% 보다 낫다(11-08 최적 조건 탐색, 두 구간 공통) — 손절은 대박주를 '끝까지 쥐는' "
+                     "규칙이 아니라 실패작을 빨리 버리는 규칙이다.")
+        try:
+            cp = json.load(open('results/winners_v19_capture.json', encoding='utf-8')) if m == 'KR' else None
+        except Exception:
+            cp = None
+        if cp:
+            lines.append(f"**실전 규칙은 대박주를 탔나 — ** 같은 5년 한국 대박주 {cp['winners']}종 중 v1.9 가 산 건 {cp['bought']}종, "
+                         f"그중 {cp['stopped']}종이 손절·래칫으로 털렸고 다시 산 건 {cp['rebought']}종, 매도 수익을 이어 곱해 손해로 끝난 게 "
+                         f"{cp['net_loss']}종이다. → **v1.9 는 대박주를 '찾기'는 하지만 '타지'는 못한다.** 수익은 대박주 몇 개를 끝까지 쥐어서가 아니라 "
+                         "여러 종목을 짧게 갈아타며 난다. 대박주를 더 오래 타려면 손절 '폭'이 아니라 **재진입 규칙**(신고가 재돌파 시 재매수 등)을 "
+                         "사전 등록으로 검증해야 한다(10-31 래칫 실험: 신고가 재진입이 승자 ×0.8 → ×2.0~2.7 회복).")
+    lines.append("**한계 — ** 같은 5년을 보고 고른 특징이라 가설입니다. 규칙 변경은 반드시 사전 등록 백테스트를 거칩니다.")
+    with st.container(border=True):
+        st.markdown("##### 🧭 그래서 무엇을 배웠나 — 전략에 쓰는 결론")
+        for x in lines:
+            st.markdown(f"- {x}")
+
+
 _TS = [None]
 
 
@@ -92,6 +148,8 @@ def render(mkt_sel: str, tsrc, name_of=None):
                 delta_color='off', help='저점→고점 상승(로그) 중 52주 신고가 돌파 주 이후에 남아 있던 몫의 중앙값. 저점은 지나야 알지만 돌파는 그 주에 안다')
     k[3].metric("고점 −20% 손절에 털림", f"{h['stopped_out']['20']:.0f}%", f"상승 도중 최대 낙폭 중앙 {h['run_dd']['median']:.0f}%",
                 delta_color='off', help='점화→고점 사이 고점 대비 −20% 를 한 번이라도 찍고, 그 뒤 더 오른 승자 비율')
+
+    _lessons(r, m)
 
     # 2026-11-08 차니 "탭 없이 드러내자" — 서브탭 4개 → 한 화면에 질문 순서대로
     t1 = t2 = t3 = t4 = st.container()
