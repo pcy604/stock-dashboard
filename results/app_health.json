@@ -1,37 +1,63 @@
 {
- "at": "2026-11-08T18:19:37Z",
+ "at": "2026-11-09T01:40:33Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
    "page": "배포 빌드 = main",
-   "ok": false,
-   "deployed": null,
-   "why": "화면에 배포 빌드 표시가 없다"
+   "ok": true,
+   "deployed": {
+    "sha": "3fa7bd4b8a6a",
+    "ts": 1794171600,
+    "at": "2026-11-08 21:00"
+   },
+   "why": "최신 main 과 같다",
+   "behind": 0,
+   "lag_min": 0
   },
   {
    "page": "🏠 종합",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🏠 종합\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 4838,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🌍 매크로",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🌍 매크로\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 6958,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🔎 종목 발굴",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔎 종목 발굴\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 2110,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🔍 종목 분석",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🔍 종목 분석\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 915,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "🛡️ 내 포트폴리오",
-   "ok": false,
-   "error": "탭 열기 실패: Locator.click: Timeout 20000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"tab\", name=\"🛡️ 내 포트폴리오\").first\n"
+   "ok": true,
+   "exceptions": 0,
+   "error_words": [],
+   "text_len": 928,
+   "samples": [],
+   "finished": true
   },
   {
    "page": "종목 분석 ?sym=TSLA",
@@ -47,10 +73,10 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 14625,
+   "text_len": 14626,
    "samples": [],
    "finished": true
   }
  ],
- "ok": false
+ "ok": true
 }
