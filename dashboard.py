@@ -414,6 +414,8 @@ h3 { font-size: 16px !important; font-weight: 700 !important; }
 .mo-kpi.mid  { border-left-color: #F59E0B; } .mo-kpi.mid .v  { color: var(--warn); }
 .mo-kpi.bad  { border-left-color: #DC2626; } .mo-kpi.bad .v  { color: var(--neg); }
 .mo-kpi.na   { border-left-color: #D1D5DB; }
+.mo-kpi.t .v { font-family: inherit; font-size: 17px; line-height: 1.3; word-break: keep-all; }   /* 2026-11-10 v2 판정 카드(글) */
+.mo-axis { font-size: 20px; font-weight: 700; margin: 26px 0 2px; padding-top: 14px; border-top: 2px solid var(--line); }
 .mo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; margin: 4px 0 6px; }
 .mo-chip { background: var(--surface); border-radius: var(--radius-sm); padding: 9px 12px 8px; box-shadow: 0 0 0 1px var(--line) inset; }
 .mo-chip .l { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -5774,6 +5776,239 @@ _name_index = _symsrch.name_index
 _resolve_symbol = _symsrch.resolve_symbol
 
 
+# ── 🔍 종목 분석 v2 (2026-11-10) — 5축 화면. 옛 화면은 '화면' 선택(또는 ?layout=v1)으로 그대로 돌아간다 ──
+_AN_AXMAP = [('수급', ('peer',)), ('펀더멘털', ('flow', 'earn', 'seg')), ('밸류', ('val',)),
+             ('촉매·리스크', ('ref',)), ('매매 계획', ('plan', 'price')), ('원자료', ('fin', 'profile'))]
+
+
+def _an_v2_on() -> bool:
+    qp = st.query_params.get('layout')
+    if qp in ('v1', 'v2'):
+        st.session_state['an_layout'] = qp
+    return st.session_state.get('an_layout', os.environ.get('ANALYSIS_LAYOUT', 'v2')) != 'v1'
+
+
+def _an_layout_switch():
+    cur = '옛 화면' if not _an_v2_on() else '새 화면(5축)'
+
+    def _chg():
+        v = st.session_state.get('an_layout_sel')
+        st.session_state['an_layout'] = 'v1' if v == '옛 화면' else 'v2'
+    st.segmented_control('화면', ['새 화면(5축)', '옛 화면'], default=cur, key='an_layout_sel', on_change=_chg,
+                         help='2026-11-10 새 화면(결론 → 수급 → 펀더멘털 → 밸류 → 촉매·리스크 → 매매 계획 → 원자료). '
+                              '마음에 안 들면 옛 화면으로 — 주소 끝 ?layout=v1 도 같다.')
+
+
+def _an_axes_pick(A2) -> list:
+    """펼칠 축 — 로그인하면 계정에 저장(다음에 그대로 열림), 아니면 이 세션만. 결론 줄은 항상 보인다."""
+    if 'an_axes' not in st.session_state:
+        saved = None
+        try:
+            import access as _accm
+            import user_store as _usm
+            _em = _accm.email()
+            if _em and _usm.ready():
+                saved = (_usm.load(_em) or {}).get('analysis_axes')
+        except Exception:
+            saved = None
+        st.session_state['an_axes'] = [a for a in (saved if isinstance(saved, list) else
+                                                   (A2.DEFAULT_AXES_MOBILE if IS_MOBILE else A2.DEFAULT_AXES)) if a in A2.AXES]
+
+    def _save():
+        v = list(st.session_state.get('an_axes_w') or [])
+        st.session_state['an_axes'] = v
+        try:
+            import access as _accm
+            import user_store as _usm
+            _em = _accm.email()
+            if _em and _usm.ready():
+                blob = {k: x for k, x in (_usm.load(_em) or {}).items() if not k.startswith('_')}
+                blob['analysis_axes'] = v
+                _usm.save(_em, blob)
+        except Exception:
+            pass
+    st.pills('펼칠 축 — 누른 것만 아래에 펼친다 (결론은 항상)', A2.AXES, selection_mode='multi',
+             default=st.session_state['an_axes'], key='an_axes_w', on_change=_save,
+             format_func=lambda a: f"{A2.AXIS_ICON[a]} {a}")
+    return list(st.session_state.get('an_axes_w', st.session_state['an_axes']) or [])
+
+
+def _an_cards(cards) -> str:
+    import html as _hx
+    return '<div class="mo-kpis">' + ''.join(
+        f'<div class="mo-kpi t {c["tone"]}"><span class="l">{_hx.escape(c["label"])}</span>'
+        f'<span class="v">{_hx.escape(str(c["value"]))}</span><span class="s">{_hx.escape(str(c["sub"]))}</span></div>'
+        for c in cards) + '</div>'
+
+
+def _an_v2_fill(L: dict):
+    """v2 — 각 축의 '첫 줄 판정' 카드와 맨 위 결론. 섹션 코드가 이미 계산한 값(locals)을 읽기만 한다 —
+    없는 값은 '-'·판정 불가로 정직하게(여기서 새로 추정하지 않는다)."""
+    A2 = L['_A2']
+    sym, is_kr, hist, info = L['sym8_clean'], L['is_kr_sym'], L['hist'], L['info']
+    C = lambda label, value, sub='', tone='na': {'label': label, 'value': value, 'sub': sub, 'tone': tone}
+    pxf = (lambda v: f"₩{v:,.0f}") if is_kr else (lambda v: f"${v:,.2f}")
+    res = {}
+
+    # ── 수급 ──
+    try:
+        h = A2.high52(hist['Close'])
+        rs = None
+        if not _CMB.empty and sym in _CMB.index and pd.notna(_CMB.loc[sym, 'RS']):
+            rs = float(_CMB.loc[sym, 'RS'])
+        sd = L.get('_sd') or _sector_detail()
+        gsel, glabel = str(L.get('_gsel') or ''), L.get('_glabel')
+        mkt = 'KR' if is_kr else 'US'
+        if is_kr and gsel.startswith('테마'):
+            fam = sd.get('theme') or {}
+        elif is_kr and gsel.startswith('네이버 업종'):
+            fam = sd.get('upjong') or {}
+        elif not is_kr and gsel.startswith('세부 산업'):
+            fam = sd.get('industry') or {}
+        else:
+            col = '_업종full' if '_업종full' in _CMB.columns else '업종'
+            fam = {k: list(v.index.astype(str)) for k, v in _CMB.groupby(col)} if not _CMB.empty else {}
+            glabel = str(_CMB.loc[sym, col]) if (not _CMB.empty and sym in _CMB.index) else None
+        gh = A2.group_heat(_CMB, fam, market=mkt)
+        grow = gh[gh['group'] == glabel] if glabel is not None and len(gh) else gh.iloc[0:0]
+        gpct = float(grow['pct'].iloc[0]) if len(grow) else None
+        vr = A2.volume_ratio(hist.get('Volume'))
+        q = A2.flow_quadrant(gpct, rs)
+        cards = [
+            C('업종 온도 (같은 무리 RS 중앙값 순위)',
+              (f"{glabel} · {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위" if len(grow) else (glabel or '업종 미상')),
+              (f"무리 RS 중앙 {grow['med_rs'].iloc[0]:.0f} · 상위 {gpct:.0f}% · {int(grow['n'].iloc[0])}종" if len(grow) else '비교할 무리가 3종 미만이거나 분류 없음'),
+              'na' if gpct is None else ('good' if gpct <= 30 else 'bad' if gpct >= 70 else 'mid')),
+            C('종목 강도 (RS · 52주 고점)',
+              (f"RS {rs:.0f}" if rs is not None else 'RS -') + (f" · 고점 대비 {h['dd']:+.1f}%" if h else ''),
+              (f"52주 고점 {pxf(h['high'])} ({h['date']}, {h['weeks']}주 전) · 종가 기준" if h else '가격 이력 부족'),
+              'na' if rs is None else ('good' if rs >= 80 else 'bad' if rs < 50 else 'mid')),
+            C('수급 판정', q['label'], q['why'] + (f" · 거래량 {vr:.1f}배(5일÷20일)" if vr else ''), q['tone']),
+        ]
+        res['수급'] = q['tone']
+        if '수급' in L['_AXH']:
+            L['_AXH']['수급'].markdown(_an_cards(cards), unsafe_allow_html=True)
+    except Exception as e:
+        res['수급'] = 'na'
+        if '수급' in L['_AXH']:
+            L['_AXH']['수급'].caption(f"`수급 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
+
+    # ── 펀더멘털 ──
+    cyc = {}
+    try:
+        ed = L.get('_ed') or {}
+        if is_kr:
+            rows = list(_kr_cons_hist(sym))
+            lv = _kr_cons_live(sym)
+            if lv:
+                rows.append({'date': pd.Timestamp.today().strftime('%Y-%m-%d'), 'sym': sym, **lv})
+            fwd = A2.forward_kr(rows)
+        else:
+            fwd = A2.forward_us(ed.get('eps_trend'), ed.get('eps_revisions'))
+        cyc = A2.cycle_position(_sx.quarterly_frame(_q_rows_long(sym, is_kr)[0]))
+        oy = ry = None
+        if not _CMB.empty and sym in _CMB.index:
+            oy = pd.to_numeric(pd.Series([_CMB.loc[sym].get('영업익YoY(%)')]), errors='coerce').iloc[0]
+            ry = pd.to_numeric(pd.Series([_CMB.loc[sym].get('매출YoY(%)')]), errors='coerce').iloc[0]
+        et0 = L.get('_et0') or {}
+        ah0 = L.get('_ah0') or {}
+        state = et0.get('state') if is_kr else (f"이익 가속 {ah0['rows'][0]['주차']}" if ah0.get('rows') else '이익 가속 신호 없음')
+        past_val = ' · '.join(x for x in (f"영업익 {oy:+.0f}%" if pd.notna(oy) else None, f"매출 {ry:+.0f}%" if pd.notna(ry) else None) if x) or '-'
+        past_tone = 'na' if pd.isna(oy) and not state else ('good' if (pd.notna(oy) and oy > 0) or '흑자전환' in str(state) else 'bad' if pd.notna(oy) and oy < 0 else 'mid')
+        cards = [C('앞으로 (컨센서스·리비전) — 대표', fwd['value'], fwd['sub'], fwd['tone']),
+                 C('사이클 위치 (자기 이익률 분포)', cyc['value'], cyc['sub'], cyc['tone']),
+                 C('지금까지 (최근 분기 YoY)', past_val, f"{state or '-'} · 사이클 기업은 바닥에서 이 숫자가 가장 나쁘다", past_tone)]
+        res['펀더멘털'] = fwd['tone'] if fwd['tone'] != 'na' else (cyc['tone'] if cyc.get('cyclical') else past_tone)
+        if '펀더멘털' in L['_AXH']:
+            L['_AXH']['펀더멘털'].markdown(_an_cards(cards), unsafe_allow_html=True)
+    except Exception as e:
+        res['펀더멘털'] = 'na'
+        if '펀더멘털' in L['_AXH']:
+            L['_AXH']['펀더멘털'].caption(f"`펀더멘털 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
+
+    # ── 밸류 ──
+    try:
+        bm = L.get('_bm') or {}
+        vb = L.get('_vb') or {}
+        peg = L.get('_peg')
+        peg = float(peg) if peg is not None and pd.notna(peg) else None
+        per = vb.get('per_ttm')
+        try:                                    # _pr 은 뒤 섹션에서 st.columns 로 덮인다 — 다시 계산
+            pr = _cm.peer_rank(_CMB, sym, codes=L.get('_gcodes'), label=L.get('_glabel')) or {}
+        except Exception:
+            pr = {}
+        med = next((r['업종중앙'] for r in (pr.get('rows') or []) if r['지표'] == 'PER(배)'), None)
+        ratio = (per / med) if (per and med and per > 0 and med > 0) else None
+        v = A2.valuation_reading(bm.get('rank'), peg, ratio, cyc.get('cyclical'))
+        cards = [C('밸류 종합 (참고 — 매수 판정엔 안 씀)', v['value'], v['sub'], v['tone']),
+                 C(f"자기 과거 ({bm.get('kind', 'P/E')} 밴드)",
+                   (f"{bm['now']:.1f}배 · {bm['rank']:.0f}% 기간보다 비쌈" if bm.get('now') is not None and bm.get('rank') is not None else '-'),
+                   (f"과거 중앙 {bm['pct'][50]:.1f}배 · 사업 구조가 바뀌었으면 과거 비교는 의미가 약하다" if bm.get('pct') else '밴드 계산 불가'),
+                   'na' if bm.get('rank') is None else ('good' if bm['rank'] <= 25 else 'bad' if bm['rank'] >= 75 else 'mid')),
+                 C('동종 대비 · 성장 대비',
+                   (f"P/E {per:.1f}배 vs 업종 {med:.1f}배" if per and med else 'P/E -'),
+                   (f"PEG {peg:.2f} (1 미만 = 성장 대비 쌈, 린치)" if peg else 'PEG - (적자·컨센서스 없음)'),
+                   'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.25 else 'mid'))]
+        res['밸류'] = v['tone']
+        if '밸류' in L['_AXH']:
+            L['_AXH']['밸류'].markdown(_an_cards(cards), unsafe_allow_html=True)
+    except Exception as e:
+        res['밸류'] = 'na'
+        if '밸류' in L['_AXH']:
+            L['_AXH']['밸류'].caption(f"`밸류 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
+
+    # ── 촉매·리스크 ──
+    try:
+        nx_us, nx = L.get('_next_us'), (L.get('_eq') or {}).get('next') or {}
+        now = pd.Timestamp.today().normalize()
+        if nx_us is not None:
+            nd = pd.Timestamp(nx_us[0]).tz_localize(None) if getattr(pd.Timestamp(nx_us[0]), 'tz', None) else pd.Timestamp(nx_us[0])
+            ev = C('다음 실적 발표', f"{nd:%Y-%m-%d}", f"D-{(nd.normalize() - now).days}", 'mid' if (nd - now).days <= 14 else 'na')
+        elif nx.get('예상') is not None:
+            ev = C('다음 실적 발표', f"{nx['예상']:%m월 %d일} 전후(추정)", f"전년 같은 분기 발표일 기준", 'na')
+        else:
+            ev = C('다음 실적 발표', '-', '일정 미상', 'na')
+        risk, chk = L.get('_risk') or [], L.get('_chk_') or []
+        nr = [r for r in risk if r.get('state') == 'warn']
+        nc = [r for r in chk if r.get('state') == 'warn']
+        cards = [ev,
+                 C('리스크 점검', f"{len(nr)}개 해당" if risk else '-', ' · '.join(r['name'] for r in nr)[:80] or '해당 없음',
+                   'na' if not risk else ('good' if not nr else 'mid' if len(nr) <= 2 else 'bad')),
+                 C('데이터 점검', f"이상 {len(nc)}건" if chk else '-', ' · '.join(r['name'] for r in nc)[:80] or f"{len(chk)}개 항목 정상",
+                   'na' if not chk else ('good' if not nc else 'bad'))]
+        res['리스크'] = cards[1]['tone']
+        if '촉매·리스크' in L['_AXH']:
+            box = L['_AXH']['촉매·리스크']
+            box.markdown(_an_cards(cards), unsafe_allow_html=True)
+            if risk or chk:
+                with box.expander('근거 — 리스크 점검 · 데이터 점검', expanded=bool(nc)):
+                    ico = {'ok': '✅', 'warn': '⚠️', 'na': '·'}
+                    st.markdown('\n'.join(f"- {ico.get(r.get('state'), '·')} **{r['name']}** · {r.get('detail', '')}" for r in risk + chk))
+    except Exception as e:
+        if '촉매·리스크' in L['_AXH']:
+            L['_AXH']['촉매·리스크'].caption(f"`촉매·리스크 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
+
+    # ── 결론 (항상) ──
+    try:
+        fw = {'good': '좋아지는 회사', 'mid': '실적 신호가 엇갈림', 'bad': '나빠지는 회사', 'na': '실적 판단 불가'}[res.get('펀더멘털', 'na')]
+        fl = {'good': '시장이 주목 중', 'mid': '시장 관심은 부분적', 'bad': '지금은 시장이 외면', 'na': '수급 판단 불가'}[res.get('수급', 'na')]
+        cards = [C('🌊 수급·관심', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[res.get('수급', 'na')], fl, res.get('수급', 'na')),
+                 C('🏭 펀더멘털 (앞으로 우선)', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[res.get('펀더멘털', 'na')], fw, res.get('펀더멘털', 'na')),
+                 C('⚖️ 밸류 (참고)', {'good': '쌈', 'mid': '보통', 'bad': '비쌈', 'na': '-'}[res.get('밸류', 'na')],
+                   '사이클 기업·적자면 판정 보류', res.get('밸류', 'na'))]
+        with L['_V2C']:
+            st.markdown(f"#### 🧭 결론 — {fw}, {fl}")
+            st.markdown(_an_cards(cards), unsafe_allow_html=True)
+            rk, bst = L.get('_rk'), L.get('_bst')
+            if L.get('_IS_LAB') and isinstance(rk, list) and rk:
+                n_ok = sum(1 for x in rk if x[1])
+                st.caption(f"🤖 실전 규칙 {n_ok}/{len(rk)} 통과 · 봇 상태: {bst or '-'} — 자세한 대조는 🎯 매매 계획 축(소유자에게만 보임)")
+            st.caption("세 신호는 아래 각 축 첫 줄 카드의 대표값이다(수급 = 업종 온도 × 종목 RS · 펀더멘털 = 컨센서스 리비전 우선, "
+                       "없으면 사이클 위치·최근 분기). 규칙 계산이며 투자 권유가 아니다.")
+    except Exception as e:
+        L['_V2C'].caption(f"`결론 계산 실패: {type(e).__name__}: {str(e)[:100]}`")
+
+
 @st.fragment
 def _tab_analysis():
     # 2026-10-15 — 이 탭의 조작(검색·토글·버튼)은 이 탭만 다시 그린다. 예전에는 검색 한 번에
@@ -5782,6 +6017,7 @@ def _tab_analysis():
     with guard('종목 분석'):
         st.header("🔍 종목 분석")
         st.caption("종목명 또는 코드 — KR: 삼성전자 · 005930  |  US: TSLA · Tesla")
+        _an_layout_switch()
 
         # 2026-10-15 — 모바일에서 검색이 안 되던 문제. 키보드의 '이동/검색'(Enter)은 입력칸만
         #   반영하고 '분석' 버튼은 안 눌린 상태라 아무 일도 없었다. 폼으로 묶어 Enter 도 제출로 친다
@@ -5897,7 +6133,8 @@ def _tab_analysis():
                     _hi52 = float(hist['Close'].tail(252).max()); _lo52 = float(hist['Close'].tail(252).min())
                     _dd = (price_now / _hi52 - 1) * 100
                     _wk = _ttp.get('weeks_since_high')
-                    _chips.append(('neg' if _dd < -20 else '', '52주 고점 대비', f"{_dd:+.1f}%"
+                    _hi52d = pd.Timestamp(hist['Close'].tail(252).idxmax())      # 2026-11-10 차니: 고점 날짜도 같이
+                    _chips.append(('neg' if _dd < -20 else '', f"52주 고점({_hi52d:%y.%m.%d}) 대비", f"{_dd:+.1f}%"
                                    + (f" · 신고가 후 {_wk}주" if _wk else " · 이번 주 신고가" if _wk == 0 else '')))
                     if _lo52 > 0:
                         _chips.append(('pos', '52주 저점 대비', f"{(price_now / _lo52 - 1) * 100:+.0f}%"))
@@ -5942,9 +6179,33 @@ def _tab_analysis():
                 # ── 화면 순서 (2026-10-19 재배치) ───────────────────────────────
                 # 코드는 데이터 의존 순서대로 돌고, **보이는 순서는 이 컨테이너 순서**가 정한다.
                 # 판단 → 가격·위험 → 실적 → 구조 → 가치 → 근거 상세 → 원표 → 개요 → 참고 통계.
-                _SEC = {_k: st.container() for _k in ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val',
-                                                     'canslim', 'fin', 'profile', 'ref')}
-                if IS_MOBILE:
+                # ── 2026-11-10 v2 (차니 합의): 결론 → 수급 → 펀더멘털 → 밸류 → 촉매·리스크 → 매매 계획 → 원자료.
+                #   옛 화면은 그대로 남아 있다 — 탭 위 '화면' 선택 또는 ?layout=v1 로 즉시 되돌린다(코드도 섹션을 지우지 않고 숨긴다).
+                _V2, _HID, _HID_PH, _V2C, _AXH, _AXSEL = _an_v2_on(), None, None, None, {}, []
+                if _V2:
+                    import analysis_v2 as _A2
+                    _A2 = _fresh_module(_A2)
+                    _V2C = st.container()                                   # 결론 (맨 끝에 채운다)
+                    _AXSEL = _an_axes_pick(_A2)
+                    _SEC = {}
+                    for _ax, _keys in _AN_AXMAP:
+                        if _ax in _AXSEL:
+                            _box = st.container()
+                            with _box:
+                                st.markdown(f'<div class="mo-axis">{_A2.AXIS_ICON[_ax]} {_ax}</div>', unsafe_allow_html=True)
+                                _AXH[_ax] = st.container()                  # 블록 첫 줄 판정 카드(맨 끝에 채운다)
+                            for _k in _keys:
+                                _SEC[_k] = _box.container()
+                    _HID_PH = st.empty()                                    # 숨긴 축·삭제 합의 섹션 — 계산은 그대로(다른 판정이 쓴다), 화면에선 지운다
+                    _HID = _HID_PH.container()
+                    for _k in ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val', 'canslim', 'fin', 'profile', 'ref'):
+                        _SEC.setdefault(_k, _HID.container())
+                    _SEC['summary'] = _HID.container()                      # 요약 판단 5칸 → 결론 줄로 대체
+                    _SEC['canslim'] = _HID.container()                      # CANSLIM 스코어카드(정성 입력 포함) → 삭제 합의
+                else:
+                    _SEC = {_k: st.container() for _k in ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val',
+                                                         'canslim', 'fin', 'profile', 'ref')}
+                if IS_MOBILE and not _V2:
                     # 2026-10-21 — 폰에서 종목 하나가 세로 2만 px(손가락 24번)였다. 요약 판단만 펼쳐 두고 나머지는 탭으로.
                     #   (펼침 상자 안에 펼침 상자를 넣을 수 없어 '접기' 대신 탭 — 섹션 안에 이미 펼침 상자가 있다)
                     _SEC = {'summary': _SEC['summary'], 'plan': _SEC['plan']}   # 매매 판단도 탭 밖에(핵심)
@@ -6969,8 +7230,8 @@ def _tab_analysis():
                     # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
                     # ════════════════════════════════════════════════════════════
                     st.divider()
-                    _mstat = st.container()
-                    _gcdc = st.container()
+                    _mstat = _HID.container() if _V2 else st.container()    # 2026-11-10 v2: 월별 상승률·이평 크로스 삭제 합의 → 숨김
+                    _gcdc = _HID.container() if _V2 else st.container()
 
                     with _mstat:
                         st.subheader("📆 월별 상승률 통계 (연도 × 월)")
@@ -7962,6 +8223,15 @@ def _tab_analysis():
                         pass
                     except Exception as _e_plan:
                         st.caption(f"`매매 판단 계산 실패: {type(_e_plan).__name__}: {str(_e_plan)[:120]}`")
+
+                # ── v2: 축별 첫 줄 판정 + 결론을 채우고, 숨긴 섹션은 지운다 (2026-11-10) ──
+                if _V2:
+                    try:
+                        _an_v2_fill({**locals(), '_IS_LAB': _IS_LAB})
+                    except Exception as _e_v2:
+                        _V2C.caption(f"`v2 판정 실패: {type(_e_v2).__name__}: {str(_e_v2)[:120]}`")
+                    if _HID_PH is not None:
+                        _HID_PH.empty()
 
         else:
             st.caption("예: TSLA · NVDA · 005930(삼성전자) · 000660(SK하이닉스)")
