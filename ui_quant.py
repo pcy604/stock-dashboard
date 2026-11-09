@@ -686,7 +686,7 @@ def _advanced(m, base, pname):
         for sg in xe.get('signals') or []:
             lab = next(o for o, kk in _SOPT.items() if kk == sg['type'])
             fl = next((o for o, kk in _FKEY.items() if kk.split(':')[0] == str(sg.get('field', '')).split(':')[0]), None)
-            srows.append({'신호': lab, 'n/m': sg.get('n') or sg.get('m'), 'level/배수/%': sg.get('level') or sg.get('vol_x') or sg.get('pct'),
+            srows.append({'신호': lab, 'n/m': sg.get('n') or sg.get('m'), 'level/배수/%': sg.get('level') or sg.get('vol_x') or sg.get('pct') or sg.get('x'),
                           '지표': fl, '조건': sg.get('op'), '값': sg.get('value')})
         sdf = st.data_editor(pd.DataFrame(srows, columns=['신호', 'n/m', 'level/배수/%', '지표', '조건', '값']), num_rows='dynamic',
                              hide_index=True, use_container_width=True,
@@ -711,6 +711,8 @@ def _advanced(m, base, pname):
             d['pct'] = float(b) if ok(b) else 7.0
         if t == 'rank_out':
             d['m'] = int(a) if ok(a) else int(mxp) * 2
+        if t == 'climax':                                            # 화면에선 '40주선 위 x%' 전량 매도만(검증 결과 뒤 확장)
+            d.update(rule='ext', x=float(b) if ok(b) else 70.0)
         if t == 'field':
             if not r.get('지표'):
                 continue

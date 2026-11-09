@@ -84,7 +84,13 @@ EXIT_SIGNALS = {
     'bear':      ('큰 음봉', 'pct', '주봉 (종가 ÷ 시가 − 1) ≤ −pct%'),
     'field':     ('펀더멘털·지표 조건', 'field,op,value', '예: 영업이익 YoY < 0, PER > 60'),
     'rank_out':  ('순위 이탈', 'm', '순위 필드로 상위 m 밖으로 밀림(리밸런싱 주에만)'),
+    'climax':    ('클라이맥스(과열 고점)', 'rule,x,action',
+                  "2026-11-10 차니 '관상'. rule: ext(40주선 위 x%) · vol(거래량 52주 평균 x배 + 주간 +10%) · "
+                  "rsi(주봉 RSI14 ≥ x) · streak(양봉 x주 연속) · accel(4주 +x%) · combo(위 기본값 중 2개 이상). "
+                  "action: sell(전량) · half(절반 덜기, 보유당 1번) · tight(그때부터 손절을 고점 −x2%로 조임) · "
+                  "min_gain: 진입가 대비 이만큼(%) 오른 뒤에만"),
 }
+CLIMAX_DEFAULT = dict(ext=70, vol=3, rsi=85, streak=8, accel=50)
 OPS = ['>=', '<=', '>', '<', '==', '!=', 'between', 'contains']
 
 DEFAULT_SPEC = dict(
@@ -261,7 +267,32 @@ def _exit_matrix(P, sig):
         return (c / o - 1) * 100 <= -abs(float(sig.get('pct', 7)))
     if t == 'field':
         return _cond(P.get(sig['field']), sig.get('op', '<'), sig.get('value', 0))
+    if t == 'climax':
+        return climax_matrix(P, sig.get('rule', 'ext'), sig.get('x'))
     return None                                         # rank_out 은 리밸런싱 때 따로
+
+
+def climax_matrix(P, rule, x=None):
+    """과열 고점 '관상'을 숫자로(2026-11-10). 그 주 종가로 판정 → 다음 주 시가 체결(미래 정보 없음)."""
+    c, o = P.base('close'), P.base('open')
+    d = CLIMAX_DEFAULT
+    if rule == 'ext':
+        return P.get('ma_gap:40') >= float(x if x is not None else d['ext'])
+    if rule == 'vol':
+        return (P.get('vol_x:52') >= float(x if x is not None else d['vol'])) & (P.get('ret:1') >= 10)
+    if rule == 'rsi':
+        return P.get('rsi:14') >= float(x if x is not None else d['rsi'])
+    if rule == 'streak':
+        n = int(x if x is not None else d['streak'])
+        up = (c > c.shift(1)).astype(float).where(c.notna())
+        return up.rolling(n, min_periods=n).sum() >= n
+    if rule == 'accel':
+        return P.get('ret:4') >= float(x if x is not None else d['accel'])
+    if rule == 'combo':
+        k = int(x if x is not None else 2)
+        ms = [climax_matrix(P, r).fillna(False).astype(int) for r in ('ext', 'vol', 'rsi', 'streak', 'accel')]
+        return sum(ms) >= k
+    raise KeyError(f'모르는 클라이맥스 규칙: {rule}')
 
 
 def cash_state(px: pd.Series, c: dict) -> pd.Series:
@@ -383,6 +414,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                 for th, trl in tr_l:
                     if g * 100 >= th:
                         p['stop'] = max(p['stop'], p['peak'] * (1 - trl / 100))
+            if p.get('tight'):
+                p['stop'] = max(p['stop'], p['peak'] * (1 - p['tight'] / 100))
             if p['stop'] and pd.notna(row['Low']) and row['Low'] <= p['stop']:
                 px = min(row['Open'], p['stop']) if pd.notna(row['Open']) else p['stop']
                 return True, float(px)
@@ -503,6 +536,8 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                     for th, trl in tr_l:
                         if g * 100 >= th:
                             p['stop'] = max(p['stop'], p['peak'] * (1 - trl / 100))
+                if p.get('tight'):
+                    p['stop'] = max(p['stop'], p['peak'] * (1 - p['tight'] / 100))
             elif t + 1 < len(dates) and not np.isfinite(C[t + 1:min(t + 5, len(dates)), j]).any():
                 amt = p['u'] * p['last']; cash += amt * (1 - cost)
                 log(t, j, '매도', p['last'], amt / max(val(t), 1e-12), '가격 끊김(상폐·이탈)', p['last'] / p['avg'] - 1)
@@ -525,6 +560,18 @@ def run(panel: Panel, spec, index_px: pd.Series = None, bench_px: pd.Series = No
                     if db is not None:
                         trig = db
                         nm = f"{int(sg.get('n', 5))}일선 이탈"       # 일봉으로 판정했을 때만 라벨도 '일'로(정직)
+                if trig and sg.get('type') == 'climax' and np.isfinite(C[t, j]) and \
+                        (C[t, j] / p['entry'] - 1) * 100 < float(sg.get('min_gain', 0)):
+                    trig = False                                     # 클라이맥스는 '오른 뒤'에만 — 산 직후 과열은 고점이 아니다
+                if trig and sg.get('type') == 'climax' and sg.get('action', 'sell') != 'sell':
+                    nm = f"클라이맥스({sg.get('rule', 'ext')})"
+                    if sg['action'] == 'half' and not p.get('halved') and np.isfinite(C[t, j]):
+                        p['halved'] = True
+                        pend.append(('trim', j, p['u'] * C[t, j] / E * 0.5, nm + ' 절반 덜기'))
+                    elif sg['action'] == 'tight':
+                        p['tight'] = float(sg.get('x2', 10))
+                        p['stop'] = max(p['stop'], p['peak'] * (1 - p['tight'] / 100))
+                    continue
                 if trig:
                     pend.append(('sell', j, None, nm)); sold.add(j); break
         tgt_e = expo[t]
