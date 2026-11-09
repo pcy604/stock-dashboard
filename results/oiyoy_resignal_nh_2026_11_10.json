@@ -1,0 +1,504 @@
+{
+ "run": "2026-11-09 21:30",
+ "markets": {
+  "KR": {
+   "v19": {
+    "train": {
+     "cagr": 15.0,
+     "mdd": -21.9,
+     "calmar": 0.685,
+     "n": 454
+    },
+    "test": {
+     "cagr": 24.91,
+     "mdd": -24.84,
+     "calmar": 1.003,
+     "n": 578
+    },
+    "full": {
+     "cagr": 20.85,
+     "mdd": -25.38,
+     "calmar": 0.821,
+     "n": 1027
+    }
+   },
+   "v19_winners_loss": 12,
+   "T1": {
+    "rows": {
+     "20": {
+      "train": {
+       "cagr": 9.76,
+       "mdd": -23.6,
+       "calmar": 0.414,
+       "n": 506
+      },
+      "test": {
+       "cagr": 32.9,
+       "mdd": -34.05,
+       "calmar": 0.966,
+       "n": 631
+      },
+      "full": {
+       "cagr": 21.83,
+       "mdd": -34.11,
+       "calmar": 0.64,
+       "n": 1132
+      }
+     },
+     "30": {
+      "train": {
+       "cagr": 13.47,
+       "mdd": -20.46,
+       "calmar": 0.658,
+       "n": 503
+      },
+      "test": {
+       "cagr": 30.72,
+       "mdd": -36.67,
+       "calmar": 0.838,
+       "n": 627
+      },
+      "full": {
+       "cagr": 24.97,
+       "mdd": -32.62,
+       "calmar": 0.765,
+       "n": 1126
+      }
+     },
+     "50": {
+      "train": {
+       "cagr": 10.98,
+       "mdd": -20.58,
+       "calmar": 0.534,
+       "n": 499
+      },
+      "test": {
+       "cagr": 40.57,
+       "mdd": -30.93,
+       "calmar": 1.312,
+       "n": 625
+      },
+      "full": {
+       "cagr": 25.96,
+       "mdd": -30.93,
+       "calmar": 0.839,
+       "n": 1126
+      }
+     },
+     "75": {
+      "train": {
+       "cagr": 6.65,
+       "mdd": -27.33,
+       "calmar": 0.243,
+       "n": 499
+      },
+      "test": {
+       "cagr": 43.76,
+       "mdd": -31.42,
+       "calmar": 1.393,
+       "n": 614
+      },
+      "full": {
+       "cagr": 23.98,
+       "mdd": -31.42,
+       "calmar": 0.763,
+       "n": 1113
+      }
+     },
+     "100": {
+      "train": {
+       "cagr": 6.68,
+       "mdd": -33.63,
+       "calmar": 0.199,
+       "n": 493
+      },
+      "test": {
+       "cagr": 46.85,
+       "mdd": -25.77,
+       "calmar": 1.818,
+       "n": 597
+      },
+      "full": {
+       "cagr": 25.78,
+       "mdd": -33.63,
+       "calmar": 0.767,
+       "n": 1087
+      }
+     },
+     "150": {
+      "train": {
+       "cagr": 14.56,
+       "mdd": -24.04,
+       "calmar": 0.606,
+       "n": 486
+      },
+      "test": {
+       "cagr": 31.43,
+       "mdd": -25.79,
+       "calmar": 1.219,
+       "n": 592
+      },
+      "full": {
+       "cagr": 23.71,
+       "mdd": -28.01,
+       "calmar": 0.847,
+       "n": 1076
+      }
+     },
+     "200": {
+      "train": {
+       "cagr": 18.89,
+       "mdd": -21.7,
+       "calmar": 0.87,
+       "n": 482
+      },
+      "test": {
+       "cagr": 29.8,
+       "mdd": -25.59,
+       "calmar": 1.165,
+       "n": 601
+      },
+      "full": {
+       "cagr": 25.32,
+       "mdd": -25.59,
+       "calmar": 0.989,
+       "n": 1080
+      }
+     }
+    },
+    "pick": 200,
+    "checks": {
+     "c1": true,
+     "c2": true,
+     "c3": true,
+     "c4": false,
+     "passed": false
+    }
+   },
+   "T2": {
+    "main": {
+     "train": {
+      "cagr": 15.21,
+      "mdd": -19.3,
+      "calmar": 0.788,
+      "n": 471
+     },
+     "test": {
+      "cagr": 20.29,
+      "mdd": -24.73,
+      "calmar": 0.82,
+      "n": 597
+     },
+     "full": {
+      "cagr": 19.21,
+      "mdd": -24.73,
+      "calmar": 0.777,
+      "n": 1069
+     }
+    },
+    "neighbors": {
+     "w13": {
+      "cagr": 21.6,
+      "mdd": -28.63,
+      "calmar": 0.755,
+      "n": 1063
+     },
+     "w52": {
+      "cagr": 18.78,
+      "mdd": -26.71,
+      "calmar": 0.703,
+      "n": 1070
+     },
+     "cool0_only": {
+      "cagr": 20.46,
+      "mdd": -25.78,
+      "calmar": 0.794,
+      "n": 1043
+     }
+    },
+    "winners_loss": 11,
+    "checks": {
+     "c1": false,
+     "c2": false,
+     "c3": false,
+     "c4": true,
+     "passed": false
+    }
+   }
+  },
+  "US": {
+   "v19": {
+    "train": {
+     "cagr": 7.26,
+     "mdd": -28.62,
+     "calmar": 0.254,
+     "n": 453
+    },
+    "test": {
+     "cagr": 12.44,
+     "mdd": -25.47,
+     "calmar": 0.489,
+     "n": 500
+    },
+    "full": {
+     "cagr": 9.96,
+     "mdd": -30.16,
+     "calmar": 0.33,
+     "n": 951
+    }
+   },
+   "v19_winners_loss": null,
+   "T1": {
+    "rows": {
+     "20": {
+      "train": {
+       "cagr": 4.32,
+       "mdd": -29.61,
+       "calmar": 0.146,
+       "n": 490
+      },
+      "test": {
+       "cagr": 6.25,
+       "mdd": -30.88,
+       "calmar": 0.202,
+       "n": 558
+      },
+      "full": {
+       "cagr": 5.4,
+       "mdd": -36.15,
+       "calmar": 0.149,
+       "n": 1046
+      }
+     },
+     "30": {
+      "train": {
+       "cagr": 9.86,
+       "mdd": -30.67,
+       "calmar": 0.321,
+       "n": 474
+      },
+      "test": {
+       "cagr": 6.95,
+       "mdd": -30.71,
+       "calmar": 0.226,
+       "n": 556
+      },
+      "full": {
+       "cagr": 8.44,
+       "mdd": -37.11,
+       "calmar": 0.227,
+       "n": 1028
+      }
+     },
+     "50": {
+      "train": {
+       "cagr": 10.18,
+       "mdd": -33.19,
+       "calmar": 0.307,
+       "n": 464
+      },
+      "test": {
+       "cagr": 7.27,
+       "mdd": -33.94,
+       "calmar": 0.214,
+       "n": 555
+      },
+      "full": {
+       "cagr": 8.75,
+       "mdd": -39.91,
+       "calmar": 0.219,
+       "n": 1017
+      }
+     },
+     "75": {
+      "train": {
+       "cagr": 8.36,
+       "mdd": -32.19,
+       "calmar": 0.26,
+       "n": 456
+      },
+      "test": {
+       "cagr": 8.8,
+       "mdd": -31.27,
+       "calmar": 0.282,
+       "n": 545
+      },
+      "full": {
+       "cagr": 8.67,
+       "mdd": -39.0,
+       "calmar": 0.222,
+       "n": 999
+      }
+     },
+     "100": {
+      "train": {
+       "cagr": 9.2,
+       "mdd": -30.82,
+       "calmar": 0.299,
+       "n": 460
+      },
+      "test": {
+       "cagr": 9.88,
+       "mdd": -30.64,
+       "calmar": 0.322,
+       "n": 553
+      },
+      "full": {
+       "cagr": 9.63,
+       "mdd": -38.25,
+       "calmar": 0.252,
+       "n": 1011
+      }
+     },
+     "150": {
+      "train": {
+       "cagr": 7.79,
+       "mdd": -31.8,
+       "calmar": 0.245,
+       "n": 466
+      },
+      "test": {
+       "cagr": 12.95,
+       "mdd": -28.41,
+       "calmar": 0.456,
+       "n": 535
+      },
+      "full": {
+       "cagr": 10.5,
+       "mdd": -39.16,
+       "calmar": 0.268,
+       "n": 999
+      }
+     },
+     "200": {
+      "train": {
+       "cagr": 9.64,
+       "mdd": -28.08,
+       "calmar": 0.343,
+       "n": 461
+      },
+      "test": {
+       "cagr": 8.91,
+       "mdd": -31.73,
+       "calmar": 0.281,
+       "n": 537
+      },
+      "full": {
+       "cagr": 9.35,
+       "mdd": -37.66,
+       "calmar": 0.248,
+       "n": 996
+      }
+     }
+    },
+    "pick": 200,
+    "checks": {
+     "c1": false,
+     "c2": false,
+     "c3": false,
+     "c4": false,
+     "passed": false
+    }
+   },
+   "T2": {
+    "main": {
+     "train": {
+      "cagr": 11.6,
+      "mdd": -29.6,
+      "calmar": 0.392,
+      "n": 475
+     },
+     "test": {
+      "cagr": 15.52,
+      "mdd": -27.87,
+      "calmar": 0.557,
+      "n": 515
+     },
+     "full": {
+      "cagr": 13.82,
+      "mdd": -30.83,
+      "calmar": 0.448,
+      "n": 987
+     }
+    },
+    "neighbors": {
+     "w13": {
+      "cagr": 14.12,
+      "mdd": -27.19,
+      "calmar": 0.52,
+      "n": 974
+     },
+     "w52": {
+      "cagr": 11.66,
+      "mdd": -33.2,
+      "calmar": 0.351,
+      "n": 983
+     },
+     "cool0_only": {
+      "cagr": 9.69,
+      "mdd": -30.88,
+      "calmar": 0.314,
+      "n": 955
+     }
+    },
+    "winners_loss": null,
+    "checks": {
+     "c1": true,
+     "c2": true,
+     "c3": true,
+     "c4": true,
+     "passed": true
+    }
+   },
+   "T3": {
+    "main": {
+     "train": {
+      "cagr": 0.9,
+      "mdd": -30.54,
+      "calmar": 0.029,
+      "n": 409
+     },
+     "test": {
+      "cagr": 8.35,
+      "mdd": -33.92,
+      "calmar": 0.246,
+      "n": 438
+     },
+     "full": {
+      "cagr": 2.75,
+      "mdd": -38.46,
+      "calmar": 0.072,
+      "n": 847
+     }
+    },
+    "neighbors": {
+     "nh26": {
+      "cagr": 4.63,
+      "mdd": -34.1,
+      "calmar": 0.136,
+      "n": 874
+     },
+     "nh39": {
+      "cagr": 2.59,
+      "mdd": -34.08,
+      "calmar": 0.076,
+      "n": 866
+     },
+     "hi5": {
+      "cagr": 2.85,
+      "mdd": -34.56,
+      "calmar": 0.082,
+      "n": 837
+     }
+    },
+    "checks": {
+     "c1": false,
+     "c2": false,
+     "c3": false,
+     "c4": true,
+     "passed": false
+    }
+   }
+  }
+ }
+}
