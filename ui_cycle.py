@@ -12,6 +12,9 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import cycle_compare as C
+if getattr(C, 'VERSION', 1) < 2:          # 2026-11-10 클라우드가 옛 cycle_compare 를 들고 있어 KeyError 'dates'·전부 '미회복'이 떴다
+    import importlib
+    C = importlib.reload(C)
 import sym_search as S
 
 _GREEN, _RED = '#16A34A', '#D9363E'

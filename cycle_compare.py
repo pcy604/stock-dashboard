@@ -11,6 +11,9 @@
 배포 환경엔 그 테이블 자체가 없을 수도 있어(2026-11-07, 배포에서 실제로 'no such
 table: prices' 발생) 쓰지 않는다 — daily_store는 한국·미국 둘 다, 그때그때 받는다.
 """
+# 2026-11-10 v2: build_segment 에 dates·recover — 화면(ui_cycle)이 이 숫자로 옛 모듈을 감지해 다시 읽는다(클라우드가 옛 모듈을 메모리에 들고 있었다)
+VERSION = 2
+
 import numpy as np
 import pandas as pd
 
