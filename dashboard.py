@@ -5385,12 +5385,13 @@ def _ai_summary_auto(sym, is_kr, name, fallback_text):
     try:
         d = _j.loads(p.read_text(encoding='utf-8'))
         if d.get('src_key') == src_key and d.get('text'):
+            d['text'] = _strip_ai_preamble(d['text'])
             return d
     except Exception:
         pass
     btxt = official_business_text(sym, is_kr)
     src = '10-K 공식 사업보고(Item 1~)' if btxt else '공식 사업설명(yfinance)'
-    txt = ai_business_summary(name, btxt or fallback_text, src)
+    txt = _strip_ai_preamble(ai_business_summary(name, btxt or fallback_text, src))
     out = {'text': txt, 'src': src, 'src_key': src_key, 'generated': datetime.now().isoformat(timespec='seconds')}
     if txt and not txt.startswith('('):          # '(…실패…)' 안내문은 저장하지 않는다
         try:
@@ -5675,6 +5676,7 @@ def ai_business_summary(name, text, src='공식 사업설명'):
             "**🏰 경쟁·해자**: 경쟁 구도와 이 회사의 우위(기술·점유율·전환비용) (2~3줄)\n"
             "**⚠️ 핵심 리스크**: 문서에 명시된 리스크 중 투자판단에 중요한 것 (2~3줄)\n"
             "**✅ 체크포인트**: 투자자가 다음 분기에 확인해야 할 지표·이벤트 2~3개\n\n"
+            "첫 줄은 반드시 '🎯 한 줄 정의'로 시작하라 — 제목·작성일·대상·보고서 연도 같은 머리말을 쓰지 마라.\n"
             "규칙: 과장·추측 금지, 문서에 있는 사실만. 일반론('경쟁이 치열함' 같은 말) 금지 — "
             "구체적 이름과 숫자로. 문서에 없는 항목은 '문서에 언급 없음'으로.\n\n"
             + str(text)[:100000])
@@ -5691,6 +5693,80 @@ def ai_business_summary(name, text, src='공식 사업설명'):
         return f"(AI 요약 실패 — Gemini 서버 혼잡. 잠시 후 다시 눌러줘. [{str(last)[:60]}])"
     except Exception as e:
         return f"(AI 요약 실패: {str(e)[:80]})"
+
+
+def _strip_ai_preamble(txt: str) -> str:
+    """AI 요약 앞의 지어낸 머리말('작성일: 2024년 5월 10일 · 대상: 펀드매니저 · 2024년 10-K 요약')을 지운다.
+    2026-11-10 NVDA 실화면 — 원천은 2026-02 공시 10-K 인데 머리말이 2024년이라고 적혀 있었다. 캐시된 옛 요약에도 적용."""
+    if not isinstance(txt, str):
+        return txt
+    i = txt.find('🎯')
+    if i <= 0:
+        return txt
+    j = txt.rfind('\n', 0, i)
+    return txt[j + 1:] if j >= 0 else txt[i:]
+
+
+def _div_yield(yi: dict, price: float):
+    """배당수익률(%). yfinance 'dividendYield' 는 버전에 따라 비율(0.0002)·퍼센트(0.02)로 바뀌어
+    ×100 하면 NVDA 54.00% 같은 값이 나왔다(2026-11-10 실화면). 연 배당금 ÷ 현재가를 먼저 쓴다."""
+    try:
+        r = yi.get('dividendRate') or yi.get('trailingAnnualDividendRate')
+        if r and price and price > 0:
+            v = float(r) / float(price) * 100
+            return v if 0 <= v < 25 else None
+        t = yi.get('trailingAnnualDividendYield')
+        if t is not None:
+            v = float(t) * 100
+            return v if 0 <= v < 25 else None
+    except Exception:
+        pass
+    return None
+
+
+@st.cache_data(ttl=600)
+def _live_plan():
+    """실전 봇의 이번 주 계획(live/plan_latest.json) — 규칙 숫자·매수 목록·후보·지수 게이트."""
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'plan_latest.json'), encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _live_rule() -> dict:
+    return (_live_plan() or {}).get('rule') or {'slots': 10, 'first': 0.5, 'add_steps': [[0.1, 0.25], [0.2, 0.25]],
+                                                'rs_exit': 70, 'cap': 0.3, 'stop': 0.2, 'rs_min': 80, 'ma_days': 50,
+                                                'kr_min_mc': 1e11, 'us_min_mc': 3e8}
+
+
+def _bot_status(sym: str) -> tuple[str, str]:
+    """이 종목이 실전 봇에서 지금 어떤 상태인가 → (문구, 톤). 계획 파일과 원장(live/ledger.json)만 읽는다."""
+    pl = _live_plan() or {}
+    code = sym.replace('.KS', '').replace('.KQ', '')
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'ledger.json'), encoding='utf-8') as f:
+            led = json.load(f)
+    except Exception:
+        led = {}
+    for mk in ('KR', 'US'):
+        pos = ((led.get(mk) or {}).get('positions') or {}).get(code)
+        if pos:
+            q = pos.get('qty') or pos.get('quantity')
+            return (f"보유 중{f' {q}주' if q else ''}", 'good')
+    if any(k.split('-')[3:4] == [code] and k.endswith('BUY') for k in (led.get('pending') or {})):
+        return ("매수 주문 접수(체결 대기)", 'good')
+    for mk, sl in (pl.get('sleeves') or {}).items():
+        for b in sl.get('buys') or []:
+            if b.get('sym') == code:
+                return (f"이번 주 매수 계획 · {b.get('qty')}주 · 손절 스탑 {b.get('stop'):,.0f}", 'good')
+        for b in sl.get('skipped') or []:
+            if b.get('sym') == code:
+                return (f"후보지만 건너뜀 — {b.get('why')}", 'mid')
+        for i, b in enumerate(sl.get('candidates_top') or [], 1):
+            if b.get('sym') == code:
+                return (f"후보 {i}위 · RS {b.get('rs')} · {b.get('why')}", 'mid')
+    return ("후보 아님", 'na')
 
 
 import sym_search as _symsrch       # 2026-11-07: 검색 로직은 공유(ui_cycle.py도 씀) — 여기 두 함수는 얇은 별칭
@@ -5816,7 +5892,9 @@ def _tab_analysis():
                 _chips = []
                 _ttp = _sx.trend_template(hist['Close'], hist.get('High'), hist.get('Low'))
                 try:
-                    _hi52 = float(hist['High'].tail(252).max()); _lo52 = float(hist['Low'].tail(252).min())
+                    # 2026-11-10 — 장중 고가(High) 기준이라 같은 화면의 낙폭·정류장·피벗(종가 기준)과 숫자가 달랐다
+                    #   (NVDA 실화면: 머리 −27.0% vs 낙폭 −25.8%). 화면 전체를 종가 기준으로 통일.
+                    _hi52 = float(hist['Close'].tail(252).max()); _lo52 = float(hist['Close'].tail(252).min())
                     _dd = (price_now / _hi52 - 1) * 100
                     _wk = _ttp.get('weeks_since_high')
                     _chips.append(('neg' if _dd < -20 else '', '52주 고점 대비', f"{_dd:+.1f}%"
@@ -6383,14 +6461,15 @@ def _tab_analysis():
                             _pf = x.get(_pf_key) if _pf_key else None
                             _srows.append({
                                 '사업부문': x['name'],
-                                '주요제품': (str(x.get('products'))[:40] if x.get('products') else '-'),
                                 f'매출({_cu})': (x['revenue'] / _dv) if x.get('revenue') else None,
                                 '매출비중(%)': x.get('revenue_pct'),
-                                **({f'부문 {_pf_lab}(%)': (_pf / x['revenue'] * 100) if (_pf is not None and x.get('revenue')) else None,
+                                **({f'{_pf_lab}(%)': (_pf / x['revenue'] * 100) if (_pf is not None and x.get('revenue')) else None,
                                     '이익비중(%)': (_pf / _tot_pf * 100) if (_pf is not None and _tot_pf) else None} if _pf_key else {}),
+                                # 2026-11-10 — 긴 설명 열이 앞에 있어 숫자 머리글이 '매출···'·'부문 O···'로 잘렸다 → 맨 뒤로
+                                '주요제품': (str(x.get('products'))[:40] if x.get('products') else '-'),
                             })
                         _segdf = pd.DataFrame(_srows)
-                        _sc1, _sc2 = st.columns([1, 1.25], gap='large')
+                        _sc1, _sc2 = st.columns([1, 1.5], gap='large')
                         with _sc1:
                             _fig_seg = go.Figure()
                             _fig_seg.add_trace(go.Bar(
@@ -6725,7 +6804,7 @@ def _tab_analysis():
                         ('PBR',         _fx(_vb.get('pbr'), 'x')),
                         ('PSR (TTM)',   _fx(_vb.get('psr_ttm'), 'x')),
                         ('PEG',         _fx(_peg, '', dp=2)),
-                        ('배당수익률',   _fx(yi2.get('dividendYield'), '%', mult=100, dp=2)),
+                        ('배당수익률',   _fx(_div_yield(yi2, float(price_now)), '%', dp=2)),
                         ('EPS (TTM)',   _fx(_vb.get('eps_ttm'), '', dp=2 if not is_kr_sym else 0)),
                         ('EPS (12MF)',  _fx(_vb.get('eps_12mf'), '', dp=2 if not is_kr_sym else 0)),
                         ('ROE',         _fx(_pick(_pf.get('roe'), 'returnOnEquity'), '%')),
@@ -7712,6 +7791,13 @@ def _tab_analysis():
                         _cur = _sw['current'] or {}
                         _low_piv = next((pv['price'] for pv in reversed(_sw['pivots']) if pv['type'] == 'L'), None)
                         _st = _tp.stops(_p, ma50=_ma50, ma200=_ma200, last_low=_low_piv)
+                        # 2026-11-10 — 1차 손절이 '매수가 −8%'(오닐)였다. 실전 규칙(봇)은 '보유 중 고점 대비 −20%'라
+                        #   차트의 빨간 점선(고점 −20%)과 이 카드가 서로 다른 말을 했다. 1차 = 실전 규칙, 오닐 −8% 는 참고로 내린다.
+                        _LR = _live_rule()
+                        _stop_r = float(_LR.get('stop', 0.2))
+                        _st = {'s1': _p * (1 - _stop_r), 's1_pct': -_stop_r * 100,
+                               'why1': f"실전 규칙 — 보유 중 최고가 대비 −{_stop_r * 100:.0f}%(매수 직후엔 매수가 기준, 주 1회 판정)",
+                               's2': _st['s1'], 's2_pct': _st['s1_pct'], 'why2': '참고 · ' + _st['why1']}
                         _vb2 = _LP.get('_vb') or {}
                         _bd = (_LP.get('_band') or {})
                         _tg = _tp.targets(_p, cons={'mean': info.get('targetMeanPrice'), 'high': info.get('targetHighPrice'),
@@ -7740,9 +7826,9 @@ def _tab_analysis():
                         _dn_pct = (_dn_px / _p - 1) * 100 if _dn_px else None
                         _rr = ((_base['price'] - _p) / (_p - _st['s1'])) if _base and _base['price'] > _p else None
                         _risk_b = st.session_state.get('plan_risk', 1.0)
-                        _slot = st.session_state.get('plan_slot', 1.5)
+                        _slot = st.session_state.get('plan_slot', round(100 / max(int(_LR.get('slots', 10)), 1) * float(_LR.get('first', 0.5)), 2))
                         _ps = _tp.position_size(verdict_state=_vd['state'], stop_pct=_st['s1_pct'], vol_annual=_volA,
-                                                risk_budget=_risk_b, slot_cap=_slot, trim_cap=_slot * 3)
+                                                risk_budget=_risk_b, slot_cap=_slot, trim_cap=float(_LR.get('cap', 0.3)) * 100)
                         _fs = _tp.forward_similar(_c_all)
 
                         st.markdown("## 🎯 매매 판단 — 규칙 계산")
@@ -7752,17 +7838,54 @@ def _tab_analysis():
                             _kpi('목표 중앙값', f"{_base['up']:+.0f}%" if _base else '-',
                                  (f"{_pf_(_base['price']).replace(chr(92), '')} · 범위 {_base['lo']:+.0f}~{_base['hi']:+.0f}% · {_base['name']}" if _base else '목표가 계산 불가'),
                                  'na' if not _base else ('good' if _base['up'] >= 20 else 'mid' if _base['up'] > 0 else 'bad')),
-                            _kpi('1차 손절(참고)', f"{_st['s1_pct']:.0f}%", f"{_pf_(_st['s1'])} · 2차 {_pf_(_st['s2'])}({_st['s2_pct']:.0f}%)", 'mid'),
+                            _kpi('손절선(실전 규칙)', f"{_st['s1_pct']:.0f}%", f"{_pf_(_st['s1'])} · 고점 따라 올라감 · 참고 {_pf_(_st['s2'])}({_st['s2_pct']:.0f}%)", 'mid'),
                             _kpi('역사적 다운사이드', f"{_dn_pct:.0f}%" if _dn_pct is not None else '-',
                                  (f"{_pf_(_dn_px)} · 스윙 {len(_sw['declines'])}회 중앙값" if _dn_px else '표본 없음'),
                                  'na' if _dn_pct is None else ('bad' if _dn_pct <= -30 else 'mid')),
-                            _kpi('보상 ÷ 위험', f"{_rr:.1f}배" if _rr else '-', ('목표 중앙값 상승폭 ÷ 1차 손절폭' if _rr else '목표 중앙값이 현재가 아래'), 'na' if not _rr else ('good' if _rr >= 3 else 'mid' if _rr >= 1.5 else 'bad')),
+                            _kpi('보상 ÷ 위험', f"{_rr:.1f}배" if _rr else '-', ('목표 중앙값 상승폭 ÷ 실전 손절폭' if _rr else '목표 중앙값이 현재가 아래'), 'na' if not _rr else ('good' if _rr >= 3 else 'mid' if _rr >= 1.5 else 'bad')),
                             _kpi('투입 가능 비중', f"{_ps['rec']:.1f}%",
                                  (f"판정이 '매수 가능 영역' 아님 → 신규 0 (조건 충족 시 {min(_ps['risk_size'], _slot) * (0.5 if _ps['half'] else 1):.1f}%)"
-                                  if _ps['rec'] == 0 else ("총자산 기준 · 변동성 60%↑ 절반" if _ps['half'] else "총자산 기준 · 원칙 v1 상한")),
+                                  if _ps['rec'] == 0 else ("총자산 기준 · 변동성 60%↑ 절반" if _ps['half'] else "총자산 기준 · 실전 첫 매수 한 칸")),
                                  'good' if _ps['rec'] > 0 else 'na'),
                         ]
                         st.markdown('<div class="mo-kpis">' + ''.join(_plan_cards).replace('\\$', '$') + '</div>', unsafe_allow_html=True)
+
+                        # 2026-11-10 — 🤖 실전 규칙 체크. 위 '판정'은 추세 템플릿(오닐·미너비니) 계산이고 봇이 실제로 사는 규칙과 달랐다
+                        #   (연결성 결손: 종목분석에서 '탈출 검토'인데 봇은 같은 주에 매수하는 일이 생긴다). 봇 규칙을 그대로 한 줄로 대조한다.
+                        try:
+                            _rs_v = float(_CMB.loc[sym8_clean, 'RS']) if (not _CMB.empty and sym8_clean in _CMB.index
+                                                                        and pd.notna(_CMB.loc[sym8_clean, 'RS'])) else None
+                        except Exception:
+                            _rs_v = None
+                        _rsmin = float(_LR.get('rs_min', 80))
+                        _mcmin = float(_LR.get('kr_min_mc' if is_kr_sym else 'us_min_mc', 1e11 if is_kr_sym else 3e8))
+                        if is_kr_sym:
+                            _et_x = _LP.get('_et0') or {}
+                            _e_lbl = f"{_et_x.get('state', '판정 불가')} (분기 영업이익 기준)"
+                            _e_ok = _et_x.get('level') == '흑자전환' or '흑자전환' in str(_et_x.get('state'))
+                        else:
+                            _ahx = _LP.get('_ah0') or {}
+                            _e_ok = bool(_ahx.get('rows')) and (pd.Timestamp.today() - pd.Timestamp(_ahx['rows'][0]['주차'])).days <= 7 * 13
+                            _e_lbl = (f"이익 가속 {_ahx['rows'][0]['주차']}" if _ahx.get('rows') else '이익 가속 신호 없음')
+                        _ix = ((_live_plan() or {}).get('index') or {}).get('KR' if is_kr_sym else 'US') or {}
+                        _bst, _btone = _bot_status(sym8_clean)
+                        _rk = [
+                            ('이익', _e_ok, f"{'영업 흑자전환' if is_kr_sym else '이익 가속(최근 13주) 또는 흑자전환'} · 지금: {_e_lbl}"),
+                            (f"RS ≥ {_rsmin:.0f}", None if _rs_v is None else _rs_v >= _rsmin, f"지금 {_rs_v:.0f}" if _rs_v is not None else '공통 지표 명단 밖'),
+                            (f"{int(_LR.get('ma_days', 50))}일선 위", None if _ma50 is None else _p > _ma50,
+                             f"{(_p / _ma50 - 1) * 100:+.1f}%" if _ma50 else '표본 부족'),
+                            ("시총 하한", (mc >= _mcmin) if mc else None,
+                             f"{_mcs} (하한 {('%s억원' % format(_mcmin / 1e8, ',.0f')) if is_kr_sym else ('$%.1fB' % (_mcmin / 1e9))})"),
+                            (f"지수 {_ix.get('lbl', '')}", _ix.get('ok'), (f"{_ix.get('last', 0):,.0f} vs {_ix.get('ma200', 0):,.0f}"
+                                                                         + (' · ⚠️ 오버라이드' if _ix.get('override') else '')) if _ix else '계획 파일 없음'),
+                        ]
+                        _ic = {True: '✅', False: '❌', None: '·'}
+                        _pass = sum(1 for _, o, _ in _rk if o)
+                        st.markdown(f"**🤖 실전 규칙 대조 — {_pass}/{len(_rk)} 통과 · 봇 상태: {_bst}**")
+                        st.markdown("  ·  ".join(f"{_ic[o]} {n} <span style='color:#6B7280'>({t})</span>" for n, o, t in _rk),
+                                    unsafe_allow_html=True)
+                        st.caption(f"봇 규칙 원문 live/PREREG_2026-11.md · 계획 {(_live_plan() or {}).get('made', '-')} 작성 · RS 는 종목 발굴 표와 같은 공통 지표"
+                                   "(봇은 월요일 스냅샷이라 하루 이틀 다를 수 있다). 위 '판정'(추세 템플릿)은 참고 — 실제 주문은 이 줄의 규칙으로 나간다.")
 
                         _pl, _pr = st.columns(2, gap='large')
                         with _pl:
@@ -7775,10 +7898,11 @@ def _tab_analysis():
                             else:
                                 st.caption("목표가를 계산할 재료(컨센서스·PER 밴드·12MF EPS)가 없다.")
                             st.markdown("**🛑 손절 참고선**")
-                            st.markdown(f"- 1차 {_pf_(_st['s1'])} ({_st['s1_pct']:.0f}%) — {_st['why1']}\n"
-                                        f"- 2차 {_pf_(_st['s2'])} ({_st['s2_pct']:.0f}%) — {_st['why2']}\n"
-                                        f"- ⚠️ **매매 원칙 v1**: 위성 종목은 가격 손절을 쓰지 않는다(백테스트 CAGR 15.4% → 9.9%). "
-                                        f"대신 **비중**(한 종목 총자산 {_slot:.1f}%)이 손절을 대신한다 — 위 선은 트레이더식 참고값.")
+                            st.markdown(f"- 🔴 **실전 손절** {_pf_(_st['s1'])} ({_st['s1_pct']:.0f}%) — {_st['why1']}\n"
+                                        f"- 트레이더식 참고 {_pf_(_st['s2'])} ({_st['s2_pct']:.0f}%) — {_st['why2'].replace('참고 · ', '')}\n"
+                                        f"- 실전 규칙: {int(_LR.get('slots', 10))}종목 · 첫 매수 {float(_LR.get('first', 0.5)) * 100:.0f}% → "
+                                        + ' · '.join(f"+{a * 100:.0f}%에 {w * 100:.0f}%" for a, w in (_LR.get('add_steps') or []))
+                                        + f" 불타기 · RS {int(_LR.get('rs_exit', 70))} 미만이면 매도(규칙 원문: live/PREREG)")
                         with _pr:
                             st.markdown(f"**✅ 판정 근거 — {_vd['state']}**")
                             _ico = {'ok': '✅', 'warn': '⚠️', 'bad': '❌', 'na': '·'}
@@ -7787,7 +7911,7 @@ def _tab_analysis():
                                 st.caption(f"리버모어 피벗 {_pf_(_liv['pivot'])}(직전 1년 최고 종가, 최근 2주 제외) · 지금 {_liv['gap']:+.1f}% · "
                                            f"거래량 {('%.1f배' % _liv['vol_ratio']) if _liv.get('vol_ratio') else '-'}(최근 5일 ÷ 그 전 20일). "
                                            f"피라미딩은 첫 매수가 수익일 때만 {_pf_(_liv['adds'][0])}·{_pf_(_liv['adds'][1])}(피벗 +5%·+10%)에서 — "
-                                           "손실 중 추가(물타기)는 금지. 원칙 v1 은 불타기 기본 OFF(검증상 수익 개선 없음).")
+                                           "손실 중 추가(물타기)는 금지. 실전 봇의 불타기는 피벗이 아니라 '체결가 +10%·+20%' 기준이다.")
 
                         # 🚏 정류장 — 전 종목 빅데이터 (2026-10-27 개편)
                         #   사용자 지적: 5% 간격 막대는 '역'을 무시하고 n 미터마다 자른 것. → 전 종목 스윙(한국 1,240종 12.6만 개·
@@ -7866,8 +7990,8 @@ def _tab_analysis():
                         with st.expander("💼 비중 계산 조건 바꾸기"):
                             _k1, _k2 = st.columns(2)
                             _k1.number_input("한 번에 잃어도 되는 금액(총자산 %)", 0.25, 5.0, float(_risk_b), 0.25, key='plan_risk')
-                            _k2.number_input("한 종목 상한(총자산 %) — 원칙 v1 위성 한 칸 1.5", 0.5, 20.0, float(_slot), 0.5, key='plan_slot')
-                            st.caption(f"위험예산식 비중 = {_risk_b:.2f}% ÷ 1차 손절폭 {abs(_st['s1_pct']):.0f}% = **{_ps['risk_size']:.1f}%** → "
+                            _k2.number_input("첫 매수 한 칸(총자산 %) — 실전: 100 ÷ 종목 수 × 첫 매수 비율", 0.5, 30.0, float(_slot), 0.5, key='plan_slot')
+                            st.caption(f"위험예산식 비중 = {_risk_b:.2f}% ÷ 실전 손절폭 {abs(_st['s1_pct']):.0f}% = **{_ps['risk_size']:.1f}%** → "
                                        f"상한 {_slot:.1f}%와 비교해 작은 쪽" + (" → 연 변동성 60% 이상이라 절반" if _ps['half'] else '')
                                        + f". 판정이 '매수 가능 영역'이 아니면 신규 투입 0. 한 종목 최대(트림선) {_ps['trim_cap']:.1f}%. "
                                        "AI 판단이 아니라 같은 입력이면 같은 답이 나오는 규칙이다 — 포트 전체(섹터 쏠림·현금)는 🛡️ 내 포트폴리오 탭에서.")
