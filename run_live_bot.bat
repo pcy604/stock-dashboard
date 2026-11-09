@@ -12,7 +12,8 @@ git pull --rebase --autostash origin main
 "%PYTHON%" live\bot.py --send > live\bot_last.txt 2>&1
 type live\bot_last.txt >> data\live_bot.log
 rem bot_last.txt = 상시 점검(Claude)이 노트북이 돌았는지 확인하는 흔적
-git add live\bot_last.txt live\ledger.json live\trades.jsonl live\violations.jsonl 2>nul
+rem 2026-11-09: 없는 파일(trades.jsonl 등)이 하나라도 섞이면 git add 전체가 실패해 원장이 안 올라갔다 → 파일마다 따로
+for %%F in (live\bot_last.txt live\ledger.json live\trades.jsonl live\violations.jsonl) do if exist %%F git add %%F
 git diff --cached --quiet || git commit -m "auto: 주문 봇 원장 %date%"
 rem 2026-11-09: CI 자동 커밋이 앞서면 push 가 거부됐다 → 올리기 전에 받고, 실패하면 한 번 더
 git pull --rebase --autostash origin main
