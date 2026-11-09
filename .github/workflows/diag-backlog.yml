@@ -1,0 +1,28 @@
+# 수주 데이터 확보 가능성 점검(1회성) — tools/probe_backlog.py 가 바뀌면 실행. 작업 환경은 DART 차단이라 러너에서.
+name: diag-backlog
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tools/probe_backlog.py', '.github/workflows/diag-backlog.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DART_KEY: ${{ secrets.DART_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pandas
+      - run: python tools/probe_backlog.py
+      - if: always()
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add -f data/research/probe_backlog.json || exit 0
+          git commit -m "auto: 수주 데이터 점검 $(date -u +%F)" || exit 0
+          git pull --rebase origin main && git push origin HEAD:main
