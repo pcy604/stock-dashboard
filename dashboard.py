@@ -1148,7 +1148,7 @@ _OB_CSS = """
   .ob2-sec { display:flex; align-items:baseline; justify-content:space-between; margin:22px 2px 10px; }
   .ob2-sec b { font-size:15px; font-weight:750; letter-spacing:-.02em; color:var(--ink); }
   .ob2-sec span { font-size:12px; color:var(--ink-3); }
-  .ob2-step { height:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:var(--radius-sm,10px);
+  .ob2-step { height:100%; min-height:178px; box-sizing:border-box; border:1px solid var(--line); border-radius:var(--radius-sm,10px);
               background:var(--surface); padding:14px 14px 12px; position:relative; }
   .ob2-step.on { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-2); }
   .ob2-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
@@ -1177,12 +1177,14 @@ _OB_HERO = """
   <div class="ob2-kick">QUICK TOUR · 30 SEC</div>
   <h3>시장 → 종목 → 내 계좌,<br>위에서 아래로 좁혀 갑니다</h3>
   <p>공식 공시(DART · SEC EDGAR)와 시장 가격을 매일 자동으로 모아
-     <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를 숫자로 답하는 리서치 도구입니다.</p>
+     <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를 숫자로 답하는 리서치 도구입니다.
+     같은 규칙(실전 v1.9 — 한국)으로 운영자의 자동매매 봇이 실제 계좌를 굴립니다.</p>
   <div class="ob2-chips">
     <span class="ob2-chip">🇰🇷 🇺🇸 한 화면</span>
     <span class="ob2-chip">📄 공식 공시 기반</span>
     <span class="ob2-chip">⏱ 매일 자동 갱신</span>
-    <span class="ob2-chip">🔒 보유 종목은 암호화</span>
+    <span class="ob2-chip">🤖 실전 봇과 같은 규칙</span>
+    <span class="ob2-chip">🔒 보유 종목은 내 계정에만</span>
   </div>
 </div>
 <div class="ob2-sec"><b>다섯 단계, 탭 순서 그대로</b><span>카드 아래 버튼으로 바로 이동</span></div></div>
@@ -1190,17 +1192,17 @@ _OB_HERO = """
 
 # (탭 이름, 질문, 설명, 예상 초) — 탭 이름은 아래 st.tabs 와 글자까지 같아야 버튼이 작동한다
 _OB_STEPS = [
-    ("🏠 종합", "이번 주, 들어가도 되나?", "코어 ON/OFF · 목표 현금비중 · 이번 주 할 일을 한 장에.", 5),
-    ("🌍 매크로", "왜 그렇게 판정했나?", "글로벌 돈의 흐름과 경기 국면. 사계절·달걀 위 현재 위치.", 7),
-    ("🔎 종목 발굴", "그럼 뭘 살까?", "교집합 후보 — 가격 강도 상위이면서 이익이 가속하거나 흑자로 돌아선 종목. 신호 목록이지 포트폴리오가 아닙니다.", 7),
-    ("🔍 종목 분석", "이 종목, 진짜 맞나?", "코드 입력(NVDA · 005930) → 차트 · 재무 3표 · 멀티플 · AI 요약.", 6),
-    ("🛡️ 내 포트폴리오", "내 계좌는 원칙대로인가?", "보유 종목을 손절선 · 비중 원칙에 대 봅니다. 비밀번호로만 열립니다.", 5),
+    ("🏠 종합", "이번 주, 들어가도 되나?", "실전 규칙의 신규 매수 허용 여부 · 오늘 시장 한 줄 · 지수 카드 · 이번 주 할 일.", 5),
+    ("🌍 매크로", "왜 그렇게 판정했나?", "글로벌 돈의 흐름과 경기 국면. 사계절·달걀 위 현재 위치와 한국 수급.", 7),
+    ("🔎 종목 발굴", "그럼 뭘 살까?", "실전 v1.9 후보 — RS 80 이상 × 영업이익 흑자전환 × 주봉 5주선 위. 위 10개가 이번 주 매수 대상.", 7),
+    ("🔍 종목 분석", "이 종목, 진짜 맞나?", "코드 입력(005930 · NVDA) → 결론 한 줄 → 수급 · 펀더멘털 · 밸류 · 촉매 · 매매 계획 중 원하는 축만.", 6),
+    ("🛡️ 내 포트폴리오", "내 계좌는 원칙대로인가?", "보유 종목을 손절선(고점 −20%) · 비중 원칙에 대 봅니다. 구글 로그인 후 내 계정에만.", 5),
 ]
 
 _OB_RULES = """
 <div class="ob2"><div class="ob2-sec"><b>지키는 원칙 세 줄</b><span>도구보다 먼저</span></div>
 <div class="ob2-rules">
-  <div class="ob2-rule acc"><b>판정 → 후보 → 검증</b>시장이 OFF 면 후보가 좋아 보여도 비중을 줄입니다.</div>
+  <div class="ob2-rule acc"><b>판정 → 후보 → 검증</b>지수가 5주선 아래면 후보가 좋아 보여도 신규 매수를 쉽니다.</div>
   <div class="ob2-rule warn"><b>손절가를 먼저</b>사기 전에 자를 가격부터. 기준은 진입가가 아니라 <b>보유 중 고점 대비</b>.</div>
   <div class="ob2-rule pos"><b>숫자는 확률</b>점수·신호는 보장이 아니며 매수 권유가 아닙니다. <code>-</code> 는 오류가 아니라 '데이터 없음'.</div>
 </div>
@@ -1214,29 +1216,36 @@ def _ob_go(name):
 
 
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
-with st.expander("⚡ 처음이신가요? — 30초 투어 (5단계 · 원칙 · 전체 설명서)",
+import ui_home as _UH
+with st.expander("📘 사용법 — 30초 투어 · 할 수 있는 것 · 활용 루틴 · 전체 설명서",
                  expanded=_first_visit and not IS_MOBILE
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
-    st.html(_OB_CSS + _OB_HERO)
-    _tot = sum(s[3] for s in _OB_STEPS)
-    _acc = 0
-    for _i, (_col, (_tab, _q, _d, _sec)) in enumerate(zip(st.columns(len(_OB_STEPS)), _OB_STEPS), 1):
-        _acc += _sec
-        with _col:
-            st.html(_OB_CSS + f"""<div class="ob2"><div class="ob2-step{' on' if _tab == _ob_cur else ''}">
-              <div class="ob2-top"><span class="ob2-n">{_i}</span><span class="ob2-t">~{_sec}s</span></div>
-              <div class="ob2-q">{_q}</div><div class="ob2-tab">{_tab}</div>
-              <div class="ob2-d">{_d}</div>
-              <div class="ob2-bar"><i style="width:{round(_acc / _tot * 100)}%"></i></div></div></div>""")
-            st.button("지금 여기" if _tab == _ob_cur else "열기 →", key=f'ob_go_{_i}', on_click=_ob_go,
-                      args=(_tab,), width='stretch', disabled=_tab == _ob_cur)
-    st.html(_OB_CSS + _OB_RULES)
-    # 구 '프로젝트 종합' 탭에 있던 전체 사용설명서 — 탭을 없애면서 여기로 이관
-    with st.expander("📚 전체 사용설명서 — 개념 사전 · 데이터 신뢰등급 · 자주 묻는 것"):
+    _gt1, _gt2, _gt3, _gt4 = st.tabs(["⚡ 30초 투어", "🧭 할 수 있는 것", "🗓️ 활용 루틴", "📚 전체 설명서"])
+    with _gt2:
+        _UH.caps_panel()
+    with _gt3:
+        _UH.routines_panel()
+    with _gt4:
+        st.caption("구성: ① 처음 5분(배우기) ② 이럴 땐 이렇게(하는 법) ③ 화면·용어 사전(찾아보기) ④ 왜 이렇게 만들었나(이해하기) — Diátaxis 문서 체계")
         try:
             st.markdown(Path('GUIDE.md').read_text(encoding='utf-8'))
         except Exception:
             st.caption("GUIDE.md 없음 — 저장소에서 확인.")
+    with _gt1:
+        st.html(_OB_CSS + _OB_HERO)
+        _tot = sum(s[3] for s in _OB_STEPS)
+        _acc = 0
+        for _i, (_col, (_tab, _q, _d, _sec)) in enumerate(zip(st.columns(len(_OB_STEPS)), _OB_STEPS), 1):
+            _acc += _sec
+            with _col:
+                st.html(_OB_CSS + f"""<div class="ob2"><div class="ob2-step{' on' if _tab == _ob_cur else ''}">
+                  <div class="ob2-top"><span class="ob2-n">{_i}</span><span class="ob2-t">~{_sec}s</span></div>
+                  <div class="ob2-q">{_q}</div><div class="ob2-tab">{_tab}</div>
+                  <div class="ob2-d">{_d}</div>
+                  <div class="ob2-bar"><i style="width:{round(_acc / _tot * 100)}%"></i></div></div></div>""")
+                st.button("지금 여기" if _tab == _ob_cur else "열기 →", key=f'ob_go_{_i}', on_click=_ob_go,
+                          args=(_tab,), width='stretch', disabled=_tab == _ob_cur)
+        st.html(_OB_CSS + _OB_RULES)
 
 # 탭 순서 = 의사결정 순서. 내 돈이 어떻게 되고 있나(포트폴리오) → 뭘 살까(발굴) →
 # 이게 맞나(분석) → 지금 사도 되나(매크로). 구루 인사이트는 2026-08-11 페이지에서 제거
@@ -1334,29 +1343,33 @@ def _ops_counts():
 
 
 def _status_bar(v):
-    """모든 탭 위 한 줄 — 같은 판정을 어느 탭에서 보든 같은 값으로."""
-    c, a, ph, g = v.get('core') or {}, v.get('alloc') or {}, v.get('phase') or {}, v.get('greed') or {}
-    if c:
-        sw = (f"<b style='color:{'#15803d' if c['on'] else '#b91c1c'}'>코어 {'ON' if c['on'] else 'OFF'}</b> "
-              f"S&P500 200일선 {c['gap']:+.1f}%")
+    """모든 탭 위 한 줄 — 같은 판정을 어느 탭에서 보든 같은 값으로.
+    2026-11-10 개편: 맨 앞 = 실전 규칙 v1.9(한국) 지수 게이트. 옛 '코어 ON/OFF · 50/30/20'(원칙 v1.3, 미국 SPY)은
+    실전이 한국 단독(11-04)으로 바뀐 뒤 돈을 움직이지 않는 규칙인데 맨 앞에 있어 판정을 오해하게 했다 → 참고로 내림."""
+    c, ph, g = v.get('core') or {}, v.get('phase') or {}, v.get('greed') or {}
+    gt = _UH.gate(_live_plan() or {})
+    col = {'g': '#15803d', 'r': '#b91c1c', 'y': '#b45309'}.get(gt['tone'], '#6b7280')
+    if gt['rows']:
+        sw = (f"<b style='color:{col}'>신규 매수 {'가능' if gt['tone'] == 'g' else '중지' if gt['tone'] == 'r' else '부분'}</b> "
+              + ' · '.join(f"{r['lab']} 5주선 {'위' if r['rule_ok'] else '아래'}" for r in gt['rows'])
+              + (" <span style='color:#b45309'>(이번 주 오버라이드)</span>" if gt.get('override') else ''))
     else:
-        sw = "<b style='color:#6b7280'>코어 판정 불가</b>"
-    al = (f"목표 코어 {a['core_now']} · 위성 {a['satellite']} · 현금 {a['cash_total']}" if a.get('cash_total') is not None else "목표 비중 —")
+        sw = "<b style='color:#6b7280'>실전 판정 불가</b>"
     ka, stl = _ops_counts()
     bad = (ka or 0) + (stl or 0)
     dat = ("<span style='color:#15803d'>데이터 정상</span>" if bad == 0 and ka is not None
            else f"<span style='color:#b91c1c'>데이터 점검 {bad}건</span>")
-    bits = [sw, al]
+    bits = [sw]
+    if c:
+        bits.append(f"미국 S&P500 200일선 {c['gap']:+.1f}% <span style='color:#9ca3af'>(참고)</span>")
     if ph.get('name'):
         bits.append(f"국면 {ph.get('emoji', '')} {ph['name']} <span style='color:#9ca3af'>(참고)</span>")
     if g.get('word'):
         bits.append(f"경고 {g.get('n', 0)}/3 <span style='color:#9ca3af'>(참고)</span>")
-    bits += [dat, f"<span style='color:#9ca3af'>{v.get('asof') or '-'} 종가 기준</span>"]
+    bits += [dat, f"<span style='color:#9ca3af'>계획표 {gt.get('made') or '-'} · 지수 {v.get('asof') or '-'} 종가</span>"]
     st.markdown("<div style='font-size:13px;padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;"
                 "background:#fafafa;color:#374151;margin:2px 0 6px'>" + " &nbsp;·&nbsp; ".join(bits) + "</div>",
                 unsafe_allow_html=True)
-    if v.get('changed'):
-        st.warning(f"⚠️ 이번 주 코어 스위치 전환 — {'OFF → ON: 코어 복귀' if c.get('on') else 'ON → OFF: 코어를 현금으로'}. 🏠 종합 탭 '할 일' 참고")
 
 
 # 자리만 잡고 맨 끝에서 채운다 — 라이브 계산(macro.json 이 낡았을 때)이 아래 탭 전부를 붙잡지 않게
@@ -9000,81 +9013,102 @@ def _goto_tab(name):
     st.session_state['main_tab'] = name
 
 
-def _home_verdict(V):
-    """① 이번 주 판정 — 🌍 매크로 탭 맨 위 카드와 같은 값(verdict.py)."""
-    st.subheader("① 이번 주 판정")
-    c, a, ph, g, fl, ec = (V.get(k) or {} for k in ('core', 'alloc', 'phase', 'greed', 'flow', 'econ'))
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric('코어 스위치 · 확정 규칙', '판정 불가' if not c else ('ON' if c['on'] else 'OFF'),
-              None if not c else f"S&P500 200일선 {c['gap']:+.1f}%", delta_color='normal' if c else 'off',
-              help='원칙 v1.3 §3 — SPY 종가가 200일 이평 위면 코어 보유, 아래면 코어를 현금으로. 비중을 바꾸는 유일한 규칙')
-    k2.metric('이번 주 목표 비중(%)',
-              '-' if a.get('cash_total') is None else f"{a['core_now']} / {a['satellite']} / {a['cash_total']}",
-              '코어 / 위성 / 현금', delta_color='off', delta_arrow='off',
-              help='시작 배분 50/30/20(executor/config.json). 스위치 OFF 면 코어 몫이 현금으로 간다. 위성에는 시장 필터가 없다(§4)')
-    k3.metric('사이클 국면 · 참고', f"{ph.get('emoji', '')} {ph.get('name') or '-'}",
-              f"욕심 경고 {g.get('n', '-')}/3" if g else None, delta_color='off', delta_arrow='off',
-              help='우라가미 4계절과 참고 경고 3종(신용 스프레드·역국면·강달러) — 백테스트에서 비중 규칙으로 살아남지 못해 표시만 한다')
-    k4.metric('돈의 흐름 · 경기 · 참고', f"{fl.get('word') or '-'}", ec.get('word') or None,
-              delta_color='off', delta_arrow='off', help='🌍 매크로 탭 축 1(자산 8종 200일선)·축 2(선행·동행 지표) 요약')
-    kr = V.get('kr_core') or {}
-    _src = ('results/macro.json (verdict.py · 매일 06:00 KST)' if V.get('_src') == 'file'
-            else f"라이브 계산(verdict.core_switch) — macro.json 이 없거나 낡음({V.get('_file_asof') or '없음'}) · 국면·흐름은 직전 파일 값")
-    _krt = '-' if not kr else f"{'위' if kr['on'] else '아래'} {kr['gap']:+.1f}%"
-    st.caption(f"코스피 200일선 {_krt} — 한국 노출은 지수로 갖는다(원칙 v1.2). 왜 이렇게 판정했는지는 🌍 매크로 탭.")
-    st.caption(f"출처: {_src} · 마지막 갱신: {V.get('asof') or '-'} 종가")
+def _home_top(V):
+    """① 결론 + 시장 — 역피라미드 1·2층(2026-11-10 개편). 결론 배너 → 지수 카드 → 시장 폭·업종."""
+    rep = load_json(Path('results/market_report.json')) or {}
+    gt = _UH.gate(_live_plan() or {})
+    line, ldate = _UH.one_liner(rep)
+    idx = {x['name']: x for x in _UH.indices(rep)}
+    krf = ((rep.get('latest_kr') or {}).get('facts') or {}).get('stocks', {}).get('KR') or {}
+    dly = ((rep.get('latest_daily') or {}).get('facts') or {}).get('stocks', {}).get('KR') or {}
+    chips = []
+    for n in ('코스피', '코스닥', 'S&P500'):
+        d = (idx.get(n) or {}).get('d1')
+        if d is not None:
+            chips.append(f"{n} <b class='{'p' if d > 0 else 'n'}'>{d:+.2f}%</b>")
+    b = krf.get('breadth_all') or {}
+    if b.get('up') is not None:
+        _t = (b.get('up') or 0) + (b.get('down') or 0) + (b.get('flat') or 0)
+        chips.append(f"한국 상승 종목 {b['up'] / _t * 100:.0f}%" if _t else '')
+    ka, stl = _ops_counts()
+    chips.append('데이터 정상' if (ka or 0) + (stl or 0) == 0 and ka is not None else f"⚠️ 데이터 점검 {(ka or 0) + (stl or 0)}건")
+    _UH.hero(gt, line, ldate, [c for c in chips if c])
+    _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
+    _UH.market_cards(list(idx.values()), _asof)
+    if krf:
+        _UH.breadth_sectors(krf, dly, krf.get('asof') or (rep.get('latest_kr') or {}).get('date') or '-')
+    # 옛 '이번 주 판정'(원칙 v1.3 — 미국 SPY 코어/위성 50/30/20) — 실전은 한국 v1.9 단독(11-04)이라 참고로 접어 둔다
+    with st.expander("참고 — 미국 코어 스위치 · 사이클 국면 · 돈의 흐름 (돈을 움직이지 않는 지표)"):
+        c, a, ph, g, fl, ec = (V.get(k) or {} for k in ('core', 'alloc', 'phase', 'greed', 'flow', 'econ'))
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric('미국 코어 스위치 · 원칙 v1.3', '판정 불가' if not c else ('ON' if c['on'] else 'OFF'),
+                  None if not c else f"S&P500 200일선 {c['gap']:+.1f}%", delta_color='normal' if c else 'off',
+                  help='SPY 종가가 200일 이평 위면 코어 보유. 2026-11-04 실전이 한국 단독(v1.7→v1.9)으로 바뀐 뒤 실제 주문에는 쓰지 않는다')
+        k2.metric('옛 목표 비중(%)', '-' if a.get('cash_total') is None else f"{a['core_now']} / {a['satellite']} / {a['cash_total']}",
+                  '코어 / 위성 / 현금', delta_color='off', delta_arrow='off')
+        k3.metric('사이클 국면', f"{ph.get('emoji', '')} {ph.get('name') or '-'}",
+                  f"욕심 경고 {g.get('n', '-')}/3" if g else None, delta_color='off', delta_arrow='off',
+                  help='우라가미 4계절과 경고 3종 — 백테스트에서 비중 규칙으로 살아남지 못해 표시만 한다')
+        k4.metric('돈의 흐름 · 경기', f"{fl.get('word') or '-'}", ec.get('word') or None,
+                  delta_color='off', delta_arrow='off', help='🌍 매크로 탭 축 1·축 2 요약')
+        _src = ('results/macro.json (verdict.py · 매일 06:00 KST)' if V.get('_src') == 'file'
+                else f"라이브 계산 — macro.json 이 없거나 낡음({V.get('_file_asof') or '없음'})")
+        st.caption(f"출처: {_src} · 마지막 갱신: {V.get('asof') or '-'} 종가 · 왜 이런 판정인지는 🌍 매크로 탭")
 
 
 def _home_todo(V):
-    """② 이번 주 할 일 — 원칙 v1 §8 주간 사이클 순서: 데이터 → 코어 → 위성 매도 → 위성 매수 → 보유 점검."""
-    st.subheader("② 이번 주 할 일")
-    c = V.get('core') or {}
+    """② 이번 주 할 일 — 실전 봇의 주간 순서: 데이터 → 지수 게이트 → 매도·손절 → 신규·불타기 → 체결 확인 → 내 보유 점검.
+    2026-11-10: 옛 표(미국 이익가속 신호·코어 스위치)를 실전 v1.9 계획표(live/plan_latest.json)로 교체.
+    매매 상세(종목·수량)는 소유자만 — 콘텐츠 공개 규칙 '체결 후 주간 사후 공개'(11-10)."""
+    st.subheader("이번 주 할 일")
+    pl = _live_plan() or {}
+    kr = (pl.get('sleeves') or {}).get('KR') or {}
+    gt = _UH.gate(pl)
+    try:
+        led = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'ledger.json'), encoding='utf-8'))
+    except Exception:
+        led = {}
     ka, stl = _ops_counts()
-    acc = load_json(Path('results/leaders_accel.json')) or {}
-    cands = acc.get('candidates') or []
     pf = st.session_state.get('pf_eval')
-    rows = []
     bad = (ka or 0) + (stl or 0)
-    rows.append(('① 데이터', '🔴' if bad else '🟢',
-                 f"정답 점검 틀림 {ka}건 · 갱신 정지 {stl}건 — 신호를 쓰기 전에 데이터부터(원칙 §8 ①)" if bad
-                 else '정답 점검·신선도 전 항목 정상'))
-    if not c:
-        rows.append(('② 코어', '⚪', '판정 불가 — 지난주 상태 유지'))
-    elif V.get('changed'):
-        rows.append(('② 코어', '🟠', 'ON 전환 → 코어 복귀 매수' if c['on'] else 'OFF 전환 → 코어 매도, 현금으로'))
+    buys, adds = kr.get('buys') or [], kr.get('adds') or []
+    sells = (kr.get('stops') or []) + (kr.get('exits') or []) + (kr.get('trims') or [])
+    pend = led.get('pending') or {}
+    pos = ((led.get('KR') or {}).get('positions') or {})
+    rows = [('① 데이터', '🔴' if bad else '🟢',
+             f"정답 점검 틀림 {ka}건 · 갱신 정지 {stl}건 — 신호를 쓰기 전에 데이터부터" if bad else '정답 점검·신선도 전 항목 정상'),
+            ('② 지수 게이트', {'g': '🟢', 'r': '🔴', 'y': '🟠'}.get(gt['tone'], '⚪'),
+             gt['head'] + (' — 단 이번 주 오버라이드로 매수 진행' if gt.get('override') else ''))]
+    if _IS_LAB:
+        rows += [('③ 매도·손절', '🟠' if sells else '🟢',
+                  f"{len(sells)}건 — 고점 −20% 손절 · RS 70 미만 탈락" if sells else '해당 없음'),
+                 ('④ 신규·불타기', '🟢' if buys or adds else '⚪',
+                  f"신규 {len(buys)}종 · 불타기 {len(adds)}건 · 예상 사용 {kr.get('cash_krw', 0) - kr.get('cash_after_krw', 0):,.0f}원 "
+                  f"(현금 {kr.get('cash_krw', 0):,.0f} → {kr.get('cash_after_krw', 0):,.0f}원)" if buys or adds else '이번 주 주문 없음'),
+                 ('⑤ 체결 확인', '🟠' if pend else '🟢',
+                  f"체결 대기 {len(pend)}건 · 보유 {len(pos)}종 — 원장(live/ledger.json) 기준" if pend else f"대기 없음 · 보유 {len(pos)}종")]
     else:
-        rows.append(('② 코어', '🟢' if c['on'] else '🔴', '유지 (보유)' if c['on'] else '유지 (현금)'))
-    rows.append(('③ 위성 신규', '🟢' if cands else '⚪',
-                 f"이익가속 신호 {len(cands)}종 ({acc.get('signal_week', '-')} 주) — 시총 작은 순 · 칸당 위성 5% · 월요일 매수 · 보유 중이면 건너뜀"
-                 if cands else f"신규 신호 없음 ({acc.get('signal_week', '-')} 주) — 빈 칸은 S&P500 으로(§4-6)"))
-    rows.append(('④ 보유 점검', ('🟢' if pf and not pf['n_vi'] else '🟠') if pf else '⚪',
+        rows.append(('③ 매수 후보', '⚪', '이번 주 매수 대상은 🔎 종목 발굴 맨 위 표(RS 높은 순 10종). 운영자 계좌 내역은 체결 후 주간 공개'))
+    rows.append(('⑥ 내 보유 점검', ('🟢' if pf and not pf['n_vi'] else '🟠') if pf else '⚪',
                  (f"{pf['grade']} · {pf['n']}종 · 위반 {pf['n_vi']}건" + (' — ' + ' / '.join(pf['top']) if pf['top'] else ''))
-                 if pf else '보유 종목이 아직 없습니다 — 🛡️ 내 포트폴리오 탭에서 토스 잔고를 불러오거나 입력'))
+                 if pf else '🛡️ 내 포트폴리오에서 토스 잔고를 불러오거나 입력하면 손절선·비중 위반을 여기서 같이 봅니다'))
     st.dataframe(pd.DataFrame([{'단계': r[0], '상태': r[1], '할 일': r[2]} for r in rows]),
-                 filters=False, color=False, src='verdict.py · leaders_accel.json · 정답 점검·신선도 · 🛡️ 포트폴리오 평가',
-                 asof=V.get('asof'), use_container_width=True,
+                 filters=False, color=False, src='live/plan_latest.json(주말 계획표) · live/ledger.json · 정답 점검·신선도 · 🛡️ 포트폴리오 평가',
+                 asof=pl.get('made'), use_container_width=True,
                  column_config={'할 일': st.column_config.TextColumn('할 일', width='large')})
-    st.caption("위성 매도(52주 보유 후 33주 신고가 미갱신)·트림(위성 15% 초과)은 보유 기록이 있어야 판정된다 — "
-               "토스 자동매매(executor) 원장이 붙으면 이 표가 주문표가 된다.")
-    if cands:
-        _t = pd.DataFrame([{'종목': x.get('name'), '코드': x.get('sym'), '시총($B)': x.get('mc'),
-                            '신호 주 상승(%)': x.get('up'), '영업이익 가속(%p)': x.get('oia'),
-                            '매출 YoY(%)': x.get('revy'), 'PER': x.get('per')}
-                           for x in sorted(cands, key=lambda x: x.get('mc') or 9e9)])
+    if _IS_LAB and buys:
+        _t = pd.DataFrame([{'종목': x.get('name'), '코드': x.get('sym'), 'RS': x.get('rs'), '기준가(원)': x.get('ref_px'),
+                            '수량(주)': x.get('qty'), '금액(원)': x.get('krw'), '손절가(원)': x.get('stop'),
+                            '불타기 가격(원)': x.get('add_trigger')} for x in buys])
         for _c in _t.columns[2:]:
-            _t[_c] = pd.to_numeric(_t[_c], errors='coerce')        # None → NaN('-'), 숫자 정렬 유지
-        _tsrc('leaders_accel.py — 이익가속 신호 (시총 작은 순 = 원칙 §4 매수 순서)', path='results/leaders_accel.json',
-              asof=acc.get('signal_week'))
-        st.dataframe(_t, filters=False, column_config={
-            '시총($B)': st.column_config.NumberColumn(format='%.2f'),
-            '신호 주 상승(%)': st.column_config.NumberColumn(format='%+.1f'),
-            '영업이익 가속(%p)': st.column_config.NumberColumn(format='%+.1f'),
-            '매출 YoY(%)': st.column_config.NumberColumn(format='%+.1f'),
-            'PER': st.column_config.NumberColumn(format='%.1f')})
-        st.caption("종목·코드 칸을 누르면 🔍 종목 분석으로 · 전체 이력은 🔎 종목 발굴 → 💎 펀더멘털 → 이익가속")
+            _t[_c] = pd.to_numeric(_t[_c], errors='coerce')
+        _tsrc('live/plan.py — 이번 주 신규 매수(소유자만 보임)', path='live/plan_latest.json', asof=pl.get('made'))
+        st.dataframe(_t, filters=False, column_config={c: st.column_config.NumberColumn(format='localized' if c != 'RS' else '%d')
+                                                      for c in _t.columns[2:]})
+        st.caption("손절가 = 기준가 −20%(보유 후엔 보유 중 고점 −20%로 끌어올림) · 불타기 = +10%·+20%에서 25%씩 · 종목·코드 칸을 누르면 🔍 종목 분석")
     b1, b2, b3 = st.columns(3)
     b1.button("🌍 매크로 근거 보기", on_click=_goto_tab, args=("🌍 매크로",), use_container_width=True, key='home_go_macro')
-    b2.button("🔎 발굴 전체 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')
+    b2.button("🔎 이번 주 후보 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')
     b3.button("🛡️ 보유 점검하기", on_click=_goto_tab, args=("🛡️ 내 포트폴리오",), use_container_width=True, key='home_go_pf')
 
 
@@ -9083,30 +9117,35 @@ with guard('이번 주 판정'):
     _VERDICT = _verdict_now()
 with _status_slot, guard('상단 배지'):
     _status_bar(_VERDICT)
-with tab_home, guard('종합 — 판정'):
+with tab_home, guard('종합 — 결론·시장'):
     _lazy(tab_home)
-    st.caption("월요일 아침 이 화면 하나 — ① 판정 ② 할 일 ③ 시황. 판정은 verdict.py 한 곳에서 계산하고 모든 탭이 같은 값을 읽는다.")
-    _home_verdict(_VERDICT)
+    _home_top(_VERDICT)
 with tab_home, guard('종합 — 할 일'):
     _lazy(tab_home)
     _home_todo(_VERDICT)
 
 with tab_rep, guard('시황 리포트'):
     _lazy(tab_home)
-    st.subheader("③ 시황 리포트")
+    st.subheader("시황 리포트")
     _rep = load_json(Path('results/market_report.json')) or {}
-    st.caption("매일 06시(KST) 일간 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
+    st.caption("매일 06시(KST) 일간 · 06:45 한국 장 마감 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
                "뉴스·전망을 지어내지 않도록 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
     _hist = _rep.get('history') or []
     if not _hist:
         st.info("아직 발행된 리포트가 없습니다. 다음 자동 갱신(매일 06시)부터 쌓입니다.")
     else:
-        _opts = [f"{h['date']} · {'일간' if h['kind']=='daily' else '주간'}" for h in _hist]
+        _KN = {'daily': '일간(미국 포함)', 'weekly': '주간', 'kr': '한국 장 마감'}
+        _opts = [f"{h['date']} · {_KN.get(h['kind'], h['kind'])}" for h in _hist]
         _i = st.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick")
         _h = _hist[_i]
         st.caption(f"작성: {'AI(' + _h['engine'].split(':')[-1] + ')' if _h['engine'].startswith('gemini') else '숫자 템플릿'}")
         # 2026-10-24 — 리포트 본문의 #·## 가 탭 제목(①②③)보다 커서 위계가 뒤집혔다 → 두 단계 내려 그린다
-        st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _h['markdown'], flags=re.M))
+        # 2026-11-10 — 숫자·시장 폭·업종은 위 카드와 겹친다 → 체크포인트만 펼쳐 두고 전문은 접는다
+        _ck = re.search(r'##\s*체크포인트\s*\n+(.+?)(?:\n##|\n※|$)', _h['markdown'], flags=re.S)
+        if _ck:
+            st.markdown("**이번에 볼 것 (체크포인트)**\n\n" + _ck.group(1).strip())
+        with st.expander("리포트 전문 — 한 줄 요약 · 숫자 · 강약 종목 · 체크포인트", expanded=not _ck):
+            st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _h['markdown'], flags=re.M))
         _lf = (_rep.get(f"latest_{_h['kind']}") or {})
         # 2026-10-21 — 리포트에 나온 종목을 눌러 종목 분석으로(리포트 → 분석 연결)
         _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
