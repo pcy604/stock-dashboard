@@ -143,6 +143,14 @@ def index_facts():
                             d1=_r((c / s.iloc[-2] - 1) * 100), d5=_r((c / s.iloc[-6] - 1) * 100),
                             m1=_r((c / s.iloc[-22] - 1) * 100), from_52w_high=_r((c / s.max() - 1) * 100),
                             above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None))
+            if sym in ("^KS11", "^KQ11"):   # 실전 v1.9 지수 게이트(주봉 5주선) — 봇 계획표·종합 탭과 같은 계산(verdict.weekly_gate). 2026-11-11
+                try:
+                    import verdict as _V
+                    g = _V.weekly_gate(s)
+                    if g:
+                        out[-1]["gate5w"] = {k: g.get(k) for k in ("on", "gap", "week", "partial", "live_on", "live_gap")}
+                except Exception as e:
+                    print("  5주선 게이트 생략:", str(e)[:60])
         except Exception as e:
             out.append(dict(name=name, sym=sym, error=str(e)[:60]))
     return out
