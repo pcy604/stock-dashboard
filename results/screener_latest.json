@@ -1,101 +1,13 @@
 {
-  "date": "2026-11-10",
-  "total": 532,
+  "date": "2026-11-11",
+  "total": 529,
   "stocks": [
-    {
-      "market": "KR",
-      "sym": "207940",
-      "name": "삼성바이오로직스",
-      "marcap": 69899336010000,
-      "pct_change": 2.65,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -25.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "180640",
-      "name": "한진칼",
-      "marcap": 13853172062500,
-      "pct_change": 37.56,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "역사적",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": 7.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "003490",
-      "name": "대한항공",
-      "marcap": 10715219721900,
-      "pct_change": 11.36,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -0.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "032640",
-      "name": "LG유플러스",
-      "marcap": 6782355157360,
-      "pct_change": 9.28,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -15.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
     {
       "market": "KR",
       "sym": "128940",
       "name": "한미약품",
-      "marcap": 6085220725000,
-      "pct_change": 19.39,
+      "marcap": 6194114148500,
+      "pct_change": 20.98,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -108,7 +20,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -23.9,
+      "dist_52w": -20.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "009420",
+      "name": "한올바이오파마",
+      "marcap": 2439637794600,
+      "pct_change": 33.78,
+      "signals": [
+        "거래량폭발",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -31.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -116,8 +50,8 @@
       "market": "KR",
       "sym": "030000",
       "name": "제일기획",
-      "marcap": 1974935137500,
-      "pct_change": 1.67,
+      "marcap": 1968858414000,
+      "pct_change": 0.21,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -130,52 +64,29 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -16.4,
+      "dist_52w": -16.9,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "181710",
-      "name": "NHN",
-      "marcap": 1926806314000,
-      "pct_change": 61.08,
+      "sym": "007810",
+      "name": "코리아써키트",
+      "marcap": 1650004256000,
+      "pct_change": -1.01,
       "signals": [
-        "52주신고가",
+        "이평선수렴",
         "RSI/MACD"
       ],
       "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
+      "high_type": "",
+      "sig_52w": false,
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
-      "sig_maconv": false,
+      "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -1.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "020560",
-      "name": "아시아나항공",
-      "marcap": 1604667638690,
-      "pct_change": 10.13,
-      "signals": [
-        "52주신고가",
-        "거래량폭발",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": true,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -0.7,
+      "dist_52w": -47.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -183,8 +94,8 @@
       "market": "KR",
       "sym": "006280",
       "name": "녹십자",
-      "marcap": 1597549744600,
-      "pct_change": 0.58,
+      "marcap": 1605730321200,
+      "pct_change": 0.94,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -197,7 +108,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -25.0,
+      "dist_52w": -23.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -205,8 +116,8 @@
       "market": "KR",
       "sym": "192080",
       "name": "더블유게임즈",
-      "marcap": 1153954006000,
-      "pct_change": 7.86,
+      "marcap": 1247117265200,
+      "pct_change": 6.68,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -219,7 +130,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -22.9,
+      "dist_52w": -22.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -227,8 +138,8 @@
       "market": "KR",
       "sym": "000080",
       "name": "하이트진로",
-      "marcap": 1146684539850,
-      "pct_change": -0.56,
+      "marcap": 1121436439890,
+      "pct_change": -0.74,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -241,7 +152,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -17.2,
+      "dist_52w": -17.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -249,8 +160,30 @@
       "market": "KR",
       "sym": "030190",
       "name": "NICE평가정보",
-      "marcap": 1044758526130,
-      "pct_change": 4.04,
+      "marcap": 1051168087640,
+      "pct_change": 6.57,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -0.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "453340",
+      "name": "현대그린푸드",
+      "marcap": 662420374800,
+      "pct_change": 3.27,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -269,32 +202,10 @@
     },
     {
       "market": "KR",
-      "sym": "093320",
-      "name": "케이아이엔엑스",
-      "marcap": 854488000000,
-      "pct_change": -0.4,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -2.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
       "sym": "089590",
       "name": "제주항공",
-      "marcap": 550777927550,
-      "pct_change": 24.32,
+      "marcap": 599162518550,
+      "pct_change": 29.62,
       "signals": [
         "52주신고가",
         "이평선수렴"
@@ -307,7 +218,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 6.2,
+      "dist_52w": 10.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -315,31 +226,52 @@
       "market": "KR",
       "sym": "104700",
       "name": "한국철강",
-      "marcap": 470205000000,
-      "pct_change": 0.16,
+      "marcap": 470569500000,
+      "pct_change": -0.04,
       "signals": [
         "52주신고가",
-        "거래량폭발",
         "RSI/MACD"
       ],
-      "total_signals": 3,
+      "total_signals": 2,
       "high_type": "52주",
       "sig_52w": true,
-      "sig_vol": true,
+      "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": false,
       "sig_rsimacd": true,
-      "dist_52w": -0.6,
+      "dist_52w": -0.7,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "215200",
-      "name": "메가스터디교육",
-      "marcap": 400097337600,
-      "pct_change": 7.41,
+      "sym": "002320",
+      "name": "한진",
+      "marcap": 285232162080,
+      "pct_change": 19.73,
+      "signals": [
+        "거래량폭발",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -12.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "002900",
+      "name": "TYM",
+      "marcap": 269100000000,
+      "pct_change": 7.5,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -352,30 +284,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -18.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "298690",
-      "name": "에어부산",
-      "marcap": 261641284432,
-      "pct_change": 34.11,
-      "signals": [
-        "거래량폭발",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": true,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -13.1,
+      "dist_52w": -31.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -383,8 +292,8 @@
       "market": "KR",
       "sym": "134380",
       "name": "미원화학",
-      "marcap": 257314356000,
-      "pct_change": 5.9,
+      "marcap": 260173404400,
+      "pct_change": 5.62,
       "signals": [
         "5일선라이딩",
         "이평선수렴"
@@ -397,7 +306,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": -23.1,
+      "dist_52w": -23.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -406,56 +315,77 @@
       "sym": "069510",
       "name": "에스텍",
       "marcap": 166377500000,
-      "pct_change": 5.6,
-      "signals": [
-        "거래량폭발",
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": true,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -8.4,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "KR",
-      "sym": "267850",
-      "name": "아시아나IDT",
-      "marcap": 156843000000,
-      "pct_change": 81.24,
+      "pct_change": 37.07,
       "signals": [
         "52주신고가",
-        "이평선수렴",
-        "RSI/MACD"
+        "이평선수렴"
       ],
-      "total_signals": 3,
+      "total_signals": 2,
       "high_type": "역사적",
       "sig_52w": true,
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": 42.5,
+      "sig_rsimacd": false,
+      "dist_52w": 18.9,
       "vol_ratio": null,
       "sector": "기타"
     },
     {
       "market": "KR",
-      "sym": "105740",
-      "name": "디케이락",
-      "marcap": 109819940400,
-      "pct_change": 7.84,
+      "sym": "119830",
+      "name": "아이텍",
+      "marcap": 164538923200,
+      "pct_change": 14.21,
+      "signals": [
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -31.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "136540",
+      "name": "윈스테크넷",
+      "marcap": 139252319640,
+      "pct_change": 2.94,
+      "signals": [
+        "거래량폭발",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -18.4,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "KR",
+      "sym": "120240",
+      "name": "대정화금",
+      "marcap": 105986363340,
+      "pct_change": 0.89,
       "signals": [
         "52주신고가",
-        "이평선수렴"
+        "RSI/MACD"
       ],
       "total_signals": 2,
       "high_type": "52주",
@@ -463,9 +393,9 @@
       "sig_vol": false,
       "sig_ma5": false,
       "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -1.3,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": -2.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -473,8 +403,8 @@
       "market": "KR",
       "sym": "362320",
       "name": "청담글로벌",
-      "marcap": 100774505790,
-      "pct_change": 10.83,
+      "marcap": 102843797490,
+      "pct_change": 6.89,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -487,7 +417,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -44.2,
+      "dist_52w": -43.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -495,7 +425,7 @@
       "market": "US",
       "sym": "LLY",
       "name": "ELI LILLY & Co",
-      "marcap": 1053559835449,
+      "marcap": 1261436086376,
       "pct_change": 0.07,
       "signals": [
         "52주신고가",
@@ -562,7 +492,7 @@
       "market": "US",
       "sym": "JNJ",
       "name": "JOHNSON & JOHNSON",
-      "marcap": 662493210021,
+      "marcap": 690774510131,
       "pct_change": 4.27,
       "signals": [
         "52주신고가",
@@ -607,7 +537,7 @@
       "market": "US",
       "sym": "KO",
       "name": "COCA COLA CO",
-      "marcap": 412251308640,
+      "marcap": 413111675978,
       "pct_change": 0.21,
       "signals": [
         "52주신고가",
@@ -717,6 +647,29 @@
     },
     {
       "market": "US",
+      "sym": "LIN",
+      "name": "LINDE PLC",
+      "marcap": 238875070572,
+      "pct_change": 0.12,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -5.1,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "IBM",
       "name": "INTERNATIONAL BUSINESS MACHINES CORP",
       "marcap": 238652449278,
@@ -734,29 +687,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -26.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LIN",
-      "name": "LINDE PLC",
-      "marcap": 222072601459,
-      "pct_change": 0.12,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -5.1,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -987,6 +917,29 @@
     },
     {
       "market": "US",
+      "sym": "LOW",
+      "name": "LOWES COMPANIES INC",
+      "marcap": 130208103424,
+      "pct_change": 6.39,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -20.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "SBUX",
       "name": "STARBUCKS CORP",
       "marcap": 117857153047,
@@ -1072,29 +1025,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -6.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LOW",
-      "name": "LOWES COMPANIES INC",
-      "marcap": 104346000000,
-      "pct_change": 6.39,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -20.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1415,7 +1345,7 @@
       "market": "US",
       "sym": "ITW",
       "name": "ILLINOIS TOOL WORKS INC",
-      "marcap": 82432206530,
+      "marcap": 81488669122,
       "pct_change": -1.14,
       "signals": [
         "5일선라이딩",
@@ -1866,6 +1796,28 @@
     },
     {
       "market": "US",
+      "sym": "IDXX",
+      "name": "IDEXX LABORATORIES INC /DE",
+      "marcap": 55676955423,
+      "pct_change": 5.21,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -8.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "CVNA",
       "name": "CARVANA CO.",
       "marcap": 54435178474,
@@ -1883,28 +1835,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -21.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "IDXX",
-      "name": "IDEXX LABORATORIES INC /DE",
-      "marcap": 52918516754,
-      "pct_change": 5.21,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -8.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2024,7 +1954,7 @@
       "market": "US",
       "sym": "KDP",
       "name": "Keurig Dr Pepper Inc.",
-      "marcap": 50103805447,
+      "marcap": 50267097223,
       "pct_change": 0.33,
       "signals": [
         "52주신고가",
@@ -2271,7 +2201,7 @@
       "market": "US",
       "sym": "KR",
       "name": "KROGER CO",
-      "marcap": 41562880371,
+      "marcap": 41350081298,
       "pct_change": -0.51,
       "signals": [
         "5일선라이딩",
@@ -2404,6 +2334,29 @@
     },
     {
       "market": "US",
+      "sym": "KMB",
+      "name": "KIMBERLY CLARK CORP",
+      "marcap": 37227918101,
+      "pct_change": 3.4,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -4.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "WEC",
       "name": "WEC ENERGY GROUP, INC.",
       "marcap": 36353652354,
@@ -2445,29 +2398,6 @@
       "sig_maconv": true,
       "sig_rsimacd": false,
       "dist_52w": -9.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "KMB",
-      "name": "KIMBERLY CLARK CORP",
-      "marcap": 36003950000,
-      "pct_change": 3.4,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -4.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2579,6 +2509,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -9.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "IR",
+      "name": "Ingersoll Rand Inc.",
+      "marcap": 33718126934,
+      "pct_change": 5.02,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -13.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2697,28 +2649,6 @@
     },
     {
       "market": "US",
-      "sym": "IR",
-      "name": "Ingersoll Rand Inc.",
-      "marcap": 32107514302,
-      "pct_change": 5.02,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -13.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "CBOE",
       "name": "Cboe Global Markets, Inc.",
       "marcap": 32033563138,
@@ -2759,6 +2689,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -7.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LH",
+      "name": "LABCORP HOLDINGS INC.",
+      "marcap": 30192594909,
+      "pct_change": 4.57,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -0.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3099,28 +3051,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -3.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LH",
-      "name": "LABCORP HOLDINGS INC.",
-      "marcap": 25346579504,
-      "pct_change": 4.57,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": -0.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3537,6 +3467,51 @@
     },
     {
       "market": "US",
+      "sym": "ITT",
+      "name": "ITT INC.",
+      "marcap": 19464332598,
+      "pct_change": 8.07,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -5.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LNT",
+      "name": "ALLIANT ENERGY CORP",
+      "marcap": 18973030901,
+      "pct_change": 0.6,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -6.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "ZBH",
       "name": "ZIMMER BIOMET HOLDINGS, INC.",
       "marcap": 18242182148,
@@ -3555,28 +3530,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -3.7,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "ITT",
-      "name": "ITT INC.",
-      "marcap": 18011263836,
-      "pct_change": 8.07,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -5.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3718,7 +3671,7 @@
       "market": "US",
       "sym": "JLL",
       "name": "JONES LANG LASALLE INC",
-      "marcap": 17325571232,
+      "marcap": 17361200761,
       "pct_change": 0.21,
       "signals": [
         "이평선수렴",
@@ -3733,6 +3686,29 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -4.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "KIM",
+      "name": "KIMCO REALTY CORP",
+      "marcap": 17292950496,
+      "pct_change": 2.83,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -3.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3760,29 +3736,6 @@
     },
     {
       "market": "US",
-      "sym": "LNT",
-      "name": "ALLIANT ENERGY CORP",
-      "marcap": 17007542492,
-      "pct_change": 0.6,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -6.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "HAS",
       "name": "HASBRO, INC.",
       "marcap": 16912184005,
@@ -3800,29 +3753,6 @@
       "sig_maconv": false,
       "sig_rsimacd": false,
       "dist_52w": -2.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "KIM",
-      "name": "KIMCO REALTY CORP",
-      "marcap": 16816689376,
-      "pct_change": 2.83,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -3.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3846,6 +3776,29 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -4.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LAMR",
+      "name": "LAMAR ADVERTISING CO/NEW",
+      "marcap": 16102609876,
+      "pct_change": 0.7,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -4.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3875,29 +3828,6 @@
     },
     {
       "market": "US",
-      "sym": "LAMR",
-      "name": "LAMAR ADVERTISING CO/NEW",
-      "marcap": 15991032117,
-      "pct_change": 0.7,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -4.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "TRU",
       "name": "TransUnion",
       "marcap": 15810937698,
@@ -3915,6 +3845,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -6.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "JAZZ",
+      "name": "Jazz Pharmaceuticals plc",
+      "marcap": 15757685197,
+      "pct_change": 13.57,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -8.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -3960,6 +3912,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -6.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LECO",
+      "name": "LINCOLN ELECTRIC HOLDINGS INC",
+      "marcap": 15404407825,
+      "pct_change": -0.37,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -8.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -4121,28 +4095,6 @@
     },
     {
       "market": "US",
-      "sym": "LECO",
-      "name": "LINCOLN ELECTRIC HOLDINGS INC",
-      "marcap": 14142009057,
-      "pct_change": -0.37,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -8.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "OHI",
       "name": "OMEGA HEALTHCARE INVESTORS INC",
       "marcap": 14038604835,
@@ -4182,28 +4134,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -12.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "JAZZ",
-      "name": "Jazz Pharmaceuticals plc",
-      "marcap": 13874268157,
-      "pct_change": 13.57,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -8.6,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -4455,6 +4385,29 @@
     },
     {
       "market": "US",
+      "sym": "KYMR",
+      "name": "Kymera Therapeutics, Inc.",
+      "marcap": 11848299398,
+      "pct_change": 8.9,
+      "signals": [
+        "52주신고가",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": 0.6,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "CCK",
       "name": "CROWN HOLDINGS, INC.",
       "marcap": 11724558231,
@@ -4700,29 +4653,6 @@
     },
     {
       "market": "US",
-      "sym": "KYMR",
-      "name": "Kymera Therapeutics, Inc.",
-      "marcap": 10879855069,
-      "pct_change": 8.9,
-      "signals": [
-        "52주신고가",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": 0.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "R",
       "name": "RYDER SYSTEM INC",
       "marcap": 10768122951,
@@ -4762,6 +4692,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -27.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LTH",
+      "name": "Life Time Group Holdings, Inc.",
+      "marcap": 10528446012,
+      "pct_change": 7.01,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -3.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -4902,6 +4854,28 @@
     },
     {
       "market": "US",
+      "sym": "LLYVA",
+      "name": "Liberty Live Holdings, Inc.",
+      "marcap": 9578584260,
+      "pct_change": 2.11,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -4.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "TTC",
       "name": "TORO CO",
       "marcap": 9520338719,
@@ -4919,6 +4893,28 @@
       "sig_maconv": false,
       "sig_rsimacd": false,
       "dist_52w": -2.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LEVI",
+      "name": "LEVI STRAUSS & CO",
+      "marcap": 9413956175,
+      "pct_change": 4.65,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -6.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -4988,28 +4984,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -1.1,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LTH",
-      "name": "Life Time Group Holdings, Inc.",
-      "marcap": 9120611460,
-      "pct_change": 7.01,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -3.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -5127,23 +5101,23 @@
     },
     {
       "market": "US",
-      "sym": "LLYVA",
-      "name": "Liberty Live Holdings, Inc.",
-      "marcap": 8836137869,
-      "pct_change": 2.11,
+      "sym": "KNSL",
+      "name": "Kinsale Capital Group, Inc.",
+      "marcap": 8690414631,
+      "pct_change": 1.7,
       "signals": [
-        "이평선수렴",
-        "RSI/MACD"
+        "5일선라이딩",
+        "이평선수렴"
       ],
       "total_signals": 2,
       "high_type": "",
       "sig_52w": false,
       "sig_vol": false,
-      "sig_ma5": false,
+      "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -4.8,
+      "sig_rsimacd": false,
+      "dist_52w": -8.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -5194,29 +5168,6 @@
     },
     {
       "market": "US",
-      "sym": "IDA",
-      "name": "IDACORP INC",
-      "marcap": 8623018237,
-      "pct_change": -0.22,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -5.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "CNM",
       "name": "Core & Main, Inc.",
       "marcap": 8619737242,
@@ -5234,6 +5185,29 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -19.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "IDA",
+      "name": "IDACORP INC",
+      "marcap": 8603661650,
+      "pct_change": -0.22,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -5.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -5261,28 +5235,6 @@
     },
     {
       "market": "US",
-      "sym": "KNSL",
-      "name": "Kinsale Capital Group, Inc.",
-      "marcap": 8544999891,
-      "pct_change": 1.7,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -8.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "ALV",
       "name": "AUTOLIV INC",
       "marcap": 8525654777,
@@ -5300,6 +5252,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -5.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "KNSA",
+      "name": "Kiniksa Pharmaceuticals International, plc",
+      "marcap": 8386705307,
+      "pct_change": 8.77,
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": 0.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -5344,6 +5318,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -7.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LNC",
+      "name": "LINCOLN NATIONAL CORP",
+      "marcap": 8184383289,
+      "pct_change": 3.24,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -9.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -5527,50 +5523,6 @@
     },
     {
       "market": "US",
-      "sym": "KNSA",
-      "name": "Kiniksa Pharmaceuticals International, plc",
-      "marcap": 7710741707,
-      "pct_change": 8.77,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": 0.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LNC",
-      "name": "LINCOLN NATIONAL CORP",
-      "marcap": 7660719858,
-      "pct_change": 3.24,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -9.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "VSXY",
       "name": "Victoria's Secret & Co.",
       "marcap": 7632000122,
@@ -5616,6 +5568,28 @@
     },
     {
       "market": "US",
+      "sym": "LOAR",
+      "name": "Loar Holdings Inc.",
+      "marcap": 7361260277,
+      "pct_change": 15.7,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -4.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "PB",
       "name": "PROSPERITY BANCSHARES INC",
       "marcap": 7358212452,
@@ -5633,28 +5607,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -5.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LEVI",
-      "name": "LEVI STRAUSS & CO",
-      "marcap": 7304605181,
-      "pct_change": 4.65,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -6.2,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -6380,28 +6332,6 @@
     },
     {
       "market": "US",
-      "sym": "LOAR",
-      "name": "Loar Holdings Inc.",
-      "marcap": 5815367506,
-      "pct_change": 15.7,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -4.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "OUT",
       "name": "OUTFRONT Media Inc.",
       "marcap": 5700663620,
@@ -6577,6 +6507,28 @@
       "sig_maconv": true,
       "sig_rsimacd": false,
       "dist_52w": -2.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LPX",
+      "name": "LOUISIANA-PACIFIC CORP",
+      "marcap": 5476696794,
+      "pct_change": 3.63,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -21.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -6782,6 +6734,29 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -20.9,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LIVN",
+      "name": "LivaNova PLC",
+      "marcap": 5101589415,
+      "pct_change": 15.46,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -6.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -7078,28 +7053,6 @@
     },
     {
       "market": "US",
-      "sym": "LPX",
-      "name": "LOUISIANA-PACIFIC CORP",
-      "marcap": 4593516690,
-      "pct_change": 3.63,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -21.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "COLD",
       "name": "AMERICOLD REALTY TRUST",
       "marcap": 4571368137,
@@ -7184,6 +7137,50 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -3.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "KTB",
+      "name": "Kontoor Brands, Inc.",
+      "marcap": 4477091123,
+      "pct_change": 6.05,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -7.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "ICUI",
+      "name": "ICU MEDICAL INC/DE",
+      "marcap": 4473056358,
+      "pct_change": 10.14,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -7.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -7281,7 +7278,7 @@
       "market": "US",
       "sym": "ITRI",
       "name": "ITRON, INC.",
-      "marcap": 4374515272,
+      "marcap": 4383284673,
       "pct_change": 0.2,
       "signals": [
         "이평선수렴",
@@ -7323,6 +7320,28 @@
     },
     {
       "market": "US",
+      "sym": "IPAR",
+      "name": "INTERPARFUMS INC",
+      "marcap": 4360793850,
+      "pct_change": 13.6,
+      "signals": [
+        "52주신고가",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": true,
+      "dist_52w": -0.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "ARX",
       "name": "Accelerant Holdings",
       "marcap": 4344385209,
@@ -7340,6 +7359,29 @@
       "sig_maconv": false,
       "sig_rsimacd": false,
       "dist_52w": -0.1,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "KRC",
+      "name": "KILROY REALTY CORP",
+      "marcap": 4294176377,
+      "pct_change": 1.15,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -15.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -7367,6 +7409,28 @@
     },
     {
       "market": "US",
+      "sym": "JOE",
+      "name": "ST JOE Co",
+      "marcap": 4250768920,
+      "pct_change": 9.04,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": 2.2,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "THO",
       "name": "THOR INDUSTRIES INC",
       "marcap": 4249410435,
@@ -7389,33 +7453,10 @@
     },
     {
       "market": "US",
-      "sym": "KRC",
-      "name": "KILROY REALTY CORP",
-      "marcap": 4245339048,
-      "pct_change": 1.15,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -15.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "KTB",
-      "name": "Kontoor Brands, Inc.",
-      "marcap": 4221506993,
-      "pct_change": 6.05,
+      "sym": "LION",
+      "name": "Lionsgate Studios Corp.",
+      "marcap": 4241489806,
+      "pct_change": 17.3,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -7428,30 +7469,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -7.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LIVN",
-      "name": "LivaNova PLC",
-      "marcap": 4208081305,
-      "pct_change": 15.46,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -6.8,
+      "dist_52w": -14.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -7547,31 +7565,9 @@
     },
     {
       "market": "US",
-      "sym": "ICUI",
-      "name": "ICU MEDICAL INC/DE",
-      "marcap": 4061139997,
-      "pct_change": 10.14,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -7.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "INDB",
       "name": "INDEPENDENT BANK CORP",
-      "marcap": 4043297708,
+      "marcap": 4060916367,
       "pct_change": 0.44,
       "signals": [
         "이평선수렴",
@@ -7635,28 +7631,6 @@
     },
     {
       "market": "US",
-      "sym": "JOE",
-      "name": "ST JOE Co",
-      "marcap": 3898282920,
-      "pct_change": 9.04,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": 2.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "SMG",
       "name": "SCOTTS MIRACLE-GRO CO",
       "marcap": 3863315840,
@@ -7701,28 +7675,6 @@
     },
     {
       "market": "US",
-      "sym": "IPAR",
-      "name": "INTERPARFUMS INC",
-      "marcap": 3838753962,
-      "pct_change": 13.6,
-      "signals": [
-        "52주신고가",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": true,
-      "dist_52w": -0.3,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "PLSE",
       "name": "PULSE BIOSCIENCES, INC.",
       "marcap": 3827032459,
@@ -7762,6 +7714,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -41.6,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "IRON",
+      "name": "Disc Medicine, Inc.",
+      "marcap": 3700648918,
+      "pct_change": 3.36,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -18.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -7895,28 +7869,6 @@
       "sig_maconv": false,
       "sig_rsimacd": false,
       "dist_52w": 2.2,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "IRON",
-      "name": "Disc Medicine, Inc.",
-      "marcap": 3580421123,
-      "pct_change": 3.36,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -18.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -8188,28 +8140,6 @@
       "sig_maconv": false,
       "sig_rsimacd": true,
       "dist_52w": -1.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LION",
-      "name": "Lionsgate Studios Corp.",
-      "marcap": 3315153285,
-      "pct_change": 17.3,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -14.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -8774,6 +8704,28 @@
     },
     {
       "market": "US",
+      "sym": "KSS",
+      "name": "KOHLS Corp",
+      "marcap": 2825341018,
+      "pct_change": 3.19,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -2.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "NBTB",
       "name": "NBT BANCORP INC",
       "marcap": 2770729911,
@@ -8813,28 +8765,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -14.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "KSS",
-      "name": "KOHLS Corp",
-      "marcap": 2738041103,
-      "pct_change": 3.19,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": -2.7,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -9310,6 +9240,28 @@
     },
     {
       "market": "US",
+      "sym": "IDT",
+      "name": "IDT CORP",
+      "marcap": 2065336781,
+      "pct_change": 0.44,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩"
+      ],
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": -2.3,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "ZYME",
       "name": "Zymeworks Inc.",
       "marcap": 2063808853,
@@ -9371,28 +9323,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -9.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "IDT",
-      "name": "IDT CORP",
-      "marcap": 2056338566,
-      "pct_change": 0.44,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": -2.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -9692,7 +9622,7 @@
       "market": "US",
       "sym": "JJSF",
       "name": "J&J SNACK FOODS CORP",
-      "marcap": 1661245045,
+      "marcap": 1659195954,
       "pct_change": -0.12,
       "signals": [
         "5일선라이딩",
@@ -9982,7 +9912,7 @@
       "sym": "ESBA",
       "name": "Empire State Realty OP, L.P.",
       "marcap": 1344735000,
-      "pct_change": 6.31,
+      "pct_change": 1.42,
       "signals": [
         "5일선라이딩",
         "이평선수렴",
@@ -9996,7 +9926,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -31.4,
+      "dist_52w": -34.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -10653,6 +10583,51 @@
     },
     {
       "market": "US",
+      "sym": "INN",
+      "name": "Summit Hotel Properties, Inc.",
+      "marcap": 777615779,
+      "pct_change": 1.55,
+      "signals": [
+        "52주신고가",
+        "5일선라이딩",
+        "이평선수렴"
+      ],
+      "total_signals": 3,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": false,
+      "dist_52w": -2.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "IRWD",
+      "name": "IRONWOOD PHARMACEUTICALS INC",
+      "marcap": 774777528,
+      "pct_change": 35.26,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -19.0,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "CNNE",
       "name": "Cannae Holdings, Inc.",
       "marcap": 767290098,
@@ -10670,29 +10645,6 @@
       "sig_maconv": true,
       "sig_rsimacd": false,
       "dist_52w": -4.6,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "INN",
-      "name": "Summit Hotel Properties, Inc.",
-      "marcap": 765752001,
-      "pct_change": 1.55,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩",
-        "이평선수렴"
-      ],
-      "total_signals": 3,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": false,
-      "dist_52w": -2.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -10836,18 +10788,17 @@
       "marcap": 660300886,
       "pct_change": 1.12,
       "signals": [
-        "거래량폭발",
-        "이평선수렴",
-        "RSI/MACD"
+        "5일선라이딩",
+        "이평선수렴"
       ],
-      "total_signals": 3,
+      "total_signals": 2,
       "high_type": "",
       "sig_52w": false,
-      "sig_vol": true,
-      "sig_ma5": false,
+      "sig_vol": false,
+      "sig_ma5": true,
       "sig_cup": false,
       "sig_maconv": true,
-      "sig_rsimacd": true,
+      "sig_rsimacd": false,
       "dist_52w": -25.0,
       "vol_ratio": null,
       "sector": "기타"
@@ -11026,28 +10977,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -4.0,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "IRWD",
-      "name": "IRONWOOD PHARMACEUTICALS INC",
-      "marcap": 572805635,
-      "pct_change": 35.26,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -19.0,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -11301,7 +11230,7 @@
       "market": "US",
       "sym": "JOUT",
       "name": "JOHNSON OUTDOORS INC",
-      "marcap": 496858059,
+      "marcap": 497689078,
       "pct_change": 0.17,
       "signals": [
         "이평선수렴",
@@ -11316,6 +11245,28 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -10.5,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "LOCO",
+      "name": "El Pollo Loco Holdings, Inc.",
+      "marcap": 476543330,
+      "pct_change": 1.28,
+      "signals": [
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 2,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -9.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -11338,28 +11289,6 @@
       "sig_maconv": true,
       "sig_rsimacd": true,
       "dist_52w": -6.9,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "LOCO",
-      "name": "El Pollo Loco Holdings, Inc.",
-      "marcap": 459923234,
-      "pct_change": 1.28,
-      "signals": [
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 2,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": false,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -9.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -11588,6 +11517,29 @@
     },
     {
       "market": "US",
+      "sym": "IIIV",
+      "name": "i3 Verticals, Inc.",
+      "marcap": 417831853,
+      "pct_change": 4.83,
+      "signals": [
+        "5일선라이딩",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 3,
+      "high_type": "",
+      "sig_52w": false,
+      "sig_vol": false,
+      "sig_ma5": true,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": -35.8,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
       "sym": "SHOE",
       "name": "SHOE STATION GROUP INC",
       "marcap": 414641708,
@@ -11632,47 +11584,23 @@
     },
     {
       "market": "US",
-      "sym": "IIIV",
-      "name": "i3 Verticals, Inc.",
-      "marcap": 398573951,
-      "pct_change": 4.83,
+      "sym": "JAKK",
+      "name": "JAKKS PACIFIC INC",
+      "marcap": 407770269,
+      "pct_change": 12.53,
       "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
+        "52주신고가",
+        "5일선라이딩"
       ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
+      "total_signals": 2,
+      "high_type": "52주",
+      "sig_52w": true,
       "sig_vol": false,
       "sig_ma5": true,
       "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -35.8,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
-      "sym": "RVRF",
-      "name": "River Financial Corp",
-      "marcap": 390812450,
-      "pct_change": 0.0,
-      "signals": [
-        "5일선라이딩",
-        "이평선수렴",
-        "RSI/MACD"
-      ],
-      "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": true,
-      "sig_rsimacd": true,
-      "dist_52w": -4.3,
+      "sig_maconv": false,
+      "sig_rsimacd": false,
+      "dist_52w": 2.5,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -11702,7 +11630,7 @@
       "market": "US",
       "sym": "ISTR",
       "name": "Investar Holding Corp",
-      "marcap": 388472606,
+      "marcap": 387511358,
       "pct_change": -0.25,
       "signals": [
         "컵위드핸들",
@@ -11766,28 +11694,6 @@
     },
     {
       "market": "US",
-      "sym": "JAKK",
-      "name": "JAKKS PACIFIC INC",
-      "marcap": 362360522,
-      "pct_change": 12.53,
-      "signals": [
-        "52주신고가",
-        "5일선라이딩"
-      ],
-      "total_signals": 2,
-      "high_type": "52주",
-      "sig_52w": true,
-      "sig_vol": false,
-      "sig_ma5": true,
-      "sig_cup": false,
-      "sig_maconv": false,
-      "sig_rsimacd": false,
-      "dist_52w": 2.5,
-      "vol_ratio": null,
-      "sector": "기타"
-    },
-    {
-      "market": "US",
       "sym": "CVEO",
       "name": "Civeo Corp",
       "marcap": 354037420,
@@ -11835,7 +11741,7 @@
       "sym": "AVBH",
       "name": "Avidbank Holdings, Inc.",
       "marcap": 341014813,
-      "pct_change": -0.72,
+      "pct_change": 0.2,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -11857,21 +11763,45 @@
       "sym": "BUKS",
       "name": "BUTLER NATIONAL CORP",
       "marcap": 330702165,
-      "pct_change": -2.3,
+      "pct_change": 1.36,
       "signals": [
-        "5일선라이딩",
+        "52주신고가",
         "이평선수렴",
         "RSI/MACD"
       ],
       "total_signals": 3,
-      "high_type": "",
-      "sig_52w": false,
+      "high_type": "52주",
+      "sig_52w": true,
       "sig_vol": false,
-      "sig_ma5": true,
+      "sig_ma5": false,
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -4.0,
+      "dist_52w": -1.7,
+      "vol_ratio": null,
+      "sector": "기타"
+    },
+    {
+      "market": "US",
+      "sym": "KINS",
+      "name": "KINGSTONE COMPANIES, INC.",
+      "marcap": 317148063,
+      "pct_change": 7.3,
+      "signals": [
+        "52주신고가",
+        "거래량폭발",
+        "이평선수렴",
+        "RSI/MACD"
+      ],
+      "total_signals": 4,
+      "high_type": "52주",
+      "sig_52w": true,
+      "sig_vol": true,
+      "sig_ma5": false,
+      "sig_cup": false,
+      "sig_maconv": true,
+      "sig_rsimacd": true,
+      "dist_52w": 4.3,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -11879,8 +11809,8 @@
       "market": "US",
       "sym": "ISBA",
       "name": "ISABELLA BANK CORP",
-      "marcap": 312315654,
-      "pct_change": 0.78,
+      "marcap": 311397537,
+      "pct_change": 2.06,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -11893,7 +11823,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -30.1,
+      "dist_52w": -30.8,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -11922,7 +11852,7 @@
     }
   ],
   "fetch_fail_pct": {
-    "KR": 0.5,
+    "KR": 0.6,
     "US": 0.8
   }
 }
