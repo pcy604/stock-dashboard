@@ -50,4 +50,16 @@ fk = dict(kind="kr", generated="2026-10-21 15:52", verdict={},
 t = M.template(fk)
 assert "한국 장 마감 시황" in t and "오늘 수익률" in t and "US" not in t and "이익가속" not in t, t
 print("✅ 한국 장 마감 리포트(오늘 등락·휴장 판정 재료)")
+# 52주 신고가(장중 고가 ≥ 52주 고가 — hi52 가 오늘 고가를 이미 포함해도 잡힌다) · 특징주 · 거래대금 상위 — 2026-11-11
+al = pd.DataFrame({"Code": ["000001", "000002", "000003", "000004"], "Name": ["신고가A", "장중만B", "급등C", "상한D"],
+                   "Marcap": [5e11, 5e11, 3e11, 2e11], "Close": [110.0, 99.0, 50.0, 30.0], "High": [110.0, 99.5, 51.0, 30.0],
+                   "Amount": [9e10, 1e10, 5e10, 2e10], "_r": [3.0, 5.0, 12.0, 30.0]})
+M._j = lambda p: {"date": "2026-11-11", "stocks": [
+    {"market": "KR", "sym": "000001", "hi52": 110.0}, {"market": "KR", "sym": "000002", "hi52": 100.0}]}
+mv = M.kr_movers(al, "2026-11-11")
+assert mv["new_high_52w"]["n"] == 1 and mv["new_high_52w"]["top"][0]["name"] == "신고가A" and mv["new_high_52w"]["top"][0]["close_high"], mv["new_high_52w"]
+assert [r["name"] for r in mv["featured"]] == ["급등C", "상한D"] and mv["featured"][1]["tag"] == "상한가", "거래대금 순"
+assert mv["featured"][0]["tag"] == "거래대금 2위" and mv["turnover_top"][0]["amt_b"] == 900, mv
+assert "new_high_52w" not in M.kr_movers(al, "2026-11-12"), "어제 고점표로 오늘 신고가를 판정하지 않는다"
+print("✅ 52주 신고가·특징주·거래대금 상위")
 print("ALL PASS")

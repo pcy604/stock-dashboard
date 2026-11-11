@@ -252,11 +252,69 @@ def kr_today_facts(today=None):
         sectors.sort(key=lambda x: -x["ret"])
     except Exception as e:
         print("  업종 집계 생략:", str(e)[:80])
-    return {"KR": dict(universe=len(big), basis="d1", asof=today,
-                       top=[row(r) for _, r in big[::-1].head(6).iterrows()],
-                       bottom=[row(r) for _, r in big.head(6).iterrows()],
-                       breadth_up=round((big["_r"] > 0).mean() * 100) if len(big) else None,
-                       breadth_all=breadth, turnover_tn=turnover, megacaps=mega, sectors=sectors)}
+    out = dict(universe=len(big), basis="d1", asof=today,
+               top=[row(r) for _, r in big[::-1].head(6).iterrows()],
+               bottom=[row(r) for _, r in big.head(6).iterrows()],
+               breadth_up=round((big["_r"] > 0).mean() * 100) if len(big) else None,
+               breadth_all=breadth, turnover_tn=turnover, megacaps=mega, sectors=sectors)
+    try:
+        out.update(kr_movers(allr, today))
+    except Exception as e:
+        print("  신고가·특징주 생략:", str(e)[:80])
+    return {"KR": out}
+
+
+def kr_movers(allr, today):
+    """2026-11-11 차니 요청 — 시황에 '52주 신고가·특징주 탑 몇 개'.
+
+    · 52주 신고가: 오늘 **장중 고가 ≥ 52주 최고가**(perf_latest.hi52 = 주봉 고가). 뉴스의 '장중 52주 신고가'와 같은 정의.
+      ⚠️ 처음엔 '종가 > hi52' 로 했다가 0종이 나왔다 — perf_run 이 장중에 다시 돌아 hi52 에 **오늘 고가가 이미 들어 있다**
+      (11-11 에스텍 종가 = hi52). '≥ 고가' 는 hi52 가 오늘을 포함하든 안 하든 맞다. 종가까지 고점이면 close_high 표시.
+      대상은 perf_run 유니버스(시총 1천억+). perf_latest 가 오늘 판이 아니면 생략. 목록에 High 열이 없으면(스냅샷) 생략.
+    · 거래대금 상위: 오늘 돈이 몰린 곳 — 지수 대장주와 겹쳐도 그대로 보여 준다.
+    · 특징주: 상한가 + (시총 1천억+ · 거래대금 300억+ 중 +10% 이상 급등). 이유 꼬리표를 같이 단다.
+    """
+    import pandas as pd
+    res = {}
+    amt = pd.to_numeric(allr["Amount"], errors="coerce") if "Amount" in allr else None
+    a = allr.assign(_amt=amt if amt is not None else 0)
+    if amt is not None:
+        a["_amt_rank"] = a["_amt"].rank(ascending=False, method="first")
+        tv = a.sort_values("_amt", ascending=False).head(10)
+        res["turnover_top"] = [dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1), amt_b=int(round(r["_amt"] / 1e8)))
+                               for _, r in tv.iterrows() if r["_amt"] > 0]
+    # 특징주 — 상한가 + 거래대금 300억+ 급등. **거래대금 순**(11-11: 상한가 10종이 우선주·소형주로 칸을 다 채워
+    #   주성엔지니어링 2,563억 +12.8% 가 밀렸다 — 돈이 몰린 쪽이 특징주다).
+    feat = {}
+    for _, r in a[a["_r"] >= 29.5].iterrows():
+        feat[r["Code"]] = dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1), tag="상한가", _a=float(r["_amt"] or 0))
+    if amt is not None:
+        hot = a[(a["Marcap"] >= 1e11) & (a["_amt"] >= 3e10) & (a["_r"] >= 10)]
+        for _, r in hot.iterrows():
+            feat.setdefault(r["Code"], dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1),
+                                            tag=f"거래대금 {int(r['_amt_rank'])}위", _a=float(r["_amt"])))
+    fl = sorted(feat.values(), key=lambda x: -x["_a"])[:8]
+    res["featured"] = [{k: v for k, v in x.items() if k != "_a"} for x in fl]
+    lu = a[a["_r"] >= 29.5].sort_values("_amt", ascending=False)
+    res["limit_up"] = [dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1)) for _, r in lu.iterrows()]
+    # 52주 신고가
+    p = _j("results/perf_latest.json")
+    if p.get("date") == today and "High" in a:
+        hi = {s["sym"]: s for s in p.get("stocks", []) if s.get("market") == "KR" and s.get("hi52")}
+        nh = []
+        for _, r in a.iterrows():
+            s = hi.get(str(r["Code"]).zfill(6))
+            hv = pd.to_numeric(r.get("High"), errors="coerce")
+            if s and pd.notna(hv) and hv > 0 and float(hv) >= float(s["hi52"]):
+                nh.append(dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1), marcap=float(r["Marcap"]),
+                               amt=float(r["_amt"] or 0), young=bool(s.get("young")),
+                               close_high=bool(float(r["Close"]) >= float(hv))))
+        nh.sort(key=lambda x: -x["amt"])          # 돈이 몰린 신고가부터
+        res["new_high_52w"] = dict(n=len(nh), universe=len(hi),
+                                   top=[{k: v for k, v in x.items() if k in ("name", "sym", "ret", "young", "close_high")} for x in nh[:8]])
+    else:
+        print(f"  perf_latest 날짜 {p.get('date')} ≠ {today} 또는 High 열 없음 → 52주 신고가 생략")
+    return res
 
 
 _SEC_NAME = {  # KSIC 업종명 → 읽히는 이름. 없으면 _sec_short 규칙. (삼성전자는 KSIC상 '통신 및 방송 장비'다 — 대장주를 같이 적는 이유)
@@ -383,6 +441,14 @@ def template(f):
         b, t = kr["breadth_all"], kr.get("turnover_tn") or {}
         L += ["", f"**시장 폭** 상승 {b['up']:,} · 하락 {b['down']:,} · 보합 {b['flat']:,} · 상한가 {b['limit_up']} · 하한가 {b['limit_down']}"
               + (" · 거래대금 " + " · ".join(f"{k} {v:,.1f}조" for k, v in t.items()) if t else "")]
+    nh = kr.get("new_high_52w") or {}
+    if nh:
+        L.append(f"**52주 신고가(장중)** {nh['n']}종/{nh['universe']:,}종"
+                 + (" — " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in nh["top"][:6]) if nh["top"] else ""))
+    if kr.get("featured"):
+        L.append("**특징주** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['tag']})" for r in kr["featured"]))
+    if kr.get("turnover_top"):
+        L.append("**거래대금 상위** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['amt_b']:,}억)" for r in kr["turnover_top"][:5]))
     if kr.get("megacaps"):
         L.append("**시총 상위 10** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in kr["megacaps"]))
     if kr.get("sectors"):
