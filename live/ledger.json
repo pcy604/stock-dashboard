@@ -5,8 +5,139 @@
   "deposits": []
  },
  "KR": {
-  "cash_krw": 300000,
-  "positions": {},
+  "cash_krw": 61370,
+  "positions": {
+   "010170": {
+    "name": "대한광통신",
+    "shares": 2,
+    "avg": 11120.0,
+    "first_px": 11120.0,
+    "peak": 12970.0,
+    "stop": 10376.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 12970.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "228850": {
+    "name": "레이언스",
+    "shares": 3,
+    "avg": 7356.7,
+    "first_px": 7356.7,
+    "peak": 7610.0,
+    "stop": 6088.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 7610.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "446540": {
+    "name": "메가터치",
+    "shares": 4,
+    "avg": 5690.0,
+    "first_px": 5690.0,
+    "peak": 7190.0,
+    "stop": 5752.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 7190.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "092190": {
+    "name": "서울바이오시스",
+    "shares": 4,
+    "avg": 6480.0,
+    "first_px": 6480.0,
+    "peak": 7150.0,
+    "stop": 5720.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 7150.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "046890": {
+    "name": "서울반도체",
+    "shares": 2,
+    "avg": 8960.0,
+    "first_px": 8960.0,
+    "peak": 9920.0,
+    "stop": 7936.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 9920.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "356680": {
+    "name": "엑스게이트",
+    "shares": 2,
+    "avg": 13200.0,
+    "first_px": 13200.0,
+    "peak": 14040.0,
+    "stop": 11232.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 14040.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "046970": {
+    "name": "우리로",
+    "shares": 4,
+    "avg": 6215.0,
+    "first_px": 6215.0,
+    "peak": 6900.0,
+    "stop": 5520.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 6900.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "317400": {
+    "name": "자이에스앤디",
+    "shares": 3,
+    "avg": 7566.7,
+    "first_px": 7566.7,
+    "peak": 8200.0,
+    "stop": 6560.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 8200.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "396300": {
+    "name": "HT로보틱스",
+    "shares": 4,
+    "avg": 6640.0,
+    "first_px": 6640.0,
+    "peak": 6970.0,
+    "stop": 5576.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 6970.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   },
+   "024840": {
+    "name": "KBI메탈",
+    "shares": 8,
+    "avg": 3400.0,
+    "first_px": 3400.0,
+    "peak": 3610.0,
+    "stop": 2888.0,
+    "added": false,
+    "adds": 0,
+    "last_px": 3610.0,
+    "opened": "2026-11-09",
+    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
+   }
+  },
   "deposits": [
    [
     "2026-11-03",
@@ -15,147 +146,18 @@
   ]
  },
  "plan_note": "2026-11-04 v1.7: 한국 단독. 첫 입금 30만(KR). 2026-12부터 매달 100만 전부 KR",
- "done_ids": [],
- "pending": {
-  "2026-11-08-010170-BUY": {
-   "orderId": "BuwIYGLzNvnbI8AnJulybtuYPS41z7R3pA0EMGwoXc9ph6022f11T4VqvfDxy0_ngFnl6yV_CYD7n9BqB8nG9A",
-   "o": {
-    "sym": "010170",
-    "name": "대한광통신",
-    "side": "BUY",
-    "quantity": 1,
-    "px": 10890.0,
-    "why": "신규: 흑자전환 RS98",
-    "cid": "2026-11-08-010170-BUY",
-    "lim": 11970
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-046970-BUY": {
-   "orderId": "rSxMUPL2IYbaDIHlZtg05Z2EsJq4qicmF-kUPMvoYBNcaK8fmCMG-AQ_GpaKmw9_VwExq2C47U5fU6Xtc2a68g",
-   "o": {
-    "sym": "046970",
-    "name": "우리로",
-    "side": "BUY",
-    "quantity": 2,
-    "px": 6080.0,
-    "why": "신규: 흑자전환 RS98",
-    "cid": "2026-11-08-046970-BUY",
-    "lim": 6680
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-092190-BUY": {
-   "orderId": "mI-3gzZHT5YY2f8A_GCzxWYVQlhmzXe4uyvgs5O28n-Q1QX_tR2cVxWvg0-pRUUCpO_iWRuAuiBWsntYcWqUAg",
-   "o": {
-    "sym": "092190",
-    "name": "서울바이오시스",
-    "side": "BUY",
-    "quantity": 2,
-    "px": 6080.0,
-    "why": "신규: 흑자전환 RS98",
-    "cid": "2026-11-08-092190-BUY",
-    "lim": 6680
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-396300-BUY": {
-   "orderId": "ewgQatE8Vb6s1LnOpIQzaO_qYuTc0C79qknNjrmYefUu2hmoOG96XIA34YdgGRK3xirNJ1vUbnfqDIoqbSgN-w",
-   "o": {
-    "sym": "396300",
-    "name": "HT로보틱스",
-    "side": "BUY",
-    "quantity": 2,
-    "px": 6780.0,
-    "why": "신규: 흑자전환 RS97",
-    "cid": "2026-11-08-396300-BUY",
-    "lim": 7450
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-356680-BUY": {
-   "orderId": "k95WcDea1pp878eCfK4eFtK10rBJsoLRSjvn2SuWXUM13yJBm6GLvT4u_sYLbB9FnHRTsbQOgMHoeerWmoEo0A",
-   "o": {
-    "sym": "356680",
-    "name": "엑스게이트",
-    "side": "BUY",
-    "quantity": 1,
-    "px": 11920.0,
-    "why": "신규: 흑자전환 RS95",
-    "cid": "2026-11-08-356680-BUY",
-    "lim": 13110
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-024840-BUY": {
-   "orderId": "brnpvEmEANtXSkxqUS8fWZ2cUzuIGe_1DNYSBK-ZV6EzjQhnfbSeCVx0G_tOUFfOvz_ezBGHMqJVEyjVWXEECw",
-   "o": {
-    "sym": "024840",
-    "name": "KBI메탈",
-    "side": "BUY",
-    "quantity": 4,
-    "px": 3465.0,
-    "why": "신규: 흑자전환 RS94",
-    "cid": "2026-11-08-024840-BUY",
-    "lim": 3810
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-317400-BUY": {
-   "orderId": "WVWgVNB6xremAbnwjGSEl18vJwfGL9YdWDfdcYjA0TnsHW10bLCl4ujuB7qgTGQaXb0z86Cpfti6Lb8O9QqSzQ",
-   "o": {
-    "sym": "317400",
-    "name": "자이에스앤디",
-    "side": "BUY",
-    "quantity": 2,
-    "px": 7250.0,
-    "why": "신규: 흑자전환 RS93",
-    "cid": "2026-11-08-317400-BUY",
-    "lim": 7970
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-446540-BUY": {
-   "orderId": "NB5bt1VIMA6Hg8esk-pe6N2yWyf640XcaOZh1tAV0sK8zPcegD_Nm0fFbMI2uwx8qzp5XojK0ssqvXZZb4R_sg",
-   "o": {
-    "sym": "446540",
-    "name": "메가터치",
-    "side": "BUY",
-    "quantity": 2,
-    "px": 5910.0,
-    "why": "신규: 흑자전환 RS92",
-    "cid": "2026-11-08-446540-BUY",
-    "lim": 6500
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-046890-BUY": {
-   "orderId": "rSxMUPL2IYbaDIHlZtg05a9RUggwapF3ygSkJXwXuhKpFg-7wPAVwUnQAxzbQSgatBHluwegFvc3gglmKMhPBw",
-   "o": {
-    "sym": "046890",
-    "name": "서울반도체",
-    "side": "BUY",
-    "quantity": 1,
-    "px": 8890.0,
-    "why": "신규: 흑자전환 RS91",
-    "cid": "2026-11-08-046890-BUY",
-    "lim": 9770
-   },
-   "at": "2026-11-09"
-  },
-  "2026-11-08-228850-BUY": {
-   "orderId": "IJeC7XbGeKrtb0-Vb9CT0uH1CCrtQ_qyIoCH5PyUdZNE95QxkIBX6KT_yJ9cS5UgEhsIC63kd29ixTpGxYkPtg",
-   "o": {
-    "sym": "228850",
-    "name": "레이언스",
-    "side": "BUY",
-    "quantity": 2,
-    "px": 7400.0,
-    "why": "신규: 흑자전환 RS89",
-    "cid": "2026-11-08-228850-BUY",
-    "lim": 8140
-   },
-   "at": "2026-11-09"
-  }
- }
+ "done_ids": [
+  "2026-11-08-010170-BUY",
+  "2026-11-08-024840-BUY",
+  "2026-11-08-046890-BUY",
+  "2026-11-08-046970-BUY",
+  "2026-11-08-092190-BUY",
+  "2026-11-08-228850-BUY",
+  "2026-11-08-317400-BUY",
+  "2026-11-08-356680-BUY",
+  "2026-11-08-396300-BUY",
+  "2026-11-08-446540-BUY"
+ ],
+ "pending": {},
+ "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)"
 }

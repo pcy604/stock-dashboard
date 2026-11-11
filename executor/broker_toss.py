@@ -202,3 +202,36 @@ class TossTrader(TossReader):
 
     def order(self, account_seq, order_id):
         return self._get(f"/api/v1/orders/{order_id}", account=account_seq, what="주문 상세") or {}
+
+
+# ── 주문·거래내역 조회 (2026-11-11 — 공식 스펙 1.2.28 대조) ─────────────────
+#   GET /api/v1/orders?status=OPEN|CLOSED&symbol=&from=&to=&cursor=&limit=  → result{orders[], hasNext, nextCursor}
+#       OPEN 은 전량 반환(limit·cursor 무시). 체결은 orders[].execution{filledQuantity, averageFilledPrice, commission, filledAt}
+#   GET /api/v1/transactions?transactionTypes=BUY,SELL,…&from=&to=&cursor=&limit=  → result{transactions[], hasNext, nextCursor}
+#       from/to 는 **결제일** 기준(미결제는 예상 결제일) — 오늘 산 건 to=오늘+3일 이상으로 받아야 보인다.
+#   ⚠️ clientOrderId 멱등은 **10분만** 유효 — 그 뒤 같은 값은 새 주문이 된다(11-09 이중 체결 원인).
+def _pages(reader, path, account, params, key, what, max_pages=20):
+    out, cur = [], None
+    for _ in range(max_pages):
+        q = dict(params)
+        if cur:
+            q["cursor"] = cur
+        res = reader._get(path, account=account, params=q, what=what) or {}
+        out += res.get(key) or []
+        if not res.get("hasNext") or not res.get("nextCursor"):
+            break
+        cur = res["nextCursor"]
+    return out
+
+
+def list_orders(reader, account_seq, status="OPEN", symbol=None, frm=None, to=None):
+    q = {"status": status}
+    if status == "CLOSED":
+        q["limit"] = 100
+    q.update({k: v for k, v in (("symbol", symbol), ("from", frm), ("to", to)) if v})
+    return _pages(reader, "/api/v1/orders", account_seq, q, "orders", f"주문 목록({status})")
+
+
+def list_transactions(reader, account_seq, frm, to, types=("BUY", "SELL", "DEPOSIT", "WITHDRAWAL", "FEE", "DIVIDEND")):
+    q = {"from": frm, "to": to, "limit": 100, "transactionTypes": ",".join(types)}
+    return _pages(reader, "/api/v1/transactions", account_seq, q, "transactions", "거래내역")

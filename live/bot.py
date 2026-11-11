@@ -223,7 +223,14 @@ def guard(orders, L, plan, eq, cash_krw=None):
 
 # ── 체결 반영 ──────────────────────────────────────────────────────────
 def _fill(res):
-    """주문 상세 응답에서 체결 수량·평균가. 필드 이름은 첫 실주문에서 확정(넓게 읽는다)."""
+    """주문 상세 응답에서 체결 수량·평균가.
+    2026-11-11: 공식 스펙상 체결은 result.execution{filledQuantity, averageFilledPrice, commission} 안에 있다.
+    예전엔 최상위만 읽어 체결을 영영 못 알아봤다(11-09 주문이 '대기'로 남은 원인) → execution 먼저."""
+    res = dict(res or {})
+    ex = res.get("execution")
+    if isinstance(ex, dict):
+        res = {**res, **{k: v for k, v in ex.items() if v not in (None, "")}}
+
     def n(*ks):
         for k in ks:
             try:
@@ -282,14 +289,17 @@ def run(send=False, phase="reg"):
     msg = [("🔴 실전" if live else "🧪 모의") + f" 주문 봇 {day} · 🇰🇷 · " + ("시가 단일가 창" if phase == "pre" else "정규장")]
     cid, sec = _keys()
     T = acct = cash = None
+    legacy = []
     if cid and sec:
         from executor.broker_toss import TossTrader, TossError
         try:
             T = TossTrader(cid, sec, live=live)
             accts = T.accounts()
             acct = (accts[0] or {}).get("accountSeq") if accts else None
-            diff, legacy = reconcile(L[M]["positions"], T.holdings(acct))
+            hold = T.holdings(acct)
+            diff, legacy = reconcile(L[M]["positions"], hold)
             cash = T.cash(acct).get("KRW")
+            _toss_snapshot(L, T, acct, hold, cash, day)
             if legacy:
                 msg.append(f"  · 시스템 밖 국내 보유(건드리지 않음): {', '.join(legacy[:8])}")
             if diff:
@@ -327,6 +337,17 @@ def run(send=False, phase="reg"):
             if o["side"] == "BUY":
                 o["lim"] = limit_px(o["px"])
     orders, blocked = guard(orders, L, plan, eq, cash)
+    if T is not None:                                            # 2026-11-11 이중 주문 차단 — clientOrderId 는 10분만 막는다
+        held = set(legacy) | set(L[M]["positions"])
+        open_syms = {str(x.get("symbol")) for x in (L.get("toss") or {}).get("open_orders", [])}
+        keep = []
+        for o in orders:
+            if o["side"] == "BUY" and o["sym"] in open_syms:
+                blocked.append(f"{o['sym']} 토스에 진행 중 주문 있음 — 이중 주문 방지"); continue
+            if o["side"] == "BUY" and "-BUY" in o["cid"] and o["sym"] in held:
+                blocked.append(f"{o['sym']} 이미 토스에 보유 — 신규 매수 생략(원장 반영 먼저)"); continue
+            keep.append(o)
+        orders = keep
     if live:
         mark_peaks(L, closes)
     for n_ in notes + [f"차단: {w}" for w in blocked]:
@@ -348,6 +369,7 @@ def run(send=False, phase="reg"):
             msg.append(line + " (모의 — 보낼 요청 생성만)"); continue
         oid = r.get("orderId")
         L["pending"][o["cid"]] = dict(orderId=oid, o=o, at=day)
+        _save(L)                                                  # 2026-11-11: 주문 직후 바로 저장 — 중간에 죽어도 다음 실행이 같은 주문을 또 내지 않게
         if phase == "pre":                                        # 09:00 시가에 체결 — 09:10 실행이 확인
             msg.append(line + " ⏳ 시가 체결 대기"); continue
         for _ in range(10):                                       # 시장가라 대개 바로 체결
@@ -363,9 +385,43 @@ def run(send=False, phase="reg"):
     return _done(msg, send, L, save=live)
 
 
+def _save(L):
+    LEDGER.write_text(json.dumps(L, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def _toss_snapshot(L, T, acct, hold, cash, day):
+    """2026-11-11 — 토스에서 본 그대로를 원장 'toss' 칸에 남긴다(보유·현금·진행 중 주문·최근 30일 거래내역).
+    원장은 매 실행 커밋되니 Claude·차니가 노트북 없이 GitHub 에서 매매 기록을 본다. 실패해도 봇은 계속."""
+    from executor.broker_toss import list_orders, list_transactions
+    snap = dict(at=datetime.now(KST).strftime("%Y-%m-%d %H:%M KST"), cash_krw=cash,
+                holdings=[{k: h.get(k) for k in ("sym", "name", "qty", "avg_cost", "last_price", "pnl_pct")}
+                          for h in hold if (h.get("market") or "").upper() == "KR"])
+    try:
+        snap["open_orders"] = [{k: x.get(k) for k in ("orderId", "symbol", "side", "orderType", "price", "quantity", "status", "orderedAt")}
+                               for x in list_orders(T, acct, "OPEN")]
+    except Exception as e:
+        snap["open_orders"], snap["open_orders_err"] = [], f"{type(e).__name__}: {str(e)[:120]}"
+    try:
+        d0 = date.fromisoformat(day)
+        tx = list_transactions(T, acct, str(d0 - timedelta(days=30)), str(d0 + timedelta(days=5)))
+        snap["tx"] = [{k: x.get(k) for k in ("transactionTime", "transactionType", "symbol", "quantity", "filledPrice",
+                                              "amount", "commission", "tax", "settled", "settlementDate", "isCancellation")}
+                      for x in tx if (x.get("marketCountry") or "KR") == "KR"]
+    except Exception as e:
+        snap["tx"], snap["tx_err"] = [], f"{type(e).__name__}: {str(e)[:120]}"
+    L["toss"] = snap
+    try:                                                          # 대조에서 멈추는 실행(save=False)도 이 칸만은 남긴다
+        disk = _load(LEDGER, {})
+        if disk:
+            disk["toss"] = snap
+            _save(disk)
+    except Exception:
+        pass
+
+
 def _done(msg, send, L, save):
     if save:
-        LEDGER.write_text(json.dumps(L, ensure_ascii=False, indent=1), encoding="utf-8")
+        _save(L)
     text = "\n".join(msg)
     print(text)
     tok, chat = os.environ.get("TELEGRAM_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
