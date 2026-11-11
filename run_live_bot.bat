@@ -8,7 +8,11 @@ set PYTHON=C:\Users\lg\AppData\Local\Python\bin\python.exe
 set DIR=C:\Users\lg\Desktop\stock_screener
 set LIVE_TRADING=ON
 cd /d %DIR%
-git pull --rebase --autostash origin main
+rem 2026-11-11: 노트북의 다른 작업이 data\krx_listing_last.csv(.asof)를 고치고 CI 도 같은 파일을 커밋 → autostash 되돌리기 충돌로
+rem   '병합 안 된 파일'이 남아 11-10~11 봇 결과가 커밋·푸시되지 못했다. 데이터 파일은 CI 가 주인 — 노트북 수정본은 버리고 시작한다.
+git rebase --abort >nul 2>&1
+git checkout HEAD -- data/krx_listing_last.csv data/krx_listing_last.csv.asof >nul 2>&1
+git pull --rebase --autostash origin main || echo ⛔ git pull 실패 — 노트북 저장소 확인 필요(git status)
 "%PYTHON%" live\bot.py --send > live\bot_last.txt 2>&1
 type live\bot_last.txt >> data\live_bot.log
 rem bot_last.txt = 상시 점검(Claude)이 노트북이 돌았는지 확인하는 흔적
