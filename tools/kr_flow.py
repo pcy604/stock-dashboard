@@ -115,8 +115,13 @@ def investor_day(mk: str, d: str) -> dict | None:
     bd = str(j.get('bizdate') or '')
     if not j or bd[:8] != d:                    # 휴장일이면 다른 날을 돌려준다 → 버린다
         return None
-    return dict(date=f'{bd[:4]}-{bd[4:6]}-{bd[6:8]}', 개인=_num(j.get('personalValue')),
-                외국인=_num(j.get('foreignValue')), 기관=_num(j.get('institutionalValue')))
+    row = dict(date=f'{bd[:4]}-{bd[4:6]}-{bd[6:8]}', 개인=_num(j.get('personalValue')),
+               외국인=_num(j.get('foreignValue')), 기관=_num(j.get('institutionalValue')))
+    # 2026-11-11 — 장 시작 전·집계 전에는 그날 날짜로 0·0·0 을 돌려준다(08-17 행도 같은 모양). 실행이 늦게 돌면
+    #   (cron 17:47 이 실제로는 다음 날 01~04시) 두 시장 다 0 이 되어 아래 '두 시장 같다' 점검이 실패했다 → 버린다.
+    if not any(row[k] for k in ('개인', '외국인', '기관')):
+        return None
+    return row
 
 
 def investor(mk: str, days: int = 95, prev: list | None = None) -> list[dict]:
@@ -209,7 +214,8 @@ def main() -> int:
              src='네이버 증권 — 투자자별 순매수(m.stock.naver.com/api/index/*/trend) · 증시자금동향(stock.naver.com/api/domestic/market/trendDeposit), 단위 억원',
              investor=inv, deposit=dep, summary=summarize(inv, dep), err=ERR)
     print(f"투자자 코스피 {len(inv['KOSPI'])}일 · 코스닥 {len(inv['KOSDAQ'])}일 · 자금동향 {len(dep)}일 · 실패 {ERR}")
-    if inv['KOSPI'] and inv['KOSDAQ'] and inv['KOSPI'][-1]['외국인'] == inv['KOSDAQ'][-1]['외국인']:
+    if (inv['KOSPI'] and inv['KOSDAQ'] and inv['KOSPI'][-1]['date'] == inv['KOSDAQ'][-1]['date']
+            and inv['KOSPI'][-1]['외국인'] and inv['KOSPI'][-1]['외국인'] == inv['KOSDAQ'][-1]['외국인']):
         print('::error::코스피와 코스닥 수급이 같다 — sosok 매개변수가 무시됐을 수 있다')
         return 1
     if ok < 2:
