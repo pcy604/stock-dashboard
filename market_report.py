@@ -261,7 +261,69 @@ def kr_today_facts(today=None):
         out.update(kr_movers(allr, today))
     except Exception as e:
         print("  신고가·특징주 생략:", str(e)[:80])
+    try:
+        out["heatmap"] = kr_heatmap(big, today)
+    except Exception as e:
+        print("  히트맵 생략:", str(e)[:80])
+    try:
+        fl = kr_flow_today(today)
+        if fl:
+            out["flow"] = fl
+    except Exception as e:
+        print("  수급 생략:", str(e)[:80])
     return {"KR": out}
+
+
+_HM_GROUP = [  # 네이버 업종(59종) → 히트맵 묶음(방송 히트맵 수준). 위에서부터 첫 일치. 2026-11-11
+    ("반도체", ("반도체",)),
+    ("2차전지·전기제품", ("전기제품",)),
+    ("전력기기", ("전기장비",)),
+    ("자동차", ("자동차",)),
+    ("조선", ("조선",)),
+    ("방산·항공", ("우주항공", "국방")),
+    ("금융", ("은행", "증권", "보험", "금융", "창업투자", "카드")),
+    ("바이오·제약", ("제약", "생물공학", "건강관리", "생명과학")),
+    ("IT하드웨어", ("전자장비", "디스플레이", "전자제품", "핸드셋", "통신장비", "컴퓨터")),
+    ("인터넷·게임·엔터", ("양방향미디어", "IT서비스", "소프트웨어", "게임", "방송", "광고", "출판")),
+    ("에너지·소재", ("석유", "화학", "철강", "비철", "금속", "종이")),
+    ("기계·건설", ("기계", "건설", "건축")),
+    ("지주", ("복합기업",)),
+    ("소비재", ("식품", "화장품", "음료", "담배", "백화점", "판매업체", "호텔", "레저", "섬유", "가정용", "교육")),
+    ("통신·유틸리티", ("통신서비스", "유틸리티")),
+    ("운송", ("항공사", "해운", "운송", "도로")),
+]
+
+
+def _hm_group(upjong):
+    for g, keys in _HM_GROUP:
+        if any(k in (upjong or "") for k in keys):
+            return g
+    return "기타"
+
+
+def kr_heatmap(big, today):
+    """업종 히트맵(봇 시황 카드 2장째, 2026-11-11) — 시총 1조+ 종목의 이름·업종 묶음·시총(조)·등락.
+    업종은 네이버 업종(data/sector_detail.json) → _HM_GROUP 16묶음. KSIC 는 삼성전자를 '통신·방송장비'로 둬서 쓰지 않는다."""
+    sd = (_j("data/sector_detail.json") or {}).get("kr") or {}
+    rows = [dict(name=r["Name"], sym=r["Code"], sec=_hm_group((sd.get(str(r["Code"]).zfill(6)) or {}).get("upjong")),
+                 mc=round(float(r["Marcap"]) / 1e12, 2), ret=_r(r["_r"], 1)) for _, r in big.iterrows()]
+    rows.sort(key=lambda x: -x["mc"])
+    return rows
+
+
+def kr_flow_today(today):
+    """오늘 투자자별 순매수(억원) — 코스피·코스닥. 네이버 모바일 API(tools/kr_flow.investor_day 재사용).
+    장 마감 직후(15:50)엔 잠정치다 — 카드에 '잠정' 표기. 휴장일·실패면 빈 값."""
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools"))
+    import kr_flow
+    d = today.replace("-", "")
+    out = {}
+    for mk in ("KOSPI", "KOSDAQ"):
+        r = kr_flow.investor_day(mk, d)
+        if r:
+            out[mk] = {k: r[k] for k in ("개인", "외국인", "기관")}
+    return out
 
 
 def kr_movers(allr, today):

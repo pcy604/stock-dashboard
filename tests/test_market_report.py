@@ -63,3 +63,11 @@ assert mv["featured"][0]["tag"] == "거래대금 2위" and mv["turnover_top"][0]
 assert "new_high_52w" not in M.kr_movers(al, "2026-11-12"), "어제 고점표로 오늘 신고가를 판정하지 않는다"
 print("✅ 52주 신고가·특징주·거래대금 상위")
 print("ALL PASS")
+# 업종 히트맵 묶음(네이버 업종 → 16묶음) — 2026-11-11
+assert M._hm_group("반도체와반도체장비") == "반도체" and M._hm_group("손해보험") == "금융" and M._hm_group("전기제품") == "2차전지·전기제품"
+assert M._hm_group("전기장비") == "전력기기" and M._hm_group("자동차부품") == "자동차" and M._hm_group(None) == "기타"
+M._j = lambda p: {"kr": {"005930": {"upjong": "반도체와반도체장비"}}}
+hm = M.kr_heatmap(pd.DataFrame({"Code": ["005930", "999999"], "Name": ["삼성전자", "모름"], "Marcap": [1.2e15, 2e12], "_r": [2.8, -1.0]}), "2026-11-11")
+assert hm[0] == dict(name="삼성전자", sym="005930", sec="반도체", mc=1200.0, ret=2.8) and hm[1]["sec"] == "기타", hm
+print("✅ 업종 히트맵 묶음")
+print("ALL PASS")
