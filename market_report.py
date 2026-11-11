@@ -359,6 +359,10 @@ def kr_movers(allr, today):
     res["featured"] = [{k: v for k, v in x.items() if k != "_a"} for x in fl]
     lu = a[a["_r"] >= 29.5].sort_values("_amt", ascending=False)
     res["limit_up"] = [dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1)) for _, r in lu.iterrows()]
+    try:   # 오늘의 테마 (2026-11-11)
+        res.update(kr_themes(a))
+    except Exception as e:
+        print("  테마 생략:", str(e)[:80])
     # 52주 신고가
     p = _j("results/perf_latest.json")
     if p.get("date") == today and "High" in a:
@@ -377,6 +381,40 @@ def kr_movers(allr, today):
     else:
         print(f"  perf_latest 날짜 {p.get('date')} ≠ {today} 또는 High 열 없음 → 52주 신고가 생략")
     return res
+
+
+_THEME_SKIP = ("SPAC", "기업인수목적")
+
+
+def kr_themes(a, min_theme=5):
+    """오늘의 강세·약세 테마 — 네이버 테마(data/sector_detail.json, 주 1회 갱신)별 구성 종목 단순 평균 등락(구성 min_theme 종+).
+    한국 마감시황 방송의 '오늘의 테마' 코너. 히트맵(kr_heatmap)이 업종 단위라면 이건 재료 단위다. 2026-11-11"""
+    sd = _j("data/sector_detail.json") or {}
+    det = sd.get("kr") or {}
+    b = a.assign(Code=a["Code"].astype(str).str.zfill(6))
+    # 테마
+    th = {}
+    for _, r in b.iterrows():
+        for t in (det.get(r["Code"]) or {}).get("themes") or []:
+            if not any(x in t for x in _THEME_SKIP):
+                th.setdefault(t, []).append(r)
+    rows = []
+    for t, rs in th.items():
+        if len(rs) < min_theme:
+            continue
+        rets = [x["_r"] for x in rs]
+        lead = sorted(rs, key=lambda x: -x["_r"])[:3]
+        rows.append(dict(name=t.split("(")[0].strip()[:16], n=len(rs), ret=_r(sum(rets) / len(rets), 1),
+                         up=sum(1 for v in rets if v > 0),
+                         lead=[dict(name=x["Name"], ret=_r(x["_r"], 1)) for x in lead],
+                         lag=[dict(name=x["Name"], ret=_r(x["_r"], 1)) for x in sorted(rs, key=lambda x: x["_r"])[:3]]))
+    rows.sort(key=lambda x: -x["ret"])
+    # 같은 이름으로 잘린 테마(예: '코로나19') 중복 제거
+    seen, uniq = set(), []
+    for x in rows:
+        if x["name"] not in seen:
+            seen.add(x["name"]); uniq.append(x)
+    return dict(themes_top=uniq[:6], themes_bottom=uniq[::-1][:4], themes_asof=sd.get("asof"))
 
 
 _SEC_NAME = {  # KSIC 업종명 → 읽히는 이름. 없으면 _sec_short 규칙. (삼성전자는 KSIC상 '통신 및 방송 장비'다 — 대장주를 같이 적는 이유)
@@ -507,6 +545,9 @@ def template(f):
     if nh:
         L.append(f"**52주 신고가(장중)** {nh['n']}종/{nh['universe']:,}종"
                  + (" — " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in nh["top"][:6]) if nh["top"] else ""))
+    if kr.get("themes_top"):
+        L.append("**강세 테마** " + ", ".join(f"{t['name']} {t['ret']:+.1f}%({'·'.join(x['name'] for x in t['lead'][:2])})" for t in kr["themes_top"][:3])
+                 + " · **약세** " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in kr.get("themes_bottom", [])[:2]))
     if kr.get("featured"):
         L.append("**특징주** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['tag']})" for r in kr["featured"]))
     if kr.get("turnover_top"):

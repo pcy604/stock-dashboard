@@ -61,7 +61,12 @@ assert mv["new_high_52w"]["n"] == 1 and mv["new_high_52w"]["top"][0]["name"] == 
 assert [r["name"] for r in mv["featured"]] == ["급등C", "상한D"] and mv["featured"][1]["tag"] == "상한가", "거래대금 순"
 assert mv["featured"][0]["tag"] == "거래대금 2위" and mv["turnover_top"][0]["amt_b"] == 900, mv
 assert "new_high_52w" not in M.kr_movers(al, "2026-11-12"), "어제 고점표로 오늘 신고가를 판정하지 않는다"
-print("✅ 52주 신고가·특징주·거래대금 상위")
+M._j = lambda p: {"kr": {"000001": {"themes": ["HBM"]}, "000002": {"themes": ["HBM", "SPAC 테마"]}, "000003": {"themes": ["HBM"]},
+                        "000004": {"themes": ["HBM", "기타"]}}} if "sector_detail" in p else {}
+th = M.kr_themes(al, min_theme=2)
+assert th["themes_top"][0]["name"] == "HBM" and th["themes_top"][0]["n"] == 4 and th["themes_top"][0]["lead"][0]["name"] == "상한D", th
+assert all("SPAC" not in x["name"] for x in th["themes_top"]), "스팩 제외"
+print("✅ 52주 신고가·특징주·거래대금 상위 · 오늘의 테마")
 print("ALL PASS")
 # 업종 히트맵 묶음(네이버 업종 → 16묶음) — 2026-11-11
 assert M._hm_group("반도체와반도체장비") == "반도체" and M._hm_group("손해보험") == "금융" and M._hm_group("전기제품") == "2차전지·전기제품"
