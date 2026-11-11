@@ -1217,6 +1217,7 @@ def _ob_go(name):
 
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
+import html as _html
 with st.expander("📘 사용법 — 30초 투어 · 할 수 있는 것 · 활용 루틴 · 전체 설명서",
                  expanded=_first_visit and not IS_MOBILE
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
@@ -9033,10 +9034,15 @@ def _home_top(V):
     ka, stl = _ops_counts()
     chips.append('데이터 정상' if (ka or 0) + (stl or 0) == 0 and ka is not None else f"⚠️ 데이터 점검 {(ka or 0) + (stl or 0)}건")
     _UH.hero(gt, line, ldate, [c for c in chips if c])
+    if _IS_LAB:                                   # 2026-11-11 진단: 실전 계좌가 종합에 없었다 — 소유자에게 가장 먼저 필요한 정보
+        _home_account()
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof)
     if krf:
-        _UH.breadth_sectors(krf, dly, krf.get('asof') or (rep.get('latest_kr') or {}).get('date') or '-')
+        _kfa = krf.get('asof') or (rep.get('latest_kr') or {}).get('date') or '-'
+        _kfl = load_json(Path('results/kr_flow.json')) or {}
+        _UH.breadth_sectors(krf, dly, _kfa, flow=dict(today=krf.get('flow'), today_date=_kfa,
+                                                       summary=_kfl.get('summary') or {}, asof=_kfa))
     # 옛 '이번 주 판정'(원칙 v1.3 — 미국 SPY 코어/위성 50/30/20) — 실전은 한국 v1.9 단독(11-04)이라 참고로 접어 둔다
     with st.expander("참고 — 미국 코어 스위치 · 사이클 국면 · 돈의 흐름 (돈을 움직이지 않는 지표)"):
         c, a, ph, g, fl, ec = (V.get(k) or {} for k in ('core', 'alloc', 'phase', 'greed', 'flow', 'econ'))
@@ -9056,18 +9062,59 @@ def _home_top(V):
         st.caption(f"출처: {_src} · 마지막 갱신: {V.get('asof') or '-'} 종가 · 왜 이런 판정인지는 🌍 매크로 탭")
 
 
+def _led():
+    try:
+        return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'ledger.json'), encoding='utf-8'))
+    except Exception:
+        return {}
+
+
+def _home_account():
+    """🔐 내 실전 계좌 — 원장(live/ledger.json)만으로. 소유자만. 코스피 비교는 첫 입금일 종가부터."""
+    led = _led()
+    a = _UH.account(led, _live_plan() or {})
+    if not a['n'] and not a['dep']:
+        return
+    deps = ((led.get('KR') or {}).get('deposits') or [])
+    since = str(deps[0][0]) if deps else '-'
+    ks = None
+    try:
+        kx = fetch_index_history('KS11', 60)
+        if not kx.empty and since != '-':
+            c = kx.iloc[:, 0]
+            base = c[c.index <= pd.Timestamp(since)]
+            if len(base):
+                ks = (c.iloc[-1] / base.iloc[-1] - 1) * 100
+    except Exception:
+        ks = None
+    _UH.account_cards(a, ks, since)
+    if a['rows']:
+        _t = pd.DataFrame(a['rows'])
+        if IS_MOBILE:                             # 폰: 11열은 이름이 잘린다 → 판단에 필요한 4열만
+            _t = _t[['종목', '코드', '수익률(%)', '손절 여유(%)']]
+        _la = max([m for p_ in ((led.get('KR') or {}).get('positions') or {}).values()
+                   for m in re.findall(r'\d{4}-\d{2}-\d{2}', str(p_.get('src') or '') + ' ' + str(p_.get('opened') or ''))] or ['-'])
+        _tsrc('live/ledger.json — 봇 원장(토스 체결·가격 기록) · 소유자만', path='live/ledger.json', asof=_la)
+        st.dataframe(_t, filters=False, column_config={
+            '평단(원)': st.column_config.NumberColumn(format='localized'),
+            '현재가(원)': st.column_config.NumberColumn(format='localized'),
+            '보유 고점(원)': st.column_config.NumberColumn(format='localized'),
+            '손절가(원)': st.column_config.NumberColumn(format='localized'),
+            '수익률(%)': st.column_config.NumberColumn(format='%+.2f'),
+            '손절 여유(%)': st.column_config.NumberColumn(format='%.1f', help='현재가가 손절가보다 몇 % 위인가 — 0 에 가까울수록 위험(5% 미만은 위 카드에 표시)'),
+            '수량(주)': st.column_config.NumberColumn(format='%d'), '불타기': st.column_config.NumberColumn(format='%d')})
+        st.caption("손절가 = 보유 중 고점 −20%(올라가기만 함) · 불타기 = +10%·+20%에서 25%씩 · 성과는 코스피와 같은 기간으로 비교 · "
+                   "11-13까지 오버라이드 주는 성과 판정에서 분리")
+
+
 def _home_todo(V):
-    """② 이번 주 할 일 — 실전 봇의 주간 순서: 데이터 → 지수 게이트 → 매도·손절 → 신규·불타기 → 체결 확인 → 내 보유 점검.
-    2026-11-10: 옛 표(미국 이익가속 신호·코어 스위치)를 실전 v1.9 계획표(live/plan_latest.json)로 교체.
-    매매 상세(종목·수량)는 소유자만 — 콘텐츠 공개 규칙 '체결 후 주간 사후 공개'(11-10)."""
+    """② 이번 주 할 일 — 실전 봇의 주간 순서. 2026-11-11 진단 반영: 표 → 체크리스트(종합 카드와 같은 디자인),
+    계획(plan)과 원장(ledger)을 대조해 이미 체결된 신규는 '완료'로(계획표만 보면 체결 뒤에도 '신규 10종'이 남았다)."""
     st.subheader("이번 주 할 일")
     pl = _live_plan() or {}
     kr = (pl.get('sleeves') or {}).get('KR') or {}
     gt = _UH.gate(pl)
-    try:
-        led = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'ledger.json'), encoding='utf-8'))
-    except Exception:
-        led = {}
+    led = _led()
     ka, stl = _ops_counts()
     pf = st.session_state.get('pf_eval')
     bad = (ka or 0) + (stl or 0)
@@ -9075,37 +9122,36 @@ def _home_todo(V):
     sells = (kr.get('stops') or []) + (kr.get('exits') or []) + (kr.get('trims') or [])
     pend = led.get('pending') or {}
     pos = ((led.get('KR') or {}).get('positions') or {})
-    rows = [('① 데이터', '🔴' if bad else '🟢',
-             f"정답 점검 틀림 {ka}건 · 갱신 정지 {stl}건 — 신호를 쓰기 전에 데이터부터" if bad else '정답 점검·신선도 전 항목 정상'),
-            ('② 지수 게이트', {'g': '🟢', 'r': '🔴', 'y': '🟠'}.get(gt['tone'], '⚪'),
-             gt['head'] + (' — 단 이번 주 오버라이드로 매수 진행' if gt.get('override') else ''))]
+    done = [b for b in buys if b.get('sym') in pos]
+    todo_b = [b for b in buys if b.get('sym') not in pos]
+    rows = [('데이터', 'r' if bad else 'g',
+             f"정답 점검 틀림 {ka}건 · 갱신 정지 {stl}건 — 신호를 쓰기 전에 데이터부터" if bad else '정답 점검·신선도 전 항목 정상', ''),
+            ('지수 게이트', gt['tone'], _html.escape(gt['head']),
+             '이번 주 오버라이드로 매수 진행 — 성과 판정에서 분리' if gt.get('override') else '')]
     if _IS_LAB:
-        rows += [('③ 매도·손절', '🟠' if sells else '🟢',
-                  f"{len(sells)}건 — 고점 −20% 손절 · RS 70 미만 탈락" if sells else '해당 없음'),
-                 ('④ 신규·불타기', '🟢' if buys or adds else '⚪',
-                  f"신규 {len(buys)}종 · 불타기 {len(adds)}건 · 예상 사용 {kr.get('cash_krw', 0) - kr.get('cash_after_krw', 0):,.0f}원 "
-                  f"(현금 {kr.get('cash_krw', 0):,.0f} → {kr.get('cash_after_krw', 0):,.0f}원)" if buys or adds else '이번 주 주문 없음'),
-                 ('⑤ 체결 확인', '🟠' if pend else '🟢',
-                  f"체결 대기 {len(pend)}건 · 보유 {len(pos)}종 — 원장(live/ledger.json) 기준" if pend else f"대기 없음 · 보유 {len(pos)}종")]
+        rows += [('매도·손절', 'y' if sells else 'g', f"{len(sells)}건 — 고점 −20% 손절 · RS 70 미만 탈락" if sells else '해당 없음',
+                  '손절선은 매일 봇이 점검'),
+                 ('신규·불타기', 'g' if not todo_b else 'y',
+                  (f"계획 {len(buys)}종 중 체결 {len(done)}종" + (f" · 미체결 {len(todo_b)}종" if todo_b else ' — 완료')
+                   + (f" · 불타기 {len(adds)}건" if adds else '')) if buys or adds else '이번 주 주문 없음',
+                  f"계획표 {pl.get('made', '-')}"),
+                 ('체결 확인', 'y' if pend else 'g', f"체결 대기 {len(pend)}건" if pend else '대기 없음', f"보유 {len(pos)}종 · 원장 기준")]
     else:
-        rows.append(('③ 매수 후보', '⚪', '이번 주 매수 대상은 🔎 종목 발굴 맨 위 표(RS 높은 순 10종). 운영자 계좌 내역은 체결 후 주간 공개'))
-    rows.append(('⑥ 내 보유 점검', ('🟢' if pf and not pf['n_vi'] else '🟠') if pf else '⚪',
+        rows.append(('매수 후보', 'k', '이번 주 매수 대상은 🔎 종목 발굴 맨 위 표(RS 높은 순 10종)', '운영자 계좌 내역은 체결 후 주간 공개'))
+    rows.append(('내 보유 점검', ('g' if pf and not pf['n_vi'] else 'y') if pf else 'k',
                  (f"{pf['grade']} · {pf['n']}종 · 위반 {pf['n_vi']}건" + (' — ' + ' / '.join(pf['top']) if pf['top'] else ''))
-                 if pf else '🛡️ 내 포트폴리오에서 토스 잔고를 불러오거나 입력하면 손절선·비중 위반을 여기서 같이 봅니다'))
-    st.dataframe(pd.DataFrame([{'단계': r[0], '상태': r[1], '할 일': r[2]} for r in rows]),
-                 filters=False, color=False, src='live/plan_latest.json(주말 계획표) · live/ledger.json · 정답 점검·신선도 · 🛡️ 포트폴리오 평가',
-                 asof=pl.get('made'), use_container_width=True,
-                 column_config={'할 일': st.column_config.TextColumn('할 일', width='large')})
-    if _IS_LAB and buys:
+                 if pf else '🛡️ 내 포트폴리오에서 보유 종목을 넣으면 손절선·비중 위반을 여기서 같이 봅니다', ''))
+    _UH.steps(rows)
+    st.caption(f"출처: live/plan_latest.json(주말 계획표 {pl.get('made', '-')}) · live/ledger.json · 정답 점검·신선도 · 🛡️ 포트폴리오 평가")
+    if _IS_LAB and todo_b:
         _t = pd.DataFrame([{'종목': x.get('name'), '코드': x.get('sym'), 'RS': x.get('rs'), '기준가(원)': x.get('ref_px'),
                             '수량(주)': x.get('qty'), '금액(원)': x.get('krw'), '손절가(원)': x.get('stop'),
-                            '불타기 가격(원)': x.get('add_trigger')} for x in buys])
+                            '불타기 가격(원)': x.get('add_trigger')} for x in todo_b])
         for _c in _t.columns[2:]:
             _t[_c] = pd.to_numeric(_t[_c], errors='coerce')
-        _tsrc('live/plan.py — 이번 주 신규 매수(소유자만 보임)', path='live/plan_latest.json', asof=pl.get('made'))
-        st.dataframe(_t, filters=False, column_config={c: st.column_config.NumberColumn(format='localized' if c != 'RS' else '%d')
-                                                      for c in _t.columns[2:]})
-        st.caption("손절가 = 기준가 −20%(보유 후엔 보유 중 고점 −20%로 끌어올림) · 불타기 = +10%·+20%에서 25%씩 · 종목·코드 칸을 누르면 🔍 종목 분석")
+        _tsrc('live/plan.py — 아직 체결 안 된 이번 주 신규(소유자만)', path='live/plan_latest.json', asof=pl.get('made'))
+        st.dataframe(_t, filters=False, color=False, column_config={c: st.column_config.NumberColumn(format='localized' if c != 'RS' else '%d')
+                                                                   for c in _t.columns[2:]})
     b1, b2, b3 = st.columns(3)
     b1.button("🌍 매크로 근거 보기", on_click=_goto_tab, args=("🌍 매크로",), use_container_width=True, key='home_go_macro')
     b2.button("🔎 이번 주 후보 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')

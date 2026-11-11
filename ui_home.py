@@ -56,9 +56,22 @@ CSS = """
   .hm-row { display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0; border-bottom:1px dashed var(--line-2);
             font-variant-numeric:tabular-nums; }
   .hm-row:last-child { border-bottom:0; } .hm-row em { font-style:normal; color:var(--ink-3); font-size:11.5px; }
-  .hm-mega { display:flex; flex-wrap:wrap; gap:6px; }
-  .hm-mega span { font-size:12px; padding:3px 9px; border-radius:999px; border:1px solid var(--line); background:var(--surface);
-            font-variant-numeric:tabular-nums; }
+  .hm-mega { display:grid; gap:6px; grid-template-columns:repeat(5,minmax(0,1fr)); }
+  .hm-mega > span { font-size:12px; padding:5px 10px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
+            font-variant-numeric:tabular-nums; display:flex; justify-content:space-between; gap:6px; white-space:nowrap; overflow:hidden; }
+  .hm-four { display:grid; gap:10px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+  @media (max-width:1100px) { .hm-four { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width:560px) { .hm-four { grid-template-columns:1fr; } .hm-mega { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .hm-steps { border:1px solid var(--line); border-radius:10px; background:var(--surface); overflow:hidden; }
+  .hm-step { display:grid; grid-template-columns:22px 118px 1fr; gap:10px; align-items:start; padding:10px 14px;
+            border-bottom:1px solid var(--line-2); font-size:13px; }
+  .hm-step:last-child { border-bottom:0; }
+  .hm-step .dot { width:10px; height:10px; border-radius:50%; margin-top:5px; }
+  .hm-step .k { font-weight:700; color:var(--ink); } .hm-step .v { color:var(--ink-2); line-height:1.55; }
+  .hm-step .v em { font-style:normal; color:var(--ink-3); font-size:12px; margin-left:8px; }
+  .hm-step .v em::before { content:'· '; }
+  .hm-acc { display:grid; gap:8px; grid-template-columns:repeat(5,minmax(0,1fr)); }
+  @media (max-width:980px) { .hm-acc { grid-template-columns:repeat(2,minmax(0,1fr)); } }
   .hm-src { font-size:11.5px; color:var(--ink-3); margin:6px 2px 0; }
   /* 사용법 패널 */
   .hm-cap { border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:13px 15px; height:100%; box-sizing:border-box; }
@@ -186,7 +199,7 @@ def market_cards(rows: list[dict], asof: str = ''):
       <div class="hm-src">출처: Yahoo Finance(market_report.py) · 마지막 갱신: {_e(asof)}</div></div>""")
 
 
-def breadth_sectors(kr: dict, nh: dict, asof: str = ''):
+def breadth_sectors(kr: dict, nh: dict, asof: str = '', flow: dict | None = None):
     """한국 시장 폭(상승·하락 종목 수) + 업종 강약 + 시총 상위 — '지수 뒤의 내부 체력'."""
     b = kr.get('breadth_all') or {}
     up, dn, fl = b.get('up') or 0, b.get('down') or 0, b.get('flat') or 0
@@ -210,17 +223,114 @@ def breadth_sectors(kr: dict, nh: dict, asof: str = ''):
     def _rows(ss):
         return ''.join(f"<div class='hm-row'><span>{_e(s['name'])} <em>{s.get('n', '')}종 · 대장 {_e(s.get('lead'))}</em></span>"
                        f"{_pct(s['ret'], nd=1)}</div>" for s in ss) or "<div class='hm-kv'>-</div>"
-    mega = ''.join(f"<span>{_e(m.get('name'))} {_pct(m.get('ret'), nd=1)}</span>" for m in (kr.get('megacaps') or [])[:10])
+    mega = ''.join(f"<span><b style='font-weight:600'>{_e(m.get('name'))}</b>{_pct(m.get('ret'), nd=1)}</span>" for m in (kr.get('megacaps') or [])[:10])
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🇰🇷 지수 뒤의 체력 — 시장 폭 · 업종</b>
       <span>지수가 올라도 오르는 종목이 적으면 소수 대형주 장세</span></div>
-      <div class="hm-two">
+      <div class="hm-four">
         <div class="hm-box"><h5>시장 폭 (코스피+코스닥 전 종목)</h5>{bar}<div class="hm-kv">{'<br>'.join(kv)}</div></div>
+        {flow_box(flow or {})}
         <div class="hm-box"><h5>강한 업종 (시총가중)</h5>{_rows(sec[:5])}</div>
         <div class="hm-box"><h5>하위 업종 (시총가중)</h5>{_rows(sorted(sec[-5:], key=lambda s: s['ret']))}</div>
       </div>
       <div class="hm-sec" style="margin-top:12px"><b style="font-size:13px">시총 상위 10</b><span>지수를 움직이는 종목</span></div>
       <div class="hm-mega">{mega or '<span>-</span>'}</div>
-      <div class="hm-src">출처: 네이버 금융 전 종목 시세·업종(market_report.py, 한국 장 마감 리포트) · 마지막 갱신: {_e(asof)}</div></div>""")
+      <div class="hm-src">출처: 네이버 금융 전 종목 시세·업종·투자자별 매매·증시자금동향(market_report.py · tools/kr_flow.py) · 마지막 갱신: {_e(asof)}</div></div>""")
+
+
+def _jo(v):
+    """억원 → '±1.23조' 또는 '±4,567억'."""
+    if v is None:
+        return '-'
+    return f"{v / 1e4:+.1f}조" if abs(v) >= 1e4 else f"{v:+,.0f}억"
+
+
+def _sgn(v, txt):
+    if v is None or v == 0:
+        return f"<span class='z'>{txt}</span>"
+    return f"<span class='{'p' if v > 0 else 'n'}'>{txt}</span>"
+
+
+def flow_box(fl: dict) -> str:
+    """수급 박스 — 오늘(잠정) 외국인·기관 + 5·20일 누적(kr_flow) + 신용잔고. 날짜를 같이 적고 3일 넘게 묵으면 경고.
+    입력 = dict(today={'KOSPI':{개인,외국인,기관},...}, today_date=, summary=kr_flow.summary, asof=오늘)."""
+    import datetime as _dt
+    sm = fl.get('summary') or {}
+    td = fl.get('today') or {}
+    lines = []
+    for mk, lab in (('KOSPI', '코스피'), ('KOSDAQ', '코스닥')):
+        t, s = td.get(mk) or {}, sm.get(mk) or {}
+        f1 = t.get('외국인') if t else s.get('d1')
+        i1 = t.get('기관') if t else None
+        bits = [f"외국인 {_sgn(f1, _jo(f1))}"]
+        if i1 is not None:
+            bits.append(f"기관 {_sgn(i1, _jo(i1))}")
+        if s.get('d5') is not None:
+            bits.append(f"<em>외국인 5일 {_sgn(s['d5'], _jo(s['d5']))} · 20일 {_sgn(s.get('d20'), _jo(s.get('d20')))}</em>")
+        lines.append(f"<div class='hm-row' style='display:block'><b>{lab}</b> {' · '.join(bits[:2])}<br>{bits[2] if len(bits) > 2 else ''}</div>")
+    cr = sm.get('credit') or {}
+    if cr.get('v') is not None:
+        lines.append(f"<div class='hm-row' style='display:block'><b>신용잔고</b> {cr['v'] / 1e4:,.1f}조 "
+                     f"<em>(고점 대비 {cr.get('from_peak', 0):+.1f}% · {_e(cr.get('date'))})</em></div>")
+    when = fl.get('today_date') if td else (sm.get('KOSPI') or {}).get('date')
+    stale = ''
+    try:
+        gap = (_dt.date.fromisoformat(str(fl.get('asof'))[:10]) - _dt.date.fromisoformat(str(when)[:10])).days
+        if gap > 3:
+            stale = f"<div class='hm-kv' style='color:var(--warn)'>⚠️ {gap}일 전 자료 — 수집 정지 확인 필요</div>"
+    except Exception:
+        pass
+    tag = '오늘 잠정' if td else '최근 거래일'
+    return (f"<div class='hm-box'><h5>수급 — 누가 사고 파나 <span style='font-weight:500;color:var(--ink-3);font-size:11.5px'>"
+            f"({tag} · {_e(when)})</span></h5>{''.join(lines) or '<div class=hm-kv>수급 자료 없음</div>'}{stale}</div>")
+
+
+def steps(rows: list[tuple]):
+    """할 일 체크리스트 — (단계, 톤 g/y/r/k, 본문, 보조) . 표가 아니라 순서 목록이라 카드 목록으로(같은 디자인)."""
+    col = {'g': 'var(--pos)', 'y': '#D97706', 'r': 'var(--neg)', 'k': '#CBD5E1'}
+    body = ''.join(f"""<div class="hm-step"><span class="dot" style="background:{col.get(t, '#CBD5E1')}"></span>
+        <span class="k">{_e(k)}</span><span class="v">{v}{f' <em>{sub}</em>' if sub else ''}</span></div>"""
+                   for k, t, v, sub in rows)
+    st.html(CSS + f'<div class="hm"><div class="hm-steps">{body}</div></div>')
+
+
+def account(led: dict, plan: dict) -> dict:
+    """실전 원장(한국) 요약 — 봇이 기록한 가격(last_px) 기준. 실시간 시세 아님."""
+    kr = (led or {}).get('KR') or {}
+    pos = kr.get('positions') or {}
+    dep = sum(float(d[1]) for d in (kr.get('deposits') or []) if len(d) > 1)
+    cash = float(kr.get('cash_krw') or 0)
+    rows, ev, cost = [], 0.0, 0.0
+    for code, p in pos.items():
+        sh, avg, px = p.get('shares') or 0, p.get('avg'), p.get('last_px')
+        v = (px or avg or 0) * sh
+        ev += v
+        cost += (avg or 0) * sh
+        rows.append(dict(종목=p.get('name'), 코드=code, **{
+            '수량(주)': sh, '평단(원)': avg, '현재가(원)': px,
+            '수익률(%)': (px / avg - 1) * 100 if px and avg else None,
+            '보유 고점(원)': p.get('peak'), '손절가(원)': p.get('stop'),
+            '손절 여유(%)': (px / p['stop'] - 1) * 100 if px and p.get('stop') else None,
+            '불타기': p.get('adds') or 0, '매수일': p.get('opened')}))
+    tot = ev + cash
+    return dict(rows=sorted(rows, key=lambda r: -(r['수익률(%)'] or -1e9)), n=len(pos), ev=ev, cash=cash, tot=tot,
+                dep=dep, pnl=tot - dep if dep else None, pnl_pct=(tot / dep - 1) * 100 if dep else None,
+                unreal=ev - cost, cash_pct=cash / tot * 100 if tot else None,
+                near=[r for r in rows if r['손절 여유(%)'] is not None and r['손절 여유(%)'] < 5])
+
+
+def account_cards(a: dict, kospi_since: float | None, since: str):
+    def card(nm, big, sub, cls='z'):
+        return f'<div class="hm-card"><div class="nm">{nm}</div><div class="px">{big}</div><div class="sub {cls}">{sub}</div></div>'
+    c = [card('계좌 평가액', f"{a['tot']:,.0f}원", f"입금 {a['dep']:,.0f}원"),
+         card('손익(입금 대비)', '-' if a['pnl'] is None else f"{a['pnl']:+,.0f}원",
+              '-' if a['pnl_pct'] is None else f"{a['pnl_pct']:+.2f}%" + (f" · 코스피 {kospi_since:+.2f}%" if kospi_since is not None else ''),
+              'z' if not a['pnl'] else ('p' if a['pnl'] > 0 else 'n')),
+         card('보유', f"{a['n']}종", f"평가 {a['ev']:,.0f}원"),
+         card('현금', f"{a['cash']:,.0f}원", '-' if a['cash_pct'] is None else f"비중 {a['cash_pct']:.1f}%"),
+         card('손절선 5% 이내', f"{len(a['near'])}종", ' · '.join(r['종목'] for r in a['near'][:3]) or '없음',
+              'n' if a['near'] else 'z')]
+    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🔐 내 실전 계좌 (토스 한국 · 소유자만)</b>
+      <span>봇이 기록한 가격 기준 · 실시간 아님 · {since}부터 운용</span></div><div class="hm-acc">{''.join(c)}</div></div>""")
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────
