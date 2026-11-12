@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12h'
+VERSION = '2026-11-12i'
 
 CSS = """
 <style>
@@ -558,10 +558,14 @@ def rule_checkpoints(idx_rows: list[dict], kr: dict, flow_sum: dict | None, even
         out.append(f"시장 폭: 오늘 상승 종목 {r:.0f}% — " + ("반등이 소수 대형주가 아니라 넓게 퍼짐. 이런 날이 이어지는지(60%+)" if r >= 60
                    else "지수와 달리 오르는 종목이 적음 — 소수 종목 장세 주의" if r < 45 else "중립"))
     k = (flow_sum or {}).get('KOSPI') or {}
-    if k.get('d1') is not None and k.get('d5') is not None:
-        same = (k['d1'] >= 0) == (k['d5'] >= 0)
-        out.append(f"코스피 외국인: 오늘 {k['d1'] / 1e4:+.2f}조 · 5일 {k['d5'] / 1e4:+.1f}조 — "
-                   + ("방향 같음(추세 지속)" if same else "오늘만 방향이 바뀜 — 5일 합계가 플러스로 돌아서야 추세 전환"))
+    # 2026-11-12: kr_flow 요약은 17:47 갱신 — 15:50 리포트 직후엔 어제 값이라 '오늘'로 쓰면 날짜가 섞인다 → 오늘 잠정치(facts.flow) 우선
+    t1 = (((kr or {}).get('flow') or {}).get('KOSPI') or {}).get('외국인')
+    d1 = t1 if t1 is not None else k.get('d1')
+    if d1 is not None and k.get('d5') is not None:
+        same = (d1 >= 0) == (k['d5'] >= 0)
+        out.append(f"코스피 외국인: 오늘{' 잠정' if t1 is not None else ''} {d1 / 1e4:+.2f}조 · 5일 {k['d5'] / 1e4:+.1f}조"
+                   f"({_e(str(k.get('date') or '-')[5:])}까지) — "
+                   + ("방향 같음(추세 지속)" if same else "오늘만 방향이 다름 — 5일 합계가 플러스로 돌아서야 추세 전환"))
     near = [e for e in (events or []) if 0 <= e.get('dday', 99) <= 7 and e.get('kind') in ('한국', '미국', '실전 규칙')]
     if near:
         out.append("7일 안 일정: " + ' · '.join(f"{e['date'][5:]} {_e(e['name'].split(' — ')[0])}" for e in near[:3]))

@@ -27,3 +27,9 @@ def test_rule_checkpoints_gate_distance():
                            {"KOSPI": {"d1": 6729.0, "d5": -54713.0}}, [])
     assert "5,477" in r[0] and "1.9%" in r[0]          # 5375.36/(1-0.0185) = 5,476.6
     assert "70%" in r[1] and "추세 전환" in r[2]
+
+
+def test_rule_checkpoints_flow_uses_today_provisional():
+    r = U.rule_checkpoints([], {"flow": {"KOSPI": {"외국인": 3704.0}}},
+                           {"KOSPI": {"date": "2026-11-11", "d1": 6729.0, "d5": -54713.0}}, [])
+    assert "오늘 잠정 +0.37조" in r[0] and "11-11까지" in r[0]
