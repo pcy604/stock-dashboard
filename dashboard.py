@@ -1222,8 +1222,17 @@ _UH_VER = '2026-11-12f'                     # ui_home.VERSION 과 같아야 함(
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
+def _owner_seen() -> bool:
+    """소유자(매일 오는 사람)는 사용법을 접은 채 시작 — 2026-11-12 배포 화면: 새 접속마다 펼쳐져 결론까지 스크롤해야 했다."""
+    try:
+        import access as _acc0
+        return bool(_acc0.is_owner())
+    except Exception:
+        return False
+
+
 with st.expander("📘 사용법 — 30초 투어 · 할 수 있는 것 · 활용 루틴 · 전체 설명서",
-                 expanded=_first_visit and not IS_MOBILE
+                 expanded=_first_visit and not IS_MOBILE and not _owner_seen()
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
     _gt1, _gt2, _gt3, _gt4 = st.tabs(["⚡ 30초 투어", "🧭 할 수 있는 것", "🗓️ 활용 루틴", "📚 전체 설명서"])
     with _gt2:
