@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12b'
+VERSION = '2026-11-12c'
 
 CSS = """
 <style>
@@ -371,6 +371,25 @@ def account_cards(a: dict, kospi_since: float | None, since: str):
               'n' if (a['top_sector'][1] or 0) > 30 else 'z')]
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🔐 내 실전 계좌 (토스 한국 · 소유자만)</b>
       <span>{_e(a['src'])} {_e(a.get('at') or '')} 기준 · 실시간 아님 · {since}부터 운용</span></div><div class="hm-acc">{''.join(c)}</div></div>""")
+
+
+def events_box(ev: list[dict], days: int):
+    """🗓️ 다가오는 일정 — 보유 종목에 걸린 것(실적 기한) · 내 규칙(오버라이드 종료·계획표) · 한국 · 미국."""
+    tag = {'보유': ('#B91C1C', '#FEE2E2'), '내 규칙': ('#1D4ED8', '#DBEAFE'), '한국': ('#374151', '#F3F4F6'),
+           '미국': ('#374151', '#F3F4F6')}
+    rows = []
+    for e in ev[:12]:
+        fg, bg = tag.get(e.get('kind'), ('#374151', '#F3F4F6'))
+        dd = '오늘' if e['dday'] == 0 else f"D-{e['dday']}"
+        hot = e.get('hot') or e['dday'] <= 1
+        rows.append(f"""<div class="hm-step" style="grid-template-columns:96px 52px 64px 1fr">
+          <span class="k" style="font-variant-numeric:tabular-nums">{e['date'][5:]} ({e['wd']}){f"<br><em style='font-style:normal;font-weight:500;color:var(--ink-3);font-size:11.5px'>{_e(e['time'])} KST</em>" if e.get('time') else ''}</span>
+          <span style="font-size:12px;font-weight:700;color:{'var(--neg)' if hot else 'var(--ink-2)'}">{dd}</span>
+          <span><i style="font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;color:{fg};background:{bg}">{_e(e.get('kind'))}</i></span>
+          <span class="v"><b style="color:var(--ink)">{_e(e['name'])}</b>{f"<br>{_e(e['detail'])}" if e.get('detail') else ''}</span></div>""")
+    body = ''.join(rows) or "<div class='hm-step'><span></span><span></span><span></span><span class='v'>예정된 일정 없음</span></div>"
+    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🗓️ 다가오는 일정 — {days}일</b>
+      <span>보유 종목 실적 기한·내 규칙 일정이 먼저 · 시각은 한국 시간</span></div><div class="hm-steps">{body}</div></div>""")
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────

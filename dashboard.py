@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12b'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12c'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -9040,6 +9040,7 @@ def _home_top(V):
     _UH.hero(gt, line, ldate, [c for c in chips if c])
     if _IS_LAB:                                   # 2026-11-11 진단: 실전 계좌가 종합에 없었다 — 소유자에게 가장 먼저 필요한 정보
         _home_account()
+    _home_events()
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof)
     if krf:
@@ -9071,6 +9072,44 @@ def _led():
         return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'ledger.json'), encoding='utf-8'))
     except Exception:
         return {}
+
+
+def _home_events():
+    """🗓️ 다가오는 일정(2026-11-12) — events.py(공식 일정 + 옵션 만기·보고서 기한 + 보유 종목 실적 미반영) + 내 규칙 일정."""
+    import events as _EV
+    if getattr(_EV, 'VERSION', None) != '2026-11-12a':
+        import importlib as _il2
+        _EV = _il2.reload(_EV)
+    today = pd.Timestamp.now(tz='Asia/Seoul').date()
+    led = _led()
+    hold = {c: p.get('name') for c, p in ((led.get('KR') or {}).get('positions') or {}).items()} if _IS_LAB else None
+    try:
+        fq = pd.read_parquet('data/kr_fundamentals_q.parquet', columns=['sym', 'year', 'q']) if hold else None
+    except Exception:
+        fq = None
+    ev = _EV.build(today, 35, hold, fq)
+    if not _IS_LAB:                               # 공개 사용자: 보유 종목 이름 없이 기한만
+        for e in ev:
+            if e.get('kind') == '보유':
+                e['kind'] = '한국'
+                e.pop('detail', None)
+    # 내 규칙 일정 — 오버라이드 종료, 다음 주말 계획표
+    pl = _live_plan() or {}
+    ov = next((x.get('override') for x in (pl.get('index') or {}).values() if x.get('override')), None)
+    m = re.search(r'(\d{4}-\d{2}-\d{2})', str(ov or ''))
+    extra = []
+    if m and str(today) <= m.group(1):
+        extra.append(dict(date=m.group(1), time='', kind='내 규칙', name='오버라이드 종료 — 다음 계획표부터 지수·종목 5주선 규칙 복귀',
+                          detail='이 주 성과는 따로 집계'))
+    sat = today + pd.Timedelta(days=(5 - today.weekday()) % 7)
+    extra.append(dict(date=str(sat), time='', kind='내 규칙', name='다음 주 계획표(live-plan) — 신규·손절·불타기 목록 확정'))
+    for e in extra:
+        d = pd.Timestamp(e['date']).date()
+        e['dday'], e['wd'] = (d - today).days, '월화수목금토일'[d.weekday()]
+    ev = sorted(ev + extra, key=lambda e: (e['date'], e.get('time') or ''))
+    _UH.events_box(ev, 35)
+    st.caption("출처: 한국은행·federalreserve.gov·bls.gov 공식 일정(data/events_calendar.json, 손으로 갱신) · KRX 옵션 만기 규정 · "
+               "자본시장법 보고서 기한 · 실적 반영 = data/kr_fundamentals_q.parquet 에 그 분기가 들어왔는지 · 휴장일 보정 없음")
 
 
 def _home_account():

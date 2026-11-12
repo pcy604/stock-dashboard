@@ -1,0 +1,12 @@
+{
+  "note": "손으로 넣는 공식 일정. 날짜·시각은 KST. 출처는 각 기관 공식 발표(확인일 2026-11-12). 계산으로 나오는 일정(옵션만기·분기보고서 기한)은 events.py 가 만든다.",
+  "events": [
+    {"date": "2026-11-19", "time": "04:00", "name": "FOMC 의사록(10-27~28 회의)", "kind": "미국", "src": "federalreserve.gov FOMC calendar"},
+    {"date": "2026-11-26", "time": "09:00", "name": "한국은행 금통위 통화정책방향 결정", "kind": "한국", "src": "한국은행 2026 금통위 일정(7-16·8-27·10-22·11-26)"},
+    {"date": "2026-12-10", "time": "04:00", "name": "FOMC 금리 결정·점도표(12-8~9 회의)", "kind": "미국", "src": "federalreserve.gov FOMC calendar"},
+    {"date": "2026-12-10", "time": "22:30", "name": "미국 CPI(11월분)", "kind": "미국", "src": "bls.gov CPI release schedule"},
+    {"date": "2026-12-31", "time": "04:00", "name": "FOMC 의사록(12-8~9 회의)", "kind": "미국", "src": "federalreserve.gov FOMC calendar"},
+    {"date": "2027-01-13", "time": "22:30", "name": "미국 CPI(12월분)", "kind": "미국", "src": "bls.gov CPI release schedule"},
+    {"date": "2027-02-11", "time": "22:30", "name": "미국 CPI(1월분)", "kind": "미국", "src": "bls.gov CPI release schedule"}
+  ]
+}
