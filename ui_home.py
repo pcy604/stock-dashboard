@@ -16,6 +16,10 @@ import re
 
 import streamlit as st
 
+# dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
+# 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
+VERSION = '2026-11-12a'
+
 CSS = """
 <style>
   .hm { font-family:'Pretendard',-apple-system,'Malgun Gothic',system-ui,sans-serif; color:var(--ink); }

@@ -1148,7 +1148,7 @@ _OB_CSS = """
   .ob2-sec { display:flex; align-items:baseline; justify-content:space-between; margin:22px 2px 10px; }
   .ob2-sec b { font-size:15px; font-weight:750; letter-spacing:-.02em; color:var(--ink); }
   .ob2-sec span { font-size:12px; color:var(--ink-3); }
-  .ob2-step { height:100%; min-height:178px; box-sizing:border-box; border:1px solid var(--line); border-radius:var(--radius-sm,10px);
+  .ob2-step { height:100%; min-height:200px; box-sizing:border-box; border:1px solid var(--line); border-radius:var(--radius-sm,10px);
               background:var(--surface); padding:14px 14px 12px; position:relative; }
   .ob2-step.on { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-2); }
   .ob2-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
@@ -1218,6 +1218,10 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
+_UH_VER = '2026-11-12a'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+if getattr(_UH, 'VERSION', None) != _UH_VER:
+    import importlib as _il
+    _UH = _il.reload(_UH)
 with st.expander("📘 사용법 — 30초 투어 · 할 수 있는 것 · 활용 루틴 · 전체 설명서",
                  expanded=_first_visit and not IS_MOBILE
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
