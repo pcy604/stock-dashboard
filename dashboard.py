@@ -8417,6 +8417,42 @@ with tab_pf, guard('포트폴리오 가드레일'):
             (st.caption if _pok else st.warning)(f"🔐 계정 저장 연결: {'정상' if _pok else '오류 — ' + _pmsg}")
             if st.session_state.get('pf_db_msg'):
                 st.caption(st.session_state.pop('pf_db_msg'))
+            # ── 🤖 텔레그램 봇 연결 (2026-11-12) — 계정 ↔ 봇 chat, 보유 종목 → 봇 감시 ──
+            if _pok:
+                with st.expander('🤖 텔레그램 봇 연결 — 보유 종목의 공시·중요 뉴스를 봇으로 받기', expanded=False):
+                    import tg_link as _tgl
+                    _ls = _tgl.status(_pf_email)
+                    if _ls['state'] == 'linked':
+                        st.success(f"연결됨 · {str(_ls.get('linked_at') or '')[:10]}")
+                        _rows = st.session_state.get('pf_rows') or []
+                        _syms = [str(r.get('sym') or '').strip() for r in _rows if str(r.get('sym') or '').strip()]
+                        _c1, _c2 = st.columns([3, 1])
+                        if _c1.button(f'보유 종목 {len(_syms)}개를 봇 감시에 추가', disabled=not _syms, key='tg_push'):
+                            try:
+                                _tgl.push_watch(_pf_email, _syms)
+                                st.info('보냈어요 — 봇이 다음 실행(보통 1시간 안)에 감시 등록하고 텔레그램으로 알려 드려요.')
+                            except Exception as _e:
+                                st.warning(f'보내기 실패: {str(_e)[:80]}')
+                        if _c2.button('연결 끊기', key='tg_unlink'):
+                            try:
+                                _tgl.unlink(_pf_email)
+                                st.rerun()
+                            except Exception as _e:
+                                st.warning(f'끊기 실패: {str(_e)[:80]}')
+                    elif _ls['state'] == 'no_table':
+                        st.caption('준비 중 — 관리자 설정(account_links 표)이 아직 안 됐어요.')
+                    elif _ls['state'] == 'error':
+                        st.caption(f"`연결 상태 확인 실패 — {_ls.get('why', '')}`")
+                    else:
+                        if st.button('연결 링크 만들기 (30분 유효)', key='tg_code'):
+                            try:
+                                st.session_state['tg_code'] = _tgl.new_code(_pf_email)
+                            except Exception as _e:
+                                st.warning(f'코드 만들기 실패: {str(_e)[:80]}')
+                        _code = st.session_state.get('tg_code') or (_ls.get('code') if _ls['state'] == 'pending' else None)
+                        if _code:
+                            st.markdown(f"[👉 텔레그램에서 열기]({_tgl.link_url(_code)}) — 열리면 **시작**을 누르세요. "
+                                        f"안 열리면 봇에 `/link {_code}` 를 보내도 돼요.")
 
         def _pf_load():
             if 'pf_rows' in st.session_state:
