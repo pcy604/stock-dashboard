@@ -16,7 +16,7 @@
     "stop": 10504.0,
     "added": false,
     "adds": 0,
-    "last_px": 13130.0,
+    "last_px": 12960.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -29,7 +29,7 @@
     "stop": 6088.0,
     "added": false,
     "adds": 0,
-    "last_px": 7600.0,
+    "last_px": 7220.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -42,7 +42,7 @@
     "stop": 5864.0,
     "added": true,
     "adds": 2,
-    "last_px": 7330.0,
+    "last_px": 7270.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -55,7 +55,7 @@
     "stop": 5720.0,
     "added": true,
     "adds": 1,
-    "last_px": 7150.0,
+    "last_px": 6640.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -68,7 +68,7 @@
     "stop": 8008.0,
     "added": false,
     "adds": 0,
-    "last_px": 10010.0,
+    "last_px": 8930.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -81,7 +81,7 @@
     "stop": 11336.0,
     "added": false,
     "adds": 0,
-    "last_px": 14170.0,
+    "last_px": 13370.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -94,7 +94,7 @@
     "stop": 5592.0,
     "added": true,
     "adds": 1,
-    "last_px": 6990.0,
+    "last_px": 6790.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -107,7 +107,7 @@
     "stop": 6632.0,
     "added": false,
     "adds": 0,
-    "last_px": 8290.0,
+    "last_px": 7390.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -120,7 +120,7 @@
     "stop": 5640.0,
     "added": false,
     "adds": 0,
-    "last_px": 7050.0,
+    "last_px": 6570.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -129,11 +129,11 @@
     "shares": 8,
     "avg": 3400.0,
     "first_px": 3400.0,
-    "peak": 3630.0,
-    "stop": 2904.0,
+    "peak": 3660.0,
+    "stop": 2928.0,
     "added": false,
     "adds": 0,
-    "last_px": 3630.0,
+    "last_px": 3660.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    }
@@ -165,88 +165,88 @@
  "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-12 09:11 KST",
-  "cash_krw": 45031.0,
+  "at": "2026-11-13 08:40 KST",
+  "cash_krw": 37810.0,
   "holdings": [
    {
     "sym": "010170",
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 13120.0,
-    "pnl_pct": 17.98
+    "last_price": 13040.0,
+    "pnl_pct": 17.26
    },
    {
     "sym": "228850",
     "name": "레이언스",
     "qty": 3.0,
     "avg_cost": 7356.666666,
-    "last_price": 7330.0,
-    "pnl_pct": -0.36
+    "last_price": 7200.0,
+    "pnl_pct": -2.12
    },
    {
     "sym": "446540",
     "name": "메가터치",
-    "qty": 5.0,
-    "avg_cost": 5984.0,
-    "last_price": 7210.0,
-    "pnl_pct": 20.48
+    "qty": 6.0,
+    "avg_cost": 6190.0,
+    "last_price": 7180.0,
+    "pnl_pct": 15.989999999999998
    },
    {
     "sym": "092190",
     "name": "서울바이오시스",
     "qty": 5.0,
     "avg_cost": 6556.0,
-    "last_price": 6830.0,
-    "pnl_pct": 4.17
+    "last_price": 6640.0,
+    "pnl_pct": 1.28
    },
    {
     "sym": "046890",
     "name": "서울반도체",
     "qty": 2.0,
     "avg_cost": 8960.0,
-    "last_price": 9470.0,
-    "pnl_pct": 5.6899999999999995
+    "last_price": 9160.0,
+    "pnl_pct": 2.23
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 13890.0,
-    "pnl_pct": 5.220000000000001
+    "last_price": 13230.0,
+    "pnl_pct": 0.22
    },
    {
     "sym": "046970",
     "name": "우리로",
     "qty": 5.0,
     "avg_cost": 6364.0,
-    "last_price": 6910.0,
-    "pnl_pct": 8.57
+    "last_price": 6890.0,
+    "pnl_pct": 8.260000000000002
    },
    {
     "sym": "317400",
     "name": "자이에스앤디",
     "qty": 3.0,
     "avg_cost": 7566.666666,
-    "last_price": 7870.0,
-    "pnl_pct": 4.0
+    "last_price": 7350.0,
+    "pnl_pct": -2.86
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 6700.0,
-    "pnl_pct": 0.8999999999999999
+    "last_price": 6690.0,
+    "pnl_pct": 0.75
    },
    {
     "sym": "024840",
     "name": "KBI메탈",
     "qty": 8.0,
     "avg_cost": 3400.0,
-    "last_price": 3560.0,
-    "pnl_pct": 4.7
+    "last_price": 3650.0,
+    "pnl_pct": 7.35
    }
   ],
   "open_orders": [],
@@ -281,142 +281,142 @@
     "transactionTime": null,
     "transactionType": "BUY",
     "symbol": "446540",
-    "quantity": "1",
+    "quantity": "2",
     "filledPrice": null,
-    "amount": "7160",
-    "commission": "1",
+    "amount": "14380",
+    "commission": "2",
     "tax": "0",
     "settled": false,
     "settlementDate": "2026-11-16",
     "isCancellation": false
    },
    {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "228850",
-    "quantity": "1",
-    "filledPrice": null,
-    "amount": "7610",
-    "commission": "1",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "046970",
-    "quantity": "2",
-    "filledPrice": null,
-    "amount": "12860",
-    "commission": "1",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "396300",
-    "quantity": "2",
-    "filledPrice": null,
-    "amount": "13520",
-    "commission": "2",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "010170",
-    "quantity": "1",
-    "filledPrice": null,
-    "amount": "11780",
-    "commission": "1",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "446540",
-    "quantity": "2",
-    "filledPrice": null,
-    "amount": "12040",
-    "commission": "1",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "356680",
-    "quantity": "1",
-    "filledPrice": null,
-    "amount": "13800",
-    "commission": "2",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "092190",
-    "quantity": "2",
-    "filledPrice": null,
-    "amount": "13760",
-    "commission": "2",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "024840",
-    "quantity": "4",
-    "filledPrice": null,
-    "amount": "13980",
-    "commission": "2",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
-    "transactionType": "BUY",
-    "symbol": "317400",
-    "quantity": "1",
-    "filledPrice": null,
-    "amount": "8100",
-    "commission": "1",
-    "tax": "0",
-    "settled": false,
-    "settlementDate": "2026-11-13",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
+    "transactionTime": "2026-11-13T00:07:16.569+09:00",
     "transactionType": "BUY",
     "symbol": "046890",
     "quantity": "1",
-    "filledPrice": null,
+    "filledPrice": "9200",
     "amount": "9200",
     "commission": "1",
     "tax": "0",
-    "settled": false,
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.560+09:00",
+    "transactionType": "BUY",
+    "symbol": "446540",
+    "quantity": "2",
+    "filledPrice": "6020",
+    "amount": "12040",
+    "commission": "1",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.551+09:00",
+    "transactionType": "BUY",
+    "symbol": "396300",
+    "quantity": "2",
+    "filledPrice": "6760",
+    "amount": "13520",
+    "commission": "2",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.541+09:00",
+    "transactionType": "BUY",
+    "symbol": "356680",
+    "quantity": "1",
+    "filledPrice": "13800",
+    "amount": "13800",
+    "commission": "2",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.532+09:00",
+    "transactionType": "BUY",
+    "symbol": "228850",
+    "quantity": "1",
+    "filledPrice": "7610",
+    "amount": "7610",
+    "commission": "1",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.520+09:00",
+    "transactionType": "BUY",
+    "symbol": "092190",
+    "quantity": "2",
+    "filledPrice": "6880",
+    "amount": "13760",
+    "commission": "2",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.509+09:00",
+    "transactionType": "BUY",
+    "symbol": "046970",
+    "quantity": "2",
+    "filledPrice": "6430",
+    "amount": "12860",
+    "commission": "1",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.497+09:00",
+    "transactionType": "BUY",
+    "symbol": "024840",
+    "quantity": "4",
+    "filledPrice": "3495",
+    "amount": "13980",
+    "commission": "2",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.484+09:00",
+    "transactionType": "BUY",
+    "symbol": "010170",
+    "quantity": "1",
+    "filledPrice": "11780",
+    "amount": "11780",
+    "commission": "1",
+    "tax": "0",
+    "settled": true,
+    "settlementDate": "2026-11-13",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-13T00:07:16.468+09:00",
+    "transactionType": "BUY",
+    "symbol": "317400",
+    "quantity": "1",
+    "filledPrice": "8100",
+    "amount": "8100",
+    "commission": "1",
+    "tax": "0",
+    "settled": true,
     "settlementDate": "2026-11-13",
     "isCancellation": false
    },
