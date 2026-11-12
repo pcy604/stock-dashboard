@@ -3914,11 +3914,11 @@ def _macro_v2_top(_PX, _RG):
 
     # ── ① 이번 주 판정 — 2026-10-20 다른 탭과 같은 st.metric 카드로 통일(사용자 피드백)
     st.subheader("이번 주 판정")
-    st.caption("매주 월요일 아침에 이 한 줄만 보면 된다. 비중을 바꾸는 확정 규칙은 코어 스위치(200일선) 하나다.")
+    st.caption("미국 중심 두 축 요약 — 참고. 지금 돈을 움직이는 규칙은 맨 위 '실전 판정'(한국 주봉 5주선)이다. 코어 스위치(S&P500 200일선)는 옛 원칙 v1.3 의 미국 코어 규칙(미국 슬리브 2026-11-04 중단).")
     nl, nl13 = _A['nl'], _A['nl13']
     _flow_short = {'위험자산으로 유입': '유입', '위험자산에서 이탈': '이탈'}.get(flow['word'], flow['word'])
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric('코어 스위치 · 확정 규칙', '판정 불가' if core_on is None else ('ON' if core_on else 'OFF'),
+    k1.metric('코어 스위치 · 옛 v1.3 (참고)', '판정 불가' if core_on is None else ('ON' if core_on else 'OFF'),
               None if gap200 is None else f"200일선 {'위' if core_on else '아래'} {gap200:+.1f}%",
               delta_color='normal' if core_on is not None else 'off',
               help='S&P500(SPY) 종가가 200일 이평 위면 코어 보유, 아래면 코어를 현금으로 — 원칙 v1의 유일한 확정 비중 규칙')
@@ -4040,7 +4040,7 @@ def _regime_history_panel(h):
     fw.insert(3, '중앙 지속(개월)', [_md.get(k) for k in _ms.ORDER])
     st.dataframe(fw, filters=False,
                  src=f"FRED(FEDFUNDS·INDPRO·UNRATE·CPIAUCSL, 발표 시차 1개월) · S&P500 가격지수(Yahoo) · {h.index[0]:%Y-%m}~{h.index[-1]:%Y-%m} 월말 · macro_season.py",
-                 asof=f"{h.index[-1]:%Y-%m-%d}",
+                 asof=f"{h.index[-1]:%Y-%m} 월말 기준(진행 중 달 포함)",
                  column_config={c: st.column_config.NumberColumn(c, format=('%+.1f' if '평균' in c else '%.0f'))
                                 for c in fw.columns if c != '계절'})
     st.caption("배경색 = 그 달 계절, 선 = S&P500(배당 제외). 같은 규칙을 과거에 그대로 적용했다(미래 값 미사용). "
@@ -4218,7 +4218,7 @@ def _macro_live_top():
     P = _alert_px()
     st.subheader("실전 판정 — 지금 돈을 움직이는 규칙")
     st.caption("실전 시범(토스·한국 단독)은 종목이 속한 시장(코스피/코스닥)의 **주봉 종가가 5주선 위일 때만** 신규 매수·불타기를 한다(live/PREREG v1.4). "
-               "코어 스위치(S&P500 200일선)는 원칙 v1의 자산배분 규칙. 비중을 바꾸는 것은 이 카드들뿐이다.")
+               "S&P500 200일선(옛 원칙 v1.3 코어 스위치)은 미국 슬리브 중단(2026-11-04) 뒤 **참고** — 지금 돈을 움직이는 건 앞의 두 카드와 봇 계획표뿐이다.")
     kg, qg = _V.weekly_gate(P['^KS11'][0]), _V.weekly_gate(P['^KQ11'][0])
     spy = fetch_index_history('SPY', 400)
     sw = _V.core_switch(spy.iloc[:, 0]) if not spy.empty else {}
@@ -4244,15 +4244,20 @@ def _macro_live_top():
     c1, c2, c3, c4 = st.columns(4)
     _gate_card(c1, '코스피 · 주봉 5주선', kg, 'KR')
     _gate_card(c2, '코스닥 · 주봉 5주선', qg, 'KQ')
-    c3.metric('S&P500 · 200일선 (코어)', '판정 불가' if not sw else ('ON' if sw['on'] else 'OFF'),
+    c3.metric('S&P500 · 200일선 (참고)', '판정 불가' if not sw else ('ON' if sw['on'] else 'OFF'),
               None if not sw else f"{sw['gap']:+.1f}% (200일선 대비)", delta_color='normal',
               help=f"{_sw_src} 종가가 200일 이평 위면 코어 보유, 아래면 현금 — 원칙 v1.3 §3. 상단 배지와 같은 계산(verdict.core_switch)." + (f" 기준일 {sw.get('date')}." if sw else ''))
     kr_ok, kq_ok = (pix.get('KR') or {}).get('ok'), (pix.get('KQ') or {}).get('ok')
     _pv = ('신규 중지' if kr_ok is False and kq_ok is False else ('신규 가능' if kr_ok and kq_ok else '시장별로 다름')) if pix else '계획표 없음'
+    _ovr = [(pix.get(k) or {}).get('override') for k in ('KR', 'KQ') if (pix.get(k) or {}).get('override')]
+    if _ovr:                                # 2026-11-12 감사: 오버라이드 주에 '신규 가능'·'계산 불일치' 경고가 같이 떠 모순으로 보였다
+        _pv = '오버라이드'
     c4.metric('봇 계획표 · 이번 주', _pv, f"{plan.get('made', '-')} 작성", delta_color='off', delta_arrow='off',
               help='live/plan_latest.json — 매주 토 18:23 KST 에 금요일 주봉으로 다시 만든다. 봇(live/bot.py)은 이 표만 따른다.')
     _mis = [n for n, g, k in (('코스피', kg, 'KR'), ('코스닥', qg, 'KQ'))
-            if g and pix.get(k) and pix[k].get('date') == g['week'] and bool(pix[k].get('ok')) != bool(g['on'])]
+            if g and pix.get(k) and not pix[k].get('override') and pix[k].get('date') == g['week'] and bool(pix[k].get('ok')) != bool(g['on'])]
+    if _ovr:
+        st.caption(f"🟠 {_ovr[0]} — 규칙상 판정(위 카드)과 다르게 이번 주만 매수했다. 성과는 따로 집계한다.")
     if _mis:
         st.caption(f"⚠️ {'·'.join(_mis)}: 같은 주봉인데 계획표와 이 화면의 판정이 다르다 — 계산 불일치, 확인 필요.")
 
@@ -4312,7 +4317,7 @@ def _macro_kr_block():
         if not x:
             col.metric(lab, '-', None, help='results/kr_flow.json 없음 — kr-flow 워크플로 수집 대기')
             continue
-        col.metric(lab, f"{x['d20'] / 1e4:+,.2f}조원", f"5일 {x['d5']:+,.0f}억원", delta_color='normal',
+        col.metric(lab, f"{x['d20'] / 1e4:+,.2f}조원", (f"5일 {x['d5'] / 1e4:+,.2f}조원" if abs(x['d5']) >= 1e4 else f"5일 {x['d5']:+,.0f}억원"), delta_color='normal',
                    help=f"{x['date']} 기준 외국인 순매수 합계. 1일 {x['d1']:+,.0f}억 · 60일 {x['d60'] / 1e4:+,.2f}조원. "
                         "20일 누적이 크게 마이너스면 외국인 이탈(원화 약세와 같이 오면 더 무겁게 본다).")
     cr = sm.get('credit')
@@ -4451,7 +4456,7 @@ def _macro_scoreboard(h):
     st.dataframe(T[['시장', '전략', '판정', 'CAGR', 'MDD', '보유 대비 수익(%p)', '보유 대비 낙폭(%p)', 'Sharpe', '노출', '전환', '기간']]
                  .rename(columns={'CAGR': '연 수익(%)', 'MDD': '최대 낙폭(%)', '노출': '주식 보유 기간(%)', '전환': '전환(회)'}),
                  filters=False, src='macro_long_px(Yahoo: ^SP500TR·^KS11) · FRED TB3MS · macro_timing.py',
-                 asof=str(h.index[-1].date()) if h is not None and len(h) else None)
+                 asof=(str(h.index[-1])[:7] + ' 월말 기준(진행 중 달 포함)') if h is not None and len(h) else None)   # 11-12 감사: '2026-11-30' 미래 날짜로 보였다
     st.caption("읽는 법: 대부분의 신호는 **수익을 조금 내주고 낙폭을 크게 줄입니다**(보험료). 한국은 주봉 5·10주선이 수익도 이겼습니다 — "
                "실전 v1.9 가 '소속 지수 5주선 아래면 신규 중지'를 쓰는 근거. 4계절은 전환이 적어(수십 번) 표본이 작고, "
                "전환 시점 정보만 썼지만 정의 자체는 사후에 다듬은 것이라 실제 성적은 이보다 나쁠 수 있습니다.")

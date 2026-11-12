@@ -169,7 +169,7 @@ def hero(g: dict, line: str, line_date: str, chips: list[str], live: str = ''):
     detail = ' · '.join(f"{r['lab']} {_num(r['last'])} vs 5주선 {_num(r['ma'])} ({'위' if r['rule_ok'] else '아래'} · {r.get('date') or '-'} 주봉)"
                         for r in g['rows'])
     body = (f"<p><b style='color:#fff'>오늘 시장</b> — {_e(line)} <span style='color:#9CA3AF'>(AI 요약 · {_e(line_date)})</span></p>"
-            if line else "<p>오늘 시황 요약이 아직 없습니다 — 매일 06:45(KST) 한국 장 마감 리포트가 쌓입니다.</p>")
+            if line else "<p>오늘 시황 요약이 아직 없습니다 — 평일 15:50(KST) 한국 장 마감 리포트가 쌓입니다.</p>")
     st.html(CSS + f"""<div class="hm"><div class="hm-hero" style="--glow:{glow}">
       <div class="hm-kick">THIS WEEK · 실전 규칙 v1.9 (한국) · 계획표 {_e(g.get('made'))}</div>
       <h3>{_e(g['head'])}</h3>{ov}
@@ -562,7 +562,7 @@ CAPS = [
         ("지수·환율·금리·원자재 12종 카드", 'k'),
         ("한국 시장 폭·업종 강약·시총 상위", 'k'),
         ("이번 주 할 일 — 데이터 → 게이트 → 매수 → 보유 점검", 'g'),
-        ("시황 리포트(매일 06:45·월요일 주간) · 시황 챗봇", 'y')]),
+        ("시황 리포트(평일 15:50 한국 · 06:15 미국 · 월요일 주간) · 시황 챗봇", 'y')]),
     ("🌍 매크로", "왜 그런 판정이 나왔나?", [
         ("세계 증시 강도판 — 어디가 제일 강한가", 'k'),
         ("축 1 돈의 흐름 · 축 2 경제(선행·동행)", 'y'),
