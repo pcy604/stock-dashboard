@@ -16,7 +16,7 @@ import pandas as pd
 
 import gov
 
-VERSION = '2026-11-12a'
+VERSION = '2026-11-12b'
 ROOT = Path(__file__).resolve().parent
 
 
@@ -222,7 +222,7 @@ def _scorecard(st, actor, owner_uid):
     st.markdown("#### 주간 스코어카드 — 최근 12주")
     df = pd.DataFrame(rows)
     st.dataframe(df, hide_index=True, src='경영실 gov_kpi_weekly(자동 = 이 화면 열 때 계산 · 수동 = 아래 입력)',
-                 asof=wk.isoformat(), filters=False)
+                 asof=wk.isoformat(), filters=False, color=False)   # 단위가 섞인 행이라 색은 판정 열(🟢🔴)로만
 
     with st.expander('✏️ 이번 주 값 입력·수정 (수동 KPI, 또는 자동 값 덮어쓰기)'):
         opts = {k['title']: k['meta']['key'] for k in kpis}

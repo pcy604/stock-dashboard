@@ -9370,7 +9370,7 @@ if tab_gov is not None:
     with tab_gov, guard('경영실'):
         _lazy(tab_gov)
         import ui_gov as _UG
-        if getattr(_UG, 'VERSION', None) != '2026-11-12a':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
+        if getattr(_UG, 'VERSION', None) != '2026-11-12b':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
             import importlib as _il, gov as _G
             _il.reload(_G); _UG = _il.reload(_UG)
         import access as _accg
