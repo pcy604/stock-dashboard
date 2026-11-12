@@ -5819,8 +5819,9 @@ _resolve_symbol = _symsrch.resolve_symbol
 
 
 # ── 🔍 종목 분석 v2 (2026-11-10) — 5축 화면. 옛 화면은 '화면' 선택(또는 ?layout=v1)으로 그대로 돌아간다 ──
-_AN_AXMAP = [('수급', ('peer',)), ('펀더멘털', ('flow', 'earn', 'seg')), ('밸류', ('val',)),
-             ('촉매·리스크', ('ref',)), ('매매 계획', ('plan', 'price')), ('원자료', ('fin', 'profile'))]
+# 2026-11-13 7블록(차니 확정): 정체 블록이 개요·사업부문을 가져간다. 첫 줄 카드는 stock_snapshot.compute 가 한 번에 계산.
+_AN_AXMAP = [('수급', ('peer',)), ('이익 방향', ('flow', 'earn')), ('가격', ('val',)), ('정체', ('profile', 'seg')),
+             ('깨지는 조건·촉매', ('ref',)), ('매매 계획', ('plan', 'price')), ('원자료', ('fin',))]
 
 
 def _an_v2_on() -> bool:
@@ -5853,8 +5854,9 @@ def _an_axes_pick(A2) -> list:
                 saved = (_usm.load(_em) or {}).get('analysis_axes')
         except Exception:
             saved = None
-        st.session_state['an_axes'] = [a for a in (saved if isinstance(saved, list) else
-                                                   (A2.DEFAULT_AXES_MOBILE if IS_MOBILE else A2.DEFAULT_AXES)) if a in A2.AXES]
+        _al = getattr(A2, 'AXIS_ALIAS', {})
+        st.session_state['an_axes'] = [a for a in dict.fromkeys(_al.get(a, a) for a in (saved if isinstance(saved, list) else
+                                                   (A2.DEFAULT_AXES_MOBILE if IS_MOBILE else A2.DEFAULT_AXES))) if a in A2.AXES]
 
     def _save():
         v = list(st.session_state.get('an_axes_w') or [])
@@ -5884,176 +5886,49 @@ def _an_cards(cards) -> str:
 
 
 def _an_v2_fill(L: dict):
-    """v2 — 각 축의 '첫 줄 판정' 카드와 맨 위 결론. 섹션 코드가 이미 계산한 값(locals)을 읽기만 한다 —
-    없는 값은 '-'·판정 불가로 정직하게(여기서 새로 추정하지 않는다)."""
-    A2 = L['_A2']
-    sym, is_kr, hist, info = L['sym8_clean'], L['is_kr_sym'], L['hist'], L['info']
-    C = lambda label, value, sub='', tone='na': {'label': label, 'value': value, 'sub': sub, 'tone': tone}
-    pxf = (lambda v: f"₩{v:,.0f}") if is_kr else (lambda v: f"${v:,.2f}")
-    res = {}
-
-    # ── 수급 ──
+    """v2 — 각 축의 '첫 줄 판정' 카드와 맨 위 결론. 계산은 stock_snapshot.compute 한 곳(봇 /report 가 읽을 정본과 같은 dict),
+    여기선 그리기만 한다. 없는 값은 '-'·판정 불가로 정직하게(여기서 새로 추정하지 않는다)."""
+    import stock_snapshot as _ss
+    _ss = _fresh_module(_ss)
+    ctx = {'A2': L['_A2'], 'CMB': _CMB, 'cm': _cm, 'sector_detail': _sector_detail, 'kr_cons_hist': _kr_cons_hist,
+           'kr_cons_live': _kr_cons_live, 'sx': _sx, 'q_rows_long': _q_rows_long, 'live_plan': _live_plan}
     try:
-        h = A2.high52(hist['Close'])
-        rs = None
-        if not _CMB.empty and sym in _CMB.index and pd.notna(_CMB.loc[sym, 'RS']):
-            rs = float(_CMB.loc[sym, 'RS'])
-        sd = L.get('_sd') or _sector_detail()
-        gsel, glabel = str(L.get('_gsel') or ''), L.get('_glabel')
-        mkt = 'KR' if is_kr else 'US'
-        if is_kr and gsel.startswith('테마'):
-            fam = sd.get('theme') or {}
-        elif is_kr and gsel.startswith('네이버 업종'):
-            fam = sd.get('upjong') or {}
-        elif not is_kr and gsel.startswith('세부 산업'):
-            fam = sd.get('industry') or {}
-        else:
-            col = '_업종full' if '_업종full' in _CMB.columns else '업종'
-            fam = {k: list(v.index.astype(str)) for k, v in _CMB.groupby(col)} if not _CMB.empty else {}
-            glabel = str(_CMB.loc[sym, col]) if (not _CMB.empty and sym in _CMB.index) else None
-        gh = A2.group_heat(_CMB, fam, market=mkt, min_n=5)        # 3~4종 무리는 자기 자신이 중앙값을 좌우한다(000660 '반도체 대표주' 3종 실화면)
-        grow = gh[gh['group'] == glabel] if glabel is not None and len(gh) else gh.iloc[0:0]
-        gpct = float(grow['pct'].iloc[0]) if len(grow) else None
-        vr = A2.volume_ratio(hist.get('Volume'))
-        q = A2.flow_quadrant(gpct, rs)
-        cards = [
-            C('업종 온도 (같은 무리 RS 중앙값 순위)',
-              (f"{glabel} · {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위" if len(grow) else (glabel or '업종 미상')),
-              (f"무리 RS 중앙 {grow['med_rs'].iloc[0]:.0f} · 상위 {gpct:.0f}% · {int(grow['n'].iloc[0])}종" if len(grow) else '무리가 5종 미만이거나 분류 없음 — 아래 \'비교할 무리\'를 넓혀 보세요'),
-              'na' if gpct is None else ('good' if gpct <= 30 else 'bad' if gpct >= 70 else 'mid')),
-            C('종목 강도 (RS · 52주 고점)',
-              (f"RS {rs:.0f}" if rs is not None else 'RS -') + (f" · 고점 대비 {h['dd']:+.1f}%" if h else ''),
-              (f"52주 고점 {pxf(h['high'])} ({h['date']}, {h['weeks']}주 전) · 종가 기준" if h else '가격 이력 부족'),
-              'na' if rs is None else ('good' if rs >= 80 else 'bad' if rs < 50 else 'mid')),
-            C('수급 판정', q['label'], q['why'] + (f" · 거래량 {vr:.1f}배(5일÷20일)" if vr else ''), q['tone']),
-        ]
-        res['수급'] = q['tone']
-        if '수급' in L['_AXH']:
-            L['_AXH']['수급'].markdown(_an_cards(cards), unsafe_allow_html=True)
-    except Exception as e:
-        res['수급'] = 'na'
-        if '수급' in L['_AXH']:
-            L['_AXH']['수급'].caption(f"`수급 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
-
-    # ── 펀더멘털 ──
-    cyc = {}
-    try:
-        ed = L.get('_ed') or {}
-        if is_kr:
-            rows = list(_kr_cons_hist(sym))
-            lv = _kr_cons_live(sym)
-            if lv:
-                rows.append({'date': pd.Timestamp.today().strftime('%Y-%m-%d'), 'sym': sym, **lv})
-            fwd = A2.forward_kr(rows)
-        else:
-            fwd = A2.forward_us(ed.get('eps_trend'), ed.get('eps_revisions'))
-        cyc = A2.cycle_position(_sx.quarterly_frame(_q_rows_long(sym, is_kr)[0]))
-        oy = ry = None
-        if not _CMB.empty and sym in _CMB.index:
-            oy = pd.to_numeric(pd.Series([_CMB.loc[sym].get('영업익YoY(%)')]), errors='coerce').iloc[0]
-            ry = pd.to_numeric(pd.Series([_CMB.loc[sym].get('매출YoY(%)')]), errors='coerce').iloc[0]
-        et0 = L.get('_et0') or {}
-        ah0 = L.get('_ah0') or {}
-        state = et0.get('state') if is_kr else (f"이익 가속 {ah0['rows'][0]['주차']}" if ah0.get('rows') else '이익 가속 신호 없음')
-        past_val = ' · '.join(x for x in (f"영업익 {oy:+.0f}%" if pd.notna(oy) else None, f"매출 {ry:+.0f}%" if pd.notna(ry) else None) if x) or '-'
-        past_tone = 'na' if pd.isna(oy) and not state else ('good' if (pd.notna(oy) and oy > 0) or '흑자전환' in str(state) else 'bad' if pd.notna(oy) and oy < 0 else 'mid')
-        cards = [C('앞으로 (컨센서스·리비전) — 대표', fwd['value'], fwd['sub'], fwd['tone']),
-                 C('사이클 위치 (자기 이익률 분포)', cyc['value'], cyc['sub'], cyc['tone']),
-                 C('지금까지 (최근 분기 YoY)', past_val, f"{state or '-'} · 사이클 기업은 바닥에서 이 숫자가 가장 나쁘다", past_tone)]
-        res['펀더멘털'] = fwd['tone'] if fwd['tone'] != 'na' else (cyc['tone'] if cyc.get('cyclical') else past_tone)
-        # 사이클 기업이 자기 이익률 분포의 천장권(80 백분위+)이면 '개선'이라 말하지 않는다 — 린치: 최대 이익·최저 P/E 에서 사면 반토막
-        if cyc.get('cyclical') and (cyc.get('pct') or 0) >= 80 and res['펀더멘털'] == 'good':
-            res['펀더멘털'], res['_cyc_peak'] = 'mid', True
-        if '펀더멘털' in L['_AXH']:
-            L['_AXH']['펀더멘털'].markdown(_an_cards(cards), unsafe_allow_html=True)
-    except Exception as e:
-        res['펀더멘털'] = 'na'
-        if '펀더멘털' in L['_AXH']:
-            L['_AXH']['펀더멘털'].caption(f"`펀더멘털 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
-
-    # ── 밸류 ──
-    try:
-        bm = L.get('_bm') or {}
-        vb = L.get('_vb') or {}
-        peg = L.get('_peg')
-        peg = float(peg) if peg is not None and pd.notna(peg) else None
-        per = vb.get('per_ttm')
-        try:                                    # _pr 은 뒤 섹션에서 st.columns 로 덮인다 — 다시 계산
-            pr = _cm.peer_rank(_CMB, sym, codes=L.get('_gcodes'), label=L.get('_glabel')) or {}
-        except Exception:
-            pr = {}
-        med = next((r['업종중앙'] for r in (pr.get('rows') or []) if r['지표'] == 'PER(배)'), None)
-        ratio = (per / med) if (per and med and per > 0 and med > 0) else None
-        v = A2.valuation_reading(bm.get('rank'), peg, ratio, cyc.get('cyclical'))
-        cards = [C('밸류 종합 (참고 — 매수 판정엔 안 씀)', v['value'], v['sub'], v['tone']),
-                 C(f"자기 과거 ({bm.get('kind', 'P/E')} 밴드)",
-                   (f"{bm['now']:.1f}배 · {bm['rank']:.0f}% 기간보다 비쌈" if bm.get('now') is not None and bm.get('rank') is not None else '-'),
-                   (f"과거 중앙 {bm['pct'][50]:.1f}배 · 사업 구조가 바뀌었으면 과거 비교는 의미가 약하다" if bm.get('pct') else '밴드 계산 불가'),
-                   'na' if bm.get('rank') is None else ('good' if bm['rank'] <= 25 else 'bad' if bm['rank'] >= 75 else 'mid')),
-                 C('동종 대비 · 성장 대비',
-                   (f"P/E {per:.1f}배 vs 업종 {med:.1f}배" if per and med else 'P/E -'),
-                   (f"PEG {peg:.2f} (1 미만 = 성장 대비 쌈, 린치)" if peg else 'PEG - (적자·컨센서스 없음)'),
-                   'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.25 else 'mid'))]
-        res['밸류'] = v['tone']
-        if '밸류' in L['_AXH']:
-            L['_AXH']['밸류'].markdown(_an_cards(cards), unsafe_allow_html=True)
-    except Exception as e:
-        res['밸류'] = 'na'
-        if '밸류' in L['_AXH']:
-            L['_AXH']['밸류'].caption(f"`밸류 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
-
-    # ── 촉매·리스크 ──
-    try:
-        nx_us, nx = L.get('_next_us'), (L.get('_eq') or {}).get('next') or {}
-        now = pd.Timestamp.today().normalize()
-        if nx_us is not None:
-            nd = pd.Timestamp(nx_us[0]).tz_localize(None) if getattr(pd.Timestamp(nx_us[0]), 'tz', None) else pd.Timestamp(nx_us[0])
-            ev = C('다음 실적 발표', f"{nd:%Y-%m-%d}", f"D-{(nd.normalize() - now).days}", 'mid' if (nd - now).days <= 14 else 'na')
-        elif nx.get('예상') is not None:
-            ev = C('다음 실적 발표', f"{nx['예상']:%m월 %d일} 전후(추정)", f"전년 같은 분기 발표일 기준", 'na')
-        else:
-            ev = C('다음 실적 발표', '-', '일정 미상', 'na')
-        risk, chk = L.get('_risk') or [], L.get('_chk_') or []
-        nr = [r for r in risk if r.get('state') == 'warn']
-        nc = [r for r in chk if r.get('state') == 'warn']
-        cards = [ev,
-                 C('리스크 점검', f"{len(nr)}개 해당" if risk else '-', ' · '.join(r['name'] for r in nr)[:80] or '해당 없음',
-                   'na' if not risk else ('good' if not nr else 'mid' if len(nr) <= 2 else 'bad')),
-                 C('데이터 점검', f"이상 {len(nc)}건" if chk else '-', ' · '.join(r['name'] for r in nc)[:80] or f"{len(chk)}개 항목 정상",
-                   'na' if not chk else ('good' if not nc else 'bad'))]
-        res['리스크'] = cards[1]['tone']
-        if '촉매·리스크' in L['_AXH']:
-            box = L['_AXH']['촉매·리스크']
-            box.markdown(_an_cards(cards), unsafe_allow_html=True)
-            if risk or chk:
-                with box.expander('근거 — 리스크 점검 · 데이터 점검', expanded=bool(nc)):
-                    ico = {'ok': '✅', 'warn': '⚠️', 'na': '·'}
-                    st.markdown('\n'.join(f"- {ico.get(r.get('state'), '·')} **{r['name']}** · {r.get('detail', '')}" for r in risk + chk))
-    except Exception as e:
-        if '촉매·리스크' in L['_AXH']:
-            L['_AXH']['촉매·리스크'].caption(f"`촉매·리스크 판정 실패: {type(e).__name__}: {str(e)[:100]}`")
-
-    # ── 결론 (항상) ──
-    try:
-        fw = {'good': '좋아지는 회사', 'mid': '실적 신호가 엇갈림', 'bad': '나빠지는 회사', 'na': '실적 판단 불가'}[res.get('펀더멘털', 'na')]
-        if res.get('_cyc_peak'):
-            fw = '이익은 사이클 천장권(주의)'
-        fl = {'good': '시장이 주목 중', 'mid': '시장 관심은 부분적', 'bad': '지금은 시장이 외면', 'na': '수급 판단 불가'}[res.get('수급', 'na')]
-        cards = [C('🌊 수급·관심', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[res.get('수급', 'na')], fl, res.get('수급', 'na')),
-                 C('🏭 펀더멘털 (앞으로 우선)', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[res.get('펀더멘털', 'na')], fw, res.get('펀더멘털', 'na')),
-                 C('⚖️ 밸류 (참고)', {'good': '쌈', 'mid': '보통', 'bad': '비쌈', 'na': '-'}[res.get('밸류', 'na')],
-                   '사이클 기업·적자면 판정 보류', res.get('밸류', 'na'))]
-        with L['_V2C']:
-            st.markdown(f"#### 🧭 결론 — {fw}, {fl}")
-            st.markdown(_an_cards(cards), unsafe_allow_html=True)
-            rk, bst = L.get('_rk'), L.get('_bst')
-            if L.get('_IS_LAB') and isinstance(rk, list) and rk:
-                n_ok = sum(1 for x in rk if x[1])
-                st.caption(f"🤖 실전 규칙 {n_ok}/{len(rk)} 통과 · 봇 상태: {bst or '-'} — 자세한 대조는 🎯 매매 계획 축(소유자에게만 보임)")
-            st.caption("세 신호는 아래 각 축 첫 줄 카드의 대표값이다(수급 = 업종 온도 × 종목 RS · 펀더멘털 = 컨센서스 리비전 우선, "
-                       "없으면 사이클 위치·최근 분기). 규칙 계산이며 투자 권유가 아니다.")
+        snap = _ss.compute(L, ctx)
     except Exception as e:
         L['_V2C'].caption(f"`결론 계산 실패: {type(e).__name__}: {str(e)[:100]}`")
+        return
+    L['_snap'] = snap
+    if os.environ.get('SNAP_SAVE') == '1':          # CI 사전 계산(봇 정본)에서만 파일로 — 배포 서버 디스크엔 안 쓴다
+        try:
+            _ss.save(snap)
+        except Exception as e:
+            print(f'[snap save] {e}')
+    for ax, b in snap['blocks'].items():
+        if ax not in L['_AXH']:
+            continue
+        box = L['_AXH'][ax]
+        if b.get('error'):
+            box.caption(f"`{ax} 판정 실패: {b['error']}`")
+            continue
+        if b.get('cards'):
+            box.markdown(_an_cards(b['cards']), unsafe_allow_html=True)
+        if ax == '깨지는 조건·촉매' and b.get('detail'):
+            with box.expander('근거 — 깨지는 조건의 지금 거리 · 리스크 점검 · 데이터 점검', expanded=bool(b.get('expand'))):
+                ico = {'ok': '✅', 'warn': '⚠️', 'na': '·'}
+                st.markdown('\n'.join(f"- {ico.get(r.get('state'), '·')} **{r['name']}** · {r.get('detail', '')}" for r in b['detail']))
+    try:
+        vd = snap['verdict']
+        with L['_V2C']:
+            st.markdown(f"#### 🧭 결론 — {vd['head']} &nbsp;<span style='font-size:.8em;color:#6B7280'>🪪 {vd['type_chip']}</span>",
+                        unsafe_allow_html=True)
+            st.markdown(_an_cards(vd['cards']), unsafe_allow_html=True)
+            rl = vd.get('rules')
+            if L.get('_IS_LAB') and rl:
+                st.caption(f"🤖 실전 규칙 {rl['pass']}/{rl['total']} 통과 · 봇 상태: {rl['bot']} — 자세한 대조는 🎯 매매 계획 축(소유자에게만 보임)")
+            st.caption("세 신호는 아래 각 축 첫 줄 카드의 대표값이다(수급 = 업종 온도 × 종목 RS · 이익 방향 = 컨센서스 리비전 우선, "
+                       "없으면 사이클 위치·최근 분기 · 유형 = 린치 6유형 v1 규칙). 규칙 계산이며 투자 권유가 아니다.")
+    except Exception as e:
+        L['_V2C'].caption(f"`결론 그리기 실패: {type(e).__name__}: {str(e)[:100]}`")
 
 
 @st.fragment
