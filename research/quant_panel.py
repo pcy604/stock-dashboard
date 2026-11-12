@@ -31,6 +31,24 @@ def _f32(d):
     return d[COLS]
 
 
+def _keep_once_in(d, floor):
+    """2026-11-12 감사 — 시총 하한을 '그 주' 기준으로 자르면 ① 시총이 비는 주(상장 첫해·SEC 주식수 공백·회전율로 비운 칸)와
+    ② 하한 아래로 떨어진 보유 종목의 가격이 통째로 사라져, 엔진이 '패널 이탈 = 마지막 종가에 정리'로 처리한다(급락 손실 누락).
+    한 번이라도 하한을 넘은 종목은 그 뒤 행을 남긴다(시총 NaN 포함). 매수 필터(marcap ≥ 하한)는 엔진이 그대로 건다."""
+    d = d.sort_values(["sym", "date"])
+    hit = (d.marcap >= floor).astype(int).groupby(d.sym).cummax().astype(bool)
+    return d[hit].copy()
+
+
+def coverage(d, probes):
+    """정답 점검용 — 종목별 첫 주. known_answers 가 읽는다."""
+    out = {}
+    for s_ in probes:
+        x = d.loc[d.sym == s_, "date"]
+        out[s_] = str(x.min().date()) if len(x) else None
+    return out
+
+
 def us():
     ver = os.environ.get("FACTOR_VER", "v1")
     os.environ["FACTOR_VER"] = ver
@@ -59,7 +77,7 @@ def us():
     # 거래 없는 주(거래량 0 — 비상장 리츠 IVT 처럼 호가만 멈춰 있는 값)는 체결할 수 없다 → 뺀다
     d = d[~(d.volume == 0)]
     d = d.drop(columns=["_capfix", "_capbad"])
-    d = d[d.marcap >= 2e8].copy()
+    d = _keep_once_in(d, 2e8)
     # 영업이익 YoY: 같은 종목 4분기 전 값(분기 패널에서)
     q = d.dropna(subset=["period_end"]).drop_duplicates(["sym", "period_end"])[["sym", "period_end", "op_income"]].sort_values(["sym", "period_end"])
     q["op4"] = q.groupby("sym").op_income.shift(4)
@@ -112,7 +130,7 @@ def kr():
                                         close=("Close", "last"), volume=("Volume", "sum"), marcap=("Marcap", "last"),
                                         mid=("MarketId", "last"), last_day=("Date", "last")).reset_index()
     w = w.rename(columns={"Code": "sym", "week": "date"})
-    w = w[w.marcap >= 5e10]
+    w = _keep_once_in(w, 5e10)
     # 2026-11-08 정답 점검 — 수정주가가 깨지면 빌드 실패(메가스터디 무상증자·삼성 50:1 분할·에코프로 5:1 분할 주에 −30% 넘는 가짜 폭락이 없어야)
     for s_, a_, b_ in (("072870", "2018-06-11", "2018-06-18"), ("005930", "2018-04-23", "2018-05-07"), ("086520", "2024-04-15", "2024-04-29")):
         x_ = w[(w.sym == s_) & (w.date >= pd.Timestamp(a_)) & (w.date <= pd.Timestamp(b_))].sort_values("date")
@@ -190,7 +208,9 @@ def main(markets=("US", "KR")):
         try:
             d = fn()
             d.to_parquet(os.path.join(OUT, f"quant_panel_{m}.parquet"), index=False, compression="zstd")
-            info[m] = dict(rows=int(len(d)), syms=int(d.sym.nunique()), start=str(d.date.min().date()), end=str(d.date.max().date()))
+            info[m] = dict(rows=int(len(d)), syms=int(d.sym.nunique()), start=str(d.date.min().date()), end=str(d.date.max().date()),
+                           cap_nan_rows=int(d.marcap.isna().sum()),
+                           first_week=coverage(d, ("NVDA", "PLTR", "TSLA") if m == "US" else ("005930", "086520", "247540")))
         except Exception as e:
             info[m] = dict(error=f"{type(e).__name__}: {e}")
             print(f"[{m}] 실패: {e}")

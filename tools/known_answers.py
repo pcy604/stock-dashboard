@@ -507,6 +507,18 @@ def _():
     return not bad, ' · '.join(f"{m} {(i.get(m) or {}).get('rows', 0):,}행 ~{(i.get(m) or {}).get('end', '-')}" for m in ('US', 'KR')) + (f" · 문제 {bad}" if bad else '')
 
 
+@check('퀀트 백테스트', '패널이 종목 첫 주를 잃지 않았나 — TSLA·삼성전자는 2014 초부터 (NVDA·PLTR 첫 주는 참고 표시, 2026-11-12)')
+def _():
+    i = _j('results/quant_panel_info.json')
+    fw = {**((i.get('US') or {}).get('first_week') or {}), **((i.get('KR') or {}).get('first_week') or {})}
+    if not fw:
+        return False, '첫 주 기록 없음 — 패널 재빌드 필요(quant-panel 워크플로, 2026-11-12 빌더가 기록 시작)'
+    ok = (fw.get('TSLA') or '9999') <= '2014-03-31' and (fw.get('005930') or '9999') <= '2014-01-31'
+    nan_ = ' · '.join(f"{m} 시총 빈 행 {(i.get(m) or {}).get('cap_nan_rows', '-'):,}" if isinstance((i.get(m) or {}).get('cap_nan_rows'), int)
+                      else f"{m} 시총 빈 행 -" for m in ('US', 'KR'))
+    return ok, ' · '.join(f"{k} {v or '없음'}" for k, v in fw.items()) + f" · {nan_} · 참고: NVDA·PLTR 는 상장 직후·SEC 주식수 공백 주가 빠질 수 있음(시총 없이는 매수 불가라 성과 편향은 작음)"
+
+
 @check('퀀트 백테스트', '실전 시범 계획표가 이번 주 것인가(토요일 생성, 8일 이내) — live/plan_latest.json')
 def _():
     d = _j('live/plan_latest.json')
