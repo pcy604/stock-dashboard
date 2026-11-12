@@ -120,6 +120,17 @@ def reconcile(ledger_pos, toss_hold):
     return diff, sorted(s for s in t if s not in ledger_pos)
 
 
+def _same_week(d1, d2) -> bool:
+    """2026-11-12 — 같은 ISO 주인가. 11-12 09:10·09:11 연속 실행이 메가터치 1차·2차 불타기를 1분 간격으로 샀다.
+    백테스트(quant_engine)는 주봉 하나에 불타기 1단계뿐 → 실전도 주 1단계로 맞춘다."""
+    try:
+        a = d1 if isinstance(d1, date) else date.fromisoformat(str(d1)[:10])
+        b = d2 if isinstance(d2, date) else date.fromisoformat(str(d2)[:10])
+        return a.isocalendar()[:2] == b.isocalendar()[:2]
+    except Exception:
+        return False
+
+
 def _adds(p) -> int:
     """불타기 몇 차까지 했나 — v1.8 이전 원장('added' 참/거짓)도 읽는다."""
     return int(p.get("adds", 1 if p.get("added") else 0))
@@ -161,6 +172,10 @@ def decide(L, plan, closes, bmap, today=None):
                 orders.append(dict(sym=sym, name=p.get("name"), side="SELL", quantity=q, px=c, trim=True,
                                    why=f"상한 덜기: 비중 {p['shares'] * c / equity * 100:.0f}% > {TRIM_CAP * 100:.0f}% → {TRIM_CAP * 100:.0f}%",
                                    cid=f"{yw[0]}W{yw[1]:02d}-{sym}-TRIM"))
+        elif (_adds(p) < len(ADD_STEPS) and c >= p["first_px"] * (1 + ADD_STEPS[_adds(p)][0])
+              and _same_week(p.get("last_add"), today)):
+            notes.append(f"{p.get('name', sym)} 불타기 {_adds(p) + 1}차 조건 충족 — 이번 주 이미 불타기({p['last_add']}) → 다음 주"
+                         " (백테스트 엔진과 같게 주 1단계)")
         elif _adds(p) < len(ADD_STEPS) and c >= p["first_px"] * (1 + ADD_STEPS[_adds(p)][0]):
             at, f = ADD_STEPS[_adds(p)]
             q = math.floor(min(target * f, TRIM_CAP * equity - p["shares"] * c) / c)   # 불타기로 상한 30% 를 넘지 않게
@@ -251,7 +266,7 @@ def apply_fill(L, o, q, px, fee, day):
         p = P.get(o["sym"])
         if p:                                                    # 불타기
             tot = p["shares"] + q
-            p.update(avg=(p["avg"] * p["shares"] + px * q) / tot, shares=tot, adds=_adds(p) + 1, added=True)
+            p.update(avg=(p["avg"] * p["shares"] + px * q) / tot, shares=tot, adds=_adds(p) + 1, added=True, last_add=day)
         else:
             P[o["sym"]] = dict(name=o.get("name") or o["sym"], shares=q, avg=px, first_px=px, peak=px, stop=px * (1 - STOP),
                                added=False, adds=0, last_px=px, opened=day)
@@ -382,6 +397,12 @@ def run(send=False, phase="reg"):
             line += " ⏳ 미체결 — 다음 실행에서 확인"
         msg.append(line)
     msg.append(f"  슬리브 자산 ≈ {eq['equity_krw']:,}원 · 종목당 목표 {eq['target_krw']:,}원")
+    if T is not None and live and orders:                        # 2026-11-12: 스냅샷이 주문 '전' 것이라 메가터치 6 vs 5 오경보
+        try:
+            time.sleep(2)
+            _toss_snapshot(L, T, acct, T.holdings(acct), T.cash(acct).get("KRW"), day)
+        except Exception as e:
+            msg.append(f"  · 주문 뒤 토스 스냅샷 실패 — {type(e).__name__}")
     return _done(msg, send, L, save=live)
 
 

@@ -164,3 +164,21 @@ def test_naver_rows_parse():
     x = '<chartdata symbol="010170"><item data="20261105|10500|11000|10400|10700|123" />\n<item data="20261106|10700|11200|10600|10860|456" /></chartdata>'
     r = B._naver_rows(x)
     assert r == [(date(2026, 11, 5), 10700.0), (date(2026, 11, 6), 10860.0)]
+
+
+def test_pyramid_one_step_per_week():
+    """2026-11-12 메가터치: 09:10·09:11 연속 실행이 1차·2차를 1분 간격 매수 → 백테스트(주봉 1단계)와 다름. 같은 주엔 1단계만."""
+    px = {"000002": (12500.0, "d")}                                             # +25% — 1·2차 조건 모두 충족
+    p_after1 = P(added=True, adds=1, peak=12500, stop=10000, last_add="2026-11-19")
+    o, notes, _ = B.decide(L0({"000002": p_after1}, cash=3_000_000), PLAN, px, BM, today=date(2026, 11, 20))
+    assert not [x for x in o if "ADD" in x["cid"]] and any("이번 주 이미 불타기" in n for n in notes)
+    o, _, _ = B.decide(L0({"000002": p_after1}, cash=3_000_000), PLAN, px, BM, today=date(2026, 11, 23))   # 다음 주 월요일
+    assert [x["cid"] for x in o if "ADD" in x["cid"]][0].endswith("ADD2")
+
+
+def test_apply_fill_records_last_add(tmp_path, monkeypatch):
+    monkeypatch.setattr(B, "TRADES", tmp_path / "trades.jsonl")              # 실제 매매 기록에 쓰지 않게
+    L = L0({"000002": P(added=False, adds=0)})
+    B.apply_fill(L, dict(sym="000002", side="BUY", name="X", why="불타기 1차", cid="000002-x-ADD1"), 1, 11000.0, 1.0, "2026-11-12")
+    p = L["KR"]["positions"]["000002"]
+    assert p["adds"] == 1 and p["last_add"] == "2026-11-12"

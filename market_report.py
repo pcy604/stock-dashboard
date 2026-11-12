@@ -360,7 +360,7 @@ def kr_heatmap(big, today):
 def breadth_log(today, breadth, kr):
     """results/kr_breadth_log.json 에 오늘 시장 폭(상승·하락·보합·신고가 수)을 덧붙이고 최근 30개를 돌려준다.
     2026-11-12 시작 — 이전 날짜는 없다(지어내지 않는다). 같은 날짜는 덮어쓴다."""
-    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "kr_breadth_log.json")
+    p = os.environ.get("MR_BREADTH_LOG") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "kr_breadth_log.json")
     try:
         log = json.load(open(p, encoding="utf-8"))
     except Exception:

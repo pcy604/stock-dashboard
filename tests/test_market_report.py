@@ -38,6 +38,8 @@ fake = pd.DataFrame({"Code": ["005930", "000660", "123456"], "Name": ["삼성전
                      "Marcap": [1e15, 9e14, 1e11], "ChagesRatio": [4.4, -1.2, 30.0]})
 fake.attrs = {"asof": "2026-10-21"}
 _s.modules["krx_listing"] = types.SimpleNamespace(stock_listing=lambda *a, **k: fake)
+import os as _os, tempfile as _tf
+_os.environ["MR_BREADTH_LOG"] = _os.path.join(_tf.mkdtemp(), "kr_breadth_log.json")   # 실제 results/ 에 쓰지 않게(2026-11-12)
 k = M.kr_today_facts("2026-10-21")["KR"]
 assert k["basis"] == "d1" and k["top"][0]["name"] == "삼성전자" and k["universe"] == 2 and k["breadth_up"] == 50, k
 assert M.kr_today_facts("2026-10-22") == {}, "어제 목록을 오늘 것으로 쓰지 않는다"
