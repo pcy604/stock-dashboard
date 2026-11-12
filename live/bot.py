@@ -296,6 +296,25 @@ def _keys():
     return rd("TOSS_CLIENT_ID", ".toss_client_id"), rd("TOSS_CLIENT_SECRET", ".toss_client_secret")
 
 
+def settle_pending(L, T, acct, day, msg):
+    """지난 실행의 주문 체결을 원장에 먼저 반영한다. 반영한 건수를 돌려준다.
+
+    2026-11-12 감사: 예전엔 원장↔토스 대조가 이 확인보다 앞에 있었다 → 08:40 시가 주문이 09:00 체결되면
+    09:10 실행에서 토스 수량 > 원장 수량(pending)으로 '불일치 → 중단'이 되고, 체결 반영 코드에 영영 닿지 못했다.
+    """
+    n = 0
+    for c_id, pd_ in list(L["pending"].items()):
+        q, px, fee = _fill(T.order(acct, pd_["orderId"]))
+        if q and px:
+            apply_fill(L, pd_["o"], q, px, fee, day)
+            L["done_ids"].append(c_id); L["pending"].pop(c_id); n += 1
+            msg.append(f"  ✅ 지난 주문 체결: {pd_['o']['side']} {pd_['o'].get('name')} {q:.0f}주 @ {px:,.0f}")
+        elif pd_.get("at") != day:                          # DAY 주문은 그날 끝나면 소멸 — 묶어 두지 않고 다음 판단으로
+            L["pending"].pop(c_id)
+            msg.append(f"  ⌛ 지난 주문 미체결 소멸: {pd_['o']['side']} {pd_['o'].get('name')} ({pd_['at']}) — 오늘 다시 판단")
+    return n
+
+
 def run(send=False, phase="reg"):
     live = is_live()
     L = _load(LEDGER, None); plan = _load(PLAN, {})
@@ -312,6 +331,9 @@ def run(send=False, phase="reg"):
             accts = T.accounts()
             acct = (accts[0] or {}).get("accountSeq") if accts else None
             hold = T.holdings(acct)
+            if live and L["pending"] and settle_pending(L, T, acct, day, msg):
+                _save(L)                                         # 체결 반영은 대조 결과와 무관하게 남긴다
+                hold = T.holdings(acct)
             diff, legacy = reconcile(L[M]["positions"], hold)
             cash = T.cash(acct).get("KRW")
             _toss_snapshot(L, T, acct, hold, cash, day)
@@ -331,17 +353,6 @@ def run(send=False, phase="reg"):
         msg.append("  ⛔ 토스 키 없음 — 실전 불가"); return _done(msg, send, L, save=False)
     else:
         msg.append("  · 토스 키 없음 — 원장만으로 모의 계산")
-
-    if T and live:                                               # 지난 실행의 미체결 확인
-        for c_id, pd_ in list(L["pending"].items()):
-            q, px, fee = _fill(T.order(acct, pd_["orderId"]))
-            if q and px:
-                apply_fill(L, pd_["o"], q, px, fee, day)
-                L["done_ids"].append(c_id); L["pending"].pop(c_id)
-                msg.append(f"  ✅ 지난 주문 체결: {pd_['o']['side']} {pd_['o'].get('name')} {q:.0f}주 @ {px:,.0f}")
-            elif pd_.get("at") != day:                          # DAY 주문은 그날 끝나면 소멸 — 묶어 두지 않고 다음 판단으로
-                L["pending"].pop(c_id)
-                msg.append(f"  ⌛ 지난 주문 미체결 소멸: {pd_['o']['side']} {pd_['o'].get('name')} ({pd_['at']}) — 오늘 다시 판단")
 
     bmap = board()
     buys = [b["sym"] for b in ((plan.get("sleeves") or {}).get(M) or {}).get("buys", [])]

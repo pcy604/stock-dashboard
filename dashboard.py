@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12i'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12j'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -1657,8 +1657,12 @@ with t_core, guard('주도주 교집합'):
     for _k, _lab, _col in (('KR', '코스피', _g[0]), ('KQ', '코스닥', _g[1])):
         _x = _ix.get(_k) or {}
         if _x:
-            _col.metric(f"{_lab} 5주선", '🟢 매수 가능' if _x.get('ok') else '🔴 신규 중지',
-                        f"{_x.get('last', 0):,.2f} vs 5주선 {_x.get('ma200', 0):,.2f} · {_x.get('date', '')}", delta_color='off')
+            # 2026-11-12 감사: 오버라이드 주에는 ok=True 라 '🟢 매수 가능'인데 종가 < 5주선이 같이 찍혀 모순으로 보였다.
+            _above = (_x.get('last') or 0) > (_x.get('ma200') or 0)
+            _lbl = ('🟢 매수 가능' if _above else '🟠 오버라이드(규칙상 중지)') if _x.get('ok') else '🔴 신규 중지'
+            _col.metric(f"{_lab} 5주선", _lbl,
+                        f"{_x.get('last', 0):,.2f} vs 5주선 {_x.get('ma200', 0):,.2f} · {_x.get('date', '')}", delta_color='off',
+                        help=(_x.get('override') or None))
     if _GMKT == 'US':
         st.info("v1.9 는 한국 전용입니다(2026-11-04 차니 결정 — 미국 슬리브 중단). 같은 규칙의 미국판은 퀀트 백테스트에서 S&P500(배당 포함)에 못 미쳤습니다.")
     elif _CMB.empty:

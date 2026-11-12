@@ -22,6 +22,10 @@ sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 import os
 
+# 2026-11-12: `python tools/x.py` 로 돌면 sys.path[0] = tools/ 라 루트의 config·telegram_notifier 를 못 찾았다
+#   (CI 실패 알림이 'No module named config' 로 한 번도 안 나감). 루트를 앞에 넣는다.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def _reasons(repo, rid, limit=6):
     """2026-10-19 — '실패했다'만으로는 원인이 안 보여 10-14~10-18 경보가 묻혔다.

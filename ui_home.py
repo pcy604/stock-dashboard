@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12i'
+VERSION = '2026-11-12j'
 
 CSS = """
 <style>
@@ -537,39 +537,13 @@ def dates_strip(items: list[tuple]):
 
 
 def rule_checkpoints(idx_rows: list[dict], kr: dict, flow_sum: dict | None, events: list[dict] | None) -> list[str]:
-    """이번에 볼 것 — 숫자 조건으로(2026-11-12). AI 체크포인트는 '~할지'처럼 판정 기준이 없어 행동으로 못 옮긴다.
-    ① 지수별 5주선까지 거리(금요일 종가 기준 = 실전 v1.9 신규 매수 조건) ② 시장 폭 ③ 외국인 수급 방향 ④ 7일 안 일정."""
-    out = []
-    for x in idx_rows:
-        g = x.get('gate5w') or {}
-        c, lg = x.get('close'), g.get('live_gap')
-        if c is None or lg is None:
-            continue
-        ma = c / (1 + lg / 100)
-        if lg < 0:
-            out.append(f"<b>{_e(x['name'])}</b> 금요일 종가가 <b>{ma:,.0f}</b>(5주선) 위면 다음 주 {_e(x['name'])} 종목 신규 매수 재개 — "
-                       f"지금 {c:,.0f}, <b>{(ma / c - 1) * 100:.1f}%</b> 더 올라야 함")
-        else:
-            out.append(f"<b>{_e(x['name'])}</b> 금요일 종가가 <b>{ma:,.0f}</b>(5주선) 아래로 내려가면 다음 주 신규 매수 중지 — 지금 여유 {lg:+.1f}%")
-    b = (kr or {}).get('breadth_all') or {}
-    t = (b.get('up') or 0) + (b.get('down') or 0) + (b.get('flat') or 0)
-    if t:
-        r = b['up'] / t * 100
-        out.append(f"시장 폭: 오늘 상승 종목 {r:.0f}% — " + ("반등이 소수 대형주가 아니라 넓게 퍼짐. 이런 날이 이어지는지(60%+)" if r >= 60
-                   else "지수와 달리 오르는 종목이 적음 — 소수 종목 장세 주의" if r < 45 else "중립"))
-    k = (flow_sum or {}).get('KOSPI') or {}
-    # 2026-11-12: kr_flow 요약은 17:47 갱신 — 15:50 리포트 직후엔 어제 값이라 '오늘'로 쓰면 날짜가 섞인다 → 오늘 잠정치(facts.flow) 우선
-    t1 = (((kr or {}).get('flow') or {}).get('KOSPI') or {}).get('외국인')
-    d1 = t1 if t1 is not None else k.get('d1')
-    if d1 is not None and k.get('d5') is not None:
-        same = (d1 >= 0) == (k['d5'] >= 0)
-        out.append(f"코스피 외국인: 오늘{' 잠정' if t1 is not None else ''} {d1 / 1e4:+.2f}조 · 5일 {k['d5'] / 1e4:+.1f}조"
-                   f"({_e(str(k.get('date') or '-')[5:])}까지) — "
-                   + ("방향 같음(추세 지속)" if same else "오늘만 방향이 다름 — 5일 합계가 플러스로 돌아서야 추세 전환"))
-    near = [e for e in (events or []) if 0 <= e.get('dday', 99) <= 7 and e.get('kind') in ('한국', '미국', '실전 규칙')]
-    if near:
-        out.append("7일 안 일정: " + ' · '.join(f"{e['date'][5:]} {_e(e['name'].split(' — ')[0])}" for e in near[:3]))
-    return out
+    """이번에 볼 것 — 숫자 조건(2026-11-12). 계산은 market_report.rule_checks 한 곳 — 봇 '확인할 것'과 같은 문장."""
+    import re
+    import importlib
+    import market_report as _mr
+    if not hasattr(_mr, 'rule_checks'):          # 배포 서버가 옛 모듈을 메모리에 들고 있는 일이 있었다(11-12 ui_home)
+        _mr = importlib.reload(_mr)
+    return [re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', _e(r)) for r in _mr.rule_checks(idx_rows, kr, flow_sum, events)]
 
 
 def checkpoints_box(rows: list[str], asof: str):

@@ -182,3 +182,23 @@ def test_apply_fill_records_last_add(tmp_path, monkeypatch):
     B.apply_fill(L, dict(sym="000002", side="BUY", name="X", why="불타기 1차", cid="000002-x-ADD1"), 1, 11000.0, 1.0, "2026-11-12")
     p = L["KR"]["positions"]["000002"]
     assert p["adds"] == 1 and p["last_add"] == "2026-11-12"
+
+
+def test_settle_pending_before_reconcile(tmp_path, monkeypatch):
+    """2026-11-12 — 시가 주문이 체결된 뒤 실행하면 토스 수량 > 원장(pending). 체결을 먼저 반영해야 대조가 맞는다."""
+    monkeypatch.setattr(B, "TRADES", tmp_path / "trades.jsonl")
+    L = L0({"000001": P(shares=3, added=False, adds=0)})            # 불타기 주문이 시가에 체결된 경우
+    o = dict(sym="000001", side="BUY", name="가나", why="불타기 1차", cid="000001-x-ADD1", quantity=2, px=10000)
+    L["pending"]["000001-x-ADD1"] = dict(orderId="A1", o=o, at="2026-11-12")
+
+    class T:
+        def order(self, acct, oid):
+            return {"execution": {"filledQuantity": 2, "averageFilledPrice": 10050, "commission": 3}}
+    toss = [{"sym": "000001", "qty": 5, "market": "KR"}]
+    diff_before, _ = B.reconcile(L["KR"]["positions"], toss)
+    assert diff_before                                       # 예전 순서라면 여기서 '불일치 → 중단'
+    msg = []
+    assert B.settle_pending(L, T(), "acct", "2026-11-12", msg) == 1
+    assert not L["pending"] and L["KR"]["positions"]["000001"]["shares"] == 5
+    diff_after, _ = B.reconcile(L["KR"]["positions"], toss)
+    assert not diff_after

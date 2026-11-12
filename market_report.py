@@ -20,6 +20,12 @@ import os
 import sys
 from datetime import datetime, date
 
+
+def _now_kst() -> str:
+    """2026-11-12 리포트 꼬리 시각이 CI(UTC) 기준이라 15:45 KST 리포트가 '06:45' 로 보였다 — 한국 시각으로 찍는다."""
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M")
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "results", "market_report.json")
@@ -510,13 +516,80 @@ def _sec_short(s):
     return s.split(",")[0].split(" 및 ")[0].strip()[:14]
 
 
+def rule_checks(idx_rows, kr, flow_sum=None, events=None) -> list[str]:
+    """이번에 볼 것 — 숫자 조건(2026-11-12). 대시보드 🎯 상자와 봇 '확인할 것'이 같은 함수를 쓴다(**굵게** 마크다운).
+    ① 지수별 5주선까지 거리(금요일 종가 = 실전 v1.9 신규 매수 조건) ② 시장 폭 ③ 외국인 수급 방향 ④ 7일 안 일정."""
+    out = []
+    for x in idx_rows or []:
+        g = x.get('gate5w') or {}
+        c, lg = x.get('close'), g.get('live_gap')
+        if c is None or lg is None:
+            continue
+        ma = c / (1 + lg / 100)
+        if lg < 0:
+            out.append(f"**{x['name']}** 금요일 종가가 **{ma:,.0f}**(5주선) 위면 다음 주 {x['name']} 종목 신규 매수 재개 — "
+                       f"지금 {c:,.0f}, **{(ma / c - 1) * 100:.1f}%** 더 올라야 함")
+        else:
+            out.append(f"**{x['name']}** 금요일 종가가 **{ma:,.0f}**(5주선) 아래로 내려가면 다음 주 신규 매수 중지 — 지금 여유 {lg:+.1f}%")
+    b = (kr or {}).get('breadth_all') or {}
+    t = (b.get('up') or 0) + (b.get('down') or 0) + (b.get('flat') or 0)
+    if t:
+        r = b['up'] / t * 100
+        out.append(f"시장 폭: 오늘 상승 종목 {r:.0f}% — " + ("반등이 소수 대형주가 아니라 넓게 퍼짐. 이런 날이 이어지는지(60%+)" if r >= 60
+                   else "지수와 달리 오르는 종목이 적음 — 소수 종목 장세 주의" if r < 45 else "중립"))
+    k = (flow_sum or {}).get('KOSPI') or {}
+    # kr_flow 요약은 17:47 갱신 — 15:50 리포트 직후엔 어제 값이라 '오늘'로 쓰면 날짜가 섞인다 → 오늘 잠정치(facts.flow) 우선
+    t1 = (((kr or {}).get('flow') or {}).get('KOSPI') or {}).get('외국인')
+    d1 = t1 if t1 is not None else k.get('d1')
+    if d1 is not None and k.get('d5') is not None:
+        same = (d1 >= 0) == (k['d5'] >= 0)
+        out.append(f"코스피 외국인: 오늘{' 잠정' if t1 is not None else ''} {d1 / 1e4:+.2f}조 · 5일 {k['d5'] / 1e4:+.1f}조"
+                   f"({str(k.get('date') or '-')[5:]}까지) — "
+                   + ("방향 같음(추세 지속)" if same else "오늘만 방향이 다름 — 5일 합계가 플러스로 돌아서야 추세 전환"))
+    near = []
+    for e in events or []:
+        dd = e.get('dday')
+        if dd is None:
+            try:
+                dd = (date.fromisoformat(str(e['date'])[:10]) - date.today()).days
+            except Exception:
+                continue
+        if 0 <= dd <= 7 and e.get('kind') in ('한국', '미국', '실전 규칙'):
+            near.append(e)
+    if near:
+        out.append("7일 안 일정: " + ' · '.join(f"{e['date'][5:]} {e['name'].split(' — ')[0]}" for e in near[:3]))
+    return out
+
+
+def _kr_rule_checks(f):
+    """facts(kind='kr') 에 rule_checks 를 싣는다 — 봇이 AI 체크포인트 대신 쓴다. 실패해도 리포트는 나간다."""
+    try:
+        import json as _j
+        from pathlib import Path as _P
+        root = _P(__file__).resolve().parent
+        fl = _P(root / 'results' / 'kr_flow.json')
+        flow_sum = (_j.loads(fl.read_text(encoding='utf-8')) or {}).get('summary') if fl.exists() else None
+        try:
+            import events as _ev
+            evs = _ev.build(days=8)
+        except Exception:
+            evs = None
+        idx = [x for x in f.get('indices') or [] if x.get('name') in ('코스피', '코스닥')]
+        return rule_checks(idx, (f.get('stocks') or {}).get('KR') or {}, flow_sum, evs)
+    except Exception as e:
+        print('  숫자 체크포인트 생략:', str(e)[:100])
+        return []
+
+
 def facts(kind):
     if kind == "kr":
         sg = signal_facts()
-        return dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict={},
-                    indices=[x for x in index_facts() if x.get("sym") in KR_INDICES], stocks=kr_today_facts(),
-                    signals=dict(market_direction={"KR": sg["market_direction"].get("KR")}))
-    f = dict(kind=kind, generated=datetime.now().strftime("%Y-%m-%d %H:%M"), verdict=verdict_facts(),
+        f = dict(kind=kind, generated=_now_kst(), verdict={},
+                 indices=[x for x in index_facts() if x.get("sym") in KR_INDICES], stocks=kr_today_facts(),
+                 signals=dict(market_direction={"KR": sg["market_direction"].get("KR")}))
+        f["rule_checks"] = _kr_rule_checks(f)
+        return f
+    f = dict(kind=kind, generated=_now_kst(), verdict=verdict_facts(),
              indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
     if kind == "daily":
         try:
@@ -582,11 +655,19 @@ def template(f):
     """AI 없이도 발행되는 숫자 리포트."""
     v = f.get("verdict") or {}
     L = [f"## {_TITLE.get(f['kind'], '시황')} — 숫자 요약", ""]
+    # 2026-11-12 첫 줄 = 실전 v1.9(한국 주봉 5주선) 판정. 옛 '코어 50/위성 30' 은 원칙 v1.3 잔재라 참고로 내림.
+    _g = []
+    for x in f.get("indices") or []:
+        g = x.get("gate5w") or {}
+        if g.get("on") is not None:
+            _g.append(f"{x['name']} {'위' if g.get('on') else '아래'}({(g.get('gap') or 0):+.1f}%)")
+    if _g:
+        _all = all((x.get("gate5w") or {}).get("on") for x in f["indices"] if (x.get("gate5w") or {}).get("on") is not None)
+        L += [f"**실전 규칙 v1.9** — 주봉 5주선 {' · '.join(_g)} → 신규 매수 {'가능' if _all else '중지(소속 지수 아래인 시장)'}", ""]
     if v:
-        t = v.get("target_core_sat_cash") or [None] * 3
-        L += [("⚠️ **코어 스위치 전환** · " if v.get("changed") else "") +
-              f"**이번 주 판정** — 코어 {'ON' if v.get('core_on') else 'OFF'} (S&P500 200일선 {v.get('core_gap_200d', 0):+.1f}%) · "
-              f"목표 코어 {t[0]} / 위성 {t[1]} / 현금 {t[2]} · 국면 {v.get('phase_ref') or '-'}(참고) · 욕심 경고 {v.get('greed_warn_n', '-')}/3(참고)", ""]
+        L += [("⚠️ 미국 코어 스위치 전환 · " if v.get("changed") else "") +
+              f"참고 — 미국 S&P500 200일선 {v.get('core_gap_200d', 0):+.1f}% · 국면 {v.get('phase_ref') or '-'} · "
+              f"욕심 경고 {v.get('greed_warn_n', '-')}/3 (돈을 움직이지 않는 지표)", ""]
     L += ["| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |", "|---|---|---|---|---|---|"]
     for x in f["indices"]:
         if "close" in x:
@@ -636,7 +717,7 @@ def template(f):
     L += ["", "CANSLIM 시장방향 " + " · ".join(f"{m} {md_[m]}" for m in ("KR", "US") if md_.get(m))]
     if "accel_new" in sg:
         L.append(f"이익가속 신규({sg.get('accel_week')}): " + (", ".join(c['sym'] for c in sg['accel_new']) or "없음"))
-    L += ["", f"※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · {f['generated']}"]
+    L += ["", f"※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · {f['generated']} KST"]
     return "\n".join(L)
 
 
@@ -707,7 +788,7 @@ def compose(ai_md, f):
     out += ["## 숫자"] + body
     if chk:
         out += ["", "## 체크포인트", chk]
-    out += ["", f"※ 문장 AI · 숫자 자동 · 투자 권유 아님 · {f['generated']}"]
+    out += ["", f"※ 문장 AI · 숫자 자동 · 투자 권유 아님 · {f['generated']} KST"]
     return "\n".join(out)
 
 
