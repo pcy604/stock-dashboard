@@ -90,7 +90,7 @@ _RE = {'ma': '이평 위로 마감하면', 'confirm': '이평 위 k번 연속 �
 
 @st.cache_resource(show_spinner=False, ttl=3600 * 12)
 def _panel(m):
-    _ver = '2026-11-08 us_capfix'      # 패널을 새로 빌드하면 이 글자를 바꾼다 — 함수 코드가 바뀌어야 배포 앱의 12시간 캐시가 버려진다
+    _ver = '2026-11-12 once_in·univ_floor'      # 패널을 새로 빌드하면 이 글자를 바꾼다 — 함수 코드가 바뀌어야 배포 앱의 12시간 캐시가 버려진다
     loc = f'results/quant_panel_{m}.parquet'
     if os.path.exists(loc):
         df = pd.read_parquet(loc)
@@ -104,6 +104,7 @@ def _panel(m):
         sm['market'] = sm['market'].astype('category')
     df = df.drop(columns=[c for c in ('market',) if c in df.columns])   # 문자열 열(메모리)
     P = Q.Panel(df)
+    P.univ_floor = {'KR': 5e10, 'US': 2e8}.get(m)       # 패널 빌더 하한과 같아야 함(research/quant_panel.py)
     P.sym_market = sm
     del df
     gc.collect()

@@ -136,6 +136,11 @@ class Panel:
             a[ri, ci] = df[c].to_numpy(dtype='float32', na_value=np.nan)
             self._base[c] = pd.DataFrame(a, index=self.dates, columns=self.syms)
         self._m = {}
+        # 2026-11-12: 패널이 '한 번 하한을 넘은 종목'의 이후 행을 남기게 바뀌었다(research/quant_panel._keep_once_in).
+        #   RS 백분위는 그 주 유니버스(시총 ≥ 하한) 안에서만 매긴다 — 화면·실전 RS(returns.json, 현재 시총 기준 목록)와 같은 분모.
+        #   기본값은 종목 코드로 시장을 추정(한국 6자리 숫자 = 500억, 그 밖 = $2억) — research/ 스크립트도 같은 분모를 쓰게.
+        _kr = len(self.syms) and pd.Series(self.syms[:50]).astype(str).str.fullmatch(r'\d{6}').mean() > 0.5
+        self.univ_floor = 5e10 if _kr else 2e8
 
     def base(self, col):
         if col not in self._base:                       # 이 시장에 없는 데이터 → 조건은 전부 거짓
@@ -192,6 +197,8 @@ class Panel:
         elif name == 'rs':
             r = {k: c / c.shift(k) - 1 for k in (13, 26, 39, 52)}
             sc = 0.4 * r[13] + 0.2 * r[26] + 0.2 * r[39] + 0.2 * r[52]
+            if self.univ_floor:
+                sc = sc.where(self.base('marcap') >= self.univ_floor)
             v = sc.rank(axis=1, pct=True) * 99
         elif name == 'rs_chg':                      # 2026-11-06 차니: RS 의 방향(속도) — 지금 RS − n주 전 RS (백분위 점수 차)
             rs = self.get('rs')
