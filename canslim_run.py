@@ -457,9 +457,9 @@ def build_report(hits, m_ok, m_dir):
                    if h.get('a_growth_y1') is not None and h.get('a_growth_y2') is not None else "?")
             i_s = _f(h.get('i_inst_pct'), "억")
             lines.append(
-                f"{cap_str:>8}  {h.get('rs_pct',0):>4.0f}p  "
-                f"{h.get('n_dist_pct',0):+5.1f}%  "
-                f"{h.get('s_vol_ratio',0):>4.1f}x  "
+                f"{cap_str:>8}  {(h.get('rs_pct') or 0):>4.0f}p  "
+                f"{(h.get('n_dist_pct') or 0):+5.1f}%  "
+                f"{(f'{v:>4.1f}x' if isinstance(v := h.get('s_vol_ratio'), (int, float)) else '   ?x')}  "
                 f"{c_s:>7}  {a_s:>12}  {i_s:>6}  {h['name']}"
             )
 
