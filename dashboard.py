@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12d'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12e'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -9049,6 +9049,13 @@ def _home_top(V):
         _kfl = load_json(Path('results/kr_flow.json')) or {}
         _UH.breadth_sectors(krf, dly, _kfa, flow=dict(today=krf.get('flow'), today_date=_kfa,
                                                        summary=_kfl.get('summary') or {}, asof=_kfa))
+        _UH.movers_box(krf, _kfa)
+        if krf.get('heatmap'):
+            with st.expander(f"🗺️ 업종 히트맵 — 시총 1조+ {len(krf['heatmap'])}종 (면적 = 시총 · 색 = 등락)", expanded=not IS_MOBILE):
+                _hf = _UH.heatmap_fig(krf['heatmap'])
+                if _hf is not None:
+                    st.plotly_chart(_hf, use_container_width=True, config={'displayModeBar': False})
+                    st.caption(f"출처: 네이버 금융 전 종목 시세 · 업종 = 네이버 업종 16묶음(market_report.kr_heatmap) · 마지막 갱신: {_kfa} · 칸을 누르면 업종 확대")
     # 옛 '이번 주 판정'(원칙 v1.3 — 미국 SPY 코어/위성 50/30/20) — 실전은 한국 v1.9 단독(11-04)이라 참고로 접어 둔다
     with st.expander("참고 — 미국 코어 스위치 · 사이클 국면 · 돈의 흐름 (돈을 움직이지 않는 지표)"):
         c, a, ph, g, fl, ec = (V.get(k) or {} for k in ('core', 'alloc', 'phase', 'greed', 'flow', 'econ'))

@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12d'
+VERSION = '2026-11-12e'
 
 CSS = """
 <style>
@@ -427,6 +427,62 @@ def pulse_box(idx_rows: list[dict], hist: list[dict]):
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>시장 방향 — 오닐식 (참고)</b>
       <span>실전 규칙(5주선)과 별개 · 이 저장소에서 백테스트 안 함 · 분배일 = −0.2%↓ + 거래량 증가</span></div>
       <div class="hm-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">{''.join(cards)}{trend}</div></div>""")
+
+
+def movers_box(kr: dict, asof: str = ''):
+    """오늘 무엇이 움직였나 — 강세 테마 · 특징주(돈이 몰린 급등) · 52주 신고가. 시황 리포트 facts 재사용(봇 시황 2장과 같은 계산)."""
+    tt, tb = kr.get('themes_top') or [], kr.get('themes_bottom') or []
+    ft, nh = kr.get('featured') or [], kr.get('new_high_52w') or {}
+    if not (tt or ft or nh):
+        return False
+
+    def lead(t):
+        return ' · '.join(f"{_e(x['name'])} {_pct(x.get('ret'), nd=1)}" for x in (t.get('lead') or [])[:3])
+    th = ''.join(f"<div class='hm-row' style='display:block'><b>{_e(t['name'])}</b> {_pct(t.get('ret'), nd=1)} "
+                 f"<em>{t.get('up', '-')}/{t.get('n', '-')}종 상승</em><br><span style='font-size:11.5px'>{lead(t)}</span></div>"
+                 for t in tt[:3]) or "<div class='hm-kv'>-</div>"
+    if tb:
+        th += ("<div class='hm-kv' style='margin-top:6px'>약세: " + ', '.join(f"{_e(t['name'])} {_pct(t.get('ret'), nd=1)}" for t in tb[:3]) + "</div>")
+    fr = ''.join(f"<div class='hm-row'><span>{_e(x['name'])} <em>{_e(x.get('tag'))}</em></span>{_pct(x.get('ret'), nd=1)}</div>"
+                 for x in ft[:6]) or "<div class='hm-kv'>해당 없음</div>"
+    nr = ''.join(f"<div class='hm-row'><span>{_e(x['name'])}{' <em>상장 1년 미만</em>' if x.get('young') else ''}</span>{_pct(x.get('ret'), nd=1)}</div>"
+                 for x in (nh.get('top') or [])[:6]) or "<div class='hm-kv'>-</div>"
+    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🔥 오늘 무엇이 움직였나</b>
+      <span>테마 = 네이버 테마 구성 종목 단순 평균(5종+) · 특징주 = 상한가 + 거래대금 300억+·+10% · 돈이 몰린 순</span></div>
+      <div class="hm-two" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div class="hm-box"><h5>강세 테마</h5>{th}</div>
+        <div class="hm-box"><h5>특징주</h5>{fr}</div>
+        <div class="hm-box"><h5>52주 신고가 {nh.get('n', '-')}종 <span style='font-weight:500;color:var(--ink-3)'>/ {nh.get('universe', '-')}종</span></h5>{nr}</div>
+      </div><div class="hm-src">출처: 네이버 금융 전 종목 시세·테마(market_report.py) · 마지막 갱신: {_e(asof)}</div></div>""")
+    return True
+
+
+def heatmap_fig(rows: list[dict]):
+    """업종 히트맵(시총 1조+) — 면적 = 시총, 색 = 등락(±5% 에서 포화, 0 = 회색). 봇 이미지는 작아서 기각됐지만 웹은 확대·호버 가능."""
+    import plotly.graph_objects as go
+    rows = [r for r in rows or [] if r.get('mc') and r.get('ret') is not None]
+    if not rows:
+        return None
+    secs = sorted({r['sec'] or '기타' for r in rows})
+    ids = [f"s:{x}" for x in secs] + [f"{r['sec'] or '기타'}/{r['sym']}" for r in rows]
+    labels = secs + [r['name'] for r in rows]
+    parents = [''] * len(secs) + [f"s:{r['sec'] or '기타'}" for r in rows]
+    vals = [sum(r['mc'] for r in rows if (r['sec'] or '기타') == x) for x in secs] + [r['mc'] for r in rows]
+    sec_ret = []
+    for x in secs:
+        rr = [r for r in rows if (r['sec'] or '기타') == x]
+        sec_ret.append(sum(r['ret'] * r['mc'] for r in rr) / sum(r['mc'] for r in rr))
+    col = sec_ret + [r['ret'] for r in rows]
+    # finviz 식: 0% = 짙은 회색, ±5% 에서 포화 — 흰 글자가 어느 칸에서나 읽힌다(밝은 회색 중앙은 흰 글자가 안 보였다)
+    fig = go.Figure(go.Treemap(ids=ids, labels=labels, parents=parents, values=vals, branchvalues='total', customdata=col,
+                               marker=dict(colors=col, colorscale=[[0, '#B91C1C'], [0.5, '#4B5563'], [1, '#15803D']],
+                                           cmid=0, cmin=-5, cmax=5, line=dict(width=1, color='#fff')),
+                               textfont=dict(color='#fff'), root_color='#fff',
+                               texttemplate='%{label}<br>%{customdata:+.1f}%',
+                               hovertemplate='%{label}<br>시총 %{value:,.1f}조<br>%{customdata:+.2f}%<extra></extra>',
+                               tiling=dict(pad=2), pathbar=dict(visible=False)))
+    fig.update_layout(height=520, margin=dict(l=0, r=0, t=0, b=0), font=dict(family='Pretendard, Malgun Gothic, sans-serif', size=12))
+    return fig
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────
