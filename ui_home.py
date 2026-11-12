@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12a'
+VERSION = '2026-11-12b'
 
 CSS = """
 <style>
@@ -74,7 +74,7 @@ CSS = """
   .hm-step .k { font-weight:700; color:var(--ink); } .hm-step .v { color:var(--ink-2); line-height:1.55; }
   .hm-step .v em { font-style:normal; color:var(--ink-3); font-size:12px; margin-left:8px; }
   .hm-step .v em::before { content:'· '; }
-  .hm-acc { display:grid; gap:8px; grid-template-columns:repeat(5,minmax(0,1fr)); }
+  .hm-acc { display:grid; gap:8px; grid-template-columns:repeat(6,minmax(0,1fr)); }
   @media (max-width:980px) { .hm-acc { grid-template-columns:repeat(2,minmax(0,1fr)); } }
   .hm-src { font-size:11.5px; color:var(--ink-3); margin:6px 2px 0; }
   /* 사용법 패널 */
@@ -297,29 +297,62 @@ def steps(rows: list[tuple]):
     st.html(CSS + f'<div class="hm"><div class="hm-steps">{body}</div></div>')
 
 
-def account(led: dict, plan: dict) -> dict:
-    """실전 원장(한국) 요약 — 봇이 기록한 가격(last_px) 기준. 실시간 시세 아님."""
+def account(led: dict, plan: dict, sectors: dict | None = None) -> dict:
+    """실전 원장(한국) 요약. 2026-11-12: **토스 스냅샷(led['toss'])이 있으면 수량·평단·현재가·현금은 토스가 정답**
+    (원장 현금은 11-11 손 입력 추정치였다 — 61,370 vs 토스 45,031). 고점·손절가·불타기 횟수는 원장(봇 상태).
+    원장과 토스 수량이 다르면 mismatch 에 담는다(주문 직후 미체결·이중 체결을 화면에서 바로 보이게)."""
     kr = (led or {}).get('KR') or {}
     pos = kr.get('positions') or {}
+    tz = (led or {}).get('toss') or {}
+    th = {str(h.get('sym')): h for h in (tz.get('holdings') or [])}
+    use_t = bool(th)
     dep = sum(float(d[1]) for d in (kr.get('deposits') or []) if len(d) > 1)
-    cash = float(kr.get('cash_krw') or 0)
-    rows, ev, cost = [], 0.0, 0.0
-    for code, p in pos.items():
-        sh, avg, px = p.get('shares') or 0, p.get('avg'), p.get('last_px')
-        v = (px or avg or 0) * sh
-        ev += v
+    cash = float(tz['cash_krw']) if use_t and tz.get('cash_krw') is not None else float(kr.get('cash_krw') or 0)
+    rows, ev, cost, mism = [], 0.0, 0.0, []
+    for code in sorted(set(pos) | set(th)):
+        p, h = pos.get(code) or {}, th.get(code) or {}
+        sh = float(h['qty']) if h.get('qty') is not None else float(p.get('shares') or 0)
+        avg = h.get('avg_cost') if h.get('avg_cost') is not None else p.get('avg')
+        px = h.get('last_price') if h.get('last_price') is not None else p.get('last_px')
+        if use_t and float(p.get('shares') or 0) != sh:
+            mism.append(f"{p.get('name') or h.get('name')} 원장 {float(p.get('shares') or 0):g}주 · 토스 {sh:g}주")
+        ev += (px or avg or 0) * sh
         cost += (avg or 0) * sh
-        rows.append(dict(종목=p.get('name'), 코드=code, **{
+        peak = max(x for x in (p.get('peak'), px) if x) if (p.get('peak') or px) else None
+        stop = p.get('stop')
+        sd = (sectors or {}).get(code) or {}
+        rows.append(dict(종목=p.get('name') or h.get('name'), 코드=code, 업종=sd.get('upjong'), **{
             '수량(주)': sh, '평단(원)': avg, '현재가(원)': px,
             '수익률(%)': (px / avg - 1) * 100 if px and avg else None,
-            '보유 고점(원)': p.get('peak'), '손절가(원)': p.get('stop'),
-            '손절 여유(%)': (px / p['stop'] - 1) * 100 if px and p.get('stop') else None,
+            '보유 고점(원)': peak, '손절가(원)': stop,
+            '손절 여유(%)': (px / stop - 1) * 100 if px and stop else None,
             '불타기': p.get('adds') or 0, '매수일': p.get('opened')}))
     tot = ev + cash
-    return dict(rows=sorted(rows, key=lambda r: -(r['수익률(%)'] or -1e9)), n=len(pos), ev=ev, cash=cash, tot=tot,
-                dep=dep, pnl=tot - dep if dep else None, pnl_pct=(tot / dep - 1) * 100 if dep else None,
-                unreal=ev - cost, cash_pct=cash / tot * 100 if tot else None,
-                near=[r for r in rows if r['손절 여유(%)'] is not None and r['손절 여유(%)'] < 5])
+    # 업종 쏠림 — 평가액 기준 업종 비중 + 2종 이상 겹치는 테마(같이 빠질 위험)
+    by, th_cnt = {}, {}
+    for r in rows:
+        v = (r['현재가(원)'] or r['평단(원)'] or 0) * r['수량(주)']
+        by[r['업종'] or '미분류'] = by.get(r['업종'] or '미분류', 0) + v
+        for t in ((sectors or {}).get(r['코드']) or {}).get('themes') or []:
+            th_cnt.setdefault(t, []).append(r['종목'])
+    top_sec = max(by.items(), key=lambda kv: kv[1]) if by else (None, 0)
+    shared = sorted([(t, n) for t, n in th_cnt.items() if len(n) >= 2], key=lambda x: -len(x[1]))
+    return dict(rows=sorted(rows, key=lambda r: -(r['수익률(%)'] if r['수익률(%)'] is not None else -1e9)), n=len(rows),
+                ev=ev, cash=cash, tot=tot, dep=dep, pnl=tot - dep if dep else None,
+                pnl_pct=(tot / dep - 1) * 100 if dep else None, unreal=ev - cost,
+                cash_pct=cash / tot * 100 if tot else None,
+                near=[r for r in rows if r['손절 여유(%)'] is not None and r['손절 여유(%)'] < 5],
+                src='토스 스냅샷' if use_t else '봇 원장', at=tz.get('at'), mismatch=mism,
+                top_sector=(top_sec[0], top_sec[1] / ev * 100 if ev else None), shared=shared[:4])
+
+
+def health(rows: list[tuple]):
+    """실행 건강 한 줄 — (이름, 톤, 값). 봇이 돌았나·토스 동기화·원장 대조. 11-09 이중 체결·11-10 미실행을 화면에서 바로."""
+    col = {'g': 'var(--pos)', 'y': '#D97706', 'r': 'var(--neg)', 'k': 'var(--ink-3)'}
+    chips = ''.join(f"<span style='display:inline-flex;gap:6px;align-items:center;font-size:12px;padding:4px 10px;border:1px solid var(--line);"
+                    f"border-radius:999px;background:var(--surface)'><i style='width:8px;height:8px;border-radius:50%;background:{col.get(t)}'></i>"
+                    f"<b style='font-weight:650'>{_e(k)}</b> {v}</span>" for k, t, v in rows)
+    st.html(CSS + f"<div class='hm' style='display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px'>{chips}</div>")
 
 
 def account_cards(a: dict, kospi_since: float | None, since: str):
@@ -332,9 +365,12 @@ def account_cards(a: dict, kospi_since: float | None, since: str):
          card('보유', f"{a['n']}종", f"평가 {a['ev']:,.0f}원"),
          card('현금', f"{a['cash']:,.0f}원", '-' if a['cash_pct'] is None else f"비중 {a['cash_pct']:.1f}%"),
          card('손절선 5% 이내', f"{len(a['near'])}종", ' · '.join(r['종목'] for r in a['near'][:3]) or '없음',
-              'n' if a['near'] else 'z')]
+              'n' if a['near'] else 'z'),
+         card('업종 쏠림(최대)', '-' if a['top_sector'][1] is None else f"{a['top_sector'][1]:.0f}%",
+              f"{_e(a['top_sector'][0])} · 겹치는 테마 " + (', '.join(f"{t} {len(n)}종" for t, n in a['shared'][:2]) or '없음'),
+              'n' if (a['top_sector'][1] or 0) > 30 else 'z')]
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🔐 내 실전 계좌 (토스 한국 · 소유자만)</b>
-      <span>봇이 기록한 가격 기준 · 실시간 아님 · {since}부터 운용</span></div><div class="hm-acc">{''.join(c)}</div></div>""")
+      <span>{_e(a['src'])} {_e(a.get('at') or '')} 기준 · 실시간 아님 · {since}부터 운용</span></div><div class="hm-acc">{''.join(c)}</div></div>""")
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────

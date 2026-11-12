@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12a'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12b'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -9076,9 +9076,16 @@ def _led():
 def _home_account():
     """🔐 내 실전 계좌 — 원장(live/ledger.json)만으로. 소유자만. 코스피 비교는 첫 입금일 종가부터."""
     led = _led()
-    a = _UH.account(led, _live_plan() or {})
+    a = _UH.account(led, _live_plan() or {}, (load_json(Path('data/sector_detail.json')) or {}).get('kr') or {})
     if not a['n'] and not a['dep']:
         return
+    # 실행 건강 — 봇 마지막 실행·토스 동기화·원장 대조(2026-11-12: 이중 체결·미실행이 화면에 안 보였다)
+    try:
+        _bl = (Path('live/bot_last.txt').read_text(encoding='utf-8').splitlines() or [''])[0]
+    except Exception:
+        _bl = ''
+    _bd = (re.findall(r'\d{4}-\d{2}-\d{2}', _bl) or [None])[0]
+    _bage = (pd.Timestamp.now(tz='Asia/Seoul').normalize().tz_localize(None) - pd.Timestamp(_bd)).days if _bd else None
     deps = ((led.get('KR') or {}).get('deposits') or [])
     since = str(deps[0][0]) if deps else '-'
     ks = None
@@ -9092,13 +9099,22 @@ def _home_account():
     except Exception:
         ks = None
     _UH.account_cards(a, ks, since)
+    _UH.health([
+        ('봇 실행', 'g' if _bage is not None and _bage <= 1 else ('y' if _bage is not None and _bage <= 3 else 'r'),
+         _html.escape(_bl.replace('🔴 실전 주문 봇 ', '')[:40] or '기록 없음')),
+        ('토스 동기화', 'g' if a.get('at') else 'r', _html.escape(str(a.get('at') or '없음'))),
+        ('원장↔토스', 'y' if a['mismatch'] else 'g',
+         _html.escape(' / '.join(a['mismatch'][:3])) + ' — 주문 직후면 다음 동기화에서 맞춰짐' if a['mismatch'] else '일치'),
+    ])
     if a['rows']:
         _t = pd.DataFrame(a['rows'])
         if IS_MOBILE:                             # 폰: 11열은 이름이 잘린다 → 판단에 필요한 4열만
             _t = _t[['종목', '코드', '수익률(%)', '손절 여유(%)']]
+        else:
+            _t = _t.drop(columns=['매수일'])
         _la = max([m for p_ in ((led.get('KR') or {}).get('positions') or {}).values()
                    for m in re.findall(r'\d{4}-\d{2}-\d{2}', str(p_.get('src') or '') + ' ' + str(p_.get('opened') or ''))] or ['-'])
-        _tsrc('live/ledger.json — 봇 원장(토스 체결·가격 기록) · 소유자만', path='live/ledger.json', asof=_la)
+        _tsrc(f"live/ledger.json — {a['src']}(수량·평단·현재가·현금) + 봇 원장(고점·손절·불타기) · 소유자만", path='live/ledger.json', asof=a.get('at') or _la)
         st.dataframe(_t, filters=False, column_config={
             '평단(원)': st.column_config.NumberColumn(format='localized'),
             '현재가(원)': st.column_config.NumberColumn(format='localized'),
