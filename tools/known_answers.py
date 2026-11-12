@@ -22,6 +22,7 @@ import os
 import sys
 from datetime import date, datetime
 
+import numpy as np
 import pandas as pd
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -511,6 +512,39 @@ def _():
     d = _j('live/plan_latest.json')
     n = sum(len((v or {}).get('buys') or []) for v in (d.get('sleeves') or {}).values())
     return _age(d.get('made')) <= 8, f"작성 {d.get('made')}({_age(d.get('made'))}일) · 신규 매수 {n}건"
+
+# ───────────────────────── 실전 봇 운영 (2026-11-12) ─────────────────────────
+# 11-10~11 봇이 돌았는데 커밋이 막혀 이틀 동안 아무도 몰랐고, 11-12 원장↔토스 수량이 어긋났다.
+# 데이터 품질이 아니라 '운영' 문제라 화면의 '데이터 점검' 숫자에는 넣지 않는다(dashboard._ops_counts 가 영역으로 거른다).
+def _bdays_since(d):
+    try:
+        return int(np.busday_count(pd.Timestamp(str(d)[:10]).date(), TODAY))
+    except Exception:
+        return 9999
+
+
+@check('실전 봇', '주문 봇이 최근 2영업일 안에 돌았는가 (live/bot_last.txt 날짜)')
+def _():
+    try:
+        line = open(os.path.join(BASE, 'live/bot_last.txt'), encoding='utf-8').readline()
+    except Exception:
+        return False, 'bot_last.txt 없음'
+    import re as _re
+    d = (_re.findall(r'\d{4}-\d{2}-\d{2}', line) or [None])[0]
+    n = _bdays_since(d) if d else 9999
+    return n <= 2, f"마지막 실행 {d} ({n}영업일 전) — 노트북 켜짐·인터넷·토스 허용 IP"
+
+
+@check('실전 봇', '원장 보유 수량과 토스 스냅샷 수량이 같은가 (이중 체결·미체결 감지)')
+def _():
+    led = _j('live/ledger.json')
+    t = {str(h.get('sym')): float(h.get('qty') or 0) for h in ((led.get('toss') or {}).get('holdings') or [])}
+    if not t:
+        return True, '토스 스냅샷 없음 — 판정 생략'
+    p = {c: float(x.get('shares') or 0) for c, x in ((led.get('KR') or {}).get('positions') or {}).items()}
+    bad = [f"{c} 원장 {p.get(c, 0):g}·토스 {t.get(c, 0):g}" for c in sorted(set(p) | set(t)) if p.get(c, 0) != t.get(c, 0)]
+    return not bad, f"스냅샷 {(led.get('toss') or {}).get('at')} · 불일치 {bad or '없음'}"
+
 
 def main():
     strict = '--strict' in sys.argv

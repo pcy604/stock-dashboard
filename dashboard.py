@@ -1336,7 +1336,7 @@ def _ops_counts():
     """(정답 점검 틀림 수, 갱신 정지 수) — 상단 배지·종합 탭용. 10분 캐시(파일 수십 개를 읽는다)."""
     try:
         import tools.known_answers as _ka
-        ka = sum(1 for r in _ka.run() if not r['ok'])
+        ka = sum(1 for r in _ka.run() if not r['ok'] and r.get('area') != '실전 봇')   # 운영 경보는 데이터 점검과 분리(2026-11-12)
     except Exception:
         ka = None
     try:
@@ -9155,7 +9155,7 @@ def _home_events():
     if m and str(today) <= m.group(1):
         extra.append(dict(date=m.group(1), time='', kind='내 규칙', name='오버라이드 종료 — 다음 계획표부터 지수·종목 5주선 규칙 복귀',
                           detail='이 주 성과는 따로 집계'))
-    sat = today + pd.Timedelta(days=(5 - today.weekday()) % 7)
+    sat = today + __import__("datetime").timedelta(days=(5 - today.weekday()) % 7)
     extra.append(dict(date=str(sat), time='', kind='내 규칙', name='다음 주 계획표(live-plan) — 신규·손절·불타기 목록 확정'))
     for e in extra:
         d = pd.Timestamp(e['date']).date()
