@@ -13,7 +13,7 @@ import datetime as dt
 import json
 from pathlib import Path
 
-VERSION = '2026-11-12a'
+VERSION = '2026-11-12b'
 _ROOT = Path(__file__).resolve().parent
 WD = '월화수목금토일'
 
@@ -44,6 +44,8 @@ def report_deadlines(start: dt.date, end: dt.date) -> list[dict]:
         for (mm, dd, fy, q, nm) in ((5, 15, y, 1, '1분기 보고서'), (8, 14, y, 2, '반기 보고서'),
                                     (11, 14, y, 3, '3분기 보고서'), (3, 31, y - 1, 4, '사업보고서')):
             d = dt.date(y, mm, dd)
+            while d.weekday() >= 5:              # 기간 말일이 토·일이면 다음 월요일(민법 161조) — 휴장일 미보정
+                d += dt.timedelta(days=1)
             if start <= d <= end:
                 out.append(dict(date=d.isoformat(), time='', kind='보유', name=f'{nm} 법정 기한({fy}년 {q}분기)',
                                 src='자본시장법(분기·반기 종료 후 45일, 사업연도 종료 후 90일 · 휴일이면 다음 영업일)',

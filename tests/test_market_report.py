@@ -78,3 +78,16 @@ hm = M.kr_heatmap(pd.DataFrame({"Code": ["005930", "999999"], "Name": ["삼성�
 assert hm[0] == dict(name="삼성전자", sym="005930", sec="반도체", mc=1200.0, ret=2.8) and hm[1]["sec"] == "기타", hm
 print("✅ 업종 히트맵 묶음")
 print("ALL PASS")
+
+
+def test_chat_context_keeps_korea_close():
+    """2026-11-12 사고: 12,000자 절단에 한국 장 마감 자료가 통째로 잘렸다."""
+    import json, pathlib, market_report as _M
+    real = json.loads((pathlib.Path(__file__).parent.parent / "results" / "market_report.json").read_text(encoding="utf-8"))
+    old, _M._j = _M._j, (lambda p: real)
+    try:
+        c = _M.chat_context()
+    finally:
+        _M._j = old
+    assert "한국 장 마감" in c and "themes_top" in c and "heatmap" not in c
+    assert len(c) <= 12000

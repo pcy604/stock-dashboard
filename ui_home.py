@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12g'
+VERSION = '2026-11-12h'
 
 CSS = """
 <style>
@@ -220,8 +220,8 @@ def breadth_sectors(kr: dict, nh: dict, asof: str = '', flow: dict | None = None
     kv = [ratio,
           f"상한가 {b.get('limit_up', '-')} · 하한가 {b.get('limit_down', '-')}",
           ' · '.join(f"{k} 거래대금 {v:,.1f}조" for k, v in to.items()) or '거래대금 -',
-          f"대형주 {kr.get('universe', '-')}종 중 상승 {kr.get('breadth_up', '-')}%",
-          f"52주 신고가 {nh.get('new_high', '-')}종 · 근접 {nh.get('near_52w', '-')}종 <em style='color:var(--ink-3)'>(대형주 · 주간)</em>"]
+          f"대형주 {kr.get('universe', '-')}종 중 상승 {kr.get('breadth_up', '-')}%"]
+    # 2026-11-12: '52주 신고가(대형주·주간)'는 아래 🔥 상자의 '오늘 장중 신고가'와 숫자가 달라(11 vs 9) 혼동 → 한 곳(🔥)만
     sec = kr.get('sectors') or []
     sec = sorted([s for s in sec if s.get('ret') is not None], key=lambda s: -s['ret'])
 
@@ -376,7 +376,7 @@ def account_cards(a: dict, kospi_since: float | None, since: str):
 
 def events_box(ev: list[dict], days: int):
     """🗓️ 다가오는 일정 — 보유 종목에 걸린 것(실적 기한) · 내 규칙(오버라이드 종료·계획표) · 한국 · 미국."""
-    tag = {'보유': ('#B91C1C', '#FEE2E2'), '내 규칙': ('#1D4ED8', '#DBEAFE'), '한국': ('#374151', '#F3F4F6'),
+    tag = {'보유': ('#B91C1C', '#FEE2E2'), '실전 규칙': ('#1D4ED8', '#DBEAFE'), '내 규칙': ('#1D4ED8', '#DBEAFE'), '한국': ('#374151', '#F3F4F6'),
            '미국': ('#374151', '#F3F4F6')}
     rows = []
     for e in ev[:12]:
@@ -390,7 +390,7 @@ def events_box(ev: list[dict], days: int):
           <span class="v"><b style="color:var(--ink)">{_e(e['name'])}</b>{f"<br>{_e(e['detail'])}" if e.get('detail') else ''}</span></div>""")
     body = ''.join(rows) or "<div class='hm-step'><span></span><span></span><span></span><span class='v'>예정된 일정 없음</span></div>"
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🗓️ 다가오는 일정 — {days}일</b>
-      <span>보유 종목 실적 기한·내 규칙 일정이 먼저 · 시각은 한국 시간</span></div><div class="hm-steps">{body}</div></div>""")
+      <span>날짜순 · 시각은 한국 시간</span></div><div class="hm-steps">{body}</div></div>""")
 
 
 def pulse_box(idx_rows: list[dict], hist: list[dict]):
@@ -510,7 +510,7 @@ def last_session(now) -> str:
     return str(d)
 
 
-def date_items(now, kr: str, us: str, plan: str, bot: str) -> list[tuple]:
+def date_items(now, kr: str, us: str, plan: str, bot: str | None = None) -> list[tuple]:
     """홈 '기준 시각' 한 줄(2026-11-12) — 상자마다 흩어진 날짜를 한 곳에. (라벨, 값, 낡음 여부).
     낡음 = 한국 종가가 마지막 장보다 앞 / 계획표가 8일+ / 봇이 평일 09:20 이후인데 오늘 안 돎."""
     import datetime as _dt
@@ -524,9 +524,9 @@ def date_items(now, kr: str, us: str, plan: str, bot: str) -> list[tuple]:
     bot_due = now.weekday() < 5 and (now.hour, now.minute) >= (9, 20)
     return [('한국 종가', kr10 or '-', not kr10 or kr10 < ls),
             ('미국 종가', str(us or '-')[:10], False),
-            ('계획표', pl10 or '-', pl_old),
-            ('봇 실행', str(bot or '-')[:16], bool(bot_due and bt10 != today)),
-            ('지금', now.strftime('%m-%d %H:%M KST'), False)]
+            ('주간 판정', pl10 or '-', pl_old)] + \
+           ([('봇 실행', str(bot)[:16], bool(bot_due and bt10 != today))] if bot is not None else []) + \
+           [('지금', now.strftime('%m-%d %H:%M KST'), False)]
 
 
 def dates_strip(items: list[tuple]):
@@ -534,6 +534,46 @@ def dates_strip(items: list[tuple]):
                    f"{_e(v)}{' ⚠' if old else ''}</b></span>" for k, v, old in items)
     st.html(CSS + f"<div class='hm'><div style='font-size:12.5px;color:var(--ink-3);padding:6px 2px 2px;"
                   f"font-variant-numeric:tabular-nums'>📅 {bits}<span style='color:var(--ink-3)'>· ⚠ = 늦음(주말만 보정·휴장일 미보정)</span></div></div>")
+
+
+def rule_checkpoints(idx_rows: list[dict], kr: dict, flow_sum: dict | None, events: list[dict] | None) -> list[str]:
+    """이번에 볼 것 — 숫자 조건으로(2026-11-12). AI 체크포인트는 '~할지'처럼 판정 기준이 없어 행동으로 못 옮긴다.
+    ① 지수별 5주선까지 거리(금요일 종가 기준 = 실전 v1.9 신규 매수 조건) ② 시장 폭 ③ 외국인 수급 방향 ④ 7일 안 일정."""
+    out = []
+    for x in idx_rows:
+        g = x.get('gate5w') or {}
+        c, lg = x.get('close'), g.get('live_gap')
+        if c is None or lg is None:
+            continue
+        ma = c / (1 + lg / 100)
+        if lg < 0:
+            out.append(f"<b>{_e(x['name'])}</b> 금요일 종가가 <b>{ma:,.0f}</b>(5주선) 위면 다음 주 {_e(x['name'])} 종목 신규 매수 재개 — "
+                       f"지금 {c:,.0f}, <b>{(ma / c - 1) * 100:.1f}%</b> 더 올라야 함")
+        else:
+            out.append(f"<b>{_e(x['name'])}</b> 금요일 종가가 <b>{ma:,.0f}</b>(5주선) 아래로 내려가면 다음 주 신규 매수 중지 — 지금 여유 {lg:+.1f}%")
+    b = (kr or {}).get('breadth_all') or {}
+    t = (b.get('up') or 0) + (b.get('down') or 0) + (b.get('flat') or 0)
+    if t:
+        r = b['up'] / t * 100
+        out.append(f"시장 폭: 오늘 상승 종목 {r:.0f}% — " + ("반등이 소수 대형주가 아니라 넓게 퍼짐. 이런 날이 이어지는지(60%+)" if r >= 60
+                   else "지수와 달리 오르는 종목이 적음 — 소수 종목 장세 주의" if r < 45 else "중립"))
+    k = (flow_sum or {}).get('KOSPI') or {}
+    if k.get('d1') is not None and k.get('d5') is not None:
+        same = (k['d1'] >= 0) == (k['d5'] >= 0)
+        out.append(f"코스피 외국인: 오늘 {k['d1'] / 1e4:+.2f}조 · 5일 {k['d5'] / 1e4:+.1f}조 — "
+                   + ("방향 같음(추세 지속)" if same else "오늘만 방향이 바뀜 — 5일 합계가 플러스로 돌아서야 추세 전환"))
+    near = [e for e in (events or []) if 0 <= e.get('dday', 99) <= 7 and e.get('kind') in ('한국', '미국', '실전 규칙')]
+    if near:
+        out.append("7일 안 일정: " + ' · '.join(f"{e['date'][5:]} {_e(e['name'].split(' — ')[0])}" for e in near[:3]))
+    return out
+
+
+def checkpoints_box(rows: list[str], asof: str):
+    if not rows:
+        return
+    li = ''.join(f"<div class='hm-row' style='display:block;padding:5px 0'>{r}</div>" for r in rows)
+    st.html(CSS + f"""<div class="hm"><div class="hm-box"><h5>🎯 이번에 볼 것 — 숫자 조건 <span style='font-weight:500;color:var(--ink-3)'>({_e(asof)} 기준)</span></h5>{li}
+      <div class="hm-src">출처: 시황 리포트 facts(지수 주봉 5주선·시장 폭) · tools/kr_flow.py · events.py — 규칙 계산, AI 아님 · 마지막 갱신: {_e(asof)}</div></div></div>""")
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────

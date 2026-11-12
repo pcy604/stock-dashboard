@@ -753,7 +753,7 @@ if __name__ == "__main__":
 CHAT_PROMPT = """너는 이 대시보드의 시황 도우미다. 아래 [자료]만 근거로 한국어로 짧고 정확하게 답한다.
 - 자료에 없는 숫자·뉴스·전망은 지어내지 않는다. 없으면 "자료에 없습니다"라고 말하고 어느 탭에서 볼 수 있는지 안내한다.
 - 매수·매도 추천을 하지 않는다. 판단 근거(숫자)만 정리한다.
-- 숫자를 인용할 때는 기준일을 같이 적는다.
+- 숫자를 인용할 때는 기준일을 같이 적는다. 같은 숫자가 여러 리포트에 있으면 날짜가 가장 최신인 것을 쓴다(한국은 '한국 장 마감').
 [자료]
 {ctx}
 [질문]
@@ -761,13 +761,30 @@ CHAT_PROMPT = """너는 이 대시보드의 시황 도우미다. 아래 [자료]
 
 
 def chat_context(extra_rows=None, max_chars=12000):
+    """챗봇 자료(2026-11-12 수정). 예전엔 latest_* 를 통째로 이어 붙여 12,000자에서 잘랐는데, 일간+주간이 이미
+    12,600자라 한국 장 마감(latest_kr — 테마·수급·업종)이 통째로 잘려 챗봇이 본 적이 없었다.
+    → 최신 한국 장 마감을 맨 앞에, 히트맵(2.2만 자) 같은 큰 목록은 빼고, 리포트마다 상한을 둔다."""
     db = _j("results/market_report.json") or {}
-    ctx = {k: {"date": v.get("date"), "facts": v.get("facts")} for k, v in db.items()
-           if k.startswith("latest_") and isinstance(v, dict)}
+    drop = {"heatmap", "turnover_top", "limit_up", "breadth_hist"}
+
+    def _slim(v):
+        f = json.loads(json.dumps(v.get("facts") or {}, ensure_ascii=False))
+        for m in ((f.get("stocks") or {}).values()):
+            if isinstance(m, dict):
+                for k in drop:
+                    m.pop(k, None)
+        return {"date": v.get("date"), "facts": f}
+
+    order = [("latest_kr", "한국 장 마감(가장 최신 한국 숫자)", 6000), ("latest_daily", "일간 — 미국 마감", 4000),
+             ("latest_weekly", "주간", 2000)]
+    parts = []
     if extra_rows:
-        ctx["관련 종목"] = extra_rows
-    t = json.dumps(ctx, ensure_ascii=False)
-    return t[:max_chars]
+        parts.append('"관련 종목": ' + json.dumps(extra_rows, ensure_ascii=False)[:1500])
+    for k, lab, cap in order:
+        v = db.get(k)
+        if isinstance(v, dict):
+            parts.append(json.dumps({lab: _slim(v)}, ensure_ascii=False)[:cap])
+    return "\n".join(parts)[:max_chars]
 
 
 def answer(q, key=None, extra_rows=None):

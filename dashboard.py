@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12g'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12h'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -9068,10 +9068,8 @@ def _home_top(V):
         _bl0 = ''
     _bt0 = (re.findall(r'\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}', _bl0) or re.findall(r'\d{4}-\d{2}-\d{2}', _bl0) or [''])[0].replace('T', ' ')
     _UH.dates_strip(_UH.date_items(pd.Timestamp.now(tz='Asia/Seoul').tz_localize(None), _asof0,
-                                   (idx.get('S&P500') or {}).get('date'), gt.get('made'), _bt0 if _IS_LAB else '-'))
-    if _IS_LAB:                                   # 2026-11-11 진단: 실전 계좌가 종합에 없었다 — 소유자에게 가장 먼저 필요한 정보
-        _home_today(gt, ka, stl)
-        _home_account()
+                                   (idx.get('S&P500') or {}).get('date'), gt.get('made')))
+    # 2026-11-12 차니: 종합 = 고객이 보는 첫 페이지 → 소유자에게도 고객과 '같은 화면'. 계좌·오늘 할 일·봇 기록은 🏛️ 경영실(_ops_today)
     _home_events()
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof)
@@ -9153,18 +9151,18 @@ def _home_today(gt, ka, stl):
 def _home_events():
     """🗓️ 다가오는 일정(2026-11-12) — events.py(공식 일정 + 옵션 만기·보고서 기한 + 보유 종목 실적 미반영) + 내 규칙 일정."""
     import events as _EV
-    if getattr(_EV, 'VERSION', None) != '2026-11-12a':
+    if getattr(_EV, 'VERSION', None) != '2026-11-12b':
         import importlib as _il2
         _EV = _il2.reload(_EV)
     today = pd.Timestamp.now(tz='Asia/Seoul').date()
     led = _led()
-    hold = {c: p.get('name') for c, p in ((led.get('KR') or {}).get('positions') or {}).items()} if _IS_LAB else None
+    hold = None                                   # 2026-11-12 — 보유 종목 실적은 🏛️ 경영실(_ops_today)로
     try:
         fq = pd.read_parquet('data/kr_fundamentals_q.parquet', columns=['sym', 'year', 'q']) if hold else None
     except Exception:
         fq = None
     ev = _EV.build(today, 35, hold, fq)
-    if not _IS_LAB:                               # 공개 사용자: 보유 종목 이름 없이 기한만
+    if True:                                      # 종합은 공개판: 보유 종목 이름 없이 시장 전체 기한만
         for e in ev:
             if e.get('kind') == '보유':
                 e['kind'] = '한국'
@@ -9175,17 +9173,18 @@ def _home_events():
     m = re.search(r'(\d{4}-\d{2}-\d{2})', str(ov or ''))
     extra = []
     if m and str(today) <= m.group(1):
-        extra.append(dict(date=m.group(1), time='', kind='내 규칙', name='오버라이드 종료 — 다음 계획표부터 지수·종목 5주선 규칙 복귀',
-                          detail='이 주 성과는 따로 집계'))
+        extra.append(dict(date=m.group(1), time='', kind='실전 규칙', name='이번 주 예외(오버라이드) 종료 — 다음 주부터 지수·종목 5주선 규칙 복귀',
+                          detail='예외 주 성과는 따로 집계'))
     sat = today + __import__("datetime").timedelta(days=(5 - today.weekday()) % 7)
-    extra.append(dict(date=str(sat), time='', kind='내 규칙', name='다음 주 계획표(live-plan) — 신규·손절·불타기 목록 확정'))
+    extra.append(dict(date=str(sat), time='', kind='실전 규칙', name='주간 판정 갱신 — 금요일 종가로 신규 매수 가능/중지 확정'))
     for e in extra:
         d = pd.Timestamp(e['date']).date()
         e['dday'], e['wd'] = (d - today).days, '월화수목금토일'[d.weekday()]
     ev = sorted(ev + extra, key=lambda e: (e['date'], e.get('time') or ''))
+    st.session_state['_home_ev'] = ev            # 🎯 이번에 볼 것(시황 블록)이 7일 안 일정을 쓴다
     _UH.events_box(ev, 35)
     st.caption("출처: 한국은행·federalreserve.gov·bls.gov 공식 일정(data/events_calendar.json, 손으로 갱신) · KRX 옵션 만기 규정 · "
-               "자본시장법 보고서 기한 · 실적 반영 = data/kr_fundamentals_q.parquet 에 그 분기가 들어왔는지 · 휴장일 보정 없음")
+               "자본시장법 보고서 기한(토·일이면 다음 월요일) · 휴장일 보정 없음")
 
 
 def _home_account():
@@ -9242,7 +9241,7 @@ def _home_account():
                    "11-13까지 오버라이드 주는 성과 판정에서 분리")
 
 
-def _home_todo(V):
+def _home_todo(V, owner=False):
     """② 이번 주 할 일 — 실전 봇의 주간 순서. 2026-11-11 진단 반영: 표 → 체크리스트(종합 카드와 같은 디자인),
     계획(plan)과 원장(ledger)을 대조해 이미 체결된 신규는 '완료'로(계획표만 보면 체결 뒤에도 '신규 10종'이 남았다)."""
     st.subheader("이번 주 할 일")
@@ -9263,7 +9262,7 @@ def _home_todo(V):
              f"정답 점검 틀림 {ka}건 · 갱신 정지 {stl}건 — 신호를 쓰기 전에 데이터부터" if bad else '정답 점검·신선도 전 항목 정상', ''),
             ('지수 게이트', gt['tone'], _html.escape(gt['head']),
              '이번 주 오버라이드로 매수 진행 — 성과 판정에서 분리' if gt.get('override') else '')]
-    if _IS_LAB:
+    if owner:
         rows += [('매도·손절', 'y' if sells else 'g', f"{len(sells)}건 — 고점 −20% 손절 · RS 70 미만 탈락" if sells else '해당 없음',
                   '손절선은 매일 봇이 점검'),
                  ('신규·불타기', 'g' if not todo_b else 'y',
@@ -9278,7 +9277,7 @@ def _home_todo(V):
                  if pf else '🛡️ 내 포트폴리오에서 보유 종목을 넣으면 손절선·비중 위반을 여기서 같이 봅니다', ''))
     _UH.steps(rows)
     st.caption(f"출처: live/plan_latest.json(주말 계획표 {pl.get('made', '-')}) · live/ledger.json · 정답 점검·신선도 · 🛡️ 포트폴리오 평가")
-    if _IS_LAB and todo_b:
+    if owner and todo_b:
         _t = pd.DataFrame([{'종목': x.get('name'), '코드': x.get('sym'), 'RS': x.get('rs'), '기준가(원)': x.get('ref_px'),
                             '수량(주)': x.get('qty'), '금액(원)': x.get('krw'), '손절가(원)': x.get('stop'),
                             '불타기 가격(원)': x.get('add_trigger')} for x in todo_b])
@@ -9287,10 +9286,34 @@ def _home_todo(V):
         _tsrc('live/plan.py — 아직 체결 안 된 이번 주 신규(소유자만)', path='live/plan_latest.json', asof=pl.get('made'))
         st.dataframe(_t, filters=False, color=False, column_config={c: st.column_config.NumberColumn(format='localized' if c != 'RS' else '%d')
                                                                    for c in _t.columns[2:]})
+    if owner:
+        return
     b1, b2, b3 = st.columns(3)
     b1.button("🌍 매크로 근거 보기", on_click=_goto_tab, args=("🌍 매크로",), use_container_width=True, key='home_go_macro')
     b2.button("🔎 이번 주 후보 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')
     b3.button("🛡️ 보유 점검하기", on_click=_goto_tab, args=("🛡️ 내 포트폴리오",), use_container_width=True, key='home_go_pf')
+
+
+def _ops_today():
+    """📟 오늘 운영(2026-11-12, 소유자만) — 종합에서 옮김: 오늘 할 일·봇 기록 · 실전 계좌 · 보유 종목 실적 기한 · 이번 주 실행 점검."""
+    st.subheader("📟 오늘 운영 — 소유자만")
+    gt = _UH.gate(_live_plan() or {})
+    ka, stl = _ops_counts()
+    _home_today(gt, ka, stl)
+    _home_account()
+    try:
+        import events as _EV
+        led = _led()
+        hold = {c: p.get('name') for c, p in ((led.get('KR') or {}).get('positions') or {}).items()}
+        fq = pd.read_parquet('data/kr_fundamentals_q.parquet', columns=['sym', 'year', 'q']) if hold else None
+        ev = [e for e in _EV.build(pd.Timestamp.now(tz='Asia/Seoul').date(), 35, hold, fq) if e.get('kind') == '보유']
+        if ev:
+            _UH.events_box(ev, 35)
+            st.caption("출처: events.py 보고서 법정 기한(토·일이면 다음 월요일) · 실적 반영 = data/kr_fundamentals_q.parquet 에 그 분기가 있는지")
+    except Exception as _e:
+        st.caption(f"`보유 실적 기한 실패: {type(_e).__name__}: {_e}`")
+    _home_todo(_VERDICT, owner=True)
+    st.divider()
 
 
 # ── 상단 배지 + 🏠 종합 — 맨 끝에서(판정 계산이 다른 탭을 붙잡지 않게) ──────────
@@ -9309,15 +9332,25 @@ with tab_rep, guard('시황 리포트'):
     _lazy(tab_home)
     st.subheader("📰 시황 리포트 · 💬 묻기")
     _rep = load_json(Path('results/market_report.json')) or {}
+    # 2026-11-12 — 체크포인트를 AI 문장('~할지') 대신 숫자 조건으로. 실전 규칙(주봉 5주선)까지 거리부터
+    _krf = (_rep.get('latest_kr') or {})
+    _kf = (_krf.get('facts') or {})
+    _UH.checkpoints_box(_UH.rule_checkpoints([x for x in (_kf.get('indices') or []) if x.get('name') in ('코스피', '코스닥')],
+                                             ((_kf.get('stocks') or {}).get('KR') or {}),
+                                             (load_json(Path('results/kr_flow.json')) or {}).get('summary'),
+                                             st.session_state.get('_home_ev')),
+                        str(_krf.get('date') or '-'))
     _rt_read, _rt_ask = st.tabs(["📰 리포트 읽기", "💬 리포트에 묻기"])   # 2026-11-12 리포트+챗봇 한 블록
     with _rt_read:
-        st.caption("매일 06시(KST) 일간 · 06:45 한국 장 마감 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
-                   "뉴스·전망을 지어내지 않도록 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
+        st.caption("한국 장 마감 리포트 평일 15:50(KST) · 미국 포함 일간 매일 06:15 · 주간 월요일. 지수와 이 사이트 데이터 **숫자만으로** 작성 — "
+                   "뉴스·전망을 지어내지 않게 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
         _hist = _rep.get('history') or []
         if not _hist:
             st.info("아직 발행된 리포트가 없습니다. 다음 자동 갱신(매일 06시)부터 쌓입니다.")
         else:
-            _KN = {'daily': '일간(미국 포함)', 'weekly': '주간', 'kr': '한국 장 마감'}
+            _KN = {'daily': '일간 — 미국 마감(한국은 전 거래일)', 'weekly': '주간', 'kr': '한국 장 마감'}
+            # 같은 날짜면 한국 장 마감(15:50)이 미국 포함 일간(06:15)보다 나중 — 최신을 맨 위로(2026-11-12: 기본이 미국 리포트였다)
+            _hist = sorted(_hist, key=lambda h: (h['date'], {'kr': 2, 'daily': 1, 'weekly': 0}.get(h['kind'], 0)), reverse=True)
             _opts = [f"{h['date']} · {_KN.get(h['kind'], h['kind'])}" for h in _hist]
             _i = st.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick")
             _h = _hist[_i]
@@ -9325,9 +9358,7 @@ with tab_rep, guard('시황 리포트'):
             # 2026-10-24 — 리포트 본문의 #·## 가 탭 제목(①②③)보다 커서 위계가 뒤집혔다 → 두 단계 내려 그린다
             # 2026-11-10 — 숫자·시장 폭·업종은 위 카드와 겹친다 → 체크포인트만 펼쳐 두고 전문은 접는다
             _ck = re.search(r'##\s*체크포인트\s*\n+(.+?)(?:\n##|\n※|$)', _h['markdown'], flags=re.S)
-            if _ck:
-                st.markdown("**이번에 볼 것 (체크포인트)**\n\n" + _ck.group(1).strip())
-            with st.expander("리포트 전문 — 한 줄 요약 · 숫자 · 강약 종목 · 체크포인트", expanded=not _ck):
+            with st.expander("리포트 전문 — 한 줄 요약 · 숫자 · 강약 종목 · AI 코멘트", expanded=False):
                 st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _h['markdown'], flags=re.M))
             _lf = (_rep.get(f"latest_{_h['kind']}") or {})
             # 2026-10-21 — 리포트에 나온 종목을 눌러 종목 분석으로(리포트 → 분석 연결)
@@ -9339,7 +9370,10 @@ with tab_rep, guard('시황 리포트'):
                         if _x.get('sym') and _x['sym'] not in [y for y, _ in _syms]:
                             _syms.append((_x['sym'], f"{'▲' if _k == 'top' else '▼'} {_x.get('name') or _x['sym']} {_x.get('ret', 0):+.1f}%"))
             if _syms:
-                st.caption("리포트에 나온 종목 — 누르면 🔍 종목 분석")
+                _BS = {'d1': '오늘', 'ret_1w': '1주', 'ret_4w': '4주'}
+                _bsl = ' · '.join(f"{_m} {_BS.get((_fst.get(_m) or {}).get('basis'), (_fst.get(_m) or {}).get('basis') or '-')}"
+                                  for _m in ('KR', 'US') if _fst.get(_m))
+                st.caption(f"리포트에 나온 종목(수익률 기간: {_bsl}) — 누르면 🔍 종목 분석")
                 _bc = st.columns(6)
                 for _n, (_sy, _lb) in enumerate(_syms[:12]):
                     _bc[_n % 6].button(_lb, key=f"rep_go_{_sy}", on_click=_goto_analysis, args=(_sy,), use_container_width=True)
@@ -9381,6 +9415,7 @@ with tab_rep, guard('시황 리포트'):
 if tab_gov is not None:
     with tab_gov, guard('경영실'):
         _lazy(tab_gov)
+        _ops_today()
         import ui_gov as _UG
         if getattr(_UG, 'VERSION', None) != '2026-11-12b':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
             import importlib as _il, gov as _G
@@ -9396,7 +9431,7 @@ st.divider()
 st.caption(
     "**ⓘ 이용 안내** · 이 사이트는 공개 데이터와 정해진 규칙으로 계산한 결과, AI 요약을 보여주는 "
     "**정보 도구이며 투자 권유가 아닙니다.** 모든 투자 판단과 책임은 이용자 본인에게 있습니다.\n\n"
-    "**데이터 지연** · 표·신호·점수는 매일 06:00(KST) 갱신되는 **전일 종가 기준**입니다. "
+    "**데이터 지연** · 한국 시장 요약은 평일 15:50(KST) 장 마감 기준, 미국·신호·점수는 매일 06:00 갱신되는 **전일 종가 기준**입니다. "
     "종목 분석의 현재가도 무료 API 기준이라 **최소 15분 이상 지연**되거나 오류가 있을 수 있습니다.\n\n"
     "**백테스트·목표가** · 상승 확률·평균 상승률은 표시된 기간의 과거 성과이며 미래 수익을 보장하지 않습니다. "
     "목표가는 증권사 컨센서스를 옮긴 것으로, 이 사이트의 의견이 아닙니다.\n\n"
