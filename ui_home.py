@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12f'
+VERSION = '2026-11-12g'
 
 CSS = """
 <style>
@@ -497,6 +497,43 @@ def today_box(me: list[tuple], bot: list[str], asof: str):
       <div class="hm-box" style="border-left:4px solid var(--accent)"><h5>🙋 오늘 차니가 할 일</h5>{mine}</div>
       <div class="hm-box"><h5>🤖 오늘 봇이 한 일 <span style='font-weight:500;color:var(--ink-3)'>({_e(asof)})</span></h5>{done}</div>
     </div></div>""")
+
+
+def last_session(now) -> str:
+    """지금(KST) 기준 '이미 끝난' 마지막 한국 거래일(주말만 보정, 휴장일 미보정). 15:30 전이면 전 거래일."""
+    import datetime as _dt
+    d = now.date() if hasattr(now, 'date') else now
+    if not (now.weekday() < 5 and (now.hour, now.minute) >= (15, 30)):
+        d -= _dt.timedelta(days=1)
+    while d.weekday() >= 5:
+        d -= _dt.timedelta(days=1)
+    return str(d)
+
+
+def date_items(now, kr: str, us: str, plan: str, bot: str) -> list[tuple]:
+    """홈 '기준 시각' 한 줄(2026-11-12) — 상자마다 흩어진 날짜를 한 곳에. (라벨, 값, 낡음 여부).
+    낡음 = 한국 종가가 마지막 장보다 앞 / 계획표가 8일+ / 봇이 평일 09:20 이후인데 오늘 안 돎."""
+    import datetime as _dt
+    ls = last_session(now)
+    today = str(now.date())
+    kr10, pl10, bt10 = str(kr or '')[:10], str(plan or '')[:10], str(bot or '')[:10]
+    try:
+        pl_old = (now.date() - _dt.date.fromisoformat(pl10)).days > 8
+    except Exception:
+        pl_old = True
+    bot_due = now.weekday() < 5 and (now.hour, now.minute) >= (9, 20)
+    return [('한국 종가', kr10 or '-', not kr10 or kr10 < ls),
+            ('미국 종가', str(us or '-')[:10], False),
+            ('계획표', pl10 or '-', pl_old),
+            ('봇 실행', str(bot or '-')[:16], bool(bot_due and bt10 != today)),
+            ('지금', now.strftime('%m-%d %H:%M KST'), False)]
+
+
+def dates_strip(items: list[tuple]):
+    bits = ''.join(f"<span style='margin-right:14px;white-space:nowrap'>{_e(k)} <b style='color:{'#D97706' if old else 'var(--ink-1)'}'>"
+                   f"{_e(v)}{' ⚠' if old else ''}</b></span>" for k, v, old in items)
+    st.html(CSS + f"<div class='hm'><div style='font-size:12.5px;color:var(--ink-3);padding:6px 2px 2px;"
+                  f"font-variant-numeric:tabular-nums'>📅 {bits}<span style='color:var(--ink-3)'>· ⚠ = 늦음(주말만 보정·휴장일 미보정)</span></div></div>")
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────

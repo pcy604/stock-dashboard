@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12f'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12g'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -1373,16 +1373,20 @@ def _status_bar(v):
     bad = (ka or 0) + (stl or 0)
     dat = ("<span style='color:#15803d'>데이터 정상</span>" if bad == 0 and ka is not None
            else f"<span style='color:#b91c1c'>데이터 점검 {bad}건</span>")
-    bits = [sw]
+    # 2026-11-12 축소 — 돈을 움직이지 않는 참고 지표(미국 200일선·국면·경고)는 '참고' 툴팁으로 접는다
+    ref = []
     if c:
-        bits.append(f"미국 S&P500 200일선 {c['gap']:+.1f}% <span style='color:#9ca3af'>(참고)</span>")
+        ref.append(f"미국 S&P500 200일선 {c['gap']:+.1f}%")
     if ph.get('name'):
-        bits.append(f"국면 {ph.get('emoji', '')} {ph['name']} <span style='color:#9ca3af'>(참고)</span>")
+        ref.append(f"국면 {ph['name']}")
     if g.get('word'):
-        bits.append(f"경고 {g.get('n', 0)}/3 <span style='color:#9ca3af'>(참고)</span>")
-    bits += [dat, f"<span style='color:#9ca3af'>계획표 {gt.get('made') or '-'} · 지수 {v.get('asof') or '-'} 종가</span>"]
-    st.markdown("<div style='font-size:13px;padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;"
-                "background:#fafafa;color:#374151;margin:2px 0 6px'>" + " &nbsp;·&nbsp; ".join(bits) + "</div>",
+        ref.append(f"경고 {g.get('n', 0)}/3")
+    bits = [sw, dat]
+    if ref:
+        bits.append(f"<span style='color:#9ca3af;cursor:help;border-bottom:1px dotted #9ca3af' "
+                    f"title='{_html.escape(' · '.join(ref))} — 실전 주문에는 쓰지 않음'>참고 {len(ref)}</span>")
+    st.markdown("<div style='font-size:12.5px;padding:4px 10px;border:1px solid #e5e7eb;border-radius:8px;"
+                "background:#fafafa;color:#374151;margin:2px 0 4px'>" + " &nbsp;·&nbsp; ".join(bits) + "</div>",
                 unsafe_allow_html=True)
 
 
@@ -9058,6 +9062,13 @@ def _home_top(V):
     _live = (f"<b style='color:#fff'>이번 주 진행분</b> ({_asof0}) — 5주선 대비 " + ' · '.join(_lv)
              + " · <span style='color:#9CA3AF'>금요일 종가로 확정 → 주말 계획표에 반영</span>") if _lv else ''
     _UH.hero(gt, line, ldate, [c for c in chips if c], _live)
+    try:                                          # 2026-11-12 날짜 통일 — 흩어진 기준일을 한 줄로, 늦은 것은 주황
+        _bl0 = (Path('live/bot_last.txt').read_text(encoding='utf-8').splitlines() or [''])[0]
+    except Exception:
+        _bl0 = ''
+    _bt0 = (re.findall(r'\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}', _bl0) or re.findall(r'\d{4}-\d{2}-\d{2}', _bl0) or [''])[0].replace('T', ' ')
+    _UH.dates_strip(_UH.date_items(pd.Timestamp.now(tz='Asia/Seoul').tz_localize(None), _asof0,
+                                   (idx.get('S&P500') or {}).get('date'), gt.get('made'), _bt0 if _IS_LAB else '-'))
     if _IS_LAB:                                   # 2026-11-11 진단: 실전 계좌가 종합에 없었다 — 소유자에게 가장 먼저 필요한 정보
         _home_today(gt, ka, stl)
         _home_account()
@@ -9296,72 +9307,73 @@ with tab_home, guard('종합 — 할 일'):
 
 with tab_rep, guard('시황 리포트'):
     _lazy(tab_home)
-    st.subheader("시황 리포트")
+    st.subheader("📰 시황 리포트 · 💬 묻기")
     _rep = load_json(Path('results/market_report.json')) or {}
-    st.caption("매일 06시(KST) 일간 · 06:45 한국 장 마감 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
-               "뉴스·전망을 지어내지 않도록 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
-    _hist = _rep.get('history') or []
-    if not _hist:
-        st.info("아직 발행된 리포트가 없습니다. 다음 자동 갱신(매일 06시)부터 쌓입니다.")
-    else:
-        _KN = {'daily': '일간(미국 포함)', 'weekly': '주간', 'kr': '한국 장 마감'}
-        _opts = [f"{h['date']} · {_KN.get(h['kind'], h['kind'])}" for h in _hist]
-        _i = st.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick")
-        _h = _hist[_i]
-        st.caption(f"작성: {'AI(' + _h['engine'].split(':')[-1] + ')' if _h['engine'].startswith('gemini') else '숫자 템플릿'}")
-        # 2026-10-24 — 리포트 본문의 #·## 가 탭 제목(①②③)보다 커서 위계가 뒤집혔다 → 두 단계 내려 그린다
-        # 2026-11-10 — 숫자·시장 폭·업종은 위 카드와 겹친다 → 체크포인트만 펼쳐 두고 전문은 접는다
-        _ck = re.search(r'##\s*체크포인트\s*\n+(.+?)(?:\n##|\n※|$)', _h['markdown'], flags=re.S)
-        if _ck:
-            st.markdown("**이번에 볼 것 (체크포인트)**\n\n" + _ck.group(1).strip())
-        with st.expander("리포트 전문 — 한 줄 요약 · 숫자 · 강약 종목 · 체크포인트", expanded=not _ck):
-            st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _h['markdown'], flags=re.M))
-        _lf = (_rep.get(f"latest_{_h['kind']}") or {})
-        # 2026-10-21 — 리포트에 나온 종목을 눌러 종목 분석으로(리포트 → 분석 연결)
-        _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
-        _syms = []
-        for _m in ('KR', 'US'):
-            for _k in ('top', 'bottom'):
-                for _x in (_fst.get(_m) or {}).get(_k, [])[:3]:
-                    if _x.get('sym') and _x['sym'] not in [y for y, _ in _syms]:
-                        _syms.append((_x['sym'], f"{'▲' if _k == 'top' else '▼'} {_x.get('name') or _x['sym']} {_x.get('ret', 0):+.1f}%"))
-        if _syms:
-            st.caption("리포트에 나온 종목 — 누르면 🔍 종목 분석")
-            _bc = st.columns(6)
-            for _n, (_sy, _lb) in enumerate(_syms[:12]):
-                _bc[_n % 6].button(_lb, key=f"rep_go_{_sy}", on_click=_goto_analysis, args=(_sy,), use_container_width=True)
-        if _lf.get('date') == _h['date']:
-            with st.expander("근거 숫자 보기 (리포트가 쓴 원자료)"):
-                st.json(_lf.get('facts') or {}, expanded=False)
-
-    st.divider()
-    st.markdown("#### 💬 시황 챗봇")
-    st.caption("최신 리포트의 원자료와 질문에 나온 종목의 숫자만 근거로 답합니다. 매수·매도 추천은 하지 않습니다. "
-               "AI 무료 한도가 있어 세션당 10회로 제한합니다.")
-    st.session_state.setdefault('chat_log', [])
-    for _role, _msg in st.session_state['chat_log'][-12:]:
-        with st.chat_message(_role):
-            st.markdown(_msg)
-    _qc1, _qc2 = st.columns([5, 1])
-    _q = _qc1.text_input("질문", placeholder="예: 어제 코스피 왜 빠졌어? / 이번 주 미국 강세 종목은? / 티에스이 신호 어때?",
-                         label_visibility="collapsed", key="chat_q")
-    if _qc2.button("묻기", key="chat_go", use_container_width=True) and _q.strip():
-        if sum(1 for r, _ in st.session_state['chat_log'] if r == 'user') >= 10:
-            st.warning("이번 세션 질문 한도(10회)를 다 썼습니다. 새로고침하면 초기화됩니다.")
+    _rt_read, _rt_ask = st.tabs(["📰 리포트 읽기", "💬 리포트에 묻기"])   # 2026-11-12 리포트+챗봇 한 블록
+    with _rt_read:
+        st.caption("매일 06시(KST) 일간 · 06:45 한국 장 마감 · 월요일 주간. 지수(Yahoo)와 이 사이트의 데이터 **숫자만으로** 작성합니다 — "
+                   "뉴스·전망을 지어내지 않도록 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
+        _hist = _rep.get('history') or []
+        if not _hist:
+            st.info("아직 발행된 리포트가 없습니다. 다음 자동 갱신(매일 06시)부터 쌓입니다.")
         else:
-            _key = _gemini_key_site()
-            if not _key:
-                _ans = "AI 키가 설정되지 않았습니다 — Streamlit Secrets 에 GEMINI_KEY 가 필요합니다."
+            _KN = {'daily': '일간(미국 포함)', 'weekly': '주간', 'kr': '한국 장 마감'}
+            _opts = [f"{h['date']} · {_KN.get(h['kind'], h['kind'])}" for h in _hist]
+            _i = st.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick")
+            _h = _hist[_i]
+            st.caption(f"작성: {'AI(' + _h['engine'].split(':')[-1] + ')' if _h['engine'].startswith('gemini') else '숫자 템플릿'}")
+            # 2026-10-24 — 리포트 본문의 #·## 가 탭 제목(①②③)보다 커서 위계가 뒤집혔다 → 두 단계 내려 그린다
+            # 2026-11-10 — 숫자·시장 폭·업종은 위 카드와 겹친다 → 체크포인트만 펼쳐 두고 전문은 접는다
+            _ck = re.search(r'##\s*체크포인트\s*\n+(.+?)(?:\n##|\n※|$)', _h['markdown'], flags=re.S)
+            if _ck:
+                st.markdown("**이번에 볼 것 (체크포인트)**\n\n" + _ck.group(1).strip())
+            with st.expander("리포트 전문 — 한 줄 요약 · 숫자 · 강약 종목 · 체크포인트", expanded=not _ck):
+                st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _h['markdown'], flags=re.M))
+            _lf = (_rep.get(f"latest_{_h['kind']}") or {})
+            # 2026-10-21 — 리포트에 나온 종목을 눌러 종목 분석으로(리포트 → 분석 연결)
+            _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
+            _syms = []
+            for _m in ('KR', 'US'):
+                for _k in ('top', 'bottom'):
+                    for _x in (_fst.get(_m) or {}).get(_k, [])[:3]:
+                        if _x.get('sym') and _x['sym'] not in [y for y, _ in _syms]:
+                            _syms.append((_x['sym'], f"{'▲' if _k == 'top' else '▼'} {_x.get('name') or _x['sym']} {_x.get('ret', 0):+.1f}%"))
+            if _syms:
+                st.caption("리포트에 나온 종목 — 누르면 🔍 종목 분석")
+                _bc = st.columns(6)
+                for _n, (_sy, _lb) in enumerate(_syms[:12]):
+                    _bc[_n % 6].button(_lb, key=f"rep_go_{_sy}", on_click=_goto_analysis, args=(_sy,), use_container_width=True)
+            if _lf.get('date') == _h['date']:
+                with st.expander("근거 숫자 보기 (리포트가 쓴 원자료)"):
+                    st.json(_lf.get('facts') or {}, expanded=False)
+
+    with _rt_ask:
+        st.caption("최신 리포트의 원자료와 질문에 나온 종목의 숫자만 근거로 답합니다. 매수·매도 추천은 하지 않습니다. "
+                   "AI 무료 한도가 있어 세션당 10회로 제한합니다.")
+        st.session_state.setdefault('chat_log', [])
+        for _role, _msg in st.session_state['chat_log'][-12:]:
+            with st.chat_message(_role):
+                st.markdown(_msg)
+        _qc1, _qc2 = st.columns([5, 1])
+        _q = _qc1.text_input("질문", placeholder="예: 어제 코스피 왜 빠졌어? / 이번 주 미국 강세 종목은? / 티에스이 신호 어때?",
+                             label_visibility="collapsed", key="chat_q")
+        if _qc2.button("묻기", key="chat_go", use_container_width=True) and _q.strip():
+            if sum(1 for r, _ in st.session_state['chat_log'] if r == 'user') >= 10:
+                st.warning("이번 세션 질문 한도(10회)를 다 썼습니다. 새로고침하면 초기화됩니다.")
             else:
-                with st.spinner("답변 작성 중…"):
-                    try:
-                        import market_report as _MR
-                        _ans, _m = _MR.answer(_q.strip(), key=_key, extra_rows=_related_rows(_q))
-                        _ans += f"\n\n_※ AI({_m}) 생성 · 사실 확인 필요 · 투자 권유 아님_"
-                    except Exception as _e:
-                        _ans = f"답변 실패 — AI 한도 초과 또는 일시 오류일 수 있습니다. ({str(_e)[:80]})"
-            st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
-            st.rerun()
+                _key = _gemini_key_site()
+                if not _key:
+                    _ans = "AI 키가 설정되지 않았습니다 — Streamlit Secrets 에 GEMINI_KEY 가 필요합니다."
+                else:
+                    with st.spinner("답변 작성 중…"):
+                        try:
+                            import market_report as _MR
+                            _ans, _m = _MR.answer(_q.strip(), key=_key, extra_rows=_related_rows(_q))
+                            _ans += f"\n\n_※ AI({_m}) 생성 · 사실 확인 필요 · 투자 권유 아님_"
+                        except Exception as _e:
+                            _ans = f"답변 실패 — AI 한도 초과 또는 일시 오류일 수 있습니다. ({str(_e)[:80]})"
+                st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
+                st.rerun()
 
 
 
