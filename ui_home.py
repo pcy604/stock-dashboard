@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12e'
+VERSION = '2026-11-12f'
 
 CSS = """
 <style>
@@ -163,7 +163,7 @@ def indices(rep: dict) -> list[dict]:
 
 
 # ── 그리기 ──────────────────────────────────────────────────────────────
-def hero(g: dict, line: str, line_date: str, chips: list[str]):
+def hero(g: dict, line: str, line_date: str, chips: list[str], live: str = ''):
     glow = {'g': 'rgba(74,222,128,.30)', 'r': 'rgba(248,113,113,.32)', 'y': 'rgba(252,211,77,.30)'}.get(g['tone'], 'rgba(126,162,255,.30)')
     ov = (f'<div class="ov">⚠️ {_e(g["override"])}</div>' if g.get('override') else '')
     detail = ' · '.join(f"{r['lab']} {_num(r['last'])} vs 5주선 {_num(r['ma'])} ({'위' if r['rule_ok'] else '아래'} · {r.get('date') or '-'} 주봉)"
@@ -173,7 +173,8 @@ def hero(g: dict, line: str, line_date: str, chips: list[str]):
     st.html(CSS + f"""<div class="hm"><div class="hm-hero" style="--glow:{glow}">
       <div class="hm-kick">THIS WEEK · 실전 규칙 v1.9 (한국) · 계획표 {_e(g.get('made'))}</div>
       <h3>{_e(g['head'])}</h3>{ov}
-      <p style="font-size:12.5px;color:#9CA3AF;margin-bottom:8px">{_e(detail)}</p>
+      <p style="font-size:12.5px;color:#9CA3AF;margin-bottom:4px">{_e(detail)}</p>
+      {f'<p style="font-size:13px;color:#E5E7EB;margin-bottom:8px">{live}</p>' if live else ''}
       {body}
       <div class="hm-chips">{''.join(f'<span class="hm-chip">{c}</span>' for c in chips)}</div>
     </div></div>""")
@@ -483,6 +484,19 @@ def heatmap_fig(rows: list[dict]):
                                tiling=dict(pad=2), pathbar=dict(visible=False)))
     fig.update_layout(height=520, margin=dict(l=0, r=0, t=0, b=0), font=dict(family='Pretendard, Malgun Gothic, sans-serif', size=12))
     return fig
+
+
+def today_box(me: list[tuple], bot: list[str], asof: str):
+    """오늘 — '차니가 할 일'(대부분 없음이어야 정상) + '봇이 한 일'. 1억 손실의 원인은 규율 → 화면이 '손대지 마라'를 먼저 말한다."""
+    col = {'g': 'var(--pos)', 'y': '#D97706', 'r': 'var(--neg)'}
+    mine = ''.join(f"<div style='display:flex;gap:8px;align-items:baseline;font-size:13.5px;margin:3px 0'>"
+                   f"<i style='width:9px;height:9px;border-radius:50%;background:{col.get(t, '#9CA3AF')};flex:none;transform:translateY(1px)'></i>"
+                   f"<span>{v}</span></div>" for t, v in me)
+    done = ''.join(f"<div class='hm-row'><span>{_e(b)}</span></div>" for b in bot[:6]) or "<div class='hm-kv'>오늘 매매 없음</div>"
+    st.html(CSS + f"""<div class="hm"><div class="hm-two" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);margin-top:10px">
+      <div class="hm-box" style="border-left:4px solid var(--accent)"><h5>🙋 오늘 차니가 할 일</h5>{mine}</div>
+      <div class="hm-box"><h5>🤖 오늘 봇이 한 일 <span style='font-weight:500;color:var(--ink-3)'>({_e(asof)})</span></h5>{done}</div>
+    </div></div>""")
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────

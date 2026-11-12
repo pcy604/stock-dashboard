@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12e'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12f'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -9024,6 +9024,7 @@ def _home_top(V):
     gt = _UH.gate(_live_plan() or {})
     line, ldate = _UH.one_liner(rep)
     idx = {x['name']: x for x in _UH.indices(rep)}
+    _asof0 = max([str(x.get('date') or '') for x in idx.values() if x.get('name') in ('코스피', '코스닥')] or ['-'])
     krf = ((rep.get('latest_kr') or {}).get('facts') or {}).get('stocks', {}).get('KR') or {}
     dly = ((rep.get('latest_daily') or {}).get('facts') or {}).get('stocks', {}).get('KR') or {}
     chips = []
@@ -9037,8 +9038,17 @@ def _home_top(V):
         chips.append(f"한국 상승 종목 {b['up'] / _t * 100:.0f}%" if _t else '')
     ka, stl = _ops_counts()
     chips.append('데이터 정상' if (ka or 0) + (stl or 0) == 0 and ka is not None else f"⚠️ 데이터 점검 {(ka or 0) + (stl or 0)}건")
-    _UH.hero(gt, line, ldate, [c for c in chips if c])
+    # 이번 주 진행분 — 금요일 종가로 확정되는 주봉 5주선을 '지금 종가'로 미리 본다(market_report gate5w.live_*)
+    _lv = []
+    for _n in ('코스피', '코스닥'):
+        _g = (idx.get(_n) or {}).get('gate5w') or {}
+        if _g.get('live_gap') is not None:
+            _lv.append(f"{_n} {'위' if _g.get('live_on') else '아래'} {_g['live_gap']:+.2f}%")
+    _live = (f"<b style='color:#fff'>이번 주 진행분</b> ({_asof0}) — 5주선 대비 " + ' · '.join(_lv)
+             + " · <span style='color:#9CA3AF'>금요일 종가로 확정 → 주말 계획표에 반영</span>") if _lv else ''
+    _UH.hero(gt, line, ldate, [c for c in chips if c], _live)
     if _IS_LAB:                                   # 2026-11-11 진단: 실전 계좌가 종합에 없었다 — 소유자에게 가장 먼저 필요한 정보
+        _home_today(gt, ka, stl)
         _home_account()
     _home_events()
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
@@ -9080,6 +9090,42 @@ def _led():
         return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'ledger.json'), encoding='utf-8'))
     except Exception:
         return {}
+
+
+def _home_today(gt, ka, stl):
+    """🙋 오늘 차니가 할 일 / 🤖 오늘 봇이 한 일 — 2026-11-12. 할 일이 '없음'이어야 정상인 화면."""
+    led = _led()
+    today = pd.Timestamp.now(tz='Asia/Seoul')
+    td = str(today.date())
+    a = _UH.account(led, {}, None)
+    me = []
+    if (ka or 0) + (stl or 0):
+        me.append(('r', f"데이터 점검 {(ka or 0) + (stl or 0)}건 — 오늘 숫자는 믿지 말 것(맨 아래 정답 점검)"))
+    if a['mismatch']:
+        me.append(('y', "토스 앱에서 수량 확인: " + _html.escape(' / '.join(a['mismatch'][:2])) + " — 다르면 알려주기"))
+    try:
+        _bl = (Path('live/bot_last.txt').read_text(encoding='utf-8').splitlines() or [''])[0]
+    except Exception:
+        _bl = ''
+    _bd = (re.findall(r'\d{4}-\d{2}-\d{2}', _bl) or [''])[0]
+    if today.weekday() < 5 and (today.hour, today.minute) >= (9, 20) and _bd != td:
+        me.append(('r', f"봇이 오늘 안 돌았음(마지막 {_html.escape(_bd or '없음')}) — 노트북 켜짐·인터넷·토스 허용 IP 확인"))
+    if a['near']:
+        me.append(('y', "손절선 5% 이내: " + ', '.join(_html.escape(r['종목']) for r in a['near'][:3]) + " — 봇이 자르니 손대지 말 것"))
+    if not me:
+        me.append(('g', "<b>없음.</b> 손절·불타기·신규는 봇이 규칙대로 처리합니다. 규칙을 바꾸고 싶으면 먼저 백테스트."))
+    if gt.get('override'):
+        me.append(('y', "이번 주는 오버라이드 주 — 성과 판정에서 분리"))
+    bot = []
+    try:
+        for ln in Path('live/trades.jsonl').read_text(encoding='utf-8').splitlines():
+            t = json.loads(ln)
+            if t.get('day') == td:
+                bot.append(f"{'매수' if t.get('side') == 'BUY' else '매도'} {t.get('name')} {t.get('qty', 0):g}주 @ {t.get('px', 0):,.0f} — "
+                           f"{(t.get('why') or '').split(':')[0]}")
+    except Exception:
+        pass
+    _UH.today_box(me, bot, td)
 
 
 def _home_events():
