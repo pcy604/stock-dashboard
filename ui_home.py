@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12c'
+VERSION = '2026-11-12d'
 
 CSS = """
 <style>
@@ -390,6 +390,43 @@ def events_box(ev: list[dict], days: int):
     body = ''.join(rows) or "<div class='hm-step'><span></span><span></span><span></span><span class='v'>예정된 일정 없음</span></div>"
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🗓️ 다가오는 일정 — {days}일</b>
       <span>보유 종목 실적 기한·내 규칙 일정이 먼저 · 시각은 한국 시간</span></div><div class="hm-steps">{body}</div></div>""")
+
+
+def pulse_box(idx_rows: list[dict], hist: list[dict]):
+    """오닐 방식 시장 방향(참고) + 시장 폭 추이. market_report 가 매일 계산한 facts.indices[].pulse · stocks.KR.breadth_hist."""
+    tone = {'상승 추세': 'p', '상승 확인': 'p', '압력 받는 상승': 'n'}
+    cards = []
+    for x in idx_rows:
+        pz = x.get('pulse') or {}
+        if not pz:
+            continue
+        st_ = pz.get('state', '-')
+        cls = tone.get(st_, 'z' if '반등' in st_ else 'n')
+        sub = [f"분배일 {pz.get('dist_n', '-')}개 (25거래일)"]
+        if pz.get('ftd_date'):
+            sub.append(f"팔로스루 {pz['ftd_date'][5:]}")
+        if pz.get('low_date'):
+            sub.append(f"저점 {pz['low_date'][5:]} ({pz.get('corr_dd', 0):+.1f}%)")
+        cards.append(f"""<div class="hm-card"><div class="nm">{_e(x.get('name'))} · 오닐식 시장 방향</div>
+          <div class="px {cls}" style="font-size:17px">{_e(st_)}</div><div class="sub">{' · '.join(sub)}</div></div>""")
+    trend = ''
+    pts = [h for h in (hist or []) if h.get('up') is not None and h.get('down') is not None]
+    if len(pts) >= 2:
+        bars = ''.join(
+            f"<span title='{_e(h['date'])} 상승 {h['up'] / max(1, h['up'] + h['down'] + (h.get('flat') or 0)) * 100:.0f}%' "
+            f"style='display:inline-block;width:10px;margin-right:2px;vertical-align:bottom;"
+            f"height:{max(2, h['up'] / max(1, h['up'] + h['down'] + (h.get('flat') or 0)) * 44):.0f}px;"
+            f"background:{'var(--pos)' if h['up'] >= h['down'] else 'var(--neg)'};border-radius:2px'></span>" for h in pts[-30:])
+        trend = (f"<div class='hm-card'><div class='nm'>한국 상승 종목 비율 — 최근 {len(pts[-30:])}거래일</div>"
+                 f"<div style='height:46px;margin-top:6px'>{bars}</div><div class='sub'>초록 = 오른 종목이 더 많은 날 · 기록 {pts[0]['date']}부터</div></div>")
+    elif pts:
+        trend = ("<div class='hm-card'><div class='nm'>한국 상승 종목 비율 — 추이</div><div class='sub' style='margin-top:8px'>"
+                 f"기록 시작 {pts[0]['date']} — 2거래일부터 막대로 보입니다</div></div>")
+    if not cards and not trend:
+        return
+    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>시장 방향 — 오닐식 (참고)</b>
+      <span>실전 규칙(5주선)과 별개 · 이 저장소에서 백테스트 안 함 · 분배일 = −0.2%↓ + 거래량 증가</span></div>
+      <div class="hm-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">{''.join(cards)}{trend}</div></div>""")
 
 
 # ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────

@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12c'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-12d'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -9043,6 +9043,7 @@ def _home_top(V):
     _home_events()
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof)
+    _UH.pulse_box([idx[n] for n in ('코스피', '코스닥') if n in idx], krf.get('breadth_hist') or [])
     if krf:
         _kfa = krf.get('asof') or (rep.get('latest_kr') or {}).get('date') or '-'
         _kfl = load_json(Path('results/kr_flow.json')) or {}

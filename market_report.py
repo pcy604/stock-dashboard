@@ -59,6 +59,34 @@ def _series(sym, df):
     return s
 
 
+def kr_pulse(sym):
+    """오닐 방식 시장 방향(market_pulse) — 종가·거래량 일봉. Yahoo 먼저, 안 되면 FDR. 2026-11-12 종합 진단."""
+    import market_pulse as _mp
+    c = v = None
+    try:
+        import yfinance as yf
+        d = yf.download(sym, period="1y", interval="1d", progress=False, auto_adjust=False)
+        if d is not None and len(d):
+            c = d["Close"].squeeze().dropna()
+            v = d["Volume"].squeeze()
+            if (v.fillna(0) == 0).mean() > 0.2:      # Yahoo 지수 거래량 빈칸 많으면 FDR 로
+                c = v = None
+    except Exception:
+        c = v = None
+    if c is None and sym in _FDR:
+        try:
+            import FinanceDataReader as fdr
+            from datetime import timedelta
+            d = fdr.DataReader(_FDR[sym], (date.today() - timedelta(days=400)).isoformat())
+            c, v = d["Close"].dropna(), d["Volume"]
+        except Exception:
+            return {}
+    if c is None:
+        return {}
+    c = drop_open_bar(c, sym)
+    return _mp.pulse(c, v.reindex(c.index))
+
+
 # 2026-10-21: 10-21 일간 리포트가 한국 09:26(장중)에 만들어져 코스피 장중 값이 '종가'로 찍혔다(실제 그날 +4%대).
 #   장이 아직 열려 있는 시장의 '오늘 봉'은 미완성이라 버린다 — 언제 돌려도 마지막 확정 종가만 쓴다.
 _SESSION = {"KR": ("Asia/Seoul", 15, 35), "US": ("America/New_York", 16, 5)}   # 마감 + 5분(종가 단일가 반영). 2026-11-06: 생성을 마감+10·15분으로 앞당김 — 여유가 15분이면 오늘 봉을 버린다
@@ -151,6 +179,12 @@ def index_facts():
                         out[-1]["gate5w"] = {k: g.get(k) for k in ("on", "gap", "week", "partial", "live_on", "live_gap")}
                 except Exception as e:
                     print("  5주선 게이트 생략:", str(e)[:60])
+                try:
+                    pz = kr_pulse(sym)
+                    if pz:
+                        out[-1]["pulse"] = pz
+                except Exception as e:
+                    print("  오닐 시장 방향 생략:", str(e)[:60])
         except Exception as e:
             out.append(dict(name=name, sym=sym, error=str(e)[:60]))
     return out
@@ -274,6 +308,10 @@ def kr_today_facts(today=None):
     except Exception as e:
         print("  히트맵 생략:", str(e)[:80])
     try:
+        out["breadth_hist"] = breadth_log(today, breadth, out)
+    except Exception as e:
+        print("  시장 폭 기록 생략:", str(e)[:80])
+    try:
         fl = kr_flow_today(today)
         if fl:
             out["flow"] = fl
@@ -317,6 +355,24 @@ def kr_heatmap(big, today):
                  mc=round(float(r["Marcap"]) / 1e12, 2), ret=_r(r["_r"], 1)) for _, r in big.iterrows()]
     rows.sort(key=lambda x: -x["mc"])
     return rows
+
+
+def breadth_log(today, breadth, kr):
+    """results/kr_breadth_log.json 에 오늘 시장 폭(상승·하락·보합·신고가 수)을 덧붙이고 최근 30개를 돌려준다.
+    2026-11-12 시작 — 이전 날짜는 없다(지어내지 않는다). 같은 날짜는 덮어쓴다."""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "kr_breadth_log.json")
+    try:
+        log = json.load(open(p, encoding="utf-8"))
+    except Exception:
+        log = []
+    b = breadth or {}
+    row = dict(date=today, up=b.get("up"), down=b.get("down"), flat=b.get("flat"),
+               new_high=(kr.get("new_high_52w") or {}).get("n"))
+    log = [r for r in log if r.get("date") != today] + [row]
+    log = sorted(log, key=lambda r: r["date"])[-400:]
+    with open(p, "w", encoding="utf-8") as f:
+        json.dump(log, f, ensure_ascii=False, indent=0)
+    return log[-30:]
 
 
 def kr_flow_today(today):
