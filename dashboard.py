@@ -1390,10 +1390,12 @@ try:
     _IS_LAB = _acc_lab.is_owner() or os.environ.get('LAB_OPEN') == '1'
 except Exception:
     _IS_LAB = os.environ.get('LAB_OPEN') == '1'
-_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"] + (["🔬 연구실"] if _IS_LAB else [])
+# 2026-11-12 차니 — 🏛️ 경영실(KPI·로드맵·결정·이슈·회의록·변경 이력) 도 소유자만. 연구실과 같은 판정.
+_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"] + (["🔬 연구실", "🏛️ 경영실"] if _IS_LAB else [])
 _mt = st.tabs(key='main_tab', on_change='rerun', tabs=_MAIN_TABS)
 tab_home, tab4, tab_screen, tab7, tab_pf = _mt[:5]
 tab_lab = _mt[5] if _IS_LAB else None
+tab_gov = _mt[6] if _IS_LAB else None
 if _IS_LAB:
     with tab_lab:
         st.caption("🔬 **연구실 — 소유자만 보입니다.** 검증 중이거나 기각된 연구 · 퀀트 백테스트. 결론이 난 것만 다른 탭으로 옮깁니다.")
@@ -9352,6 +9354,18 @@ with tab_rep, guard('시황 리포트'):
             st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
             st.rerun()
 
+
+
+# ── 🏛️ 경영실 (2026-11-12, 소유자만) — 열려 있을 때만 그린다 ─────────
+if tab_gov is not None:
+    with tab_gov, guard('경영실'):
+        _lazy(tab_gov)
+        import ui_gov as _UG
+        if getattr(_UG, 'VERSION', None) != '2026-11-12a':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
+            import importlib as _il, gov as _G
+            _il.reload(_G); _UG = _il.reload(_UG)
+        import access as _accg
+        _UG.render(st, _accg.email() or 'owner', _accg.uid())
 
 
 # ── 페이지 최하단 고지 — 모든 탭 공통 (2026-10-21 지인 베타 배포 전 필수) ─────────

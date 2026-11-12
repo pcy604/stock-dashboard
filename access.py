@@ -115,12 +115,21 @@ def track(event: str, **props):
 
 def track_session(tab: str | None):
     """세션 첫 렌더 1회 + 탭이 바뀔 때마다 1회. 매 상호작용마다 보내지 않는다(쿼터·잡음)."""
+    # 2026-11-12 경영실 KPI(WAU·기능 사용률)는 우리 DB(usage_events)에서 센다 — PostHog 키 유무와 무관
+    try:
+        import gov as _gov
+    except Exception:
+        _gov = None
     if not st.session_state.get('_trk_started'):
         st.session_state['_trk_started'] = True
         track('session_start')
+        if _gov:
+            _gov.log_usage(uid(), 'session_start', tab or '')
     if tab and st.session_state.get('_trk_tab') != tab:
         st.session_state['_trk_tab'] = tab
         track('tab_view', tab=tab)
+        if _gov:
+            _gov.log_usage(uid(), 'tab_view', tab)
 
 
 def gate(feature: str = '내 포트폴리오') -> bool:
