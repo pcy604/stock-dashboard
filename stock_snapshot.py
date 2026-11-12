@@ -225,7 +225,7 @@ def compute(L: dict, ctx: dict) -> dict:
             if isinstance(cand, str) and cand.strip():
                 story = cand.strip()
                 break
-        cards = [C('유형 (린치 6유형 · v1 규칙)', ty['label'], ty['sub'], 'na'),
+        cards = [C('유형 (린치 6유형 · v1 규칙 — 사이클 여부는 이익률 분포로 자동 판정, 틀릴 수 있음)', ty['label'], ty['sub'], 'na'),
                  C('업종 내 위치', pos_val, pos_sub, pos_tone),
                  C('이 회사는 무엇인가', (story[:90] + '…') if story and len(story) > 90 else (story or '-'),
                    '사업부문·고객은 아래 상세 · 숫자 없는 이야기는 이야기일 뿐(다모다란)', 'na')]

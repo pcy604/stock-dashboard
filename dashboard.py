@@ -5855,8 +5855,11 @@ def _an_axes_pick(A2) -> list:
         except Exception:
             saved = None
         _al = getattr(A2, 'AXIS_ALIAS', {})
-        st.session_state['an_axes'] = [a for a in dict.fromkeys(_al.get(a, a) for a in (saved if isinstance(saved, list) else
+        _ax = [a for a in dict.fromkeys(_al.get(a, a) for a in (saved if isinstance(saved, list) else
                                                    (A2.DEFAULT_AXES_MOBILE if IS_MOBILE else A2.DEFAULT_AXES))) if a in A2.AXES]
+        if isinstance(saved, list) and saved and '정체' not in _ax and not IS_MOBILE:
+            _ax.append('정체')            # 2026-11-13 신설 블록 — 옛 저장값엔 없으니 한 번은 펼쳐 보여준다(끄면 저장됨)
+        st.session_state['an_axes'] = sorted(_ax, key=A2.AXES.index)
 
     def _save():
         v = list(st.session_state.get('an_axes_w') or [])
