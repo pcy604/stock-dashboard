@@ -1,14 +1,14 @@
 {
- "at": "2026-11-11T20:09:10Z",
+ "at": "2026-11-12T02:52:29Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
    "page": "배포 빌드 = main",
    "ok": true,
    "deployed": {
-    "sha": "d1f664972a1c",
-    "ts": 1794415140,
-    "at": "2026-11-11 16:39"
+    "sha": "f4f60c4160e8",
+    "ts": 1794450180,
+    "at": "2026-11-12 02:23"
    },
    "why": "최신 main 과 같다",
    "behind": 0,
@@ -16,13 +16,10 @@
   },
   {
    "page": "🏠 종합",
-   "ok": false,
+   "ok": true,
    "exceptions": 0,
-   "error_words": [
-    "AttributeError",
-    "TypeError"
-   ],
-   "text_len": 3941,
+   "error_words": [],
+   "text_len": 10133,
    "samples": [],
    "finished": true
   },
@@ -31,7 +28,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 7007,
+   "text_len": 6940,
    "samples": [],
    "finished": true
   },
@@ -40,7 +37,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 2154,
+   "text_len": 2087,
    "samples": [],
    "finished": true
   },
@@ -49,7 +46,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 979,
+   "text_len": 912,
    "samples": [],
    "finished": true
   },
@@ -58,7 +55,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 972,
+   "text_len": 905,
    "samples": [],
    "finished": true
   },
@@ -67,7 +64,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 8604,
+   "text_len": 8523,
    "samples": [],
    "finished": true
   },
@@ -76,10 +73,10 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 8093,
+   "text_len": 8026,
    "samples": [],
    "finished": true
   }
  ],
- "ok": false
+ "ok": true
 }
