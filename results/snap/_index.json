@@ -1,0 +1,25 @@
+{
+ "made": "2026-11-13T19:55Z",
+ "ok": [
+  "010170",
+  "228850",
+  "446540",
+  "046890",
+  "356680",
+  "317400",
+  "396300",
+  "092870",
+  "159010",
+  "006110",
+  "078350",
+  "005930",
+  "TSLA"
+ ],
+ "fail": {
+  "092190": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero`",
+  "046970": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero`",
+  "024840": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero`"
+ },
+ "n_target": 16,
+ "secs": 1165
+}

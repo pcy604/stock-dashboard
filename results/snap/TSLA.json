@@ -1,0 +1,276 @@
+{
+ "v": 1,
+ "sym": "TSLA",
+ "market": "US",
+ "asof": "2026-11-13",
+ "name": "Tesla, Inc.",
+ "type": {
+  "label": "경기순환",
+  "sub": "이익률이 자기 분포 안에서 크게 오르내림 — P/E 는 거꾸로 읽는다(최저 P/E = 천장)",
+  "cyclical": true
+ },
+ "blocks": {
+  "수급": {
+   "tone": "bad",
+   "cards": [
+    {
+     "label": "업종 온도 (같은 무리 RS 중앙값 순위)",
+     "value": "Auto Manufacturers · 85/113위",
+     "sub": "무리 RS 중앙 30 · 상위 75% · 6종",
+     "tone": "bad"
+    },
+    {
+     "label": "종목 강도 (RS · 52주 고점)",
+     "value": "RS 32 · 고점 대비 -20.2%",
+     "sub": "52주 고점 $489.88 (2025-12-16, 47주 전) · 종가 기준",
+     "tone": "bad"
+    },
+    {
+     "label": "수급 판정",
+     "value": "업종·종목 모두 약함 — 회피",
+     "sub": "업종 상위 75% · 종목 RS 32 · 거래량 0.7배(5일÷20일)",
+     "tone": "bad"
+    }
+   ],
+   "detail": [],
+   "error": null
+  },
+  "이익 방향": {
+   "tone": "bad",
+   "cards": [
+    {
+     "label": "앞으로 (컨센서스·리비전) — 대표",
+     "value": "내년 EPS +25%",
+     "sub": "추정치 90일 -3.7% · 30일 상향−하향 -10건",
+     "tone": "bad"
+    },
+    {
+     "label": "사이클 위치 (자기 이익률 분포)",
+     "value": "사이클 기업 · 중간 — 하강 국면",
+     "sub": "영업이익률(TTM) 3.3% · 지난 14년 중 54 백분위 · 1년 전 4.7%",
+     "tone": "mid"
+    },
+    {
+     "label": "지금까지 (최근 분기 YoY)",
+     "value": "영업익 -56% · 매출 -0%",
+     "sub": "이익 가속 2024-12-09 · 사이클 기업은 바닥에서 이 숫자가 가장 나쁘다",
+     "tone": "bad"
+    }
+   ],
+   "detail": [],
+   "error": null
+  },
+  "가격": {
+   "tone": "na",
+   "cards": [
+    {
+     "label": "밸류 종합 (참고 — 매수 판정엔 안 씀)",
+     "value": "사이클 기업 — P/E 해석 주의",
+     "sub": "이익 바닥에선 P/E 가 높고 천장에선 낮다(린치). P/B·자기 과거 밴드를 같이 볼 것",
+     "tone": "na"
+    },
+    {
+     "label": "자기 과거 (P/E 밴드)",
+     "value": "480.5배 · 98% 기간보다 비쌈",
+     "sub": "과거 중앙 125.7배 · 사업 구조가 바뀌었으면 과거 비교는 의미가 약하다",
+     "tone": "bad"
+    },
+    {
+     "label": "동종 대비 · 성장 대비",
+     "value": "P/E 480.5배 vs 업종 226.7배",
+     "sub": "PEG 4.63 (1 미만 = 성장 대비 쌈, 린치)",
+     "tone": "bad"
+    }
+   ],
+   "detail": [],
+   "error": null
+  },
+  "정체": {
+   "tone": "na",
+   "cards": [
+    {
+     "label": "유형 (린치 6유형 · v1 규칙 — 사이클 여부는 이익률 분포로 자동 판정, 틀릴 수 있음)",
+     "value": "경기순환",
+     "sub": "이익률이 자기 분포 안에서 크게 오르내림 — P/E 는 거꾸로 읽는다(최저 P/E = 천장)",
+     "tone": "na"
+    },
+    {
+     "label": "업종 내 위치",
+     "value": "Auto Manufacturers · 시총 1/6위",
+     "sub": "RS 3/6위 · 박세익: 산업 1등·과점인가가 첫 질문",
+     "tone": "good"
+    },
+    {
+     "label": "이 회사는 무엇인가",
+     "value": "Tesla, Inc. designs, develops, manufactures, leases, and sells electric vehicles, and ener…",
+     "sub": "사업부문·고객은 아래 상세 · 숫자 없는 이야기는 이야기일 뿐(다모다란)",
+     "tone": "na"
+    }
+   ],
+   "detail": [],
+   "error": null
+  },
+  "깨지는 조건·촉매": {
+   "tone": "bad",
+   "cards": [
+    {
+     "label": "판단이 깨지는 조건",
+     "value": "4개 중 3개 이미 해당",
+     "sub": "RS 70 아래 · 52주 고점 −20% · 컨센서스 하향 전환",
+     "tone": "bad"
+    },
+    {
+     "label": "다음 실적 발표",
+     "value": "2027-01-27",
+     "sub": "D-75",
+     "tone": "na"
+    },
+    {
+     "label": "리스크 점검",
+     "value": "4개 해당",
+     "sub": "청산선 아래(보유 시) · 밸류 부담 · 마진 악화 · 사업 집중",
+     "tone": "bad"
+    }
+   ],
+   "detail": [
+    {
+     "state": "warn",
+     "name": "RS 70 아래 (실전 v1.9 탈락 매도)",
+     "detail": "지금 RS 32"
+    },
+    {
+     "state": "warn",
+     "name": "52주 고점 −20% (실전 손절선 기준은 보유 중 고점)",
+     "detail": "지금 고점 대비 -20.2%"
+    },
+    {
+     "state": "warn",
+     "name": "컨센서스 하향 전환 (이익 방향 악화)",
+     "detail": "지금 하향"
+    },
+    {
+     "state": "ok",
+     "name": "소속 지수 주봉 5주선 이탈 (신규 매수 중지)",
+     "detail": "지금 위"
+    },
+    {
+     "name": "청산선 아래(보유 시)",
+     "state": "warn",
+     "detail": "52주 고점 대비 -20% — 보유 중이면 원칙상 청산선(고점 −20%) 아래"
+    },
+    {
+     "name": "밸류 부담",
+     "state": "warn",
+     "detail": "P/E 480.5배 — 과거 98%의 기간보다 비쌈"
+    },
+    {
+     "name": "적자",
+     "state": "ok",
+     "detail": "최근 4분기 흑자"
+    },
+    {
+     "name": "마진 악화",
+     "state": "warn",
+     "detail": "영업이익률 1년 새 -3.2%p"
+    },
+    {
+     "name": "부채 부담",
+     "state": "ok",
+     "detail": "부채비율(D/E) 18%"
+    },
+    {
+     "name": "추정치 하향",
+     "state": "ok",
+     "detail": "올해 EPS 컨센서스 30일 새 -0.7%"
+    },
+    {
+     "name": "고변동성",
+     "state": "ok",
+     "detail": "연환산 변동성 46%"
+    },
+    {
+     "name": "사업 집중",
+     "state": "warn",
+     "detail": "최대 부문이 매출의 90%"
+    },
+    {
+     "name": "잠재 희석",
+     "state": "na",
+     "detail": "데이터 없음"
+    },
+    {
+     "name": "현재가",
+     "state": "ok",
+     "detail": "391.15"
+    },
+    {
+     "name": "주가 최신",
+     "state": "ok",
+     "detail": "마지막 봉 2026-11-13 (평일 0일 전)"
+    },
+    {
+     "name": "재무 최신",
+     "state": "ok",
+     "detail": "최신 분기 2026-09 (분기 말부터 44일)"
+    },
+    {
+     "name": "PER 교차검증",
+     "state": "ok",
+     "detail": "공시 TTM 480.5x vs yfinance 429.8x (+12%)"
+    },
+    {
+     "name": "매출 교차검증",
+     "state": "ok",
+     "detail": "공시 TTM vs yfinance 차이 +0.0%"
+    },
+    {
+     "name": "시총 정합",
+     "state": "ok",
+     "detail": "시총 vs 주가×주식수 차이 +0.0%"
+    },
+    {
+     "name": "부문 합계 검산",
+     "state": "ok",
+     "detail": "부문 매출 합 vs 연결 매출 +0.0% (XBRL 원본)"
+    },
+    {
+     "name": "컨센서스 표본",
+     "state": "ok",
+     "detail": "애널리스트 40명"
+    }
+   ],
+   "error": null,
+   "expand": false
+  },
+  "원자료": {
+   "tone": "na",
+   "cards": [],
+   "detail": [],
+   "error": null
+  }
+ },
+ "verdict": {
+  "head": "나빠지는 회사, 지금은 시장이 외면",
+  "type_chip": "경기순환",
+  "cards": [
+   {
+    "label": "🌊 수급·관심",
+    "value": "약함",
+    "sub": "지금은 시장이 외면",
+    "tone": "bad"
+   },
+   {
+    "label": "🏭 이익 방향 (앞으로 우선)",
+    "value": "악화",
+    "sub": "나빠지는 회사",
+    "tone": "bad"
+   },
+   {
+    "label": "⚖️ 가격 (참고)",
+    "value": "-",
+    "sub": "사이클 기업·적자면 판정 보류",
+    "tone": "na"
+   }
+  ]
+ }
+}
