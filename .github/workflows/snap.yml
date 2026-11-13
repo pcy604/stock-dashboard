@@ -1,0 +1,45 @@
+# 종목 분석 스냅샷 사전 계산 (2026-11-13, 통폐합 P1) — results/snap/{코드}.json
+#   화면(종목 분석 탭)을 헤드리스로 돌려 stock_snapshot.compute 결과를 저장한다. 봇 /report 는 이 파일을 그리기만 한다.
+#   대상: 실전 보유 ∪ 이번 주 후보 ∪ data/snap_watch.txt(봇 감시). 한국 장 마감 뒤 1회 + 수동.
+name: snap
+on:
+  workflow_dispatch:
+    inputs:
+      codes:
+        description: '추가 코드(공백 구분, 예: 005930 TSLA)'
+        required: false
+        default: ''
+  schedule:
+    - cron: '23 8 * * 1-5'      # 월~금 17:23 KST — kr-flow(17:47)·market-report 보다 앞, 재무·컨센서스 갱신 뒤
+permissions:
+  contents: write
+jobs:
+  snap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      DART_KEY: ${{ secrets.DART_KEY }}
+      GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+      FRED_KEY: ${{ secrets.FRED_KEY }}
+      PYTHONIOENCODING: utf-8
+      SNAP_MAX: '40'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: 사전 계산
+        run: python tools/precompute_snap.py ${{ github.event.inputs.codes }}
+      - name: 커밋 & 푸시
+        if: always()
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add results/snap
+          git diff --staged --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "auto: 종목 스냅샷 $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done

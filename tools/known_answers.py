@@ -577,3 +577,26 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# ───────────────────────── 종목 분석 스냅샷 (2026-11-13, 통폐합 P1) ─────────────────────────
+@check('종목 스냅샷', '사전 계산이 돌았고(4일 이내) 실전 보유 종목 전부에 7블록 스냅샷이 있는가 — 봇 /report 정본')
+def _():
+    if not os.path.exists(os.path.join(BASE, 'results/snap/_index.json')):
+        return True, '아직 첫 실행 전(snap 워크플로) — 파일 생기면 검사 시작'
+    idx = _j('results/snap/_index.json')
+    led = _j('live/ledger.json')
+    held = [c for mk in ('KR', 'US') for c in (((led.get(mk) or {}).get('positions') or {}).keys())]
+    missing, stale = [], []
+    for c in held:
+        p = os.path.join(BASE, 'results/snap', f'{c}.json')
+        if not os.path.exists(p):
+            missing.append(c)
+            continue
+        js = _j(f'results/snap/{c}.json')
+        if _age(js.get('asof')) > 4 or len(js.get('blocks') or {}) < 6 or not (js.get('verdict') or {}).get('head'):
+            stale.append(c)
+    age = _age(str(idx.get('made', ''))[:10])
+    ok = age <= 4 and not missing and not stale and len(idx.get('ok') or []) >= max(1, len(held))
+    return ok, (f"실행 {idx.get('made')} · 성공 {len(idx.get('ok') or [])}/{idx.get('n_target')} · 보유 {len(held)}종 "
+                f"누락 {missing or '없음'} · 낡음/계약위반 {stale or '없음'} · 실패 {list((idx.get('fail') or {}).items())[:3]}")
