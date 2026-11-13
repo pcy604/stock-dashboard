@@ -1,5 +1,5 @@
 {
- "made": "2026-11-13T19:55Z",
+ "made": "2026-11-13T20:32Z",
  "ok": [
   "010170",
   "228850",
@@ -11,15 +11,13 @@
   "092870",
   "159010",
   "006110",
-  "078350",
-  "005930",
-  "TSLA"
+  "078350"
  ],
  "fail": {
-  "092190": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero`",
-  "046970": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero`",
-  "024840": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero`"
+  "092190": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero` / `@ dashboard.py:61 ← dashboard.py:6064 ← stock_extras.py:274`",
+  "046970": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero` / `@ dashboard.py:61 ← dashboard.py:6064 ← stock_extras.py:274`",
+  "024840": "error: **종목 분석** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다. · `ZeroDivisionError: float division by zero` / `@ dashboard.py:61 ← dashboard.py:6064 ← stock_extras.py:274`"
  },
- "n_target": 16,
- "secs": 1165
+ "n_target": 14,
+ "secs": 2095
 }
