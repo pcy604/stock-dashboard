@@ -6,7 +6,7 @@
 봇 /report 는 이 파일만 읽어 그린다(상태 = 대시보드 정본).
 
 대상 = 실전 보유(live/ledger.json) ∪ 이번 주 후보(live/plan_latest.json candidates_top) ∪ 인자로 준 코드 ∪ data/snap_watch.txt(봇 감시 종목, 봇이 커밋).
-사용: python tools/precompute_snap.py [코드 ...]   환경: SNAP_MAX(기본 40) · SNAP_TIMEOUT(초, 기본 240)
+사용: python tools/precompute_snap.py [코드 ...]   환경: SNAP_MAX(기본 40) · SNAP_TIMEOUT(초, 기본 420 — 첫 실행 실측 한국 150~265초/종목)
 출력: results/snap/_index.json {made, ok:[...], fail:{코드: 이유}} — 정답 점검이 읽는다.
 """
 from __future__ import annotations
@@ -64,10 +64,10 @@ def run_one(code: str, timeout: int) -> tuple[bool, str]:
         return False, f'run: {type(e).__name__}: {str(e)[:120]}'
     if at.exception:
         return False, f'exception: {str(at.exception[0])[:120]}'
+    bad = [c.value for c in at.caption if c.value.startswith('`')]      # guard() 가 삼킨 예외 본문(백틱 캡션)
     errs = [e.value for e in at.error]
     if errs:
-        return False, f'error: {errs[0][:120]}'
-    bad = [c.value for c in at.caption if c.value.startswith('`') and ('실패' in c.value)]
+        return False, f'error: {errs[0][:80]} · {" / ".join(b[:160] for b in bad[:2]) or "삼킨 예외 없음"}'
     path = os.path.join(SNAP_DIR, f'{code}.json')
     if not os.path.exists(path):
         return False, '파일 없음 — 종목 화면이 끝까지 안 그려짐' + (f' · {bad[0][:80]}' if bad else '')
@@ -86,7 +86,7 @@ def main():
     os.environ.setdefault('ANALYSIS_LAYOUT', 'v2')
     os.makedirs(SNAP_DIR, exist_ok=True)
     codes = targets(sys.argv[1:])
-    timeout = int(os.environ.get('SNAP_TIMEOUT', '240'))
+    timeout = int(os.environ.get('SNAP_TIMEOUT', '420'))
     print(f'대상 {len(codes)}종: {" ".join(codes)}')
     ok, fail = [], {}
     t0 = time.time()

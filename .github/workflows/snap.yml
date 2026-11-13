@@ -16,7 +16,7 @@ permissions:
 jobs:
   snap:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 150
     env:
       DART_KEY: ${{ secrets.DART_KEY }}
       GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
@@ -42,4 +42,7 @@ jobs:
           git add results/snap
           git diff --staged --quiet && { echo "변경 없음"; exit 0; }
           git commit -m "auto: 종목 스냅샷 $(date -u +%Y-%m-%d)"
+          # 화면을 돌리면 앱이 캐시·데이터 파일을 건드린다 — 첫 실행(11-13)에서 그 변경 때문에 rebase 가 거부돼 푸시 0건.
+          git checkout -- . && git clean -fdq -e results/snap
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
+          echo "::error::푸시 실패" && exit 1
