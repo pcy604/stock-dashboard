@@ -38,7 +38,11 @@ from pandas.io.formats.style import Styler
 GREEN = (22, 163, 74)
 RED = (220, 38, 38)
 A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배경에 먹힌다
-MIN_ROWS_FOR_FILTER = 3          # 2026-11-01 8→3: 정렬(No. 재번호)을 거의 모든 표에서 쓰게
+# 2026-11-13 3→6(+열 5개 이상): 3행·2열짜리 운영 표에까지 '🔎 필터·정렬' 패널이 붙어
+#   정작 표를 덮는 일이 있었다(경영실 기능 사용률). 머리글 클릭 정렬·No. 재번호는 AgGrid 가 하므로
+#   작은 표는 패널 없이도 정렬된다 — 패널은 '걸러낼 것이 실제로 있는 표'에만 붙인다.
+MIN_ROWS_FOR_FILTER = 6
+MIN_COLS_FOR_FILTER = 5
 API_VERSION = 12          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
@@ -1031,7 +1035,9 @@ def install(st):
             seen = st.session_state.setdefault('_tbl_seen', {})
             seen[base] = seen.get(base, -1) + 1
             key = f'{base}#{seen[base]}'
-            use_f = filters if filters is not None else len(df) >= MIN_ROWS_FOR_FILTER
+            use_f = (filters if filters is not None else
+                     (len(df) >= MIN_ROWS_FOR_FILTER and
+                      len([c for c in df.columns if not str(c).startswith('_')]) >= MIN_COLS_FOR_FILTER))
             if use_f and not kw.get('on_select'):
                 _, hide, keep, order = _filter_ui(st, df, key)
                 if order is not None or not keep.all():

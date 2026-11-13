@@ -57,8 +57,8 @@ def _run(a_json, b_json, ixmap_json, mt, mkts):
     agg = []
     for (m, g), G in P.groupby(['market', 'grp'], sort=False):
         q = R.aggregate(G.to_dict('records'))
-        agg.append({'시장': _MK[m], '그룹': g, '종목 수': q['n'], '규칙 배수 중앙(×)': q['mult_med'], '그냥 보유 배수 중앙(×)': q['bh_med'],
-                    '규칙 MDD 중앙(%)': q['mdd_med'] * 100, '그냥 보유 MDD 중앙(%)': q['bh_mdd_med'] * 100,
+        agg.append({'시장': _MK[m], '그룹': g, '종목 수': q['n'], '규칙 배수 중앙(×)': q['mult_med'], '단순 보유 배수 중앙(×)': q['bh_med'],
+                    '규칙 MDD 중앙(%)': q['mdd_med'] * 100, '단순 보유 MDD 중앙(%)': q['bh_mdd_med'] * 100,
                     'MDD 개선(%p)': (q['mdd_med'] - q['bh_mdd_med']) * 100, '거래 수 중앙': q['trades_med'],
                     '종목 게임 보유(%)': q['exposure_med'] * 100, '손실 종목(%)': q['lose'] * 100})
     return pd.DataFrame(agg), P
@@ -68,7 +68,7 @@ def render(mkt_sel: str, tsrc):
     st.caption("**두 게임을 따로 둡니다.** 🅰 종목 게임 = 주도주 필터로 고른 종목을 언제 들고 내리나(손절·사다리·재매수). "
                "🅱 지수 게임 = 종목이 보유 상태일 때 지수(S&P500·나스닥·러셀 / 코스피·코스닥)를 보고 실제로 몇 %를 담나. "
                "**일봉 · 스탑 체결**: 손절은 손절선에, 재매수는 판 가격에(갭이면 시가). 지수 비중은 그날 종가로 정해 다음 날 시가에. 편도 0.3%.")
-    st.warning("⚠️ 승자100은 결과를 보고 고른 표본입니다 — 수익률은 기대 수익이 아닙니다. **대조100(무작위)에서 MDD 가 줄고 덜 잃는지**와 함께 보세요.", icon=None)
+    st.warning("⚠️ 승자100은 결과를 보고 고른 표본입니다 — 수익률은 기대 수익이 아닙니다. **대조100(무작위)에서 MDD 가 줄고 손실이 작은지**와 함께 확인해 주십시오.", icon=None)
     if not os.path.exists(PX):
         st.info("일봉 표본이 아직 없습니다 — GitHub Actions 'research-ratchet' 실행 후 생깁니다.")
         return
@@ -146,19 +146,19 @@ def render(mkt_sel: str, tsrc):
         A, P = _run(json.dumps(a, sort_keys=True), json.dumps(b, sort_keys=True), json.dumps(ixm, sort_keys=True), mt, mkts)
     tsrc('trade_rules.py (화면에서 계산)', path=PX)
     st.dataframe(A, hide_index=True, use_container_width=True, column_config={
-        c: st.column_config.NumberColumn(format='%.2f') for c in ['규칙 배수 중앙(×)', '그냥 보유 배수 중앙(×)']} | {
-        c: st.column_config.NumberColumn(format='%.0f') for c in ['규칙 MDD 중앙(%)', '그냥 보유 MDD 중앙(%)', 'MDD 개선(%p)', '거래 수 중앙', '종목 게임 보유(%)', '손실 종목(%)']})
-    st.caption("MDD 개선(%p) = 규칙 MDD − 그냥 보유 MDD (양수면 낙폭이 줄어든 것).")
+        c: st.column_config.NumberColumn(format='%.2f') for c in ['규칙 배수 중앙(×)', '단순 보유 배수 중앙(×)']} | {
+        c: st.column_config.NumberColumn(format='%.0f') for c in ['규칙 MDD 중앙(%)', '단순 보유 MDD 중앙(%)', 'MDD 개선(%p)', '거래 수 중앙', '종목 게임 보유(%)', '손실 종목(%)']})
+    st.caption("MDD 개선(%p) = 규칙 MDD − 단순 보유 MDD (양수면 낙폭이 줄어든 것).")
 
     # ── ③ 종목별 · 차트 ─────────────────────────────
     st.markdown("##### 🔍 종목별 — 행을 골라 차트로 보기")
     grp = st.segmented_control("그룹", ['승자100', '대조100'], default='승자100', key='tr_grp') or '승자100'
     Q = P[P.grp == grp].sort_values('bh', ascending=False).reset_index(drop=True)
     V = pd.DataFrame({'No.': range(1, len(Q) + 1), '종목': Q.name, '코드': Q.sym, '시장': Q.market.map(_MK),
-                      '규칙(×)': Q.mult, '그냥 보유(×)': Q.bh, '규칙 MDD(%)': Q.mdd * 100, '보유 MDD(%)': Q.bh_mdd * 100, '거래(회)': Q.n_trades})
+                      '규칙(×)': Q.mult, '단순 보유(×)': Q.bh, '규칙 MDD(%)': Q.mdd * 100, '보유 MDD(%)': Q.bh_mdd * 100, '거래(회)': Q.n_trades})
     tsrc('trade_rules.py (화면에서 계산)', path=PX)
     ev = st.dataframe(V, hide_index=True, use_container_width=True, on_select='rerun', selection_mode='single-row', key='tr_tbl',
-                      column_config={c: st.column_config.NumberColumn(format='%.2f') for c in ['규칙(×)', '그냥 보유(×)']}
+                      column_config={c: st.column_config.NumberColumn(format='%.2f') for c in ['규칙(×)', '단순 보유(×)']}
                       | {c: st.column_config.NumberColumn(format='%.0f') for c in ['규칙 MDD(%)', '보유 MDD(%)']})
     try:
         ri = (ev.selection.rows or [0])[0]
@@ -177,5 +177,5 @@ def render(mkt_sel: str, tsrc):
         fig.add_trace(go.Scatter(x=idx[si], y=[t['sell'] for t in sim['trades'] if t['i1'] is not None], mode='markers', name='매도',
                                  marker=dict(symbol='triangle-down', size=9, color='#2453C8')))
         fig.update_layout(height=320, margin=dict(l=8, r=8, t=8, b=8), yaxis=dict(type='log', title=None), showlegend=False)
-        st.markdown(f"**{r['name']} ({r.sym})** — 규칙 ×{r.mult:.2f} · 그냥 보유 ×{r.bh:.2f} · 거래 {r.n_trades}회 · 🔺매수 🔻매도(로그 축)")
+        st.markdown(f"**{r['name']} ({r.sym})** — 규칙 ×{r.mult:.2f} · 단순 보유 ×{r.bh:.2f} · 거래 {r.n_trades}회 · 🔺매수 🔻매도(로그 축)")
         st.plotly_chart(fig, use_container_width=True)

@@ -80,15 +80,15 @@ def flow_quadrant(group_pct: float | None, stock_rs: float | None, top_pct: floa
     s = stock_rs >= rs_strong
     if group_pct is None or pd.isna(group_pct):
         return {'label': '종목 강함 · 업종 미상' if s else '종목 약함 · 업종 미상', 'tone': 'mid' if s else 'bad',
-                'why': '업종 분류가 없어 업종 강도를 못 잼'}
+                'why': '업종 분류 없음 — 업종 강도 산출 불가'}
     g = group_pct <= top_pct
     if g and s:
         return {'label': '주도 업종의 주도주', 'tone': 'good', 'why': f'업종 상위 {group_pct:.0f}% · 종목 RS {stock_rs:.0f}'}
     if g and not s:
-        return {'label': '업종은 뜨는데 이 종목은 소외', 'tone': 'mid', 'why': f'업종 상위 {group_pct:.0f}% · 종목 RS {stock_rs:.0f}'}
+        return {'label': '업종 강세 · 종목 소외', 'tone': 'mid', 'why': f'업종 상위 {group_pct:.0f}% · 종목 RS {stock_rs:.0f}'}
     if s:
-        return {'label': '혼자 강함 — 업종 지원 없음', 'tone': 'mid', 'why': f'업종 상위 {group_pct:.0f}% · 종목 RS {stock_rs:.0f}'}
-    return {'label': '업종·종목 모두 약함 — 회피', 'tone': 'bad', 'why': f'업종 상위 {group_pct:.0f}% · 종목 RS {stock_rs:.0f}'}
+        return {'label': '종목 단독 강세 — 업종 수급 뒷받침 없음', 'tone': 'mid', 'why': f'업종 상위 {group_pct:.0f}% · 종목 RS {stock_rs:.0f}'}
+    return {'label': '업종·종목 동반 약세', 'tone': 'bad', 'why': f'업종 상위 {group_pct:.0f}% · 종목 RS {stock_rs:.0f}'}
 
 
 def volume_ratio(vol: pd.Series | None, a: int = 5, b: int = 20) -> float | None:
@@ -181,7 +181,7 @@ def forward_kr(hist_rows: list[dict] | pd.DataFrame | None) -> dict:
         else:
             tone = 'mid'
     val = f"{gl} {growth:+.0f}%" if growth is not None else '성장률 -'
-    sub = (f"추정치 {span}일 {rev:+.1f}%" if rev is not None and span else "추정치 변화 이력 쌓는 중(2026-10~)")
+    sub = (f"추정치 {span}일 {rev:+.1f}%" if rev is not None and span else "추정치 변화 이력 축적 중(2026-10~)")
     return {'tone': tone, 'value': val, 'sub': sub, 'growth': growth, 'rev': rev, 'span': span}
 
 
@@ -234,18 +234,18 @@ def valuation_reading(band_pct: float | None, peg: float | None, per_vs_peer: fl
     사이클 기업은 P/E 해석을 뒤집지 않고 '판정 보류 + P/B·정상화 이익을 보라'고 말한다(바닥에선 P/E 가 높게 나온다)."""
     if cyclical:
         return {'tone': 'na', 'value': '사이클 기업 — P/E 해석 주의',
-                'sub': '이익 바닥에선 P/E 가 높고 천장에선 낮다(린치). P/B·자기 과거 밴드를 같이 볼 것'}
+                'sub': '이익 바닥에서 P/E 가 높고 천장에서 낮게 형성(피터 린치) — P/B·자기 과거 밴드 병행 확인'}
     votes, why = [], []
     if peg is not None and peg > 0:
         votes.append(1 if peg < 1 else (-1 if peg > 2 else 0)); why.append(f"PEG {peg:.2f}")
     if band_pct is not None:
-        votes.append(1 if band_pct <= 25 else (-1 if band_pct >= 75 else 0)); why.append(f"자기 과거 {band_pct:.0f}% 기간보다 비쌈")
+        votes.append(1 if band_pct <= 25 else (-1 if band_pct >= 75 else 0)); why.append(f"자기 과거 {band_pct:.0f}% 구간 상회")
     if per_vs_peer is not None and per_vs_peer > 0:
         votes.append(1 if per_vs_peer <= 0.8 else (-1 if per_vs_peer >= 1.25 else 0)); why.append(f"업종 대비 {per_vs_peer:.2f}배")
     if not votes:
-        return {'tone': 'na', 'value': '판정 불가', 'sub': '적자 또는 멀티플 데이터 없음 — P/S 를 볼 것'}
+        return {'tone': 'na', 'value': '판정 불가', 'sub': '적자 또는 멀티플 데이터 없음 — P/S 참고'}
     s = sum(votes)
-    lab, tone = ('성장 대비 쌈', 'good') if s >= 1 else (('비쌈', 'bad') if s <= -1 else ('보통', 'mid'))
+    lab, tone = ('성장 대비 저평가', 'good') if s >= 1 else (('고평가', 'bad') if s <= -1 else ('중립', 'mid'))
     return {'tone': tone, 'value': lab, 'sub': ' · '.join(why)}
 
 

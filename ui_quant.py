@@ -273,7 +273,7 @@ def _nl_box(m):
                         st.session_state['qb_nl_n'] = used + 1
                     except Exception as e:
                         st.error(f'변환 실패: {type(e).__name__}: {str(e)[:200]}')
-        c2.caption(f'이번 접속에서 {used}/15회 사용 · AI 는 설정만 만들고, 실행은 아래 같은 엔진이 합니다. 결과 설정은 반드시 눈으로 확인하세요.')
+        c2.caption(f'이번 접속에서 {used}/15회 사용 · AI 는 설정만 만들고, 실행은 아래 같은 엔진이 합니다. 생성된 설정은 반드시 직접 확인해 주십시오.')
         nl = st.session_state.get('qb_nl')
         if nl and nl.get('m') == m:
             if nl['dropped']:
@@ -393,7 +393,7 @@ def _filter_bar(m, base, pname):
         orig.setdefault(f['field'].split(':')[0], f)
     K = f"qb_fb|{pname}|{m}"
     with st.container(border=True):
-        st.markdown("**📐 종목 필터** — 쓸 지표를 고르고 범위를 넣으세요. 비운 칸 = 제한 없음")
+        st.markdown("**📐 종목 필터** — 사용할 지표를 선택하고 범위를 입력합니다. 빈 칸은 제한 없음")
         grp = {g: [bk[b] for b in bs if b in bk] for g, bs in _GROUPS.items()}
         _seen = {k for v in grp.values() for k in v} | {bk.get(_MONTH)}
         grp['📈 시장 (가격·수급·업종)'] += [k for k in keys if k not in _seen]
@@ -597,7 +597,7 @@ def _verdict(S, bmn):
     if dc >= 0 and dm >= 0:
         v = f"✅ **{bmn}보다 수익도 높고 낙폭도 작았습니다**"
     elif dc >= 0:
-        v = f"⚠️ **수익은 {bmn}보다 높지만 낙폭이 더 컸습니다** — 버틸 수 있는 하락인지 보세요"
+        v = f"⚠️ **수익은 {bmn}보다 높지만 낙폭이 더 컸습니다** — 감내 가능한 낙폭인지 확인이 필요합니다"
     elif dm >= 0:
         v = f"🛡️ **수익은 {bmn}보다 낮지만 낙폭은 작았습니다**"
     else:
@@ -772,7 +772,7 @@ def render(mkt_sel: str, tsrc):
         return
     S, eq, bm, T, Hd = r['stats'], r['equity'], r['bench'], r['trades'], r['holdings']
     if not S:
-        st.info('결과가 없습니다 — 시작일·필터를 확인하세요.')
+        st.info('결과가 없습니다 — 시작일·필터를 확인해 주십시오.')
         return
 
     # ── 결과 ──
@@ -804,7 +804,7 @@ def render(mkt_sel: str, tsrc):
         _holdings(Hd, eq, tsrc)
     with st.expander('🧾 명세 보기 (복사해 두면 고급 → 명세 붙여넣기로 되살림)'):
         st.code(json.dumps(spec, ensure_ascii=False), language='json')
-    st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 숫자가 부풀려집니다 — 다른 시작 연도·이웃 값에서도 비슷한지 확인하세요.')
+    st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 숫자가 부풀려집니다 — 다른 시작 연도·인접 값에서도 결과가 유지되는지 확인해 주십시오.')
 
 
 def _monthly_frame(eq):

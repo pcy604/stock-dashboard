@@ -16,7 +16,7 @@ import pandas as pd
 
 import gov
 
-VERSION = '2026-11-12b'
+VERSION = '2026-11-13a'
 ROOT = Path(__file__).resolve().parent
 
 
@@ -142,6 +142,80 @@ def _ok(v, meta):
     return v >= t if meta.get('better', 'up') == 'up' else v <= t
 
 
+# ── 처리 대기 큐 ───────────────────────────────────────────────────────────
+def _d(v):
+    try:
+        return _dt.date.fromisoformat(str(v)[:10])
+    except Exception:
+        return None
+
+
+def _queue(kpis: list[dict], cur: dict, items: list[dict], today: _dt.date) -> list[tuple]:
+    """지금 쳐낼 것을 위에서부터 한 줄씩. 반환 = ui_home.steps 형식 (라벨, 톤, 본문, 보조).
+
+    순서는 경영 상식 그대로다. ① 돈과 사고를 먼저 막고 ② 기한이 지난 약속을 치우고
+    ③ 남이 기다리는 미결(결정)을 비우고 ④ 마지막에 기록을 남긴다.
+    건수만 세지 않고 '가장 급한 한 건'을 같이 적는다 — 열고 나서 또 고르지 않게.
+    """
+    by = {k: [i for i in items if i['kind'] == k] for k in ('roadmap', 'decision', 'issue', 'meeting')}
+    q = []
+
+    # ① 사고 — 운영이 멈추거나 돈이 새는 것
+    acc = [i for i in by['issue'] if (i.get('meta') or {}).get('type') == '사고' and i['status'] != '종결']
+    if acc:
+        q.append(('사고 대응', 'r', f"종결 안 된 사고 {len(acc)}건 — 가장 오래된 것: {acc[0]['title']}",
+                  '🚨 이슈 탭 · 원인과 재발 방지를 적고 종결로 바꿉니다'))
+
+    # ② 회사 KPI 미달 — 이사회가 보는 숫자
+    miss = [k for k in kpis if (k.get('meta') or {}).get('tier') == '회사'
+            and _ok(cur.get(k['meta']['key'], {}).get('value'), k['meta']) is False]
+    if miss:
+        q.append(('회사 KPI 미달', 'r', ' · '.join(k['title'] for k in miss),
+                  '📊 스코어카드 · 미달 원인을 이슈로 열거나 목표를 고칩니다'))
+
+    # ③ 기한 — 지난 것부터, 그다음 일주일 안
+    late = sorted([i for i in by['roadmap'] if i['status'] in ('예정', '진행') and (_d(i.get('due')) or today + _dt.timedelta(999)) < today],
+                  key=lambda i: _d(i['due']))
+    soon = sorted([i for i in by['roadmap'] if i['status'] in ('예정', '진행')
+                   and today <= (_d(i.get('due')) or today + _dt.timedelta(999)) <= today + _dt.timedelta(7)],
+                  key=lambda i: _d(i['due']))
+    if late:
+        q.append(('기한 초과', 'r', f"로드맵 {len(late)}건 — {late[0]['title']} ({(today - _d(late[0]['due'])).days}일 지남)",
+                  '🗺️ 로드맵 탭 · 기한을 다시 잡거나 보류로 내립니다'))
+    if soon:
+        q.append(('이번 주 기한', 'y', f"로드맵 {len(soon)}건 — {soon[0]['title']} (D-{(_d(soon[0]['due']) - today).days})",
+                  '🗺️ 로드맵 탭 · 진행률을 올립니다'))
+
+    # ④ 미결 — 결정이 안 나서 아래가 멈춰 있는 것
+    prop = sorted([i for i in by['decision'] if i['status'] == '제안'], key=lambda i: str(i.get('updated_at')))
+    if prop:
+        oldest = _d(prop[0].get('updated_at'))
+        age = f" · {(today - oldest).days}일째" if oldest else ''
+        q.append(('결정 대기', 'y', f"{len(prop)}건 — {prop[0]['title']}{age}",
+                  '⚖️ 결정 로그 탭 · 승인 또는 기각으로 닫습니다'))
+
+    # ⑤ 조치 중인 이슈 — 사고는 아니지만 열려 있는 것
+    opn = [i for i in by['issue'] if i['status'] in ('열림', '조치 중') and (i.get('meta') or {}).get('type') != '사고']
+    if opn:
+        q.append(('열린 이슈', 'y', f"{len(opn)}건 — {opn[0]['title']}", '🚨 이슈 탭'))
+
+    # ⑥ 기록 — 주간 리듬을 끊기지 않게
+    done_mt = [i for i in by['meeting'] if i['status'] == '예정' and (_d(i.get('due')) or today) < today]
+    if done_mt:
+        q.append(('회의록 미작성', 'y', f"지난 회의 {len(done_mt)}건 — {done_mt[0]['title']}",
+                  '📝 회의록 탭 · 결정은 ⚖️ 결정 로그로 옮깁니다'))
+    blank = [k for k in kpis if not (k.get('meta') or {}).get('auto')
+             and cur.get((k.get('meta') or {}).get('key'), {}).get('value') is None]
+    if blank:
+        q.append(('이번 주 값 입력', 'k', f"손 입력 KPI {len(blank)}개 비어 있음 — {', '.join(k['title'] for k in blank[:3])}"
+                  + ('…' if len(blank) > 3 else ''), "📊 스코어카드 · '이번 주 값 입력'을 펼쳐 넣습니다"))
+
+    if not q:
+        q.append(('처리 대기 없음', 'g', '기한 초과·미결·사고가 없습니다',
+                  '다음 주간 리뷰까지 🗺️ 로드맵 진행률만 올리면 됩니다'))
+    return [(f'{n}. {lab}', t, body, sub) for n, (lab, t, body, sub) in enumerate(q, 1)]
+
+
 # ── 화면 ──────────────────────────────────────────────────────────────────
 def render(st, actor: str, owner_uid: str):
     st.caption("🏛️ **경영실 — 소유자만 보입니다.** 여기서 고친 모든 내용은 🕘 변경 이력에 전/후 그대로 남습니다(지울 수 없음). "
@@ -156,15 +230,33 @@ def render(st, actor: str, owner_uid: str):
     except Exception as e:
         st.error(f"경영실 표가 아직 없습니다 — docs/sql/gov.sql 을 Supabase 에서 실행해야 합니다. (`{str(e)[:120]}`)")
         return
+    # 2026-11-13: 탭 7개를 열어놓고 '뭐부터 손대야 하나'가 안 보인다는 지적 → 들어오자마자 순서가 정해진 큐를 먼저 보여준다.
+    try:
+        import ui_home as _UH                      # 늦은 임포트: ui_gov 는 streamlit 없이도 임포트돼야 한다(테스트 계약)
+        _items = gov.items()
+        _kpis = [k for k in _items if k['kind'] == 'kpi' and k.get('status') == '활성']
+        _wk = gov.week_of()
+        _cur = {r['key']: r for r in gov.kpi_values(2) if r['week'] == _wk.isoformat()}
+        _today = (_dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(hours=9)).date()
+        st.markdown('#### 지금 쳐낼 것 — 위에서부터 하나씩')
+        _UH.steps(_queue(_kpis, _cur, _items, _today))
+        st.caption('순서 기준: ① 사고·회사 KPI 미달 → ② 기한 → ③ 미결 → ④ 기록. '
+                   '한 건을 닫으면 이 목록에서 사라집니다. 아래 탭은 그 건을 실제로 고치는 곳입니다.')
+    except Exception as e:
+        st.caption(f'`처리 대기 큐 계산 실패: {str(e)[:120]}`')
+
+    st.markdown('---')
     tabs = st.tabs(['📊 스코어카드', '🗺️ 로드맵', '⚖️ 결정 로그', '🚨 이슈', '📝 회의록', '🕘 변경 이력', '⚙️ KPI 정의'])
     with tabs[0]:
         _scorecard(st, actor, owner_uid)
     for t, kind in zip(tabs[1:5], ['roadmap', 'decision', 'issue', 'meeting']):
         with t:
+            st.caption(_GUIDE[kind])
             _items(st, kind, actor)
     with tabs[5]:
         _history(st)
     with tabs[6]:
+        st.caption(_GUIDE['kpi'])
         _items(st, 'kpi', actor)
 
 
@@ -238,18 +330,36 @@ def _scorecard(st, actor, owner_uid):
                 st.success('저장했습니다 — 변경 이력에 남았습니다'); st.rerun()
 
     with st.expander('📈 기능 사용률 — 탭별 최근 28일 (대시보드 방문 기록, 소유자 제외)'):
+        # 2026-11-13: 표는 비었는데 '🔎 필터·정렬' 패널만 떠서 화면을 덮었다 → filters=False,
+        #   그리고 0건일 때 '기록이 없다'로 끝내지 않고 분모(방문자 수)를 같이 적는다.
         try:
-            ev = [e for e in gov.usage(28) if e['event'] == 'tab_view' and e['uid'] != owner_uid]
+            raw = gov.usage(28)
+            ev = [e for e in raw if e['event'] == 'tab_view' and e['uid'] != owner_uid]
+            visitors = len({e['uid'] for e in raw if e['uid'] != owner_uid})
             if ev:
                 u = pd.DataFrame(ev)
-                t = u.groupby('tab').agg(**{'열람(회)': ('uid', 'size'), '사람(명)': ('uid', 'nunique')}).reset_index()
-                st.dataframe(t.rename(columns={'tab': '탭'}).sort_values('열람(회)', ascending=False), hide_index=True,
+                t = (u.groupby('tab').agg(**{'열람(회)': ('uid', 'size'), '사람(명)': ('uid', 'nunique')})
+                     .reset_index().rename(columns={'tab': '탭'}).sort_values('열람(회)', ascending=False))
+                t['비중(%)'] = (t['열람(회)'] / t['열람(회)'].sum() * 100).round(1)
+                st.caption(f"28일간 소유자 외 방문자 {visitors}명 · 탭 열람 {len(ev):,}회 — 아무도 안 여는 탭은 없애거나 앞으로 당깁니다.")
+                st.dataframe(t, hide_index=True, filters=False,
                              src='usage_events', asof=_dt.date.today().isoformat())
+            elif visitors:
+                st.caption(f'방문자 {visitors}명은 있으나 탭 열람 기록이 없습니다 — 기록 코드(access.track)를 확인해야 합니다.')
             else:
-                st.caption('아직 기록이 없습니다 — 2026-11-12 부터 쌓입니다.')
+                st.caption('소유자 외 방문자가 아직 없습니다. 기록은 2026-11-12 부터 쌓입니다 — 사람이 들어와야 숫자가 생깁니다.')
         except Exception as e:
             st.caption(f'`사용 기록 읽기 실패: {str(e)[:100]}`')
 
+
+# 탭마다 '여기에 무엇을 넣는 곳인가'를 한 줄로. 쓰는 사람이 나 혼자라도 석 달 뒤의 나는 남이다.
+_GUIDE = {
+    'roadmap': '무엇을 언제까지 만들 것인가. 기한과 진행률이 있는 일만 넣습니다 — 아이디어는 결정 로그에 제안으로 올립니다.',
+    'decision': '되돌리기 어려운 선택과 그 근거. 제안 → 승인·기각으로 닫고, 승인된 것만 로드맵으로 내려보냅니다.',
+    'issue': '지금 잘못돼 있는 것. 종류를 사고로 두면 스코어카드 운영 사고·무사고 연속 주에 자동 반영됩니다.',
+    'meeting': '주간·월간 리뷰에서 오간 말. 여기서 나온 결정은 반드시 결정 로그에도 남깁니다.',
+    'kpi': '무엇을 숫자로 볼 것인가. 자동 KPI 는 화면을 열 때 계산되고, 수동 KPI 는 스코어카드에서 손으로 넣습니다.',
+}
 
 _LABELS = {'title': '제목', 'status': '상태', 'dept': '부서', 'owner': '담당', 'period': '기간·종류',
            'due': '기한', 'progress': '진행률(%)', 'updated_at': '마지막 수정', 'updated_by': '수정자'}

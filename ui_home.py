@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-12j'
+VERSION = '2026-11-13a'
 
 CSS = """
 <style>
@@ -285,7 +285,7 @@ def flow_box(fl: dict) -> str:
     except Exception:
         pass
     tag = '오늘 잠정' if td else '최근 거래일'
-    return (f"<div class='hm-box'><h5>수급 — 누가 사고 파나 <span style='font-weight:500;color:var(--ink-3);font-size:11.5px'>"
+    return (f"<div class='hm-box'><h5>수급 — 투자자별 매매 <span style='font-weight:500;color:var(--ink-3);font-size:11.5px'>"
             f"({tag} · {_e(when)})</span></h5>{''.join(lines) or '<div class=hm-kv>수급 자료 없음</div>'}{stale}</div>")
 
 
@@ -319,14 +319,19 @@ def account(led: dict, plan: dict, sectors: dict | None = None) -> dict:
             mism.append(f"{p.get('name') or h.get('name')} 원장 {float(p.get('shares') or 0):g}주 · 토스 {sh:g}주")
         ev += (px or avg or 0) * sh
         cost += (avg or 0) * sh
-        peak = max(x for x in (p.get('peak'), px) if x) if (p.get('peak') or px) else None
-        stop = p.get('stop')
+        # 고점은 **원장값(보유 중 최고 종가)** 그대로 쓴다. 2026-11-13: 여기서 현재가와 max 를 씌우는 바람에
+        # 장중 신고가 종목은 고점만 올라가고 손절가(원장)는 그대로라 '손절 여유'가 규칙(-20%)과 어긋나 보였다.
+        peak, stop = p.get('peak'), p.get('stop')
+        mval = (px or avg or 0) * sh                       # 평가액
+        pnl = (px - avg) * sh if (px is not None and avg is not None) else None
         sd = (sectors or {}).get(code) or {}
         rows.append(dict(종목=p.get('name') or h.get('name'), 코드=code, 업종=sd.get('upjong'), **{
-            '수량(주)': sh, '평단(원)': avg, '현재가(원)': px,
+            '수량(주)': sh, '평단(원)': avg, '현재가(원)': px, '평가액(원)': mval, '평가손익(원)': pnl,
             '수익률(%)': (px / avg - 1) * 100 if px and avg else None,
             '보유 고점(원)': peak, '손절가(원)': stop,
-            '손절 여유(%)': (px / stop - 1) * 100 if px and stop else None,
+            # 손절 여유 = **지금 가격에서 손절가까지 남은 하락폭.** 고점에 있을 때 정확히 20.0 이 된다.
+            # (옛 식 px/stop-1 은 분모가 손절가라 같은 상태에서 25% 로 나왔다 — 2026-11-13 정정)
+            '손절 여유(%)': (1 - stop / px) * 100 if px and stop else None,
             '불타기': p.get('adds') or 0, '매수일': p.get('opened')}))
     tot = ev + cash
     # 업종 쏠림 — 평가액 기준 업종 비중 + 2종 이상 겹치는 테마(같이 빠질 위험)
@@ -363,7 +368,8 @@ def account_cards(a: dict, kospi_since: float | None, since: str):
          card('손익(입금 대비)', '-' if a['pnl'] is None else f"{a['pnl']:+,.0f}원",
               '-' if a['pnl_pct'] is None else f"{a['pnl_pct']:+.2f}%" + (f" · 코스피 {kospi_since:+.2f}%" if kospi_since is not None else ''),
               'z' if not a['pnl'] else ('p' if a['pnl'] > 0 else 'n')),
-         card('보유', f"{a['n']}종", f"평가 {a['ev']:,.0f}원"),
+         card('보유', f"{a['n']}종", f"평가 {a['ev']:,.0f}원 · 평가손익 {a['unreal']:+,.0f}원",
+              'z' if not a['unreal'] else ('p' if a['unreal'] > 0 else 'n')),
          card('현금', f"{a['cash']:,.0f}원", '-' if a['cash_pct'] is None else f"비중 {a['cash_pct']:.1f}%"),
          card('손절선 5% 이내', f"{len(a['near'])}종", ' · '.join(r['종목'] for r in a['near'][:3]) or '없음',
               'n' if a['near'] else 'z'),

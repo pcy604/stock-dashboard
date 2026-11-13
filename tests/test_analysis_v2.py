@@ -20,8 +20,8 @@ def test_group_heat_and_quadrant():
     gh = A.group_heat(base, {'hot': ['a', 'b', 'c'], 'cold': ['d', 'e', 'f'], 'tiny': ['g']}, market='KR')
     assert list(gh['group']) == ['hot', 'cold']          # tiny(1종)는 빠진다
     assert A.flow_quadrant(10, 90)['tone'] == 'good'
-    assert A.flow_quadrant(10, 30)['label'].startswith('업종은 뜨는데')
-    assert A.flow_quadrant(80, 90)['label'].startswith('혼자')
+    assert A.flow_quadrant(10, 30)['label'].startswith('업종 강세')
+    assert A.flow_quadrant(80, 90)['label'].startswith('종목 단독 강세')
     assert A.flow_quadrant(80, 10)['tone'] == 'bad'
     assert A.flow_quadrant(10, None)['tone'] == 'na'
 
@@ -38,7 +38,7 @@ def test_forward_us_upgrade_vs_downgrade():
 
 def test_forward_kr_short_history_is_honest():
     f = A.forward_kr([{'date': '2026-11-01', 'op_0y': 100, 'op_1y': 150}])
-    assert f['growth'] == 50 and f['rev'] is None and '쌓는 중' in f['sub']
+    assert f['growth'] == 50 and f['rev'] is None and '축적 중' in f['sub']
     f2 = A.forward_kr([{'date': '2026-10-01', 'op_0y': 100, 'op_1y': 150}, {'date': '2026-11-01', 'op_0y': 100, 'op_1y': 120}])
     assert f2['rev'] < 0
 

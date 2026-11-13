@@ -869,7 +869,7 @@ def data_stamp(path: str, prefix: str = '데이터 기준') -> str:
             base = f"{prefix} **{r['date']}** ({age}) · 갱신 주기 {r['cycle']}"
             if r['state'] != 'ok':
                 return (f"🔴 **갱신 정지** — {base}. 허용 {r['max_age']}일을 넘겼습니다. "
-                        f"이 화면 숫자는 그날 기준이니 최신 시세로 다시 확인하세요.")
+                        f"이 화면 숫자는 그날 기준이니 최신 시세로 다시 확인해 주십시오.")
             return base
     return ''
 
@@ -1218,7 +1218,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-12j'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-13a'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -1666,7 +1666,7 @@ with t_core, guard('주도주 교집합'):
     if _GMKT == 'US':
         st.info("v1.9 는 한국 전용입니다(2026-11-04 차니 결정 — 미국 슬리브 중단). 같은 규칙의 미국판은 퀀트 백테스트에서 S&P500(배당 포함)에 못 미쳤습니다.")
     elif _CMB.empty:
-        st.warning("기간 수익률 데이터 없음 — returns.json 갱신(weekly-profile) 후 다시 열어 주세요.")
+        st.warning("기간 수익률 데이터 없음 — returns.json 갱신(weekly-profile) 후 다시 열어 주십시오.")
     else:
         _tas = {r['sym'] for r in (_taj.get('stocks') or []) if r.get('status') == '흑자전환완료'}
         _trend_ok = {c['sym'] for c in (_pkr.get('candidates_top') or [])} | {c['sym'] for c in (_pkr.get('skipped') or [])
@@ -3279,7 +3279,7 @@ with (t_52 or st.empty()), guard('52주 신고가'):
         st.write("조건에 맞는 종목이 없습니다.")
     st.caption("⚠️ 신고가는 **탐색 출발점**이지 매수 신호가 아닙니다. 상장폐지 종목까지 넣은 12.5년 검증에서 "
                "한국 52주 신고가 돌파 포트폴리오(KR-P1)는 KOSPI에 못 미쳤습니다(CAGR 4.3% vs 9.3%). "
-               "실적이 받쳐주는지(오른쪽 매출·영업익 YoY 열)를 보고 🚀 주도주 → CANSLIM · 🔍 종목 분석으로 이어서 보세요.")
+               "실적이 받쳐주는지(오른쪽 매출·영업익 YoY 열)를 보고 🚀 주도주 → CANSLIM · 🔍 종목 분석 순으로 확인하십시오.")
 
 
 with (t_value or st.empty()), guard('가치 발굴'):
@@ -3358,7 +3358,7 @@ with (t_value or st.empty()), guard('가치 발굴'):
                            f"위치만 보면 안 보이던 것. **컨센리비전**=애널 추정(올해EPS) 4주 변화 "
                            f"({'축적 {}주차 — 방향 판독까지 몇 주 더'.format(len(_REVM)) if _REVM else '스냅샷 축적 시작 — 다음 주부터 방향'}).")
             else:
-                st.info("조건 통과 종목 없음 — 기준을 완화해보세요.")
+                st.info("조건 통과 종목 없음 — 기준을 완화해 주십시오.")
 
 
 
@@ -3482,7 +3482,7 @@ with (tab3 or st.empty()), guard('CANSLIM'):
         df3 = pd.DataFrame(rows3) if rows3 else pd.DataFrame()
 
         if df3.empty:
-            st.warning("조건을 충족하는 종목이 없습니다. 슬라이더를 완화해보세요.")
+            st.warning("조건을 충족하는 종목이 없습니다. 조건을 완화해 주십시오.")
         else:
             df3 = df3.sort_values(['_score', '_rs'], ascending=False).reset_index(drop=True)
             _nk = int((df3['시장'] == 'KR').sum()); _nu = len(df3) - _nk
@@ -3722,7 +3722,7 @@ def _index_compare_chart(closes):
     default = [n for n in ('S&P500', '나스닥', '코스피', '닛케이225', '대만 가권', '비트코인') if n in pool]
     sel = st.multiselect('비교 대상', list(pool), default=default, key='cmp_sel')
     if not sel or start >= end:
-        st.caption("대상을 고르고 시작일이 종료일보다 앞서게 해 주세요.")
+        st.caption("대상을 선택하고 시작일을 종료일보다 앞서게 설정해 주십시오.")
         return
     fx = _mo_fx_closes()
     ccy_of = {n: v[2] for n, v in _mfc.INDEX_COUNTRY.items()}
@@ -3944,7 +3944,7 @@ def _macro_v2_top(_PX, _RG):
         st.caption("200일선 이격이 + 면 그 자산으로 돈이 들어오는 중. 위험자산(주식·구리·비트코인)이 함께 +이고 "
                    "장기채·달러가 − 면 '위험 선호', 반대면 '안전자산 도피'다. 비트코인은 유동성에 가장 먼저 반응하는 자산으로 본다.")
     else:
-        st.info("자산 시세를 받지 못했습니다(Yahoo). 잠시 후 새로고침하세요.")
+        st.info("자산 시세를 받지 못했습니다(Yahoo). 잠시 후 새로고침해 주십시오.")
 
     # 유동성·신용·심리 — st.metric (값 · 변화 · 판정은 help)
     st.markdown("##### 유동성 · 신용 · 심리")
@@ -4450,7 +4450,7 @@ def _macro_scoreboard(h):
     st.markdown("##### 📊 이 탭의 신호로 사고팔았다면 — 시장을 이겼나")
     T = _macro_score_cached(str(h.index[-1]) if h is not None and len(h) else '')
     win = T[T['판정'].astype(str).str.startswith('✅')]
-    st.caption("같은 지수를 ① 그냥 들고 있기 ② 신호가 켜졌을 때만 들고 나머지는 현금. 신호 판정은 그 봉 종가, 체결은 다음 봉, 전환마다 비용 0.1%. "
+    st.caption("같은 지수를 ① 단순 보유 ② 신호가 켜졌을 때만 들고 나머지는 현금. 신호 판정은 그 봉 종가, 체결은 다음 봉, 전환마다 비용 0.1%. "
                "미국 = S&P500 배당 포함 · 현금 = 3개월 국채 / 한국 = 코스피 가격지수 · 현금 이자 0(보수적). "
                f"**수익과 낙폭을 둘 다 이긴 신호: {', '.join(win['시장'] + ' ' + win['전략']) if len(win) else '없음'}.**")
     st.dataframe(T[['시장', '전략', '판정', 'CAGR', 'MDD', '보유 대비 수익(%p)', '보유 대비 낙폭(%p)', 'Sharpe', '노출', '전환', '기간']]
@@ -5722,7 +5722,9 @@ def ai_business_summary(name, text, src='공식 사업설명'):
             "**✅ 체크포인트**: 투자자가 다음 분기에 확인해야 할 지표·이벤트 2~3개\n\n"
             "첫 줄은 반드시 '🎯 한 줄 정의'로 시작하라 — 제목·작성일·대상·보고서 연도 같은 머리말을 쓰지 마라.\n"
             "규칙: 과장·추측 금지, 문서에 있는 사실만. 일반론('경쟁이 치열함' 같은 말) 금지 — "
-            "구체적 이름과 숫자로. 문서에 없는 항목은 '문서에 언급 없음'으로.\n\n"
+            "구체적 이름과 숫자로. 문서에 없는 항목은 '문서에 언급 없음'으로.\n"
+            "문체: 증권사 리포트 개조식 — 명사형·평서형 종결(…임/…함/…이다)로 끝낸다. 대화체('~해요', '~네요', "
+            "'~것 같습니다')와 독자에게 말 거는 문장('~보세요'), 소제목 외 이모지는 쓰지 않는다.\n\n"
             + str(text)[:100000])
         client = genai.Client(api_key=key)   # 임시객체로 쓰면 요청 중 GC로 닫힘("client has been closed")
         import time as _t
@@ -5977,7 +5979,7 @@ def _tab_analysis():
         _cands = st.session_state.get('sym8_cands')
         if _cands is not None:
             if not _cands:
-                st.warning(f"'{sym8}' 와 맞는 종목이 없습니다. 이름 일부나 종목코드로 다시 찾아보세요.")
+                st.warning(f"'{sym8}' 와 맞는 종목이 없습니다. 종목명 일부 또는 종목코드로 다시 검색해 주십시오.")
             else:
                 _cc1, _cc2, _ = st.columns([3.1, 0.9, 4.0])
                 _pick = _cc1.selectbox(f"후보 {len(_cands)}개 (시총 큰 순)", _cands,
@@ -7188,7 +7190,7 @@ def _tab_analysis():
                                        "홀수해/짝수해는 대선·중간선거 주기 같은 격년 패턴 확인용. "
                                        "연간=전년 말 대비(올해는 연초 대비 YTD). ⚠️ 표본 적으면 우연 — 해가 많을수록 믿을 만.")
                         else:
-                            st.info("월별 통계 표본 부족 — 기간을 '3y'나 '5y'로 늘려주세요.")
+                            st.info("월별 통계 표본 부족 — 기간을 '3y' 또는 '5y'로 늘려 주십시오.")
 
                     with _gcdc:
                         st.subheader("⚡ 이동평균 크로스 매매 백테스트")
@@ -7252,11 +7254,11 @@ def _tab_analysis():
                                     '지금': '골든' if r['state'] == 'golden' else '데드'} for r in _cmp]), filters=False)
                             st.caption(f"현재 상태: **{_cur_gc}**{_openmsg}. X일선이 Y일선을 상향 돌파한 날 종가 매수 → "
                                        "다음 하향 이탈 날 종가 매도. ⚠️ 후행지표라 횡보장에서는 잦은 손실(휩쏘). "
-                                       "'보유 대비'가 마이너스면 이 종목에선 크로스 매매가 그냥 들고 있는 것보다 못했다는 뜻. "
+                                       "'보유 대비'가 마이너스면 이 종목에선 크로스 매매가 단순 보유보다 부진했다는 뜻. "
                                        "⚠️ ★ 1등은 **과거 이 종목에서** 1등일 뿐이다 — 5개 중 1등을 고르면 운이 섞인다(과적합). "
                                        "다른 종목·다른 기간에서도 1등인지 봐야 원칙이 된다.")
                         else:
-                            st.info(f"교차 신호 없음 — 검증 기간이 짧거나 MA{_ff}/MA{_ss} 교차가 없었다. 시작일을 앞당겨 보세요.")
+                            st.info(f"교차 신호 없음 — 검증 기간이 짧거나 MA{_ff}/MA{_ss} 교차가 없었습니다. 시작일을 앞당겨 주십시오.")
 
 
                     # 2026-10-21 — '그래서 얼마 샀나/팔았나'가 안 보였다 → 금액 열 + 최근 1년 매수·매도·순매수 합계.
@@ -7600,7 +7602,7 @@ def _tab_analysis():
                                 _bL, _bR = st.columns([1, 2.2], gap='medium')
                                 with _bL:
                                     _stat_grid([('', [(f"현재 {_b['kind']}", f"{_b['now']:.1f}배"),
-                                                      ("과거 대비", f"{_b['rank']:.0f}%의 기간보다 비쌈"),
+                                                      ("과거 대비", f"{_b['rank']:.0f}%의 구간 상회"),
                                                       ("10분위 아래였던 기간", f"{_b['below10']:.0f}%")])], one=True)
                                 with _bR:
                                     if _b['implied']:
@@ -7808,7 +7810,7 @@ def _tab_analysis():
                     if _bm_:
                         _rk = _bm_['rank']
                         _cards.append(_kpi(f"밸류 · {_bm_['kind']}", f"{_bm_['now']:.1f}배",
-                                           f"과거 {_rk:.0f}%의 기간보다 비쌈 · 중앙값 {_bm_['pct'][50]:.1f}배",
+                                           f"과거 {_rk:.0f}%의 구간 상회 · 중앙값 {_bm_['pct'][50]:.1f}배",
                                            'bad' if _rk >= 80 else 'mid' if _rk >= 60 else 'good'))
                     else:
                         _cards.append(_kpi('밸류', '-', '밴드 계산 불가', 'na'))
@@ -7848,7 +7850,7 @@ def _tab_analysis():
                                        'na' if not _chk_ else ('bad' if _nd else 'good')))
                     st.markdown(f'<div class="mo-kpis">{"".join(_cards)}</div>', unsafe_allow_html=True)
                     if _nd:
-                        st.error("데이터 이상이 있습니다 — 아래 숫자 중 일부가 틀렸을 수 있습니다. '근거 보기'에서 무엇이 이상한지 확인하세요.")
+                        st.error("데이터 이상이 있습니다 — 아래 숫자 중 일부가 틀렸을 수 있습니다. '근거 보기'에서 이상 항목을 확인해 주십시오.")
 
                     _ico = {'warn': '⚠️', 'ok': '✅', 'na': '·'}
                     _ord = lambda rs: sorted(rs, key=lambda r: {'warn': 0, 'ok': 1, 'na': 2}[r['state']])
@@ -8329,7 +8331,7 @@ with tab_pf, guard('포트폴리오 가드레일'):
                                 st.warning(f'코드 만들기 실패: {str(_e)[:80]}')
                         _code = st.session_state.get('tg_code') or (_ls.get('code') if _ls['state'] == 'pending' else None)
                         if _code:
-                            st.markdown(f"[👉 텔레그램에서 열기]({_tgl.link_url(_code)}) — 열리면 **시작**을 누르세요. "
+                            st.markdown(f"[👉 텔레그램에서 열기]({_tgl.link_url(_code)}) — 열리면 **시작**을 눌러 주십시오. "
                                         f"안 열리면 봇에 `/link {_code}` 를 보내도 돼요.")
 
         def _pf_load():
@@ -8546,7 +8548,7 @@ with tab_pf, guard('포트폴리오 가드레일'):
         _total_cap = _cap_col.number_input(
             "총자본 (현금 포함, 원)", min_value=0,
             value=int(st.session_state.get('pf_cap', 0)), step=1_000_000, format="%d",
-            help="현금 비중까지 점검하려면 넣으세요. 0이면 보유분만 봅니다.")
+            help="현금 비중까지 점검하려면 입력해 주십시오. 0이면 보유분만 평가합니다.")
 
         st.markdown("**보유 종목** — 행 추가·삭제 가능. "
                     "`종목코드`는 KR이면 6자리(005930), US면 티커(AAPL).")
@@ -8589,7 +8591,7 @@ with tab_pf, guard('포트폴리오 가드레일'):
             r for r in _edited.to_dict('records') if str(r.get('sym') or '').strip()]
 
         if not _live:
-            st.info('보유 종목을 입력하고 **저장 & 평가**를 누르세요. '
+            st.info('보유 종목을 입력하고 **저장 & 평가**를 눌러 주십시오. '
                     '현재가 · 매수 후 최고가 · 신고가 경과주는 자동으로 채웁니다.')
         else:
             _pos, _miss = [], []
@@ -9145,8 +9147,8 @@ def _home_account():
     ])
     if a['rows']:
         _t = pd.DataFrame(a['rows'])
-        if IS_MOBILE:                             # 폰: 11열은 이름이 잘린다 → 판단에 필요한 4열만
-            _t = _t[['종목', '코드', '수익률(%)', '손절 여유(%)']]
+        if IS_MOBILE:                             # 폰: 13열은 이름이 잘린다 → 판단에 필요한 5열만
+            _t = _t[['종목', '코드', '평가손익(원)', '수익률(%)', '손절 여유(%)']]
         else:
             _t = _t.drop(columns=['매수일'])
         _la = max([m for p_ in ((led.get('KR') or {}).get('positions') or {}).values()
@@ -9155,13 +9157,18 @@ def _home_account():
         st.dataframe(_t, filters=False, column_config={
             '평단(원)': st.column_config.NumberColumn(format='localized'),
             '현재가(원)': st.column_config.NumberColumn(format='localized'),
-            '보유 고점(원)': st.column_config.NumberColumn(format='localized'),
-            '손절가(원)': st.column_config.NumberColumn(format='localized'),
+            '평가액(원)': st.column_config.NumberColumn(format='localized', help='현재가 × 수량'),
+            '평가손익(원)': st.column_config.NumberColumn(format='localized', help='(현재가 − 평단) × 수량 · 미실현'),
+            '보유 고점(원)': st.column_config.NumberColumn(format='localized',
+                help='보유 중 최고 **종가**. 장중 신고가는 그날 종가가 확정된 뒤 반영되므로, 현재가가 이 값보다 높을 수 있습니다.'),
+            '손절가(원)': st.column_config.NumberColumn(format='localized', help='보유 고점 × 0.80 — 내려가지 않습니다'),
             '수익률(%)': st.column_config.NumberColumn(format='%+.2f'),
-            '손절 여유(%)': st.column_config.NumberColumn(format='%.1f', help='현재가가 손절가보다 몇 % 위인가 — 0 에 가까울수록 위험(5% 미만은 위 카드에 표시)'),
+            '손절 여유(%)': st.column_config.NumberColumn(format='%.1f',
+                help='지금 가격에서 손절가까지 남은 하락폭. 고점에 있으면 정확히 20.0 이고, 고점에서 밀릴수록 줄어듭니다. '
+                     '장중 신고가 상태에서는 고점(종가)이 아직 갱신되지 않아 20 을 넘습니다. 5 미만은 위 카드에 표시.'),
             '수량(주)': st.column_config.NumberColumn(format='%d'), '불타기': st.column_config.NumberColumn(format='%d')})
-        st.caption("손절가 = 보유 중 고점 −20%(올라가기만 함) · 불타기 = +10%·+20%에서 25%씩 · 성과는 코스피와 같은 기간으로 비교 · "
-                   "11-13까지 오버라이드 주는 성과 판정에서 분리")
+        st.caption("손절가 = 보유 중 고점(종가) −20%, 올라가기만 함 · 손절 여유 = 지금 가격에서 손절가까지 남은 하락폭(고점이면 20.0) · "
+                   "불타기 = +10%·+20%에서 25%씩 · 성과는 코스피와 같은 기간으로 비교 · 11-13까지 오버라이드 주는 성과 판정에서 분리")
 
 
 def _home_todo(V, owner=False):
@@ -9340,7 +9347,7 @@ if tab_gov is not None:
         _lazy(tab_gov)
         _ops_today()
         import ui_gov as _UG
-        if getattr(_UG, 'VERSION', None) != '2026-11-12b':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
+        if getattr(_UG, 'VERSION', None) != '2026-11-13a':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
             import importlib as _il, gov as _G
             _il.reload(_G); _UG = _il.reload(_UG)
         import access as _accg

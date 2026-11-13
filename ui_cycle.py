@@ -40,7 +40,7 @@ def _pick_symbol():
     cands = st.session_state.get('cyc_cands')
     if cands is not None:
         if not cands:
-            st.warning(f"'{q}' 와 맞는 종목이 없습니다. 이름 일부나 종목코드로 다시 찾아보세요.")
+            st.warning(f"'{q}' 와 맞는 종목이 없습니다. 종목명 일부 또는 종목코드로 다시 검색해 주십시오.")
         else:
             pick = st.radio('후보', [c for c, _ in cands], format_func=lambda c: dict(cands)[c],
                             key='cyc_cand_pick', label_visibility='collapsed')
@@ -56,12 +56,12 @@ def render(mkt_sel: str, tsrc):
     st.markdown("#### 🔁 사이클 비교")
     sym = _pick_symbol()
     if not sym:
-        st.info('종목을 검색하세요.')
+        st.info('종목을 검색해 주십시오.')
         return
     m = S.market_of(sym)
     close = C.load_close(sym, m)
     if close is None or len(close) < 10:
-        st.error(f'{sym}({m}) 가격 데이터가 없습니다 — 코드를 확인하세요.')
+        st.error(f'{sym}({m}) 가격 데이터가 없습니다 — 종목코드를 확인해 주십시오.')
         return
     render_for(sym, close, tsrc, src='daily_store (FinanceDataReader 캐시)')
 
@@ -137,7 +137,7 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
     if skipped:
         st.caption(f'⚠️ {skipped}개 구간은 건너뜀 — 시작일이 종료일보다 늦거나 거래일이 2일 미만입니다.')
     if not segs:
-        st.info(f'{int(x)}% 이상 되돌린 꼭짓점이 없습니다 — 기준을 낮추거나 기간을 넓혀 보세요.')
+        st.info(f'{int(x)}% 이상 되돌린 꼭짓점이 없습니다 — 기준을 낮추거나 기간을 넓혀 주십시오.')
         return
 
     # ── 가격 + 구간 색 ──

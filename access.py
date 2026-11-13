@@ -149,7 +149,7 @@ def gate(feature: str = '내 포트폴리오') -> bool:
     if not allowed(e):
         with st.container(border=True):
             st.markdown("#### ⏳ 테스트 초대 대기 중")
-            st.caption(f"`{e}` 계정은 아직 테스트 명단에 없습니다. 운영자에게 이 이메일을 알려주세요.")
+            st.caption(f"`{e}` 계정은 아직 테스트 명단에 없습니다. 운영자에게 이 이메일 주소를 전달해 주십시오.")
             st.button("로그아웃", on_click=st.logout, key='acc_logout_wait')
         track('gate_blocked')
         return False

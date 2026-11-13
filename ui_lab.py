@@ -109,25 +109,25 @@ def render(mkt_sel: str, tsrc):
     A = _agg(D)
 
     # ── 결과 카드 ─────────────────────────────────────
-    st.markdown("##### 결과 — 그냥 보유와 비교")
+    st.markdown("##### 결과 — 단순 보유와 비교")
     for m in mkts:
         w, c = A.get((m, '승자100')), A.get((m, '대조100'))
         if not (w and c):
             continue
         k1, k2, k3, k4 = st.columns(4)
-        k1.metric(f"{_MK[m]} 대박주 — 남긴 수익", f"×{w['mult']:.2f}", f"그냥 보유 ×{w['bh']:.2f}", delta_color='off',
+        k1.metric(f"{_MK[m]} 대박주 — 남긴 수익", f"×{w['mult']:.2f}", f"단순 보유 ×{w['bh']:.2f}", delta_color='off',
                   help='5년 뒤 자산 배수(중앙값). 1 = 본전')
         k2.metric("대박주 상승을 지킨 비율", f"{(w['mult'] - 1) / (w['bh'] - 1) * 100:.0f}%" if w['bh'] > 1 else '-',
-                  help='(전략 배수 − 1) ÷ (그냥 보유 배수 − 1). 100% = 그냥 들고 있던 만큼')
-        k3.metric("평범한 종목 — 결과", f"×{c['mult']:.2f}", f"그냥 보유 ×{c['bh']:.2f}", delta_color='off',
+                  help='(전략 배수 − 1) ÷ (단순 보유 배수 − 1). 100% = 단순 보유와 같은 수준')
+        k3.metric("평범한 종목 — 결과", f"×{c['mult']:.2f}", f"단순 보유 ×{c['bh']:.2f}", delta_color='off',
                   help='무작위 100종에서의 배수(중앙값)')
-        k4.metric("평범한 종목 — 최대 낙폭", f"{c['mdd']:.0f}%", f"{c['mdd'] - c['bh_mdd']:+.0f}%p (그냥 보유 {c['bh_mdd']:.0f}%)",
+        k4.metric("평범한 종목 — 최대 낙폭", f"{c['mdd']:.0f}%", f"{c['mdd'] - c['bh_mdd']:+.0f}%p (단순 보유 {c['bh_mdd']:.0f}%)",
                   help='종목별 최대 낙폭의 중앙값. 화살표가 + 면 낙폭이 줄어든 것')
         good_w = w['bh'] > 1 and (w['mult'] - 1) / (w['bh'] - 1) >= 0.6
         good_c = c['mult'] >= c['bh'] and c['mdd'] - c['bh_mdd'] >= 10
         verdict = ('✅ 둘 다 잘함 — 후보로 기록할 만합니다' if good_w and good_c else
                    '🟡 대박주는 지켰지만 평범한 종목 방어는 약함' if good_w else
-                   '🟡 방어는 됐지만 대박주 상승을 많이 놓침' if good_c else '❌ 둘 다 그냥 보유보다 나쁨')
+                   '🟡 방어는 됐지만 대박주 상승을 많이 놓침' if good_c else '❌ 둘 다 단순 보유보다 나쁨')
         st.caption(f"{_MK[m]} 판정: {verdict} · 거래 횟수(중앙) 대박주 {w['trades']:.0f}회 · 주식을 들고 있던 기간 {w['expo']:.0f}% "
                    "(기준: 대박주 상승 60% 이상 유지 + 평범한 종목 낙폭 10%p 이상 축소)")
 

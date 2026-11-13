@@ -49,7 +49,7 @@ def render(mkt_sel: str, tsrc):
     st.caption("**한 종목**에 '오를수록 손절선(=익절선)을 끌어올리는' 규칙을 걸면 어떻게 되나. 판정은 주봉 종가, 체결은 다음 주 종가, 편도 0.3%. "
                "손절선은 전부 **보유 중 최고 종가 대비**(초기 손절·본전 보장만 진입가 대비).")
     st.warning("⚠️ **승자100은 결과를 보고 고른 표본**입니다 — 이 숫자는 기대 수익이 아닙니다. '오래 쥐는 규칙'은 승자에서 늘 이기므로, "
-               "**대조100(같은 조건 무작위)에서 손실을 얼마나 줄였는지와 함께** 보세요. 둘 다 좋아야 쓸 만한 규칙입니다.", icon=None)
+               "**대조100(같은 조건 무작위)에서 손실을 얼마나 줄였는지와 함께** 확인해 주십시오. 두 조건을 모두 충족해야 유효한 규칙입니다.", icon=None)
     if not os.path.exists(PX):
         st.info("가격 표본이 아직 없습니다 — GitHub Actions 'research-ratchet' 실행 후 생깁니다.")
         return
@@ -121,9 +121,9 @@ def render(mkt_sel: str, tsrc):
     st.dataframe(S, hide_index=True, use_container_width=True, column_config={
         '규칙배수중앙': st.column_config.NumberColumn('규칙 배수 중앙(×)', format='%.2f'),
         '규칙배수기하': st.column_config.NumberColumn('규칙 배수 기하(×)', format='%.2f', help='종목별 배수의 기하평균 — 동일 비중으로 나눠 담았을 때에 가깝다'),
-        '보유배수중앙': st.column_config.NumberColumn('같은 진입·그냥 보유(×)', format='%.2f', help='같은 날 사서 끝까지 들고 있었다면'),
+        '보유배수중앙': st.column_config.NumberColumn('같은 진입·단순 보유(×)', format='%.2f', help='같은 날 사서 끝까지 들고 있었다면'),
         '창전체보유중앙': st.column_config.NumberColumn('창 첫 주부터 보유(×)', format='%.2f'),
-        '보유보다나음': st.column_config.NumberColumn('그냥 보유보다 나은 종목(%)', format='%.0f'),
+        '보유보다나음': st.column_config.NumberColumn('단순 보유보다 나은 종목(%)', format='%.0f'),
         '손실종목': st.column_config.NumberColumn('손실 종목(%)', format='%.0f'),
         '거래수중앙': st.column_config.NumberColumn('거래 수 중앙', format='%.0f'),
         '보유기간': st.column_config.NumberColumn('보유 기간(%)', format='%.0f'),

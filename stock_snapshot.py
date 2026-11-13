@@ -49,17 +49,17 @@ def lynch_type(cyclical: bool | None, rev_yoy: float | None, state: str | None,
     매출 YoY ≥ 20 → 고성장 / 시총 $50B+ 이고 매출 5~20 → 대형우량 / 매출 < 5 → 저성장."""
     st = str(state or '')
     if '흑자전환' in st or '적자' in st:
-        return {'label': '회생(턴어라운드)', 'sub': f"{st} — 린치: 바닥 탈출이 확인될 때 가장 세게 간다", 'cyclical': bool(cyclical)}
+        return {'label': '회생(턴어라운드)', 'sub': f"{st} — 피터 린치 분류: 실적 바닥 탈출이 확인되는 국면의 상승폭이 가장 큼", 'cyclical': bool(cyclical)}
     if cyclical:
-        return {'label': '경기순환', 'sub': '이익률이 자기 분포 안에서 크게 오르내림 — P/E 는 거꾸로 읽는다(최저 P/E = 천장)', 'cyclical': True}
+        return {'label': '경기순환', 'sub': '이익률이 자기 분포 안에서 크게 변동 — P/E 역방향 해석 필요(최저 P/E = 이익 천장)', 'cyclical': True}
     if rev_yoy is None:
         return {'label': '판정 불가', 'sub': '매출 성장률 없음', 'cyclical': False}
     if rev_yoy >= 20:
         return {'label': '고성장', 'sub': f"매출 YoY {rev_yoy:+.0f}% — PEG·성장 지속성이 핵심", 'cyclical': False}
     if rev_yoy < 5:
-        return {'label': '저성장', 'sub': f"매출 YoY {rev_yoy:+.0f}% — 배당·자사주 없이는 재미없다(린치)", 'cyclical': False}
+        return {'label': '저성장', 'sub': f"매출 YoY {rev_yoy:+.0f}% — 배당·자사주 정책이 수익률을 좌우(피터 린치)", 'cyclical': False}
     if mcap_usd is not None and mcap_usd >= 50e9:
-        return {'label': '대형우량', 'sub': f"매출 YoY {rev_yoy:+.0f}% · 시총 ${mcap_usd / 1e9:,.0f}B — 30~50% 먹고 넘기는 종목", 'cyclical': False}
+        return {'label': '대형우량', 'sub': f"매출 YoY {rev_yoy:+.0f}% · 시총 ${mcap_usd / 1e9:,.0f}B — 린치 분류상 30~50% 구간 차익 실현 대상", 'cyclical': False}
     return {'label': '중간 성장', 'sub': f"매출 YoY {rev_yoy:+.0f}% — 고성장·대형우량 사이", 'cyclical': False}
 
 
@@ -80,7 +80,7 @@ def break_conditions(rs: float | None, dd52: float | None, fwd_tone: str | None,
     if not rows:
         return {'value': '-', 'sub': '조건을 잴 데이터 없음', 'tone': 'na', 'rows': rows}
     return {'value': f"{len(rows)}개 중 {len(hit)}개 이미 해당",
-            'sub': ' · '.join(r[0].split(' (')[0] for r in hit) if hit else '아직 해당 없음 — 아래 근거에 지금 거리',
+            'sub': ' · '.join(r[0].split(' (')[0] for r in hit) if hit else '해당 조건 없음 — 조건별 현재 거리는 아래 근거 참조',
             'tone': 'bad' if len(hit) >= 2 else ('mid' if hit else 'good'), 'rows': rows}
 
 
@@ -127,10 +127,10 @@ def compute(L: dict, ctx: dict) -> dict:
         vr = A2.volume_ratio(hist.get('Volume'))
         q = A2.flow_quadrant(gpct, rs)
         cards = [
-            C('업종 온도 (같은 무리 RS 중앙값 순위)',
+            C('업종 온도 (비교군 RS 중앙값 순위)',
               (f"{glabel} · {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위" if len(grow) else (glabel or '업종 미상')),
-              (f"무리 RS 중앙 {grow['med_rs'].iloc[0]:.0f} · 상위 {gpct:.0f}% · {int(grow['n'].iloc[0])}종" if len(grow)
-               else "무리가 5종 미만이거나 분류 없음 — 아래 '비교할 무리'를 넓혀 보세요"),
+              (f"비교군 RS 중앙값 {grow['med_rs'].iloc[0]:.0f} · 상위 {gpct:.0f}% · {int(grow['n'].iloc[0])}종" if len(grow)
+               else "비교군이 5종 미만이거나 분류 없음 — 아래에서 비교군 범위를 넓혀 주십시오"),
               'na' if gpct is None else ('good' if gpct <= 30 else 'bad' if gpct >= 70 else 'mid')),
             C('종목 강도 (RS · 52주 고점)',
               (f"RS {rs:.0f}" if rs is not None else 'RS -') + (f" · 고점 대비 {h['dd']:+.1f}%" if h else ''),
@@ -166,7 +166,7 @@ def compute(L: dict, ctx: dict) -> dict:
                      'bad' if oy is not None and oy < 0 else 'mid')
         cards = [C('앞으로 (컨센서스·리비전) — 대표', fwd['value'], fwd['sub'], fwd['tone']),
                  C('사이클 위치 (자기 이익률 분포)', cyc['value'], cyc['sub'], cyc['tone']),
-                 C('지금까지 (최근 분기 YoY)', past_val, f"{state or '-'} · 사이클 기업은 바닥에서 이 숫자가 가장 나쁘다", past_tone)]
+                 C('지금까지 (최근 분기 YoY)', past_val, f"{state or '-'} · 사이클 기업은 바닥 국면에서 이 수치가 가장 나쁨", past_tone)]
         t = fwd['tone'] if fwd['tone'] != 'na' else (cyc['tone'] if cyc.get('cyclical') else past_tone)
         peak = bool(cyc.get('cyclical') and (cyc.get('pct') or 0) >= 80 and t == 'good')   # 린치: 최대 이익·최저 P/E 에서 사면 반토막
         if peak:
@@ -192,14 +192,14 @@ def compute(L: dict, ctx: dict) -> dict:
         med = next((r['업종중앙'] for r in (pr.get('rows') or []) if r['지표'] == 'PER(배)'), None)
         ratio = (per / med) if (per and med and per > 0 and med > 0) else None
         v = A2.valuation_reading(bm.get('rank'), peg, ratio, cyc.get('cyclical'))
-        cards = [C('밸류 종합 (참고 — 매수 판정엔 안 씀)', v['value'], v['sub'], v['tone']),
+        cards = [C('밸류 종합 (참고 — 매수 판정 미반영)', v['value'], v['sub'], v['tone']),
                  C(f"자기 과거 ({bm.get('kind', 'P/E')} 밴드)",
-                   (f"{bm['now']:.1f}배 · {bm['rank']:.0f}% 기간보다 비쌈" if bm.get('now') is not None and bm.get('rank') is not None else '-'),
-                   (f"과거 중앙 {bm['pct'][50]:.1f}배 · 사업 구조가 바뀌었으면 과거 비교는 의미가 약하다" if bm.get('pct') else '밴드 계산 불가'),
+                   (f"{bm['now']:.1f}배 · {bm['rank']:.0f}% 구간 상회" if bm.get('now') is not None and bm.get('rank') is not None else '-'),
+                   (f"과거 중앙값 {bm['pct'][50]:.1f}배 · 사업 구조 변경 시 과거 비교의 설명력 저하" if bm.get('pct') else '밴드 계산 불가'),
                    'na' if bm.get('rank') is None else ('good' if bm['rank'] <= 25 else 'bad' if bm['rank'] >= 75 else 'mid')),
                  C('동종 대비 · 성장 대비',
                    (f"P/E {per:.1f}배 vs 업종 {med:.1f}배" if per and med else 'P/E -'),
-                   (f"PEG {peg:.2f} (1 미만 = 성장 대비 쌈, 린치)" if peg else 'PEG - (적자·컨센서스 없음)'),
+                   (f"PEG {peg:.2f} — 1 미만은 성장 대비 저평가(피터 린치)" if peg else 'PEG - (적자·컨센서스 없음)'),
                    'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.25 else 'mid'))]
         tone['가격'] = v['tone']
         snap['blocks']['가격'] = {'tone': v['tone'], 'cards': cards, 'detail': [], 'error': None, 'peer_rank': pr}
@@ -215,7 +215,7 @@ def compute(L: dict, ctx: dict) -> dict:
         mc = prr.get('시총') or {}
         rsr = prr.get('RS') or {}
         pos_val = (f"{pr.get('sector')} · 시총 {mc['순위']}/{mc['비교수']}위" if mc.get('순위') else (pr.get('sector') or '업종 미상'))
-        pos_sub = (f"RS {rsr['순위']}/{rsr['비교수']}위 · 박세익: 산업 1등·과점인가가 첫 질문" if rsr.get('순위') else '업종 내 순위 계산 불가')
+        pos_sub = (f"RS {rsr['순위']}/{rsr['비교수']}위 · 산업 내 1위·과점 여부가 1차 점검 항목" if rsr.get('순위') else '업종 내 순위 계산 불가')
         pos_tone = 'na' if not mc.get('순위') else ('good' if mc['순위'] <= 2 else 'mid' if mc['순위'] <= 5 else 'na')
         prof = L.get('_prof') or {}
         seg = L.get('_seg_ai') or {}
@@ -225,10 +225,10 @@ def compute(L: dict, ctx: dict) -> dict:
             if isinstance(cand, str) and cand.strip():
                 story = cand.strip()
                 break
-        cards = [C('유형 (린치 6유형 · v1 규칙 — 사이클 여부는 이익률 분포로 자동 판정, 틀릴 수 있음)', ty['label'], ty['sub'], 'na'),
+        cards = [C('유형 (피터 린치 6유형 · v1 규칙 — 사이클 여부는 이익률 분포로 자동 판정하며 오분류 가능)', ty['label'], ty['sub'], 'na'),
                  C('업종 내 위치', pos_val, pos_sub, pos_tone),
                  C('이 회사는 무엇인가', (story[:90] + '…') if story and len(story) > 90 else (story or '-'),
-                   '사업부문·고객은 아래 상세 · 숫자 없는 이야기는 이야기일 뿐(다모다란)', 'na')]
+                   '사업부문·고객 구성은 아래 상세 · 서사는 숫자로 확인될 때만 근거가 됨(다모다란)', 'na')]
         snap['blocks']['정체'] = {'tone': 'na', 'cards': cards, 'detail': [], 'error': None}
     except Exception as e:
         snap['blocks']['정체'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"}
@@ -274,16 +274,16 @@ def compute(L: dict, ctx: dict) -> dict:
 
     # 결론 (항상) ─────────────────────────────────────────────────────────
     f_t, s_t, p_t = tone.get('이익 방향', 'na'), tone.get('수급', 'na'), tone.get('가격', 'na')
-    fw = {'good': '좋아지는 회사', 'mid': '실적 신호가 엇갈림', 'bad': '나빠지는 회사', 'na': '실적 판단 불가'}[f_t]
+    fw = {'good': '이익 개선 국면', 'mid': '이익 신호 혼조', 'bad': '이익 악화 국면', 'na': '이익 판단 불가'}[f_t]
     if tone.get('_cyc_peak'):
-        fw = '이익은 사이클 천장권(주의)'
-    fl = {'good': '시장이 주목 중', 'mid': '시장 관심은 부분적', 'bad': '지금은 시장이 외면', 'na': '수급 판단 불가'}[s_t]
+        fw = '이익 사이클 천장권 — 해석 주의'
+    fl = {'good': '수급 유입', 'mid': '수급 부분 유입', 'bad': '수급 이탈', 'na': '수급 판단 불가'}[s_t]
     snap['verdict'] = {
         'head': f"{fw}, {fl}",
         'type_chip': snap['type']['label'],
         'cards': [C('🌊 수급·관심', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[s_t], fl, s_t),
                   C('🏭 이익 방향 (앞으로 우선)', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[f_t], fw, f_t),
-                  C('⚖️ 가격 (참고)', {'good': '쌈', 'mid': '보통', 'bad': '비쌈', 'na': '-'}[p_t], '사이클 기업·적자면 판정 보류', p_t)],
+                  C('⚖️ 가격 (참고)', {'good': '저평가', 'mid': '중립', 'bad': '고평가', 'na': '-'}[p_t], '사이클 기업·적자 종목은 판정 보류', p_t)],
         'rules': rules,
     }
     return snap
