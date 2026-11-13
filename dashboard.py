@@ -64,6 +64,14 @@ def guard(section: str):
     except Exception as e:
         st.error(f"⚠️ **{section}** 섹션을 그리지 못했습니다 — 다른 탭은 정상입니다.")
         st.caption(f"`{type(e).__name__}: {e}`")
+        import traceback
+        tb = traceback.extract_tb(e.__traceback__)
+        mine = [f for f in tb if 'stock-dashboard' in f.filename or f.filename.endswith(('dashboard.py',)) or '/home/claude/' in f.filename
+                or not ('site-packages' in f.filename)]
+        where = ' ← '.join(f"{os.path.basename(f.filename)}:{f.lineno}" for f in (mine or tb)[-4:])
+        print(f"[guard] {section}: {type(e).__name__}: {e} @ {where}", flush=True)   # 서버 로그·CI 로그에 위치를 남긴다(2026-11-13)
+        if os.environ.get('SNAP_SAVE') == '1':
+            st.caption(f"`@ {where}`")
 
 
 # ── 표에 숫자 강도 색 입히기 ─────────────────────────────────────────
