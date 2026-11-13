@@ -165,7 +165,7 @@
  "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-13 08:40 KST",
+  "at": "2026-11-13 09:10 KST",
   "cash_krw": 37810.0,
   "holdings": [
    {
@@ -173,80 +173,80 @@
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 13040.0,
-    "pnl_pct": 17.26
+    "last_price": 13390.0,
+    "pnl_pct": 20.41
    },
    {
     "sym": "228850",
     "name": "레이언스",
     "qty": 3.0,
     "avg_cost": 7356.666666,
-    "last_price": 7200.0,
-    "pnl_pct": -2.12
+    "last_price": 7310.0,
+    "pnl_pct": -0.63
    },
    {
     "sym": "446540",
     "name": "메가터치",
     "qty": 6.0,
     "avg_cost": 6190.0,
-    "last_price": 7180.0,
-    "pnl_pct": 15.989999999999998
+    "last_price": 7500.0,
+    "pnl_pct": 21.16
    },
    {
     "sym": "092190",
     "name": "서울바이오시스",
     "qty": 5.0,
     "avg_cost": 6556.0,
-    "last_price": 6640.0,
-    "pnl_pct": 1.28
+    "last_price": 6895.0,
+    "pnl_pct": 5.17
    },
    {
     "sym": "046890",
     "name": "서울반도체",
     "qty": 2.0,
     "avg_cost": 8960.0,
-    "last_price": 9160.0,
-    "pnl_pct": 2.23
+    "last_price": 9260.0,
+    "pnl_pct": 3.34
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 13230.0,
-    "pnl_pct": 0.22
+    "last_price": 13880.0,
+    "pnl_pct": 5.1499999999999995
    },
    {
     "sym": "046970",
     "name": "우리로",
     "qty": 5.0,
     "avg_cost": 6364.0,
-    "last_price": 6890.0,
-    "pnl_pct": 8.260000000000002
+    "last_price": 7040.0,
+    "pnl_pct": 10.620000000000001
    },
    {
     "sym": "317400",
     "name": "자이에스앤디",
     "qty": 3.0,
     "avg_cost": 7566.666666,
-    "last_price": 7350.0,
-    "pnl_pct": -2.86
+    "last_price": 7400.0,
+    "pnl_pct": -2.1999999999999997
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 6690.0,
-    "pnl_pct": 0.75
+    "last_price": 6830.0,
+    "pnl_pct": 2.86
    },
    {
     "sym": "024840",
     "name": "KBI메탈",
     "qty": 8.0,
     "avg_cost": 3400.0,
-    "last_price": 3650.0,
-    "pnl_pct": 7.35
+    "last_price": 3750.0,
+    "pnl_pct": 10.290000000000001
    }
   ],
   "open_orders": [],
