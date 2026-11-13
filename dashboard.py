@@ -1200,7 +1200,7 @@ _OB_HERO = """
 
 # (탭 이름, 질문, 설명, 예상 초) — 탭 이름은 아래 st.tabs 와 글자까지 같아야 버튼이 작동한다
 _OB_STEPS = [
-    ("🏠 종합", "이번 주, 들어가도 되나?", "실전 규칙의 신규 매수 허용 여부 · 오늘 시장 한 줄 · 지수 카드 · 이번 주 할 일.", 5),
+    ("🏠 종합", "이번 주, 들어가도 되나?", "이번 주 시장 신호 · 글로벌 마켓 · 오늘의 시장(한·미) · 시황 리포트.", 5),
     ("🌍 매크로", "왜 그렇게 판정했나?", "글로벌 돈의 흐름과 경기 국면. 사계절·달걀 위 현재 위치와 한국 수급.", 7),
     ("🔎 종목 발굴", "그럼 뭘 살까?", "실전 v1.9 후보 — RS 80 이상 × 영업이익 흑자전환 × 주봉 5주선 위. 위 10개가 이번 주 매수 대상.", 7),
     ("🔍 종목 분석", "이 종목, 진짜 맞나?", "코드 입력(005930 · NVDA) → 결론 한 줄 → 수급 · 펀더멘털 · 밸류 · 촉매 · 매매 계획 중 원하는 축만.", 6),
@@ -1226,10 +1226,19 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-13a'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-14a'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
+def _plan_public(pl: dict) -> dict:
+    """2026-11-14 — 계획표의 오버라이드(운영자의 이번 주 예외 결정)는 고객 화면에서 뺀다. 판정은 규칙대로(종가 > 5주선)."""
+    if not globals().get('_IS_LAB'):
+        for x in (pl.get('index') or {}).values():
+            if isinstance(x, dict) and x.pop('override', None) is not None:
+                x['ok'] = bool(x.get('last') is not None and x.get('ma200') is not None and x['last'] > x['ma200'])
+    return pl
+
+
 def _owner_seen() -> bool:
     """소유자(매일 오는 사람)는 사용법을 접은 채 시작 — 2026-11-12 배포 화면: 새 접속마다 펼쳐져 결론까지 스크롤해야 했다."""
     try:
@@ -1389,7 +1398,7 @@ def _status_bar(v):
         ref.append(f"국면 {ph['name']}")
     if g.get('word'):
         ref.append(f"경고 {g.get('n', 0)}/3")
-    bits = [sw, dat]
+    bits = [sw, dat] if _IS_LAB else [sw]          # 2026-11-14 '데이터 점검'은 운영 정보 → 소유자만
     if ref:
         bits.append(f"<span style='color:#9ca3af;cursor:help;border-bottom:1px dotted #9ca3af' "
                     f"title='{_html.escape(' · '.join(ref))} — 실전 주문에는 쓰지 않음'>참고 {len(ref)}</span>")
@@ -1466,7 +1475,7 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     #   🔬 연구실 → 🗂 발굴 도구로(소유자만). 핸들 이름은 그대로 두고, 공개 시점엔 None → 각 블록이 _lab_enter 로 건너뛴다.
     # 2026-11-08 차니: 맨 위 = 실전 규칙 v1.9 후보, 그 아래 = 재료 목록(공개 — 가격·재무 사실 목록이라 숨길 이유 없음). 후보 바구니 제거.
     t_core = st.container()
-t_gain = t_52 = tab3 = t_lead = t_turn = t_value = None
+t_cap = t_gain = t_52 = tab3 = t_lead = t_turn = t_value = None
 if True:                                          # 2026-11-08 공개(옛: 소유자만)
     # 2026-11-08 차니 "발굴 도구는 종목 발굴이랑 뭐가 다르지?" — 다른 건 '재료'(교집합 이전 목록)라는 것뿐이고,
     #   보는 이유도 '교집합에 왜 들어왔나/빠졌나' 확인이라 종목 발굴 아래가 제자리. 연구실 서브탭에서 내린다.
@@ -1476,12 +1485,12 @@ if True:                                          # 2026-11-08 공개(옛: 소�
         st.markdown("##### 🗂 재료 목록")
         st.caption("교집합 후보를 만드는 재료 — 가격이 먼저 말하는 목록(상승 상위·52주 신고가·CANSLIM)과 숫자가 먼저 말하는 목록(이익가속·흑자전환·가치). "
                    "위 후보에 왜 들어왔는지·왜 빠졌는지 확인할 때 엽니다. 고른 목록 하나만 계산합니다.")
-        _TOOLS = ["🔥 상승 상위", "📈 52주 신고가", "🏆 CANSLIM", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
+        _TOOLS = ["🏦 시총 상위", "🔥 상승 상위", "📈 52주 신고가", "🏆 CANSLIM", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
         _tool = st.segmented_control('재료 목록', _TOOLS, default=None, key='tools_pick', label_visibility='collapsed')
         if _tool:
             _tc = st.container()
             _TOOL_IDS.add(id(_tc))
-            t_gain, t_52, tab3, t_lead, t_turn, t_value = [(_tc if _tool == _t else None) for _t in _TOOLS]
+            t_cap, t_gain, t_52, tab3, t_lead, t_turn, t_value = [(_tc if _tool == _t else None) for _t in _TOOLS]
 
 # 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
 try:
@@ -1650,7 +1659,7 @@ with t_core, guard('주도주 교집합'):
     _lazy(tab_screen)
     _taj = load_json(Path('results/turnaround_latest.json')) or {}
     _v19 = load_json(Path('results/v19_bt.json')) or {}
-    _plan = load_json(Path('live/plan_latest.json')) or {}
+    _plan = _plan_public(load_json(Path('live/plan_latest.json')) or {})   # 2026-11-14 오버라이드는 소유자만
     _pkr = ((_plan.get('sleeves') or {}).get('KR') or {})
     _ix = _plan.get('index') or {}
     if _v19:
@@ -1672,7 +1681,7 @@ with t_core, guard('주도주 교집합'):
                         f"{_x.get('last', 0):,.2f} vs 5주선 {_x.get('ma200', 0):,.2f} · {_x.get('date', '')}", delta_color='off',
                         help=(_x.get('override') or None))
     if _GMKT == 'US':
-        st.info("v1.9 는 한국 전용입니다(2026-11-04 차니 결정 — 미국 슬리브 중단). 같은 규칙의 미국판은 퀀트 백테스트에서 S&P500(배당 포함)에 못 미쳤습니다.")
+        st.info("v1.9 는 한국 전용입니다(2026-11-04 결정 — 미국 슬리브 중단). 같은 규칙의 미국판은 퀀트 백테스트에서 S&P500(배당 포함)에 못 미쳤습니다.")
     elif _CMB.empty:
         st.warning("기간 수익률 데이터 없음 — returns.json 갱신(weekly-profile) 후 다시 열어 주십시오.")
     else:
@@ -2127,6 +2136,28 @@ with (t_old or st.empty()), guard('연구실 — 지난 연구'):
 # ── 🔭 대박주 역분석 → ui_winners.py (2026-11-08 재작성, 퀀트 백테스트 → 개별 종목 심층 분석 안) ──
 
 # ── 🔥 상승 상위 (기간 상승률 + 주봉 신호 + 실적증감 + 계절성 + 낙폭 필터) ──
+with (t_cap or st.empty()), guard('시총 상위'):
+    # 2026-11-14 — 종합 '시총 상위 10'의 확장판. 몇 개를 볼지 숫자를 직접 넣는다(목록 하드코딩 금지 규칙).
+    _lab_enter(t_cap)
+    _retc = load_json(Path('results/returns.json')) or {}
+    _cn = st.number_input("표시 종목 수", min_value=10, max_value=500, value=50, step=10, key="cap_n")
+    _crows = [{'종목': s_['name'], '코드': s_['sym'], '1개월(%)': s_.get('ret_1m'), 'YTD(%)': s_.get('ret_ytd'),
+               '1년(%)': s_.get('ret_12m')} for s_ in (_retc.get('stocks') or [])
+              if _GMKT == '전체' or s_.get('market') == _GMKT]
+    if not _crows:
+        st.info("기간 수익률 데이터 없음 — results/returns.json")
+    else:
+        _cdf = _cm.frame(pd.DataFrame(_crows), _CMB, ['YTD(%)', '1년(%)'], market=_GMKT, sort_by='시총')
+        _cdf = _cdf.head(int(_cn))
+        st.subheader(f"🏦 시총 상위 {len(_cdf)}종 — 정렬: 시총(달러 환산)")
+        _tsrc('KRX·SEC 시총 → common_metrics · 기간 수익률 returns.json · ' + _cm.source_label(_CMM), path='results/returns.json')
+        if getattr(st, '_tbl_ver', 0) >= 7:
+            st.dataframe(_cdf, hide_index=True, column_config=_cm.help_config(st, _cdf), tkey='cap_top')
+        else:
+            st.dataframe(_cdf, hide_index=True, column_config=_cm.help_config(st, _cdf), key='cap_top')
+        st.caption(cap_caption())
+
+
 with (t_gain or st.empty()), guard('상승 상위'):
     _lab_enter(t_gain)
     st.caption("기간 상승률 상위 + 주봉 신호 · 향후 2개월 계절성. 실적(매출·영업익 YoY)·PER·RS 는 오른쪽 공통 열.")
@@ -4233,10 +4264,7 @@ def _macro_live_top():
     _sw_src = 'SPY'
     if not sw:                              # FDR 이 막히면 S&P500 지수(Yahoo/커밋 파일)로 — 판정 불가보다 낫다
         sw, _sw_src = _V.core_switch(P['^GSPC'][0]), f"S&P500 지수({P['^GSPC'][1]})" 
-    try:
-        plan = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'plan_latest.json'), encoding='utf-8'))
-    except Exception:
-        plan = {}
+    plan = _plan_public(load_json(Path('live/plan_latest.json')) or {})   # 2026-11-14 오버라이드는 소유자만
     pix = plan.get('index') or {}
 
     def _gate_card(col, lab, g, key):
@@ -5780,12 +5808,14 @@ def _div_yield(yi: dict, price: float):
 
 @st.cache_data(ttl=600)
 def _live_plan():
-    """실전 봇의 이번 주 계획(live/plan_latest.json) — 규칙 숫자·매수 목록·후보·지수 게이트."""
+    """실전 봇의 이번 주 계획(live/plan_latest.json) — 규칙 숫자·매수 목록·후보·지수 게이트.
+    2026-11-14: 오버라이드(운영자의 이번 주 예외 결정)는 운영 정보 → 소유자에게만. 고객 화면은 규칙대로의 판정(종가 > 5주선)."""
     try:
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'live', 'plan_latest.json'), encoding='utf-8') as f:
-            return json.load(f)
+            pl = json.load(f)
     except Exception:
         return {}
+    return _plan_public(pl)
 
 
 def _live_rule() -> dict:
@@ -8926,7 +8956,7 @@ else:
     with guard('운영 점검 요약'):
         _ka_n, _st_n = _ops_counts()          # 상단 배지와 같은 캐시(10분) — 두 번 읽지 않는다
         _ka_n, _st_n = _ka_n or 0, _st_n or 0
-        if _ka_n or _st_n:
+        if (_ka_n or _st_n) and _IS_LAB:           # 2026-11-14 운영 점검은 소유자만(고객 화면에 내부 점검 문구 노출 X)
             st.caption(f"🔴 운영 점검 — 정답 점검 틀림 {_ka_n}건 · 갱신 정지 {_st_n}건. "
                        "자세히는 주소 끝에 `?diag=admin`.")
 st.caption("출처: DART·SEC EDGAR(공식 재무) · FinanceDataReader/KRX(가격) · "
@@ -8966,76 +8996,103 @@ def _goto_tab(name):
     st.session_state['main_tab'] = name
 
 
+def _goto_tool(tool, mkt=None):
+    """종합 → 🔎 종목 발굴 재료 목록(52주 신고가·시총 상위)으로 바로 이동. 2026-11-14."""
+    st.session_state['main_tab'] = '🔎 종목 발굴'
+    st.session_state['tools_pick'] = tool
+    if mkt:
+        st.session_state['screen_mkt'] = mkt
+
+
 def _home_top(V):
-    """① 결론 + 시장 — 역피라미드 1·2층(2026-11-10 개편). 결론 배너 → 지수 카드 → 시장 폭·업종."""
+    """종합 = 고객이 보는 첫 페이지(2026-11-14 재편). 운영·결정 사항(오버라이드·데이터 점검·주간 판정 일정)은 🏛️ 경영실.
+    순서: 이번 주 시장 신호 → 기준 시각 → 다가오는 일정 → 글로벌 마켓 → 시장 추세 판정 → 오늘의 시장(한·미) → 매크로 국면."""
     rep = load_json(Path('results/market_report.json')) or {}
     gt = _UH.gate(_live_plan() or {})
     line, ldate = _UH.one_liner(rep)
     idx = {x['name']: x for x in _UH.indices(rep)}
     _asof0 = max([str(x.get('date') or '') for x in idx.values() if x.get('name') in ('코스피', '코스닥')] or ['-'])
     krf = ((rep.get('latest_kr') or {}).get('facts') or {}).get('stocks', {}).get('KR') or {}
-    dly = ((rep.get('latest_daily') or {}).get('facts') or {}).get('stocks', {}).get('KR') or {}
+    dfa = (rep.get('latest_daily') or {}).get('facts') or {}
+    inr = dfa.get('internals') or {}
+    usf = inr.get('US') or {}
     chips = []
-    for n in ('코스피', '코스닥', 'S&P500'):
+    for n in ('코스피', '코스닥', 'S&P500', '나스닥'):
         d = (idx.get(n) or {}).get('d1')
         if d is not None:
             chips.append(f"{n} <b class='{'p' if d > 0 else 'n'}'>{d:+.2f}%</b>")
     b = krf.get('breadth_all') or {}
-    if b.get('up') is not None:
-        _t = (b.get('up') or 0) + (b.get('down') or 0) + (b.get('flat') or 0)
-        chips.append(f"한국 상승 종목 {b['up'] / _t * 100:.0f}%" if _t else '')
-    ka, stl = _ops_counts()
-    chips.append('데이터 정상' if (ka or 0) + (stl or 0) == 0 and ka is not None else f"⚠️ 데이터 점검 {(ka or 0) + (stl or 0)}건")
-    # 이번 주 진행분 — 금요일 종가로 확정되는 주봉 5주선을 '지금 종가'로 미리 본다(market_report gate5w.live_*)
+    _t = (b.get('up') or 0) + (b.get('down') or 0) + (b.get('flat') or 0)
+    if _t:
+        chips.append(f"한국 상승 종목 {b['up'] / _t * 100:.0f}%")
+    if usf.get('breadth_up') is not None:
+        chips.append(f"미국 대형주 상승 {usf['breadth_up']}%")
+    # 이번 주 흐름 — 금요일 종가로 확정되는 주봉 5주선을 '지금 종가'로 미리 본다(market_report gate5w.live_*)
     _lv = []
     for _n in ('코스피', '코스닥'):
         _g = (idx.get(_n) or {}).get('gate5w') or {}
         if _g.get('live_gap') is not None:
-            _lv.append(f"{_n} {'위' if _g.get('live_on') else '아래'} {_g['live_gap']:+.2f}%")
-    _live = (f"<b style='color:#fff'>이번 주 진행분</b> ({_asof0}) — 5주선 대비 " + ' · '.join(_lv)
-             + " · <span style='color:#9CA3AF'>금요일 종가로 확정 → 주말 계획표에 반영</span>") if _lv else ''
-    _UH.hero(gt, line, ldate, [c for c in chips if c], _live)
-    try:                                          # 2026-11-12 날짜 통일 — 흩어진 기준일을 한 줄로, 늦은 것은 주황
-        _bl0 = (Path('live/bot_last.txt').read_text(encoding='utf-8').splitlines() or [''])[0]
-    except Exception:
-        _bl0 = ''
-    _bt0 = (re.findall(r'\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}', _bl0) or re.findall(r'\d{4}-\d{2}-\d{2}', _bl0) or [''])[0].replace('T', ' ')
+            _lv.append(f"{_n} <span class='{'p' if _g['live_gap'] > 0 else 'n'}'>{_g['live_gap']:+.2f}%</span>")
+    _live = (f"<span>이번 주 흐름 <b>({_asof0[5:]} 종가)</b> — 5주선 대비 " + ' · '.join(_lv) + "</span>") if _lv else ''
+    _UH.hero(gt, line, ldate, chips, _live)
     _UH.dates_strip(_UH.date_items(pd.Timestamp.now(tz='Asia/Seoul').tz_localize(None), _asof0,
                                    (idx.get('S&P500') or {}).get('date'), gt.get('made')))
-    # 2026-11-12 차니: 종합 = 고객이 보는 첫 페이지 → 소유자에게도 고객과 '같은 화면'. 계좌·오늘 할 일·봇 기록은 🏛️ 경영실(_ops_today)
     _home_events()
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof)
-    _UH.pulse_box([idx[n] for n in ('코스피', '코스닥') if n in idx], krf.get('breadth_hist') or [])
-    if krf:
-        _kfa = krf.get('asof') or (rep.get('latest_kr') or {}).get('date') or '-'
+    # 시장 추세 판정 + 대형주 상승 비율 30거래일(한·미). 한국은 일봉 추이 + 오늘 장 마감 값(같은 시총 1조+ 기준)
+    _kt = _UH.trend_points((inr.get('KR_trend') or {}).get('hist'))
+    _kfa = krf.get('asof') or (rep.get('latest_kr') or {}).get('date') or '-'
+    if _kt and krf.get('breadth_up') is not None and _kfa > _kt[-1][0]:
+        _kt.append((_kfa, float(krf['breadth_up'])))
+    _kb = ' · 시총 1조+'
+    if not _kt:                                   # 일봉 추이가 아직 없으면 전 종목 기록(2026-11-12~)
+        _kt, _kb = _UH.trend_points(krf.get('breadth_hist')), ' · 전 종목(기록 11-12~)'
+    _UH.pulse_box([idx[n] for n in ('코스피', '코스닥', 'S&P500', '나스닥') if n in idx],
+                  [('한국 상승 종목 비율', _kt[-30:], _kb),
+                   ('미국 상승 종목 비율', _UH.trend_points(usf.get('breadth_hist'))[-30:],
+                    f" · 시총 상위 {usf.get('universe', 500)}")])
+    # 오늘의 시장 — 한국·미국 같은 모양(2026-11-14: 옛 '지수 뒤의 체력' + '오늘 무엇이 움직였나' 통합)
+    st.html(_UH.CSS + "<div class='hm'><div class='hm-sec'><b>오늘의 시장</b><span>지수 아래 실제 등락 종목 수 · 돈이 간 업종과 종목 · "
+                      "업종 줄을 누르면 구성 종목</span></div></div>")
+    _mk = st.segmented_control('시장', ['🇰🇷 한국', '🇺🇸 미국'], default='🇰🇷 한국', key='home_mkt',
+                               label_visibility='collapsed') or '🇰🇷 한국'
+    _is_kr = _mk.startswith('🇰🇷')
+    _m = krf if _is_kr else usf
+    if not _m:
+        st.info("이 시장의 오늘 자료가 아직 없습니다 — 한국은 평일 15:50, 미국은 06:30(KST) 시황 갱신 때 채워집니다.")
+    else:
+        _ma = _kfa if _is_kr else (usf.get('asof') or '-')
         _kfl = load_json(Path('results/kr_flow.json')) or {}
-        _UH.breadth_sectors(krf, dly, _kfa, flow=dict(today=krf.get('flow'), today_date=_kfa,
-                                                       summary=_kfl.get('summary') or {}, asof=_kfa))
-        _UH.movers_box(krf, _kfa)
-        if krf.get('heatmap'):
-            with st.expander(f"🗺️ 업종 히트맵 — 시총 1조+ {len(krf['heatmap'])}종 (면적 = 시총 · 색 = 등락)", expanded=not IS_MOBILE):
+        _UH.market_today(_m, _is_kr, _ma, flow=dict(today=krf.get('flow'), today_date=_kfa,
+                                                     summary=_kfl.get('summary') or {}, asof=_kfa) if _is_kr else None)
+        _mk2 = 'KR' if _is_kr else 'US'
+        _b1, _b2, _b3 = st.columns(3)
+        _b1.button("📈 52주 신고가 전체 → 종목 발굴", on_click=_goto_tool, args=("📈 52주 신고가", _mk2),
+                   use_container_width=True, key='home_go_52')
+        _b2.button("🏦 시총 상위 더 보기 → 종목 발굴", on_click=_goto_tool, args=("🏦 시총 상위", _mk2),
+                   use_container_width=True, key='home_go_cap')
+        _b3.button("🔥 상승 상위 → 종목 발굴", on_click=_goto_tool, args=("🔥 상승 상위", _mk2),
+                   use_container_width=True, key='home_go_gain')
+        _sr = _UH.sector_table(_m)
+        if _sr:
+            with st.expander(f"업종 전체 {len(_sr)}개 — 강한 순 (위 5개만으로 부족할 때)"):
+                _tsrc(('네이버 금융 전 종목 시세 · 업종 = KSIC(시총 1조+ 3종 이상)' if _is_kr
+                       else 'Yahoo Finance · 업종 = Yahoo industry(시총 상위 500 중 3종 이상)'), path='results/market_report.json', asof=_ma)
+                st.dataframe(pd.DataFrame(_sr), hide_index=True, filters=False,
+                             column_config={'등락(%)': st.column_config.NumberColumn(format='%+.1f', help='업종 안 종목의 시총가중 1일 등락'),
+                                            '종목 수': st.column_config.NumberColumn(format='%d')})
+        if _is_kr and krf.get('heatmap'):
+            with st.expander(f"🗺️ 업종 히트맵 — 시총 1조+ {len(krf['heatmap'])}종 (면적 = 시총 · 색 = 등락)", expanded=False):
                 _hf = _UH.heatmap_fig(krf['heatmap'])
                 if _hf is not None:
                     st.plotly_chart(_hf, use_container_width=True, config={'displayModeBar': False})
                     st.caption(f"출처: 네이버 금융 전 종목 시세 · 업종 = 네이버 업종 16묶음(market_report.kr_heatmap) · 마지막 갱신: {_kfa} · 칸을 누르면 업종 확대")
-    # 옛 '이번 주 판정'(원칙 v1.3 — 미국 SPY 코어/위성 50/30/20) — 실전은 한국 v1.9 단독(11-04)이라 참고로 접어 둔다
-    with st.expander("참고 — 미국 코어 스위치 · 사이클 국면 · 돈의 흐름 (돈을 움직이지 않는 지표)"):
-        c, a, ph, g, fl, ec = (V.get(k) or {} for k in ('core', 'alloc', 'phase', 'greed', 'flow', 'econ'))
-        k1, k2, k3, k4 = st.columns(4)
-        k1.metric('미국 코어 스위치 · 원칙 v1.3', '판정 불가' if not c else ('ON' if c['on'] else 'OFF'),
-                  None if not c else f"S&P500 200일선 {c['gap']:+.1f}%", delta_color='normal' if c else 'off',
-                  help='SPY 종가가 200일 이평 위면 코어 보유. 2026-11-04 실전이 한국 단독(v1.7→v1.9)으로 바뀐 뒤 실제 주문에는 쓰지 않는다')
-        k2.metric('옛 목표 비중(%)', '-' if a.get('cash_total') is None else f"{a['core_now']} / {a['satellite']} / {a['cash_total']}",
-                  '코어 / 위성 / 현금', delta_color='off', delta_arrow='off')
-        k3.metric('사이클 국면', f"{ph.get('emoji', '')} {ph.get('name') or '-'}",
-                  f"욕심 경고 {g.get('n', '-')}/3" if g else None, delta_color='off', delta_arrow='off',
-                  help='우라가미 4계절과 경고 3종 — 백테스트에서 비중 규칙으로 살아남지 못해 표시만 한다')
-        k4.metric('돈의 흐름 · 경기', f"{fl.get('word') or '-'}", ec.get('word') or None,
-                  delta_color='off', delta_arrow='off', help='🌍 매크로 탭 축 1·축 2 요약')
-        _src = ('results/macro.json (verdict.py · 매일 06:00 KST)' if V.get('_src') == 'file'
-                else f"라이브 계산 — macro.json 이 없거나 낡음({V.get('_file_asof') or '없음'})")
-        st.caption(f"출처: {_src} · 마지막 갱신: {V.get('asof') or '-'} 종가 · 왜 이런 판정인지는 🌍 매크로 탭")
+    # 매크로 국면 — 옛 '참고(미국 코어 스위치·옛 목표 비중)' 접이식 대체(2026-11-14)
+    _UH.macro_cards(V)
+    _src = ('results/macro.json (verdict.py · 매일 06:00 KST)' if V.get('_src') == 'file'
+            else f"라이브 계산 — macro.json 이 없거나 낡음({V.get('_file_asof') or '없음'})")
+    st.caption(f"출처: {_src} · 마지막 갱신: {V.get('asof') or '-'} 종가")
 
 
 def _led():
@@ -9100,24 +9157,28 @@ def _home_events():
             if e.get('kind') == '보유':
                 e['kind'] = '한국'
                 e.pop('detail', None)
-    # 내 규칙 일정 — 오버라이드 종료, 다음 주말 계획표
+    # 2026-11-14 — 실전 규칙 일정(오버라이드 종료·주간 판정 갱신)은 운영 일정 → 🏛️ 경영실(_rule_events)
+    st.session_state['_home_ev'] = ev            # 🎯 이번에 볼 것(시황 블록)이 7일 안 일정을 쓴다
+    _UH.events_box(ev, 35)
+    st.caption("출처: 한국은행·federalreserve.gov·bls.gov 공식 일정(data/events_calendar.json, 손으로 갱신) · KRX 옵션 만기 규정 · "
+               "자본시장법 보고서 기한(토·일이면 다음 월요일) · 휴장일 보정 없음")
+
+
+def _rule_events(today):
+    """운영 일정(소유자) — 오버라이드 종료 · 주간 판정 갱신. 2026-11-14 종합에서 옮김."""
     pl = _live_plan() or {}
     ov = next((x.get('override') for x in (pl.get('index') or {}).values() if x.get('override')), None)
     m = re.search(r'(\d{4}-\d{2}-\d{2})', str(ov or ''))
     extra = []
     if m and str(today) <= m.group(1):
         extra.append(dict(date=m.group(1), time='', kind='실전 규칙', name='이번 주 예외(오버라이드) 종료 — 다음 주부터 지수·종목 5주선 규칙 복귀',
-                          detail='예외 주 성과는 따로 집계'))
+                          detail=str(ov)))
     sat = today + __import__("datetime").timedelta(days=(5 - today.weekday()) % 7)
-    extra.append(dict(date=str(sat), time='', kind='실전 규칙', name='주간 판정 갱신 — 금요일 종가로 신규 매수 가능/중지 확정'))
+    extra.append(dict(date=str(sat), time='', kind='실전 규칙', name='주간 판정 갱신 — 금요일 종가로 신규 매수 가능/중지 확정 → 주말 계획표'))
     for e in extra:
         d = pd.Timestamp(e['date']).date()
         e['dday'], e['wd'] = (d - today).days, '월화수목금토일'[d.weekday()]
-    ev = sorted(ev + extra, key=lambda e: (e['date'], e.get('time') or ''))
-    st.session_state['_home_ev'] = ev            # 🎯 이번에 볼 것(시황 블록)이 7일 안 일정을 쓴다
-    _UH.events_box(ev, 35)
-    st.caption("출처: 한국은행·federalreserve.gov·bls.gov 공식 일정(data/events_calendar.json, 손으로 갱신) · KRX 옵션 만기 규정 · "
-               "자본시장법 보고서 기한(토·일이면 다음 월요일) · 휴장일 보정 없음")
+    return extra
 
 
 def _home_account():
@@ -9244,10 +9305,13 @@ def _ops_today():
         led = _led()
         hold = {c: p.get('name') for c, p in ((led.get('KR') or {}).get('positions') or {}).items()}
         fq = pd.read_parquet('data/kr_fundamentals_q.parquet', columns=['sym', 'year', 'q']) if hold else None
-        ev = [e for e in _EV.build(pd.Timestamp.now(tz='Asia/Seoul').date(), 35, hold, fq) if e.get('kind') == '보유']
+        _td = pd.Timestamp.now(tz='Asia/Seoul').date()
+        ev = sorted([e for e in _EV.build(_td, 35, hold, fq) if e.get('kind') == '보유'] + _rule_events(_td),
+                    key=lambda e: (e['date'], e.get('time') or ''))
         if ev:
             _UH.events_box(ev, 35)
-            st.caption("출처: events.py 보고서 법정 기한(토·일이면 다음 월요일) · 실적 반영 = data/kr_fundamentals_q.parquet 에 그 분기가 있는지")
+            st.caption("출처: events.py 보고서 법정 기한(토·일이면 다음 월요일) · 실적 반영 = data/kr_fundamentals_q.parquet 에 그 분기가 있는지 · "
+                       "실전 규칙 일정 = live/plan_latest.json(오버라이드)")
     except Exception as _e:
         st.caption(f"`보유 실적 기한 실패: {type(_e).__name__}: {_e}`")
     _home_todo(_VERDICT, owner=True)
@@ -9262,66 +9326,62 @@ with _status_slot, guard('상단 배지'):
 with tab_home, guard('종합 — 결론·시장'):
     _lazy(tab_home)
     _home_top(_VERDICT)
-with tab_home, guard('종합 — 할 일'):
-    _lazy(tab_home)
-    _home_todo(_VERDICT)
+# 2026-11-14 — 공개판 '이번 주 할 일'(데이터 점검·게이트 중복·안내 문구) 폐지. 운영 할 일은 🏛️ 경영실(_ops_today → _home_todo owner).
 
 with tab_rep, guard('시황 리포트'):
     _lazy(tab_home)
-    st.subheader("📰 시황 리포트 · 💬 묻기")
+    # 2026-11-14 재편 — 리포트 본문을 바로 펼친다(옛: 선택 상자 → 접힌 전문 → JSON). 다음에 볼 숫자 · 리포트 종목 · 질문은 그 아래.
     _rep = load_json(Path('results/market_report.json')) or {}
-    # 2026-11-12 — 체크포인트를 AI 문장('~할지') 대신 숫자 조건으로. 실전 규칙(주봉 5주선)까지 거리부터
-    _krf = (_rep.get('latest_kr') or {})
-    _kf = (_krf.get('facts') or {})
-    _UH.checkpoints_box(_UH.rule_checkpoints([x for x in (_kf.get('indices') or []) if x.get('name') in ('코스피', '코스닥')],
-                                             ((_kf.get('stocks') or {}).get('KR') or {}),
-                                             (load_json(Path('results/kr_flow.json')) or {}).get('summary'),
-                                             st.session_state.get('_home_ev')),
-                        str(_krf.get('date') or '-'))
-    _rt_read, _rt_ask = st.tabs(["📰 리포트 읽기", "💬 리포트에 묻기"])   # 2026-11-12 리포트+챗봇 한 블록
-    with _rt_read:
-        st.caption("한국 장 마감 리포트 평일 15:50(KST) · 미국 포함 일간 매일 06:15 · 주간 월요일. 지수와 이 사이트 데이터 **숫자만으로** 작성 — "
-                   "뉴스·전망을 지어내지 않게 제한했고, AI 한도에 걸리면 숫자 요약으로 대체됩니다.")
-        _hist = _rep.get('history') or []
-        if not _hist:
-            st.info("아직 발행된 리포트가 없습니다. 다음 자동 갱신(매일 06시)부터 쌓입니다.")
-        else:
-            _KN = {'daily': '일간 — 미국 마감(한국은 전 거래일)', 'weekly': '주간', 'kr': '한국 장 마감'}
-            # 같은 날짜면 한국 장 마감(15:50)이 미국 포함 일간(06:15)보다 나중 — 최신을 맨 위로(2026-11-12: 기본이 미국 리포트였다)
-            _hist = sorted(_hist, key=lambda h: (h['date'], {'kr': 2, 'daily': 1, 'weekly': 0}.get(h['kind'], 0)), reverse=True)
-            _opts = [f"{h['date']} · {_KN.get(h['kind'], h['kind'])}" for h in _hist]
-            _i = st.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick")
-            _h = _hist[_i]
-            st.caption(f"작성: {'AI(' + _h['engine'].split(':')[-1] + ')' if _h['engine'].startswith('gemini') else '숫자 템플릿'}")
-            # 2026-10-24 — 리포트 본문의 #·## 가 탭 제목(①②③)보다 커서 위계가 뒤집혔다 → 두 단계 내려 그린다
-            # 2026-11-10 — 숫자·시장 폭·업종은 위 카드와 겹친다 → 체크포인트만 펼쳐 두고 전문은 접는다
-            _ck = re.search(r'##\s*체크포인트\s*\n+(.+?)(?:\n##|\n※|$)', _h['markdown'], flags=re.S)
-            with st.expander("리포트 전문 — 한 줄 요약 · 숫자 · 강약 종목 · AI 코멘트", expanded=False):
-                st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _h['markdown'], flags=re.M))
-            _lf = (_rep.get(f"latest_{_h['kind']}") or {})
-            # 2026-10-21 — 리포트에 나온 종목을 눌러 종목 분석으로(리포트 → 분석 연결)
-            _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
-            _syms = []
-            for _m in ('KR', 'US'):
-                for _k in ('top', 'bottom'):
-                    for _x in (_fst.get(_m) or {}).get(_k, [])[:3]:
-                        if _x.get('sym') and _x['sym'] not in [y for y, _ in _syms]:
-                            _syms.append((_x['sym'], f"{'▲' if _k == 'top' else '▼'} {_x.get('name') or _x['sym']} {_x.get('ret', 0):+.1f}%"))
-            if _syms:
-                _BS = {'d1': '오늘', 'ret_1w': '1주', 'ret_4w': '4주'}
-                _bsl = ' · '.join(f"{_m} {_BS.get((_fst.get(_m) or {}).get('basis'), (_fst.get(_m) or {}).get('basis') or '-')}"
-                                  for _m in ('KR', 'US') if _fst.get(_m))
-                st.caption(f"리포트에 나온 종목(수익률 기간: {_bsl}) — 누르면 🔍 종목 분석")
-                _bc = st.columns(6)
-                for _n, (_sy, _lb) in enumerate(_syms[:12]):
-                    _bc[_n % 6].button(_lb, key=f"rep_go_{_sy}", on_click=_goto_analysis, args=(_sy,), use_container_width=True)
-            if _lf.get('date') == _h['date']:
-                with st.expander("근거 숫자 보기 (리포트가 쓴 원자료)"):
-                    st.json(_lf.get('facts') or {}, expanded=False)
+    _hist = sorted(_rep.get('history') or [], key=lambda h: (h['date'], {'kr': 2, 'daily': 1, 'weekly': 0}.get(h['kind'], 0)), reverse=True)
+    _KN = {'daily': '미국 장 마감', 'weekly': '주간', 'kr': '한국 장 마감'}
+    _rc1, _rc2 = st.columns([3, 2])
+    _rc1.html(_UH.CSS + "<div class='hm'><div class='hm-sec' style='margin-top:6px'><b>시황 리포트</b>"
+              "<span>한국 장 마감 평일 15:50 · 미국 장 마감 06:30(KST) · 숫자 근거로만 작성</span></div></div>")
+    if not _hist:
+        st.info("아직 발행된 리포트가 없습니다 — 다음 장 마감 후 갱신됩니다.")
+    else:
+        _opts = [f"{h['date']} · {_KN.get(h['kind'], h['kind'])}" for h in _hist]
+        _i = _rc2.selectbox("리포트", range(len(_opts)), format_func=lambda i: _opts[i], key="rep_pick", label_visibility='collapsed')
+        _h = _hist[_i]
+        _md = _h['markdown']
+        _sum = re.search(r'##\s*한 줄 요약\s*\n+(.+?)(?:\n\s*\n|\n##|$)', _md, flags=re.S)
+        _ck = re.search(r'##\s*체크포인트\s*\n+(.+?)(?:\n##|\n※|$)', _md, flags=re.S)
+        _cks = [re.sub(r'^\s*\d+[.)]\s*', '', x).strip() for x in (_ck.group(1).strip().splitlines() if _ck else []) if x.strip()]
+        _lf = (_rep.get(f"latest_{_h['kind']}") or {})
+        _rules = []
+        if _h['kind'] == 'kr' and _lf.get('date') == _h['date']:
+            _kf = _lf.get('facts') or {}
+            _rules = _UH.rule_checkpoints([x for x in (_kf.get('indices') or []) if x.get('name') in ('코스피', '코스닥')],
+                                          ((_kf.get('stocks') or {}).get('KR') or {}),
+                                          (load_json(Path('results/kr_flow.json')) or {}).get('summary'),
+                                          st.session_state.get('_home_ev'))
+        _UH.report_card(_h['date'], _KN.get(_h['kind'], _h['kind']),
+                        _sum.group(1).strip().replace('\n', ' ') if _sum else '', _cks, _rules,
+                        'AI(' + _h['engine'].split(':')[-1] + ') · 숫자 검증 통과' if _h['engine'].startswith('gemini') else '숫자 템플릿(AI 미사용)')
+        # 리포트에 나온 종목 → 종목 분석
+        _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
+        _syms = []
+        for _m in ('KR', 'US'):
+            for _k in ('top', 'bottom'):
+                for _x in (_fst.get(_m) or {}).get(_k, [])[:3]:
+                    if _x.get('sym') and _x['sym'] not in [y for y, _ in _syms]:
+                        _syms.append((_x['sym'], f"{'▲' if _k == 'top' else '▼'} {_x.get('name') or _x['sym']} {_x.get('ret', 0):+.1f}%"))
+        if _syms:
+            _BS = {'d1': '1일', 'ret_1w': '1주', 'ret_4w': '4주'}
+            _bsl = ' · '.join(f"{'한국' if _m == 'KR' else '미국'} {_BS.get((_fst.get(_m) or {}).get('basis'), '-')}"
+                              for _m in ('KR', 'US') if _fst.get(_m))
+            st.caption(f"리포트 속 강세·약세 종목({_bsl} 수익률) — 누르면 🔍 종목 분석")
+            _bc = st.columns(6)
+            for _n, (_sy, _lb) in enumerate(_syms[:12]):
+                _bc[_n % 6].button(_lb, key=f"rep_go_{_sy}", on_click=_goto_analysis, args=(_sy,), use_container_width=True)
+        with st.expander("리포트 전문 — 숫자 표 포함"):
+            st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _md, flags=re.M))
+        if _IS_LAB and _lf.get('date') == _h['date']:
+            with st.expander("🔒 근거 숫자(JSON) — 소유자만"):
+                st.json(_lf.get('facts') or {}, expanded=False)
 
-    with _rt_ask:
-        st.caption("최신 리포트의 원자료와 질문에 나온 종목의 숫자만 근거로 답합니다. 매수·매도 추천은 하지 않습니다. "
-                   "AI 무료 한도가 있어 세션당 10회로 제한합니다.")
+    with st.expander("💬 리포트에 묻기 — 최신 리포트 숫자만 근거로 답변 (세션당 10회)"):
+        st.caption("매수·매도 추천은 하지 않습니다. AI 무료 한도로 세션당 10회까지입니다.")
         st.session_state.setdefault('chat_log', [])
         for _role, _msg in st.session_state['chat_log'][-12:]:
             with st.chat_message(_role):
@@ -9347,6 +9407,12 @@ with tab_rep, guard('시황 리포트'):
                 st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
                 st.rerun()
 
+with tab_home, guard('종합 — 바로가기'):
+    _lazy(tab_home)
+    _n1, _n2, _n3 = st.columns(3)
+    _n1.button("🌍 매크로 근거 보기", on_click=_goto_tab, args=("🌍 매크로",), use_container_width=True, key='home_go_macro')
+    _n2.button("🔎 이번 주 매수 후보 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')
+    _n3.button("🛡️ 내 보유 종목 점검", on_click=_goto_tab, args=("🛡️ 내 포트폴리오",), use_container_width=True, key='home_go_pf')
 
 
 # ── 🏛️ 경영실 (2026-11-12, 소유자만) — 열려 있을 때만 그린다 ─────────

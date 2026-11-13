@@ -10,6 +10,9 @@ on:
   schedule:
     - cron: '50 6 * * 1-5'    # KST 15:50 월~금 — 한국 장 마감
     - cron: '30 21 * * 1-5'   # KST 06:30 화~토 — 미국 장 마감(월~금 장)
+  push:                       # 2026-11-14 계산 코드가 바뀌면 바로 일간(미국) 판을 다시 만든다 — 다음 정기 실행까지 화면이 빈칸이 되지 않게
+    branches: [main]
+    paths: ['market_report.py', 'market_internals.py']
   workflow_dispatch:
     inputs:
       kind:
@@ -26,6 +29,7 @@ jobs:
     timeout-minutes: 15
     env:
       GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+      FRED_KEY: ${{ secrets.FRED_KEY }}       # 하이일드 스프레드(2026-11-14)
     steps:
       - uses: actions/checkout@v4
         with:

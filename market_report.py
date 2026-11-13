@@ -29,7 +29,7 @@ def _now_kst() -> str:
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "results", "market_report.json")
-INDICES = [("^KS11", "코스피"), ("^KQ11", "코스닥"), ("^GSPC", "S&P500"), ("^IXIC", "나스닥"),
+INDICES = [("^KS11", "코스피"), ("^KQ11", "코스닥"), ("^GSPC", "S&P500"), ("^IXIC", "나스닥"), ("^DJI", "다우"),
            ("^SOX", "필라델피아 반도체"), ("^VIX", "VIX"), ("KRW=X", "원/달러"), ("^TNX", "미국 10년물(%)")]
 MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
 
@@ -96,7 +96,7 @@ def kr_pulse(sym):
 # 2026-10-21: 10-21 일간 리포트가 한국 09:26(장중)에 만들어져 코스피 장중 값이 '종가'로 찍혔다(실제 그날 +4%대).
 #   장이 아직 열려 있는 시장의 '오늘 봉'은 미완성이라 버린다 — 언제 돌려도 마지막 확정 종가만 쓴다.
 _SESSION = {"KR": ("Asia/Seoul", 15, 35), "US": ("America/New_York", 16, 5)}   # 마감 + 5분(종가 단일가 반영). 2026-11-06: 생성을 마감+10·15분으로 앞당김 — 여유가 15분이면 오늘 봉을 버린다
-_MKT_OF = {"^KS11": "KR", "^KQ11": "KR", "^GSPC": "US", "^IXIC": "US", "^SOX": "US", "^VIX": "US", "^TNX": "US"}
+_MKT_OF = {"^KS11": "KR", "^KQ11": "KR", "^GSPC": "US", "^IXIC": "US", "^DJI": "US", "^SOX": "US", "^VIX": "US", "^TNX": "US"}
 
 
 def drop_open_bar(s, sym, now=None):
@@ -159,6 +159,8 @@ def us_extra_facts():
     pairs = US_ASSETS + US_SECTORS + US_MEGA
     df = _download([s for s, _ in pairs])
     q = {x["sym"]: x for x in quote_facts(pairs, df, short=True)}
+    # 2026-11-14: 자산(달러·금·유가·비트코인)도 지수처럼 1개월·52주 고점·200일선 — 종합 카드 정보가 칸마다 달랐다
+    q.update({x["sym"]: x for x in quote_facts(US_ASSETS, df, short=False)})
     pick = lambda L: [q[s] for s, _ in L if "close" in q.get(s, {})]
     sec = sorted(pick(US_SECTORS), key=lambda x: -x["d1"])
     return dict(assets=pick(US_ASSETS), sectors=sec, megacaps=pick(US_MEGA))
@@ -177,6 +179,13 @@ def index_facts():
                             d1=_r((c / s.iloc[-2] - 1) * 100), d5=_r((c / s.iloc[-6] - 1) * 100),
                             m1=_r((c / s.iloc[-22] - 1) * 100), from_52w_high=_r((c / s.max() - 1) * 100),
                             above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None))
+            if sym in ("^GSPC", "^IXIC"):   # 2026-11-14 미국도 오닐식 시장 방향(종합 '시장 방향' 카드)
+                try:
+                    pz = kr_pulse(sym)
+                    if pz:
+                        out[-1]["pulse"] = pz
+                except Exception as e:
+                    print("  오닐 시장 방향(미국) 생략:", str(e)[:60])
             if sym in ("^KS11", "^KQ11"):   # 실전 v1.9 지수 게이트(주봉 5주선) — 봇 계획표·종합 탭과 같은 계산(verdict.weekly_gate). 2026-11-11
                 try:
                     import verdict as _V
@@ -194,6 +203,26 @@ def index_facts():
         except Exception as e:
             out.append(dict(name=name, sym=sym, error=str(e)[:60]))
     return out
+
+
+def hy_fact():
+    """하이일드 스프레드(ICE BofA US HY OAS, FRED BAMLH0A0HYM2) — 신용 스트레스. 2026-11-14 종합 카드.
+    등락은 %가 아니라 bp(0.01%p) — 스프레드는 '수준의 변화'가 뜻이 있다. 키가 없으면 빈 값."""
+    try:
+        import verdict as _V
+        obs = _V.fred_fetch("BAMLH0A0HYM2", 300)
+        if len(obs) < 30:
+            return {}
+        v = [x[1] for x in obs]
+        c = v[-1]
+        bp = lambda k: _r((c - v[-1 - k]) * 100, 0) if len(v) > k else None
+        ma = sum(v[-200:]) / len(v[-200:])
+        return dict(name="하이일드 스프레드", sym="BAMLH0A0HYM2", date=obs[-1][0], close=_r(c), unit="bp",
+                    d1=bp(1), d5=bp(5), m1=bp(21), from_52w_low=_r((c - min(v[-252:])) * 100, 0),
+                    above_200d=bool(c > ma))
+    except Exception as e:
+        print("  하이일드 스프레드 생략:", str(e)[:60])
+        return {}
 
 
 def stock_facts(kind):
@@ -294,9 +323,13 @@ def kr_today_facts(today=None):
         for sec, g in b2.groupby("_sec"):
             if len(g) >= 3:
                 w = g["Marcap"] / g["Marcap"].sum()
-                lead = g.sort_values("Marcap", ascending=False).iloc[0]
+                gs = g.sort_values("Marcap", ascending=False)
+                lead = gs.iloc[0]
+                # 2026-11-14 members: 화면에서 업종을 누르면 구성 종목(시총 순) — '대장' 한 종목만으론 업종을 알 수 없었다
                 sectors.append(dict(name=_sec_short(sec), n=len(g), ret=_r((g["_r"] * w).sum(), 1),
-                                    lead=lead["Name"], lead_ret=_r(lead["_r"], 1)))
+                                    lead=lead["Name"], lead_ret=_r(lead["_r"], 1),
+                                    members=[dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1),
+                                                  mc=_r(float(r["Marcap"]) / 1e12, 1)) for _, r in gs.iterrows()]))
         sectors.sort(key=lambda x: -x["ret"])
     except Exception as e:
         print("  업종 집계 생략:", str(e)[:80])
@@ -596,6 +629,15 @@ def facts(kind):
             f["us"] = us_extra_facts()
         except Exception as e:
             print("  미국 자산·업종·대장주 생략:", str(e)[:100])
+        try:   # 2026-11-14 종합 '오늘의 시장 — 미국' + 한·미 대형주 상승 비율 30거래일
+            import market_internals as _MI
+            f["internals"] = dict(US=_MI.us_internals(), KR_trend=_MI.kr_trend())
+        except Exception as e:
+            print("  시장 내부(미국·추이) 생략:", str(e)[:100])
+        try:
+            f["hy"] = hy_fact()
+        except Exception as e:
+            print("  시장 내부(미국·추이) 생략:", str(e)[:100])
     return f
 
 
@@ -755,13 +797,25 @@ def unbacked_pcts(md, f):
     return bad
 
 
+_AI_DROP = {"heatmap", "members", "breadth_hist", "hist", "turnover_top"}
+
+
+def _ai_slim(x):
+    """AI 프롬프트용 — 화면 전용 큰 목록(히트맵·업종 구성 종목·추이)은 뺀다. 2026-11-14(구성 종목 추가로 프롬프트가 커짐)."""
+    if isinstance(x, dict):
+        return {k: _ai_slim(v) for k, v in x.items() if k not in _AI_DROP}
+    if isinstance(x, list):
+        return [_ai_slim(v) for v in x]
+    return x
+
+
 def render(f):
     asof = next((x.get("date") for x in f["indices"] if x.get("date")), f["generated"][:10])
     span = {"daily": "전일 미국 장(한국 지수는 오후 한국 리포트가 다루니 언급하지 말 것)", "weekly": "지난 1주",
             "kr": "오늘 한국 장(마감 기준)"}.get(f["kind"], "최근")
     try:
         txt, model = ask_gemini(PROMPT.format(span=span, asof=asof,
-                                              facts=json.dumps(f, ensure_ascii=False)))
+                                              facts=json.dumps(_ai_slim(f), ensure_ascii=False)))
     except Exception as e:
         print("  Gemini 생략 →", str(e)[:120])
         return template(f), "template"
