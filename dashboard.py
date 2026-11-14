@@ -5817,6 +5817,12 @@ def _an_layout_switch():
 
 def _an_axes_pick(A2) -> list:
     """펼칠 축 — 로그인하면 계정에 저장(다음에 그대로 열림), 아니면 이 세션만. 결론 줄은 항상 보인다."""
+    _al0 = getattr(A2, 'AXIS_ALIAS', {})
+    for _sk in ('an_axes', 'an_axes_w'):       # 2026-11-15 재구조 — 세션에 남은 옛 축 이름(이익 방향·가격…)을 새 탭으로 옮긴다
+        _old = st.session_state.get(_sk)
+        if isinstance(_old, list) and any(a not in A2.AXES for a in _old):
+            _nw = [a for a in dict.fromkeys(_al0.get(a, a) for a in _old) if a in A2.AXES]
+            st.session_state[_sk] = sorted(_nw or list(A2.DEFAULT_AXES), key=A2.AXES.index)
     if 'an_axes' not in st.session_state:
         saved = None
         try:
