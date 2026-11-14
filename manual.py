@@ -24,7 +24,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-15a'
+VERSION = '2026-11-15b'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -114,7 +114,7 @@ DATA_ROWS = [
     ("미국 재무", "SEC EDGAR 원문(10-Q · 10-K)", ['fin-daily'], "실적 발표 후 공시까지 1~3주"),
     ("실전 후보(주도주)", "위 가격 + 분기 재무", ['weekly-accel'], "금요일 종가 기준 — 주중에는 안 바뀜"),
     ("다음 주 계획표", "실전 후보 + 지수 5주선", ['live-plan'], "토요일 저녁 확정"),
-    ("오늘의 시장 · 시황 리포트", "한국 시총 1,000억+ · 미국 시총 $3억+ 일봉(Yahoo) · 수급·테마·특징주는 네이버 · 문장은 AI 작성", ['market-report'], "숫자 조건은 규칙 계산, 문장만 AI"),
+    ("오늘의 시장 · 시황 리포트", "한국 시총 1,000억+ · 미국 SEC 공시 상장사 시총 $3억+ 일봉(Yahoo, 상장 1개월 미만 제외) · 수급·테마·특징주는 네이버 · 문장은 AI 작성", ['market-report'], "숫자 조건은 규칙 계산, 문장만 AI"),
     ("종목 분석 결론(스냅샷)", "위 전부를 종목별로 묶음", ['snap'], "장 마감 후 1회"),
     ("한국 수급 · 신용", "네이버 금융", ['kr-flow'], "비공식 API"),
     ("매크로", "FRED(금리·물가·신용 스프레드) · Yahoo(VIX)", ['macro-long'], "FRED 는 하루 지연"),

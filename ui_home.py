@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-15b'
+VERSION = '2026-11-15c'
 
 CSS = """
 <style>
@@ -195,7 +195,11 @@ def indices(rep: dict) -> list[dict]:
         for x in (f.get('indices') or []) + ((f.get('us') or {}).get('assets') or []) + ([f['hy']] if f.get('hy') else []):
             n = x.get('name')
             if n and (n not in by or str(x.get('date') or '') >= str(by[n].get('date') or '')):
-                by[n] = x
+                old = by.get(n) or {}
+                by[n] = dict(x)
+                for kk in ('spark', 'ma200', 'pulse'):        # 2026-11-15 한국 장 마감판엔 추이선이 없어 코스피·코스닥 칸이 비었다
+                    if by[n].get(kk) is None and old.get(kk) is not None:
+                        by[n][kk] = old[kk]
     return [by[n] for n in _CARD_ORDER if n in by]
 
 
@@ -427,10 +431,12 @@ def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period:
         bg = (f"color-mix(in srgb, var({'--pos' if (r or 0) > 0 else '--neg'}) {a * 100:.0f}%, var(--surface))" if r else 'var(--surface)')
         chips.append(f"<div class='hm-mc' style='background:{bg}'>{_a(x.get('name'), x.get('sym'))} {_pct(r, nd=1)}</div>")
     if kr:
-        src = ("Yahoo Finance 일봉(시총 1,000억+ · 일·주·월 같은 종목) · 업종 = KSIC · 테마 = 네이버 테마 · "
+        src = ("Yahoo Finance 일봉 · 대상 = 코스피·코스닥 시총 1,000억+ 중 일봉이 오늘·1일·5일·21일 전 모두 있는 종목(상장 1개월 미만 제외 → 일·주·월 같은 종목) · "
+               "업종 = KSIC · 테마 = 네이버 테마 · "
                "수급·특징주·전 종목 등락 = 네이버 금융(market_report.py · tools/kr_flow.py)")
     else:
-        src = "Yahoo Finance 일봉 · 시총 $3억+ 전 종목(일·주·월 같은 종목) · 업종 = Yahoo industry(3종+ 묶음) · 대형주 = 시총 상위 500"
+        src = ("Yahoo Finance 일봉 · 대상 = SEC 공시 미국 상장사 중 시총 $3억+ · Yahoo 일봉이 오늘·1일·5일·21일 전 모두 있는 종목"
+               "(상장 1개월 미만·시세 이상치 제외 → 일·주·월 같은 종목) · 업종 = Yahoo industry(3종+ 묶음) · 대형주 = 시총 상위 500")
     src += ' · market_internals.py'
     if period != 'd1' and m.get('since'):
         src += f" · 기간 {m['since']} 종가 → {m.get('asof')} 종가"
@@ -820,7 +826,7 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
 # 문구·규칙 값·갱신 시각은 전부 manual.py 한 곳에서 온다(화면과 PDF 가 같은 원천). 여기는 그리기만.
 import manual as MN
 
-_MN_VER = '2026-11-15a'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
+_MN_VER = '2026-11-15b'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
 if getattr(MN, 'VERSION', None) != _MN_VER:
     import importlib as _il
     MN = _il.reload(MN)
