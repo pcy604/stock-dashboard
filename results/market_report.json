@@ -2,12 +2,12 @@
  "latest_daily": {
   "kind": "daily",
   "date": "2026-11-13",
-  "generated": "2026-11-14 14:43",
+  "generated": "2026-11-14 21:14",
   "engine": "gemini:gemini-2.5-flash",
-  "markdown": "## 일간 시황\n\n## 한 줄 요약\n반도체 및 대형 기술주의 하락이 주요 지수 전반의 약세를 이끌었으며, 시장 전반의 상승 종목 비율은 과반을 유지했으나 52주 신고가 종목은 방어주에 집중되었다.\n\n## 해설\n- **지수**: 주요 지수 중 다우만 상승하고 S&P500과 나스닥은 하락했다. 나스닥은 상승 확인일이 발생했지만 200일 이동평균선 아래에 머물렀다.\n- **업종·테마**: 기술 섹터의 하락이 두드러진 반면, 필수소비재, 에너지, 통신서비스 등 방어적 성격의 섹터들은 상승했다. 반도체 업종은 전체 섹터 중 가장 큰 폭으로 하락했다.\n- **종목**: 엔비디아와 브로드컴 같은 대형 기술주가 하락을 주도했지만, AMD는 일간 하락이 컸으나 주간 단위 상승 종목에 포함되어 개별 종목의 높은 변동성이 확인되었다.\n- **기타 자산**: 미국 10년물 금리와 달러 인덱스가 동반 상승했으며, 금, 구리, 비트코인 등은 대부분 하락했다.\n\n## 숫자\n\n**실전 규칙 v1.9** — 주봉 5주선 코스피 아래(-3.1%) · 코스닥 아래(-3.2%) → 신규 매수 중지(소속 지수 아래인 시장)\n\n참고 — 미국 S&P500 200일선 +3.9% · 국면 실적장세 · 욕심 경고 1/3 (돈을 움직이지 않는 지표)\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,290.53 | -1.0% | +4.6% | -4.8% | -42.0% |\n| 코스닥 | 699.66 | +0.5% | +8.6% | -8.0% | -42.9% |\n| S&P500 | 7,561.67 | -0.4% | +2.5% | -2.4% | -3.3% |\n| 나스닥 | 25,136.27 | -0.9% | +2.3% | -5.9% | -8.9% |\n| 다우 | 52,347.55 | +0.1% | +2.1% | +0.3% | -3.7% |\n| 필라델피아 반도체 | 10,146.32 | -3.4% | +8.1% | -12.4% | -30.7% |\n| VIX | 19.3 | +3.2% | -24.7% | +17.2% | -37.8% |\n| 원/달러 | 1,336.2 | +0.2% | -1.9% | -0.3% | -14.0% |\n| 미국 10년물(%) | 5.15 | +1.0% | +6.1% | +1.3% | -3.0% |\n\n**KR** (1주 수익률, 대형주 288종 · 상승 비율 69%)\n강세: SFA반도체 +59.5%, 티에스이 +57.6%, 코리아써키트 +49.2%, 케이씨텍 +49.1%, 한올바이오파마 +46.2%, RFHIC +44.2%\n약세: 시프트업 -13.2%, 이마트 -13.1%, 롯데쇼핑 -13.0%, 한전KPS -12.7%, 씨젠 -12.6%, 달바글로벌 -12.6%\n52주 신고가 근접 17종 · 이번 주 경신 20종\n\n**US** (1주 수익률, 대형주 708종 · 상승 비율 86%)\n강세: CoreWeave, Inc. +31.0%, Rocket Lab Corp +24.6%, MONOLITHIC POWER SYSTEMS, INC. +24.2%, ADVANCED MICRO DEVICES INC +23.1%, TERADYNE, INC +21.8%, CIENA CORP +21.6%\n약세: PERSHING SQUARE INC. -13.5%, FIRST SOLAR, INC. -11.4%, NVIDIA CORP -6.9%, NVR INC -6.4%, Revolution Medicines, Inc. -6.0%, Strategy Inc -5.1%\n52주 신고가 근접 252종 · 이번 주 경신 154종\n\n**자산** 달러인덱스 +0.2%, 금 +0.0%, WTI 유가 -0.2%, 구리 -1.7%, 비트코인 -6.3%, 미 장기채(TLT) -0.4%\n**업종(섹터 ETF)** 강세 필수소비재 +1.4%, 통신서비스 +1.1%, 에너지 +1.0% · 약세 기술 -2.0%, 경기소비재 -0.4%, 산업재 -0.4%\n**대장주** 엔비디아 -2.0%, 마이크로소프트 +0.2%, 애플 +0.4%, 알파벳 -1.0%, 아마존 -0.3%, 메타 +2.9%, 브로드컴 -4.8%, 테슬라 -1.8%, 버크셔 +0.5%, JP모건 +1.0%\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ (200일선 -18.1%) · US 상승추세 ✅ (200일선 +3.9%)\n이익가속 신규(2026-11-02): ARRY, U, PTLO, AGL, RUN, NXT, PRKS, ALGT, JBLU, PCOR\n\n\n## 체크포인트\n1. 나스닥 지수가 200일 이동평균선을 다시 상회하며 추세 전환을 시도하는지 확인한다.\n2. 필라델피아 반도체 지수의 추가 하락(-3.43%)이 멈추고 기술 대형주의 낙폭이 축소되는지 관찰한다.\n3. 미국 10년물 금리(5.15%)와 달러 인덱스의 상승세가 주식시장 전반의 하방 압력으로 이어지는지 주시한다.\n\n※ 문장 AI · 숫자 자동 · 투자 권유 아님 · 2026-11-14 14:43 KST",
+  "markdown": "## 일간 시황\n\n## 한 줄 요약\n기술·반도체 약세로 나스닥은 하락했지만, 필수소비재·에너지가 지수 낙폭을 방어했다. 시장 폭은 균형이었고, 주간 강세 종목에서 당일 차익 실현이 나타났다.\n\n## 해설\n- **지수**: `S&P500`과 `다우`는 200일선 위에 있으나, `나스닥`은 200일선 아래였다. `S&P500`은 '압력 받는 상승' 상태였다.\n- **업종·테마**: `기술` 업종과 `반도체` 업종이 가장 큰 폭의 조정을 받은 반면, `필수소비재`와 `에너지`는 강세를 보였다.\n- **종목**: 주간 강세 종목인 `AMD`와 `CoreWeave`가 당일 하락 종목에 포함되며 단기 순환 매매가 나타났다.\n\n## 숫자\n\n**실전 규칙 v1.9** — 주봉 5주선 코스피 아래(-3.1%) · 코스닥 아래(-3.2%) → 신규 매수 중지(소속 지수 아래인 시장)\n\n참고 — 미국 S&P500 200일선 +3.9% · 국면 실적장세 · 욕심 경고 1/3 (돈을 움직이지 않는 지표)\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,290.53 | -1.0% | +4.6% | -4.8% | -42.0% |\n| 코스닥 | 699.66 | +0.5% | +8.6% | -8.0% | -42.9% |\n| S&P500 | 7,561.67 | -0.4% | +2.5% | -2.4% | -3.3% |\n| 나스닥 | 25,136.27 | -0.9% | +2.3% | -5.9% | -8.9% |\n| 다우 | 52,347.55 | +0.1% | +2.1% | +0.3% | -3.7% |\n| 필라델피아 반도체 | 10,146.32 | -3.4% | +8.1% | -12.4% | -30.7% |\n| VIX | 19.3 | +3.2% | -24.7% | +17.2% | -37.8% |\n| 원/달러 | 1,336.2 | +0.2% | -1.9% | -0.3% | -14.0% |\n| 미국 10년물(%) | 5.15 | +1.0% | +6.1% | +1.3% | -3.0% |\n\n**KR** (1주 수익률, 대형주 288종 · 상승 비율 69%)\n강세: SFA반도체 +59.5%, 티에스이 +57.6%, 코리아써키트 +49.2%, 케이씨텍 +49.1%, 한올바이오파마 +46.2%, RFHIC +44.2%\n약세: 시프트업 -13.2%, 이마트 -13.1%, 롯데쇼핑 -13.0%, 한전KPS -12.7%, 씨젠 -12.6%, 달바글로벌 -12.6%\n52주 신고가 근접 17종 · 이번 주 경신 20종\n\n**US** (1주 수익률, 대형주 708종 · 상승 비율 86%)\n강세: CoreWeave, Inc. +31.0%, Rocket Lab Corp +24.6%, MONOLITHIC POWER SYSTEMS, INC. +24.2%, ADVANCED MICRO DEVICES INC +23.1%, TERADYNE, INC +21.8%, CIENA CORP +21.6%\n약세: PERSHING SQUARE INC. -13.5%, FIRST SOLAR, INC. -11.4%, NVIDIA CORP -6.9%, NVR INC -6.4%, Revolution Medicines, Inc. -6.0%, Strategy Inc -5.1%\n52주 신고가 근접 252종 · 이번 주 경신 154종\n\n**자산** 달러인덱스 +0.2%, 금 +0.0%, WTI 유가 -0.2%, 구리 -1.7%, 비트코인 -1.6%, 미 장기채(TLT) -0.4%\n**업종(섹터 ETF)** 강세 필수소비재 +1.4%, 통신서비스 +1.1%, 에너지 +1.0% · 약세 기술 -2.0%, 경기소비재 -0.4%, 산업재 -0.4%\n**대장주** 엔비디아 -2.0%, 마이크로소프트 +0.2%, 애플 +0.4%, 알파벳 -1.0%, 아마존 -0.3%, 메타 +2.9%, 브로드컴 -4.8%, 테슬라 -1.8%, 버크셔 +0.5%, JP모건 +1.0%\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ (200일선 -18.1%) · US 상승추세 ✅ (200일선 +3.9%)\n이익가속 신규(2026-11-02): ARRY, U, PTLO, AGL, RUN, NXT, PRKS, ALGT, JBLU, PCOR\n\n\n## 체크포인트\n1. `S&P500`이 '압력 받는 상승'을 이어갈지, `VIX`가 20선 위에서 안정화될지 관찰한다.\n2. `나스닥` 상승 확인에도 불구하고, `필라델피아 반도체`의 200일 이평선 회복이 기술주 반등의 조건이다.\n3. `미국 10년물 금리`와 `달러인덱스`의 상승세가 `S&P500`의 200일선 유지 여부에 영향을 미치는지 점검한다.\n\n※ 문장 AI · 숫자 자동 · 투자 권유 아님 · 2026-11-14 21:14 KST",
   "facts": {
    "kind": "daily",
-   "generated": "2026-11-14 14:43",
+   "generated": "2026-11-14 21:14",
    "verdict": {
     "asof": "2026-11-11",
     "core_on": true,
@@ -559,11 +559,11 @@
       "name": "비트코인",
       "sym": "BTC-USD",
       "date": "2026-11-14",
-      "close": 66839.47,
-      "d1": -6.31,
-      "d5": -10.38,
-      "m1": -17.56,
-      "from_52w_high": -31.04,
+      "close": 67131.17,
+      "d1": -1.64,
+      "d5": -10.76,
+      "m1": -16.91,
+      "from_52w_high": -30.74,
       "above_200d": false
      },
      {
@@ -756,11 +756,11 @@
      "asof": "2026-11-13",
      "since": "2026-11-12",
      "k": 1,
-     "universe": 2619,
+     "universe": 2638,
      "breadth_all": {
-      "up": 1342,
-      "down": 1232,
-      "flat": 45
+      "up": 1343,
+      "down": 1235,
+      "flat": 60
      },
      "big_n": 500,
      "breadth_up": 58,
@@ -1108,47 +1108,8 @@
        ]
       },
       {
-       "name": "Farm Products",
-       "n": 6,
-       "ret": 1.6,
-       "lead": "ADM",
-       "lead_ret": 2.7,
-       "members": [
-        {
-         "name": "ADM",
-         "sym": "ADM",
-         "ret": 2.7
-        },
-        {
-         "name": "BG",
-         "sym": "BG",
-         "ret": 1.7
-        },
-        {
-         "name": "TSN",
-         "sym": "TSN",
-         "ret": -0.7
-        },
-        {
-         "name": "CALM",
-         "sym": "CALM",
-         "ret": 3.5
-        },
-        {
-         "name": "DMC",
-         "sym": "DMC",
-         "ret": -0.8
-        },
-        {
-         "name": "VITL",
-         "sym": "VITL",
-         "ret": 1.1
-        }
-       ]
-      },
-      {
        "name": "가공식품",
-       "n": 30,
+       "n": 31,
        "ret": 1.6,
        "lead": "KHC",
        "lead_ret": 2.6,
@@ -1252,6 +1213,45 @@
          "name": "FLO",
          "sym": "FLO",
          "ret": -8.0
+        }
+       ]
+      },
+      {
+       "name": "농산물",
+       "n": 6,
+       "ret": 1.6,
+       "lead": "ADM",
+       "lead_ret": 2.7,
+       "members": [
+        {
+         "name": "ADM",
+         "sym": "ADM",
+         "ret": 2.7
+        },
+        {
+         "name": "BG",
+         "sym": "BG",
+         "ret": 1.7
+        },
+        {
+         "name": "TSN",
+         "sym": "TSN",
+         "ret": -0.7
+        },
+        {
+         "name": "CALM",
+         "sym": "CALM",
+         "ret": 3.5
+        },
+        {
+         "name": "DMC",
+         "sym": "DMC",
+         "ret": -0.8
+        },
+        {
+         "name": "VITL",
+         "sym": "VITL",
+         "ret": 1.1
         }
        ]
       },
@@ -1794,50 +1794,6 @@
        ]
       },
       {
-       "name": "Utilities - Renewable",
-       "n": 7,
-       "ret": 1.2,
-       "lead": "CWEN",
-       "lead_ret": 0.1,
-       "members": [
-        {
-         "name": "CWEN",
-         "sym": "CWEN",
-         "ret": 0.1
-        },
-        {
-         "name": "ORA",
-         "sym": "ORA",
-         "ret": 0.0
-        },
-        {
-         "name": "MWH",
-         "sym": "MWH",
-         "ret": 3.8
-        },
-        {
-         "name": "FRVO",
-         "sym": "FRVO",
-         "ret": -1.2
-        },
-        {
-         "name": "XIFR",
-         "sym": "XIFR",
-         "ret": 3.5
-        },
-        {
-         "name": "FLNC",
-         "sym": "FLNC",
-         "ret": -1.2
-        },
-        {
-         "name": "NRGV",
-         "sym": "NRGV",
-         "ret": 6.6
-        }
-       ]
-      },
-      {
        "name": "생활용품",
        "n": 15,
        "ret": 1.2,
@@ -1918,6 +1874,50 @@
          "name": "MAGN",
          "sym": "MAGN",
          "ret": -2.5
+        }
+       ]
+      },
+      {
+       "name": "신재생 발전",
+       "n": 7,
+       "ret": 1.2,
+       "lead": "CWEN",
+       "lead_ret": 0.1,
+       "members": [
+        {
+         "name": "CWEN",
+         "sym": "CWEN",
+         "ret": 0.1
+        },
+        {
+         "name": "ORA",
+         "sym": "ORA",
+         "ret": 0.0
+        },
+        {
+         "name": "MWH",
+         "sym": "MWH",
+         "ret": 3.8
+        },
+        {
+         "name": "FRVO",
+         "sym": "FRVO",
+         "ret": -1.2
+        },
+        {
+         "name": "XIFR",
+         "sym": "XIFR",
+         "ret": 3.5
+        },
+        {
+         "name": "FLNC",
+         "sym": "FLNC",
+         "ret": -1.2
+        },
+        {
+         "name": "NRGV",
+         "sym": "NRGV",
+         "ret": 6.6
         }
        ]
       },
@@ -2128,76 +2128,7 @@
        ]
       },
       {
-       "name": "Auto & Truck Dealerships",
-       "n": 12,
-       "ret": 1.0,
-       "lead": "CVNA",
-       "lead_ret": 2.2,
-       "members": [
-        {
-         "name": "CVNA",
-         "sym": "CVNA",
-         "ret": 2.2
-        },
-        {
-         "name": "PAG",
-         "sym": "PAG",
-         "ret": -0.6
-        },
-        {
-         "name": "KMX",
-         "sym": "KMX",
-         "ret": 1.2
-        },
-        {
-         "name": "LAD",
-         "sym": "LAD",
-         "ret": -0.2
-        },
-        {
-         "name": "RUSHA",
-         "sym": "RUSHA",
-         "ret": 0.2
-        },
-        {
-         "name": "AN",
-         "sym": "AN",
-         "ret": -1.5
-        },
-        {
-         "name": "OPLN",
-         "sym": "OPLN",
-         "ret": 1.1
-        },
-        {
-         "name": "VVV",
-         "sym": "VVV",
-         "ret": -0.6
-        },
-        {
-         "name": "GPI",
-         "sym": "GPI",
-         "ret": 1.1
-        },
-        {
-         "name": "ABG",
-         "sym": "ABG",
-         "ret": -1.2
-        },
-        {
-         "name": "SAH",
-         "sym": "SAH",
-         "ret": -1.2
-        },
-        {
-         "name": "DRVN",
-         "sym": "DRVN",
-         "ret": -1.7
-        }
-       ]
-      },
-      {
-       "name": "Utilities - Regulated Water",
+       "name": "수도 유틸리티",
        "n": 8,
        "ret": 1.0,
        "lead": "AWK",
@@ -2409,80 +2340,6 @@
        ]
       },
       {
-       "name": "REIT - Diversified",
-       "n": 13,
-       "ret": 0.9,
-       "lead": "VICI",
-       "lead_ret": 0.8,
-       "members": [
-        {
-         "name": "VICI",
-         "sym": "VICI",
-         "ret": 0.8
-        },
-        {
-         "name": "WPC",
-         "sym": "WPC",
-         "ret": 1.1
-        },
-        {
-         "name": "BNL",
-         "sym": "BNL",
-         "ret": 0.7
-        },
-        {
-         "name": "GNL",
-         "sym": "GNL",
-         "ret": -1.6
-        },
-        {
-         "name": "AAT",
-         "sym": "AAT",
-         "ret": 0.9
-        },
-        {
-         "name": "ESRT",
-         "sym": "ESRT",
-         "ret": 1.5
-        },
-        {
-         "name": "CTO",
-         "sym": "CTO",
-         "ret": 0.4
-        },
-        {
-         "name": "SAFE",
-         "sym": "SAFE",
-         "ret": 0.1
-        },
-        {
-         "name": "JBGS",
-         "sym": "JBGS",
-         "ret": 4.6
-        },
-        {
-         "name": "FVR",
-         "sym": "FVR",
-         "ret": -0.2
-        },
-        {
-         "name": "GOOD",
-         "sym": "GOOD",
-         "ret": 1.2
-        },
-        {
-         "name": "OLP",
-         "sym": "OLP",
-         "ret": 0.2
-        },
-        {
-         "name": "AHRT",
-         "sym": "AHRT",
-         "ret": 0.6
-        }
-       ]
-      },
-      {
        "name": "개인 서비스",
        "n": 7,
        "ret": 0.9,
@@ -2596,6 +2453,159 @@
          "name": "AVO",
          "sym": "AVO",
          "ret": 2.5
+        }
+       ]
+      },
+      {
+       "name": "자동차 판매",
+       "n": 13,
+       "ret": 0.9,
+       "lead": "CVNA",
+       "lead_ret": 2.2,
+       "members": [
+        {
+         "name": "CVNA",
+         "sym": "CVNA",
+         "ret": 2.2
+        },
+        {
+         "name": "PAG",
+         "sym": "PAG",
+         "ret": -0.6
+        },
+        {
+         "name": "KMX",
+         "sym": "KMX",
+         "ret": 1.2
+        },
+        {
+         "name": "LAD",
+         "sym": "LAD",
+         "ret": -0.2
+        },
+        {
+         "name": "RUSHA",
+         "sym": "RUSHA",
+         "ret": 0.2
+        },
+        {
+         "name": "AN",
+         "sym": "AN",
+         "ret": -1.5
+        },
+        {
+         "name": "ALTB",
+         "sym": "ALTB",
+         "ret": 0.0
+        },
+        {
+         "name": "OPLN",
+         "sym": "OPLN",
+         "ret": 1.1
+        },
+        {
+         "name": "VVV",
+         "sym": "VVV",
+         "ret": -0.6
+        },
+        {
+         "name": "GPI",
+         "sym": "GPI",
+         "ret": 1.1
+        },
+        {
+         "name": "ABG",
+         "sym": "ABG",
+         "ret": -1.2
+        },
+        {
+         "name": "SAH",
+         "sym": "SAH",
+         "ret": -1.2
+        },
+        {
+         "name": "DRVN",
+         "sym": "DRVN",
+         "ret": -1.7
+        }
+       ]
+      },
+      {
+       "name": "종합 리츠",
+       "n": 14,
+       "ret": 0.9,
+       "lead": "VICI",
+       "lead_ret": 0.8,
+       "members": [
+        {
+         "name": "VICI",
+         "sym": "VICI",
+         "ret": 0.8
+        },
+        {
+         "name": "WPC",
+         "sym": "WPC",
+         "ret": 1.1
+        },
+        {
+         "name": "BNL",
+         "sym": "BNL",
+         "ret": 0.7
+        },
+        {
+         "name": "GNL",
+         "sym": "GNL",
+         "ret": -1.6
+        },
+        {
+         "name": "AAT",
+         "sym": "AAT",
+         "ret": 0.9
+        },
+        {
+         "name": "ESRT",
+         "sym": "ESRT",
+         "ret": 1.5
+        },
+        {
+         "name": "CTO",
+         "sym": "CTO",
+         "ret": 0.4
+        },
+        {
+         "name": "CMRF",
+         "sym": "CMRF",
+         "ret": 0.0
+        },
+        {
+         "name": "SAFE",
+         "sym": "SAFE",
+         "ret": 0.1
+        },
+        {
+         "name": "JBGS",
+         "sym": "JBGS",
+         "ret": 4.6
+        },
+        {
+         "name": "FVR",
+         "sym": "FVR",
+         "ret": -0.2
+        },
+        {
+         "name": "GOOD",
+         "sym": "GOOD",
+         "ret": 1.2
+        },
+        {
+         "name": "OLP",
+         "sym": "OLP",
+         "ret": 0.2
+        },
+        {
+         "name": "AHRT",
+         "sym": "AHRT",
+         "ret": 0.6
         }
        ]
       },
@@ -3552,95 +3562,6 @@
        ]
       },
       {
-       "name": "REIT - Office",
-       "n": 16,
-       "ret": 0.5,
-       "lead": "BXP",
-       "lead_ret": 1.4,
-       "members": [
-        {
-         "name": "BXP",
-         "sym": "BXP",
-         "ret": 1.4
-        },
-        {
-         "name": "ARE",
-         "sym": "ARE",
-         "ret": -1.0
-        },
-        {
-         "name": "VNO",
-         "sym": "VNO",
-         "ret": 0.0
-        },
-        {
-         "name": "CUZ",
-         "sym": "CUZ",
-         "ret": 0.5
-        },
-        {
-         "name": "KRC",
-         "sym": "KRC",
-         "ret": 0.6
-        },
-        {
-         "name": "CDP",
-         "sym": "CDP",
-         "ret": 1.3
-        },
-        {
-         "name": "SLG",
-         "sym": "SLG",
-         "ret": 0.5
-        },
-        {
-         "name": "HIW",
-         "sym": "HIW",
-         "ret": 0.5
-        },
-        {
-         "name": "DEI",
-         "sym": "DEI",
-         "ret": 0.6
-        },
-        {
-         "name": "ESBA",
-         "sym": "ESBA",
-         "ret": 2.3
-        },
-        {
-         "name": "PDM",
-         "sym": "PDM",
-         "ret": 0.5
-        },
-        {
-         "name": "DEA",
-         "sym": "DEA",
-         "ret": 0.3
-        },
-        {
-         "name": "PSTL",
-         "sym": "PSTL",
-         "ret": -1.4
-        },
-        {
-         "name": "HPP",
-         "sym": "HPP",
-         "ret": 0.7
-        },
-        {
-         "name": "BDN",
-         "sym": "BDN",
-         "ret": -0.3
-        },
-        {
-         "name": "OPI",
-         "sym": "OPI",
-         "ret": 4.2
-        }
-       ]
-      },
-      {
        "name": "거래소·금융 데이터",
        "n": 12,
        "ret": 0.5,
@@ -3874,6 +3795,95 @@
          "name": "TRIP",
          "sym": "TRIP",
          "ret": -0.3
+        }
+       ]
+      },
+      {
+       "name": "오피스 리츠",
+       "n": 16,
+       "ret": 0.5,
+       "lead": "BXP",
+       "lead_ret": 1.4,
+       "members": [
+        {
+         "name": "BXP",
+         "sym": "BXP",
+         "ret": 1.4
+        },
+        {
+         "name": "ARE",
+         "sym": "ARE",
+         "ret": -1.0
+        },
+        {
+         "name": "VNO",
+         "sym": "VNO",
+         "ret": 0.0
+        },
+        {
+         "name": "CUZ",
+         "sym": "CUZ",
+         "ret": 0.5
+        },
+        {
+         "name": "KRC",
+         "sym": "KRC",
+         "ret": 0.6
+        },
+        {
+         "name": "CDP",
+         "sym": "CDP",
+         "ret": 1.3
+        },
+        {
+         "name": "SLG",
+         "sym": "SLG",
+         "ret": 0.5
+        },
+        {
+         "name": "HIW",
+         "sym": "HIW",
+         "ret": 0.5
+        },
+        {
+         "name": "DEI",
+         "sym": "DEI",
+         "ret": 0.6
+        },
+        {
+         "name": "ESBA",
+         "sym": "ESBA",
+         "ret": 2.3
+        },
+        {
+         "name": "PDM",
+         "sym": "PDM",
+         "ret": 0.5
+        },
+        {
+         "name": "DEA",
+         "sym": "DEA",
+         "ret": 0.3
+        },
+        {
+         "name": "PSTL",
+         "sym": "PSTL",
+         "ret": -1.4
+        },
+        {
+         "name": "HPP",
+         "sym": "HPP",
+         "ret": 0.7
+        },
+        {
+         "name": "BDN",
+         "sym": "BDN",
+         "ret": -0.3
+        },
+        {
+         "name": "OPI",
+         "sym": "OPI",
+         "ret": 4.2
         }
        ]
       },
@@ -4461,7 +4471,7 @@
       },
       {
        "name": "지역 은행",
-       "n": 219,
+       "n": 221,
        "ret": 0.4,
        "lead": "PNC",
        "lead_ret": 0.5,
@@ -4679,7 +4689,7 @@
       },
       {
        "name": "IT 서비스",
-       "n": 35,
+       "n": 36,
        "ret": 0.3,
        "lead": "IBM",
        "lead_ret": 1.0,
@@ -4783,115 +4793,6 @@
          "name": "PSN",
          "sym": "PSN",
          "ret": -0.3
-        }
-       ]
-      },
-      {
-       "name": "REIT - Mortgage",
-       "n": 22,
-       "ret": 0.3,
-       "lead": "NLY",
-       "lead_ret": 0.5,
-       "members": [
-        {
-         "name": "NLY",
-         "sym": "NLY",
-         "ret": 0.5
-        },
-        {
-         "name": "AGNC",
-         "sym": "AGNC",
-         "ret": 0.4
-        },
-        {
-         "name": "RITM",
-         "sym": "RITM",
-         "ret": -0.3
-        },
-        {
-         "name": "STWD",
-         "sym": "STWD",
-         "ret": -0.9
-        },
-        {
-         "name": "DX",
-         "sym": "DX",
-         "ret": 1.1
-        },
-        {
-         "name": "ARR",
-         "sym": "ARR",
-         "ret": 0.3
-        },
-        {
-         "name": "BXMT",
-         "sym": "BXMT",
-         "ret": -1.2
-        },
-        {
-         "name": "EFC",
-         "sym": "EFC",
-         "ret": 0.9
-        },
-        {
-         "name": "LADR",
-         "sym": "LADR",
-         "ret": -0.2
-        },
-        {
-         "name": "ORC",
-         "sym": "ORC",
-         "ret": 0.2
-        },
-        {
-         "name": "ARI",
-         "sym": "ARI",
-         "ret": 0.0
-        },
-        {
-         "name": "MFA",
-         "sym": "MFA",
-         "ret": 4.7
-        },
-        {
-         "name": "ADAM",
-         "sym": "ADAM",
-         "ret": 1.0
-        },
-        {
-         "name": "PMT",
-         "sym": "PMT",
-         "ret": 2.9
-        },
-        {
-         "name": "CIM",
-         "sym": "CIM",
-         "ret": -0.8
-        },
-        {
-         "name": "IVR",
-         "sym": "IVR",
-         "ret": 1.0
-        },
-        {
-         "name": "TRTX",
-         "sym": "TRTX",
-         "ret": 0.6
-        },
-        {
-         "name": "FBRT",
-         "sym": "FBRT",
-         "ret": -0.3
-        },
-        {
-         "name": "ABR",
-         "sym": "ABR",
-         "ret": -1.5
-        },
-        {
-         "name": "BRSP",
-         "sym": "BRSP",
-         "ret": 2.9
         }
        ]
       },
@@ -5000,6 +4901,115 @@
          "name": "UWMC",
          "sym": "UWMC",
          "ret": -0.8
+        }
+       ]
+      },
+      {
+       "name": "모기지 리츠",
+       "n": 22,
+       "ret": 0.3,
+       "lead": "NLY",
+       "lead_ret": 0.5,
+       "members": [
+        {
+         "name": "NLY",
+         "sym": "NLY",
+         "ret": 0.5
+        },
+        {
+         "name": "AGNC",
+         "sym": "AGNC",
+         "ret": 0.4
+        },
+        {
+         "name": "RITM",
+         "sym": "RITM",
+         "ret": -0.3
+        },
+        {
+         "name": "STWD",
+         "sym": "STWD",
+         "ret": -0.9
+        },
+        {
+         "name": "DX",
+         "sym": "DX",
+         "ret": 1.1
+        },
+        {
+         "name": "ARR",
+         "sym": "ARR",
+         "ret": 0.3
+        },
+        {
+         "name": "BXMT",
+         "sym": "BXMT",
+         "ret": -1.2
+        },
+        {
+         "name": "EFC",
+         "sym": "EFC",
+         "ret": 0.9
+        },
+        {
+         "name": "LADR",
+         "sym": "LADR",
+         "ret": -0.2
+        },
+        {
+         "name": "ORC",
+         "sym": "ORC",
+         "ret": 0.2
+        },
+        {
+         "name": "ARI",
+         "sym": "ARI",
+         "ret": 0.0
+        },
+        {
+         "name": "MFA",
+         "sym": "MFA",
+         "ret": 4.7
+        },
+        {
+         "name": "ADAM",
+         "sym": "ADAM",
+         "ret": 1.0
+        },
+        {
+         "name": "PMT",
+         "sym": "PMT",
+         "ret": 2.9
+        },
+        {
+         "name": "CIM",
+         "sym": "CIM",
+         "ret": -0.8
+        },
+        {
+         "name": "IVR",
+         "sym": "IVR",
+         "ret": 1.0
+        },
+        {
+         "name": "TRTX",
+         "sym": "TRTX",
+         "ret": 0.6
+        },
+        {
+         "name": "FBRT",
+         "sym": "FBRT",
+         "ret": -0.3
+        },
+        {
+         "name": "ABR",
+         "sym": "ABR",
+         "ret": -1.5
+        },
+        {
+         "name": "BRSP",
+         "sym": "BRSP",
+         "ret": 2.9
         }
        ]
       },
@@ -5127,75 +5137,6 @@
        ]
       },
       {
-       "name": "Insurance - Specialty",
-       "n": 12,
-       "ret": 0.2,
-       "lead": "FNF",
-       "lead_ret": 0.7,
-       "members": [
-        {
-         "name": "FNF",
-         "sym": "FNF",
-         "ret": 0.7
-        },
-        {
-         "name": "AXS",
-         "sym": "AXS",
-         "ret": 0.4
-        },
-        {
-         "name": "FAF",
-         "sym": "FAF",
-         "ret": 0.7
-        },
-        {
-         "name": "ACT",
-         "sym": "ACT",
-         "ret": -1.0
-        },
-        {
-         "name": "ESNT",
-         "sym": "ESNT",
-         "ret": -0.5
-        },
-        {
-         "name": "MTG",
-         "sym": "MTG",
-         "ret": 0.0
-        },
-        {
-         "name": "RDN",
-         "sym": "RDN",
-         "ret": -0.4
-        },
-        {
-         "name": "AGO",
-         "sym": "AGO",
-         "ret": 2.1
-        },
-        {
-         "name": "NMIH",
-         "sym": "NMIH",
-         "ret": -0.6
-        },
-        {
-         "name": "EIG",
-         "sym": "EIG",
-         "ret": 0.5
-        },
-        {
-         "name": "ITIC",
-         "sym": "ITIC",
-         "ret": 1.1
-        },
-        {
-         "name": "AMSF",
-         "sym": "AMSF",
-         "ret": 0.9
-        }
-       ]
-      },
-      {
        "name": "보안",
        "n": 12,
        "ret": 0.2,
@@ -5295,7 +5236,7 @@
       },
       {
        "name": "응용 소프트웨어",
-       "n": 101,
+       "n": 102,
        "ret": 0.2,
        "lead": "세일즈포스",
        "lead_ret": 0.1,
@@ -5556,8 +5497,77 @@
        ]
       },
       {
+       "name": "특수 보험",
+       "n": 12,
+       "ret": 0.2,
+       "lead": "FNF",
+       "lead_ret": 0.7,
+       "members": [
+        {
+         "name": "FNF",
+         "sym": "FNF",
+         "ret": 0.7
+        },
+        {
+         "name": "AXS",
+         "sym": "AXS",
+         "ret": 0.4
+        },
+        {
+         "name": "FAF",
+         "sym": "FAF",
+         "ret": 0.7
+        },
+        {
+         "name": "ACT",
+         "sym": "ACT",
+         "ret": -1.0
+        },
+        {
+         "name": "ESNT",
+         "sym": "ESNT",
+         "ret": -0.5
+        },
+        {
+         "name": "MTG",
+         "sym": "MTG",
+         "ret": 0.0
+        },
+        {
+         "name": "RDN",
+         "sym": "RDN",
+         "ret": -0.4
+        },
+        {
+         "name": "AGO",
+         "sym": "AGO",
+         "ret": 2.1
+        },
+        {
+         "name": "NMIH",
+         "sym": "NMIH",
+         "ret": -0.6
+        },
+        {
+         "name": "EIG",
+         "sym": "EIG",
+         "ret": 0.5
+        },
+        {
+         "name": "ITIC",
+         "sym": "ITIC",
+         "ret": 1.1
+        },
+        {
+         "name": "AMSF",
+         "sym": "AMSF",
+         "ret": 0.9
+        }
+       ]
+      },
+      {
        "name": "특수·제네릭 제약",
-       "n": 35,
+       "n": 36,
        "ret": 0.2,
        "lead": "ZTS",
        "lead_ret": 1.0,
@@ -5754,35 +5764,6 @@
        ]
       },
       {
-       "name": "Real Estate - Development",
-       "n": 4,
-       "ret": 0.1,
-       "lead": "HHH",
-       "lead_ret": 0.3,
-       "members": [
-        {
-         "name": "HHH",
-         "sym": "HHH",
-         "ret": 0.3
-        },
-        {
-         "name": "CCS",
-         "sym": "CCS",
-         "ret": -1.1
-        },
-        {
-         "name": "FOR",
-         "sym": "FOR",
-         "ret": 0.3
-        },
-        {
-         "name": "SKYH",
-         "sym": "SKYH",
-         "ret": 2.2
-        }
-       ]
-      },
-      {
        "name": "가구·가전",
        "n": 13,
        "ret": 0.1,
@@ -5936,8 +5917,37 @@
        ]
       },
       {
+       "name": "부동산 개발",
+       "n": 4,
+       "ret": 0.1,
+       "lead": "HHH",
+       "lead_ret": 0.3,
+       "members": [
+        {
+         "name": "HHH",
+         "sym": "HHH",
+         "ret": 0.3
+        },
+        {
+         "name": "CCS",
+         "sym": "CCS",
+         "ret": -1.1
+        },
+        {
+         "name": "FOR",
+         "sym": "FOR",
+         "ret": 0.3
+        },
+        {
+         "name": "SKYH",
+         "sym": "SKYH",
+         "ret": 2.2
+        }
+       ]
+      },
+      {
        "name": "외식",
-       "n": 27,
+       "n": 28,
        "ret": 0.1,
        "lead": "맥도날드",
        "lead_ret": -0.6,
@@ -6243,8 +6253,8 @@
       },
       {
        "name": "기업 서비스",
-       "n": 25,
-       "ret": 0.0,
+       "n": 26,
+       "ret": -0.0,
        "lead": "CTAS",
        "lead_ret": -0.6,
        "members": [
@@ -6415,6 +6425,30 @@
        ]
       },
       {
+       "name": "스팩",
+       "n": 3,
+       "ret": 0.0,
+       "lead": "BRRN",
+       "lead_ret": 0.0,
+       "members": [
+        {
+         "name": "BRRN",
+         "sym": "BRRN",
+         "ret": 0.0
+        },
+        {
+         "name": "CLUS",
+         "sym": "CLUS",
+         "ret": 0.0
+        },
+        {
+         "name": "BQST",
+         "sym": "BQST",
+         "ret": 0.0
+        }
+       ]
+      },
+      {
        "name": "엔터테인먼트",
        "n": 21,
        "ret": 0.0,
@@ -6525,7 +6559,7 @@
       },
       {
        "name": "증권·투자은행",
-       "n": 36,
+       "n": 38,
        "ret": 0.0,
        "lead": "모건스탠리",
        "lead_ret": 0.8,
@@ -6910,75 +6944,6 @@
          "name": "CVEO",
          "sym": "CVEO",
          "ret": -1.7
-        }
-       ]
-      },
-      {
-       "name": "REIT - Hotel & Motel",
-       "n": 12,
-       "ret": -0.2,
-       "lead": "HST",
-       "lead_ret": -0.1,
-       "members": [
-        {
-         "name": "HST",
-         "sym": "HST",
-         "ret": -0.1
-        },
-        {
-         "name": "RHP",
-         "sym": "RHP",
-         "ret": -1.0
-        },
-        {
-         "name": "APLE",
-         "sym": "APLE",
-         "ret": -0.1
-        },
-        {
-         "name": "PK",
-         "sym": "PK",
-         "ret": -0.5
-        },
-        {
-         "name": "DRH",
-         "sym": "DRH",
-         "ret": 0.1
-        },
-        {
-         "name": "PEB",
-         "sym": "PEB",
-         "ret": 0.0
-        },
-        {
-         "name": "SHO",
-         "sym": "SHO",
-         "ret": 0.7
-        },
-        {
-         "name": "RLJ",
-         "sym": "RLJ",
-         "ret": -0.1
-        },
-        {
-         "name": "XHR",
-         "sym": "XHR",
-         "ret": 0.2
-        },
-        {
-         "name": "INN",
-         "sym": "INN",
-         "ret": 0.3
-        },
-        {
-         "name": "CLDT",
-         "sym": "CLDT",
-         "ret": 0.2
-        },
-        {
-         "name": "SVC",
-         "sym": "SVC",
-         "ret": 2.7
         }
        ]
       },
@@ -7517,26 +7482,71 @@
        ]
       },
       {
-       "name": "Financial Conglomerates",
-       "n": 3,
-       "ret": -0.4,
-       "lead": "VOYA",
-       "lead_ret": -0.2,
+       "name": "호텔 리츠",
+       "n": 12,
+       "ret": -0.2,
+       "lead": "HST",
+       "lead_ret": -0.1,
        "members": [
         {
-         "name": "VOYA",
-         "sym": "VOYA",
-         "ret": -0.2
-        },
-        {
-         "name": "HTH",
-         "sym": "HTH",
+         "name": "HST",
+         "sym": "HST",
          "ret": -0.1
         },
         {
-         "name": "TMS",
-         "sym": "TMS",
-         "ret": -7.8
+         "name": "RHP",
+         "sym": "RHP",
+         "ret": -1.0
+        },
+        {
+         "name": "APLE",
+         "sym": "APLE",
+         "ret": -0.1
+        },
+        {
+         "name": "PK",
+         "sym": "PK",
+         "ret": -0.5
+        },
+        {
+         "name": "DRH",
+         "sym": "DRH",
+         "ret": 0.1
+        },
+        {
+         "name": "PEB",
+         "sym": "PEB",
+         "ret": 0.0
+        },
+        {
+         "name": "SHO",
+         "sym": "SHO",
+         "ret": 0.7
+        },
+        {
+         "name": "RLJ",
+         "sym": "RLJ",
+         "ret": -0.1
+        },
+        {
+         "name": "XHR",
+         "sym": "XHR",
+         "ret": 0.2
+        },
+        {
+         "name": "INN",
+         "sym": "INN",
+         "ret": 0.3
+        },
+        {
+         "name": "CLDT",
+         "sym": "CLDT",
+         "ret": 0.2
+        },
+        {
+         "name": "SVC",
+         "sym": "SVC",
+         "ret": 2.7
         }
        ]
       },
@@ -7586,6 +7596,30 @@
          "name": "HLMN",
          "sym": "HLMN",
          "ret": -0.4
+        }
+       ]
+      },
+      {
+       "name": "금융 복합기업",
+       "n": 3,
+       "ret": -0.4,
+       "lead": "VOYA",
+       "lead_ret": -0.2,
+       "members": [
+        {
+         "name": "VOYA",
+         "sym": "VOYA",
+         "ret": -0.2
+        },
+        {
+         "name": "HTH",
+         "sym": "HTH",
+         "ret": -0.1
+        },
+        {
+         "name": "TMS",
+         "sym": "TMS",
+         "ret": -7.8
         }
        ]
       },
@@ -8040,7 +8074,7 @@
        ]
       },
       {
-       "name": "Gambling",
+       "name": "도박·베팅",
        "n": 4,
        "ret": -0.6,
        "lead": "DKNG",
@@ -8196,35 +8230,6 @@
        ]
       },
       {
-       "name": "Business Equipment & Supplies",
-       "n": 4,
-       "ret": -0.7,
-       "lead": "CXT",
-       "lead_ret": -0.1,
-       "members": [
-        {
-         "name": "CXT",
-         "sym": "CXT",
-         "ret": -0.1
-        },
-        {
-         "name": "ACCO",
-         "sym": "ACCO",
-         "ret": -0.7
-        },
-        {
-         "name": "ACTG",
-         "sym": "ACTG",
-         "ret": 0.0
-        },
-        {
-         "name": "XRX",
-         "sym": "XRX",
-         "ret": -7.1
-        }
-       ]
-      },
-      {
        "name": "건자재",
        "n": 8,
        "ret": -0.7,
@@ -8275,7 +8280,7 @@
       },
       {
        "name": "건축자재",
-       "n": 25,
+       "n": 26,
        "ret": -0.7,
        "lead": "TT",
        "lead_ret": -1.4,
@@ -8477,8 +8482,37 @@
        ]
       },
       {
+       "name": "사무기기",
+       "n": 4,
+       "ret": -0.7,
+       "lead": "CXT",
+       "lead_ret": -0.1,
+       "members": [
+        {
+         "name": "CXT",
+         "sym": "CXT",
+         "ret": -0.1
+        },
+        {
+         "name": "ACCO",
+         "sym": "ACCO",
+         "ret": -0.7
+        },
+        {
+         "name": "ACTG",
+         "sym": "ACTG",
+         "ret": 0.0
+        },
+        {
+         "name": "XRX",
+         "sym": "XRX",
+         "ret": -7.1
+        }
+       ]
+      },
+      {
        "name": "복합기업",
-       "n": 13,
+       "n": 14,
        "ret": -0.8,
        "lead": "MMM",
        "lead_ret": -1.4,
@@ -8512,6 +8546,11 @@
          "name": "OTTR",
          "sym": "OTTR",
          "ret": 0.9
+        },
+        {
+         "name": "ATVK",
+         "sym": "ATVK",
+         "ret": 0.0
         },
         {
          "name": "DLX",
@@ -8911,30 +8950,6 @@
        ]
       },
       {
-       "name": "Coking Coal",
-       "n": 3,
-       "ret": -1.2,
-       "lead": "HCC",
-       "lead_ret": -1.1,
-       "members": [
-        {
-         "name": "HCC",
-         "sym": "HCC",
-         "ret": -1.1
-        },
-        {
-         "name": "AMR",
-         "sym": "AMR",
-         "ret": -1.0
-        },
-        {
-         "name": "SXC",
-         "sym": "SXC",
-         "ret": -2.0
-        }
-       ]
-      },
-      {
        "name": "게임",
        "n": 3,
        "ret": -1.2,
@@ -8955,6 +8970,30 @@
          "name": "PLTK",
          "sym": "PLTK",
          "ret": 6.0
+        }
+       ]
+      },
+      {
+       "name": "제철용 석탄",
+       "n": 3,
+       "ret": -1.2,
+       "lead": "HCC",
+       "lead_ret": -1.1,
+       "members": [
+        {
+         "name": "HCC",
+         "sym": "HCC",
+         "ret": -1.1
+        },
+        {
+         "name": "AMR",
+         "sym": "AMR",
+         "ret": -1.0
+        },
+        {
+         "name": "SXC",
+         "sym": "SXC",
+         "ret": -2.0
         }
        ]
       },
@@ -9167,7 +9206,7 @@
        ]
       },
       {
-       "name": "Other Precious Metals & Mining",
+       "name": "귀금속 채굴",
        "n": 5,
        "ret": -1.6,
        "lead": "HL",
@@ -10231,8 +10270,8 @@
       }
      ],
      "new_high_52w": {
-      "n": 27,
-      "universe": 2619,
+      "n": 32,
+      "universe": 2638,
       "top": [
        {
         "name": "애플",
@@ -10474,11 +10513,11 @@
        "asof": "2026-11-13",
        "since": "2026-11-06",
        "k": 5,
-       "universe": 2619,
+       "universe": 2638,
        "breadth_all": {
-        "up": 1711,
-        "down": 892,
-        "flat": 16
+        "up": 1713,
+        "down": 896,
+        "flat": 29
        },
        "big_n": 500,
        "breadth_up": 80,
@@ -12974,7 +13013,7 @@
         },
         {
          "name": "특수·제네릭 제약",
-         "n": 35,
+         "n": 36,
          "ret": 3.7,
          "lead": "ZTS",
          "lead_ret": 5.6,
@@ -13191,52 +13230,8 @@
          ]
         },
         {
-         "name": "Utilities - Renewable",
-         "n": 7,
-         "ret": 3.6,
-         "lead": "CWEN",
-         "lead_ret": -2.0,
-         "members": [
-          {
-           "name": "CWEN",
-           "sym": "CWEN",
-           "ret": -2.0
-          },
-          {
-           "name": "ORA",
-           "sym": "ORA",
-           "ret": -1.6
-          },
-          {
-           "name": "MWH",
-           "sym": "MWH",
-           "ret": 8.5
-          },
-          {
-           "name": "FRVO",
-           "sym": "FRVO",
-           "ret": 27.5
-          },
-          {
-           "name": "XIFR",
-           "sym": "XIFR",
-           "ret": 3.8
-          },
-          {
-           "name": "FLNC",
-           "sym": "FLNC",
-           "ret": -11.2
-          },
-          {
-           "name": "NRGV",
-           "sym": "NRGV",
-           "ret": 18.8
-          }
-         ]
-        },
-        {
          "name": "건축자재",
-         "n": 25,
+         "n": 26,
          "ret": 3.6,
          "lead": "TT",
          "lead_ret": 4.0,
@@ -13340,6 +13335,50 @@
            "name": "ROCK",
            "sym": "ROCK",
            "ret": -6.5
+          }
+         ]
+        },
+        {
+         "name": "신재생 발전",
+         "n": 7,
+         "ret": 3.6,
+         "lead": "CWEN",
+         "lead_ret": -2.0,
+         "members": [
+          {
+           "name": "CWEN",
+           "sym": "CWEN",
+           "ret": -2.0
+          },
+          {
+           "name": "ORA",
+           "sym": "ORA",
+           "ret": -1.6
+          },
+          {
+           "name": "MWH",
+           "sym": "MWH",
+           "ret": 8.5
+          },
+          {
+           "name": "FRVO",
+           "sym": "FRVO",
+           "ret": 27.5
+          },
+          {
+           "name": "XIFR",
+           "sym": "XIFR",
+           "ret": 3.8
+          },
+          {
+           "name": "FLNC",
+           "sym": "FLNC",
+           "ret": -11.2
+          },
+          {
+           "name": "NRGV",
+           "sym": "NRGV",
+           "ret": 18.8
           }
          ]
         },
@@ -13492,7 +13531,7 @@
         },
         {
          "name": "증권·투자은행",
-         "n": 36,
+         "n": 38,
          "ret": 3.4,
          "lead": "모건스탠리",
          "lead_ret": 5.1,
@@ -13910,75 +13949,6 @@
          ]
         },
         {
-         "name": "REIT - Hotel & Motel",
-         "n": 12,
-         "ret": 3.1,
-         "lead": "HST",
-         "lead_ret": 3.6,
-         "members": [
-          {
-           "name": "HST",
-           "sym": "HST",
-           "ret": 3.6
-          },
-          {
-           "name": "RHP",
-           "sym": "RHP",
-           "ret": 2.3
-          },
-          {
-           "name": "APLE",
-           "sym": "APLE",
-           "ret": 3.1
-          },
-          {
-           "name": "PK",
-           "sym": "PK",
-           "ret": 2.7
-          },
-          {
-           "name": "DRH",
-           "sym": "DRH",
-           "ret": 2.6
-          },
-          {
-           "name": "PEB",
-           "sym": "PEB",
-           "ret": 2.4
-          },
-          {
-           "name": "SHO",
-           "sym": "SHO",
-           "ret": 2.2
-          },
-          {
-           "name": "RLJ",
-           "sym": "RLJ",
-           "ret": 3.2
-          },
-          {
-           "name": "XHR",
-           "sym": "XHR",
-           "ret": 2.1
-          },
-          {
-           "name": "INN",
-           "sym": "INN",
-           "ret": 3.6
-          },
-          {
-           "name": "CLDT",
-           "sym": "CLDT",
-           "ret": 4.9
-          },
-          {
-           "name": "SVC",
-           "sym": "SVC",
-           "ret": 9.6
-          }
-         ]
-        },
-        {
          "name": "석유 메이저",
          "n": 4,
          "ret": 3.1,
@@ -14098,6 +14068,75 @@
            "name": "LAND",
            "sym": "LAND",
            "ret": -2.0
+          }
+         ]
+        },
+        {
+         "name": "호텔 리츠",
+         "n": 12,
+         "ret": 3.1,
+         "lead": "HST",
+         "lead_ret": 3.6,
+         "members": [
+          {
+           "name": "HST",
+           "sym": "HST",
+           "ret": 3.6
+          },
+          {
+           "name": "RHP",
+           "sym": "RHP",
+           "ret": 2.3
+          },
+          {
+           "name": "APLE",
+           "sym": "APLE",
+           "ret": 3.1
+          },
+          {
+           "name": "PK",
+           "sym": "PK",
+           "ret": 2.7
+          },
+          {
+           "name": "DRH",
+           "sym": "DRH",
+           "ret": 2.6
+          },
+          {
+           "name": "PEB",
+           "sym": "PEB",
+           "ret": 2.4
+          },
+          {
+           "name": "SHO",
+           "sym": "SHO",
+           "ret": 2.2
+          },
+          {
+           "name": "RLJ",
+           "sym": "RLJ",
+           "ret": 3.2
+          },
+          {
+           "name": "XHR",
+           "sym": "XHR",
+           "ret": 2.1
+          },
+          {
+           "name": "INN",
+           "sym": "INN",
+           "ret": 3.6
+          },
+          {
+           "name": "CLDT",
+           "sym": "CLDT",
+           "ret": 4.9
+          },
+          {
+           "name": "SVC",
+           "sym": "SVC",
+           "ret": 9.6
           }
          ]
         },
@@ -14788,7 +14827,7 @@
          ]
         },
         {
-         "name": "Financial Conglomerates",
+         "name": "금융 복합기업",
          "n": 3,
          "ret": 2.5,
          "lead": "VOYA",
@@ -14995,7 +15034,7 @@
          ]
         },
         {
-         "name": "Farm Products",
+         "name": "농산물",
          "n": 6,
          "ret": 2.3,
          "lead": "ADM",
@@ -15034,7 +15073,7 @@
          ]
         },
         {
-         "name": "Real Estate - Development",
+         "name": "부동산 개발",
          "n": 4,
          "ret": 2.2,
          "lead": "HHH",
@@ -15597,7 +15636,7 @@
         },
         {
          "name": "지역 은행",
-         "n": 219,
+         "n": 221,
          "ret": 1.5,
          "lead": "PNC",
          "lead_ret": 3.1,
@@ -15705,35 +15744,6 @@
          ]
         },
         {
-         "name": "Gambling",
-         "n": 4,
-         "ret": 1.4,
-         "lead": "DKNG",
-         "lead_ret": 2.1,
-         "members": [
-          {
-           "name": "DKNG",
-           "sym": "DKNG",
-           "ret": 2.1
-          },
-          {
-           "name": "CHDN",
-           "sym": "CHDN",
-           "ret": 1.8
-          },
-          {
-           "name": "RSI",
-           "sym": "RSI",
-           "ret": -3.4
-          },
-          {
-           "name": "ACEL",
-           "sym": "ACEL",
-           "ret": -1.2
-          }
-         ]
-        },
-        {
          "name": "공구",
          "n": 8,
          "ret": 1.4,
@@ -15783,9 +15793,91 @@
          ]
         },
         {
-         "name": "응용 소프트웨어",
-         "n": 101,
+         "name": "도박·베팅",
+         "n": 4,
          "ret": 1.4,
+         "lead": "DKNG",
+         "lead_ret": 2.1,
+         "members": [
+          {
+           "name": "DKNG",
+           "sym": "DKNG",
+           "ret": 2.1
+          },
+          {
+           "name": "CHDN",
+           "sym": "CHDN",
+           "ret": 1.8
+          },
+          {
+           "name": "RSI",
+           "sym": "RSI",
+           "ret": -3.4
+          },
+          {
+           "name": "ACEL",
+           "sym": "ACEL",
+           "ret": -1.2
+          }
+         ]
+        },
+        {
+         "name": "주택용품 소매",
+         "n": 3,
+         "ret": 1.4,
+         "lead": "홈디포",
+         "lead_ret": 1.5,
+         "members": [
+          {
+           "name": "홈디포",
+           "sym": "HD",
+           "ret": 1.5
+          },
+          {
+           "name": "LOW",
+           "sym": "LOW",
+           "ret": 1.4
+          },
+          {
+           "name": "FND",
+           "sym": "FND",
+           "ret": -6.8
+          }
+         ]
+        },
+        {
+         "name": "담배",
+         "n": 4,
+         "ret": 1.3,
+         "lead": "필립모리스",
+         "lead_ret": 0.5,
+         "members": [
+          {
+           "name": "필립모리스",
+           "sym": "PM",
+           "ret": 0.5
+          },
+          {
+           "name": "MO",
+           "sym": "MO",
+           "ret": 3.3
+          },
+          {
+           "name": "TPB",
+           "sym": "TPB",
+           "ret": -15.7
+          },
+          {
+           "name": "UVV",
+           "sym": "UVV",
+           "ret": -4.2
+          }
+         ]
+        },
+        {
+         "name": "응용 소프트웨어",
+         "n": 102,
+         "ret": 1.3,
          "lead": "세일즈포스",
          "lead_ret": 2.0,
          "members": [
@@ -15892,59 +15984,6 @@
          ]
         },
         {
-         "name": "주택용품 소매",
-         "n": 3,
-         "ret": 1.4,
-         "lead": "홈디포",
-         "lead_ret": 1.5,
-         "members": [
-          {
-           "name": "홈디포",
-           "sym": "HD",
-           "ret": 1.5
-          },
-          {
-           "name": "LOW",
-           "sym": "LOW",
-           "ret": 1.4
-          },
-          {
-           "name": "FND",
-           "sym": "FND",
-           "ret": -6.8
-          }
-         ]
-        },
-        {
-         "name": "담배",
-         "n": 4,
-         "ret": 1.3,
-         "lead": "필립모리스",
-         "lead_ret": 0.5,
-         "members": [
-          {
-           "name": "필립모리스",
-           "sym": "PM",
-           "ret": 0.5
-          },
-          {
-           "name": "MO",
-           "sym": "MO",
-           "ret": 3.3
-          },
-          {
-           "name": "TPB",
-           "sym": "TPB",
-           "ret": -15.7
-          },
-          {
-           "name": "UVV",
-           "sym": "UVV",
-           "ret": -4.2
-          }
-         ]
-        },
-        {
          "name": "컨설팅",
          "n": 9,
          "ret": 1.3,
@@ -16038,7 +16077,7 @@
          ]
         },
         {
-         "name": "Coking Coal",
+         "name": "제철용 석탄",
          "n": 3,
          "ret": 1.2,
          "lead": "HCC",
@@ -16348,6 +16387,85 @@
            "name": "TR",
            "sym": "TR",
            "ret": -1.8
+          }
+         ]
+        },
+        {
+         "name": "종합 리츠",
+         "n": 14,
+         "ret": 0.9,
+         "lead": "VICI",
+         "lead_ret": 0.9,
+         "members": [
+          {
+           "name": "VICI",
+           "sym": "VICI",
+           "ret": 0.9
+          },
+          {
+           "name": "WPC",
+           "sym": "WPC",
+           "ret": 1.0
+          },
+          {
+           "name": "BNL",
+           "sym": "BNL",
+           "ret": 0.5
+          },
+          {
+           "name": "GNL",
+           "sym": "GNL",
+           "ret": -3.9
+          },
+          {
+           "name": "AAT",
+           "sym": "AAT",
+           "ret": 0.8
+          },
+          {
+           "name": "ESRT",
+           "sym": "ESRT",
+           "ret": -0.2
+          },
+          {
+           "name": "CTO",
+           "sym": "CTO",
+           "ret": 0.6
+          },
+          {
+           "name": "CMRF",
+           "sym": "CMRF",
+           "ret": 28.6
+          },
+          {
+           "name": "SAFE",
+           "sym": "SAFE",
+           "ret": -6.9
+          },
+          {
+           "name": "JBGS",
+           "sym": "JBGS",
+           "ret": 0.8
+          },
+          {
+           "name": "FVR",
+           "sym": "FVR",
+           "ret": -1.7
+          },
+          {
+           "name": "GOOD",
+           "sym": "GOOD",
+           "ret": -1.8
+          },
+          {
+           "name": "OLP",
+           "sym": "OLP",
+           "ret": 0.6
+          },
+          {
+           "name": "AHRT",
+           "sym": "AHRT",
+           "ret": 0.0
           }
          ]
         },
@@ -16679,80 +16797,6 @@
          ]
         },
         {
-         "name": "REIT - Diversified",
-         "n": 13,
-         "ret": 0.5,
-         "lead": "VICI",
-         "lead_ret": 0.9,
-         "members": [
-          {
-           "name": "VICI",
-           "sym": "VICI",
-           "ret": 0.9
-          },
-          {
-           "name": "WPC",
-           "sym": "WPC",
-           "ret": 1.0
-          },
-          {
-           "name": "BNL",
-           "sym": "BNL",
-           "ret": 0.5
-          },
-          {
-           "name": "GNL",
-           "sym": "GNL",
-           "ret": -3.9
-          },
-          {
-           "name": "AAT",
-           "sym": "AAT",
-           "ret": 0.8
-          },
-          {
-           "name": "ESRT",
-           "sym": "ESRT",
-           "ret": -0.2
-          },
-          {
-           "name": "CTO",
-           "sym": "CTO",
-           "ret": 0.6
-          },
-          {
-           "name": "SAFE",
-           "sym": "SAFE",
-           "ret": -6.9
-          },
-          {
-           "name": "JBGS",
-           "sym": "JBGS",
-           "ret": 0.8
-          },
-          {
-           "name": "FVR",
-           "sym": "FVR",
-           "ret": -1.7
-          },
-          {
-           "name": "GOOD",
-           "sym": "GOOD",
-           "ret": -1.8
-          },
-          {
-           "name": "OLP",
-           "sym": "OLP",
-           "ret": 0.6
-          },
-          {
-           "name": "AHRT",
-           "sym": "AHRT",
-           "ret": 0.0
-          }
-         ]
-        },
-        {
          "name": "병원",
          "n": 31,
          "ret": 0.5,
@@ -16976,7 +17020,7 @@
         },
         {
          "name": "기업 서비스",
-         "n": 25,
+         "n": 26,
          "ret": 0.4,
          "lead": "CTAS",
          "lead_ret": 1.7,
@@ -17194,7 +17238,7 @@
         },
         {
          "name": "IT 서비스",
-         "n": 35,
+         "n": 36,
          "ret": 0.3,
          "lead": "IBM",
          "lead_ret": 0.9,
@@ -17298,80 +17342,6 @@
            "name": "PSN",
            "sym": "PSN",
            "ret": 1.7
-          }
-         ]
-        },
-        {
-         "name": "복합기업",
-         "n": 13,
-         "ret": 0.3,
-         "lead": "MMM",
-         "lead_ret": -0.8,
-         "members": [
-          {
-           "name": "MMM",
-           "sym": "MMM",
-           "ret": -0.8
-          },
-          {
-           "name": "HON",
-           "sym": "HON",
-           "ret": 1.1
-          },
-          {
-           "name": "VMI",
-           "sym": "VMI",
-           "ret": 4.1
-          },
-          {
-           "name": "GHC",
-           "sym": "GHC",
-           "ret": 2.6
-          },
-          {
-           "name": "SEB",
-           "sym": "SEB",
-           "ret": 6.2
-          },
-          {
-           "name": "OTTR",
-           "sym": "OTTR",
-           "ret": -3.2
-          },
-          {
-           "name": "DLX",
-           "sym": "DLX",
-           "ret": 0.8
-          },
-          {
-           "name": "CODI",
-           "sym": "CODI",
-           "ret": 2.9
-          },
-          {
-           "name": "MATW",
-           "sym": "MATW",
-           "ret": -2.7
-          },
-          {
-           "name": "TRC",
-           "sym": "TRC",
-           "ret": 0.9
-          },
-          {
-           "name": "FIP",
-           "sym": "FIP",
-           "ret": 13.3
-          },
-          {
-           "name": "BOC",
-           "sym": "BOC",
-           "ret": 0.7
-          },
-          {
-           "name": "FBYD",
-           "sym": "FBYD",
-           "ret": -23.1
           }
          ]
         },
@@ -17486,7 +17456,7 @@
         },
         {
          "name": "가공식품",
-         "n": 30,
+         "n": 31,
          "ret": 0.2,
          "lead": "KHC",
          "lead_ret": 2.0,
@@ -17590,6 +17560,85 @@
            "name": "FLO",
            "sym": "FLO",
            "ret": -17.6
+          }
+         ]
+        },
+        {
+         "name": "복합기업",
+         "n": 14,
+         "ret": 0.2,
+         "lead": "MMM",
+         "lead_ret": -0.8,
+         "members": [
+          {
+           "name": "MMM",
+           "sym": "MMM",
+           "ret": -0.8
+          },
+          {
+           "name": "HON",
+           "sym": "HON",
+           "ret": 1.1
+          },
+          {
+           "name": "VMI",
+           "sym": "VMI",
+           "ret": 4.1
+          },
+          {
+           "name": "GHC",
+           "sym": "GHC",
+           "ret": 2.6
+          },
+          {
+           "name": "SEB",
+           "sym": "SEB",
+           "ret": 6.2
+          },
+          {
+           "name": "OTTR",
+           "sym": "OTTR",
+           "ret": -3.2
+          },
+          {
+           "name": "ATVK",
+           "sym": "ATVK",
+           "ret": -8.4
+          },
+          {
+           "name": "DLX",
+           "sym": "DLX",
+           "ret": 0.8
+          },
+          {
+           "name": "CODI",
+           "sym": "CODI",
+           "ret": 2.9
+          },
+          {
+           "name": "MATW",
+           "sym": "MATW",
+           "ret": -2.7
+          },
+          {
+           "name": "TRC",
+           "sym": "TRC",
+           "ret": 0.9
+          },
+          {
+           "name": "FIP",
+           "sym": "FIP",
+           "ret": 13.3
+          },
+          {
+           "name": "BOC",
+           "sym": "BOC",
+           "ret": 0.7
+          },
+          {
+           "name": "FBYD",
+           "sym": "FBYD",
+           "ret": -23.1
           }
          ]
         },
@@ -18058,6 +18107,30 @@
          ]
         },
         {
+         "name": "스팩",
+         "n": 3,
+         "ret": 0.0,
+         "lead": "BRRN",
+         "lead_ret": 0.0,
+         "members": [
+          {
+           "name": "BRRN",
+           "sym": "BRRN",
+           "ret": 0.0
+          },
+          {
+           "name": "CLUS",
+           "sym": "CLUS",
+           "ret": 0.0
+          },
+          {
+           "name": "BQST",
+           "sym": "BQST",
+           "ret": 0.0
+          }
+         ]
+        },
+        {
          "name": "카드·신용",
          "n": 31,
          "ret": 0.0,
@@ -18277,7 +18350,7 @@
         },
         {
          "name": "외식",
-         "n": 27,
+         "n": 28,
          "ret": -0.1,
          "lead": "맥도날드",
          "lead_ret": -1.6,
@@ -18385,75 +18458,6 @@
          ]
         },
         {
-         "name": "Insurance - Specialty",
-         "n": 12,
-         "ret": -0.4,
-         "lead": "FNF",
-         "lead_ret": -1.0,
-         "members": [
-          {
-           "name": "FNF",
-           "sym": "FNF",
-           "ret": -1.0
-          },
-          {
-           "name": "AXS",
-           "sym": "AXS",
-           "ret": 2.6
-          },
-          {
-           "name": "FAF",
-           "sym": "FAF",
-           "ret": -3.2
-          },
-          {
-           "name": "ACT",
-           "sym": "ACT",
-           "ret": -2.2
-          },
-          {
-           "name": "ESNT",
-           "sym": "ESNT",
-           "ret": 1.8
-          },
-          {
-           "name": "MTG",
-           "sym": "MTG",
-           "ret": -2.9
-          },
-          {
-           "name": "RDN",
-           "sym": "RDN",
-           "ret": 1.7
-          },
-          {
-           "name": "AGO",
-           "sym": "AGO",
-           "ret": 1.7
-          },
-          {
-           "name": "NMIH",
-           "sym": "NMIH",
-           "ret": -1.0
-          },
-          {
-           "name": "EIG",
-           "sym": "EIG",
-           "ret": 0.6
-          },
-          {
-           "name": "ITIC",
-           "sym": "ITIC",
-           "ret": -0.8
-          },
-          {
-           "name": "AMSF",
-           "sym": "AMSF",
-           "ret": -0.5
-          }
-         ]
-        },
-        {
          "name": "의류 소매",
          "n": 18,
          "ret": -0.4,
@@ -18549,6 +18553,75 @@
            "name": "JILL",
            "sym": "JILL",
            "ret": -0.2
+          }
+         ]
+        },
+        {
+         "name": "특수 보험",
+         "n": 12,
+         "ret": -0.4,
+         "lead": "FNF",
+         "lead_ret": -1.0,
+         "members": [
+          {
+           "name": "FNF",
+           "sym": "FNF",
+           "ret": -1.0
+          },
+          {
+           "name": "AXS",
+           "sym": "AXS",
+           "ret": 2.6
+          },
+          {
+           "name": "FAF",
+           "sym": "FAF",
+           "ret": -3.2
+          },
+          {
+           "name": "ACT",
+           "sym": "ACT",
+           "ret": -2.2
+          },
+          {
+           "name": "ESNT",
+           "sym": "ESNT",
+           "ret": 1.8
+          },
+          {
+           "name": "MTG",
+           "sym": "MTG",
+           "ret": -2.9
+          },
+          {
+           "name": "RDN",
+           "sym": "RDN",
+           "ret": 1.7
+          },
+          {
+           "name": "AGO",
+           "sym": "AGO",
+           "ret": 1.7
+          },
+          {
+           "name": "NMIH",
+           "sym": "NMIH",
+           "ret": -1.0
+          },
+          {
+           "name": "EIG",
+           "sym": "EIG",
+           "ret": 0.6
+          },
+          {
+           "name": "ITIC",
+           "sym": "ITIC",
+           "ret": -0.8
+          },
+          {
+           "name": "AMSF",
+           "sym": "AMSF",
+           "ret": -0.5
           }
          ]
         },
@@ -18745,76 +18818,7 @@
          ]
         },
         {
-         "name": "Auto & Truck Dealerships",
-         "n": 12,
-         "ret": -1.0,
-         "lead": "CVNA",
-         "lead_ret": -1.6,
-         "members": [
-          {
-           "name": "CVNA",
-           "sym": "CVNA",
-           "ret": -1.6
-          },
-          {
-           "name": "PAG",
-           "sym": "PAG",
-           "ret": -0.2
-          },
-          {
-           "name": "KMX",
-           "sym": "KMX",
-           "ret": 3.4
-          },
-          {
-           "name": "LAD",
-           "sym": "LAD",
-           "ret": -4.0
-          },
-          {
-           "name": "RUSHA",
-           "sym": "RUSHA",
-           "ret": 2.1
-          },
-          {
-           "name": "AN",
-           "sym": "AN",
-           "ret": -3.4
-          },
-          {
-           "name": "OPLN",
-           "sym": "OPLN",
-           "ret": 2.2
-          },
-          {
-           "name": "VVV",
-           "sym": "VVV",
-           "ret": -0.5
-          },
-          {
-           "name": "GPI",
-           "sym": "GPI",
-           "ret": -0.4
-          },
-          {
-           "name": "ABG",
-           "sym": "ABG",
-           "ret": -2.7
-          },
-          {
-           "name": "SAH",
-           "sym": "SAH",
-           "ret": -3.6
-          },
-          {
-           "name": "DRVN",
-           "sym": "DRVN",
-           "ret": -4.7
-          }
-         ]
-        },
-        {
-         "name": "Utilities - Regulated Water",
+         "name": "수도 유틸리티",
          "n": 8,
          "ret": -1.0,
          "lead": "AWK",
@@ -18918,6 +18922,80 @@
            "name": "TRIP",
            "sym": "TRIP",
            "ret": 3.4
+          }
+         ]
+        },
+        {
+         "name": "자동차 판매",
+         "n": 13,
+         "ret": -1.0,
+         "lead": "CVNA",
+         "lead_ret": -1.6,
+         "members": [
+          {
+           "name": "CVNA",
+           "sym": "CVNA",
+           "ret": -1.6
+          },
+          {
+           "name": "PAG",
+           "sym": "PAG",
+           "ret": -0.2
+          },
+          {
+           "name": "KMX",
+           "sym": "KMX",
+           "ret": 3.4
+          },
+          {
+           "name": "LAD",
+           "sym": "LAD",
+           "ret": -4.0
+          },
+          {
+           "name": "RUSHA",
+           "sym": "RUSHA",
+           "ret": 2.1
+          },
+          {
+           "name": "AN",
+           "sym": "AN",
+           "ret": -3.4
+          },
+          {
+           "name": "ALTB",
+           "sym": "ALTB",
+           "ret": 0.0
+          },
+          {
+           "name": "OPLN",
+           "sym": "OPLN",
+           "ret": 2.2
+          },
+          {
+           "name": "VVV",
+           "sym": "VVV",
+           "ret": -0.5
+          },
+          {
+           "name": "GPI",
+           "sym": "GPI",
+           "ret": -0.4
+          },
+          {
+           "name": "ABG",
+           "sym": "ABG",
+           "ret": -2.7
+          },
+          {
+           "name": "SAH",
+           "sym": "SAH",
+           "ret": -3.6
+          },
+          {
+           "name": "DRVN",
+           "sym": "DRVN",
+           "ret": -4.7
           }
          ]
         },
@@ -19070,7 +19148,66 @@
          ]
         },
         {
-         "name": "REIT - Office",
+         "name": "레저 차량",
+         "n": 10,
+         "ret": -1.2,
+         "lead": "THO",
+         "lead_ret": -4.6,
+         "members": [
+          {
+           "name": "THO",
+           "sym": "THO",
+           "ret": -4.6
+          },
+          {
+           "name": "BC",
+           "sym": "BC",
+           "ret": -1.4
+          },
+          {
+           "name": "PII",
+           "sym": "PII",
+           "ret": 2.2
+          },
+          {
+           "name": "HOG",
+           "sym": "HOG",
+           "ret": -0.9
+          },
+          {
+           "name": "PATK",
+           "sym": "PATK",
+           "ret": 2.4
+          },
+          {
+           "name": "LCII",
+           "sym": "LCII",
+           "ret": 0.3
+          },
+          {
+           "name": "WGO",
+           "sym": "WGO",
+           "ret": -1.2
+          },
+          {
+           "name": "MCFT",
+           "sym": "MCFT",
+           "ret": 7.5
+          },
+          {
+           "name": "MBUU",
+           "sym": "MBUU",
+           "ret": -2.3
+          },
+          {
+           "name": "LVWR",
+           "sym": "LVWR",
+           "ret": -45.4
+          }
+         ]
+        },
+        {
+         "name": "오피스 리츠",
          "n": 16,
          "ret": -1.2,
          "lead": "BXP",
@@ -19155,65 +19292,6 @@
            "name": "OPI",
            "sym": "OPI",
            "ret": 17.4
-          }
-         ]
-        },
-        {
-         "name": "레저 차량",
-         "n": 10,
-         "ret": -1.2,
-         "lead": "THO",
-         "lead_ret": -4.6,
-         "members": [
-          {
-           "name": "THO",
-           "sym": "THO",
-           "ret": -4.6
-          },
-          {
-           "name": "BC",
-           "sym": "BC",
-           "ret": -1.4
-          },
-          {
-           "name": "PII",
-           "sym": "PII",
-           "ret": 2.2
-          },
-          {
-           "name": "HOG",
-           "sym": "HOG",
-           "ret": -0.9
-          },
-          {
-           "name": "PATK",
-           "sym": "PATK",
-           "ret": 2.4
-          },
-          {
-           "name": "LCII",
-           "sym": "LCII",
-           "ret": 0.3
-          },
-          {
-           "name": "WGO",
-           "sym": "WGO",
-           "ret": -1.2
-          },
-          {
-           "name": "MCFT",
-           "sym": "MCFT",
-           "ret": 7.5
-          },
-          {
-           "name": "MBUU",
-           "sym": "MBUU",
-           "ret": -2.3
-          },
-          {
-           "name": "LVWR",
-           "sym": "LVWR",
-           "ret": -45.4
           }
          ]
         },
@@ -19355,7 +19433,7 @@
          ]
         },
         {
-         "name": "Business Equipment & Supplies",
+         "name": "사무기기",
          "n": 4,
          "ret": -1.8,
          "lead": "CXT",
@@ -19591,7 +19669,7 @@
          ]
         },
         {
-         "name": "REIT - Mortgage",
+         "name": "모기지 리츠",
          "n": 22,
          "ret": -5.4,
          "lead": "NLY",
@@ -19808,7 +19886,7 @@
          ]
         },
         {
-         "name": "Other Precious Metals & Mining",
+         "name": "귀금속 채굴",
          "n": 5,
          "ret": -10.7,
          "lead": "HL",
@@ -19949,8 +20027,8 @@
         }
        ],
        "new_high_52w": {
-        "n": 177,
-        "universe": 2619,
+        "n": 182,
+        "universe": 2638,
         "top": [
          {
           "name": "애플",
@@ -20131,9 +20209,9 @@
          "ret": -10.4
         },
         {
-         "name": "CDE",
-         "sym": "CDE",
-         "ret": -9.6
+         "name": "RKT",
+         "sym": "RKT",
+         "ret": -9.0
         }
        ],
        "turnover_top": [
@@ -20186,17 +20264,17 @@
          "tag": "$59.7B"
         }
        ],
-       "turnover_txt": "$3,241.4B"
+       "turnover_txt": "$3,241.6B"
       },
       "m1": {
        "asof": "2026-11-13",
        "since": "2026-10-15",
        "k": 21,
-       "universe": 2620,
+       "universe": 2639,
        "breadth_all": {
-        "up": 1502,
-        "down": 1111,
-        "flat": 7
+        "up": 1507,
+        "down": 1117,
+        "flat": 15
        },
        "big_n": 500,
        "breadth_up": 65,
@@ -20748,8 +20826,8 @@
         },
         {
          "name": "특수·제네릭 제약",
-         "n": 35,
-         "ret": 11.2,
+         "n": 36,
+         "ret": 11.1,
          "lead": "ZTS",
          "lead_ret": 6.9,
          "members": [
@@ -20856,7 +20934,7 @@
          ]
         },
         {
-         "name": "Utilities - Regulated Water",
+         "name": "수도 유틸리티",
          "n": 8,
          "ret": 11.0,
          "lead": "AWK",
@@ -20905,9 +20983,9 @@
          ]
         },
         {
-         "name": "Auto & Truck Dealerships",
-         "n": 12,
-         "ret": 10.7,
+         "name": "자동차 판매",
+         "n": 13,
+         "ret": 10.3,
          "lead": "CVNA",
          "lead_ret": 19.4,
          "members": [
@@ -20940,6 +21018,11 @@
            "name": "AN",
            "sym": "AN",
            "ret": 11.2
+          },
+          {
+           "name": "ALTB",
+           "sym": "ALTB",
+           "ret": 0.0
           },
           {
            "name": "OPLN",
@@ -20975,7 +21058,7 @@
         },
         {
          "name": "외식",
-         "n": 27,
+         "n": 28,
          "ret": 9.8,
          "lead": "맥도날드",
          "lead_ret": 12.2,
@@ -22018,7 +22101,7 @@
          ]
         },
         {
-         "name": "Real Estate - Development",
+         "name": "부동산 개발",
          "n": 4,
          "ret": 8.6,
          "lead": "HHH",
@@ -22106,7 +22189,46 @@
          ]
         },
         {
-         "name": "REIT - Hotel & Motel",
+         "name": "폐기물",
+         "n": 6,
+         "ret": 8.5,
+         "lead": "WM",
+         "lead_ret": 8.8,
+         "members": [
+          {
+           "name": "WM",
+           "sym": "WM",
+           "ret": 8.8
+          },
+          {
+           "name": "RSG",
+           "sym": "RSG",
+           "ret": 10.2
+          },
+          {
+           "name": "CLH",
+           "sym": "CLH",
+           "ret": -8.1
+          },
+          {
+           "name": "CWST",
+           "sym": "CWST",
+           "ret": 15.8
+          },
+          {
+           "name": "ONT",
+           "sym": "ONT",
+           "ret": 65.1
+          },
+          {
+           "name": "NVRI",
+           "sym": "NVRI",
+           "ret": 28.8
+          }
+         ]
+        },
+        {
+         "name": "호텔 리츠",
          "n": 12,
          "ret": 8.5,
          "lead": "HST",
@@ -22171,45 +22293,6 @@
            "name": "SVC",
            "sym": "SVC",
            "ret": -7.9
-          }
-         ]
-        },
-        {
-         "name": "폐기물",
-         "n": 6,
-         "ret": 8.5,
-         "lead": "WM",
-         "lead_ret": 8.8,
-         "members": [
-          {
-           "name": "WM",
-           "sym": "WM",
-           "ret": 8.8
-          },
-          {
-           "name": "RSG",
-           "sym": "RSG",
-           "ret": 10.2
-          },
-          {
-           "name": "CLH",
-           "sym": "CLH",
-           "ret": -8.1
-          },
-          {
-           "name": "CWST",
-           "sym": "CWST",
-           "ret": 15.8
-          },
-          {
-           "name": "ONT",
-           "sym": "ONT",
-           "ret": 65.1
-          },
-          {
-           "name": "NVRI",
-           "sym": "NVRI",
-           "ret": 28.8
           }
          ]
         },
@@ -22338,50 +22421,6 @@
            "name": "NGVC",
            "sym": "NGVC",
            "ret": -6.0
-          }
-         ]
-        },
-        {
-         "name": "Utilities - Renewable",
-         "n": 7,
-         "ret": 7.8,
-         "lead": "CWEN",
-         "lead_ret": 11.5,
-         "members": [
-          {
-           "name": "CWEN",
-           "sym": "CWEN",
-           "ret": 11.5
-          },
-          {
-           "name": "ORA",
-           "sym": "ORA",
-           "ret": 1.0
-          },
-          {
-           "name": "MWH",
-           "sym": "MWH",
-           "ret": 16.2
-          },
-          {
-           "name": "FRVO",
-           "sym": "FRVO",
-           "ret": 12.2
-          },
-          {
-           "name": "XIFR",
-           "sym": "XIFR",
-           "ret": -22.6
-          },
-          {
-           "name": "FLNC",
-           "sym": "FLNC",
-           "ret": -27.2
-          },
-          {
-           "name": "NRGV",
-           "sym": "NRGV",
-           "ret": 25.8
           }
          ]
         },
@@ -22540,6 +22579,50 @@
            "name": "PLMR",
            "sym": "PLMR",
            "ret": 15.7
+          }
+         ]
+        },
+        {
+         "name": "신재생 발전",
+         "n": 7,
+         "ret": 7.8,
+         "lead": "CWEN",
+         "lead_ret": 11.5,
+         "members": [
+          {
+           "name": "CWEN",
+           "sym": "CWEN",
+           "ret": 11.5
+          },
+          {
+           "name": "ORA",
+           "sym": "ORA",
+           "ret": 1.0
+          },
+          {
+           "name": "MWH",
+           "sym": "MWH",
+           "ret": 16.2
+          },
+          {
+           "name": "FRVO",
+           "sym": "FRVO",
+           "ret": 12.2
+          },
+          {
+           "name": "XIFR",
+           "sym": "XIFR",
+           "ret": -22.6
+          },
+          {
+           "name": "FLNC",
+           "sym": "FLNC",
+           "ret": -27.2
+          },
+          {
+           "name": "NRGV",
+           "sym": "NRGV",
+           "ret": 25.8
           }
          ]
         },
@@ -22781,80 +22864,6 @@
          ]
         },
         {
-         "name": "복합기업",
-         "n": 13,
-         "ret": 7.3,
-         "lead": "MMM",
-         "lead_ret": 11.1,
-         "members": [
-          {
-           "name": "MMM",
-           "sym": "MMM",
-           "ret": 11.1
-          },
-          {
-           "name": "HON",
-           "sym": "HON",
-           "ret": 5.7
-          },
-          {
-           "name": "VMI",
-           "sym": "VMI",
-           "ret": -6.7
-          },
-          {
-           "name": "GHC",
-           "sym": "GHC",
-           "ret": 3.8
-          },
-          {
-           "name": "SEB",
-           "sym": "SEB",
-           "ret": -5.7
-          },
-          {
-           "name": "OTTR",
-           "sym": "OTTR",
-           "ret": -15.3
-          },
-          {
-           "name": "DLX",
-           "sym": "DLX",
-           "ret": 17.0
-          },
-          {
-           "name": "CODI",
-           "sym": "CODI",
-           "ret": 9.6
-          },
-          {
-           "name": "MATW",
-           "sym": "MATW",
-           "ret": -2.5
-          },
-          {
-           "name": "TRC",
-           "sym": "TRC",
-           "ret": 3.9
-          },
-          {
-           "name": "FIP",
-           "sym": "FIP",
-           "ret": 53.5
-          },
-          {
-           "name": "BOC",
-           "sym": "BOC",
-           "ret": 7.7
-          },
-          {
-           "name": "FBYD",
-           "sym": "FBYD",
-           "ret": -38.1
-          }
-         ]
-        },
-        {
          "name": "전력 유틸리티",
          "n": 32,
          "ret": 7.2,
@@ -22964,6 +22973,85 @@
          ]
         },
         {
+         "name": "복합기업",
+         "n": 14,
+         "ret": 7.1,
+         "lead": "MMM",
+         "lead_ret": 11.1,
+         "members": [
+          {
+           "name": "MMM",
+           "sym": "MMM",
+           "ret": 11.1
+          },
+          {
+           "name": "HON",
+           "sym": "HON",
+           "ret": 5.7
+          },
+          {
+           "name": "VMI",
+           "sym": "VMI",
+           "ret": -6.7
+          },
+          {
+           "name": "GHC",
+           "sym": "GHC",
+           "ret": 3.8
+          },
+          {
+           "name": "SEB",
+           "sym": "SEB",
+           "ret": -5.7
+          },
+          {
+           "name": "OTTR",
+           "sym": "OTTR",
+           "ret": -15.3
+          },
+          {
+           "name": "ATVK",
+           "sym": "ATVK",
+           "ret": -12.5
+          },
+          {
+           "name": "DLX",
+           "sym": "DLX",
+           "ret": 17.0
+          },
+          {
+           "name": "CODI",
+           "sym": "CODI",
+           "ret": 9.6
+          },
+          {
+           "name": "MATW",
+           "sym": "MATW",
+           "ret": -2.5
+          },
+          {
+           "name": "TRC",
+           "sym": "TRC",
+           "ret": 3.9
+          },
+          {
+           "name": "FIP",
+           "sym": "FIP",
+           "ret": 53.5
+          },
+          {
+           "name": "BOC",
+           "sym": "BOC",
+           "ret": 7.7
+          },
+          {
+           "name": "FBYD",
+           "sym": "FBYD",
+           "ret": -38.1
+          }
+         ]
+        },
+        {
          "name": "의료기기",
          "n": 60,
          "ret": 7.1,
@@ -23069,115 +23157,6 @@
            "name": "IRTC",
            "sym": "IRTC",
            "ret": -15.9
-          }
-         ]
-        },
-        {
-         "name": "기업 서비스",
-         "n": 25,
-         "ret": 7.0,
-         "lead": "CTAS",
-         "lead_ret": 6.2,
-         "members": [
-          {
-           "name": "CTAS",
-           "sym": "CTAS",
-           "ret": 6.2
-          },
-          {
-           "name": "CPRT",
-           "sym": "CPRT",
-           "ret": 14.7
-          },
-          {
-           "name": "GPN",
-           "sym": "GPN",
-           "ret": 9.2
-          },
-          {
-           "name": "RBA",
-           "sym": "RBA",
-           "ret": 9.2
-          },
-          {
-           "name": "ULS",
-           "sym": "ULS",
-           "ret": 8.0
-          },
-          {
-           "name": "ARMK",
-           "sym": "ARMK",
-           "ret": -2.0
-          },
-          {
-           "name": "DLB",
-           "sym": "DLB",
-           "ret": 4.6
-          },
-          {
-           "name": "AMTM",
-           "sym": "AMTM",
-           "ret": 15.0
-          },
-          {
-           "name": "UNF",
-           "sym": "UNF",
-           "ret": -11.1
-          },
-          {
-           "name": "FA",
-           "sym": "FA",
-           "ret": 7.0
-          },
-          {
-           "name": "AZZ",
-           "sym": "AZZ",
-           "ret": 2.3
-          },
-          {
-           "name": "MMS",
-           "sym": "MMS",
-           "ret": 7.4
-          },
-          {
-           "name": "ABM",
-           "sym": "ABM",
-           "ret": 7.6
-          },
-          {
-           "name": "TIC",
-           "sym": "TIC",
-           "ret": 22.5
-          },
-          {
-           "name": "CMPR",
-           "sym": "CMPR",
-           "ret": -25.3
-          },
-          {
-           "name": "RHLD",
-           "sym": "RHLD",
-           "ret": 26.4
-          },
-          {
-           "name": "LZ",
-           "sym": "LZ",
-           "ret": -19.5
-          },
-          {
-           "name": "TH",
-           "sym": "TH",
-           "ret": -27.7
-          },
-          {
-           "name": "BV",
-           "sym": "BV",
-           "ret": -6.5
-          },
-          {
-           "name": "TRNS",
-           "sym": "TRNS",
-           "ret": 26.0
           }
          ]
         },
@@ -23321,6 +23300,115 @@
            "name": "LCID",
            "sym": "LCID",
            "ret": -15.6
+          }
+         ]
+        },
+        {
+         "name": "기업 서비스",
+         "n": 26,
+         "ret": 6.8,
+         "lead": "CTAS",
+         "lead_ret": 6.2,
+         "members": [
+          {
+           "name": "CTAS",
+           "sym": "CTAS",
+           "ret": 6.2
+          },
+          {
+           "name": "CPRT",
+           "sym": "CPRT",
+           "ret": 14.7
+          },
+          {
+           "name": "GPN",
+           "sym": "GPN",
+           "ret": 9.2
+          },
+          {
+           "name": "RBA",
+           "sym": "RBA",
+           "ret": 9.2
+          },
+          {
+           "name": "ULS",
+           "sym": "ULS",
+           "ret": 8.0
+          },
+          {
+           "name": "ARMK",
+           "sym": "ARMK",
+           "ret": -2.0
+          },
+          {
+           "name": "DLB",
+           "sym": "DLB",
+           "ret": 4.6
+          },
+          {
+           "name": "AMTM",
+           "sym": "AMTM",
+           "ret": 15.0
+          },
+          {
+           "name": "UNF",
+           "sym": "UNF",
+           "ret": -11.1
+          },
+          {
+           "name": "FA",
+           "sym": "FA",
+           "ret": 7.0
+          },
+          {
+           "name": "AZZ",
+           "sym": "AZZ",
+           "ret": 2.3
+          },
+          {
+           "name": "MMS",
+           "sym": "MMS",
+           "ret": 7.4
+          },
+          {
+           "name": "ABM",
+           "sym": "ABM",
+           "ret": 7.6
+          },
+          {
+           "name": "TIC",
+           "sym": "TIC",
+           "ret": 22.5
+          },
+          {
+           "name": "CMPR",
+           "sym": "CMPR",
+           "ret": -25.3
+          },
+          {
+           "name": "RHLD",
+           "sym": "RHLD",
+           "ret": 26.4
+          },
+          {
+           "name": "LZ",
+           "sym": "LZ",
+           "ret": -19.5
+          },
+          {
+           "name": "TH",
+           "sym": "TH",
+           "ret": -27.7
+          },
+          {
+           "name": "BV",
+           "sym": "BV",
+           "ret": -6.5
+          },
+          {
+           "name": "TRNS",
+           "sym": "TRNS",
+           "ret": 26.0
           }
          ]
         },
@@ -23572,7 +23660,7 @@
         },
         {
          "name": "IT 서비스",
-         "n": 35,
+         "n": 36,
          "ret": 6.1,
          "lead": "IBM",
          "lead_ret": 5.6,
@@ -24308,8 +24396,8 @@
         },
         {
          "name": "지역 은행",
-         "n": 219,
-         "ret": 5.3,
+         "n": 221,
+         "ret": 5.2,
          "lead": "PNC",
          "lead_ret": 8.1,
          "members": [
@@ -24416,7 +24504,7 @@
          ]
         },
         {
-         "name": "Financial Conglomerates",
+         "name": "금융 복합기업",
          "n": 3,
          "ret": 5.1,
          "lead": "VOYA",
@@ -24440,7 +24528,7 @@
          ]
         },
         {
-         "name": "Gambling",
+         "name": "도박·베팅",
          "n": 4,
          "ret": 4.9,
          "lead": "DKNG",
@@ -24528,7 +24616,7 @@
          ]
         },
         {
-         "name": "REIT - Office",
+         "name": "오피스 리츠",
          "n": 16,
          "ret": 4.8,
          "lead": "BXP",
@@ -24824,7 +24912,7 @@
          ]
         },
         {
-         "name": "Insurance - Specialty",
+         "name": "특수 보험",
          "n": 12,
          "ret": 4.4,
          "lead": "FNF",
@@ -25180,83 +25268,88 @@
          ]
         },
         {
-         "name": "생명보험",
-         "n": 13,
-         "ret": 3.6,
-         "lead": "MET",
-         "lead_ret": 2.4,
+         "name": "종합 리츠",
+         "n": 14,
+         "ret": 3.7,
+         "lead": "VICI",
+         "lead_ret": 6.6,
          "members": [
           {
-           "name": "MET",
-           "sym": "MET",
-           "ret": 2.4
+           "name": "VICI",
+           "sym": "VICI",
+           "ret": 6.6
           },
           {
-           "name": "AFL",
-           "sym": "AFL",
-           "ret": 8.1
+           "name": "WPC",
+           "sym": "WPC",
+           "ret": 1.9
           },
           {
-           "name": "PRU",
-           "sym": "PRU",
-           "ret": 6.2
+           "name": "BNL",
+           "sym": "BNL",
+           "ret": -3.0
           },
           {
-           "name": "UNM",
-           "sym": "UNM",
-           "ret": -13.6
+           "name": "GNL",
+           "sym": "GNL",
+           "ret": -11.6
           },
           {
-           "name": "GL",
-           "sym": "GL",
-           "ret": -4.1
+           "name": "AAT",
+           "sym": "AAT",
+           "ret": 1.2
           },
           {
-           "name": "PRI",
-           "sym": "PRI",
-           "ret": 4.3
+           "name": "ESRT",
+           "sym": "ESRT",
+           "ret": 12.1
           },
           {
-           "name": "JXN",
-           "sym": "JXN",
-           "ret": 5.6
+           "name": "CTO",
+           "sym": "CTO",
+           "ret": -1.4
           },
           {
-           "name": "LNC",
-           "sym": "LNC",
-           "ret": 4.9
+           "name": "CMRF",
+           "sym": "CMRF",
+           "ret": 23.3
           },
           {
-           "name": "CNO",
-           "sym": "CNO",
-           "ret": 5.3
+           "name": "SAFE",
+           "sym": "SAFE",
+           "ret": -14.6
           },
           {
-           "name": "FG",
-           "sym": "FG",
-           "ret": 18.7
+           "name": "JBGS",
+           "sym": "JBGS",
+           "ret": 13.2
           },
           {
-           "name": "GNW",
-           "sym": "GNW",
-           "ret": -6.8
+           "name": "FVR",
+           "sym": "FVR",
+           "ret": 9.6
           },
           {
-           "name": "BHF",
-           "sym": "BHF",
-           "ret": -9.9
+           "name": "GOOD",
+           "sym": "GOOD",
+           "ret": -21.1
           },
           {
-           "name": "ABX",
-           "sym": "ABX",
-           "ret": 11.2
+           "name": "OLP",
+           "sym": "OLP",
+           "ret": -4.0
+          },
+          {
+           "name": "AHRT",
+           "sym": "AHRT",
+           "ret": 6.9
           }
          ]
         },
         {
          "name": "가공식품",
-         "n": 30,
-         "ret": 3.5,
+         "n": 31,
+         "ret": 3.6,
          "lead": "KHC",
          "lead_ret": 7.9,
          "members": [
@@ -25363,6 +25456,80 @@
          ]
         },
         {
+         "name": "생명보험",
+         "n": 13,
+         "ret": 3.6,
+         "lead": "MET",
+         "lead_ret": 2.4,
+         "members": [
+          {
+           "name": "MET",
+           "sym": "MET",
+           "ret": 2.4
+          },
+          {
+           "name": "AFL",
+           "sym": "AFL",
+           "ret": 8.1
+          },
+          {
+           "name": "PRU",
+           "sym": "PRU",
+           "ret": 6.2
+          },
+          {
+           "name": "UNM",
+           "sym": "UNM",
+           "ret": -13.6
+          },
+          {
+           "name": "GL",
+           "sym": "GL",
+           "ret": -4.1
+          },
+          {
+           "name": "PRI",
+           "sym": "PRI",
+           "ret": 4.3
+          },
+          {
+           "name": "JXN",
+           "sym": "JXN",
+           "ret": 5.6
+          },
+          {
+           "name": "LNC",
+           "sym": "LNC",
+           "ret": 4.9
+          },
+          {
+           "name": "CNO",
+           "sym": "CNO",
+           "ret": 5.3
+          },
+          {
+           "name": "FG",
+           "sym": "FG",
+           "ret": 18.7
+          },
+          {
+           "name": "GNW",
+           "sym": "GNW",
+           "ret": -6.8
+          },
+          {
+           "name": "BHF",
+           "sym": "BHF",
+           "ret": -9.9
+          },
+          {
+           "name": "ABX",
+           "sym": "ABX",
+           "ret": 11.2
+          }
+         ]
+        },
+        {
          "name": "온라인 유통",
          "n": 13,
          "ret": 3.5,
@@ -25433,80 +25600,6 @@
            "name": "LOGC",
            "sym": "LOGC",
            "ret": -10.2
-          }
-         ]
-        },
-        {
-         "name": "REIT - Diversified",
-         "n": 13,
-         "ret": 3.4,
-         "lead": "VICI",
-         "lead_ret": 6.6,
-         "members": [
-          {
-           "name": "VICI",
-           "sym": "VICI",
-           "ret": 6.6
-          },
-          {
-           "name": "WPC",
-           "sym": "WPC",
-           "ret": 1.9
-          },
-          {
-           "name": "BNL",
-           "sym": "BNL",
-           "ret": -3.0
-          },
-          {
-           "name": "GNL",
-           "sym": "GNL",
-           "ret": -11.6
-          },
-          {
-           "name": "AAT",
-           "sym": "AAT",
-           "ret": 1.2
-          },
-          {
-           "name": "ESRT",
-           "sym": "ESRT",
-           "ret": 12.1
-          },
-          {
-           "name": "CTO",
-           "sym": "CTO",
-           "ret": -1.4
-          },
-          {
-           "name": "SAFE",
-           "sym": "SAFE",
-           "ret": -14.6
-          },
-          {
-           "name": "JBGS",
-           "sym": "JBGS",
-           "ret": 13.2
-          },
-          {
-           "name": "FVR",
-           "sym": "FVR",
-           "ret": 9.6
-          },
-          {
-           "name": "GOOD",
-           "sym": "GOOD",
-           "ret": -21.1
-          },
-          {
-           "name": "OLP",
-           "sym": "OLP",
-           "ret": -4.0
-          },
-          {
-           "name": "AHRT",
-           "sym": "AHRT",
-           "ret": 6.9
           }
          ]
         },
@@ -26342,6 +26435,30 @@
          ]
         },
         {
+         "name": "스팩",
+         "n": 3,
+         "ret": 0.0,
+         "lead": "BRRN",
+         "lead_ret": 0.0,
+         "members": [
+          {
+           "name": "BRRN",
+           "sym": "BRRN",
+           "ret": 0.0
+          },
+          {
+           "name": "CLUS",
+           "sym": "CLUS",
+           "ret": 0.0
+          },
+          {
+           "name": "BQST",
+           "sym": "BQST",
+           "ret": 0.0
+          }
+         ]
+        },
+        {
          "name": "건강보험",
          "n": 11,
          "ret": -0.1,
@@ -26406,7 +26523,7 @@
          ]
         },
         {
-         "name": "Business Equipment & Supplies",
+         "name": "사무기기",
          "n": 4,
          "ret": -0.5,
          "lead": "CXT",
@@ -26545,7 +26662,7 @@
         },
         {
          "name": "증권·투자은행",
-         "n": 36,
+         "n": 38,
          "ret": -0.6,
          "lead": "모건스탠리",
          "lead_ret": 4.7,
@@ -27025,7 +27142,7 @@
         },
         {
          "name": "건축자재",
-         "n": 25,
+         "n": 26,
          "ret": -1.4,
          "lead": "TT",
          "lead_ret": -8.6,
@@ -27813,8 +27930,8 @@
         },
         {
          "name": "응용 소프트웨어",
-         "n": 101,
-         "ret": -4.5,
+         "n": 102,
+         "ret": -4.6,
          "lead": "세일즈포스",
          "lead_ret": -11.7,
          "members": [
@@ -27921,7 +28038,7 @@
          ]
         },
         {
-         "name": "Farm Products",
+         "name": "농산물",
          "n": 6,
          "ret": -4.7,
          "lead": "ADM",
@@ -28271,7 +28388,7 @@
          ]
         },
         {
-         "name": "Coking Coal",
+         "name": "제철용 석탄",
          "n": 3,
          "ret": -6.4,
          "lead": "HCC",
@@ -28324,7 +28441,7 @@
          ]
         },
         {
-         "name": "REIT - Mortgage",
+         "name": "모기지 리츠",
          "n": 22,
          "ret": -7.2,
          "lead": "NLY",
@@ -29570,7 +29687,7 @@
          ]
         },
         {
-         "name": "Other Precious Metals & Mining",
+         "name": "귀금속 채굴",
          "n": 5,
          "ret": -17.7,
          "lead": "HL",
@@ -29667,8 +29784,8 @@
         }
        ],
        "new_high_52w": {
-        "n": 554,
-        "universe": 2620,
+        "n": 560,
+        "universe": 2639,
         "top": [
          {
           "name": "애플",
@@ -29904,81 +30021,81 @@
          "tag": "$291.5B"
         }
        ],
-       "turnover_txt": "$14,409.1B"
+       "turnover_txt": "$14,410.1B"
       }
      },
      "breadth_hist": [
       {
        "date": "2026-10-05",
        "up": 322,
-       "down": 175,
-       "flat": 3
+       "down": 174,
+       "flat": 4
       },
       {
        "date": "2026-10-06",
-       "up": 337,
-       "down": 163,
-       "flat": 0
-      },
-      {
-       "date": "2026-10-07",
-       "up": 141,
-       "down": 357,
-       "flat": 2
-      },
-      {
-       "date": "2026-10-08",
-       "up": 320,
-       "down": 179,
-       "flat": 1
-      },
-      {
-       "date": "2026-10-09",
        "up": 336,
        "down": 163,
        "flat": 1
       },
       {
+       "date": "2026-10-07",
+       "up": 141,
+       "down": 356,
+       "flat": 3
+      },
+      {
+       "date": "2026-10-08",
+       "up": 319,
+       "down": 179,
+       "flat": 2
+      },
+      {
+       "date": "2026-10-09",
+       "up": 335,
+       "down": 163,
+       "flat": 2
+      },
+      {
        "date": "2026-10-12",
        "up": 299,
-       "down": 198,
-       "flat": 3
+       "down": 197,
+       "flat": 4
       },
       {
        "date": "2026-10-13",
        "up": 246,
-       "down": 253,
-       "flat": 1
+       "down": 252,
+       "flat": 2
       },
       {
        "date": "2026-10-14",
        "up": 234,
-       "down": 266,
-       "flat": 0
+       "down": 265,
+       "flat": 1
       },
       {
        "date": "2026-10-15",
-       "up": 358,
+       "up": 357,
        "down": 142,
-       "flat": 0
+       "flat": 1
       },
       {
        "date": "2026-10-16",
-       "up": 236,
+       "up": 235,
        "down": 264,
-       "flat": 0
+       "flat": 1
       },
       {
        "date": "2026-10-19",
        "up": 196,
-       "down": 300,
-       "flat": 4
+       "down": 299,
+       "flat": 5
       },
       {
        "date": "2026-10-20",
        "up": 383,
-       "down": 117,
-       "flat": 0
+       "down": 116,
+       "flat": 1
       },
       {
        "date": "2026-10-21",
@@ -29989,104 +30106,104 @@
       {
        "date": "2026-10-22",
        "up": 301,
-       "down": 199,
-       "flat": 0
+       "down": 198,
+       "flat": 1
       },
       {
        "date": "2026-10-23",
        "up": 155,
-       "down": 343,
-       "flat": 2
+       "down": 342,
+       "flat": 3
       },
       {
        "date": "2026-10-26",
-       "up": 305,
+       "up": 304,
        "down": 193,
-       "flat": 2
+       "flat": 3
       },
       {
        "date": "2026-10-27",
-       "up": 263,
+       "up": 262,
        "down": 237,
-       "flat": 0
+       "flat": 1
       },
       {
        "date": "2026-10-28",
-       "up": 268,
+       "up": 267,
        "down": 232,
-       "flat": 0
+       "flat": 1
       },
       {
        "date": "2026-10-29",
        "up": 376,
-       "down": 123,
-       "flat": 1
+       "down": 122,
+       "flat": 2
       },
       {
        "date": "2026-10-30",
        "up": 218,
-       "down": 282,
-       "flat": 0
+       "down": 281,
+       "flat": 1
       },
       {
        "date": "2026-11-02",
-       "up": 311,
+       "up": 310,
        "down": 189,
-       "flat": 0
+       "flat": 1
       },
       {
        "date": "2026-11-03",
-       "up": 213,
+       "up": 212,
        "down": 287,
-       "flat": 0
+       "flat": 1
       },
       {
        "date": "2026-11-04",
-       "up": 347,
+       "up": 346,
        "down": 152,
-       "flat": 1
+       "flat": 2
       },
       {
        "date": "2026-11-05",
-       "up": 63,
+       "up": 62,
        "down": 437,
-       "flat": 0
-      },
-      {
-       "date": "2026-11-06",
-       "up": 203,
-       "down": 296,
        "flat": 1
       },
       {
-       "date": "2026-11-09",
-       "up": 423,
-       "down": 75,
+       "date": "2026-11-06",
+       "up": 202,
+       "down": 296,
        "flat": 2
+      },
+      {
+       "date": "2026-11-09",
+       "up": 422,
+       "down": 75,
+       "flat": 3
       },
       {
        "date": "2026-11-10",
        "up": 249,
-       "down": 249,
-       "flat": 2
+       "down": 248,
+       "flat": 3
       },
       {
        "date": "2026-11-11",
        "up": 348,
-       "down": 150,
-       "flat": 2
+       "down": 149,
+       "flat": 3
       },
       {
        "date": "2026-11-12",
        "up": 136,
-       "down": 362,
-       "flat": 2
+       "down": 361,
+       "flat": 3
       },
       {
        "date": "2026-11-13",
        "up": 290,
-       "down": 207,
-       "flat": 3
+       "down": 206,
+       "flat": 4
       }
      ],
      "hist_universe": 500,
@@ -45390,7 +45507,7 @@
    "kind": "daily",
    "date": "2026-11-13",
    "engine": "gemini:gemini-2.5-flash",
-   "markdown": "## 일간 시황\n\n## 한 줄 요약\n반도체 및 대형 기술주의 하락이 주요 지수 전반의 약세를 이끌었으며, 시장 전반의 상승 종목 비율은 과반을 유지했으나 52주 신고가 종목은 방어주에 집중되었다.\n\n## 해설\n- **지수**: 주요 지수 중 다우만 상승하고 S&P500과 나스닥은 하락했다. 나스닥은 상승 확인일이 발생했지만 200일 이동평균선 아래에 머물렀다.\n- **업종·테마**: 기술 섹터의 하락이 두드러진 반면, 필수소비재, 에너지, 통신서비스 등 방어적 성격의 섹터들은 상승했다. 반도체 업종은 전체 섹터 중 가장 큰 폭으로 하락했다.\n- **종목**: 엔비디아와 브로드컴 같은 대형 기술주가 하락을 주도했지만, AMD는 일간 하락이 컸으나 주간 단위 상승 종목에 포함되어 개별 종목의 높은 변동성이 확인되었다.\n- **기타 자산**: 미국 10년물 금리와 달러 인덱스가 동반 상승했으며, 금, 구리, 비트코인 등은 대부분 하락했다.\n\n## 숫자\n\n**실전 규칙 v1.9** — 주봉 5주선 코스피 아래(-3.1%) · 코스닥 아래(-3.2%) → 신규 매수 중지(소속 지수 아래인 시장)\n\n참고 — 미국 S&P500 200일선 +3.9% · 국면 실적장세 · 욕심 경고 1/3 (돈을 움직이지 않는 지표)\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,290.53 | -1.0% | +4.6% | -4.8% | -42.0% |\n| 코스닥 | 699.66 | +0.5% | +8.6% | -8.0% | -42.9% |\n| S&P500 | 7,561.67 | -0.4% | +2.5% | -2.4% | -3.3% |\n| 나스닥 | 25,136.27 | -0.9% | +2.3% | -5.9% | -8.9% |\n| 다우 | 52,347.55 | +0.1% | +2.1% | +0.3% | -3.7% |\n| 필라델피아 반도체 | 10,146.32 | -3.4% | +8.1% | -12.4% | -30.7% |\n| VIX | 19.3 | +3.2% | -24.7% | +17.2% | -37.8% |\n| 원/달러 | 1,336.2 | +0.2% | -1.9% | -0.3% | -14.0% |\n| 미국 10년물(%) | 5.15 | +1.0% | +6.1% | +1.3% | -3.0% |\n\n**KR** (1주 수익률, 대형주 288종 · 상승 비율 69%)\n강세: SFA반도체 +59.5%, 티에스이 +57.6%, 코리아써키트 +49.2%, 케이씨텍 +49.1%, 한올바이오파마 +46.2%, RFHIC +44.2%\n약세: 시프트업 -13.2%, 이마트 -13.1%, 롯데쇼핑 -13.0%, 한전KPS -12.7%, 씨젠 -12.6%, 달바글로벌 -12.6%\n52주 신고가 근접 17종 · 이번 주 경신 20종\n\n**US** (1주 수익률, 대형주 708종 · 상승 비율 86%)\n강세: CoreWeave, Inc. +31.0%, Rocket Lab Corp +24.6%, MONOLITHIC POWER SYSTEMS, INC. +24.2%, ADVANCED MICRO DEVICES INC +23.1%, TERADYNE, INC +21.8%, CIENA CORP +21.6%\n약세: PERSHING SQUARE INC. -13.5%, FIRST SOLAR, INC. -11.4%, NVIDIA CORP -6.9%, NVR INC -6.4%, Revolution Medicines, Inc. -6.0%, Strategy Inc -5.1%\n52주 신고가 근접 252종 · 이번 주 경신 154종\n\n**자산** 달러인덱스 +0.2%, 금 +0.0%, WTI 유가 -0.2%, 구리 -1.7%, 비트코인 -6.3%, 미 장기채(TLT) -0.4%\n**업종(섹터 ETF)** 강세 필수소비재 +1.4%, 통신서비스 +1.1%, 에너지 +1.0% · 약세 기술 -2.0%, 경기소비재 -0.4%, 산업재 -0.4%\n**대장주** 엔비디아 -2.0%, 마이크로소프트 +0.2%, 애플 +0.4%, 알파벳 -1.0%, 아마존 -0.3%, 메타 +2.9%, 브로드컴 -4.8%, 테슬라 -1.8%, 버크셔 +0.5%, JP모건 +1.0%\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ (200일선 -18.1%) · US 상승추세 ✅ (200일선 +3.9%)\n이익가속 신규(2026-11-02): ARRY, U, PTLO, AGL, RUN, NXT, PRKS, ALGT, JBLU, PCOR\n\n\n## 체크포인트\n1. 나스닥 지수가 200일 이동평균선을 다시 상회하며 추세 전환을 시도하는지 확인한다.\n2. 필라델피아 반도체 지수의 추가 하락(-3.43%)이 멈추고 기술 대형주의 낙폭이 축소되는지 관찰한다.\n3. 미국 10년물 금리(5.15%)와 달러 인덱스의 상승세가 주식시장 전반의 하방 압력으로 이어지는지 주시한다.\n\n※ 문장 AI · 숫자 자동 · 투자 권유 아님 · 2026-11-14 14:43 KST"
+   "markdown": "## 일간 시황\n\n## 한 줄 요약\n기술·반도체 약세로 나스닥은 하락했지만, 필수소비재·에너지가 지수 낙폭을 방어했다. 시장 폭은 균형이었고, 주간 강세 종목에서 당일 차익 실현이 나타났다.\n\n## 해설\n- **지수**: `S&P500`과 `다우`는 200일선 위에 있으나, `나스닥`은 200일선 아래였다. `S&P500`은 '압력 받는 상승' 상태였다.\n- **업종·테마**: `기술` 업종과 `반도체` 업종이 가장 큰 폭의 조정을 받은 반면, `필수소비재`와 `에너지`는 강세를 보였다.\n- **종목**: 주간 강세 종목인 `AMD`와 `CoreWeave`가 당일 하락 종목에 포함되며 단기 순환 매매가 나타났다.\n\n## 숫자\n\n**실전 규칙 v1.9** — 주봉 5주선 코스피 아래(-3.1%) · 코스닥 아래(-3.2%) → 신규 매수 중지(소속 지수 아래인 시장)\n\n참고 — 미국 S&P500 200일선 +3.9% · 국면 실적장세 · 욕심 경고 1/3 (돈을 움직이지 않는 지표)\n\n| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |\n|---|---|---|---|---|---|\n| 코스피 | 5,290.53 | -1.0% | +4.6% | -4.8% | -42.0% |\n| 코스닥 | 699.66 | +0.5% | +8.6% | -8.0% | -42.9% |\n| S&P500 | 7,561.67 | -0.4% | +2.5% | -2.4% | -3.3% |\n| 나스닥 | 25,136.27 | -0.9% | +2.3% | -5.9% | -8.9% |\n| 다우 | 52,347.55 | +0.1% | +2.1% | +0.3% | -3.7% |\n| 필라델피아 반도체 | 10,146.32 | -3.4% | +8.1% | -12.4% | -30.7% |\n| VIX | 19.3 | +3.2% | -24.7% | +17.2% | -37.8% |\n| 원/달러 | 1,336.2 | +0.2% | -1.9% | -0.3% | -14.0% |\n| 미국 10년물(%) | 5.15 | +1.0% | +6.1% | +1.3% | -3.0% |\n\n**KR** (1주 수익률, 대형주 288종 · 상승 비율 69%)\n강세: SFA반도체 +59.5%, 티에스이 +57.6%, 코리아써키트 +49.2%, 케이씨텍 +49.1%, 한올바이오파마 +46.2%, RFHIC +44.2%\n약세: 시프트업 -13.2%, 이마트 -13.1%, 롯데쇼핑 -13.0%, 한전KPS -12.7%, 씨젠 -12.6%, 달바글로벌 -12.6%\n52주 신고가 근접 17종 · 이번 주 경신 20종\n\n**US** (1주 수익률, 대형주 708종 · 상승 비율 86%)\n강세: CoreWeave, Inc. +31.0%, Rocket Lab Corp +24.6%, MONOLITHIC POWER SYSTEMS, INC. +24.2%, ADVANCED MICRO DEVICES INC +23.1%, TERADYNE, INC +21.8%, CIENA CORP +21.6%\n약세: PERSHING SQUARE INC. -13.5%, FIRST SOLAR, INC. -11.4%, NVIDIA CORP -6.9%, NVR INC -6.4%, Revolution Medicines, Inc. -6.0%, Strategy Inc -5.1%\n52주 신고가 근접 252종 · 이번 주 경신 154종\n\n**자산** 달러인덱스 +0.2%, 금 +0.0%, WTI 유가 -0.2%, 구리 -1.7%, 비트코인 -1.6%, 미 장기채(TLT) -0.4%\n**업종(섹터 ETF)** 강세 필수소비재 +1.4%, 통신서비스 +1.1%, 에너지 +1.0% · 약세 기술 -2.0%, 경기소비재 -0.4%, 산업재 -0.4%\n**대장주** 엔비디아 -2.0%, 마이크로소프트 +0.2%, 애플 +0.4%, 알파벳 -1.0%, 아마존 -0.3%, 메타 +2.9%, 브로드컴 -4.8%, 테슬라 -1.8%, 버크셔 +0.5%, JP모건 +1.0%\n\nCANSLIM 시장방향 KR 하락추세 ⚠️ (200일선 -18.1%) · US 상승추세 ✅ (200일선 +3.9%)\n이익가속 신규(2026-11-02): ARRY, U, PTLO, AGL, RUN, NXT, PRKS, ALGT, JBLU, PCOR\n\n\n## 체크포인트\n1. `S&P500`이 '압력 받는 상승'을 이어갈지, `VIX`가 20선 위에서 안정화될지 관찰한다.\n2. `나스닥` 상승 확인에도 불구하고, `필라델피아 반도체`의 200일 이평선 회복이 기술주 반등의 조건이다.\n3. `미국 10년물 금리`와 `달러인덱스`의 상승세가 `S&P500`의 200일선 유지 여부에 영향을 미치는지 점검한다.\n\n※ 문장 AI · 숫자 자동 · 투자 권유 아님 · 2026-11-14 21:14 KST"
   },
   {
    "kind": "kr",
