@@ -2,15 +2,18 @@
 """📘 사용법·전체 설명서의 단일 원천 (2026-11-14).
 
 화면 '사용법' 패널(한눈에 · 활용 루틴 · 전체 설명서)과 PDF(docs/manual.pdf)가 전부 이 파일에서 나온다.
+2026-11-15 2차: 공개 = 한눈에(무엇) · 활용 루틴(언제·어떻게) · 전체 설명서(실전 규칙 · 데이터 · 텔레그램 봇 — 왜 믿나).
+  개선 내역 · 검증·한계는 비공개(경영실, INTERNAL) · 용어 절과 '지키는 원칙' 카드는 삭제.
 같은 내용을 두 곳에 쓰지 않는다 — 옛 GUIDE.md 는 화면이 바뀔 때마다 낡았다('검은 배너'·'이번 주 할 일'·'12종 카드').
 
 자동으로 따라오는 것(손으로 안 고친다):
   · 실전 규칙 값        ← live/plan.py RULE
   · 백테스트 숫자       ← results/v19_bt.json
   · 갱신 시각           ← .github/workflows/*.yml cron(UTC → KST)
-  · 개선 내역           ← docs/release_notes.json (화면이 바뀌는 작업마다 한 줄 — CLAUDE.md 규칙)
+  · 데이터 마지막 갱신   ← data_freshness.statuses()(파일 안의 날짜, 화면에서만 — PDF 는 주기만)
+  · 개선 내역(비공개)   ← docs/release_notes.json (화면이 바뀌는 작업마다 한 줄 — CLAUDE.md 규칙)
   · PDF                 ← manual-pdf 워크플로가 위 파일이 바뀔 때마다 다시 만든다
-손으로 고치는 것: 아래 CAPS·ROUTINES·GLOSSARY·DROPPED·DATA_ROWS 문구. 고치면 화면·PDF 가 같이 바뀐다.
+손으로 고치는 것: 아래 LEAD·CAPS·ROUTINES·DATA_FLOW·BOT_CMDS·DROPPED 문구. 고치면 화면·PDF 가 같이 바뀐다.
 
 공개 문서다 — 운영자 이름·계좌 금액·실행 인프라·사용자 수·마케팅 계획은 넣지 않는다(tests/test_manual.py 가 금칙어 검사).
 streamlit 을 import 하지 않는다(CI 에서 PDF 만 만들 때도 돌아야 한다).
@@ -24,13 +27,18 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16a'
+VERSION = '2026-11-16b'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
 # 신뢰 등급: g=실전 규칙(봇이 실제로 쓰는 것) · y=참고(검증 중·판단 보조) · k=사실(가공 없는 목록)
 TAG_TXT = {'g': '실전 규칙', 'y': '참고', 'k': '사실'}
 TAG_DESC = {'g': '자동매매 봇이 실제로 쓰는 규칙', 'y': '검증 중이거나 판단을 돕는 해석', 'k': '가공 없는 가격·재무·공시 목록'}
+
+# 첫 문장 = 이 사이트가 하는 일 전부(실전 규칙 한 줄). 기능 나열이 아니라 규칙을 먼저 말한다 — 2026-11-15.
+LEAD = "지수가 {kr_ix_weeks}주선 위일 때만, 이익이 막 흑자로 돌아선 주도주를 사고, 보유 중 고점에서 −{stop}% 빠지면 판다."
+LEAD_SUB = ("이 한 줄을 매일 공식 공시(DART · SEC EDGAR)와 시장 가격으로 다시 계산해, 시장 → 종목 → 내 계좌 순서로 다섯 탭에 펼쳤습니다. "
+            "운영자도 이 규칙(실전 v1.9 · 한국) 그대로 매매합니다.")
 
 # (탭 이름, 답하는 질문, 한 줄 요약, [(기능, 등급)]) — 탭 이름은 dashboard._MAIN_TABS 와 글자까지 같아야 버튼이 작동한다
 CAPS = [
@@ -56,39 +64,34 @@ CAPS = [
         ("히스토리 — 차트(선형/로그·사이클 구간 색)·사이클·낙폭·멀티플 밴드·정류장", 'y'),
         ("수급 — 업종 온도 × 종목 RS·업종 내 순위·동종업계·내부자 거래", 'y'),
         ("깨지는 조건 — 결론 아래 체크(손절 고점 −{stop}%는 실전 봇 규칙)", 'k')]),
-    ("🛡️ 내 포트폴리오", "내 계좌는 원칙대로인가?", "구글 로그인 후 내 계정에만 저장.", [
+    ("🛡️ 내 포트폴리오", "산 뒤에, 원칙대로 지키고 있나?", "보유 종목을 넣으면 손절선·비중을 대신 셉니다.", [
         ("보유 종목 입력 · 토스 연동 계좌는 불러오기", 'k'),
         ("손절선(보유 중 고점 −{stop}%)·종목 비중 상한({cap}%) 위반 점검", 'g'),
         ("위반 건수·등급 요약 · 텔레그램 봇 연결", 'k')]),
 ]
 
-PRINCIPLES = [
-    ('acc', "판정 → 후보 → 검증", "지수가 5주선 아래면 후보가 좋아 보여도 신규 매수를 쉽니다."),
-    ('warn', "손절가를 먼저", "사기 전에 자를 가격부터. 기준은 진입가가 아니라 보유 중 고점 대비."),
-    ('pos', "숫자는 확률", "점수·신호는 보장이 아니며 매수 권유가 아닙니다. '-' 는 오류가 아니라 '데이터 없음'."),
-]
-
+# 규칙의 실제 리듬: 금요일 종가로 판정 → 토요일 계획 → 월요일 시가 매수 · 평일엔 가진 종목 손절만. 2026-11-15 재작성.
 ROUTINES = [
-    ("매일 아침 · 1분", "오늘 장이 지수만 오른 장인지 확인", [
-        "텔레그램 @buza_alarm_bot 아침 요약을 받습니다",
-        "🏠 종합 맨 위 '이번 주 시장 신호' — 신규 매수 가능/중지",
-        "'오늘의 시장'(한국·미국 전환) — 시장 폭과 강한 업종이 지수와 같은 방향인지",
-        "강한 업종 줄을 눌러 구성 종목을 봅니다"]),
-    ("종목이 궁금할 때 · 5분", "후보를 의심하는 단계", [
-        "🔍 종목 분석에 코드 입력(005930 · NVDA)",
-        "결론 한 줄 → 실전 규칙 대조 줄을 먼저 읽습니다",
-        "펀더멘탈 → 히스토리 → 수급 순으로 궁금한 탭만 엽니다",
-        "결론 아래 '깨지는 조건'이 하나라도 켜졌는지 봅니다"]),
-    ("주말 · 15분", "다음 주 계획 — 후보는 토요일에 갱신", [
-        "🏠 종합 시황 리포트 — '다음 거래일에 볼 것'·숫자 조건",
-        "🔎 종목 발굴 — 이번 주 후보와 들어온 이유(재료 목록과 대조)",
-        "🛡️ 내 포트폴리오 — 손절선(고점 −{stop}%)·RS {rs_exit} 미만 탈락 확인",
-        "월요일 시가 전, 종목별 손절가를 먼저 적습니다"]),
-    ("월 1회 · 20분", "규칙이 아니라 국면을 점검", [
-        "🌍 매크로 — 국면이 바뀌었나, '왜 이 계절인가'",
-        "신호 성적표 — 매크로 신호가 실제로 시장을 이겼나",
-        "내 성과를 코스피·코스닥과 같은 기간으로 비교합니다",
-        "한 달 성적으로 규칙을 바꾸지 않습니다 — 바꾸려면 먼저 백테스트"]),
+    ("주 1회 · 토요일", "다음 주에 살 것 정하기", [
+        "🏠 종합 — 이번 주 시장 신호. 중지면 여기서 끝",
+        "🔎 종목 발굴 — 매수 대상 {slots}종(RS 높은 순)",
+        "🔍 종목 분석 — 실전 규칙 대조 줄이 전부 ✓인지",
+        "매수 전에 손절가(고점 −{stop}%)부터 적기"]),
+    ("평일 · 장 마감 뒤", "가진 종목만 본다", [
+        "📲 /market — 오늘 장 시황 카드",
+        "🛡️ 내 포트폴리오 — 손절선에 닿은 종목",
+        "RS {rs_exit} 아래로 내려간 종목",
+        "걸린 종목은 다음 거래일에 정리"]),
+    ("눈에 띈 종목이 있을 때", "결론 먼저, 근거는 필요한 만큼", [
+        "🔍 코드 입력(005930 · NVDA) → 결론 한 줄",
+        "대조 줄에 ✗ 가 하나라도 있으면 후보 아님",
+        "근거는 펀더멘탈 · 히스토리 · 수급 탭에서 필요한 것만",
+        "📲 /watch 종목 — 공시·중요 뉴스 알림"]),
+    ("분기 1회 · 실적 시즌", "후보가 바뀌는 때", [
+        "실적 발표 뒤 흑자전환 종목이 새로 들어옴",
+        "🌍 매크로 — 국면이 바뀌었나",
+        "신호 성적표 — 매크로 신호가 실제로 맞았나",
+        "규칙은 그대로. 바꾸려면 백테스트 먼저"]),
 ]
 
 # (항목, 값 — {…} 는 RULE 에서 채움, 이유)
@@ -107,22 +110,43 @@ RULE_ROWS = [
     ("종목 상한", "계좌의 {cap}% — 넘으면 상한까지 덜어냄", "한 종목이 계좌를 좌우하지 않게"),
 ]
 
-# (항목, 출처, 워크플로 이름들 — cron 에서 시각을 읽는다 / 없으면 문자열 그대로, 한계)
-DATA_ROWS = [
-    ("가격 · 시총 · RS", "네이버 금융 · KRX(한국) / Yahoo Finance(미국)", ['daily-refresh'], "Yahoo 는 비공식 — 끊기면 빈칸"),
-    ("한국 재무", "DART 원문 → 닿지 않으면 네이버 금융 기업분석으로 보충", ['weekly-profile'], "DART 가 해외 서버 접속을 자주 거부"),
-    ("미국 재무", "SEC EDGAR 원문(10-Q · 10-K)", ['fin-daily'], "실적 발표 후 공시까지 1~3주"),
-    ("실전 후보(주도주)", "위 가격 + 분기 재무", ['weekly-accel'], "금요일 종가 기준 — 주중에는 안 바뀜"),
-    ("다음 주 계획표", "실전 후보 + 지수 5주선", ['live-plan'], "토요일 저녁 확정"),
-    ("오늘의 시장 · 시황 리포트", "한국 시총 1,000억+ · 미국 SEC 공시 상장사 시총 $3억+ 일봉(Yahoo, 상장 1개월 미만 제외) · 수급·테마·특징주는 네이버 · 문장은 AI 작성", ['market-report'], "숫자 조건은 규칙 계산, 문장만 AI"),
-    ("종목 분석 결론(스냅샷)", "위 전부를 종목별로 묶음", ['snap'], "장 마감 후 1회"),
-    ("한국 수급 · 신용", "네이버 금융", ['kr-flow'], "비공식 API"),
-    ("매크로", "FRED(금리·물가·신용 스프레드) · Yahoo(VIX)", ['macro-long'], "FRED 는 하루 지연"),
-    ("컨센서스", "네이버 금융(한국) · Yahoo(미국)", "주 1회(월요일)", "변화 이력은 2026-10 부터 축적"),
-    ("업종 · 테마 분류", "네이버 테마(한국) · Yahoo 산업(미국)", ['sector-detail'], "공식 분류가 아닌 시장 통용 분류"),
-    ("사업부문 구조 · 기업 개요", "공시 원문 → AI 추출", "조회 시", "AI 추출 — 원문 대조 권장"),
-    ("백테스트 패널", "주봉 패널(상장폐지 포함 · 수정주가)", ['quant-panel'], "한국 분기 재무는 2018-06 부터"),
-    ("정답 점검 · 화면 점검", "반드시 참인 사실(예: 삼성전자 매출 범위) 대조", ['keepalive'], "틀리면 그날 데이터를 되돌림"),
+# 데이터 워크플로(2026-11-15): 출처 → 항목 → 주기(워크플로 cron) → 마지막 갱신(data_freshness 의 파일 안 날짜).
+# (출처, [(항목, 워크플로 이름들 또는 주기 문자열, data_freshness 경로 또는 None, 한계)])
+DATA_FLOW = [
+    ("네이버 금융 · KRX", [
+        ("한국 가격 · 시총 · RS", ['daily-refresh'], 'results/screener_latest.json', ""),
+        ("한국 수급 · 신용", ['kr-flow'], 'results/kr_flow.json', "비공식 API"),
+        ("한국 컨센서스", "주 1회(월요일)", 'results/consensus_history.jsonl', ""),
+        ("한국 분기 재무 보충", ['weekly-profile'], 'data/kr_fundamentals_q.parquet', "DART 가 닿지 않을 때"),
+        ("업종 · 테마", ['sector-detail'], 'data/sector_detail.json', "시장 통용 분류"),
+    ]),
+    ("DART (한국 공시)", [
+        ("한국 재무 원문", ['weekly-profile'], 'results/value_kr.json', "해외 서버 접속을 자주 거부"),
+    ]),
+    ("SEC EDGAR (미국 공시)", [
+        ("미국 재무 · 주식수", ['fin-daily'], 'data/us_shares.csv', "실적 발표 후 공시까지 1~3주"),
+    ]),
+    ("Yahoo Finance", [
+        ("미국 가격 · 시총", ['daily-refresh'], 'data/us_marketcap.csv', "비공식 — 끊기면 빈칸"),
+    ]),
+    ("FRED (미 연준)", [
+        ("금리 · 물가 · 신용 스프레드", ['macro-long'], 'data/research/macro_long_fred.parquet', "하루 지연"),
+    ]),
+    ("자체 계산 (위 원천을 가공)", [
+        ("실전 후보(주도주)", "주 1회(토요일)", 'results/leaders_accel.json', "금요일 종가 기준"),
+        ("다음 주 계획표", ['live-plan'], 'live/plan_latest.json', "토요일 저녁 확정"),
+        ("시황 리포트", ['market-report'], 'results/market_report.json', "숫자는 규칙 계산, 문장만 AI"),
+        ("공통 재무 (매출·영업익 YoY·PER)", ['snap'], 'results/fund_snapshot.json', ""),
+    ]),
+]
+
+# 텔레그램 봇 — 부자알람(@buza_alarm_bot). 문구는 buza-bot bot.py WELCOME 과 맞춘다.
+BOT_CMDS = [
+    ("📊 /market", "장 마감 시황 카드 — 한국 16:00 무렵 · 미국 다음 날 아침. /market on 이면 자동으로 받음"),
+    ("📰 /watch 종목", "공시는 나오는 즉시, 중요한 뉴스는 08·20시에 요약. 중요한 게 없으면 보내지 않음 · 한국은 수급 포함"),
+    ("🔍 /dashboard 종목", "이 사이트 종목 분석의 결론을 카드 한 장으로"),
+    ("📑 /report 티커", "회사 개요·사업부문·재무 추이·밸류·경쟁사 심층 리포트"),
+    ("🎬 유튜브 링크", "붙여넣으면 요약 · /add 채널 주소로 새 영상 자동 요약"),
 ]
 
 FLOW = [
@@ -157,20 +181,6 @@ DROPPED = [
     ("2026-10", "사이클 국면으로 비중 조절", "4계절·경고 3종 모두 비중 규칙으로는 통과 못 함 → 표시만"),
     ("2026-10", "이긴 종목에 좁은 추적 손절", "측정한 모든 폭에서 안 파는 것보다 나쁨 → 고점 −20% + RS 탈락으로 정리"),
     ("2026-09", "급등 + 거래량 규칙", "대상승의 출발점을 못 잡아 폐기"),
-]
-
-GLOSSARY = [
-    ("RS(상대강도)", "3개월 수익률 40% + 6·9·12개월 각 20% 가중 수익률의 시장 내 백분위(0~100). 높을수록 시장보다 강했음."),
-    ("5주선", "최근 5주 주봉 종가 평균. 지수가 이 아래면 신규 매수를 쉼."),
-    ("흑자전환", "이번 분기 영업이익 흑자 + 전년 같은 분기 적자. 그래서 영업익YoY 는 정의되지 않아 '-'."),
-    ("불타기", "오른 종목에 추가 매수. 내린 종목에 더 사는 물타기의 반대."),
-    ("시장 폭", "오른 종목 수 vs 내린 종목 수. 지수가 올라도 오른 종목이 적으면 소수 대형주 장세."),
-    ("분배일 · 팔로스루", "오닐 방식 추세 판정. 거래량이 늘며 지수가 내린 날(분배일)이 쌓이면 약세, 반등 시도 뒤 강한 상승일(팔로스루)이 나오면 추세 전환."),
-    ("업종 온도", "같은 업종 종목들의 RS 중앙값 순위. 업종 전체에 돈이 들어오는지."),
-    ("사이클 위치", "이익률이 그 회사 과거 분포에서 몇 번째 백분위인지. 천장권이면 좋아 보이는 실적이 정점일 수 있음."),
-    ("하이일드 스프레드", "투기등급 회사채 금리 − 국채 금리. 벌어지면 시장이 부도 위험을 크게 본다는 뜻."),
-    ("최대 낙폭(MDD)", "고점에서 저점까지 가장 크게 빠진 폭."),
-    ("'-'", "오류가 아니라 그 종목에 그 데이터가 없다는 뜻. 없는 값을 추정해 채우지 않음."),
 ]
 
 DISCLAIMER = ("정보 도구이며 투자 권유가 아닙니다 · 모든 백테스트 수치는 과거 성적이며 실현 수익이 아닙니다 · "
@@ -215,6 +225,10 @@ def _f(s: str, c: dict | None = None) -> str:
         return s.format(**(c or ctx()))
     except Exception:
         return s
+
+
+def lead() -> str:
+    return _f(LEAD)
 
 
 def caps() -> list:
@@ -346,7 +360,6 @@ CSS = """
   .mn-tbl td:first-child { font-weight:700; color:var(--ink); white-space:nowrap; }
   .mn-tbl td.f { font-weight:400 !important; white-space:normal !important; color:var(--ink-2) !important; }
   .mn-tbl td.nw:last-child { width:1%; }
-  @media (min-width:900px) { .mn-tour { min-height:308px; } }
   .mn-tbl td.v { color:var(--ink); } .mn-tbl td.nw { white-space:nowrap; font-variant-numeric:tabular-nums; }
   .mn-wrap { overflow-x:auto; }
   .mn-flow { display:grid; grid-template-columns:repeat(4,minmax(150px,1fr)); gap:8px; }
@@ -354,6 +367,22 @@ CSS = """
   @media (max-width:720px) { .mn-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } .mn-tbl td:first-child { white-space:normal; } }
   .mn-src { font-size:11.5px; color:var(--ink-3); margin:6px 2px 0; line-height:1.6; }
   .mn-gap { height:14px; }
+  .mn-df { display:grid; grid-template-columns:minmax(120px,170px) 1fr; gap:0 10px; border:1px solid var(--line); border-radius:10px;
+           background:var(--surface); padding:8px 12px; margin-bottom:8px; }
+  .mn-df-src { font-size:13px; font-weight:750; color:var(--ink); padding-top:6px; border-right:2px solid var(--accent-2); }
+  .mn-df-row { display:grid; grid-template-columns:14px minmax(180px,300px) 14px minmax(110px,190px) 14px auto; justify-content:start;
+               align-items:center; gap:4px 8px; padding:5px 0; border-top:1px dashed var(--line-2); }
+  .mn-df-row:first-child { border-top:0; }
+  .mn-df-it { font-size:12.5px; } .mn-df-it b { font-weight:650; color:var(--ink); }
+  .mn-df-it small, .mn-df-row small { display:block; font-size:11px; color:var(--ink-3); }
+  .mn-df-cy { font-size:12px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+  .mn-df-row > span:last-child small { display:inline; margin-left:6px; }
+  .mn-ar { color:var(--ink-3); font-size:12px; }
+  .mn-st { font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:999px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .mn-st.ok { background:var(--pos-bg); color:var(--pos); } .mn-st.bad { background:var(--neg-bg); color:var(--neg); }
+  .mn-st.na { background:var(--line-2); color:var(--ink-3); }
+  @media (max-width:720px) { .mn-df-row { grid-template-columns:14px 1fr; } .mn-df-row > .mn-ar:not(:first-child) { display:none; }
+    .mn-df { grid-template-columns:1fr; } .mn-df-src { border-right:0; border-bottom:2px solid var(--accent-2); padding:0 0 4px; } }
 </style>
 """
 
@@ -376,13 +405,10 @@ def _table(head, rows, cls=None) -> str:
 def sec_overview() -> str:
     flow = ''.join(f"""<div class="mn-card"><div class="k">{_e(k)}</div><ul>{''.join(f'<li>{_e(x)}</li>' for x in xs)}</ul></div>"""
                    for k, xs in FLOW)
-    pr = ''.join(f'<div class="mn-card {c}"><div class="t">{_e(t)}</div><p>{_e(d)}</p></div>' for c, t, d in PRINCIPLES)
-    return f"""<div class="mn-lead">공식 공시(DART · SEC EDGAR)와 시장 가격을 매일 자동으로 모아 <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를
-      숫자로 답하는 리서치 도구입니다. 화면에 보이는 것과 같은 규칙(실전 v1.9 — 한국)으로 운영자의 자동매매 봇이 실제 계좌를 굴립니다.</div>
+    return f"""<div class="mn-lead"><b style="color:var(--ink)">{_e(lead())}</b><br>{_e(LEAD_SUB)}</div>
       <div class="mn-h"><b>데이터가 화면까지 오는 길</b><span>화면 · 백테스트 · 봇이 같은 정의를 씁니다</span></div>
-      <div class="mn-flow">{flow}</div><div class="mn-gap"></div>
-      <div class="mn-h"><b>지키는 원칙</b><span>도구보다 먼저</span></div><div class="mn-grid">{pr}</div>
-      <div class="mn-src">신뢰 등급 — {_legend()}</div>"""
+      <div class="mn-flow">{flow}</div>
+      <div class="mn-src">신뢰 등급 — {_legend()} · '-' 는 오류가 아니라 '데이터 없음'</div>"""
 
 
 def sec_features() -> str:
@@ -417,11 +443,53 @@ def sec_rules() -> str:
         '<div class="mn-src">규칙 값은 봇이 읽는 설정에서 그대로 가져옵니다 — 규칙이 바뀌면 이 표도 같이 바뀝니다.</div>'
 
 
-def sec_data() -> str:
-    rows = [(_e(k), _e(src), _e(schedule(wf)), _e(lim)) for k, src, wf, lim in DATA_ROWS]
-    return ('<div class="mn-lead">전부 무료·공개 원천입니다. 시각은 한국 시간(KST). 모든 표 바로 아래에 <b>출처 · 마지막 갱신</b>이 붙습니다.</div>'
-            + _table(['항목', '출처', '갱신(KST)', '한계'], rows, {1: 'v', 2: 'nw'})
-            + '<div class="mn-src">갱신 시각은 실제 예약 실행 설정에서 읽어 옵니다. 예약 실행은 몇 분~수십 분 늦을 수 있습니다.</div>')
+def fresh(path) -> dict | None:
+    """data_freshness 의 파일 안 날짜·상태. 없거나 실패하면 None(화면에 '-')."""
+    if not path:
+        return None
+    try:
+        import data_freshness as _df
+        return _df.date_for(path)
+    except Exception:
+        return None
+
+
+def sec_data(live: bool = True) -> str:
+    """출처 → 항목 → 주기 → 마지막 갱신. live=False(PDF)는 마지막 갱신 칸을 뺀다 — PDF 는 만든 날의 사진이라."""
+    groups = []
+    for src, items in DATA_FLOW:
+        rows = []
+        for item, wf, path, lim in items:
+            st_ = ''
+            if live:
+                r = fresh(path)
+                if r and r.get('date'):
+                    ok = r['state'] == 'ok'
+                    d = r['date']
+                    lab = (f"{d[2:4]}Q{(int(d[5:7]) + 2) // 3} 분기" if str(path).endswith('fundamentals_q.parquet')   # 분기 재무 = 담긴 최신 분기
+                           else d[5:].replace('-', '/'))
+                    st_ = (f'<span class="mn-st {"ok" if ok else "bad"}">{"✓" if ok else "!"} {_e(lab)}</span>'
+                           + ('' if ok else f'<small>{_e(r.get("note"))}</small>'))
+                else:
+                    st_ = '<span class="mn-st na">-</span>'
+                st_ = f'<span class="mn-ar">→</span>{st_}'
+            rows.append(f"""<div class="mn-df-row"><span class="mn-ar">→</span>
+              <div class="mn-df-it"><b>{_e(item)}</b>{f'<small>{_e(lim)}</small>' if lim else ''}</div>
+              <span class="mn-ar">→</span><span class="mn-df-cy">{_e(schedule(wf))}</span>{st_}</div>""")
+        groups.append(f'<div class="mn-df"><div class="mn-df-src">{_e(src)}</div><div>{"".join(rows)}</div></div>')
+    head = ('출처 → 항목 → 갱신 주기(KST) → 마지막 갱신. ✓ = 주기 안에 제대로 들어옴 · ! = 늦어짐 · 날짜는 파일 안에 적힌 데이터 날짜'
+            if live else '출처 → 항목 → 갱신 주기(KST). 화면에서는 항목마다 마지막 갱신 날짜와 정상 여부가 함께 보입니다')
+    return (f'<div class="mn-src" style="margin:0 2px 10px">{head}</div>' + ''.join(groups)
+            + '<div class="mn-src">전부 무료·공개 원천 · 모든 표 바로 아래에 출처 · 마지막 갱신이 붙습니다 · 예약 실행은 몇 분~수십 분 늦을 수 있습니다.</div>')
+
+
+def sec_bot() -> str:
+    rows = [(f'<b style="color:var(--ink)">{_e(c)}</b>', _e(d)) for c, d in BOT_CMDS]
+    return (f'<div class="mn-lead">사이트를 열지 않아도 되는 일은 텔레그램 <a href="{BOT}" target="_blank" '
+            f'style="color:var(--accent);font-weight:700;text-decoration:none">@buza_alarm_bot</a>(부자알람)이 대신합니다. '
+            '종목은 티커 · 6자리 코드 · 한글 이름 모두 됩니다.</div>'
+            + _table(['명령', '하는 일'], rows, {1: 'v'})
+            + '<div class="mn-src">🔍 종목 분석 화면의 텔레그램 버튼을 누르면 그 종목이 바로 /watch 로 등록됩니다 · 전체 명령은 봇에서 /help</div>')
 
 
 def sec_method() -> str:
@@ -436,10 +504,6 @@ def sec_method() -> str:
       {_table(['시기', '시도', '결과'], rows, {1: 'v'})}"""
 
 
-def sec_glossary() -> str:
-    return _table(['용어', '뜻'], [(_e(k), _e(v)) for k, v in GLOSSARY])
-
-
 def sec_notes(limit: int | None = 20) -> str:
     rows = [(_e(r.get('date')), _e(r.get('area')), _e(r.get('text'))) for r in notes(limit)]
     if not rows:
@@ -448,16 +512,20 @@ def sec_notes(limit: int | None = 20) -> str:
         '<div class="mn-src">화면이 바뀌는 작업마다 한 줄씩 추가됩니다.</div>'
 
 
-# (id, 제목, 한 줄, 함수) — 화면 하위 탭과 PDF 목차가 같은 순서
+# (id, 제목, 한 줄, 함수) — 공개. 화면 '전체 설명서' 하위 탭은 SCREEN 만, PDF 는 전부(같은 순서).
 SECTIONS = [
     ('overview', '개요', '무엇을 하는 도구인가 · 데이터가 화면까지 오는 길', sec_overview),
     ('features', '탭별 기능', '다섯 탭이 답하는 질문과 기능 전부', sec_features),
-    ('routines', '활용 루틴', '시간대별로 무엇을 보면 되나', sec_routines),
+    ('routines', '활용 루틴', '언제 무엇을 보면 되나', sec_routines),
     ('rules', '실전 규칙', '봇이 실제로 쓰는 규칙과 그 이유', sec_rules),
-    ('data', '데이터 · 갱신', '숫자의 출처와 갱신 시각 · 한계', sec_data),
-    ('method', '검증 · 한계', '규칙을 고르는 방법 · 해보고 버린 것', sec_method),
-    ('glossary', '용어', '화면에 나오는 말', sec_glossary),
-    ('notes', '개선 내역', '최근 바뀐 것', sec_notes),
+    ('data', '데이터', '출처 → 항목 → 갱신 주기 → 마지막 갱신', sec_data),
+    ('bot', '텔레그램 봇', '사이트를 열지 않아도 되는 일', sec_bot),
+]
+SCREEN = ('rules', 'data', 'bot')            # 개요·탭별 기능은 '한눈에', 루틴은 '활용 루틴' 탭과 같은 내용이라 화면에서는 뺀다
+# 비공개(경영실) — 고객에게 다 보여줄 필요 없는 것. 공개 문서·PDF 에 넣지 않는다(2026-11-15).
+INTERNAL = [
+    ('notes', '개선 내역', '최근 바뀐 것 — 배포 공지는 안정화 뒤', sec_notes),
+    ('method', '검증 · 한계', '규칙을 고르는 방법 · 알고 써야 할 한계 · 해보고 버린 것', sec_method),
 ]
 
 _VARS = """:root{--ink:#111827;--ink-2:#374151;--ink-3:#4B5563;--line:#E5E7EB;--line-2:#F3F4F6;--surface:#FFFFFF;
@@ -469,7 +537,7 @@ def build_html(font_url: str | None = None) -> str:
     font = (f"@font-face{{font-family:'Pretendard';src:url('{font_url}') format('woff2');font-weight:100 900;}}" if font_url else '')
     toc = ''.join(f'<li><b>{_e(t)}</b> — {_e(d)}</li>' for _i, t, d, _fn in SECTIONS)
     body = ''.join(f"""<section><div class="pg-h"><span>{i:02d}</span><h2>{_e(t)}</h2><em>{_e(d)}</em></div>
-        {fn(None) if sid == 'notes' else fn()}</section>""" for i, (sid, t, d, fn) in enumerate(SECTIONS, 1))
+        {fn(False) if sid == 'data' else fn()}</section>""" for i, (sid, t, d, fn) in enumerate(SECTIONS, 1))
     b = backtest()
     return f"""<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>STOCK DASHBOARD 사용설명서</title>
 <style>{font}{_VARS}
@@ -478,7 +546,7 @@ body{{margin:0;background:#fff;font-family:'Pretendard','Noto Sans CJK KR','Malg
   -webkit-print-color-adjust:exact;print-color-adjust:exact}}
 .cover{{page-break-after:always;padding-top:38mm}}
 .cover .kick{{font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--accent)}}
-.cover h1{{font-size:38px;letter-spacing:-.04em;margin:10px 0 8px;line-height:1.2}}
+.cover h1{{font-size:30px;letter-spacing:-.04em;margin:10px 0 12px;line-height:1.35}}
 .cover p{{font-size:14px;color:var(--ink-2);line-height:1.7;max-width:150mm}}
 .cover ol{{margin:26px 0 0;padding-left:20px;font-size:13px;line-height:2;color:var(--ink-2)}}
 .cover .meta{{margin-top:30px;font-size:12px;color:var(--ink-3);line-height:1.8;border-top:1px solid var(--line);padding-top:12px}}
@@ -491,11 +559,10 @@ section{{page-break-before:always}} section:first-of-type{{page-break-before:aut
 .foot{{margin-top:18px;font-size:11px;color:var(--ink-3);line-height:1.7;border-top:1px solid var(--line);padding-top:8px}}
 </style>{CSS}</head><body><div class="mn">
 <div class="cover"><div class="kick">STOCK DASHBOARD · 사용설명서</div>
-<h1>시장 → 종목 → 내 계좌,<br>위에서 아래로 좁혀 갑니다</h1>
-<p>공식 공시와 시장 가격으로 <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를 숫자로 답하는 리서치 도구.
-실전 규칙 v1.9(한국) 백테스트 연 {b.get('CAGR', '-')}% · 최대 낙폭 {b.get('MDD', '-')}% (같은 기간 코스피 {b.get('BM_CAGR', '-')}% · {b.get('BM_MDD', '-')}%).</p>
+<h1>{_e(lead())}</h1>
+<p>{_e(LEAD_SUB)}<br>실전 규칙 v1.9(한국) 백테스트 연 {b.get('CAGR', '-')}% · 최대 낙폭 {b.get('MDD', '-')}% (같은 기간 코스피 {b.get('BM_CAGR', '-')}% · {b.get('BM_MDD', '-')}%).</p>
 <ol>{toc}</ol>
-<div class="meta">최근 개선 {_e(updated())} · 이 문서는 화면의 '📘 사용법 → 전체 설명서'와 같은 원천에서 자동으로 만들어집니다.<br>
+<div class="meta">이 문서는 화면의 '📘 사용법 → 전체 설명서'와 같은 원천에서 자동으로 만들어집니다.<br>
 사이트 {SITE}<br>텔레그램 {BOT}</div></div>
 {body}
 <div class="foot">{_e(DISCLAIMER)}</div></div></body></html>"""

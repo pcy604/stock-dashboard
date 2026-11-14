@@ -109,6 +109,10 @@
 - **화면이 사용자 눈에 바뀌는 작업을 하면 `docs/release_notes.json` 맨 위에 한 줄**(date·area·text, 공개 문장 — 운영자 이름·계좌·인프라 금지).
   탭 기능이 늘거나 빠지면 `manual.CAPS` 도 같이. 규칙 값(live/plan.py RULE)·백테스트 숫자(results/v19_bt.json)·갱신 시각(워크플로 cron)은 자동.
 - PDF 는 `manual-pdf` 워크플로가 푸시 때 다시 만든다(로컬: `bash tools/build_manual_pdf.sh`). `manual.py` 를 고치면 `VERSION` 과 ui_home `_MN_VER` 를 같이 올린다.
+- (2026-11-15) 공개 = 한눈에(규칙 한 줄 + 탭 카드 — **카드 전체가 버튼**) · 활용 루틴(규칙의 리듬: 토 계획 · 평일 손절 · 종목 의심 · 실적 시즌) ·
+  전체 설명서(실전 규칙 · 데이터 · 텔레그램 봇). **개선 내역 · 검증·한계는 비공개**(`manual.INTERNAL` → 🏛️ 경영실 '📘 설명서(비공개)'). 용어 절·'지키는 원칙' 카드 폐지.
+  데이터 절은 `DATA_FLOW`(출처 → 항목 → 주기 → 마지막 갱신) — 마지막 갱신은 `data_freshness` 레지스트리 경로로만(테스트가 등록 여부 검사).
+  봇 문구(`BOT_CMDS`)는 buza-bot `bot.py` WELCOME 과 맞춘다. 실전 원장 성과는 공개 설명서에 넣지 않는다(차니 결정).
 
 ## 변경 이력 (2026-11-15)
 - 작업 종료 시 **`docs/changelog.md` 맨 아래에 한 줄**(날짜·사건·의미)을 추가한다 — 정본. claude.ai 프로젝트 `claude/02_changelog.md` 는 11-14 까지의 동결 아카이브(다시 쓰지 말 것).

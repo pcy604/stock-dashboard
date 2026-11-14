@@ -1148,7 +1148,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or '🏠 종합'
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-15c'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-15d'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -1182,11 +1182,10 @@ with st.expander("📘 사용법",
         _UH.tour_head()
         _caps = _UH.MN.caps()
         for _i, (_col, (_tab, _q, _d, _feats)) in enumerate(zip(st.columns(len(_caps)), _caps), 1):
-            with _col:
+            with _col, st.container(key=f'obc_{_i}'):           # 카드 전체가 버튼(투명 버튼을 겹침) — 2026-11-15
                 _UH.tour_card(_i, _tab, _q, _d, _feats, _tab == _ob_cur)
-                st.button("지금 여기" if _tab == _ob_cur else "열기 →", key=f'ob_go_{_i}', on_click=_ob_go,
-                          args=(_tab,), width='stretch', disabled=_tab == _ob_cur)
-        _UH.tour_foot()
+                st.button(f"{_tab} 열기", key=f'ob_go_{_i}', on_click=_ob_go, args=(_tab,),
+                          disabled=_tab == _ob_cur, width='stretch')
 
 # 탭 순서 = 의사결정 순서. 내 돈이 어떻게 되고 있나(포트폴리오) → 뭘 살까(발굴) →
 # 이게 맞나(분석) → 지금 사도 되나(매크로). 구루 인사이트는 2026-08-11 페이지에서 제거
@@ -9497,7 +9496,7 @@ if tab_gov is not None:
         _lazy(tab_gov)
         _ops_today()
         import ui_gov as _UG
-        if getattr(_UG, 'VERSION', None) != '2026-11-13a':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
+        if getattr(_UG, 'VERSION', None) != '2026-11-15a':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
             import importlib as _il, gov as _G
             _il.reload(_G); _UG = _il.reload(_UG)
         import access as _accg

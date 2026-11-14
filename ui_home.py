@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-15c'
+VERSION = '2026-11-15d'
 
 CSS = """
 <style>
@@ -826,52 +826,71 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
 # 문구·규칙 값·갱신 시각은 전부 manual.py 한 곳에서 온다(화면과 PDF 가 같은 원천). 여기는 그리기만.
 import manual as MN
 
-_MN_VER = '2026-11-16a'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
+_MN_VER = '2026-11-16b'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
 if getattr(MN, 'VERSION', None) != _MN_VER:
     import importlib as _il
     MN = _il.reload(MN)
 
 
+# 카드 전체가 버튼 — 컨테이너(key=obc_N) 안에 카드와 투명 버튼을 겹친다(2026-11-15 '열기' 버튼 줄 삭제).
+_TOUR_CSS = """<style>
+  [class*="st-key-obc_"] { position:relative; }
+  [class*="st-key-obc_"] [data-testid="stElementContainer"]:has(.stButton) { position:absolute; inset:0; z-index:3; margin:0; width:auto !important; }
+  [class*="st-key-obc_"] .stButton, [class*="st-key-obc_"] .stButton > *, [class*="st-key-obc_"] .stButton button { width:100% !important; height:100% !important; }
+  [class*="st-key-obc_"] .stButton button { opacity:0; cursor:pointer; min-height:0; }
+  [class*="st-key-obc_"] .stButton button:disabled { cursor:default; }
+  [class*="st-key-obc_"]:hover .mn-tour:not(.on) { border-color:var(--accent); background:var(--accent-2); }
+  .mn-tour { transition:border-color .12s, background .12s; }
+  .mn-tour.on { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-2); }
+  .mn-tour .k b { float:right; font-weight:600; letter-spacing:0; color:var(--accent); }
+  @media (min-width:900px) { .mn-tour { min-height:300px; } }
+  .mn-row { display:flex; justify-content:space-between; align-items:center; gap:6px 16px; flex-wrap:wrap; margin:0 2px; }
+</style>"""
+
+
+def _bot_link() -> str:
+    return (f'📲 텔레그램 <a href="{MN.BOT}" target="_blank" style="color:var(--accent);font-weight:650;text-decoration:none">'
+            '@buza_alarm_bot</a> — 장 마감 시황 · 관심 종목 공시 알림')
+
+
 def tour_head():
-    st.html(CSS + MN.CSS + """<div class="mn"><div class="mn-lead" style="font-size:13.5px;margin-bottom:4px">
-      <b style="color:var(--ink)">시장 → 종목 → 내 계좌, 위에서 아래로 좁혀 갑니다.</b>
-      공식 공시(DART · SEC EDGAR)와 시장 가격을 매일 모아 <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를 숫자로 답합니다.
-      같은 규칙(실전 v1.9 — 한국)으로 운영자의 자동매매 봇이 실제 계좌를 굴립니다.</div>
-      <div class="mn-src" style="margin:0 2px 2px">""" + MN._legend() + """</div></div>""")
+    """한 줄 규칙(굵게) → 풀이 한 줄 → [신뢰 등급 범례 | 텔레그램] 한 줄."""
+    st.html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-lead" style="margin-bottom:6px">
+      <div style="font-size:16px;font-weight:780;color:var(--ink);letter-spacing:-.02em;line-height:1.5">{_e(MN.lead())}</div>
+      <div style="font-size:13px;margin-top:2px">{_e(MN.LEAD_SUB)}</div></div>
+      <div class="mn-row mn-src" style="margin-top:0"><span>{MN._legend()}</span><span>{_bot_link()}</span></div></div>""")
 
 
 def tour_card(i: int, tab: str, q: str, d: str, feats: list, on: bool):
-    """탭 하나 = 카드 하나: 질문 → 탭 이름 → 한 줄 → 기능 전부(등급). 버튼은 dashboard 가 카드 아래에 단다."""
+    """탭 하나 = 카드 하나: 탭 이름 → 질문 → 한 줄 → 기능(등급). 카드를 누르면 그 탭으로(dashboard 가 투명 버튼을 겹친다)."""
     li = ''.join(f"<li>{_e(f.split(' — ')[0])}{MN._tag(g)}</li>" for f, g in feats)
-    st.html(CSS + MN.CSS + f"""<div class="mn"><div class="mn-card mn-tour" style="height:100%;{
-        'border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-2)' if on else ''}">
-      <div class="k">{i} · {_e(tab)}</div><div class="t">{_e(q)}</div><div class="q">{_e(d)}</div><ul>{li}</ul></div></div>""")
-
-
-def tour_foot():
-    pr = ''.join(f'<div class="mn-card {c}"><div class="t">{_e(t)}</div><p>{_e(d)}</p></div>' for c, t, d in MN.PRINCIPLES)
-    st.html(CSS + MN.CSS + f"""<div class="mn"><div class="mn-grid">{pr}</div>
-      <div class="mn-src">📲 매일 아침 요약은 텔레그램 <a href="{MN.BOT}" target="_blank" style="color:var(--accent);font-weight:650;text-decoration:none">@buza_alarm_bot</a>
-      · 규칙의 이유·데이터 출처·한계는 '📚 전체 설명서'에 있습니다.</div></div>""")
+    st.html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-card mn-tour{' on' if on else ''}">
+      <div class="k">{i} · {_e(tab)}<b>{'지금 여기' if on else '열기 →'}</b></div><div class="t">{_e(q)}</div><div class="q">{_e(d)}</div><ul>{li}</ul></div></div>""")
 
 
 def routines_panel():
-    st.html(CSS + MN.CSS + f"""<div class="mn"><div class="mn-lead">도구보다 순서가 먼저입니다 — 판정 → 후보 → 검증 → 손절가.</div>
-      {MN.sec_routines()}</div>""")
+    st.html(CSS + MN.CSS + f'<div class="mn">{MN.sec_routines()}</div>')
 
 
 def manual_panel():
-    """전체 설명서 — 절별 하위 탭 + PDF. 활용 루틴은 옆 탭에 있어 여기서는 뺀다(PDF 에는 들어간다)."""
+    """전체 설명서 — 실전 규칙 · 데이터 · 텔레그램 봇 + PDF. 개요·탭별 기능·루틴은 옆 탭과 같아 화면에서는 뺀다(PDF 에는 들어간다)."""
     import os
-    secs = [x for x in MN.SECTIONS if x[0] != 'routines']
-    c1, c2 = st.columns([5, 1.4], vertical_alignment='center')
-    c1.caption(f"최근 개선 {MN.updated()} · 규칙 값·백테스트 숫자·갱신 시각은 원천에서 자동으로 읽습니다 — 화면이 바뀌면 설명서도 같이 바뀝니다.")
+    secs = [x for x in MN.SECTIONS if x[0] in MN.SCREEN]
+    tabs = st.tabs([x[1] for x in secs])
     pdf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docs', 'manual.pdf')
+    for tab, (_sid, title, lead, fn) in zip(tabs, secs):
+        with tab:
+            st.html(CSS + MN.CSS + f'<div class="mn">{fn()}</div>')
+    c1, c2 = st.columns([5, 1.4], vertical_alignment='center')
+    c1.caption("PDF 는 한눈에 · 활용 루틴 · 이 설명서를 한 권으로 묶은 것 · 규칙 값과 백테스트 숫자는 원천에서 자동으로 따라옵니다. " + MN.DISCLAIMER)
     if os.path.exists(pdf):
         with open(pdf, 'rb') as f:
-            c2.download_button("PDF 내려받기", f.read(), file_name=f"stock-dashboard_사용설명서_{MN.updated()}.pdf",
+            c2.download_button("PDF 내려받기", f.read(), file_name="stock-dashboard_사용설명서.pdf",
                                mime='application/pdf', key='mn_pdf', width='stretch')
-    for tab, (_sid, title, lead, fn) in zip(st.tabs([x[1] for x in secs]), secs):
+
+
+def manual_internal():
+    """🏛️ 경영실 — 공개 설명서에서 뺀 절(개선 내역 · 검증·한계). 2026-11-15."""
+    for tab, (_sid, title, lead, fn) in zip(st.tabs([x[1] for x in MN.INTERNAL]), MN.INTERNAL):
         with tab:
             st.html(CSS + MN.CSS + f'<div class="mn"><div class="mn-src" style="margin:0 2px 10px">{_e(lead)}</div>{fn()}</div>')
-    st.caption(MN.DISCLAIMER)

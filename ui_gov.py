@@ -16,7 +16,7 @@ import pandas as pd
 
 import gov
 
-VERSION = '2026-11-13a'
+VERSION = '2026-11-15a'
 ROOT = Path(__file__).resolve().parent
 
 
@@ -246,7 +246,8 @@ def render(st, actor: str, owner_uid: str):
         st.caption(f'`처리 대기 큐 계산 실패: {str(e)[:120]}`')
 
     st.markdown('---')
-    tabs = st.tabs(['📊 스코어카드', '🗺️ 로드맵', '⚖️ 결정 로그', '🚨 이슈', '📝 회의록', '🕘 변경 이력', '⚙️ KPI 정의'])
+    tabs = st.tabs(['📊 스코어카드', '🗺️ 로드맵', '⚖️ 결정 로그', '🚨 이슈', '📝 회의록', '🕘 변경 이력', '⚙️ KPI 정의',
+                    '📘 설명서(비공개)'])
     with tabs[0]:
         _scorecard(st, actor, owner_uid)
     for t, kind in zip(tabs[1:5], ['roadmap', 'decision', 'issue', 'meeting']):
@@ -258,6 +259,13 @@ def render(st, actor: str, owner_uid: str):
     with tabs[6]:
         st.caption(_GUIDE['kpi'])
         _items(st, 'kpi', actor)
+    with tabs[7]:                                  # 2026-11-15 — 공개 설명서에서 뺀 개선 내역 · 검증·한계
+        st.caption('공개 사용설명서에서 뺀 절입니다. 개선 내역은 화면이 바뀌는 작업마다 docs/release_notes.json 에 한 줄 — 배포 공지는 안정화 뒤.')
+        try:
+            import ui_home as _UH
+            _UH.manual_internal()
+        except Exception as e:
+            st.caption(f'`설명서 비공개 절 실패: {str(e)[:120]}`')
 
 
 def _scorecard(st, actor, owner_uid):

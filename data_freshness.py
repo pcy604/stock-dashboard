@@ -95,6 +95,15 @@ def _jsonl_max_date(path):
     return best
 
 
+def _parquet_max(col):
+    """parquet 산출물용(raw=True) — 날짜 열의 최댓값."""
+    def get(path):
+        import pandas as pd
+        v = pd.read_parquet(path, columns=[col])[col].max()
+        return str(v)[:10] if v is not None else None
+    return get
+
+
 def _csv_col(col):
     """CSV 산출물용. raw=True 와 함께 쓰며 getter 가 파일 경로를 받는다."""
     def get(path):
@@ -305,6 +314,15 @@ SOURCES = [
          cycle='주 1회', max_age=9, producer='turnaround_run.py',
          job='weekly-accel (금 22:17 UTC)', used_by='🔎 종목 발굴 → 💎 펀더멘털 → 흑자전환 · 🚀 주도주 → 교집합 후보',
          getter=_key('date')),
+    # 2026-11-15 — 사용설명서 '데이터' 절(출처 → 항목 → 주기 → 마지막 갱신)에 걸리는데 감시가 없던 두 개.
+    dict(path='live/plan_latest.json', label='다음 주 계획표(실전 규칙)',
+         cycle='주 1회 (토 18:23)', max_age=8, producer='live/plan.py',
+         job='live-plan', used_by='🏠 종합 이번 주 시장 신호 · 🔎 종목 발굴 매수 대상 · 자동매매 봇',
+         getter=_key('made')),
+    dict(path='data/research/macro_long_fred.parquet', label='FRED 매크로(금리·물가·신용 스프레드)',
+         cycle='평일 07:53', max_age=6, producer='tools/fetch_macro_long.py',
+         job='macro-long', used_by='🌍 매크로 · 🏠 종합 글로벌 마켓(하이일드 스프레드)',
+         getter=_parquet_max('date'), raw=True),
 ]
 
 

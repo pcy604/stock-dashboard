@@ -40,8 +40,23 @@ def test_cron_kst():
 
 
 def test_schedules_resolve():
-    for k, _s, wf, _l in manual.DATA_ROWS:
-        assert manual.schedule(wf) != '수시', k
+    for _src, items in manual.DATA_FLOW:
+        for k, wf, _p, _l in items:
+            assert manual.schedule(wf) != '수시', k
+
+
+def test_data_flow_paths_registered():
+    """데이터 절의 '마지막 갱신'은 data_freshness 레지스트리에서 온다 — 경로가 등록돼 있어야 감시·표시가 같이 붙는다."""
+    import data_freshness
+    reg = {s['path'] for s in data_freshness.SOURCES}
+    for _src, items in manual.DATA_FLOW:
+        for k, _wf, path, _l in items:
+            assert path is None or path in reg, k
+
+
+def test_internal_sections_not_public():
+    doc = manual.build_html()
+    assert '해보고 버린 것' not in doc and '개선 내역' not in doc
 
 
 def test_release_notes_shape():
