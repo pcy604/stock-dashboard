@@ -1,11 +1,11 @@
 {
   "factor_ver": "v1",
-  "db_latest_week": "2026-11-02",
-  "exported_week": "2026-11-02",
+  "db_latest_week": "2026-11-09",
+  "exported_week": "2026-11-09",
   "age_days": 5,
   "stale": false,
-  "signals": 45,
+  "signals": 63,
   "excluded": 0,
-  "picks": 45,
-  "generated_at": "2026-11-07 13:28 UTC"
+  "picks": 63,
+  "generated_at": "2026-11-14 13:47 UTC"
 }
