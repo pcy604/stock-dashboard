@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-14c'
+VERSION = '2026-11-14d'
 
 CSS = """
 <style>
@@ -139,7 +139,7 @@ def _pct(v, cls=True, neutral=False, nd=2) -> str:
     if v is None:
         return '<span class="z">-</span>'
     c = 'z' if (neutral or not cls or v == 0) else ('p' if v > 0 else 'n')
-    return f'<span class="{c}">{v:+.{nd}f}%</span>'
+    return f'<span class="{c}" style="white-space:nowrap">{v:+.{nd}f}%</span>'
 
 
 def _num(v) -> str:

@@ -17,6 +17,11 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 
 # Yahoo 업종(industry) → 한국어. 상위 500에 자주 나오는 것만 — 없는 건 영문 그대로(지어내지 않는다).
 IND_KO = {
+    'Auto & Truck Dealerships': '자동차 판매', 'Business Equipment & Supplies': '사무기기', 'Coking Coal': '제철용 석탄',
+    'Farm Products': '농산물', 'Financial Conglomerates': '금융 복합기업', 'Gambling': '도박·베팅',
+    'Insurance - Specialty': '특수 보험', 'Other Precious Metals & Mining': '귀금속 채굴', 'REIT - Diversified': '종합 리츠',
+    'REIT - Hotel & Motel': '호텔 리츠', 'REIT - Mortgage': '모기지 리츠', 'REIT - Office': '오피스 리츠',
+    'Real Estate - Development': '부동산 개발', 'Utilities - Regulated Water': '수도 유틸리티', 'Utilities - Renewable': '신재생 발전',
     'Software - Infrastructure': '인프라 소프트웨어', 'Software - Application': '응용 소프트웨어',
     'Utilities - Regulated Electric': '전력 유틸리티', 'Aerospace & Defense': '항공우주·방산',
     'Semiconductors': '반도체', 'Semiconductor Equipment & Materials': '반도체 장비·소재',
