@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16b'
+VERSION = '2026-11-16c'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -443,15 +443,33 @@ def sec_rules() -> str:
         '<div class="mn-src">규칙 값은 봇이 읽는 설정에서 그대로 가져옵니다 — 규칙이 바뀌면 이 표도 같이 바뀝니다.</div>'
 
 
-def fresh(path) -> dict | None:
-    """data_freshness 의 파일 안 날짜·상태. 없거나 실패하면 None(화면에 '-')."""
-    if not path:
-        return None
+_FRESH: dict = {}
+
+
+def fresh_all() -> dict:
+    """데이터 절에 걸린 경로만 한 번에 읽는다 — 경로마다 레지스트리 전체(파일 45개)를 다시 열면
+    배포 서버에서 수십 초가 걸려 사용법 패널 뒤 화면 전체가 멈췄다(2026-11-15). 10분 메모."""
+    import time
+    if _FRESH.get('t', 0) > time.time() - 600:
+        return _FRESH['rows']
+    paths = {p for _s, items in DATA_FLOW for _i, _w, p, _l in items if p}
     try:
         import data_freshness as _df
-        return _df.date_for(path)
+        try:
+            rows = {r['path']: r for r in _df.statuses(only=paths)}
+        except TypeError:                              # 클라우드가 옛 모듈(only 인자 없음)을 들고 있을 때
+            import importlib
+            _df = importlib.reload(_df)
+            rows = {r['path']: r for r in _df.statuses(only=paths)}
     except Exception:
-        return None
+        rows = {}
+    _FRESH.update(t=time.time(), rows=rows)
+    return rows
+
+
+def fresh(path) -> dict | None:
+    """data_freshness 의 파일 안 날짜·상태. 없거나 실패하면 None(화면에 '-')."""
+    return fresh_all().get(path) if path else None
 
 
 def sec_data(live: bool = True) -> str:

@@ -326,11 +326,13 @@ SOURCES = [
 ]
 
 
-def statuses(today: datetime | None = None) -> list[dict]:
-    """각 산출물의 마지막 데이터 날짜·경과일·상태를 계산한다."""
+def statuses(today: datetime | None = None, only: set | None = None) -> list[dict]:
+    """각 산출물의 마지막 데이터 날짜·경과일·상태를 계산한다. only = 이 경로들만(파일을 다 열지 않게)."""
     today = today or datetime.now()
     out = []
     for s in SOURCES:
+        if only is not None and s['path'] not in only:
+            continue
         row = dict(label=s['label'], path=s['path'], cycle=s['cycle'],
                    max_age=s['max_age'], producer=s['producer'], job=s['job'],
                    used_by=s['used_by'], date=None, age=None, state='unknown', note='')
