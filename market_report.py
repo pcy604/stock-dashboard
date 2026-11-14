@@ -134,6 +134,14 @@ def _download(syms):
         return None
 
 
+def _spark(s, n=63):
+    """종합 글로벌 마켓 스파크라인 — 최근 3개월(≈63거래일) 종가, 유효숫자 5자리. 2026-11-15."""
+    try:
+        return [float(f"{float(x):.5g}") for x in s.iloc[-n:].tolist()]
+    except Exception:
+        return None
+
+
 def quote_facts(pairs, df=None, short=False):
     """(심볼, 이름) 목록 → 1일·5일 등락. short=True 면 지수용 긴 항목(1개월·52주·200일선)은 뺀다."""
     df = df if df is not None else _download([s for s, _ in pairs])
@@ -148,7 +156,7 @@ def quote_facts(pairs, df=None, short=False):
                        d1=_r((c / s.iloc[-2] - 1) * 100), d5=_r((c / s.iloc[-6] - 1) * 100))
             if not short:
                 row.update(m1=_r((c / s.iloc[-22] - 1) * 100), from_52w_high=_r((c / s.max() - 1) * 100),
-                           above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None)
+                           above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None, spark=_spark(s))
             out.append(row)
         except Exception as e:
             out.append(dict(name=name, sym=sym, error=str(e)[:60]))
@@ -178,7 +186,8 @@ def index_facts():
             out.append(dict(name=name, sym=sym, date=str(s.index[-1].date()), close=_r(c),
                             d1=_r((c / s.iloc[-2] - 1) * 100), d5=_r((c / s.iloc[-6] - 1) * 100),
                             m1=_r((c / s.iloc[-22] - 1) * 100), from_52w_high=_r((c / s.max() - 1) * 100),
-                            above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None))
+                            above_200d=bool(c > s.iloc[-200:].mean()) if len(s) >= 200 else None, spark=_spark(s),
+                            ma200=_r(s.iloc[-200:].mean()) if len(s) >= 200 else None))
             if sym in ("^GSPC", "^IXIC"):   # 2026-11-14 미국도 오닐식 시장 방향(종합 '시장 방향' 카드)
                 try:
                     pz = kr_pulse(sym)
@@ -218,7 +227,7 @@ def hy_fact():
         bp = lambda k: _r((c - v[-1 - k]) * 100, 0) if len(v) > k else None
         ma = sum(v[-200:]) / len(v[-200:])
         return dict(name="하이일드 스프레드", sym="BAMLH0A0HYM2", date=obs[-1][0], close=_r(c), unit="bp",
-                    d1=bp(1), d5=bp(5), m1=bp(21), from_52w_low=_r((c - min(v[-252:])) * 100, 0),
+                    d1=bp(1), d5=bp(5), m1=bp(21), from_52w_low=_r((c - min(v[-252:])) * 100, 0), spark=v[-63:],
                     above_200d=bool(c > ma))
     except Exception as e:
         print("  하이일드 스프레드 생략:", str(e)[:60])
@@ -594,6 +603,44 @@ def rule_checks(idx_rows, kr, flow_sum=None, events=None) -> list[str]:
     return out
 
 
+def us_rule_checks(idx_rows, us=None, events=None) -> list[str]:
+    """미국 리포트의 숫자 조건 — 한국판(rule_checks)과 같은 자리·같은 말투. 2026-11-15 양식 통일.
+    ① 지수별 200일선까지 거리(매크로 '미국 장기 추세') ② 오닐 분배일 ③ 대형주 시장 폭 ④ 7일 안 미국 일정."""
+    out = []
+    for x in idx_rows or []:
+        c, ma = x.get('close'), x.get('ma200')
+        if not c or not ma:
+            continue
+        gap = (c / ma - 1) * 100
+        if gap >= 0:
+            out.append(f"**{x['name']}** 200일선 **{ma:,.0f}** 위 {gap:+.1f}% — 이 선을 종가로 깨면 장기 추세 꺼짐")
+        else:
+            out.append(f"**{x['name']}** 200일선 **{ma:,.0f}** 아래 {gap:+.1f}% — 종가로 되찾아야 장기 추세 회복")
+    for x in idx_rows or []:
+        pz = x.get('pulse') or {}
+        if pz.get('dist_n') is not None and x.get('name') == 'S&P500':
+            n = pz['dist_n']
+            out.append(f"S&P500 분배일 {n}개(25거래일) — " + ("5개 이상: 기관 매도 누적, 신고가 돌파 실패 주의" if n >= 5
+                       else "4개: 하나 더 쌓이면 '압력 받는 상승'" if n == 4 else "여유 — 상승 추세 훼손 신호 없음"))
+    bu = (us or {}).get('breadth_up')
+    if bu is not None:
+        out.append(f"시장 폭: 대형주(시총 상위 500) 상승 {bu}% — " + ("넓게 오른 날. 이어지는지(60%+)" if bu >= 60
+                   else "지수와 달리 오르는 종목이 적음 — 소수 종목 장세 주의" if bu < 45 else "중립"))
+    near = []
+    for e in events or []:
+        dd = e.get('dday')
+        if dd is None:
+            try:
+                dd = (date.fromisoformat(str(e['date'])[:10]) - date.today()).days
+            except Exception:
+                continue
+        if 0 <= dd <= 7 and e.get('kind') == '미국':
+            near.append(e)
+    if near:
+        out.append("7일 안 일정: " + ' · '.join(f"{e['date'][5:]} {e['name'].split(' — ')[0]}" for e in near[:3]))
+    return out
+
+
 def _kr_rule_checks(f):
     """facts(kind='kr') 에 rule_checks 를 싣는다 — 봇이 AI 체크포인트 대신 쓴다. 실패해도 리포트는 나간다."""
     try:
@@ -661,7 +708,8 @@ PROMPT = """너는 증권사 데일리 시황을 쓰는 시니어 애널리스�
   두 문장, 합쳐 90자 이내. ① 오늘 장을 한 마디로(무엇이 지수를 끌었나: 업종·대장주) ② 시장 폭·쏠림의 특징
   (예: "반도체 대형주가 지수를 끌어내렸지만 하락 종목은 평소의 2배가 아니라 3배 — 투매에 가까운 장.")
   ## 해설
-  글머리표(-) 3~4개, 각 70자 이내, 줄마다 굵은 꼬리표로 시작: **지수** · **수급**(자료에 있을 때만) · **업종·테마** · **종목**.
+  글머리표(-) 정확히 4개, 각 70자 이내, 이 순서·이 꼬리표만: **지수** · **수급** · **업종·테마** · **종목**.
+  (한국·미국 리포트 양식을 같게 — 2026-11-15) 투자자별 매매 자료가 없으면(미국) **수급** 줄은 거래대금 쏠림·금리·달러로 돈의 방향을 쓴다.
   꼬리표마다 서로 다른 자료를 쓴다. 표에 없는 '관계'를 말한다 — 지수와 시장 폭의 괴리, 대형주와 중소형주의 방향 차이,
   강한 업종과 약한 업종이 같은 테마로 묶이는지, 거래대금이 몰린 곳과 오른 곳이 같은지. 숫자는 줄마다 최대 2개.
   ## 체크포인트
@@ -806,7 +854,7 @@ def unbacked_pcts(md, f):
     return bad
 
 
-_AI_DROP = {"heatmap", "members", "breadth_hist", "hist", "turnover_top", "periods", "KR_mkt", "internals_kr"}
+_AI_DROP = {"spark", "breadth_hist_w", "breadth_hist_m", "heatmap", "members", "breadth_hist", "hist", "turnover_top", "periods", "KR_mkt", "internals_kr"}
 
 
 def _ai_slim(x):

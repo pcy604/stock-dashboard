@@ -601,6 +601,13 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         _PS, _PSC = None, None
 
     total = 0
+    # 2026-11-15 — 종목별 시작 주차. 예전엔 전역 MAX(as_of)+1 하나라, 한 주가 일부 종목만 들어간 채
+    #   저장되면 나머지 종목은 그 주를 **영영** 건너뛰었다(구멍). 종목마다 자기 마지막 주차 다음부터.
+    _last = {}
+    if incremental:
+        _last = dict(con.execute("SELECT sym, MAX(as_of) FROM factor_weekly WHERE factor_ver=? GROUP BY sym",
+                                 (VER,)).fetchall())
+    _tail = {}          # 종목별 가장 최근 주봉 날짜 — 주차 완성도 판정용
     # 2026-10-19 — 유니버스 2,900 중 1,900 만 적재되는 이유를 센다(어디서 빠지나)
     why = {"재무파일 없음": 0, "주봉 없음/80주 미만": 0, "새 주차 없음": 0, "공시 분기 6개 미만": 0}
     for _, row in u.iterrows():
@@ -614,8 +621,11 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         if w is None or len(w) < 80:
             why["주봉 없음/80주 미만"] += 1
             continue
+        _tail[s] = w.index[-1]
+        _st = ((pd.Timestamp(_last[s]) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+               if s in _last and _last[s] else start)
         # ★ 계산할 새 주차가 없으면 일봉·재무 로드 전에 바로 스킵
-        if w.index[-1] < pd.Timestamp(start):
+        if w.index[-1] < pd.Timestamp(_st):
             why["새 주차 없음"] += 1
             continue
         dyp = os.path.join(CACHE, f"dy_{s}.csv")
@@ -647,7 +657,7 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         w["vma20"] = w.Volume.rolling(20).mean()
         sp = spy.reindex(w.index, method="nearest")
         rec = []
-        i_start = max(60, int(np.searchsorted(w.index, pd.Timestamp(start))))
+        i_start = max(60, int(np.searchsorted(w.index, pd.Timestamp(_st))))
         for i in range(i_start, len(w)):
             d = w.index[i]
             px = float(c.iloc[i])
@@ -766,6 +776,16 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
     _w = " · ".join(f"{k} {v:,}" for k, v in why.items())
     print(f"유니버스 {len(u):,}종 중 제외 — {_w}", flush=True)
     print(f"::notice title=factor_weekly 제외 사유::유니버스 {len(u):,}종 · {_w}", flush=True)
+    # 2026-11-15 주차 완성도 — 11-07·11-14 토요일 새벽 실행은 Yahoo 주봉 최신 주가 1/3 종목(979~1,050종)에
+    #   아직 없었다. 그 상태로 발행하면 후보가 2/3 유니버스로 뽑힌다. 워크플로가 이 파일을 읽고 발행을 미룬다.
+    if _tail:
+        _tgt = max(_tail.values())
+        _stale = sum(1 for v in _tail.values() if v < _tgt)
+        _wk = dict(target=str(_tgt.date()), stale=_stale, checked=len(_tail),
+                   ratio=round(_stale / len(_tail), 3))
+        json.dump(_wk, open(os.environ.get("ACCEL_WEEK_STATS", "/tmp/accel_week.json"), "w"))
+        print(f"::notice title=주차 완성도::최신 주봉 {_wk['target']} — 아직 없는 종목 {_stale:,}/{len(_tail):,}종"
+              f"({_wk['ratio']:.0%})", flush=True)
     print(con.execute("SELECT COUNT(DISTINCT sym), MIN(as_of), MAX(as_of) FROM factor_weekly").fetchone())
     con.close()
 
@@ -818,9 +838,14 @@ def fixcap(sentinels=("NVDA", "AAPL", "MSFT", "TSLA", "AXTI", "PLTR")):
                        "AND marcap IS NULL", (VER, last)).fetchone()[0]
     tot = con.execute("SELECT COUNT(DISTINCT sym) FROM factor_weekly WHERE factor_ver=? AND as_of=?",
                       (VER, last)).fetchone()[0]
-    bad = [x for x in sentinels if con.execute(
-        "SELECT marcap IS NULL FROM factor_weekly WHERE factor_ver=? AND as_of=? AND sym=?",
-        (VER, last, x)).fetchone() in ((1,), None)]
+    # 2026-11-15 — '행이 없음'(그 주 주봉이 아직 안 들어옴)과 '시총이 빔'을 구분한다. 예전엔 둘 다 '시총 결측'으로 보고했다.
+    _r = {x: con.execute("SELECT marcap IS NULL FROM factor_weekly WHERE factor_ver=? AND as_of=? AND sym=?",
+                         (VER, last, x)).fetchone() for x in sentinels}
+    bad = [x for x, v in _r.items() if v == (1,)]
+    miss = [x for x, v in _r.items() if v is None]
+    if miss:
+        print(f"::error title=파수꾼 주차 없음::{miss} 의 최신주({last}) 행이 없다 — 주봉 미도착(주차 완성도 확인 단계가 막았어야 함)", flush=True)
+        sys.exit(1)
     con.close()
     print(f"→ {len(upd):,}행 채움 · 최신주({last}) 시총 결측 {left:,}/{tot:,}종", flush=True)
     if bad:

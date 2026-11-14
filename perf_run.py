@@ -150,6 +150,17 @@ def analyze_one(sym, name, marcap, market):
             _nh8 = int(_f52.iloc[-8:].sum())
         except Exception:
             pass
+        # 2026-11-15 — 52주 신저가 경신 주(종합 탭 '주간 신고가·신저가' 차트). 그 주 저가 < 직전 52주 저가.
+        #   신규 상장 26주 미만은 매주 신저가가 될 수 있어 뺀다. 금요일 날짜 목록만(가볍게).
+        _nl = []
+        try:
+            if 'Low' in wdf:
+                _L = wdf['Low'].astype(float)
+                _pl = _L.shift(1).rolling(52, min_periods=26).min()
+                _fl = ((_L < _pl) & _pl.notna()).iloc[-52:]
+                _nl = [str((t - pd.Timedelta(days=2)).date()) for t, f in zip(_fl.index, _fl.values) if f]
+        except Exception:
+            pass
 
         return {
             'market':      market,
@@ -165,6 +176,7 @@ def analyze_one(sym, name, marcap, market):
             'wk_since_hi': _wk_since,
             'nh':          _nh,          # 최근 52주 중 신고가 경신 주 [[금요일, 종가], ...]
             'nh_streak':   _streak,      # 이번 주까지 연속 경신 주 수
+            'nl':          _nl,          # 최근 52주 중 신저가 경신 주 [금요일, ...] (2026-11-15)
             'nh_8w':       _nh8,         # 최근 8주 중 경신 주 수
             'young':       len(wdf) < 53,   # 상장(이력) 1년 미만 — 신고가 = 상장 후 최고가
             'ret_12w':     round((curr / float(wdf['Close'].iloc[-13]) - 1) * 100, 2) if len(wdf) >= 13 else None,

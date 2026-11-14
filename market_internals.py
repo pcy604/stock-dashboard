@@ -69,6 +69,10 @@ IND_KO = {
     'Furnishings, Fixtures & Appliances': '가구·가전', 'Electronics & Computer Distribution': '전자 유통',
 }
 
+SEC_KO = {'Technology': '기술', 'Financial Services': '금융', 'Healthcare': '헬스케어', 'Consumer Cyclical': '경기소비재',
+          'Communication Services': '통신서비스', 'Industrials': '산업재', 'Consumer Defensive': '필수소비재', 'Energy': '에너지',
+          'Basic Materials': '소재', 'Real Estate': '부동산', 'Utilities': '유틸리티'}
+
 # 대형주 한국어 이름 — 화면 가독(나머지는 티커)
 NAME_KO = {'NVDA': '엔비디아', 'MSFT': '마이크로소프트', 'AAPL': '애플', 'GOOGL': '알파벳', 'GOOG': '알파벳C',
            'AMZN': '아마존', 'META': '메타', 'AVGO': '브로드컴', 'TSLA': '테슬라', 'BRK-B': '버크셔', 'BRK-A': '버크셔',
@@ -113,6 +117,20 @@ def _dl(syms, period='1y', batch=100):
     return {k: (pd.concat(v, axis=1) if v else pd.DataFrame()) for k, v in parts.items()}
 
 
+def _trend_res(close, rule, n):
+    """주간(W-FRI)·월간(ME) 상승 비율 — 그 기간 마지막 종가 기준 등락. 2026-11-15 기간 전환."""
+    cc = close.resample(rule).last()
+    r = cc.pct_change(fill_method=None) * 100
+    out = []
+    for dt, row in r.iloc[-(n + 1):].iterrows():
+        v = row.dropna()
+        if len(v) < 0.8 * close.shape[1]:
+            continue
+        out.append(dict(date=str(min(dt, close.index[-1]).date()),          # 진행 중인 주·달은 미래 말일 대신 최근 거래일
+                        up=int((v > 0).sum()), down=int((v < 0).sum()), flat=int((v == 0).sum())))
+    return out[-n:]
+
+
 def _trend(close, n=30):
     """상승 비율 — 최근 n거래일. 그날 값이 있는 종목이 80% 미만인 날(휴장·결측)은 뺀다."""
     r = close.pct_change(fill_method=None) * 100
@@ -129,7 +147,7 @@ _LIM = {1: 60, 5: 100, 21: 200}     # 기간 수익률 상한(%) — 넘으면 �
 PERIODS = (('d1', 1), ('w1', 5), ('m1', 21))
 
 
-def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3):
+def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3, hm_of=None, themes_of=None):
     """k거래일 수익률로 본 시장 내부 — 일간(k=1)·주간(5)·월간(21) 같은 모양. 2026-11-14.
     meta {sym: (이름, 시총)} · big = 대형주 sym 집합(상승·하락 상위는 대형주에서만) · amt_fmt(거래대금) → 글자."""
     import pandas as pd
@@ -155,6 +173,11 @@ def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3):
                             lead_ret=_r(g.iloc[0]['ret'], 1),
                             members=[dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1)) for x in g.head(20).itertuples()]))
     sectors.sort(key=lambda x: -x['ret'])
+    # 히트맵(2026-11-15) — 시총 상위 300, 묶음 = hm_of(sym)(미국 Yahoo sector 11 · 한국 네이버 업종 16)
+    heat = [dict(name=nm(x.sym), sym=x.sym, sec=(hm_of(x.sym) if hm_of else x.ind) or '기타',
+                 mc=_r(x.mc / mc_div, 1), ret=_r(x.ret, 1))
+            for x in rows.sort_values('mc', ascending=False).head(300).itertuples()]
+    themes = _themes(r, nm, themes_of) if themes_of else {}
     mega = [dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1), mc=_r(x.mc / mc_div, 0 if mc_div == 1e9 else 1))
             for x in rows.sort_values('mc', ascending=False).head(10).itertuples()]
     hh = h.reindex(columns=c.columns)
@@ -180,7 +203,34 @@ def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3):
                 bottom=[row(x) for x in bg.head(8).itertuples()],
                 turnover_top=[dict(name=nm(s), sym=s, ret=_r(r[s], 1), tag=amt_fmt(dv[s]))
                               for s in dv.sort_values(ascending=False).index[:8]],
-                turnover_txt=amt_fmt(float(dv.sum())))
+                turnover_txt=amt_fmt(float(dv.sum())), heatmap=heat, **themes)
+
+
+_THEME_SKIP = ('스팩', 'SPAC', '우선주')
+
+
+def _themes(r, nm, themes_of, min_theme=5):
+    """한국 테마(네이버 테마 구성, data/sector_detail.json) 기간 수익률 — 구성 종목 단순 평균. 일간판(market_report.kr_themes)과 같은 정의.
+    2026-11-15: 주간·월간에도 테마가 보이게."""
+    th = {}
+    for s_ in r.index:
+        for t in themes_of(s_) or []:
+            if not any(x in t for x in _THEME_SKIP):
+                th.setdefault(t, []).append(s_)
+    rows = []
+    for t, ss in th.items():
+        if len(ss) < min_theme:
+            continue
+        rets = [float(r[x]) for x in ss]
+        lead = sorted(ss, key=lambda x: -r[x])[:3]
+        rows.append(dict(name=t.split('(')[0].strip()[:16], n=len(ss), ret=_r(sum(rets) / len(rets), 1),
+                         up=sum(1 for v in rets if v > 0), lead=[dict(name=nm(x), sym=x, ret=_r(r[x], 1)) for x in lead]))
+    rows.sort(key=lambda x: -x['ret'])
+    seen, uniq = set(), []
+    for x in rows:
+        if x['name'] not in seen:
+            seen.add(x['name']); uniq.append(x)
+    return dict(themes_top=uniq[:6], themes_bottom=uniq[::-1][:4])
 
 
 def _clean(c):
@@ -190,14 +240,30 @@ def _clean(c):
     return c
 
 
-def _pack(c, h, v, meta, big, amt_fmt, mc_div, sec_of, n_hist):
-    views = {p: _view(c, h.loc[:c.index[-1]], v.loc[:c.index[-1]], meta, k, big, amt_fmt, mc_div, sec_of) for p, k in PERIODS}
+def _common(c):
+    """2026-11-15 — 일·주·월 **같은 종목 집합**. 옛: 기간마다 '기준일 종가가 있는 종목'이 달라 2,619 / 2,638 / 2,639 처럼 어긋났다.
+    조건: 오늘·1일 전·5일 전·21일 전 종가가 모두 있고, 기간 수익률이 상한(_LIM) 안 — 상장 1개월 미만·시세 오류 종목은 셋 다에서 빠진다."""
+    if len(c) < 23:
+        return list(c.columns)
+    ok = c.iloc[[-1, -2, -6, -22]].notna().all()
+    for k in (1, 5, 21):
+        rr = (c.iloc[-1] / c.iloc[-1 - k] - 1) * 100
+        ok &= rr.abs() <= _LIM[k]
+    return [s for s in c.columns if ok.get(s, False)]
+
+
+def _pack(c, h, v, meta, big, amt_fmt, mc_div, sec_of, n_hist, hm_of=None, themes_of=None):
+    c = c[_common(c)]
+    views = {p: _view(c, h.loc[:c.index[-1]], v.loc[:c.index[-1]], meta, k, big, amt_fmt, mc_div, sec_of,
+                      hm_of=hm_of, themes_of=themes_of) for p, k in PERIODS}
     out = dict(views.get('d1') or {})
     if not out:
         return {}
     out['periods'] = {p: views[p] for p in ('w1', 'm1') if views.get(p)}
     bc = c[[s for s in c.columns if s in big]]
     out['breadth_hist'] = _trend(bc, n_hist)
+    out['breadth_hist_w'] = _trend_res(bc, 'W-FRI', 26)      # 2026-11-15 기간 전환 — 주간 26주
+    out['breadth_hist_m'] = _trend_res(bc, 'ME', 12)         # 월간 12개월
     out['hist_universe'] = int(bc.shape[1])
     return out
 
@@ -214,12 +280,14 @@ def us_internals(top_n=500, n_hist=30):
     c = _clean(d['Close'])
     if c.empty or len(c) < 60:
         return {}
-    meta = {s['sym']: (NAME_KO.get(s['sym'], s['sym']), s['marcap']) for s in us if s['sym'] in c.columns}
+    # 2026-11-15 이름 통일 — 미국은 전부 **티커**(옛: 70종만 한글 → '엔비디아'와 'CBRS'가 섞였다)
+    meta = {s['sym']: (s['sym'], s['marcap']) for s in us if s['sym'] in c.columns}
     have = [s['sym'] for s in us if s['sym'] in c.columns and c[s['sym']].iloc[-1] == c[s['sym']].iloc[-1]]
     big = set(have[:top_n])                              # 값이 있는 종목으로 정확히 top_n(옛: 결측 1종 → 499)
     ind = lambda s: (lambda x: IND_KO.get(x, x) if x else None)((sd.get(s) or {}).get('industry'))
     fmt = lambda a: f"${a / 1e9:,.1f}B"
-    out = _pack(c, d['High'], d['Volume'], meta, big, fmt, 1e9, ind, n_hist)
+    hm = lambda s: SEC_KO.get((sd.get(s) or {}).get('sector'), (sd.get(s) or {}).get('sector'))
+    out = _pack(c, d['High'], d['Volume'], meta, big, fmt, 1e9, ind, n_hist, hm_of=hm)
     if out:
         out['basis'] = 'd1'
     return out
@@ -249,7 +317,16 @@ def kr_internals(n_hist=30):
             _sec_short = lambda x: x
         ind = lambda s: (_sec_short(smap[s]) if smap.get(s) else None)
         fmt = lambda a: (f"{a / 1e12:,.1f}조" if a >= 1e12 else f"{a / 1e8:,.0f}억")
-        out = _pack(c, h, v, meta, big, fmt, 1e12, ind, n_hist)
+        _hm0 = {}
+        try:
+            _r0 = _j('results/market_report.json')
+            for x in (((_r0.get('latest_kr') or {}).get('facts') or {}).get('stocks') or {}).get('KR', {}).get('heatmap') or []:
+                _hm0[x['sym']] = x['sec']
+        except Exception:
+            pass
+        _det = (_j('data/sector_detail.json') or {}).get('kr') or {}
+        out = _pack(c, h, v, meta, big, fmt, 1e12, ind, n_hist,
+                    hm_of=lambda s: _hm0.get(s) or ind(s), themes_of=lambda s: (_det.get(s) or {}).get('themes'))
         if out:
             out['basis'] = '시총 1,000억+'
         return out

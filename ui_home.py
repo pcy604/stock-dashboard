@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-14d'
+VERSION = '2026-11-15a'
 
 CSS = """
 <style>
@@ -79,6 +79,9 @@ CSS = """
   .hm-step .v em::before { content:'· '; }
   .hm-acc { display:grid; gap:8px; grid-template-columns:repeat(6,minmax(0,1fr)); }
   @media (max-width:980px) { .hm-acc { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .hm-mcs { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:10px; font-size:12.5px; }
+  .hm-mcs > b { font-size:12.5px; color:var(--ink-2); margin-right:4px; }
+  .hm-mc { border:1px solid var(--line); border-radius:999px; padding:3px 10px; white-space:nowrap; font-variant-numeric:tabular-nums; }
   details.hm-det { border-bottom:1px dashed var(--line-2); }
   details.hm-det:last-child { border-bottom:0; }
   details.hm-det > summary { list-style:none; cursor:pointer; display:flex; justify-content:space-between; gap:8px;
@@ -203,8 +206,10 @@ _TONE = {'g': '#16A34A', 'r': '#DC2626', 'y': '#D97706', 'k': '#64748B'}
 def hero(g: dict, line: str, line_date: str, chips: list[str], live: str = ''):
     """이번 주 시장 신호 — 밝은 카드(2026-11-14: 검은 배경이 무겁다는 지적). 운영 정보(오버라이드·데이터 점검)는 경영실로."""
     wk = next((r.get('date') for r in g['rows'] if r.get('date')), None)
-    gl = ''.join(f"<span>{_e(r['lab'])} <b>{_num(r['last'])}</b> · 5주선 {_num(r['ma'])} "
-                 f"<span class='{'p' if r['rule_ok'] else 'n'}'>({'위' if r['rule_ok'] else '아래'})</span></span>" for r in g['rows'])
+    # 2026-11-15 — '확정(지난 금요일 주봉)'과 '진행 중(최근 종가)'을 이름으로 구분(날짜만 다른 숫자 두 벌이 헷갈렸다)
+    gl = (f"<span><b>확정</b> ({_e(str(wk or '')[5:])} 주봉)</span>" if wk else '') + ''.join(
+        f"<span>{_e(r['lab'])} <b>{_num(r['last'])}</b> · 5주선 {_num(r['ma'])} "
+        f"<span class='{'p' if r['rule_ok'] else 'n'}'>({'위' if r['rule_ok'] else '아래'})</span></span>" for r in g['rows'])
     body = (f"<p><b style='color:var(--ink)'>오늘 시장</b> — {_e(line)} <span style='color:var(--ink-3);font-size:12px'>(AI 요약 · {_e(line_date)})</span></p>"
             if line else "<p>오늘 시황 요약 준비 중 — 평일 15:50(KST) 한국 장 마감 후 갱신.</p>")
     st.html(CSS + f"""<div class="hm"><div class="hm-hero" style="--tone:{_TONE.get(g['tone'], '#64748B')}">
@@ -221,8 +226,29 @@ def _bp(v) -> str:
     return '<span class="z">-</span>' if v is None else f'<span class="z">{v:+.0f}bp</span>'
 
 
-def market_cards(rows: list[dict], asof: str = ''):
-    """글로벌 마켓 — 7 × 2. 모든 카드 같은 4줄(종가·1일·5일/1개월·52주 고점/200일선). 없는 값은 '-'(지어내지 않음)."""
+def _spark(vals, color: str) -> str:
+    """최근 3개월(≈63거래일) 종가 스파크라인 — 2026-11-15. 축·눈금 없이 모양만, 마지막 점 강조."""
+    v = [float(x) for x in (vals or []) if x is not None]
+    if len(v) < 5:
+        return "<div style='height:30px'></div>"
+    lo, hi = min(v), max(v)
+    rg = (hi - lo) or 1
+    W, H = 100, 28
+    pts = ' '.join(f"{i / (len(v) - 1) * W:.1f},{H - 2 - (x - lo) / rg * (H - 4):.1f}" for i, x in enumerate(v))
+    ly = H - 2 - (v[-1] - lo) / rg * (H - 4)
+    return (f"<svg viewBox='0 0 {W} {H}' preserveAspectRatio='none' style='width:100%;height:30px;display:block;margin:4px 0 2px'>"
+            f"<polyline points='{pts}' fill='none' stroke='{color}' stroke-width='1.4' vector-effect='non-scaling-stroke'/>"
+            f"<circle cx='{W}' cy='{ly:.1f}' r='1.8' fill='{color}'/></svg>")
+
+
+_PKEY = {'d1': ('d1', '1일'), 'w1': ('d5', '5일'), 'm1': ('m1', '1개월')}
+
+
+def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
+    """글로벌 마켓 — 7 × 2. 큰 등락 = 고른 기간(일·주·월), 스파크라인 = 최근 3개월. 없는 값은 '-'(지어내지 않음).
+    2026-11-15: 기간 전환 연동 + 스파크라인."""
+    key, lab = _PKEY.get(period, _PKEY['d1'])
+    others = [(k, l) for k, l in (('d1', '1일'), ('d5', '5일'), ('m1', '1개월')) if k != key]
     cards = []
     for x in rows:
         nm = x.get('name')
@@ -230,7 +256,7 @@ def market_cards(rows: list[dict], asof: str = ''):
         bp = x.get('unit') == 'bp'
         f = (lambda k: _bp(x.get(k))) if bp else (lambda k: _pct(x.get(k), neutral=neu, nd=1))
         ab = x.get('above_200d')
-        sub = f"5일 {f('d5')} · 1개월 {f('m1')}"
+        sub = ' · '.join(f"{l} {f(k)}" for k, l in others)
         if bp:
             t1 = f"1년 저점 {x['from_52w_low']:+.0f}bp" if x.get('from_52w_low') is not None else '1년 저점 -'
         else:
@@ -241,12 +267,15 @@ def market_cards(rows: list[dict], asof: str = ''):
             dot = 'var(--ink-3)' if (neu or bp) else ('var(--pos)' if ab else 'var(--neg)')
             t2 = f"<span style='color:{dot}'>●</span> 200일선 {'위' if ab else '아래'}"
         px = f"{x['close']:.2f}%" if bp and x.get('close') is not None else _num(x.get('close'))
-        d1 = _bp(x.get('d1')) if bp else _pct(x.get('d1'), neutral=neu)
+        big = _bp(x.get(key)) if bp else _pct(x.get(key), neutral=neu)
+        mv = x.get(key)
+        col = '#94A3B8' if (neu or bp or mv is None) else ('#16A34A' if mv > 0 else '#DC2626')
         cards.append(f"""<div class="hm-card"><div class="nm">{_e(nm)}</div>
-          <div class="px">{px}</div><div class="d1">{d1}</div>
+          <div class="px">{px}</div><div class="d1">{big} <span style='font-size:11px;color:var(--ink-3);font-weight:500'>{lab}</span></div>
+          {_spark(x.get('spark'), col)}
           <div class="sub">{sub}<br>{t1} · {t2}</div></div>""")
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>글로벌 마켓</b>
-      <span>종가 · 1일 등락 · 고점 = 52주 고점 대비 · VIX·환율·금리·달러·유가·스프레드는 오르면 위험이라 색 없음 · bp = 0.01%p</span></div>
+      <span>큰 숫자 = 고른 기간 등락 · 선 = 최근 3개월 · 고점 = 52주 고점 대비 · VIX·환율·금리·달러·유가·스프레드는 오르면 위험이라 색 없음 · bp = 0.01%p</span></div>
       <div class="hm-grid">{''.join(cards) or '<div class="hm-src">지수 데이터 없음</div>'}</div>
       <div class="hm-src">출처: Yahoo Finance · FRED(하이일드 스프레드 = ICE BofA US High Yield OAS) · market_report.py · 마지막 갱신: {_e(asof)}</div></div>""")
 
@@ -283,7 +312,7 @@ def _sec_rows(ss: list[dict]) -> str:
     return ''.join(out) or "<div class='hm-kv'>-</div>"
 
 
-def _breadth_box(m: dict, rich_kr: bool) -> str:
+def _breadth_box(m: dict, kr: bool, extra: dict | None = None) -> str:
     b = m.get('breadth_all') or {}
     up, dn, fl = b.get('up') or 0, b.get('down') or 0, b.get('flat') or 0
     tot = up + dn + fl
@@ -293,17 +322,15 @@ def _breadth_box(m: dict, rich_kr: bool) -> str:
            f'<span style="width:{fl / tot * 100:.1f}%;background:#CBD5E1"></span>'
            f'<span style="width:{dn / tot * 100:.1f}%;background:var(--neg)"></span></div>')
     kv = [f"상승 <b class='p'>{up:,}</b> · 보합 {fl:,} · 하락 <b class='n'>{dn:,}</b> — 상승 비율 {up / tot * 100:.0f}%"]
-    if rich_kr:
-        kv.append(f"상한가 {b.get('limit_up', '-')} · 하한가 {b.get('limit_down', '-')}")
-        kv.append(' · '.join(f"{k} 거래대금 {v:,.1f}조" for k, v in (m.get('turnover_tn') or {}).items()) or '거래대금 -')
-        kv.append(f"대형주(시총 1조+) {m.get('universe', '-')}종 중 상승 {m.get('breadth_up', '-')}%")
-        lab = '시장 폭 — 코스피+코스닥 전 종목'
-    else:
-        tt = m.get('turnover_txt') or (f"${m['turnover_bn']:,.0f}B" if m.get('turnover_bn') else None)
-        kv.append(f"거래대금 합계 {tt}" if tt else '거래대금 -')
-        if m.get('big_n'):
-            kv.append(f"대형주 {m['big_n']:,}종 중 상승 {m.get('breadth_up', '-')}%")
-        lab = f"시장 폭 — {m.get('basis_label') or ''}{tot:,}종"
+    tt = m.get('turnover_txt') or (f"${m['turnover_bn']:,.0f}B" if m.get('turnover_bn') else None)
+    kv.append(f"거래대금 합계 {tt}" if tt else '거래대금 -')
+    if m.get('big_n'):
+        kv.append(f"대형주({'시총 1조+' if kr else '시총 상위 500'}) {m['big_n']:,}종 중 상승 {m.get('breadth_up', '-')}%")
+    eb = (extra or {}).get('breadth_all') or {}
+    if eb.get('up') is not None:      # 한국 일간 — 네이버 전 종목(1,000억 미만 포함) 보조 숫자
+        kv.append(f"<em>참고 · 코스피+코스닥 전 종목: 상승 {eb['up']:,} · 하락 {eb.get('down', 0):,} · "
+                  f"상한가 {eb.get('limit_up', '-')} · 하한가 {eb.get('limit_down', '-')}</em>")
+    lab = f"시장 폭 — {'시총 1,000억+' if kr else '시총 $3억+'} {tot:,}종"
     return f"<div class='hm-box'><h5>{lab}</h5>{bar}<div class='hm-kv'>{'<br>'.join(kv)}</div></div>"
 
 
@@ -314,70 +341,100 @@ def _rank_box(title: str, rows: list[dict], tag_key: str | None = None, note: st
     return f"<div class='hm-box'><h5>{title}</h5>{li or '<div class=hm-kv>해당 없음</div>'}{note}</div>"
 
 
+def _go(text: str, go: str, mkt: str) -> str:
+    """상자 제목 → 새 창에서 🔎 종목 발굴의 해당 재료 목록(?go=). 2026-11-15 — 옛 '→ 종목 발굴' 버튼 3개 대체."""
+    return (f"<a class='hm-a' href='{LINK_BASE}?go={go}&mkt={mkt}' target='_blank' rel='noopener' "
+            f"title='새 창에서 종목 발굴 목록 전체'>{text} ↗</a>")
+
+
 _SUB = "<span style='font-weight:500;color:var(--ink-3);font-size:11.5px'>{}</span>"
 PERIOD_LABEL = {'d1': '1일', 'w1': '최근 5거래일', 'm1': '최근 21거래일'}
 
 
-def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period: str = 'd1'):
-    """시장 내부(한국·미국 × 일간·주간·월간 같은 모양). 종목 이름 = 새 창 종목 분석 링크.
-    한국 일간만 네이버 원천이라 칸이 다르다(수급·테마·특징주). 나머지는 일봉에서 계산한 공통 모양:
-    1줄: 시장 폭 · 거래대금 상위 · 강한 업종 · 약한 업종 / 2줄: 급등(돈 몰린 순) · 52주 신고가 · 대형주 상승 상위 · 하락 상위 / 3줄: 시총 상위 10."""
-    rich = kr and period == 'd1'
+def flow_period_box(sm: dict, period: str) -> str:
+    """수급(주간·월간) — 외국인 5일·20일 누적 순매수 + 신용잔고 20일 변화(kr_flow.summary). 기관 누적은 원천에 없어 뺀다."""
+    k, lab = ('d5', '5일') if period == 'w1' else ('d20', '20일')
+    lines = []
+    for mk, nm in (('KOSPI', '코스피'), ('KOSDAQ', '코스닥')):
+        s = sm.get(mk) or {}
+        v = s.get(k)
+        lines.append(f"<div class='hm-row'><span><b>{nm}</b> 외국인 {lab} 누적</span>{_sgn(v, _jo(v))}</div>")
+    cr = sm.get('credit') or {}
+    if cr.get('v') is not None:
+        lines.append(f"<div class='hm-row' style='display:block'><b>신용잔고</b> {cr['v'] / 1e4:,.1f}조 "
+                     f"<em>20일 {cr.get('chg20', 0):+.1f}% · 고점 대비 {cr.get('from_peak', 0):+.1f}%</em></div>")
+    when = (sm.get('KOSPI') or {}).get('date') or '-'
+    return (f"<div class='hm-box'><h5>수급 — 외국인 누적 {_SUB.format(f'({lab} · {_e(when)}까지)')}</h5>"
+            f"{''.join(lines)}<div class='hm-kv' style='margin-top:4px'>기관 누적은 원천(네이버 모바일)에 없어 일간에만 표시</div></div>")
+
+
+def _theme_box(m: dict) -> str:
+    tt, tb = m.get('themes_top') or [], m.get('themes_bottom') or []
+
+    def lead(t):
+        return ' · '.join(f"{_a(x['name'], x.get('sym'))} {_pct(x.get('ret'), nd=1)}" for x in (t.get('lead') or [])[:3])
+    th = ''.join(f"<div class='hm-row' style='display:block'><b>{_e(t['name'])}</b> {_pct(t.get('ret'), nd=1)} "
+                 f"<em>{t.get('up', '-')}/{t.get('n', '-')}종 상승</em><br><span style='font-size:11.5px'>{lead(t)}</span></div>"
+                 for t in tt[:3]) or "<div class='hm-kv'>-</div>"
+    if tb:
+        th += "<div class='hm-kv' style='margin-top:6px'>약세: " + ', '.join(f"{_e(t['name'])} {_pct(t.get('ret'), nd=1)}" for t in tb[:3]) + "</div>"
+    return f"<div class='hm-box'><h5>강세 테마 {_SUB.format('(네이버 테마 · 구성 종목 단순 평균)')}</h5>{th}</div>"
+
+
+def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period: str = 'd1', extra: dict | None = None):
+    """시장 내부(한국·미국 × 일간·주간·월간 같은 모양). 2026-11-15 재배치.
+    한국: 시장 폭 · 수급 · 강한 업종 · 약한 업종 / 강세 테마 · 52주 신고가 · 특징주(일간)·급등주 · 대형주 상승 상위
+    미국: 시장 폭 · 돈이 몰린 종목 · 강한 업종 · 약한 업종 / 급등주 · 52주 신고가 · 대형주 상승 상위 · 대형주 하락 상위
+    마지막 줄: 시총 상위 10(한 줄). 상자 제목 ↗ = 새 창 종목 발굴 목록. extra = 한국 일간 네이버 전 종목 숫자(보조)."""
+    mk = 'KR' if kr else 'US'
     sec = sorted([s for s in (m.get('sectors') or []) if s.get('ret') is not None], key=lambda s: -s['ret'])
-    if rich:
-        mid = flow_box(flow or {})
+    if kr:
+        mid = flow_box(flow or {}) if period == 'd1' else flow_period_box((flow or {}).get('summary') or {}, period)
     else:
         mid = _rank_box('돈이 몰린 종목 ' + _SUB.format('(거래대금 상위)'),
                         [dict(x, tag=x.get('tag') or (f"${x['amt_b']:,.1f}B" if x.get('amt_b') is not None else None))
                          for x in (m.get('turnover_top') or [])[:6]], 'tag')
-    row1 = (_breadth_box(m, rich) + mid +
+    row1 = (_breadth_box(m, kr, extra) + mid +
             f"<div class='hm-box'><h5>강한 업종 {_SUB.format('(시총가중 · 누르면 구성 종목)')}</h5>{_sec_rows(sec[:5])}</div>"
             f"<div class='hm-box'><h5>약한 업종 {_SUB.format('(시총가중)')}</h5>{_sec_rows(sorted(sec[-5:], key=lambda s: s['ret']))}</div>")
     nh = m.get('new_high_52w') or {}
-    nh_box = _rank_box(f"52주 신고가 {nh.get('n', '-')}종 <span style='font-weight:500;color:var(--ink-3)'>/ {nh.get('universe', '-'):,}종</span>"
-                       if isinstance(nh.get('universe'), int) else f"52주 신고가 {nh.get('n', '-')}종", (nh.get('top') or [])[:6])
-    if rich:
-        tt, tb = m.get('themes_top') or [], m.get('themes_bottom') or []
-
-        def lead(t):
-            return ' · '.join(f"{_a(x['name'], x.get('sym'))} {_pct(x.get('ret'), nd=1)}" for x in (t.get('lead') or [])[:3])
-        th = ''.join(f"<div class='hm-row' style='display:block'><b>{_e(t['name'])}</b> {_pct(t.get('ret'), nd=1)} "
-                     f"<em>{t.get('up', '-')}/{t.get('n', '-')}종 상승</em><br><span style='font-size:11.5px'>{lead(t)}</span></div>"
-                     for t in tt[:3]) or "<div class='hm-kv'>-</div>"
-        if tb:
-            th += "<div class='hm-kv' style='margin-top:6px'>약세: " + ', '.join(f"{_e(t['name'])} {_pct(t.get('ret'), nd=1)}" for t in tb[:3]) + "</div>"
-        row2 = (f"<div class='hm-box'><h5>강세 테마</h5>{th}</div>" + nh_box
-                + _rank_box('특징주 ' + _SUB.format('(상한가 · 거래대금 300억+ 급등)'), (m.get('featured') or [])[:6], 'tag'))
-        cols2 = 3
+    nh_t = _go(f"52주 신고가 {nh.get('n', '-')}종", 'h52', mk) + (
+        f" <span style='font-weight:500;color:var(--ink-3)'>/ {nh['universe']:,}종</span>" if isinstance(nh.get('universe'), int) else '')
+    nh_box = _rank_box(nh_t, (nh.get('top') or [])[:6])
+    th_ = {'d1': 7, 'w1': 14, 'm1': 28}.get(period, 7)
+    if kr and period == 'd1' and (extra or {}).get('featured'):
+        hot = _rank_box(_go('특징주', 'gain', mk) + ' ' + _SUB.format('(상한가 · 거래대금 300억+ 급등)'),
+                        (extra.get('featured') or [])[:6], 'tag')
     else:
-        th_ = {'d1': 7, 'w1': 14, 'm1': 28}.get(period, 7)
-        row2 = (_rank_box('급등주 ' + _SUB.format(f'(+{th_}% 이상 · 돈이 몰린 순)'), (m.get('featured') or [])[:6], 'tag') + nh_box
-                + _rank_box('대형주 상승 상위', (m.get('top') or [])[:6]) + _rank_box('대형주 하락 상위', (m.get('bottom') or [])[:6]))
-        cols2 = 4
-    # 시총 상위 10 — 등락 크기만큼 칸을 칠한다(일간 ±4% · 주간 ±8% · 월간 ±16% 에서 포화)
+        hot = _rank_box(_go('급등주', 'gain', mk) + ' ' + _SUB.format(f'(+{th_}% 이상 · 돈이 몰린 순)'),
+                        (m.get('featured') or [])[:6], 'tag')
+    up_box = _rank_box(_go('대형주 상승 상위', 'cap', mk) + ' ' + _SUB.format('(시총 1조+)' if kr else '(시총 상위 500)'),
+                       (m.get('top') or [])[:6])
+    if kr:
+        row2 = _theme_box(m) + nh_box + hot + up_box
+    else:
+        row2 = hot + nh_box + up_box + _rank_box('대형주 하락 상위 ' + _SUB.format('(시총 상위 500)'), (m.get('bottom') or [])[:6])
+    # 시총 상위 10 — 한 줄 칩(2026-11-15: 타일 2줄이 화면을 너무 차지)
     sat = {'d1': 4, 'w1': 8, 'm1': 16}.get(period, 4)
-    mc_of = {h.get('sym'): h.get('mc') for h in (m.get('heatmap') or [])}
-    tiles = []
+    chips = []
     for x in (m.get('megacaps') or [])[:10]:
         r = x.get('ret')
         a = min(abs(r or 0) / sat, 1) * 0.22
         bg = (f"color-mix(in srgb, var({'--pos' if (r or 0) > 0 else '--neg'}) {a * 100:.0f}%, var(--surface))" if r else 'var(--surface)')
-        mc = x.get('mc') if x.get('mc') is not None else mc_of.get(x.get('sym'))
-        mct = ('-' if mc is None else (f"시총 {mc:,.0f}조" if kr else f"시총 ${mc:,.0f}B"))
-        tiles.append(f"<div class='hm-tile' style='background:{bg}'><span class='t1'>{_a(x.get('name'), x.get('sym'))}</span>"
-                     f"<span class='t2'>{_pct(r, nd=1)}</span><span class='t3'>{mct}</span></div>")
-    if rich:
-        src = '네이버 금융 전 종목 시세·업종·테마·투자자별 매매(market_report.py · tools/kr_flow.py)'
+        chips.append(f"<div class='hm-mc' style='background:{bg}'>{_a(x.get('name'), x.get('sym'))} {_pct(r, nd=1)}</div>")
+    if kr:
+        src = ("Yahoo Finance 일봉(시총 1,000억+ · 일·주·월 같은 종목) · 업종 = KSIC · 테마 = 네이버 테마 · "
+               "수급·특징주·전 종목 등락 = 네이버 금융(market_report.py · tools/kr_flow.py)")
     else:
-        src = (f"Yahoo Finance 일봉 · {'시총 1,000억+ · 업종 = KSIC' if kr else '시총 $3억+ 전 종목(NYSE·나스닥) · 업종 = Yahoo industry'}"
-               f"(3종+ 묶음) · 대형주 = {'시총 1조+' if kr else '시총 상위 500'} · market_internals.py"
-               + (f" · 기간 {m.get('since')} 종가 → {m.get('asof')} 종가" if period != 'd1' and m.get('since') else ''))
+        src = "Yahoo Finance 일봉 · 시총 $3억+ 전 종목(일·주·월 같은 종목) · 업종 = Yahoo industry(3종+ 묶음) · 대형주 = 시총 상위 500"
+    src += ' · market_internals.py'
+    if period != 'd1' and m.get('since'):
+        src += f" · 기간 {m['since']} 종가 → {m.get('asof')} 종가"
     st.html(CSS + f"""<div class="hm">
       <div class="hm-four">{row1}</div>
-      <div class="hm-two" style="grid-template-columns:repeat({cols2},minmax(0,1fr));margin-top:10px">{row2}</div>
-      <div class="hm-sec" style="margin-top:12px"><b style="font-size:13px">시총 상위 10</b><span>지수를 움직이는 종목 · 색이 진할수록 등락이 큼 · 종목 이름을 누르면 새 창에서 종목 분석</span></div>
-      <div class="hm-tiles">{''.join(tiles) or '<span>-</span>'}</div>
-      <div class="hm-src">출처: {src} · 마지막 갱신: {_e(asof)}</div></div>""")
+      <div class="hm-four" style="margin-top:10px">{row2}</div>
+      <div class="hm-mcs"><b>시총 상위 10</b>{''.join(chips) or '<span>-</span>'}</div>
+      <div class="hm-src">출처: {src} · 마지막 갱신: {_e(asof)} · 상자 제목 ↗ = 새 창에서 종목 발굴 목록 전체 · 종목 이름 = 새 창 종목 분석</div></div>""")
 
 
 def sector_table(m: dict) -> list[dict]:
@@ -556,12 +613,17 @@ _PULSE_LEGEND = ("<div class='hm-legend'>단계: <b>조정 중</b>→<b>반등 �
                  " · 상승 중 분배일 5개+ = <b>압력 받는 상승</b></div>")
 
 
-def _trend_card(label: str, pts: list[tuple], basis: str) -> str:
+_TU = {'d1': (30, '거래일', '날'), 'w1': (26, '주', '주'), 'm1': (12, '개월', '달')}
+
+
+def _trend_card(label: str, pts: list[tuple], basis: str, period: str = 'd1') -> str:
     """상승 비율 막대 — 가로 폭을 꽉 채운다(2026-11-14: 막대 2개가 왼쪽에 몰려 빈칸이 컸다). 50% 점선 = 반반."""
     if not pts:
         return f"<div class='hm-card'><div class='nm'>{_e(label)}</div><div class='sub' style='margin-top:8px'>자료 준비 중 — 다음 시황 갱신부터 표시</div></div>"
     # 칸은 언제나 30개 — 기록이 짧으면 앞을 빈 칸으로(막대 2개가 폭을 다 차지해 '꽉 찬 자료'처럼 보이지 않게)
-    pad = ''.join("<i style='height:2px;background:var(--line)'></i>" for _ in range(max(0, 30 - len(pts))))
+    slots, unit, day = _TU.get(period, _TU['d1'])
+    pts = pts[-slots:]
+    pad = ''.join("<i style='height:2px;background:var(--line)'></i>" for _ in range(max(0, slots - len(pts))))
     bars = pad + ''.join(f"<i title='{_e(d)} 상승 {p:.0f}%' style='height:{max(2, p / 100 * 64):.0f}px;"
                          f"background:{'var(--pos)' if p >= 50 else 'var(--neg)'};opacity:{0.55 + 0.45 * (i == len(pts) - 1):.2f}'></i>"
                          for i, (d, p) in enumerate(pts))
@@ -570,12 +632,12 @@ def _trend_card(label: str, pts: list[tuple], basis: str) -> str:
     upd = sum(p >= 50 for _, p in pts)
     return (f"<div class='hm-card'><div class='nm'>{_e(label)}<span style='font-weight:500'>{_e(basis)}</span></div>"
             f"<div style='display:flex;gap:14px;align-items:baseline;margin-top:2px'><span class='px {'p' if last >= 50 else 'n'}'>{last:.0f}%</span>"
-            f"<span class='sub'>최근 {len(pts)}거래일 평균 {avg:.0f}% · 오른 종목이 많은 날 {upd}일</span></div>"
+            f"<span class='sub'>최근 {len(pts)}{unit} 평균 {avg:.0f}% · 오른 종목이 더 많은 {day} {upd}번</span></div>"
             f"<div class='hm-trend'><div class='mid'></div>{bars}</div>"
-            f"<div class='sub'>{_e(pts[0][0][5:])} → {_e(pts[-1][0][5:])} · 점선 = 50% · 초록 = 오른 종목이 더 많은 날</div></div>")
+            f"<div class='sub'>{_e(pts[0][0][2:])} → {_e(pts[-1][0][2:])} · 점선 = 50% · 초록 = 오른 종목이 더 많은 {day}</div></div>")
 
 
-def pulse_box(idx_rows: list[dict], trends: list[tuple]):
+def pulse_box(idx_rows: list[dict]):
     """시장 추세 판정(오닐 방식, 참고) — 한·미 지수 카드 + 대형주 상승 비율 30거래일(한·미)."""
     tone = {'상승 추세': 'p', '상승 확인': 'p', '압력 받는 상승': 'n'}
     cards = []
@@ -592,13 +654,18 @@ def pulse_box(idx_rows: list[dict], trends: list[tuple]):
             sub.append(f"저점 {pz['low_date'][5:]} ({pz.get('corr_dd', 0):+.1f}%)")
         cards.append(f"""<div class="hm-card"><div class="nm">{_e(x.get('name'))}</div>
           <div class="px {cls}" style="font-size:17px">{_e(st_)}</div><div class="sub">{' · '.join(sub)}</div></div>""")
-    tr = ''.join(_trend_card(*t) for t in trends)
-    if not cards and not tr:
+    if not cards:
         return
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>시장 추세 판정 — 오닐 방식 (참고)</b>
-      <span>지수의 가격·거래량으로 본 상승·조정 단계 · 매수 신호(주봉 5주선)와 별개</span></div>{_PULSE_HELP}{_PULSE_LEGEND}
-      <div class="hm-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">{''.join(cards)}</div>
-      <div class="hm-two" style="margin-top:8px">{tr}</div></div>""")
+      <span>지수의 가격·거래량으로 본 상승·조정 단계 · 매수 신호(주봉 5주선)와 별개 · 일봉 판정이라 기간 전환과 무관</span></div>{_PULSE_HELP}{_PULSE_LEGEND}
+      <div class="hm-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">{''.join(cards)}</div></div>""")
+
+
+def trend_box(trends: list[tuple], period: str = 'd1'):
+    """대형주 상승 비율 — 일간 30거래일 · 주간 26주 · 월간 12개월(2026-11-15 기간 전환)."""
+    tr = ''.join(_trend_card(*t, period=period) for t in trends)
+    if tr:
+        st.html(CSS + f"<div class='hm'><div class='hm-two' style='margin-top:4px'>{tr}</div></div>")
 
 
 def trend_points(hist: list[dict]) -> list[tuple]:
@@ -629,7 +696,7 @@ def macro_cards(V: dict):
       <div class="hm-grid" style="grid-template-columns:repeat(4,minmax(0,1fr))">{''.join(cs)}</div></div>""")
 
 
-def heatmap_fig(rows: list[dict]):
+def heatmap_fig(rows: list[dict], unit: str = '조'):
     """업종 히트맵(시총 1조+) — 면적 = 시총, 색 = 등락(±5% 에서 포화, 0 = 회색). 봇 이미지는 작아서 기각됐지만 웹은 확대·호버 가능."""
     import plotly.graph_objects as go
     rows = [r for r in rows or [] if r.get('mc') and r.get('ret') is not None]
@@ -651,7 +718,7 @@ def heatmap_fig(rows: list[dict]):
                                            cmid=0, cmin=-5, cmax=5, line=dict(width=1, color='#fff')),
                                textfont=dict(color='#fff'), root_color='#fff',
                                texttemplate='%{label}<br>%{customdata:+.1f}%',
-                               hovertemplate='%{label}<br>시총 %{value:,.1f}조<br>%{customdata:+.2f}%<extra></extra>',
+                               hovertemplate='%{label}<br>시총 ' + ('$%{value:,.0f}B' if unit == '$B' else '%{value:,.1f}조') + '<br>%{customdata:+.2f}%<extra></extra>',
                                tiling=dict(pad=2), pathbar=dict(visible=False)))
     fig.update_layout(height=520, margin=dict(l=0, r=0, t=0, b=0), font=dict(family='Pretendard, Malgun Gothic, sans-serif', size=12))
     return fig
@@ -739,17 +806,17 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
       <div style="font-size:17px;font-weight:750;line-height:1.55;margin:6px 0 12px;color:var(--ink);letter-spacing:-.01em;max-width:980px">{_e(summary) or '요약 없음'}</div>
       {f'<ul class="hm-why">{wy}</ul>' if wy else ''}
       <div class="hm-two" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
-        <div><h5>다음 거래일에 볼 것</h5><ol style="margin:0;padding-left:18px;font-size:12.5px;color:var(--ink-2);line-height:1.7">{ck or '<li>-</li>'}</ol></div>
+        <div><h5>다음 거래일에 볼 것 <span style='font-weight:500;color:var(--ink-3);font-size:11.5px'>(AI)</span></h5><ol style="margin:0;padding-left:18px;font-size:12.5px;color:var(--ink-2);line-height:1.7">{ck or '<li>-</li>'}</ol></div>
         {f'<div><h5>숫자 조건 — 규칙 계산</h5>{ru}</div>' if ru else ''}
       </div>
-      <div class="hm-src">작성: {_e(engine)} · 문장은 이 사이트 숫자만 근거(뉴스·전망 없음) · 숫자 조건 = 지수 5주선·시장 폭·수급·일정(규칙 계산) · 투자 권유 아님</div></div></div>""")
+      <div class="hm-src">작성: {_e(engine)} · 문장은 이 사이트 숫자만 근거(뉴스·전망 없음) · 숫자 조건 = 한국은 지수 5주선·시장 폭·수급, 미국은 200일선·분배일·시장 폭, 공통 7일 일정(규칙 계산) · 투자 권유 아님</div></div></div>""")
 
 
 # ── 사용법 패널 (2026-11-14 재편: 한눈에 · 활용 루틴 · 전체 설명서) ─────────────────
 # 문구·규칙 값·갱신 시각은 전부 manual.py 한 곳에서 온다(화면과 PDF 가 같은 원천). 여기는 그리기만.
 import manual as MN
 
-_MN_VER = '2026-11-14a'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
+_MN_VER = '2026-11-15a'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
 if getattr(MN, 'VERSION', None) != _MN_VER:
     import importlib as _il
     MN = _il.reload(MN)
