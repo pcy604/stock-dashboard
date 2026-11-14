@@ -1137,93 +1137,15 @@ if getattr(st.plotly_chart, '_mo_wrapped', 0) != 2:
     st.plotly_chart = _plotly_chart
 st.session_state['seen_onboard'] = True
 
-# 2026-10-21 — 30초 투어로 재작성: 글로 읽는 설명서 → 탭 5단계 카드 + 바로가기 버튼.
-#   옛 카드는 '화면은 셋'·'주봉 신호' 등 탭 재편 전 내용이 남아 있었다. 숫자(종목 수 등)는 일부러 안 넣는다 — 낡는다.
-_OB_CSS = """
-<style>
-  .ob2 { font-family:'Pretendard',-apple-system,'Malgun Gothic',system-ui,sans-serif; color:var(--ink); }
-  .ob2-hero { position:relative; overflow:hidden; border-radius:var(--radius,16px); padding:26px 28px 22px;
-              background:linear-gradient(135deg,var(--hero,#111827) 0%,var(--hero-2,#1F2937) 100%); color:#F9FAFB; }
-  .ob2-hero::after { content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
-              border-radius:50%; background:radial-gradient(circle,rgba(126,162,255,.35),transparent 70%); }
-  .ob2-kick { font-size:11px; font-weight:700; letter-spacing:.14em; color:#93B4FF; margin-bottom:8px; }
-  .ob2-hero h3 { font-size:24px !important; font-weight:800 !important; letter-spacing:-.03em; margin:0 0 8px; color:#fff !important; line-height:1.3; }
-  .ob2-hero p { font-size:14px; color:#D1D5DB; margin:0; max-width:640px; line-height:1.6; }
-  .ob2-hero p b { color:#fff; }
-  .ob2-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; position:relative; z-index:1; }
-  .ob2-chip { font-size:12px; padding:5px 11px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
-              background:rgba(255,255,255,.06); color:#E5E7EB; }
-  .ob2-sec { display:flex; align-items:baseline; justify-content:space-between; margin:22px 2px 10px; }
-  .ob2-sec b { font-size:15px; font-weight:750; letter-spacing:-.02em; color:var(--ink); }
-  .ob2-sec span { font-size:12px; color:var(--ink-3); }
-  .ob2-step { height:100%; min-height:200px; box-sizing:border-box; border:1px solid var(--line); border-radius:var(--radius-sm,10px);
-              background:var(--surface); padding:14px 14px 12px; position:relative; }
-  .ob2-step.on { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-2); }
-  .ob2-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .ob2-n { width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-size:12px;
-           font-weight:800; display:flex; align-items:center; justify-content:center; font-family:var(--mono); }
-  .ob2-t { font-size:11px; color:var(--ink-3); font-family:var(--mono); }
-  .ob2-q { font-size:15px; font-weight:750; letter-spacing:-.02em; color:var(--ink); margin-bottom:2px; }
-  .ob2-tab { font-size:12px; color:var(--accent); font-weight:650; margin-bottom:8px; }
-  .ob2-d { font-size:12.5px; color:var(--ink-2); line-height:1.55; }
-  .ob2-bar { height:4px; border-radius:4px; background:var(--line-2); margin-top:12px; overflow:hidden; }
-  .ob2-bar i { display:block; height:100%; background:var(--accent); border-radius:4px; }
-  .ob2-rules { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
-  .ob2-rule { border-radius:var(--radius-sm,10px); padding:13px 15px; background:var(--surface);
-              border:1px solid var(--line); font-size:12.5px; color:var(--ink-2); line-height:1.55; }
-  .ob2-rule > b:first-child { display:block; font-size:13.5px; color:var(--ink); margin-bottom:3px; }
-  .ob2-rule.warn { border-left:4px solid var(--warn); }
-  .ob2-rule.pos  { border-left:4px solid var(--pos); }
-  .ob2-rule.acc  { border-left:4px solid var(--accent); }
-  .ob2-foot a { color:var(--accent); font-weight:650; text-decoration:none; }
-  .ob2-foot { font-size:11.5px; color:var(--ink-3); margin-top:12px; line-height:1.6; }
-</style>
-"""
-
-_OB_HERO = """
-<div class="ob2"><div class="ob2-hero">
-  <div class="ob2-kick">QUICK TOUR · 30 SEC</div>
-  <h3>시장 → 종목 → 내 계좌,<br>위에서 아래로 좁혀 갑니다</h3>
-  <p>공식 공시(DART · SEC EDGAR)와 시장 가격을 매일 자동으로 모아
-     <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를 숫자로 답하는 리서치 도구입니다.
-     같은 규칙(실전 v1.9 — 한국)으로 운영자의 자동매매 봇이 실제 계좌를 굴립니다.</p>
-  <div class="ob2-chips">
-    <span class="ob2-chip">🇰🇷 🇺🇸 한 화면</span>
-    <span class="ob2-chip">📄 공식 공시 기반</span>
-    <span class="ob2-chip">⏱ 매일 자동 갱신</span>
-    <span class="ob2-chip">🤖 실전 봇과 같은 규칙</span>
-    <span class="ob2-chip">🔒 보유 종목은 내 계정에만</span>
-  </div>
-</div>
-<div class="ob2-sec"><b>다섯 단계, 탭 순서 그대로</b><span>카드 아래 버튼으로 바로 이동</span></div></div>
-"""
-
-# (탭 이름, 질문, 설명, 예상 초) — 탭 이름은 아래 st.tabs 와 글자까지 같아야 버튼이 작동한다
-_OB_STEPS = [
-    ("🏠 종합", "이번 주, 들어가도 되나?", "이번 주 시장 신호 · 글로벌 마켓 · 오늘의 시장(한·미) · 시황 리포트.", 5),
-    ("🌍 매크로", "왜 그렇게 판정했나?", "글로벌 돈의 흐름과 경기 국면. 사계절·달걀 위 현재 위치와 한국 수급.", 7),
-    ("🔎 종목 발굴", "그럼 뭘 살까?", "실전 v1.9 후보 — RS 80 이상 × 영업이익 흑자전환 × 주봉 5주선 위. 위 10개가 이번 주 매수 대상.", 7),
-    ("🔍 종목 분석", "이 종목, 진짜 맞나?", "코드 입력(005930 · NVDA) → 결론 한 줄 → 수급 · 펀더멘털 · 밸류 · 촉매 · 매매 계획 중 원하는 축만.", 6),
-    ("🛡️ 내 포트폴리오", "내 계좌는 원칙대로인가?", "보유 종목을 손절선(고점 −20%) · 비중 원칙에 대 봅니다. 구글 로그인 후 내 계정에만.", 5),
-]
-
-_OB_RULES = """
-<div class="ob2"><div class="ob2-sec"><b>지키는 원칙 세 줄</b><span>도구보다 먼저</span></div>
-<div class="ob2-rules">
-  <div class="ob2-rule acc"><b>판정 → 후보 → 검증</b>지수가 5주선 아래면 후보가 좋아 보여도 신규 매수를 쉽니다.</div>
-  <div class="ob2-rule warn"><b>손절가를 먼저</b>사기 전에 자를 가격부터. 기준은 진입가가 아니라 <b>보유 중 고점 대비</b>.</div>
-  <div class="ob2-rule pos"><b>숫자는 확률</b>점수·신호는 보장이 아니며 매수 권유가 아닙니다. <code>-</code> 는 오류가 아니라 '데이터 없음'.</div>
-</div>
-<div class="ob2-foot">📲 매일 아침 요약은 텔레그램 <a href="https://t.me/buza_alarm_bot" target="_blank">@buza_alarm_bot</a> 으로 받을 수 있습니다.
-   다시 보려면 이 칸을 언제든 펼치세요.</div></div>
-"""
+# 2026-11-14 — 사용법 3탭 재편(한눈에 · 활용 루틴 · 전체 설명서). 문구·카드는 manual.py(단일 원천) → ui_home 이 그린다.
+#   옛 30초 투어(검은 히어로·초 단위 진행 막대)와 '할 수 있는 것'은 '한눈에' 한 탭으로 합쳤다. GUIDE.md 는 은퇴.
 
 
 def _ob_go(name):
     st.session_state['main_tab'] = name
 
 
-_ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
+_ob_cur = st.session_state.get('main_tab') or '🏠 종합'
 import ui_home as _UH
 import html as _html
 _UH_VER = '2026-11-14b'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
@@ -1248,35 +1170,23 @@ def _owner_seen() -> bool:
         return False
 
 
-with st.expander("📘 사용법 — 30초 투어 · 할 수 있는 것 · 활용 루틴 · 전체 설명서",
+with st.expander("📘 사용법",
                  expanded=_first_visit and not IS_MOBILE and not _owner_seen()
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
-    _gt1, _gt2, _gt3, _gt4 = st.tabs(["⚡ 30초 투어", "🧭 할 수 있는 것", "🗓️ 활용 루틴", "📚 전체 설명서"])
-    with _gt2:
-        _UH.caps_panel()
+    _gt1, _gt3, _gt4 = st.tabs(["⚡ 한눈에", "🗓️ 활용 루틴", "📚 전체 설명서"])
     with _gt3:
         _UH.routines_panel()
     with _gt4:
-        st.caption("구성: ① 처음 5분(배우기) ② 이럴 땐 이렇게(하는 법) ③ 화면·용어 사전(찾아보기) ④ 왜 이렇게 만들었나(이해하기) — Diátaxis 문서 체계")
-        try:
-            st.markdown(Path('GUIDE.md').read_text(encoding='utf-8'))
-        except Exception:
-            st.caption("GUIDE.md 없음 — 저장소에서 확인.")
+        _UH.manual_panel()
     with _gt1:
-        st.html(_OB_CSS + _OB_HERO)
-        _tot = sum(s[3] for s in _OB_STEPS)
-        _acc = 0
-        for _i, (_col, (_tab, _q, _d, _sec)) in enumerate(zip(st.columns(len(_OB_STEPS)), _OB_STEPS), 1):
-            _acc += _sec
+        _UH.tour_head()
+        _caps = _UH.MN.caps()
+        for _i, (_col, (_tab, _q, _d, _feats)) in enumerate(zip(st.columns(len(_caps)), _caps), 1):
             with _col:
-                st.html(_OB_CSS + f"""<div class="ob2"><div class="ob2-step{' on' if _tab == _ob_cur else ''}">
-                  <div class="ob2-top"><span class="ob2-n">{_i}</span><span class="ob2-t">~{_sec}s</span></div>
-                  <div class="ob2-q">{_q}</div><div class="ob2-tab">{_tab}</div>
-                  <div class="ob2-d">{_d}</div>
-                  <div class="ob2-bar"><i style="width:{round(_acc / _tot * 100)}%"></i></div></div></div>""")
+                _UH.tour_card(_i, _tab, _q, _d, _feats, _tab == _ob_cur)
                 st.button("지금 여기" if _tab == _ob_cur else "열기 →", key=f'ob_go_{_i}', on_click=_ob_go,
                           args=(_tab,), width='stretch', disabled=_tab == _ob_cur)
-        st.html(_OB_CSS + _OB_RULES)
+        _UH.tour_foot()
 
 # 탭 순서 = 의사결정 순서. 내 돈이 어떻게 되고 있나(포트폴리오) → 뭘 살까(발굴) →
 # 이게 맞나(분석) → 지금 사도 되나(매크로). 구루 인사이트는 2026-08-11 페이지에서 제거

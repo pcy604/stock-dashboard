@@ -1,0 +1,38 @@
+name: manual-pdf
+# 사용설명서 PDF 자동 재생성 — 설명서 원천(문구·규칙 값·백테스트 숫자·갱신 시각·개선 내역)이 바뀌면 docs/manual.pdf 를 다시 만든다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'manual.py'
+      - 'docs/release_notes.json'
+      - 'live/plan.py'
+      - 'results/v19_bt.json'
+      - '.github/workflows/*.yml'
+      - 'tools/build_manual_pdf.sh'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: manual-pdf
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: PDF 만들기
+        run: bash tools/build_manual_pdf.sh
+      - name: 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/manual.pdf docs/manual.html
+          git diff --staged --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "auto: 사용설명서 PDF $(date -u +%Y-%m-%d)"
+          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
+          echo "::error::푸시 실패" && exit 1

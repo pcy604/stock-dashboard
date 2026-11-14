@@ -4,7 +4,7 @@
   1층 결론(5초)  : 이번 주 실전 규칙(v1.9)이 신규 매수를 허락하나 + 오늘 시장 한 줄
   2층 상태(30초) : 지수·환율·금리·원자재 카드, 한국 시장 폭·업종 강약
   3층 근거(필요 시): 할 일 표 · 시황 리포트 원문 · 챗봇 (dashboard.py)
-사용법은 Diátaxis 4분류(투어=배우기 · 루틴=하는 법 · 기능 지도=찾아보기 · 설명서=이해하기)로 나눈다.
+사용법은 3탭(한눈에 · 활용 루틴 · 전체 설명서) — 문구·숫자는 manual.py 단일 원천(2026-11-14).
 
 데이터는 전부 파일에서만 읽는다(results/market_report.json · live/plan_latest.json). 여기서 외부 호출 없음.
 숫자 없으면 '-' — 지어내지 않는다.
@@ -745,70 +745,56 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
       <div class="hm-src">작성: {_e(engine)} · 문장은 이 사이트 숫자만 근거(뉴스·전망 없음) · 숫자 조건 = 지수 5주선·시장 폭·수급·일정(규칙 계산) · 투자 권유 아님</div></div></div>""")
 
 
-# ── 사용법 패널 (Diátaxis) ─────────────────────────────────────────────
-# 신뢰 등급: g=실전 규칙/검증됨 · y=참고(검증 중·표본 작음) · k=사실 목록(판단 없음)
-CAPS = [
-    ("🏠 종합", "이번 주 들어가도 되나?", [
-        ("이번 주 시장 신호 — 한국 주봉 5주선 기준 신규 매수 가능/중지", 'g'),
-        ("글로벌 마켓 14종 — 지수·환율·금리·원자재·비트코인·하이일드 스프레드", 'k'),
-        ("시장 추세 판정(오닐 방식) · 한·미 대형주 상승 비율 30일", 'y'),
-        ("오늘의 시장(한국·미국) — 시장 폭·수급·업종·테마·52주 신고가·시총 상위", 'k'),
-        ("매크로 국면 · 시황 리포트(평일 15:50 한국 · 06:30 미국) · 리포트 질문", 'y')]),
-    ("🌍 매크로", "왜 그런 판정이 나왔나?", [
-        ("세계 증시 강도판 — 어디가 제일 강한가", 'k'),
-        ("축 1 돈의 흐름 · 축 2 경제(선행·동행)", 'y'),
-        ("실전 판정 — 지금 돈을 움직이는 규칙", 'g'),
-        ("한국 수급·신용(빚) · 국면 지도(4계절·달걀)", 'y'),
-        ("정책금리·국채·수익률곡선·물가·유동성", 'k')]),
-    ("🔎 종목 발굴", "그럼 뭘 살까?", [
-        ("실전 v1.9 후보 — RS 80+ × 흑자전환 × 5주선 위", 'g'),
-        ("이번 주 매수 대상 10종 · 지수 5주선 상태", 'g'),
-        ("재료 목록 — 상승 상위·52주 신고가·CANSLIM·이익가속·흑자전환·가치", 'k')]),
-    ("🔍 종목 분석", "이 종목, 진짜 맞나?", [
-        ("결론 한 줄 → 원하는 축만 펼치기", 'y'),
-        ("수급(업종 온도 × 종목 RS) · 펀더멘털(컨센서스·사이클)", 'y'),
-        ("밸류(PEG·자기 과거 밴드·업종 대비) · 촉매·리스크", 'y'),
-        ("매매 계획(손절·불타기 가격) · 사이클 비교 · 재무 원자료", 'g'),
-        ("봇 상태(보유·체결 대기) 배지 · 텔레그램 감시 등록", 'k')]),
-    ("🛡️ 내 포트폴리오", "내 계좌는 원칙대로인가?", [
-        ("보유 종목 입력 · 토스 연동 시 불러오기(구글 로그인, 내 계정에만 저장)", 'k'),
-        ("손절선(보유 중 고점 −20%)·비중 상한 위반 점검", 'g'),
-        ("위반 건수·등급 요약", 'k')]),
-]
-TAG_TXT = {'g': '실전 규칙', 'y': '참고', 'k': '사실', 'r': '약함'}
+# ── 사용법 패널 (2026-11-14 재편: 한눈에 · 활용 루틴 · 전체 설명서) ─────────────────
+# 문구·규칙 값·갱신 시각은 전부 manual.py 한 곳에서 온다(화면과 PDF 가 같은 원천). 여기는 그리기만.
+import manual as MN
 
-ROUTINES = [
-    ("매일 아침 · 1분", ["텔레그램 @buza_alarm_bot 아침 요약을 받는다",
-                       "🏠 종합 맨 위 '이번 주 시장 신호' — 신규 매수 가능인지",
-                       "오늘의 시장 — 시장 폭·강한 업종이 지수와 같은 방향인지"]),
-    ("주말 · 15분", ["🏠 종합 시황 리포트 — 다음 주에 볼 숫자 조건",
-                     "🔎 종목 발굴 — 후보가 왜 들어왔나(재료 목록과 대조)",
-                     "🛡️ 내 포트폴리오 — 손절선(고점 −20%)·RS 70 탈락 확인",
-                     "월요일 시가 전, 손절가를 먼저 적어 둔다"]),
-    ("종목이 궁금할 때 · 5분", ["🔍 종목 분석에 코드 입력(005930 · NVDA)",
-                             "결론 → 수급 → 펀더멘털 → 밸류 순으로 축을 연다",
-                             "'매매 계획' 축의 손절가·불타기 가격을 먼저 본다",
-                             "봇 배지로 이미 보유·대기 중인지 확인"]),
-    ("월 1회 · 20분", ["🌍 매크로 — 국면이 바뀌었나, 매크로 신호가 시장을 이겼나",
-                     "성과를 코스피·코스닥과 같은 기간으로 비교",
-                     "규칙을 바꾸고 싶으면 먼저 백테스트 — 한 달 성적으로 규칙을 바꾸지 않는다"]),
-]
+_MN_VER = '2026-11-14a'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
+if getattr(MN, 'VERSION', None) != _MN_VER:
+    import importlib as _il
+    MN = _il.reload(MN)
 
 
-def caps_panel():
-    cols = ''.join(
-        f"""<div class="hm-cap"><div class="t">{_e(t)}</div><div class="q">{_e(q)}</div><ul>{''.join(
-            f'<li>{_e(f)}<span class="hm-tag {c}">{TAG_TXT[c]}</span></li>' for f, c in feats)}</ul></div>"""
-        for t, q, feats in CAPS)
-    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>이 사이트로 할 수 있는 것 — 탭별 전부</b>
-      <span><span class="hm-tag g">실전 규칙</span> 봇이 실제로 쓰는 규칙 · <span class="hm-tag y">참고</span> 검증 중·판단 보조 ·
-      <span class="hm-tag k">사실</span> 가공 없는 목록</span></div>
-      <div class="hm-two" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">{cols}</div></div>""")
+def tour_head():
+    st.html(CSS + MN.CSS + """<div class="mn"><div class="mn-lead" style="font-size:13.5px;margin-bottom:4px">
+      <b style="color:var(--ink)">시장 → 종목 → 내 계좌, 위에서 아래로 좁혀 갑니다.</b>
+      공식 공시(DART · SEC EDGAR)와 시장 가격을 매일 모아 <b>지금 들어가도 되나 · 뭘 살까 · 얼마에 자를까</b>를 숫자로 답합니다.
+      같은 규칙(실전 v1.9 — 한국)으로 운영자의 자동매매 봇이 실제 계좌를 굴립니다.</div>
+      <div class="mn-src" style="margin:0 2px 2px">""" + MN._legend() + """</div></div>""")
+
+
+def tour_card(i: int, tab: str, q: str, d: str, feats: list, on: bool):
+    """탭 하나 = 카드 하나: 질문 → 탭 이름 → 한 줄 → 기능 전부(등급). 버튼은 dashboard 가 카드 아래에 단다."""
+    li = ''.join(f"<li>{_e(f.split(' — ')[0])}{MN._tag(g)}</li>" for f, g in feats)
+    st.html(CSS + MN.CSS + f"""<div class="mn"><div class="mn-card mn-tour" style="height:100%;{
+        'border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-2)' if on else ''}">
+      <div class="k">{i} · {_e(tab)}</div><div class="t">{_e(q)}</div><div class="q">{_e(d)}</div><ul>{li}</ul></div></div>""")
+
+
+def tour_foot():
+    pr = ''.join(f'<div class="mn-card {c}"><div class="t">{_e(t)}</div><p>{_e(d)}</p></div>' for c, t, d in MN.PRINCIPLES)
+    st.html(CSS + MN.CSS + f"""<div class="mn"><div class="mn-grid">{pr}</div>
+      <div class="mn-src">📲 매일 아침 요약은 텔레그램 <a href="{MN.BOT}" target="_blank" style="color:var(--accent);font-weight:650;text-decoration:none">@buza_alarm_bot</a>
+      · 규칙의 이유·데이터 출처·한계는 '📚 전체 설명서'에 있습니다.</div></div>""")
 
 
 def routines_panel():
-    cols = ''.join(f"""<div class="hm-cap hm-rt"><div class="when">{_e(w)}</div>
-        <ol>{''.join(f'<li>{_e(s)}</li>' for s in steps)}</ol></div>""" for w, steps in ROUTINES)
-    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>이렇게 쓰면 됩니다 — 시간대별 루틴</b>
-      <span>도구보다 순서가 먼저: 판정 → 후보 → 검증 → 손절가</span></div>
-      <div class="hm-two" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">{cols}</div></div>""")
+    st.html(CSS + MN.CSS + f"""<div class="mn"><div class="mn-lead">도구보다 순서가 먼저입니다 — 판정 → 후보 → 검증 → 손절가.</div>
+      {MN.sec_routines()}</div>""")
+
+
+def manual_panel():
+    """전체 설명서 — 절별 하위 탭 + PDF. 활용 루틴은 옆 탭에 있어 여기서는 뺀다(PDF 에는 들어간다)."""
+    import os
+    secs = [x for x in MN.SECTIONS if x[0] != 'routines']
+    c1, c2 = st.columns([5, 1.4], vertical_alignment='center')
+    c1.caption(f"최근 개선 {MN.updated()} · 규칙 값·백테스트 숫자·갱신 시각은 원천에서 자동으로 읽습니다 — 화면이 바뀌면 설명서도 같이 바뀝니다.")
+    pdf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docs', 'manual.pdf')
+    if os.path.exists(pdf):
+        with open(pdf, 'rb') as f:
+            c2.download_button("PDF 내려받기", f.read(), file_name=f"stock-dashboard_사용설명서_{MN.updated()}.pdf",
+                               mime='application/pdf', key='mn_pdf', width='stretch')
+    for tab, (_sid, title, lead, fn) in zip(st.tabs([x[1] for x in secs]), secs):
+        with tab:
+            st.html(CSS + MN.CSS + f'<div class="mn"><div class="mn-src" style="margin:0 2px 10px">{_e(lead)}</div>{fn()}</div>')
+    st.caption(MN.DISCLAIMER)
