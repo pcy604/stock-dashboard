@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-14b'
+VERSION = '2026-11-14c'
 
 CSS = """
 <style>
@@ -730,7 +730,7 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
     import re as _re
 
     def _b(x):          # **굵게** 만 허용
-        return _re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', _e(x))
+        return _re.sub(r'\*\*(.+?)\*\*:?', r'<b>\1</b>', _e(x))
     wy = ''.join(f"<li>{_b(w)}</li>" for w in why[:5])
     ck = ''.join(f"<li>{_e(c)}</li>" for c in checks[:4])
     ru = ''.join(f"<div class='hm-row' style='display:block;padding:4px 0'>{r}</div>" for r in rules)
