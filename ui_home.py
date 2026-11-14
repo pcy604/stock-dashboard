@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-15a'
+VERSION = '2026-11-15b'
 
 CSS = """
 <style>
@@ -227,18 +227,22 @@ def _bp(v) -> str:
 
 
 def _spark(vals, color: str) -> str:
-    """최근 3개월(≈63거래일) 종가 스파크라인 — 2026-11-15. 축·눈금 없이 모양만, 마지막 점 강조."""
+    """최근 3개월(≈63거래일) 종가 스파크라인 — 2026-11-15. 축·눈금 없이 모양만.
+    st.html 이 <svg> 태그를 걸러내서(배포 화면 실측) SVG 를 data URI 배경 이미지로 넣는다."""
+    from urllib.parse import quote
     v = [float(x) for x in (vals or []) if x is not None]
     if len(v) < 5:
         return "<div style='height:30px'></div>"
     lo, hi = min(v), max(v)
     rg = (hi - lo) or 1
-    W, H = 100, 28
-    pts = ' '.join(f"{i / (len(v) - 1) * W:.1f},{H - 2 - (x - lo) / rg * (H - 4):.1f}" for i, x in enumerate(v))
-    ly = H - 2 - (v[-1] - lo) / rg * (H - 4)
-    return (f"<svg viewBox='0 0 {W} {H}' preserveAspectRatio='none' style='width:100%;height:30px;display:block;margin:4px 0 2px'>"
-            f"<polyline points='{pts}' fill='none' stroke='{color}' stroke-width='1.4' vector-effect='non-scaling-stroke'/>"
-            f"<circle cx='{W}' cy='{ly:.1f}' r='1.8' fill='{color}'/></svg>")
+    W, H = 200, 30
+    pts = ' '.join(f"{i / (len(v) - 1) * (W - 3):.1f},{H - 3 - (x - lo) / rg * (H - 6):.1f}" for i, x in enumerate(v))
+    ly = H - 3 - (v[-1] - lo) / rg * (H - 6)
+    svg = (f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {W} {H}' preserveAspectRatio='none'>"
+           f"<polyline points='{pts}' fill='none' stroke='{color}' stroke-width='1.6' vector-effect='non-scaling-stroke'/>"
+           f"<circle cx='{W - 3}' cy='{ly:.1f}' r='2.2' fill='{color}'/></svg>")
+    return (f"<div class='hm-spk' style=\"height:30px;margin:4px 0 2px;background:url('data:image/svg+xml,{quote(svg)}') "
+            f"no-repeat center/100% 100%\"></div>")
 
 
 _PKEY = {'d1': ('d1', '1일'), 'w1': ('d5', '5일'), 'm1': ('m1', '1개월')}
