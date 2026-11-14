@@ -260,16 +260,22 @@ def trend_template(close: pd.Series, high: pd.Series | None = None, low: pd.Seri
       ⑦ 52주 고점 대비 −25% 이내 ⑧ (RS 상위 30%) — 여기선 RS 대신 '1년 수익률 > 0' 으로 대체
     반환: {'n': 충족 수, 'of': 8, 'items': [(이름, 통과?, 설명)], 'state': 문장, 'tone',
            'high_date', 'weeks_since_high', 'from_low', 'from_high'}"""
-    c = close.dropna()
+    # 2026-11-14: 0·음수 가격(거래정지·결측을 0으로 준 원천)이 52주 저점·이평에 섞여 ZeroDivisionError 로 보유 3종(092190 등)
+    # 종목 분석 화면 전체가 안 열렸다 → 0 이하는 결측으로 본다.
+    c = close.where(close > 0).dropna()
     if len(c) < 210:
         return {'n': None, 'of': 8, 'items': [], 'state': '표본 부족(200거래일 미만)', 'tone': 'na'}
-    h = (high if high is not None else c).dropna().reindex(c.index).fillna(c)
-    l = (low if low is not None else c).dropna().reindex(c.index).fillna(c)
+    h = (high if high is not None else c)
+    l = (low if low is not None else c)
+    h = h.where(h > 0).dropna().reindex(c.index).fillna(c)
+    l = l.where(l > 0).dropna().reindex(c.index).fillna(c)
     p = float(c.iloc[-1])
     m50, m150, m200 = (float(c.rolling(n).mean().iloc[-1]) for n in (50, 150, 200))
     m200_1m = float(c.rolling(200).mean().iloc[-22])
     h52, l52 = h.tail(252), l.tail(252)
     hi, lo = float(h52.max()), float(l52.min())
+    if not all(x > 0 for x in (p, m50, m150, m200, m200_1m, hi, lo)):
+        return {'n': None, 'of': 8, 'items': [], 'state': '가격 데이터 이상(0 포함)', 'tone': 'na'}
     hi_d = h52.idxmax()
     fl, fh = (p / lo - 1) * 100, (p / hi - 1) * 100
     r1 = (p / float(c.iloc[-253]) - 1) * 100 if len(c) > 252 else None
