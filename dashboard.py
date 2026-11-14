@@ -1334,7 +1334,9 @@ def _status_bar(v):
 
 
 # 자리만 잡고 맨 끝에서 채운다 — 라이브 계산(macro.json 이 낡았을 때)이 아래 탭 전부를 붙잡지 않게
-_status_slot = st.container()
+_sb1, _sb2 = st.columns([6, 1], vertical_alignment='center')
+_status_slot = _sb1.container()
+_chat_slot = _sb2.container()            # 2026-11-15 💬 AI 질문 — 모든 탭 오른쪽 위
 _VERDICT = {}
 
 # 2026-10-21 탭 재편 — 톱다운 의사결정 순서: 이번 주 판정·할 일·시황(종합) → 왜(매크로) → 무엇을(발굴)
@@ -8904,6 +8906,41 @@ def _gemini_key_site():
     return k or os.environ.get('GEMINI_KEY', '')
 
 
+def _groq_key_site():
+    try:
+        return st.secrets.get('GROQ_KEY', '') or os.environ.get('GROQ_KEY', '')
+    except Exception:
+        return os.environ.get('GROQ_KEY', '')
+
+
+def _chat_box():
+    """💬 사이트 AI 질문(2026-11-15) — 근거 = 사이트 산출물만(chatbot.py), 무료 AI. 세션당 15문항. 추천 금지."""
+    import chatbot as _CB
+    with st.popover("💬 AI에게 묻기", use_container_width=True):
+        st.caption("이 사이트의 숫자(시황·매크로·실전 규칙·종목 스냅샷)만 근거로 답합니다. 매수·매도 추천은 하지 않습니다. "
+                   f"무료 AI라 한 번에 {_CB.SESSION_LIMIT}문항까지입니다.")
+        log = st.session_state.setdefault('ai_log', [])
+        for _r, _m in log[-8:]:
+            with st.chat_message(_r):
+                st.markdown(_m)
+        with st.form('ai_form', clear_on_submit=True, border=False):
+            _q = st.text_input("질문", placeholder="예: 지금 코스피 신규 매수 신호는? / 삼성전자 이익 방향은? / 이번 주 미국 강한 업종은?",
+                               label_visibility='collapsed')
+            _go = st.form_submit_button("묻기", use_container_width=True)
+        if _go and _q.strip():
+            if sum(1 for r, _ in log if r == 'user') >= _CB.SESSION_LIMIT:
+                st.warning(f"이번 방문 질문 한도({_CB.SESSION_LIMIT}개)를 다 썼습니다. 새로고침하면 다시 쓸 수 있습니다.")
+            else:
+                with st.spinner("답변 작성 중…"):
+                    try:
+                        _a, _md = _CB.ask(_q, log, gemini_key=_gemini_key_site(), groq_key=_groq_key_site())
+                        _a += f"\n\n<span style='font-size:11px;color:#9CA3AF'>AI({_md}) · 사이트 자료 기준 · 투자 권유 아님</span>"
+                    except Exception as _e:
+                        _a = f"지금은 답할 수 없습니다 — 무료 AI 한도 초과 또는 일시 오류입니다. 잠시 뒤 다시 시도해 주십시오. ({str(_e)[:80]})"
+                log += [('user', _q.strip()), ('assistant', _a)]
+                st.rerun()
+
+
 def _related_rows(q):
     """질문에 종목명·코드가 있으면 그 종목의 숫자를 챗봇 자료에 붙인다."""
     qn = q.replace(' ', '').casefold()
@@ -9332,6 +9369,8 @@ with guard('이번 주 판정'):
     _VERDICT = _verdict_now()
 with _status_slot, guard('상단 배지'):
     _status_bar(_VERDICT)
+with _chat_slot, guard('AI 질문'):
+    _chat_box()
 with tab_home, guard('종합 — 결론·시장'):
     _lazy(tab_home)
     _home_events(show=False)                      # 리포트 '숫자 조건'의 7일 일정용 — 표시는 맨 아래
