@@ -20,7 +20,7 @@ def period_range(label: str, presets: dict, key: str, lo, hi, default: str | Non
     dflt = default if default in opts else opts[0]
     pick = st.segmented_control(label, opts, default=dflt, key=key) or dflt
     if pick == '직접':
-        c1, c2 = st.columns(2)
+        c1, c2, _sp = st.columns([1, 1, 3])     # 2026-11-15 — 두 칸이 화면 폭 전체를 먹었다 → 날짜 폭만큼만
         days0 = next((v for v in presets.values() if v), 365)
         start = c1.date_input('시작일', value=max(lo, hi - timedelta(days=days0)), min_value=lo, max_value=hi, key=f'{key}_s')
         end = c2.date_input('종료일', value=hi, min_value=lo, max_value=hi, key=f'{key}_e')

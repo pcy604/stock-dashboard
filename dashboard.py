@@ -5788,8 +5788,13 @@ _resolve_symbol = _symsrch.resolve_symbol
 
 # ── 🔍 종목 분석 v2 (2026-11-10) — 5축 화면. 옛 화면은 '화면' 선택(또는 ?layout=v1)으로 그대로 돌아간다 ──
 # 2026-11-13 7블록(차니 확정): 정체 블록이 개요·사업부문을 가져간다. 첫 줄 카드는 stock_snapshot.compute 가 한 번에 계산.
-_AN_AXMAP = [('수급', ('peer',)), ('이익 방향', ('flow', 'earn')), ('가격', ('val',)), ('정체', ('profile', 'seg')),
-             ('깨지는 조건·촉매', ('ref',)), ('매매 계획', ('plan', 'price')), ('원자료', ('fin',))]
+# 2026-11-15 재구조(차니 확정): 결론 + 펀더멘탈 → 히스토리 → 수급. 매매 계획 삭제(종목 발굴 자동매매가 맡는다).
+#   ref(월별 통계·이평 크로스)는 숨김 유지, 내부자=ins(수급), 희석=dil(펀더멘탈), 정류장=stn(히스토리).
+_AN_AXMAP = [('펀더멘탈', ('profile', 'seg', 'flow', 'earn', 'fin', 'cons', 'val0', 'dil')),
+             ('히스토리', ('price', 'val', 'stn')),
+             ('수급', ('peer', 'ins'))]
+_AN_SECKEYS = ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val', 'canslim', 'fin', 'profile', 'ref',
+               'cons', 'val0', 'ins', 'dil', 'stn')
 
 
 def _an_v2_on() -> bool:
@@ -5800,13 +5805,13 @@ def _an_v2_on() -> bool:
 
 
 def _an_layout_switch():
-    cur = '옛 화면' if not _an_v2_on() else '새 화면(5축)'
+    cur = '옛 화면' if not _an_v2_on() else '새 화면'
 
     def _chg():
         v = st.session_state.get('an_layout_sel')
         st.session_state['an_layout'] = 'v1' if v == '옛 화면' else 'v2'
-    st.segmented_control('화면', ['새 화면(5축)', '옛 화면'], default=cur, key='an_layout_sel', on_change=_chg,
-                         help='2026-11-10 새 화면(결론 → 수급 → 펀더멘털 → 밸류 → 촉매·리스크 → 매매 계획 → 원자료). '
+    st.segmented_control('화면', ['새 화면', '옛 화면'], default=cur, key='an_layout_sel', on_change=_chg,
+                         help='새 화면(결론 → 펀더멘탈 → 히스토리 → 수급). '
                               '마음에 안 들면 옛 화면으로 — 주소 끝 ?layout=v1 도 같다.')
 
 
@@ -5874,10 +5879,14 @@ def _an_v2_fill(L: dict):
             _ss.save(snap)
         except Exception as e:
             print(f'[snap save] {e}')
+    _b2a = getattr(L['_A2'], 'BLOCK_TO_AXIS', {})
     for ax, b in snap['blocks'].items():
-        if ax not in L['_AXH']:
+        if ax == '깨지는 조건·촉매' and L.get('_V2REF') is not None:
+            box = L['_V2REF']
+        elif _b2a.get(ax) in L['_AXH']:
+            box = L['_AXH'][_b2a[ax]]
+        else:
             continue
-        box = L['_AXH'][ax]
         if b.get('error'):
             box.caption(f"`{ax} 판정 실패: {b['error']}`")
             continue
@@ -6074,11 +6083,12 @@ def _tab_analysis():
                 # 판단 → 가격·위험 → 실적 → 구조 → 가치 → 근거 상세 → 원표 → 개요 → 참고 통계.
                 # ── 2026-11-10 v2 (차니 합의): 결론 → 수급 → 펀더멘털 → 밸류 → 촉매·리스크 → 매매 계획 → 원자료.
                 #   옛 화면은 그대로 남아 있다 — 탭 위 '화면' 선택 또는 ?layout=v1 로 즉시 되돌린다(코드도 섹션을 지우지 않고 숨긴다).
-                _V2, _HID, _HID_PH, _V2C, _AXH, _AXSEL = _an_v2_on(), None, None, None, {}, []
+                _V2, _HID, _HID_PH, _V2C, _AXH, _AXSEL, _V2REF = _an_v2_on(), None, None, None, {}, [], None
                 if _V2:
                     import analysis_v2 as _A2
                     _A2 = _fresh_module(_A2)
                     _V2C = st.container()                                   # 결론 (맨 끝에 채운다)
+                    _V2REF = st.container()                                 # 2026-11-15 깨지는 조건 — 결론 바로 아래
                     _AXSEL = _an_axes_pick(_A2)
                     _SEC = {}
                     for _ax, _keys in _AN_AXMAP:
@@ -6091,13 +6101,12 @@ def _tab_analysis():
                                 _SEC[_k] = _box.container()
                     _HID_PH = st.empty()                                    # 숨긴 축·삭제 합의 섹션 — 계산은 그대로(다른 판정이 쓴다), 화면에선 지운다
                     _HID = _HID_PH.container()
-                    for _k in ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val', 'canslim', 'fin', 'profile', 'ref'):
+                    for _k in _AN_SECKEYS:
                         _SEC.setdefault(_k, _HID.container())
                     _SEC['summary'] = _HID.container()                      # 요약 판단 5칸 → 결론 줄로 대체
                     _SEC['canslim'] = _HID.container()                      # CANSLIM 스코어카드(정성 입력 포함) → 삭제 합의
                 else:
-                    _SEC = {_k: st.container() for _k in ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val',
-                                                         'canslim', 'fin', 'profile', 'ref')}
+                    _SEC = {_k: st.container() for _k in _AN_SECKEYS}
                 if IS_MOBILE and not _V2:
                     # 2026-10-21 — 폰에서 종목 하나가 세로 2만 px(손가락 24번)였다. 요약 판단만 펼쳐 두고 나머지는 탭으로.
                     #   (펼침 상자 안에 펼침 상자를 넣을 수 없어 '접기' 대신 탭 — 섹션 안에 이미 펼침 상자가 있다)
@@ -6108,6 +6117,8 @@ def _tab_analysis():
                         with _tb:
                             for _k in _keys:
                                 _SEC[_k] = st.container()
+                    for _k in _AN_SECKEYS:
+                        _SEC.setdefault(_k, st.container())
                 with _SEC['peer']:
                     # ── 🏁 업종 내 순위 (2026-10-27) ─────────────────────────────────────
                     #   대가 5인 관점 평가의 공통 결손 = '동종업계 대비'. 오닐(업종 1·2등만)·린치(동종 PER)·리버모어(동반 상승)·
@@ -6860,9 +6871,9 @@ def _tab_analysis():
                         st.caption("체슬리식: C·A=영업이익 성장(공식 DART/EDGAR) · L=시장 상대강도 · "
                                    "N·S·I=정성 입력(체슬리 엑셀 방식) · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심.")
                         st.divider()
-                with _SEC['val']:
+                with _SEC['val0']:
                     st.divider()
-                    st.markdown("## ⚖️ 멀티플 · 컨센서스 — 가격÷가치")
+                    st.markdown("### ⚖️ 밸류에이션 — 목표주가·멀티플")
                     st.caption("공식 멀티플(시총÷공식실적) · BEAR/BASE/BULL 목표주가 · 밸류에이션")
 
 
@@ -6990,8 +7001,8 @@ def _tab_analysis():
 
                 with _SEC['price']:
                     st.divider()
-                    st.markdown("## 🔵 가격 — 언제 살까")
-                    st.caption("차트·신호 · 계절성(연도×월) · 골든/데드크로스 · 수익률 · 내부자")
+                    st.markdown("### 📈 차트")
+                    pass
 
                     closes = hist['Close']
                     hist['MA20']  = closes.rolling(20).mean()
@@ -7019,10 +7030,14 @@ def _tab_analysis():
                     _bar = _cc1.segmented_control("봉", ['일봉', '주봉', '월봉'], default='주봉',
                                                   key=f"bar_{sym8_clean}") or '주봉'
                     # 2026-11-07 — 프리셋만 있으면 원하는 구간을 못 짚는다는 지적 → '직접'(날짜 두 칸) 추가(date_picker.py 공용)
-                    _per_opts = {'6개월': 182, '1년': 365, '3년': 1095, '5년': 1826, '10년': 3652, '전체': None}
+                    # 2026-11-15 — 기간 버튼 간소화(1년·3년·전체·직접) + 선형/로그. 사이클 구간 색을 이 차트에 깐다(아래 사이클 차트 삭제).
+                    _per_opts = {'1년': 365, '3년': 1095, '전체': None}
                     _plo, _phi = (hist.index.min().date(), hist.index.max().date()) if len(hist) else (datetime.today().date(), datetime.today().date())
                     _pstart, _pend = _dpk.period_range("기간", _per_opts, key=f"per_{sym8_clean}_{_bar}", lo=_plo, hi=_phi,
                                                        default={'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar])
+                    _pk_now = st.session_state.get(f"per_{sym8_clean}_{_bar}") or {'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar]
+                    _scale = _cc2.segmented_control("축", ['선형', '로그'], default='로그' if _pk_now == '전체' else '선형',
+                                                    key=f"scale_{sym8_clean}_{_bar}_{_pk_now}") or '선형'
                     _ind = _cc3.pills("보조지표", ['RSI', 'MACD', '낙폭(MDD)'], selection_mode='multi',
                                       default=[], key=f"ind_{sym8_clean}") or []
                     _rule = {'일봉': None, '주봉': 'W-FRI', '월봉': 'ME'}[_bar]
@@ -7098,6 +7113,24 @@ def _tab_analysis():
                         fig.add_hline(y=-20, line_color='rgba(220,38,38,.5)', line_dash='dot', row=_r, col=1)
                         fig.update_yaxes(title_text='낙폭', ticksuffix='%', row=_r, col=1)
 
+                    # 사이클 구간 색 — 꼭짓점 기준(%)은 아래 '사이클·낙폭'의 슬라이더 값(기본 30)
+                    try:
+                        import cycle_compare as _ccp
+                        _cx = float(st.session_state.get(f"cyc2|{sym8_clean}|x", 30))
+                        _crow = _ccp.swing_rows(hist['Close'].dropna(), _cx)
+                        _d0, _d1 = (disp.index[0], disp.index[-1]) if len(disp) else (None, None)
+                        for _rw in _crow.to_dict('records'):
+                            _a, _b = pd.Timestamp(_rw['시작일']), pd.Timestamp(_rw['종료일'])
+                            if _d0 is None or _b < _d0 or _a > _d1:
+                                continue
+                            _upw = str(_rw['라벨']).startswith('상승')
+                            fig.add_vrect(x0=max(_a, _d0), x1=min(_b, _d1), line_width=0, layer='below', row=1, col=1,
+                                          fillcolor='#16A34A' if _upw else '#D9363E',
+                                          opacity=(0.14 if '진행' in str(_rw['라벨']) else 0.07))
+                    except Exception as _e_cs:
+                        print(f'[cycle shade] {_e_cs}')
+                    if _scale == '로그':
+                        fig.update_yaxes(type='log', row=1, col=1)
                     fig.update_layout(
                         height=430 + 140 * (len(_rows) - 2), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                         font=dict(color='#4B5563', size=11), xaxis_rangeslider_visible=False,
@@ -7112,7 +7145,8 @@ def _tab_analysis():
                     _yrs = (hist.index[-1] - hist.index[0]).days / 365.25
                     st.caption(f"현재 낙폭(역대 고점 대비) **{_dd_cur:.1f}%** · 1년 최대 {_dd_1y:.1f}% · "
                                f"조회기간({_yrs:.1f}년) 최대 {_dd_all:.1f}%. 빨간 점선 = 52주 고점의 −20% — "
-                               "보유 중이면 매매 원칙상 청산을 검토하는 선(정확한 기준은 '보유 후 고점').")
+                               "보유 중이면 매매 원칙상 청산을 검토하는 선(정확한 기준은 '보유 후 고점'). "
+                               "바탕 초록·빨강 = 아래 사이클 기준(%)으로 자른 상승·하락 구간(진한 색 = 진행 중).")
                     if sym8_clean.replace('.KS','').replace('.KQ','').isdigit() and _yrs < 15:
                         st.caption("ℹ️ 한국 종목은 무료 데이터소스 한계로 최근 ~12년까지만 조회됨 (실제 상장일과 무관한 소스 제약)")
 
@@ -7227,204 +7261,206 @@ def _tab_analysis():
                             st.info(f"교차 신호 없음 — 검증 기간이 짧거나 MA{_ff}/MA{_ss} 교차가 없었습니다. 시작일을 앞당겨 주십시오.")
 
 
-                    # 2026-10-21 — '그래서 얼마 샀나/팔았나'가 안 보였다 → 금액 열 + 최근 1년 매수·매도·순매수 합계.
-                    #   돋보기(필터)는 뺐다(10행 남짓 표에 필요 없다).
-                    _ipx = hist['Close'].copy()
-                    _ipx.index = pd.to_datetime(_ipx.index)
-                    if getattr(_ipx.index, 'tz', None) is not None:
-                        _ipx.index = _ipx.index.tz_localize(None)
+                    with _SEC['ins']:
+                        # 2026-10-21 — '그래서 얼마 샀나/팔았나'가 안 보였다 → 금액 열 + 최근 1년 매수·매도·순매수 합계.
+                        #   돋보기(필터)는 뺐다(10행 남짓 표에 필요 없다).
+                        _ipx = hist['Close'].copy()
+                        _ipx.index = pd.to_datetime(_ipx.index)
+                        if getattr(_ipx.index, 'tz', None) is not None:
+                            _ipx.index = _ipx.index.tz_localize(None)
 
-                    def _px_at(d):
-                        try:
-                            _s = _ipx[_ipx.index <= pd.Timestamp(d)]
-                            return float(_s.iloc[-1]) if len(_s) else None
-                        except Exception:
-                            return None
+                        def _px_at(d):
+                            try:
+                                _s = _ipx[_ipx.index <= pd.Timestamp(d)]
+                                return float(_s.iloc[-1]) if len(_s) else None
+                            except Exception:
+                                return None
 
-                    def _ins_summary(rows, unit, div):
-                        _1y = pd.Timestamp.today() - pd.DateOffset(years=1)
-                        _b = sum(r['amt'] for r in rows if r['amt'] is not None and r['amt'] > 0 and r['d'] >= _1y)
-                        _s = sum(-r['amt'] for r in rows if r['amt'] is not None and r['amt'] < 0 and r['d'] >= _1y)
-                        _n1 = sum(1 for r in rows if r['d'] >= _1y)
-                        _f = (lambda v: f"${v/div:,.1f}M") if unit == '$M' else (lambda v: f"{v/div:,.1f}{unit}") if div != 1e8 else (lambda v: f"{v/div:,.0f}{unit}" if abs(v) >= 1e9 else f"{v/div:,.1f}{unit}")
-                        _stat_grid([('', [('최근 1년 신고', f"{_n1}건"),
-                                          ('매수 금액', _f(_b)), ('매도 금액', _f(_s)),
-                                          ('순매수', ('+' if _b - _s >= 0 else '−') + _f(abs(_b - _s)), True)])])
+                        def _ins_summary(rows, unit, div):
+                            _1y = pd.Timestamp.today() - pd.DateOffset(years=1)
+                            _b = sum(r['amt'] for r in rows if r['amt'] is not None and r['amt'] > 0 and r['d'] >= _1y)
+                            _s = sum(-r['amt'] for r in rows if r['amt'] is not None and r['amt'] < 0 and r['d'] >= _1y)
+                            _n1 = sum(1 for r in rows if r['d'] >= _1y)
+                            _f = (lambda v: f"${v/div:,.1f}M") if unit == '$M' else (lambda v: f"{v/div:,.1f}{unit}") if div != 1e8 else (lambda v: f"{v/div:,.0f}{unit}" if abs(v) >= 1e9 else f"{v/div:,.1f}{unit}")
+                            _stat_grid([('', [('최근 1년 신고', f"{_n1}건"),
+                                              ('매수 금액', _f(_b)), ('매도 금액', _f(_s)),
+                                              ('순매수', ('+' if _b - _s >= 0 else '−') + _f(abs(_b - _s)), True)])])
 
-                    # 2026-10-21 실화면: yfinance 집계 표와 Form 4 원문 표가 같은 거래를 두 번 보였다 → 원문이 되면 원문만
-                    _f4, _f4e = [], None
-                    if not is_kr_sym:
-                        try:
-                            with st.spinner("SEC Form 4 원문 읽는 중…"):
-                                _f4 = _form4_rows(sym8_clean)
-                        except Exception as _e4:
-                            _f4e = f"{type(_e4).__name__}"
-                    if is_kr_sym:
-                        _kins = kr_insiders(sym8_clean)
-                        if _kins:
-                            st.subheader("👤 내부자 거래 (DART 공식)")
-                            _kr_r = []
-                            for x in _kins:
-                                _d = pd.to_datetime(str(x['date']), errors='coerce')
-                                _p = _px_at(_d) if pd.notna(_d) else None
-                                _amt = (x['change'] * _p) if (x['change'] is not None and _p) else None
-                                _kr_r.append({'d': _d if pd.notna(_d) else pd.Timestamp('1900-01-01'), 'x': x, 'p': _p, 'amt': _amt})
-                            _ins_summary(_kr_r, '억원', 1e8)
-                            _kidf = pd.DataFrame([{
-                                '보고일': r['d'].strftime('%Y-%m-%d') if r['d'].year > 1900 else '-',
-                                '보고자': r['x']['name'], '직위': r['x']['position'],
-                                '구분': '매수' if (r['x']['change'] or 0) > 0 else ('매도' if (r['x']['change'] or 0) < 0 else '변동0'),
-                                '증감(주)': r['x']['change'],
-                                '추정금액(억원)': None if r['amt'] is None else round(r['amt'] / 1e8, 1),
-                                '보유(주)': r['x']['holdings']} for r in _kr_r])
-                            _tsrc('DART 임원·주요주주 소유상황보고 · 금액=증감×보고일 종가(추정)', live=True)
-                            _kidf = _kidf[['보고일', '구분', '추정금액(억원)', '증감(주)', '보고자', '직위', '보유(주)']]   # 폰에서도 핵심 열이 먼저 보이게
-                            st.dataframe(_kidf, filters=False, row_height=25,
-                                         column_config={'증감(주)': st.column_config.NumberColumn(format='localized'),
-                                                        '보유(주)': st.column_config.NumberColumn(format='localized'),
-                                                        '추정금액(억원)': st.column_config.NumberColumn(format='%+,.1f')})
-                            st.caption("증감>0=취득·<0=처분. **금액은 추정**: DART 소유상황보고에는 거래 단가가 없어 "
-                                       "'증감 주수 × 보고일 종가'로 계산했다(실제 체결가·장외·증여·스톡옵션 행사와 다를 수 있다). "
-                                       "정확한 단가는 DART 원문 보고서에서.")
-                        else:
-                            st.info("내부자 거래 내역 없음 (DART)")
-                    elif insid is not None and not insid.empty and not _f4:
-                        st.subheader("👤 내부자 거래 (SEC Form 4 기반)")
-                        _uins, _ur = [], []
-                        for _, _ri in insid.head(20).iterrows():
-                            _utxt = str(_ri.get('Text') or '')
-                            if 'Sale' in _utxt:
-                                _ukind, _sg = '매도', -1
-                            elif 'Purchase' in _utxt or 'Buy' in _utxt:
-                                _ukind, _sg = '매수', 1
-                            elif 'Award' in _utxt or 'Grant' in _utxt:
-                                _ukind, _sg = '부여(보상·RSU 등)', 0     # 회사가 준 주식 보상 — 본인 돈으로 산 게 아니다
-                            elif 'xercise' in _utxt:
-                                _ukind, _sg = '옵션 행사', 0
-                            elif 'onversion' in _utxt:
-                                _ukind, _sg = '전환', 0
-                            elif 'Gift' in _utxt:
-                                _ukind, _sg = '증여', 0
+                        # 2026-10-21 실화면: yfinance 집계 표와 Form 4 원문 표가 같은 거래를 두 번 보였다 → 원문이 되면 원문만
+                        _f4, _f4e = [], None
+                        if not is_kr_sym:
+                            try:
+                                with st.spinner("SEC Form 4 원문 읽는 중…"):
+                                    _f4 = _form4_rows(sym8_clean)
+                            except Exception as _e4:
+                                _f4e = f"{type(_e4).__name__}"
+                        if is_kr_sym:
+                            _kins = kr_insiders(sym8_clean)
+                            if _kins:
+                                st.subheader("👤 내부자 거래 (DART 공식)")
+                                _kr_r = []
+                                for x in _kins:
+                                    _d = pd.to_datetime(str(x['date']), errors='coerce')
+                                    _p = _px_at(_d) if pd.notna(_d) else None
+                                    _amt = (x['change'] * _p) if (x['change'] is not None and _p) else None
+                                    _kr_r.append({'d': _d if pd.notna(_d) else pd.Timestamp('1900-01-01'), 'x': x, 'p': _p, 'amt': _amt})
+                                _ins_summary(_kr_r, '억원', 1e8)
+                                _kidf = pd.DataFrame([{
+                                    '보고일': r['d'].strftime('%Y-%m-%d') if r['d'].year > 1900 else '-',
+                                    '보고자': r['x']['name'], '직위': r['x']['position'],
+                                    '구분': '매수' if (r['x']['change'] or 0) > 0 else ('매도' if (r['x']['change'] or 0) < 0 else '변동0'),
+                                    '증감(주)': r['x']['change'],
+                                    '추정금액(억원)': None if r['amt'] is None else round(r['amt'] / 1e8, 1),
+                                    '보유(주)': r['x']['holdings']} for r in _kr_r])
+                                _tsrc('DART 임원·주요주주 소유상황보고 · 금액=증감×보고일 종가(추정)', live=True)
+                                _kidf = _kidf[['보고일', '구분', '추정금액(억원)', '증감(주)', '보고자', '직위', '보유(주)']]   # 폰에서도 핵심 열이 먼저 보이게
+                                st.dataframe(_kidf, filters=False, row_height=25,
+                                             column_config={'증감(주)': st.column_config.NumberColumn(format='localized'),
+                                                            '보유(주)': st.column_config.NumberColumn(format='localized'),
+                                                            '추정금액(억원)': st.column_config.NumberColumn(format='%+,.1f')})
+                                st.caption("증감>0=취득·<0=처분. **금액은 추정**: DART 소유상황보고에는 거래 단가가 없어 "
+                                           "'증감 주수 × 보고일 종가'로 계산했다(실제 체결가·장외·증여·스톡옵션 행사와 다를 수 있다). "
+                                           "정확한 단가는 DART 원문 보고서에서.")
                             else:
-                                _ukind, _sg = '기타', 0
-                            _ush, _uval = _ri.get('Shares'), _ri.get('Value')
-                            _d = pd.to_datetime(str(_ri.get('Start Date'))[:10], errors='coerce')
-                            _uv = float(_uval) if pd.notna(_uval) and _uval else None
-                            if _uv is None and _sg and pd.notna(_ush) and pd.notna(_d):   # 금액 미기재 → 주수×그날 종가(추정)
-                                _p = _px_at(_d)
-                                _uv = float(_ush) * _p if _p else None
-                            _ur.append({'d': _d if pd.notna(_d) else pd.Timestamp('1900-01-01'),
-                                        'amt': (_sg * _uv) if (_uv is not None and _sg) else None})
-                            _uins.append({'일자': str(_ri.get('Start Date'))[:10],
-                                          '보고자': _ri.get('Insider'), '직위': _ri.get('Position'),
-                                          '구분': _ukind,
-                                          '주수': float(_ush) if pd.notna(_ush) else None,
-                                          '금액($M)': round(_sg * _uv / 1e6, 2) if (_uv is not None and _sg) else None})
-                        _ins_summary(_ur, '$M', 1e6)
-                        _udf = pd.DataFrame(_uins)[['일자', '구분', '금액($M)', '주수', '보고자', '직위']]
-                        _tsrc('SEC Form 4 (yfinance 집계)', live=True)
-                        st.dataframe(_udf, filters=False, row_height=25,
-                                     column_config={'주수': st.column_config.NumberColumn(format='localized'),
-                                                    '금액($M)': st.column_config.NumberColumn(format='%+,.2f')})
-                        st.caption("금액: 매수 +, 매도 −(백만 달러). 부여(RSU·성과주식 등 회사 보상)·옵션 행사·전환·증여는 "
-                                   "본인 현금 매매가 아니라 합계에서 뺀다 — 내부자 신호로 읽을 건 **시장에서 직접 산 매수**다. "
-                                   "Form 4 에 금액이 비어 있으면 주수×그날 종가로 추정. 정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
+                                st.info("내부자 거래 내역 없음 (DART)")
+                        elif insid is not None and not insid.empty and not _f4:
+                            st.subheader("👤 내부자 거래 (SEC Form 4 기반)")
+                            _uins, _ur = [], []
+                            for _, _ri in insid.head(20).iterrows():
+                                _utxt = str(_ri.get('Text') or '')
+                                if 'Sale' in _utxt:
+                                    _ukind, _sg = '매도', -1
+                                elif 'Purchase' in _utxt or 'Buy' in _utxt:
+                                    _ukind, _sg = '매수', 1
+                                elif 'Award' in _utxt or 'Grant' in _utxt:
+                                    _ukind, _sg = '부여(보상·RSU 등)', 0     # 회사가 준 주식 보상 — 본인 돈으로 산 게 아니다
+                                elif 'xercise' in _utxt:
+                                    _ukind, _sg = '옵션 행사', 0
+                                elif 'onversion' in _utxt:
+                                    _ukind, _sg = '전환', 0
+                                elif 'Gift' in _utxt:
+                                    _ukind, _sg = '증여', 0
+                                else:
+                                    _ukind, _sg = '기타', 0
+                                _ush, _uval = _ri.get('Shares'), _ri.get('Value')
+                                _d = pd.to_datetime(str(_ri.get('Start Date'))[:10], errors='coerce')
+                                _uv = float(_uval) if pd.notna(_uval) and _uval else None
+                                if _uv is None and _sg and pd.notna(_ush) and pd.notna(_d):   # 금액 미기재 → 주수×그날 종가(추정)
+                                    _p = _px_at(_d)
+                                    _uv = float(_ush) * _p if _p else None
+                                _ur.append({'d': _d if pd.notna(_d) else pd.Timestamp('1900-01-01'),
+                                            'amt': (_sg * _uv) if (_uv is not None and _sg) else None})
+                                _uins.append({'일자': str(_ri.get('Start Date'))[:10],
+                                              '보고자': _ri.get('Insider'), '직위': _ri.get('Position'),
+                                              '구분': _ukind,
+                                              '주수': float(_ush) if pd.notna(_ush) else None,
+                                              '금액($M)': round(_sg * _uv / 1e6, 2) if (_uv is not None and _sg) else None})
+                            _ins_summary(_ur, '$M', 1e6)
+                            _udf = pd.DataFrame(_uins)[['일자', '구분', '금액($M)', '주수', '보고자', '직위']]
+                            _tsrc('SEC Form 4 (yfinance 집계)', live=True)
+                            st.dataframe(_udf, filters=False, row_height=25,
+                                         column_config={'주수': st.column_config.NumberColumn(format='localized'),
+                                                        '금액($M)': st.column_config.NumberColumn(format='%+,.2f')})
+                            st.caption("금액: 매수 +, 매도 −(백만 달러). 부여(RSU·성과주식 등 회사 보상)·옵션 행사·전환·증여는 "
+                                       "본인 현금 매매가 아니라 합계에서 뺀다 — 내부자 신호로 읽을 건 **시장에서 직접 산 매수**다. "
+                                       "Form 4 에 금액이 비어 있으면 주수×그날 종가로 추정. 정확 대조는 위 '기업 개요'의 EDGAR Form4 링크에서.")
 
-                    # ── 📑 Form 4 원문 (US, 2026-10-21) — 장내 매매만 신호, 부여·행사·세금 반납은 보상 흐름 ─────
-                    if not is_kr_sym:
-                        st.subheader("📑 Form 4 원문 — 장내 매매·스톡옵션·RSU·워런트")
-                        if not _f4:
-                            st.info("최근 1년 Form 4 없음" if not _f4e else f"SEC 원문 조회 실패({_f4e}) — 위 yfinance 집계로 대신 표시")
-                        else:
-                            _P = [r for r in _f4 if r['code'] == 'P' and r['table'] == '주식']
-                            _S = [r for r in _f4 if r['code'] == 'S' and r['table'] == '주식']
-                            _amt = lambda rs: sum((r['shares'] or 0) * (r['price'] or 0) for r in rs)
-                            _spl = _amt([r for r in _S if r['plan_10b5_1']])
-                            _grant = [r for r in _f4 if r['code'] == 'A' and r['table'] == '파생']
-                            _stat_grid([('', [
-                                ('장내 매수', f"${_amt(_P)/1e6:,.2f}M · {len(_P)}건", True),
-                                ('장내 매도', f"${_amt(_S)/1e6:,.2f}M · {len(_S)}건"),
-                                ('계획 매도 비중', f"{_spl/_amt(_S)*100:.0f}%" if _amt(_S) else '-'),
-                                ('옵션·RSU 부여', f"{len(_grant)}건 · {sum((r['underlying'] or r['shares'] or 0) for r in _grant):,.0f}주"),
-                                ('행사·전환', f"{sum(1 for r in _f4 if r['code'] in ('M', 'X', 'O'))}건"),
-                                ('세금 납부용 반납', f"{sum(1 for r in _f4 if r['code'] == 'F')}건")])])
-                            _der = [r for r in _f4 if r['table'] == '파생']
-                            if _der:
-                                st.markdown("**파생상품 — 스톡옵션 · RSU · 성과주식 · 워런트**")
-                                _tsrc('SEC EDGAR Form 4 원문(XML 파생상품 표·각주)', live=True)
-                                st.dataframe(pd.DataFrame([{
-                                    '일자': r['date'] or '-', '보고자': r['owner'], '직위': r['role'], '종류': r['sec_kind'],
-                                    '거래': r['code_label'], '수량(주)': r['underlying'] or r['shares'],
-                                    '행사가($)': r['exercise_price'], '행사 가능일': r['exercisable'] or '각주',
-                                    '만기': r['expiration'] or '각주',
-                                    '수령 조건': ' · '.join(t for t in r['tags'] if '10b5-1' not in t and '가중평균' not in t) or '-'}
-                                    for r in _der[:40]])[['일자', '종류', '거래', '수량(주)', '행사가($)', '만기', '수령 조건',
-                                                          '보고자', '직위', '행사 가능일']], filters=False)
-                            _nd = [r for r in _f4 if r['table'] == '주식' and r['code'] in ('P', 'S')]
-                            if _nd:
-                                st.markdown("**장내 매매 — 사전계획(10b5-1) 여부**")
-                                _tsrc('SEC EDGAR Form 4 원문(XML 비파생 표)', live=True)
-                                st.dataframe(pd.DataFrame([{
-                                    '일자': r['date'] or '-', '보고자': r['owner'], '직위': r['role'], '거래': r['code_label'],
-                                    '수량(주)': r['shares'], '단가($)': r['price'],
-                                    '금액($M)': None if not (r['shares'] and r['price']) else
-                                                round((1 if r['code'] == 'P' else -1) * r['shares'] * r['price'] / 1e6, 2),
-                                    '사전계획': '10b5-1' if r['plan_10b5_1'] else '-', '거래 후 보유(주)': r['after']}
-                                    for r in _nd[:40]])[['일자', '거래', '금액($M)', '사전계획', '수량(주)', '단가($)',
-                                                         '보고자', '직위', '거래 후 보유(주)']], filters=False)
-                            _notes = list(dict.fromkeys((r['notes'], r['url']) for r in _f4 if r['notes']))
-                            if _notes:
-                                with st.expander(f"각주 원문 {len(_notes)}개(영문) — 수령 조건·계획 매매 근거"):
-                                    st.markdown("\n".join(f"- {n[:600]} [원문]({u})" for n, u in _notes[:30]))
-                            st.caption("내부자 신호로 의미가 큰 건 **장내 매수(P)** — 본인 돈으로 시장에서 산 것. 부여(A)는 회사 보상, "
-                                       "행사(M)·세금 반납(F)은 보상을 현금화하는 흐름이라 신호가 약하다. 10b5-1 = 미리 정해 둔 계획에 따른 "
-                                       "기계적 매매(2023-04부터 원문에 표시) — 계획 매도는 '팔고 싶어서 판' 매도보다 정보가 적다. "
-                                       "수령 조건은 각주 문장을 규칙으로 읽은 꼬리표다(원문 확인 권장). 최근 1년 최대 30건.")
+                        # ── 📑 Form 4 원문 (US, 2026-10-21) — 장내 매매만 신호, 부여·행사·세금 반납은 보상 흐름 ─────
+                        if not is_kr_sym:
+                            st.subheader("📑 Form 4 원문 — 장내 매매·스톡옵션·RSU·워런트")
+                            if not _f4:
+                                st.info("최근 1년 Form 4 없음" if not _f4e else f"SEC 원문 조회 실패({_f4e}) — 위 yfinance 집계로 대신 표시")
+                            else:
+                                _P = [r for r in _f4 if r['code'] == 'P' and r['table'] == '주식']
+                                _S = [r for r in _f4 if r['code'] == 'S' and r['table'] == '주식']
+                                _amt = lambda rs: sum((r['shares'] or 0) * (r['price'] or 0) for r in rs)
+                                _spl = _amt([r for r in _S if r['plan_10b5_1']])
+                                _grant = [r for r in _f4 if r['code'] == 'A' and r['table'] == '파생']
+                                _stat_grid([('', [
+                                    ('장내 매수', f"${_amt(_P)/1e6:,.2f}M · {len(_P)}건", True),
+                                    ('장내 매도', f"${_amt(_S)/1e6:,.2f}M · {len(_S)}건"),
+                                    ('계획 매도 비중', f"{_spl/_amt(_S)*100:.0f}%" if _amt(_S) else '-'),
+                                    ('옵션·RSU 부여', f"{len(_grant)}건 · {sum((r['underlying'] or r['shares'] or 0) for r in _grant):,.0f}주"),
+                                    ('행사·전환', f"{sum(1 for r in _f4 if r['code'] in ('M', 'X', 'O'))}건"),
+                                    ('세금 납부용 반납', f"{sum(1 for r in _f4 if r['code'] == 'F')}건")])])
+                                _der = [r for r in _f4 if r['table'] == '파생']
+                                if _der:
+                                    st.markdown("**파생상품 — 스톡옵션 · RSU · 성과주식 · 워런트**")
+                                    _tsrc('SEC EDGAR Form 4 원문(XML 파생상품 표·각주)', live=True)
+                                    st.dataframe(pd.DataFrame([{
+                                        '일자': r['date'] or '-', '보고자': r['owner'], '직위': r['role'], '종류': r['sec_kind'],
+                                        '거래': r['code_label'], '수량(주)': r['underlying'] or r['shares'],
+                                        '행사가($)': r['exercise_price'], '행사 가능일': r['exercisable'] or '각주',
+                                        '만기': r['expiration'] or '각주',
+                                        '수령 조건': ' · '.join(t for t in r['tags'] if '10b5-1' not in t and '가중평균' not in t) or '-'}
+                                        for r in _der[:40]])[['일자', '종류', '거래', '수량(주)', '행사가($)', '만기', '수령 조건',
+                                                              '보고자', '직위', '행사 가능일']], filters=False)
+                                _nd = [r for r in _f4 if r['table'] == '주식' and r['code'] in ('P', 'S')]
+                                if _nd:
+                                    st.markdown("**장내 매매 — 사전계획(10b5-1) 여부**")
+                                    _tsrc('SEC EDGAR Form 4 원문(XML 비파생 표)', live=True)
+                                    st.dataframe(pd.DataFrame([{
+                                        '일자': r['date'] or '-', '보고자': r['owner'], '직위': r['role'], '거래': r['code_label'],
+                                        '수량(주)': r['shares'], '단가($)': r['price'],
+                                        '금액($M)': None if not (r['shares'] and r['price']) else
+                                                    round((1 if r['code'] == 'P' else -1) * r['shares'] * r['price'] / 1e6, 2),
+                                        '사전계획': '10b5-1' if r['plan_10b5_1'] else '-', '거래 후 보유(주)': r['after']}
+                                        for r in _nd[:40]])[['일자', '거래', '금액($M)', '사전계획', '수량(주)', '단가($)',
+                                                             '보고자', '직위', '거래 후 보유(주)']], filters=False)
+                                _notes = list(dict.fromkeys((r['notes'], r['url']) for r in _f4 if r['notes']))
+                                if _notes:
+                                    with st.expander(f"각주 원문 {len(_notes)}개(영문) — 수령 조건·계획 매매 근거"):
+                                        st.markdown("\n".join(f"- {n[:600]} [원문]({u})" for n, u in _notes[:30]))
+                                st.caption("내부자 신호로 의미가 큰 건 **장내 매수(P)** — 본인 돈으로 시장에서 산 것. 부여(A)는 회사 보상, "
+                                           "행사(M)·세금 반납(F)은 보상을 현금화하는 흐름이라 신호가 약하다. 10b5-1 = 미리 정해 둔 계획에 따른 "
+                                           "기계적 매매(2023-04부터 원문에 표시) — 계획 매도는 '팔고 싶어서 판' 매도보다 정보가 적다. "
+                                           "수령 조건은 각주 문장을 규칙으로 읽은 꼬리표다(원문 확인 권장). 최근 1년 최대 30건.")
 
-                    # ── 🧨 잠재 희석 — CB·BW·EB (2026-10-21) ─────────────────────
-                    #   한국 중소형주의 '조용한 물량'. 전환가 ≤ 주가면 전환 후 매도 유인, 주가가 내리면 리픽싱으로 주식 수가 더 는다.
-                    _dil = None
-                    if is_kr_sym:
-                        _kd = kr_dilution(sym8_clean)
-                        _shn_d = _shares_now(sym8_clean, True, info)
-                        _dil = _ac_dil.summarize_dilution(_kd['terms'], shares_out=_shn_d, price=float(price_now))
-                        st.subheader("🧨 잠재 희석 — 전환사채·신주인수권부사채·교환사채")
-                        if not _kd['terms'] and not _kd['src']:
-                            st.info(f"조회 실패 — {_kd['err'] or 'DART 미접속'}. 저장본도 아직 없습니다(주간 갱신 후 표시).")
-                        else:
-                            _stat_grid([('', [
-                                ('아직 전환 가능한 발행', f"{_dil['n_active']}건"),
-                                ('잠재 신주(발행주식 대비)', f"{_dil['pot_pct']:.1f}%"),
-                                ('리픽싱 바닥까지 가면', f"{_dil['max_pct']:.1f}%"),
-                                ('지금 전환하면 이득인 물량', f"{_dil['itm_pct']:.1f}%"),
-                                ('EB(기존 주식 교환)', f"{_dil['eb_pct']:.1f}%")])])
-                            if _dil['rows']:
-                                _knm = {'CB': '전환사채', 'BW': '신주인수권부사채', 'EB': '교환사채'}
-                                _tsrc(_kd['src'] + ' · 비율 = 전환주식수 ÷ 현재 상장주식수', live='실시간' in _kd['src'])
-                                st.dataframe(pd.DataFrame([{
-                                    '종류': _knm.get(r['kind'], r['kind']), '회차': r.get('round') or '-',
-                                    '결정일': r.get('decided') or '-',
-                                    '발행액(억원)': None if not r.get('amount') else round(r['amount'] / 1e8, 1),
-                                    '전환가(원)': r.get('price'), '최저 조정가(원)': r.get('floor'),
-                                    '현재가÷전환가(%)': round(float(price_now) / r['price'] * 100) if r.get('price') else None,
-                                    '발행주식 대비(%)': None if r.get('pct') is None else round(r['pct'], 1),
-                                    '청구 종료': r.get('end') or '-',
-                                    '상태': ('전환 가능' if r['active'] else '기간 종료')} for r in _dil['rows']]),
-                                    filters=False)
-                            _ev = _kd.get('events') or []
-                            if _ev:
-                                _evc = pd.Series([e['label'] for e in _ev]).value_counts()
-                                st.markdown("**최근 1년 관련 공시** — " + " · ".join(f"{k} {v}건" for k, v in _evc.items()))
-                                with st.expander(f"공시 {len(_ev)}건 원문 링크"):
-                                    st.markdown("\n".join(f"- {e['date']} · {e['label']} · [{e['title']}]({e['url']})" for e in _ev[:40]))
-                            elif _kd.get('err'):
-                                st.caption(f"최근 공시 목록은 못 불러왔습니다({_kd['err']}) — 발행 조건만 저장본으로 표시.")
-                            st.caption("발행 **결정** 기준의 최대치다 — 이미 전환·상환된 분량은 DART 구조화 데이터로 차감할 수 없다"
-                                       "(전환청구 공시가 잦으면 이미 상당량이 주식으로 바뀌었다는 뜻). "
-                                       "'현재가÷전환가' 100% 이상 = 전환 후 바로 팔면 이익 → 매도 압력. "
-                                       "리픽싱 = 주가가 내리면 전환가를 최저 조정가까지 낮춰 주식 수가 늘어나는 조항. "
-                                       "EB 는 회사가 가진 주식을 내주는 것이라 신주 희석은 아니지만 유통 물량이 는다. "
-                                       "스톡옵션 부여 건수는 위 공시 목록에서 확인(행사가·조건은 원문).")
+                    with _SEC['dil']:
+                        # ── 🧨 잠재 희석 — CB·BW·EB (2026-10-21) ─────────────────────
+                        #   한국 중소형주의 '조용한 물량'. 전환가 ≤ 주가면 전환 후 매도 유인, 주가가 내리면 리픽싱으로 주식 수가 더 는다.
+                        _dil = None
+                        if is_kr_sym:
+                            _kd = kr_dilution(sym8_clean)
+                            _shn_d = _shares_now(sym8_clean, True, info)
+                            _dil = _ac_dil.summarize_dilution(_kd['terms'], shares_out=_shn_d, price=float(price_now))
+                            st.subheader("🧨 잠재 희석 — 전환사채·신주인수권부사채·교환사채")
+                            if not _kd['terms'] and not _kd['src']:
+                                st.info(f"조회 실패 — {_kd['err'] or 'DART 미접속'}. 저장본도 아직 없습니다(주간 갱신 후 표시).")
+                            else:
+                                _stat_grid([('', [
+                                    ('아직 전환 가능한 발행', f"{_dil['n_active']}건"),
+                                    ('잠재 신주(발행주식 대비)', f"{_dil['pot_pct']:.1f}%"),
+                                    ('리픽싱 바닥까지 가면', f"{_dil['max_pct']:.1f}%"),
+                                    ('지금 전환하면 이득인 물량', f"{_dil['itm_pct']:.1f}%"),
+                                    ('EB(기존 주식 교환)', f"{_dil['eb_pct']:.1f}%")])])
+                                if _dil['rows']:
+                                    _knm = {'CB': '전환사채', 'BW': '신주인수권부사채', 'EB': '교환사채'}
+                                    _tsrc(_kd['src'] + ' · 비율 = 전환주식수 ÷ 현재 상장주식수', live='실시간' in _kd['src'])
+                                    st.dataframe(pd.DataFrame([{
+                                        '종류': _knm.get(r['kind'], r['kind']), '회차': r.get('round') or '-',
+                                        '결정일': r.get('decided') or '-',
+                                        '발행액(억원)': None if not r.get('amount') else round(r['amount'] / 1e8, 1),
+                                        '전환가(원)': r.get('price'), '최저 조정가(원)': r.get('floor'),
+                                        '현재가÷전환가(%)': round(float(price_now) / r['price'] * 100) if r.get('price') else None,
+                                        '발행주식 대비(%)': None if r.get('pct') is None else round(r['pct'], 1),
+                                        '청구 종료': r.get('end') or '-',
+                                        '상태': ('전환 가능' if r['active'] else '기간 종료')} for r in _dil['rows']]),
+                                        filters=False)
+                                _ev = _kd.get('events') or []
+                                if _ev:
+                                    _evc = pd.Series([e['label'] for e in _ev]).value_counts()
+                                    st.markdown("**최근 1년 관련 공시** — " + " · ".join(f"{k} {v}건" for k, v in _evc.items()))
+                                    with st.expander(f"공시 {len(_ev)}건 원문 링크"):
+                                        st.markdown("\n".join(f"- {e['date']} · {e['label']} · [{e['title']}]({e['url']})" for e in _ev[:40]))
+                                elif _kd.get('err'):
+                                    st.caption(f"최근 공시 목록은 못 불러왔습니다({_kd['err']}) — 발행 조건만 저장본으로 표시.")
+                                st.caption("발행 **결정** 기준의 최대치다 — 이미 전환·상환된 분량은 DART 구조화 데이터로 차감할 수 없다"
+                                           "(전환청구 공시가 잦으면 이미 상당량이 주식으로 바뀌었다는 뜻). "
+                                           "'현재가÷전환가' 100% 이상 = 전환 후 바로 팔면 이익 → 매도 압력. "
+                                           "리픽싱 = 주가가 내리면 전환가를 최저 조정가까지 낮춰 주식 수가 늘어나는 조항. "
+                                           "EB 는 회사가 가진 주식을 내주는 것이라 신주 희석은 아니지만 유통 물량이 는다. "
+                                           "스톡옵션 부여 건수는 위 공시 목록에서 확인(행사가·조건은 원문).")
 
 
 
@@ -7587,125 +7623,127 @@ def _tab_analysis():
                             st.caption("P/B 밴드: KR 자본(잔액) 이력이 아직 짧다. 매주 네이버 기업분석으로 쌓는 중"
                                        "(2026-10-19 시작) — 과거분은 DART 를 한국 IP 에서 한 번 돌리면 채워진다.")
 
-                    # 컨센서스 추세
-                    st.markdown("### 🔁 컨센서스 추세 — 숫자보다 방향")
-                    _tr, _rv = _ed.get('eps_trend'), _ed.get('eps_revisions')
-                    if _tr is not None:
-                        _lab = {'0q': '이번 분기', '+1q': '다음 분기', '0y': '올해', '+1y': '내년'}
-                        _rows_t = []
-                        for _per, _r in _tr.iterrows():
-                            _c0 = _r.get('current')
-                            def _chg(k):
-                                v = _r.get(k)
-                                return round((_c0 / v - 1) * 100, 1) if (v and pd.notna(v) and v != 0 and pd.notna(_c0)) else None
-                            _row = {'기간': _lab.get(_per, _per), '현재 EPS': _c0,
-                                    '7일 전 대비(%)': _chg('7daysAgo'), '30일 전 대비(%)': _chg('30daysAgo'),
-                                    '90일 전 대비(%)': _chg('90daysAgo')}
-                            if _rv is not None and _per in _rv.index:
-                                _rr = _rv.loc[_per]
-                                _row['30일 상향(건)'] = _rr.get('upLast30days')
-                                _row['30일 하향(건)'] = _rr.get('downLast30days')
-                            _rows_t.append(_row)
-                        _tsrc('yfinance (애널리스트 EPS 추정치 이력)', live=True)
-                        st.dataframe(pd.DataFrame(_rows_t), filters=False, use_container_width=True)
-                        st.caption("추정치가 계속 올라가는 종목이 주가도 강하다(이익 추정 리비전 효과). "
-                                   "30일·90일 전 대비가 모두 + 이고 상향 건수가 하향보다 많으면 우호적.")
-                    elif is_kr_sym:
-                        # 2026-10-21 — 삼아알미늄: 주간 수집 대상(value_kr 249종) 밖이라 07-24 한 점에서 멈춰 있었고,
-                        #   점 하나를 추세 차트로 그려 축만 보였다. → 수집 대상을 한국 커버 1,300종으로 넓히고(consensus_snapshot),
-                        #   화면에서는 오늘 값을 직접 받아 이력 끝에 붙인다. 점이 2개 미만이면 차트 대신 숫자.
-                        _kh = pd.DataFrame(_kr_cons_hist(sym8_clean))
-                        _klive = _kr_cons_live(sym8_clean)
-                        _today = pd.Timestamp.today().normalize()
-                        if _klive:
-                            _lrow = pd.DataFrame([{'date': _today.strftime('%Y-%m-%d'), 'sym': sym8_clean, **_klive}])
-                            _kh = _lrow if _kh.empty else pd.concat(
-                                [_kh[_kh['date'] != _lrow['date'].iloc[0]], _lrow], ignore_index=True)
-                        if _kh.empty:
-                            _nc = load_json(Path('results/consensus_nocover.json')) or {}
-                            if sym8_clean in set(_nc.get('none') or []):
-                                st.info(f"애널리스트 추정치가 없는 종목입니다(네이버·FnGuide 기준, {_nc.get('date')} 확인). "
-                                        "커버하는 증권사가 없으면 컨센서스 자체가 존재하지 않는다.")
+                    with _SEC['cons']:
+                        # 컨센서스 추세
+                        st.markdown("### 🔁 컨센서스 추세 — 숫자보다 방향")
+                        _tr, _rv = _ed.get('eps_trend'), _ed.get('eps_revisions')
+                        if _tr is not None:
+                            _lab = {'0q': '이번 분기', '+1q': '다음 분기', '0y': '올해', '+1y': '내년'}
+                            _rows_t = []
+                            for _per, _r in _tr.iterrows():
+                                _c0 = _r.get('current')
+                                def _chg(k):
+                                    v = _r.get(k)
+                                    return round((_c0 / v - 1) * 100, 1) if (v and pd.notna(v) and v != 0 and pd.notna(_c0)) else None
+                                _row = {'기간': _lab.get(_per, _per), '현재 EPS': _c0,
+                                        '7일 전 대비(%)': _chg('7daysAgo'), '30일 전 대비(%)': _chg('30daysAgo'),
+                                        '90일 전 대비(%)': _chg('90daysAgo')}
+                                if _rv is not None and _per in _rv.index:
+                                    _rr = _rv.loc[_per]
+                                    _row['30일 상향(건)'] = _rr.get('upLast30days')
+                                    _row['30일 하향(건)'] = _rr.get('downLast30days')
+                                _rows_t.append(_row)
+                            _tsrc('yfinance (애널리스트 EPS 추정치 이력)', live=True)
+                            st.dataframe(pd.DataFrame(_rows_t), filters=False, use_container_width=True)
+                            st.caption("추정치가 계속 올라가는 종목이 주가도 강하다(이익 추정 리비전 효과). "
+                                       "30일·90일 전 대비가 모두 + 이고 상향 건수가 하향보다 많으면 우호적.")
+                        elif is_kr_sym:
+                            # 2026-10-21 — 삼아알미늄: 주간 수집 대상(value_kr 249종) 밖이라 07-24 한 점에서 멈춰 있었고,
+                            #   점 하나를 추세 차트로 그려 축만 보였다. → 수집 대상을 한국 커버 1,300종으로 넓히고(consensus_snapshot),
+                            #   화면에서는 오늘 값을 직접 받아 이력 끝에 붙인다. 점이 2개 미만이면 차트 대신 숫자.
+                            _kh = pd.DataFrame(_kr_cons_hist(sym8_clean))
+                            _klive = _kr_cons_live(sym8_clean)
+                            _today = pd.Timestamp.today().normalize()
+                            if _klive:
+                                _lrow = pd.DataFrame([{'date': _today.strftime('%Y-%m-%d'), 'sym': sym8_clean, **_klive}])
+                                _kh = _lrow if _kh.empty else pd.concat(
+                                    [_kh[_kh['date'] != _lrow['date'].iloc[0]], _lrow], ignore_index=True)
+                            if _kh.empty:
+                                _nc = load_json(Path('results/consensus_nocover.json')) or {}
+                                if sym8_clean in set(_nc.get('none') or []):
+                                    st.info(f"애널리스트 추정치가 없는 종목입니다(네이버·FnGuide 기준, {_nc.get('date')} 확인). "
+                                            "커버하는 증권사가 없으면 컨센서스 자체가 존재하지 않는다.")
+                                else:
+                                    st.info("컨센서스를 받지 못했습니다 — 지금 네이버(wisereport) 응답이 없고 저장된 스냅샷도 없다.")
                             else:
-                                st.info("컨센서스를 받지 못했습니다 — 지금 네이버(wisereport) 응답이 없고 저장된 스냅샷도 없다.")
+                                _kh['date'] = pd.to_datetime(_kh['date'])
+                                _kh = _kh.sort_values('date').reset_index(drop=True)
+                                _xd = pd.DatetimeIndex(_kh['date'])
+                                _kl = _kh.iloc[-1]
+                                def _kv(k, fmt):
+                                    v = _kl.get(k)
+                                    return fmt.format(v) if v is not None and pd.notna(v) else '-'
+                                def _kchg(k):
+                                    if len(_kh) < 2 or k not in _kh:
+                                        return None
+                                    v0, v1 = _kh[k].iloc[0], _kh[k].iloc[-1]
+                                    return (v1 / v0 - 1) * 100 if pd.notna(v0) and pd.notna(v1) and v0 > 0 else None
+                                _span = (_xd[-1] - _xd[0]).days
+                                _ce, _co = _kchg('eps_0y'), _kchg('op_0y')
+                                _stat_grid([('', [("올해 EPS(원)", _kv('eps_0y', '{:,.0f}')),
+                                                  ("올해 영업이익(억원)", _kv('op_0y', '{:,.0f}')),
+                                                  ("내년 EPS(원)", _kv('eps_1y', '{:,.0f}')),
+                                                  (f"올해 EPS 변화({_span}일)" if _span else "올해 EPS 변화", f"{_ce:+.1f}%" if _ce is not None else '-'),
+                                                  (f"올해 영업이익 변화({_span}일)" if _span else "올해 영업이익 변화", f"{_co:+.1f}%" if _co is not None else '-')])])
+                                if len(_kh) >= 2:
+                                    # EPS(원)와 영업이익(억)은 단위가 수천 배 달라 축을 나눈다(왼쪽 EPS · 오른쪽 영업이익)
+                                    _fk = go.Figure()
+                                    if 'eps_0y' in _kh:
+                                        _fk.add_trace(go.Scatter(x=_xd, y=_kh['eps_0y'], mode='lines+markers',
+                                                                 name='올해 EPS(원) · 왼쪽', line=dict(color='#2453C8', width=2.5)))
+                                    if 'op_0y' in _kh:
+                                        _fk.add_trace(go.Scatter(x=_xd, y=_kh['op_0y'], mode='lines+markers', yaxis='y2',
+                                                                 name='올해 영업이익(억원) · 오른쪽',
+                                                                 line=dict(color='#7C8AA5', width=2, dash='dot')))
+                                    # 날짜 눈금은 실제 스냅샷 날짜에만(자동 눈금이 같은 날짜를 여러 번 찍던 것)
+                                    _fk.update_layout(height=240, margin=dict(l=8, r=8, t=30, b=8),
+                                                      legend=dict(orientation='h', y=1.12, x=0, yanchor='bottom'),
+                                                      xaxis=dict(tickvals=_xd, tickformat='%Y-%m-%d'),
+                                                      yaxis=dict(tickformat=',.0f'),
+                                                      yaxis2=dict(overlaying='y', side='right', showgrid=False, tickformat=',.0f'))
+                                    st.plotly_chart(_fk, use_container_width=True)
+                                _gaps = _xd.to_series().diff().dt.days.dropna()
+                                _klast = (_kh[~_kh.index.isin([len(_kh) - 1])]['date'].max() if _klive else _xd[-1])
+                                _kage = (_today - pd.Timestamp(_klast)).days if pd.notna(_klast) else None
+                                st.caption("출처: 네이버금융(FnGuide) 컨센서스 — 주간 스냅샷(results/consensus_history.jsonl)"
+                                           + (" + 오늘 조회값" if _klive else "")
+                                           + f" · 점 {len(_kh)}개"
+                                           + (f" · ⚠️ 점 사이 최대 {int(_gaps.max())}일 공백 — 그 사이 움직임은 모른다" if len(_gaps) and _gaps.max() > 14 else "")
+                                           + (f" · 마지막 저장 스냅샷 {pd.Timestamp(_klast).date()}({_kage}일 전)" if _klive and _kage is not None and len(_kh) > 1 else "")
+                                           + (f" · ⚠️ {pd.Timestamp(_klast).date()} 값이다({_kage}일 전) — 지금 조회도 실패했다" if not _klive and _kage is not None and _kage > 10 else "")
+                                           + (" · 4주 이상 쌓여야 방향을 말할 수 있다" if len(_kh) < 4 else ""))
                         else:
-                            _kh['date'] = pd.to_datetime(_kh['date'])
-                            _kh = _kh.sort_values('date').reset_index(drop=True)
-                            _xd = pd.DatetimeIndex(_kh['date'])
-                            _kl = _kh.iloc[-1]
-                            def _kv(k, fmt):
-                                v = _kl.get(k)
-                                return fmt.format(v) if v is not None and pd.notna(v) else '-'
-                            def _kchg(k):
-                                if len(_kh) < 2 or k not in _kh:
-                                    return None
-                                v0, v1 = _kh[k].iloc[0], _kh[k].iloc[-1]
-                                return (v1 / v0 - 1) * 100 if pd.notna(v0) and pd.notna(v1) and v0 > 0 else None
-                            _span = (_xd[-1] - _xd[0]).days
-                            _ce, _co = _kchg('eps_0y'), _kchg('op_0y')
-                            _stat_grid([('', [("올해 EPS(원)", _kv('eps_0y', '{:,.0f}')),
-                                              ("올해 영업이익(억원)", _kv('op_0y', '{:,.0f}')),
-                                              ("내년 EPS(원)", _kv('eps_1y', '{:,.0f}')),
-                                              (f"올해 EPS 변화({_span}일)" if _span else "올해 EPS 변화", f"{_ce:+.1f}%" if _ce is not None else '-'),
-                                              (f"올해 영업이익 변화({_span}일)" if _span else "올해 영업이익 변화", f"{_co:+.1f}%" if _co is not None else '-')])])
-                            if len(_kh) >= 2:
-                                # EPS(원)와 영업이익(억)은 단위가 수천 배 달라 축을 나눈다(왼쪽 EPS · 오른쪽 영업이익)
-                                _fk = go.Figure()
-                                if 'eps_0y' in _kh:
-                                    _fk.add_trace(go.Scatter(x=_xd, y=_kh['eps_0y'], mode='lines+markers',
-                                                             name='올해 EPS(원) · 왼쪽', line=dict(color='#2453C8', width=2.5)))
-                                if 'op_0y' in _kh:
-                                    _fk.add_trace(go.Scatter(x=_xd, y=_kh['op_0y'], mode='lines+markers', yaxis='y2',
-                                                             name='올해 영업이익(억원) · 오른쪽',
-                                                             line=dict(color='#7C8AA5', width=2, dash='dot')))
-                                # 날짜 눈금은 실제 스냅샷 날짜에만(자동 눈금이 같은 날짜를 여러 번 찍던 것)
-                                _fk.update_layout(height=240, margin=dict(l=8, r=8, t=30, b=8),
-                                                  legend=dict(orientation='h', y=1.12, x=0, yanchor='bottom'),
-                                                  xaxis=dict(tickvals=_xd, tickformat='%Y-%m-%d'),
-                                                  yaxis=dict(tickformat=',.0f'),
-                                                  yaxis2=dict(overlaying='y', side='right', showgrid=False, tickformat=',.0f'))
-                                st.plotly_chart(_fk, use_container_width=True)
-                            _gaps = _xd.to_series().diff().dt.days.dropna()
-                            _klast = (_kh[~_kh.index.isin([len(_kh) - 1])]['date'].max() if _klive else _xd[-1])
-                            _kage = (_today - pd.Timestamp(_klast)).days if pd.notna(_klast) else None
-                            st.caption("출처: 네이버금융(FnGuide) 컨센서스 — 주간 스냅샷(results/consensus_history.jsonl)"
-                                       + (" + 오늘 조회값" if _klive else "")
-                                       + f" · 점 {len(_kh)}개"
-                                       + (f" · ⚠️ 점 사이 최대 {int(_gaps.max())}일 공백 — 그 사이 움직임은 모른다" if len(_gaps) and _gaps.max() > 14 else "")
-                                       + (f" · 마지막 저장 스냅샷 {pd.Timestamp(_klast).date()}({_kage}일 전)" if _klive and _kage is not None and len(_kh) > 1 else "")
-                                       + (f" · ⚠️ {pd.Timestamp(_klast).date()} 값이다({_kage}일 전) — 지금 조회도 실패했다" if not _klive and _kage is not None and _kage > 10 else "")
-                                       + (" · 4주 이상 쌓여야 방향을 말할 수 있다" if len(_kh) < 4 else ""))
-                    else:
-                        st.info("컨센서스 추세 데이터 없음 (yfinance 미제공 · KR 스냅샷 미축적 종목).")
+                            st.info("컨센서스 추세 데이터 없음 (yfinance 미제공 · KR 스냅샷 미축적 종목).")
 
-                    # 동종업계
-                    st.markdown("### 🧩 동종업계 비교")
-                    # 2026-10-20: 버튼 없이 바로(결과는 6시간 캐시 — 같은 종목을 다시 열면 즉시)
-                    if True:
-                        with st.spinner("동종업계 재무 조회..."):
-                            try:
-                                _pind, _prows = _peer_rows(sym8_clean, is_kr_sym)
-                            except Exception as _pe:
-                                _pind, _prows = None, []
-                                st.caption(f"`동종업계 조회 실패: {type(_pe).__name__}`")
-                        if not _prows or len(_prows) < 2:
-                            st.info("같은 업종 종목을 찾지 못했습니다.")
-                        else:
-                            _tsrc(("KRX 업종분류·DART 저장 손익" if is_kr_sym else "SEC SIC 업종·EDGAR 분기재무")
-                                  + " · 시총: 상장목록", live=True)
-                            _pdf = pd.DataFrame(_prows)
-                            # 동종 중앙값 행 — 이 종목이 업종 안에서 비싼지·빠른지 한눈에(이 종목 제외 중앙값)
-                            _peer_only = _pdf.iloc[1:]
-                            _med = {c: (float(pd.to_numeric(_peer_only[c], errors='coerce').median())
-                                        if pd.to_numeric(_peer_only[c], errors='coerce').notna().any() else None)
-                                    for c in ('시총($B)', 'PER(배)', 'PBR(배)', 'PSR(배)', 'ROE(%)', '매출성장(%)', '영업이익률(%)')}
-                            _pdf = pd.concat([_pdf, pd.DataFrame([{'종목': f'동종 중앙값({len(_peer_only)}종)', '코드': '', **_med,
-                                                                   '기준분기': ''}])], ignore_index=True)
-                            st.dataframe(_pdf, filters=False, use_container_width=True)
-                            st.caption(f"업종: {_pind}. 첫 행이 이 종목. 같은 업종 안에서 시총이 가장 가까운 순. "
-                                       "⚠️ 공식 업종분류는 사업 실제와 다를 수 있다(예: 대형 복합기업). "
-                                       "PER·PSR·ROE 는 TTM, PBR 은 마지막 분기말 자본 기준. 적자면 PER, 자본잠식이면 PBR·ROE 는 '-'. "
-                                       "PBR 은 ROE 와 같이 읽는다 — ROE 가 높으면 PBR 이 높은 게 정상이다.")
+                    with _SEC['peer']:
+                        # 동종업계
+                        st.markdown("### 🧩 동종업계 비교")
+                        # 2026-10-20: 버튼 없이 바로(결과는 6시간 캐시 — 같은 종목을 다시 열면 즉시)
+                        if True:
+                            with st.spinner("동종업계 재무 조회..."):
+                                try:
+                                    _pind, _prows = _peer_rows(sym8_clean, is_kr_sym)
+                                except Exception as _pe:
+                                    _pind, _prows = None, []
+                                    st.caption(f"`동종업계 조회 실패: {type(_pe).__name__}`")
+                            if not _prows or len(_prows) < 2:
+                                st.info("같은 업종 종목을 찾지 못했습니다.")
+                            else:
+                                _tsrc(("KRX 업종분류·DART 저장 손익" if is_kr_sym else "SEC SIC 업종·EDGAR 분기재무")
+                                      + " · 시총: 상장목록", live=True)
+                                _pdf = pd.DataFrame(_prows)
+                                # 동종 중앙값 행 — 이 종목이 업종 안에서 비싼지·빠른지 한눈에(이 종목 제외 중앙값)
+                                _peer_only = _pdf.iloc[1:]
+                                _med = {c: (float(pd.to_numeric(_peer_only[c], errors='coerce').median())
+                                            if pd.to_numeric(_peer_only[c], errors='coerce').notna().any() else None)
+                                        for c in ('시총($B)', 'PER(배)', 'PBR(배)', 'PSR(배)', 'ROE(%)', '매출성장(%)', '영업이익률(%)')}
+                                _pdf = pd.concat([_pdf, pd.DataFrame([{'종목': f'동종 중앙값({len(_peer_only)}종)', '코드': '', **_med,
+                                                                       '기준분기': ''}])], ignore_index=True)
+                                st.dataframe(_pdf, filters=False, use_container_width=True)
+                                st.caption(f"업종: {_pind}. 첫 행이 이 종목. 같은 업종 안에서 시총이 가장 가까운 순. "
+                                           "⚠️ 공식 업종분류는 사업 실제와 다를 수 있다(예: 대형 복합기업). "
+                                           "PER·PSR·ROE 는 TTM, PBR 은 마지막 분기말 자본 기준. 적자면 PER, 자본잠식이면 PBR·ROE 는 '-'. "
+                                           "PBR 은 ROE 와 같이 읽는다 — ROE 가 높으면 PBR 이 높은 게 정상이다.")
 
                 # ── 🧭 요약 판단 (맨 위) ─────────────────────────────────
                 _acch = None if is_kr_sym else _sx.accel_history(sym8_clean)
@@ -7875,11 +7913,12 @@ def _tab_analysis():
                 # ── 🎯 매매 판단 — 규칙 계산 (2026-10-23) ─────────────────────────
                 #   목표가(컨센서스·역사적 PER·PEG) · 다운사이드(정류장 통계) · 손절 참고선 · 매수/관망/탈출 판정 · 비중.
                 #   계산은 trade_plan.py(테스트 있음). 원칙 v1: 위성은 가격 손절 대신 크기(총자산 1.5%)로 위험 관리.
-                with _SEC['plan'] if _IS_LAB else st.empty():
+                with _SEC['stn']:
                     try:
-                        if not _IS_LAB:      # 2026-11-01 미검증 규칙 계산 → 🔬 연구실 권한(소유자)에게만. 공개 화면엔 그리지 않는다
+                        if not _IS_LAB and not _V2:      # 2026-11-01 미검증 규칙 계산 → 🔬 연구실 권한(소유자)에게만. 공개 화면엔 그리지 않는다
                             raise _LazySkip
-                        st.caption("🔬 **연구실 기능** — 검증 전 규칙 계산(소유자에게만 보임)")
+                        _planbox = _HID.container() if _V2 else st.container()   # 2026-11-15 매매 계획 삭제 — 판정·손절·목표가는 그리지 않고 정류장만 공개
+                        _planbox.caption("🔬 **연구실 기능** — 검증 전 규칙 계산(소유자에게만 보임)")
                         import trade_plan as _tp
                         import html as _hx
                         _LP = locals()
@@ -7946,87 +7985,88 @@ def _tab_analysis():
                                                 risk_budget=_risk_b, slot_cap=_slot, trim_cap=float(_LR.get('cap', 0.3)) * 100)
                         _fs = _tp.forward_similar(_c_all)
 
-                        st.markdown("## 🎯 매매 판단 — 규칙 계산")
-                        _pf_ = lambda v: (f"₩{v:,.0f}" if is_kr_sym else f"\\${v:,.2f}") if v else '-'   # $ 두 개가 수식으로 렌더되지 않게
-                        _plan_cards = [
-                            _kpi('판정', _vd['state'], (' · '.join(_vd['exit']) if _vd['exit'] else f"체크 {_vd['ok']}/{len(_vd['checks'])} 통과"), _vd['tone']),
-                            _kpi('목표 중앙값', f"{_base['up']:+.0f}%" if _base else '-',
-                                 (f"{_pf_(_base['price']).replace(chr(92), '')} · 범위 {_base['lo']:+.0f}~{_base['hi']:+.0f}% · {_base['name']}" if _base else '목표가 계산 불가'),
-                                 'na' if not _base else ('good' if _base['up'] >= 20 else 'mid' if _base['up'] > 0 else 'bad')),
-                            _kpi('손절선(실전 규칙)', f"{_st['s1_pct']:.0f}%", f"{_pf_(_st['s1'])} · 고점 따라 올라감 · 참고 {_pf_(_st['s2'])}({_st['s2_pct']:.0f}%)", 'mid'),
-                            _kpi('역사적 다운사이드', f"{_dn_pct:.0f}%" if _dn_pct is not None else '-',
-                                 (f"{_pf_(_dn_px)} · 스윙 {len(_sw['declines'])}회 중앙값" if _dn_px else '표본 없음'),
-                                 'na' if _dn_pct is None else ('bad' if _dn_pct <= -30 else 'mid')),
-                            _kpi('보상 ÷ 위험', f"{_rr:.1f}배" if _rr else '-', ('목표 중앙값 상승폭 ÷ 실전 손절폭' if _rr else '목표 중앙값이 현재가 아래'), 'na' if not _rr else ('good' if _rr >= 3 else 'mid' if _rr >= 1.5 else 'bad')),
-                            _kpi('투입 가능 비중', f"{_ps['rec']:.1f}%",
-                                 (f"판정이 '매수 가능 영역' 아님 → 신규 0 (조건 충족 시 {min(_ps['risk_size'], _slot) * (0.5 if _ps['half'] else 1):.1f}%)"
-                                  if _ps['rec'] == 0 else ("총자산 기준 · 변동성 60%↑ 절반" if _ps['half'] else "총자산 기준 · 실전 첫 매수 한 칸")),
-                                 'good' if _ps['rec'] > 0 else 'na'),
-                        ]
-                        st.markdown('<div class="mo-kpis">' + ''.join(_plan_cards).replace('\\$', '$') + '</div>', unsafe_allow_html=True)
+                        with _planbox:
+                            st.markdown("## 🎯 매매 판단 — 규칙 계산")
+                            _pf_ = lambda v: (f"₩{v:,.0f}" if is_kr_sym else f"\\${v:,.2f}") if v else '-'   # $ 두 개가 수식으로 렌더되지 않게
+                            _plan_cards = [
+                                _kpi('판정', _vd['state'], (' · '.join(_vd['exit']) if _vd['exit'] else f"체크 {_vd['ok']}/{len(_vd['checks'])} 통과"), _vd['tone']),
+                                _kpi('목표 중앙값', f"{_base['up']:+.0f}%" if _base else '-',
+                                     (f"{_pf_(_base['price']).replace(chr(92), '')} · 범위 {_base['lo']:+.0f}~{_base['hi']:+.0f}% · {_base['name']}" if _base else '목표가 계산 불가'),
+                                     'na' if not _base else ('good' if _base['up'] >= 20 else 'mid' if _base['up'] > 0 else 'bad')),
+                                _kpi('손절선(실전 규칙)', f"{_st['s1_pct']:.0f}%", f"{_pf_(_st['s1'])} · 고점 따라 올라감 · 참고 {_pf_(_st['s2'])}({_st['s2_pct']:.0f}%)", 'mid'),
+                                _kpi('역사적 다운사이드', f"{_dn_pct:.0f}%" if _dn_pct is not None else '-',
+                                     (f"{_pf_(_dn_px)} · 스윙 {len(_sw['declines'])}회 중앙값" if _dn_px else '표본 없음'),
+                                     'na' if _dn_pct is None else ('bad' if _dn_pct <= -30 else 'mid')),
+                                _kpi('보상 ÷ 위험', f"{_rr:.1f}배" if _rr else '-', ('목표 중앙값 상승폭 ÷ 실전 손절폭' if _rr else '목표 중앙값이 현재가 아래'), 'na' if not _rr else ('good' if _rr >= 3 else 'mid' if _rr >= 1.5 else 'bad')),
+                                _kpi('투입 가능 비중', f"{_ps['rec']:.1f}%",
+                                     (f"판정이 '매수 가능 영역' 아님 → 신규 0 (조건 충족 시 {min(_ps['risk_size'], _slot) * (0.5 if _ps['half'] else 1):.1f}%)"
+                                      if _ps['rec'] == 0 else ("총자산 기준 · 변동성 60%↑ 절반" if _ps['half'] else "총자산 기준 · 실전 첫 매수 한 칸")),
+                                     'good' if _ps['rec'] > 0 else 'na'),
+                            ]
+                            st.markdown('<div class="mo-kpis">' + ''.join(_plan_cards).replace('\\$', '$') + '</div>', unsafe_allow_html=True)
 
-                        # 2026-11-10 — 🤖 실전 규칙 체크. 위 '판정'은 추세 템플릿(오닐·미너비니) 계산이고 봇이 실제로 사는 규칙과 달랐다
-                        #   (연결성 결손: 종목분석에서 '탈출 검토'인데 봇은 같은 주에 매수하는 일이 생긴다). 봇 규칙을 그대로 한 줄로 대조한다.
-                        try:
-                            _rs_v = float(_CMB.loc[sym8_clean, 'RS']) if (not _CMB.empty and sym8_clean in _CMB.index
-                                                                        and pd.notna(_CMB.loc[sym8_clean, 'RS'])) else None
-                        except Exception:
-                            _rs_v = None
-                        _rsmin = float(_LR.get('rs_min', 80))
-                        _mcmin = float(_LR.get('kr_min_mc' if is_kr_sym else 'us_min_mc', 1e11 if is_kr_sym else 3e8))
-                        if is_kr_sym:
-                            _et_x = _LP.get('_et0') or {}
-                            _e_lbl = f"{_et_x.get('state', '판정 불가')} (분기 영업이익 기준)"
-                            _e_ok = _et_x.get('level') == '흑자전환' or '흑자전환' in str(_et_x.get('state'))
-                        else:
-                            _ahx = _LP.get('_ah0') or {}
-                            _e_ok = bool(_ahx.get('rows')) and (pd.Timestamp.today() - pd.Timestamp(_ahx['rows'][0]['주차'])).days <= 7 * 13
-                            _e_lbl = (f"이익 가속 {_ahx['rows'][0]['주차']}" if _ahx.get('rows') else '이익 가속 신호 없음')
-                        _ix = ((_live_plan() or {}).get('index') or {}).get('KR' if is_kr_sym else 'US') or {}
-                        _bst, _btone = _bot_status(sym8_clean)
-                        _rk = [
-                            ('이익', _e_ok, f"{'영업 흑자전환' if is_kr_sym else '이익 가속(최근 13주) 또는 흑자전환'} · 지금: {_e_lbl}"),
-                            (f"RS ≥ {_rsmin:.0f}", None if _rs_v is None else _rs_v >= _rsmin, f"지금 {_rs_v:.0f}" if _rs_v is not None else '공통 지표 명단 밖'),
-                            (f"{int(_LR.get('ma_days', 50))}일선 위", None if _ma50 is None else _p > _ma50,
-                             f"{(_p / _ma50 - 1) * 100:+.1f}%" if _ma50 else '표본 부족'),
-                            ("시총 하한", (mc >= _mcmin) if mc else None,
-                             f"{_mcs} (하한 {('%s억원' % format(_mcmin / 1e8, ',.0f')) if is_kr_sym else ('$%.1fB' % (_mcmin / 1e9))})"),
-                            (f"지수 {_ix.get('lbl', '')}", _ix.get('ok'), (f"{_ix.get('last', 0):,.0f} vs {_ix.get('ma200', 0):,.0f}"
-                                                                         + (' · ⚠️ 오버라이드' if _ix.get('override') else '')) if _ix else '계획 파일 없음'),
-                        ]
-                        _ic = {True: '✅', False: '❌', None: '·'}
-                        _pass = sum(1 for _, o, _ in _rk if o)
-                        st.markdown(f"**🤖 실전 규칙 대조 — {_pass}/{len(_rk)} 통과 · 봇 상태: {_bst}**")
-                        st.markdown("  ·  ".join(f"{_ic[o]} {n} <span style='color:#6B7280'>({t})</span>" for n, o, t in _rk),
-                                    unsafe_allow_html=True)
-                        st.caption(f"봇 규칙 원문 live/PREREG_2026-11.md · 계획 {(_live_plan() or {}).get('made', '-')} 작성 · RS 는 종목 발굴 표와 같은 공통 지표"
-                                   "(봇은 월요일 스냅샷이라 하루 이틀 다를 수 있다). 위 '판정'(추세 템플릿)은 참고 — 실제 주문은 이 줄의 규칙으로 나간다.")
-
-                        _pl, _pr = st.columns(2, gap='large')
-                        with _pl:
-                            st.markdown("**🎯 목표가 — 근거별**")
-                            if _tg:
-                                _tsrc('yfinance(애널 목표가) · 멀티플 밴드(공시 TTM) · 컨센서스 EPS — 이 화면 계산', live=True)
-                                st.dataframe(pd.DataFrame([{'근거': t['name'], f"목표가({'원' if is_kr_sym else '$'})": t['price'],
-                                                            '업사이드(%)': round(t['up'], 1), '계산': t['basis']} for t in _tg]),
-                                             filters=False)
+                            # 2026-11-10 — 🤖 실전 규칙 체크. 위 '판정'은 추세 템플릿(오닐·미너비니) 계산이고 봇이 실제로 사는 규칙과 달랐다
+                            #   (연결성 결손: 종목분석에서 '탈출 검토'인데 봇은 같은 주에 매수하는 일이 생긴다). 봇 규칙을 그대로 한 줄로 대조한다.
+                            try:
+                                _rs_v = float(_CMB.loc[sym8_clean, 'RS']) if (not _CMB.empty and sym8_clean in _CMB.index
+                                                                            and pd.notna(_CMB.loc[sym8_clean, 'RS'])) else None
+                            except Exception:
+                                _rs_v = None
+                            _rsmin = float(_LR.get('rs_min', 80))
+                            _mcmin = float(_LR.get('kr_min_mc' if is_kr_sym else 'us_min_mc', 1e11 if is_kr_sym else 3e8))
+                            if is_kr_sym:
+                                _et_x = _LP.get('_et0') or {}
+                                _e_lbl = f"{_et_x.get('state', '판정 불가')} (분기 영업이익 기준)"
+                                _e_ok = _et_x.get('level') == '흑자전환' or '흑자전환' in str(_et_x.get('state'))
                             else:
-                                st.caption("목표가를 계산할 재료(컨센서스·PER 밴드·12MF EPS)가 없다.")
-                            st.markdown("**🛑 손절 참고선**")
-                            st.markdown(f"- 🔴 **실전 손절** {_pf_(_st['s1'])} ({_st['s1_pct']:.0f}%) — {_st['why1']}\n"
-                                        f"- 트레이더식 참고 {_pf_(_st['s2'])} ({_st['s2_pct']:.0f}%) — {_st['why2'].replace('참고 · ', '')}\n"
-                                        f"- 실전 규칙: {int(_LR.get('slots', 10))}종목 · 첫 매수 {float(_LR.get('first', 0.5)) * 100:.0f}% → "
-                                        + ' · '.join(f"+{a * 100:.0f}%에 {w * 100:.0f}%" for a, w in (_LR.get('add_steps') or []))
-                                        + f" 불타기 · RS {int(_LR.get('rs_exit', 70))} 미만이면 매도(규칙 원문: live/PREREG)")
-                        with _pr:
-                            st.markdown(f"**✅ 판정 근거 — {_vd['state']}**")
-                            _ico = {'ok': '✅', 'warn': '⚠️', 'bad': '❌', 'na': '·'}
-                            st.markdown("\n".join(f"- {_ico[sx_]} **{n_}** · {t_}" for n_, sx_, t_ in _vd['checks']))
-                            if _liv.get('pivot'):
-                                st.caption(f"리버모어 피벗 {_pf_(_liv['pivot'])}(직전 1년 최고 종가, 최근 2주 제외) · 지금 {_liv['gap']:+.1f}% · "
-                                           f"거래량 {('%.1f배' % _liv['vol_ratio']) if _liv.get('vol_ratio') else '-'}(최근 5일 ÷ 그 전 20일). "
-                                           f"피라미딩은 첫 매수가 수익일 때만 {_pf_(_liv['adds'][0])}·{_pf_(_liv['adds'][1])}(피벗 +5%·+10%)에서 — "
-                                           "손실 중 추가(물타기)는 금지. 실전 봇의 불타기는 피벗이 아니라 '체결가 +10%·+20%' 기준이다.")
+                                _ahx = _LP.get('_ah0') or {}
+                                _e_ok = bool(_ahx.get('rows')) and (pd.Timestamp.today() - pd.Timestamp(_ahx['rows'][0]['주차'])).days <= 7 * 13
+                                _e_lbl = (f"이익 가속 {_ahx['rows'][0]['주차']}" if _ahx.get('rows') else '이익 가속 신호 없음')
+                            _ix = ((_live_plan() or {}).get('index') or {}).get('KR' if is_kr_sym else 'US') or {}
+                            _bst, _btone = _bot_status(sym8_clean)
+                            _rk = [
+                                ('이익', _e_ok, f"{'영업 흑자전환' if is_kr_sym else '이익 가속(최근 13주) 또는 흑자전환'} · 지금: {_e_lbl}"),
+                                (f"RS ≥ {_rsmin:.0f}", None if _rs_v is None else _rs_v >= _rsmin, f"지금 {_rs_v:.0f}" if _rs_v is not None else '공통 지표 명단 밖'),
+                                (f"{int(_LR.get('ma_days', 50))}일선 위", None if _ma50 is None else _p > _ma50,
+                                 f"{(_p / _ma50 - 1) * 100:+.1f}%" if _ma50 else '표본 부족'),
+                                ("시총 하한", (mc >= _mcmin) if mc else None,
+                                 f"{_mcs} (하한 {('%s억원' % format(_mcmin / 1e8, ',.0f')) if is_kr_sym else ('$%.1fB' % (_mcmin / 1e9))})"),
+                                (f"지수 {_ix.get('lbl', '')}", _ix.get('ok'), (f"{_ix.get('last', 0):,.0f} vs {_ix.get('ma200', 0):,.0f}"
+                                                                             + (' · ⚠️ 오버라이드' if _ix.get('override') else '')) if _ix else '계획 파일 없음'),
+                            ]
+                            _ic = {True: '✅', False: '❌', None: '·'}
+                            _pass = sum(1 for _, o, _ in _rk if o)
+                            st.markdown(f"**🤖 실전 규칙 대조 — {_pass}/{len(_rk)} 통과 · 봇 상태: {_bst}**")
+                            st.markdown("  ·  ".join(f"{_ic[o]} {n} <span style='color:#6B7280'>({t})</span>" for n, o, t in _rk),
+                                        unsafe_allow_html=True)
+                            st.caption(f"봇 규칙 원문 live/PREREG_2026-11.md · 계획 {(_live_plan() or {}).get('made', '-')} 작성 · RS 는 종목 발굴 표와 같은 공통 지표"
+                                       "(봇은 월요일 스냅샷이라 하루 이틀 다를 수 있다). 위 '판정'(추세 템플릿)은 참고 — 실제 주문은 이 줄의 규칙으로 나간다.")
+
+                            _pl, _pr = st.columns(2, gap='large')
+                            with _pl:
+                                st.markdown("**🎯 목표가 — 근거별**")
+                                if _tg:
+                                    _tsrc('yfinance(애널 목표가) · 멀티플 밴드(공시 TTM) · 컨센서스 EPS — 이 화면 계산', live=True)
+                                    st.dataframe(pd.DataFrame([{'근거': t['name'], f"목표가({'원' if is_kr_sym else '$'})": t['price'],
+                                                                '업사이드(%)': round(t['up'], 1), '계산': t['basis']} for t in _tg]),
+                                                 filters=False)
+                                else:
+                                    st.caption("목표가를 계산할 재료(컨센서스·PER 밴드·12MF EPS)가 없다.")
+                                st.markdown("**🛑 손절 참고선**")
+                                st.markdown(f"- 🔴 **실전 손절** {_pf_(_st['s1'])} ({_st['s1_pct']:.0f}%) — {_st['why1']}\n"
+                                            f"- 트레이더식 참고 {_pf_(_st['s2'])} ({_st['s2_pct']:.0f}%) — {_st['why2'].replace('참고 · ', '')}\n"
+                                            f"- 실전 규칙: {int(_LR.get('slots', 10))}종목 · 첫 매수 {float(_LR.get('first', 0.5)) * 100:.0f}% → "
+                                            + ' · '.join(f"+{a * 100:.0f}%에 {w * 100:.0f}%" for a, w in (_LR.get('add_steps') or []))
+                                            + f" 불타기 · RS {int(_LR.get('rs_exit', 70))} 미만이면 매도(규칙 원문: live/PREREG)")
+                            with _pr:
+                                st.markdown(f"**✅ 판정 근거 — {_vd['state']}**")
+                                _ico = {'ok': '✅', 'warn': '⚠️', 'bad': '❌', 'na': '·'}
+                                st.markdown("\n".join(f"- {_ico[sx_]} **{n_}** · {t_}" for n_, sx_, t_ in _vd['checks']))
+                                if _liv.get('pivot'):
+                                    st.caption(f"리버모어 피벗 {_pf_(_liv['pivot'])}(직전 1년 최고 종가, 최근 2주 제외) · 지금 {_liv['gap']:+.1f}% · "
+                                               f"거래량 {('%.1f배' % _liv['vol_ratio']) if _liv.get('vol_ratio') else '-'}(최근 5일 ÷ 그 전 20일). "
+                                               f"피라미딩은 첫 매수가 수익일 때만 {_pf_(_liv['adds'][0])}·{_pf_(_liv['adds'][1])}(피벗 +5%·+10%)에서 — "
+                                               "손실 중 추가(물타기)는 금지. 실전 봇의 불타기는 피벗이 아니라 '체결가 +10%·+20%' 기준이다.")
 
                         # 🚏 정류장 — 전 종목 빅데이터 (2026-10-27 개편)
                         #   사용자 지적: 5% 간격 막대는 '역'을 무시하고 n 미터마다 자른 것. → 전 종목 스윙(한국 1,240종 12.6만 개·
@@ -8053,6 +8093,7 @@ def _tab_analysis():
                                             f"**절반은 {_sgn}{_po['q50'] or '-'}%까지**, 4개 중 1개는 {_sgn}{_po['q25'] or '-'}%, 10개 중 1개는 {_sgn}{_po['q10'] or '-'}%까지 갔다.")
                         elif _cur:
                             st.caption("전 종목 역 지도가 아직 없다 — 이 종목 자체 스윙만 본다.")
+                        _stn_tbl = []   # 2026-11-15 — 두 칸 안 좁은 표가 열이 잘렸다 → 그래프 아래 한 표로 합친다
                         _g1, _g2 = st.columns(2, gap='large')
                         for _col, _dk, _nm2, _key2, _E, _sz, _clr in ((_g1, 'down', '하락', 'dec', _tp.DEC_EDGES, _sw['declines'], '#DC2626'),
                                                                      (_g2, 'up', '상승', 'ral', _tp.RAL_EDGES, _sw['rallies'], '#16A34A')):
@@ -8082,11 +8123,24 @@ def _tab_analysis():
                                     _pp = next((p for yy, p in (_po2.get('curve') or []) if yy >= _y), None) if _po2.get('n') else None
                                     _rows.append({f"{_nm2} 도달(%)": round(_y), "전 종목 확률(%)": None if _pp is None else round(_pp),
                                                   '이 종목 확률(%)': round(_so2['p'](_y)) if _so2.get('n', 0) >= 8 else None})
-                                _tsrc(f"전 종목 일봉 지그재그(10% 되돌림 = 새 스윙) · {(_ssj or {}).get('asof', '-')} 집계 · 이 종목 {_c_all.index[0]:%Y-%m}~",
-                                      path='results/swing_stations.json')
-                                st.dataframe(pd.DataFrame(_rows), filters=False, color=False)
-                                st.caption(f"기준: 이미 {_x0:.0f}% {_nm2}한 스윙 — 전 종목 {_po2.get('n', 0):,}개 · 이 종목 {_so2.get('n', 0)}개"
-                                           + (" (이 종목 8개 미만 — 이 종목 열 생략)" if _so2.get('n', 0) < 8 else ''))
+                                _stn_tbl.append((_nm2, _rows, _x0, _po2.get('n', 0), _so2.get('n', 0)))
+                        if _stn_tbl:
+                            _mrg = []
+                            for _ii in range(max(len(t[1]) for t in _stn_tbl)):
+                                _r2 = {}
+                                for _nmx, _rws, _x0x, _npo, _nso in _stn_tbl:
+                                    _rr2 = _rws[_ii] if _ii < len(_rws) else {}
+                                    _r2[f"{_nmx} 도달(%)"] = _rr2.get(f"{_nmx} 도달(%)")
+                                    _r2[f"{_nmx}·전 종목 확률(%)"] = _rr2.get('전 종목 확률(%)')
+                                    if _nso >= 8:
+                                        _r2[f"{_nmx}·이 종목 확률(%)"] = _rr2.get('이 종목 확률(%)')
+                                _mrg.append(_r2)
+                            _tsrc(f"전 종목 일봉 지그재그(10% 되돌림 = 새 스윙) · {(_ssj or {}).get('asof', '-')} 집계 · 이 종목 {_c_all.index[0]:%Y-%m}~",
+                                  path='results/swing_stations.json')
+                            st.dataframe(pd.DataFrame(_mrg), filters=False, color=False, use_container_width=True)
+                            st.caption(' · '.join(f"{_nmx}: 이미 {_x0x:.0f}% 간 스윙 — 전 종목 {_npo:,}개 · 이 종목 {_nso}개"
+                                                  + (" (8개 미만 — 이 종목 열 생략)" if _nso < 8 else '')
+                                                  for _nmx, _rws, _x0x, _npo, _nso in _stn_tbl))
                         st.caption(f"묶음: {_mk} · 연 변동성 {_vol_full:.0f}% → '{_bkl}' 그룹"
                                    + (f"(경계 {_mm['cut'][0]:.0f}%·{_mm['cut'][1]:.0f}%, {(_mm or {}).get('n_stocks', 0):,}종에서 3분위)" if _mm else '')
                                    + ". **전 종목 스윙 수십만 개에서 확인된 사실**: 하락은 10%를 넘긴 뒤 2.5%p마다 멈출 확률이 미국 약 20%로 거의 일정하다 — "
@@ -8102,14 +8156,15 @@ def _tab_analysis():
                             st.caption(f"지금처럼 52주 고점 대비 {_fs['dd_now']:.0f}%(±5%p)였던 날을 20거래일 간격으로 뽑아 126거래일(약 6개월) 뒤 수익을 셌다. "
                                        + ("⚠️ 10번 미만 — 참고 불가. " if _fs['n'] < 10 else '') + "기대수익 '분포'이지 예측이 아니다.")
 
-                        with st.expander("💼 비중 계산 조건 바꾸기"):
-                            _k1, _k2 = st.columns(2)
-                            _k1.number_input("한 번에 잃어도 되는 금액(총자산 %)", 0.25, 5.0, float(_risk_b), 0.25, key='plan_risk')
-                            _k2.number_input("첫 매수 한 칸(총자산 %) — 실전: 100 ÷ 종목 수 × 첫 매수 비율", 0.5, 30.0, float(_slot), 0.5, key='plan_slot')
-                            st.caption(f"위험예산식 비중 = {_risk_b:.2f}% ÷ 실전 손절폭 {abs(_st['s1_pct']):.0f}% = **{_ps['risk_size']:.1f}%** → "
-                                       f"상한 {_slot:.1f}%와 비교해 작은 쪽" + (" → 연 변동성 60% 이상이라 절반" if _ps['half'] else '')
-                                       + f". 판정이 '매수 가능 영역'이 아니면 신규 투입 0. 한 종목 최대(트림선) {_ps['trim_cap']:.1f}%. "
-                                       "AI 판단이 아니라 같은 입력이면 같은 답이 나오는 규칙이다 — 포트 전체(섹터 쏠림·현금)는 🛡️ 내 포트폴리오 탭에서.")
+                        with _planbox:
+                            with st.expander("💼 비중 계산 조건 바꾸기"):
+                                _k1, _k2 = st.columns(2)
+                                _k1.number_input("한 번에 잃어도 되는 금액(총자산 %)", 0.25, 5.0, float(_risk_b), 0.25, key='plan_risk')
+                                _k2.number_input("첫 매수 한 칸(총자산 %) — 실전: 100 ÷ 종목 수 × 첫 매수 비율", 0.5, 30.0, float(_slot), 0.5, key='plan_slot')
+                                st.caption(f"위험예산식 비중 = {_risk_b:.2f}% ÷ 실전 손절폭 {abs(_st['s1_pct']):.0f}% = **{_ps['risk_size']:.1f}%** → "
+                                           f"상한 {_slot:.1f}%와 비교해 작은 쪽" + (" → 연 변동성 60% 이상이라 절반" if _ps['half'] else '')
+                                           + f". 판정이 '매수 가능 영역'이 아니면 신규 투입 0. 한 종목 최대(트림선) {_ps['trim_cap']:.1f}%. "
+                                           "AI 판단이 아니라 같은 입력이면 같은 답이 나오는 규칙이다 — 포트 전체(섹터 쏠림·현금)는 🛡️ 내 포트폴리오 탭에서.")
                         st.caption("⚠️ 전부 공개 데이터와 정해진 규칙으로 계산한 참고값이며 투자 권유가 아니다. 판정·확률은 과거 빈도이고, "
                                    "모든 투자 판단과 책임은 이용자에게 있다.")
                     except _LazySkip:

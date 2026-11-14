@@ -113,14 +113,14 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         st.caption('사이클 비교 — 가격 이력이 60일 미만이라 건너뜁니다.')
         return
     K = f"cyc2|{sym}"
-    c1, c2, c3 = st.columns([1.3, 1.6, 1.2])
-    yrs_all = max(1, (close.index[-1] - close.index[0]).days // 365)
-    per_opts = [k for k, v in _PER.items() if v <= yrs_all + 1] + ['전체']
-    per = c1.segmented_control('기간', per_opts, default='10년' if '10년' in per_opts else per_opts[-1], key=f'{K}|p') or per_opts[-1]
-    x = c2.slider('꼭짓점 기준 — 이만큼 되돌려야 고점·저점으로 인정(%)', 10, 60, 30, 5, key=f'{K}|x',
-                  help='작게 하면 작은 출렁임까지 사이클로 잘게 쪼개고, 크게 하면 큰 사이클만 남는다. 반도체 같은 경기민감주는 30~40% 권장')
+    # 2026-11-15 — 기간 버튼 삭제(통계는 가진 이력 전체) · 기준 10~80% · 가격 차트는 위 '차트'에 구간 색으로 합침
+    c2, c3 = st.columns([3, 1])
+    x = c2.slider('꼭짓점 기준 — 이만큼 되돌려야 고점·저점으로 인정(%)', 10, 80, 30, 5, key=f'{K}|x',
+                  help='작게 하면 작은 출렁임까지 잘게 쪼개고, 크게 하면 큰 사이클만 남는다. 정상 종목은 60% 넘게 빠지는 일이 드물다 — '
+                       '경기민감주는 30~40%, 큰 사이클만 보려면 50% 이상')
     manual = c3.toggle('✏️ 구간 직접 고치기', key=f'{K}|man', help='켜면 지금 자동 구간이 표로 복사되고, 그 표를 고친 대로 계산합니다')
-    cl = close if per == '전체' else close[close.index >= close.index[-1] - pd.DateOffset(years=_PER[per])]
+    per = '전체'
+    cl = close
 
     auto = C.swing_rows(cl, float(x))
     if manual:
@@ -140,44 +140,32 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         st.info(f'{int(x)}% 이상 되돌린 꼭짓점이 없습니다 — 기준을 낮추거나 기간을 넓혀 주십시오.')
         return
 
-    # ── 가격 + 구간 색 ──
-    fig0 = go.Figure(go.Scatter(x=cl.index, y=cl.values, line=dict(color='#2453C8', width=1.3), name='종가',
-                                hovertemplate='%{x|%Y-%m-%d}<br>%{y:,.0f}<extra></extra>'))
-    for s_ in segs:
-        fig0.add_vrect(x0=pd.Timestamp(s_['start']), x1=pd.Timestamp(s_['end']), line_width=0, layer='below',
-                       fillcolor=_GREEN if s_['direction'] == '상승' else _RED, opacity=0.16 if s_.get('live') else 0.08)
-    fig0.update_layout(height=240, margin=dict(l=56, r=8, t=8, b=24), showlegend=False,
-                       yaxis=_logaxis(cl.min(), cl.max()))
-    st.plotly_chart(fig0, use_container_width=True)
-
     # ── 지금 위치 ──
     live = next((s_ for s_ in segs if s_.get('live')), None)
-    if live:
-        w = C.where_now(segs, live)
-        k1, k2, k3 = st.columns(3)
-        k1.metric(f"지금 = {live['direction']} 구간", f"{live['days']}거래일째", f"{live['ret']:+.1f}% (꼭짓점 {live['start']} 부터)", delta_color='off')
-        if w:
-            k2.metric(f"과거 {live['direction']} {w['n']}회 중앙", f"{w['days_med']:.0f}거래일 · {w['ret_med']:+.0f}%",
-                      f"최장 {w['days_max']:.0f}일 · 최대 {w['ret_max']:+.0f}%", delta_color='off')
-            k3.metric("과거 대비 위치", f"기간 {w['days_pct']:.0f} · 폭 {w['ret_pct']:.0f} 백분위",
-                      '과거 중앙을 이미 넘음' if w['days_pct'] > 50 and w['ret_pct'] > 50 else
-                      ('과거 중앙보다 짧고 얕음' if w['days_pct'] <= 50 and w['ret_pct'] <= 50 else '기간·폭 중 하나만 중앙 넘음'),
-                      delta_color='off', help='과거 같은 방향(완료) 구간 중 지금보다 짧았던(얕았던) 비율. 표본이 3회 미만이면 참고만')
-        else:
-            k2.caption(f"과거 완료된 {live['direction']} 구간이 없어 비교할 수 없습니다.")
-
-    # ── 낙폭 회차 요약 (2026-11-10 '📉 낙폭 회차' 섹션을 여기로 통합 — 같은 질문(얼마나 자주·깊이·오래)을 한 곳에서) ──
     downs = [s_ for s_ in segs if s_['direction'] == '하락' and not s_.get('live')]
     dd_now = float((cl.iloc[-1] / cl.cummax().iloc[-1] - 1) * 100)
     recs = [s_['recover'] for s_ in downs if s_.get('recover') is not None]
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric(f"{int(x)}%+ 하락", f"{len(downs)}회")
-    m2.metric("평균 낙폭", f"{sum(s_['ret'] for s_ in downs) / len(downs):.1f}%" if downs else '-')
-    m3.metric("최대 낙폭", f"{min(s_['ret'] for s_ in downs):.1f}%" if downs else '-')
-    m4.metric("평균 회복", (f"{sum(recs) / len(recs):.0f}거래일" if recs else ('미회복' if downs else '-')),
-              (f"{len(downs) - len(recs)}회 아직 미회복" if downs and len(recs) < len(downs) else None), delta_color='off',
-              help='저점에서 그 하락이 시작된 고점 가격을 되찾기까지 걸린 거래일')
-    m5.metric("기간 고점 대비 지금", f"{dd_now:.1f}%")
+    yrs = (cl.index[-1] - cl.index[0]).days / 365.25
+    parts = []
+    if live:
+        w = C.where_now(segs, live)
+        tone = '#B91C1C' if live['direction'] == '하락' else '#15803D'
+        parts.append(f"<b style='color:{tone}'>지금 {live['direction']} {live['days']}거래일째 {live['ret']:+.1f}%</b> "
+                     f"<span class='m'>({live['start']} 꼭짓점부터)</span>")
+        if w:
+            pos = ('과거 중앙을 이미 넘음' if w['days_pct'] > 50 and w['ret_pct'] > 50 else
+                   ('과거 중앙보다 짧고 얕음' if w['days_pct'] <= 50 and w['ret_pct'] <= 50 else '기간·폭 중 하나만 중앙 넘음'))
+            parts.append(f"과거 {live['direction']} {w['n']}회 중앙 {w['days_med']:.0f}일·{w['ret_med']:+.0f}% → <b>{pos}</b> "
+                         f"<span class='m'>(기간 {w['days_pct']:.0f}·폭 {w['ret_pct']:.0f} 백분위)</span>")
+    if downs:
+        parts.append(f"{int(x)}%+ 하락 <b>{len(downs)}회</b> · 평균 {sum(s_['ret'] for s_ in downs) / len(downs):.0f}% · "
+                     f"최대 {min(s_['ret'] for s_ in downs):.0f}% · 회복 평균 "
+                     + (f"{sum(recs) / len(recs):.0f}거래일" if recs else '미회복')
+                     + (f" ({len(downs) - len(recs)}회 미회복)" if len(recs) < len(downs) else ''))
+    parts.append(f"전체 고점 대비 지금 <b>{dd_now:.1f}%</b> <span class='m'>({yrs:.0f}년 이력)</span>")
+    st.markdown("<div style='background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:10px 14px;font-size:13.5px;"
+                "line-height:1.9'>" + " &nbsp;│&nbsp; ".join(parts).replace("class='m'", "style='color:#6B7280'") + "</div>",
+                unsafe_allow_html=True)
 
     # ── 구간 그림: 겹쳐 보기(같은 출발점) / 날짜순(MDD 차트) — 2026-11-10 차니 요구: 가로 전체 폭, 종료일 표기, 구간별 색 ──
     view = st.segmented_control('보기', ['겹쳐 보기 — 같은 출발점', '날짜순 — 낙폭(MDD) 차트'],
@@ -229,9 +217,10 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
     summ = C.summarize(segs)
     if len(summ):
         st.dataframe(summ, hide_index=True, use_container_width=True, filters=False)
-    with st.expander(f'구간 목록 {len(segs)}개'):
-        tsrc(src + ' · cycle_compare.py', asof=asof)
-        st.dataframe(C.detail_table(segs), hide_index=True, use_container_width=True, filters=False)
+    # 2026-11-15 — 접힌 상자 안 표(AgGrid)가 빈칸으로 그려지는 문제 → 상자 없이 바로(최근 순)
+    st.markdown(f"**구간 목록 {len(segs)}개** (최근 순)")
+    tsrc(src + ' · cycle_compare.py', asof=asof)
+    st.dataframe(C.detail_table(segs).iloc[::-1].reset_index(drop=True), hide_index=True, use_container_width=True, filters=False)
     st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림이 나온 고점·저점(지그재그) — 나중에야 확정되므로 진행 중 구간의 끝은 아직 모릅니다. "
                "검은 굵은 선 = 지금, 회색 굵은 점선 = 과거 완료 구간의 중앙 경로. 날짜순 보기의 회색 바탕 = 기간 고점 대비 낙폭(MDD), 점선 = 손절선(고점 −20%). 표본이 적으면(3회 미만) 우연일 수 있고, "
                "같은 종목도 사이클 성격(메모리·파운드리·장비 등)이 바뀌면 직접 비교가 어긋납니다.")

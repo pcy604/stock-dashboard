@@ -14,7 +14,9 @@ import stock_snapshot as S        # noqa: E402
 
 
 def test_axes_contract_match():
-    assert A2.AXES == S.BLOCKS
+    # 2026-11-15 — 화면 탭(3) ≠ 계산 블록(봇 정본 7). 블록은 BLOCK_TO_AXIS 로 탭에 묶인다.
+    assert set(A2.BLOCK_TO_AXIS) <= set(S.BLOCKS)
+    assert set(A2.BLOCK_TO_AXIS.values()) <= set(A2.AXES)
     assert set(A2.AXIS_ALIAS.values()) <= set(A2.AXES)
     assert all(a in A2.AXIS_ICON for a in A2.AXES)
 
