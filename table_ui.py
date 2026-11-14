@@ -43,7 +43,7 @@ A_MIN, A_MAX = 0.07, 0.48          # 0.48 보다 진하면 검정 글자가 배�
 #   작은 표는 패널 없이도 정렬된다 — 패널은 '걸러낼 것이 실제로 있는 표'에만 붙인다.
 MIN_ROWS_FOR_FILTER = 6
 MIN_COLS_FOR_FILTER = 5
-API_VERSION = 12          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
+API_VERSION = 13          # install() 동작·인자를 바꾸면 올린다(옛 래퍼 교체 신호) — 9: grid=True(AgGrid, 2026-11-04)
 
 # 크기가 의미 없는 열 — 식별자·순번·날짜
 NO_COLOR = {'No.', '회차', '주차', '코드', '종목', '종목명', '연도', '달', '연월', '월', '시장', '섹터',
@@ -913,11 +913,11 @@ def render_grid(st, df: pd.DataFrame, cfg: dict, key: str, height: int, color=Tr
                 f"function(p){{var b=p.data['{bgs[c]}']; return b?{{backgroundColor:b,fontVariantNumeric:'tabular-nums'}}"
                 ":{fontVariantNumeric:'tabular-nums'};}")
         if c in ('종목', '코드') and NAV['fn']:
-            opts['headerTooltip'] = '클릭하면 종목 분석으로 이동'
+            opts['headerTooltip'] = '더블클릭하면 새 창에서 종목 분석'
             opts['cellStyle'] = opts.get('cellStyle') or {'cursor': 'pointer', 'fontVariantNumeric': 'tabular-nums'}
         gb.configure_column(c, **opts)
     nav = bool(NAV['fn']) and navigate and not select and '코드' in data.columns
-    if nav or select:
+    if select:
         gb.configure_selection('single')
     go = gb.build()
     go.update(suppressFieldDotNotation=True, rowHeight=G_ROW, headerHeight=G_HEAD, animateRows=False,
@@ -926,11 +926,17 @@ def render_grid(st, df: pd.DataFrame, cfg: dict, key: str, height: int, color=Tr
               # 정렬·필터 뒤 No. 를 다시 계산 — valueGetter 는 처음 그릴 때만 돌아 번호가 행을 따라갔다(실측 1,3,5,2,4)
               onSortChanged=JsCode("function(e){e.api.refreshCells({columns:['No.'],force:true});}"),
               onFilterChanged=JsCode("function(e){e.api.refreshCells({columns:['No.'],force:true});}"))
-    if nav or select:   # 행 클릭 = 선택(이 AG Grid 버전은 클릭 선택이 기본 꺼짐 — 실측) → 종목 분석으로
+    if select:   # 행 클릭 = 선택(이 AG Grid 버전은 클릭 선택이 기본 꺼짐 — 실측)
         go['rowSelection'] = {'mode': 'singleRow', 'enableClickSelection': True, 'checkboxes': False}
+    if nav:      # 2026-11-14: 종목·코드 칸 더블클릭 → **새 창**에서 종목 분석(?sym=). 옛: 한 번 클릭에 같은 창이 통째로 넘어감
+        go['onCellDoubleClicked'] = JsCode(
+            "function(e){var f=e.colDef&&e.colDef.field; if(f!=='종목'&&f!=='코드') return; var c=e.data&&e.data['코드'];"
+            "if(!c) return; var u; try{u=window.top.location.origin+window.top.location.pathname;}"
+            "catch(x){try{u=window.parent.location.origin+window.parent.location.pathname;}catch(y){u=(document.referrer||'').split('?')[0];}}"
+            "window.open(u+'?sym='+encodeURIComponent(String(c)),'_blank');}")
     h = G_HEAD + G_ROW * min(len(data), 25) + 4 if len(data) <= 25 else int(height)
     resp = AgGrid(data, gridOptions=go, height=h, allow_unsafe_jscode=True, theme='streamlit', key=key,
-                  update_on=['selectionChanged'] if (nav or select) else [], show_toolbar=False, show_search=False,
+                  update_on=['selectionChanged'] if select else [], show_toolbar=False, show_search=False,
                   show_download_button=False,
                   custom_css={'#gridToolBar': {'display': 'none !important'},
                               '.ag-root-wrapper': {'font-family': _FONT + ' !important', 'font-size': '14px !important',
@@ -949,14 +955,6 @@ def render_grid(st, df: pd.DataFrame, cfg: dict, key: str, height: int, color=Tr
             except Exception:
                 rows = []
         return SimpleNamespace(selection=SimpleNamespace(rows=rows, columns=[], cells=[]), grid=resp)
-    if nav:
-        sel = getattr(resp, 'selected_rows', None)
-        if sel is not None and len(sel):
-            code = str((sel.iloc[0] if hasattr(sel, 'iloc') else sel[0]).get('코드') or '')
-            mark = st.session_state.get(key + '|last')
-            if code and code not in ('nan', 'None') and code != mark:
-                st.session_state[key + '|last'] = code
-                NAV['fn'](code)
     return resp
 
 

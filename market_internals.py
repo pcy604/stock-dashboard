@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""시장 내부(폭·업종·신고가·돈이 몰린 종목) — 미국판 + 대형주 상승 비율 추이(한·미). 2026-11-14 신설.
+"""시장 내부(폭·업종·신고가·돈이 몰린 종목) — 미국 전 종목 + 한국 주간·월간 + 대형주 상승 비율 추이. 2026-11-14 신설.
 
 왜: 종합 탭 '오늘의 시장'은 한국만 있었다(한국 = KRX 전 종목 목록 한 장으로 계산). 미국은 같은 목록이 없어
    **시총 상위 500(perf_latest, ≈ S&P500)** 의 1년 일봉을 Yahoo 에서 받아 같은 모양으로 만든다.
@@ -109,7 +109,7 @@ def _dl(syms, period='1y', batch=100):
 
 
 def _trend(close, n=30):
-    """대형주 상승 비율 — 최근 n거래일. 그날 값이 있는 종목이 80% 미만인 날(휴장·결측)은 뺀다."""
+    """상승 비율 — 최근 n거래일. 그날 값이 있는 종목이 80% 미만인 날(휴장·결측)은 뺀다."""
     r = close.pct_change(fill_method=None) * 100
     out = []
     for dt, row in r.iloc[-(n + 5):].iterrows():
@@ -120,83 +120,134 @@ def _trend(close, n=30):
     return out[-n:]
 
 
-def kr_trend(n=30):
-    """한국 대형주(시총 1조+) 상승 비율 30거래일 — KRX 목록(data/krx_listing_last.csv)의 시장 구분으로 .KS/.KQ."""
-    import pandas as pd
-    try:
-        df = pd.read_csv(os.path.join(BASE, 'data', 'krx_listing_last.csv'), dtype={'Code': str})
-        big = df[(pd.to_numeric(df['Marcap'], errors='coerce') >= 1e12) & df['MarketId'].isin(['STK', 'KSQ'])]
-        syms = [f"{c.zfill(6)}.{'KS' if m == 'STK' else 'KQ'}" for c, m in zip(big['Code'], big['MarketId'])]
-        d = _dl(syms, period='3mo')
-        c = d['Close'].dropna(how='all')
-        if c.empty:
-            return {}
-        return dict(universe=c.shape[1], basis='시총 1조+', hist=_trend(c, n))
-    except Exception as e:
-        print('  한국 상승 비율 추이 생략:', str(e)[:80])
-        return {}
+_LIM = {1: 60, 5: 100, 21: 200}     # 기간 수익률 상한(%) — 넘으면 분할·시세 오류 의심으로 순위에서 뺀다
+PERIODS = (('d1', 1), ('w1', 5), ('m1', 21))
 
 
-def us_internals(top_n=500, n_hist=30):
-    """미국 시총 상위 top_n — 시장 폭·업종(시총가중)·신고가·급등(돈이 몰린 순)·시총 상위·상승 비율 추이."""
+def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3):
+    """k거래일 수익률로 본 시장 내부 — 일간(k=1)·주간(5)·월간(21) 같은 모양. 2026-11-14.
+    meta {sym: (이름, 시총)} · big = 대형주 sym 집합(상승·하락 상위는 대형주에서만) · amt_fmt(거래대금) → 글자."""
     import pandas as pd
-    p = _j('results/perf_latest.json')
-    us = sorted([s for s in p.get('stocks', []) if s.get('market') == 'US' and s.get('marcap')],
-                key=lambda s: -s['marcap'])[:top_n]
-    if len(us) < 100:
+    if len(c) <= k + 1:
         return {}
-    meta = {s['sym']: s for s in us}
-    sd = (_j('data/sector_detail.json') or {}).get('us') or {}
-    d = _dl([s['sym'] for s in us])
-    c, h, v = d['Close'], d['High'], d['Volume']
-    if c.empty or len(c) < 60:
+    r = ((c.iloc[-1] / c.iloc[-1 - k] - 1) * 100).dropna()
+    r = r[[s for s in r.index if s in meta]]
+    r = r[r.abs() <= _LIM[k]]
+    if len(r) < 50:
         return {}
-    c = c.dropna(how='all')
-    last = c.index[-1]
-    if c.loc[last].notna().mean() < 0.8:           # 마지막 줄이 반쪽(장중·결측)이면 전날까지
-        c = c.iloc[:-1]
-        last = c.index[-1]
-    r1 = (c.iloc[-1] / c.iloc[-2] - 1) * 100
-    r1 = r1.dropna()
-    nm = lambda s: NAME_KO.get(s, s)
-    breadth = dict(up=int((r1 > 0).sum()), down=int((r1 < 0).sum()), flat=int((r1 == 0).sum()),
-                   limit_up=None, limit_down=None)
-    dv = (c.iloc[-1] * v.reindex(columns=c.columns).loc[last]).dropna()          # 거래대금($)
+    nm = lambda s: meta[s][0]
+    dv = (c.iloc[-k:] * v.reindex(columns=c.columns).iloc[-k:]).sum().reindex(r.index).fillna(0)   # 기간 합계 거래대금
     rank = dv.rank(ascending=False, method='first')
-    # 업종 — Yahoo industry, 3종+ 묶음만, 시총가중
-    rows = pd.DataFrame([dict(sym=s, ret=float(r1[s]), mc=float(meta[s]['marcap']),
-                              ind=(sd.get(s) or {}).get('industry')) for s in r1.index if s in meta])
+    rows = pd.DataFrame(dict(sym=r.index, ret=r.values, mc=[float(meta[s][1]) for s in r.index],
+                             ind=[sec_of(s) for s in r.index]))
     sectors = []
     for ind, g in rows[rows['ind'].notna()].groupby('ind'):
-        if len(g) < 3:
+        if len(g) < min_sec:
             continue
         g = g.sort_values('mc', ascending=False)
         w = g['mc'] / g['mc'].sum()
-        sectors.append(dict(name=IND_KO.get(ind, ind), n=len(g), ret=_r((g['ret'] * w).sum(), 1),
-                            lead=nm(g.iloc[0]['sym']), lead_ret=_r(g.iloc[0]['ret'], 1),
-                            members=[dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1)) for x in g.itertuples()]))
+        sectors.append(dict(name=ind, n=len(g), ret=_r((g['ret'] * w).sum(), 1), lead=nm(g.iloc[0]['sym']),
+                            lead_ret=_r(g.iloc[0]['ret'], 1),
+                            members=[dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1)) for x in g.head(20).itertuples()]))
     sectors.sort(key=lambda x: -x['ret'])
-    mega = [dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1), mc=_r(x.mc / 1e9, 0))
+    mega = [dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1), mc=_r(x.mc / mc_div, 0 if mc_div == 1e9 else 1))
             for x in rows.sort_values('mc', ascending=False).head(10).itertuples()]
-    # 52주 신고가 — 오늘 고가 ≥ 직전 252거래일 최고 고가
+    hh = h.reindex(columns=c.columns)
     nh = []
-    hh = h.reindex(columns=c.columns).loc[:last]
-    for s in r1.index:
-        col = hh[s].dropna()
-        if len(col) < 30:
-            continue
-        prev = col.iloc[-253:-1].max()
-        if col.iloc[-1] >= prev:
-            nh.append(dict(name=nm(s), sym=s, ret=_r(r1[s], 1), young=len(col) < 250, _a=float(dv.get(s, 0))))
-    nh.sort(key=lambda x: -x['_a'])
-    # 급등(돈이 몰린 순) — +7% 이상
-    hot = [dict(name=nm(s), sym=s, ret=_r(r1[s], 1), tag=f"거래대금 {int(rank[s])}위", _a=float(dv.get(s, 0)))
-           for s in r1.index if r1[s] >= 7 and s in rank]
+    if len(hh) > 60:
+        cur, prev = hh.iloc[-k:].max(), hh.iloc[-252 - k:-k].max()
+        cnt = hh.iloc[-252 - k:].notna().sum()
+        for s in r.index:
+            if cur.get(s) == cur.get(s) and prev.get(s) == prev.get(s) and cur[s] >= prev[s] and cnt[s] >= 30:
+                nh.append(dict(name=nm(s), sym=s, ret=_r(r[s], 1), young=bool(cnt[s] < 240), _a=float(dv[s])))
+        nh.sort(key=lambda x: -x['_a'])
+    bg = rows[rows['sym'].isin(big)].sort_values('ret')
+    row = lambda x: dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1))
+    hot = [dict(name=nm(s), sym=s, ret=_r(r[s], 1), tag=f"거래대금 {int(rank[s])}위", _a=float(dv[s]))
+           for s in r.index if r[s] >= 7 * (1 if k == 1 else 2 if k == 5 else 4)]
     hot.sort(key=lambda x: -x['_a'])
-    tv = [dict(name=nm(s), sym=s, ret=_r(r1[s], 1), amt_b=_r(dv[s] / 1e9, 1)) for s in dv.sort_values(ascending=False).index[:10]]
-    strip = lambda L: [{k: v for k, v in x.items() if k != '_a'} for x in L]
-    return dict(asof=str(last.date()), universe=int(len(r1)), basis='d1', breadth_all=breadth,
-                breadth_up=round(float((r1 > 0).mean() * 100)), sectors=sectors, megacaps=mega,
-                new_high_52w=dict(n=len(nh), universe=int(len(r1)), top=strip(nh[:8])),
-                featured=strip(hot[:8]), turnover_top=tv, turnover_bn=_r(float(dv.sum()) / 1e9, 0),
-                breadth_hist=_trend(c, n_hist))
+    strip = lambda L: [{a: b for a, b in x.items() if a != '_a'} for x in L]
+    return dict(asof=str(c.index[-1].date()), since=str(c.index[-1 - k].date()), k=k, universe=int(len(r)),
+                breadth_all=dict(up=int((r > 0).sum()), down=int((r < 0).sum()), flat=int((r == 0).sum())),
+                big_n=int(len(bg)), breadth_up=(round(float((bg['ret'] > 0).mean() * 100)) if len(bg) else None),
+                sectors=sectors, megacaps=mega, new_high_52w=dict(n=len(nh), universe=int(len(r)), top=strip(nh[:8])),
+                featured=strip(hot[:8]), top=[row(x) for x in bg[::-1].head(8).itertuples()],
+                bottom=[row(x) for x in bg.head(8).itertuples()],
+                turnover_top=[dict(name=nm(s), sym=s, ret=_r(r[s], 1), tag=amt_fmt(dv[s]))
+                              for s in dv.sort_values(ascending=False).index[:8]],
+                turnover_txt=amt_fmt(float(dv.sum())))
+
+
+def _clean(c):
+    c = c.dropna(how='all')
+    if len(c) and c.iloc[-1].notna().mean() < 0.8:      # 마지막 줄이 반쪽(장중·결측)이면 전날까지
+        c = c.iloc[:-1]
+    return c
+
+
+def _pack(c, h, v, meta, big, amt_fmt, mc_div, sec_of, n_hist):
+    views = {p: _view(c, h.loc[:c.index[-1]], v.loc[:c.index[-1]], meta, k, big, amt_fmt, mc_div, sec_of) for p, k in PERIODS}
+    out = dict(views.get('d1') or {})
+    if not out:
+        return {}
+    out['periods'] = {p: views[p] for p in ('w1', 'm1') if views.get(p)}
+    bc = c[[s for s in c.columns if s in big]]
+    out['breadth_hist'] = _trend(bc, n_hist)
+    out['hist_universe'] = int(bc.shape[1])
+    return out
+
+
+def us_internals(top_n=500, n_hist=30):
+    """미국 — 유니버스 = perf_latest 미국 전 종목(시총 $3억+, NYSE·나스닥·AMEX ≈ 2,600종). 2026-11-14 확대(옛: 상위 500만).
+    시장 폭·업종·신고가·거래대금은 전 종목, 상승·하락 상위·상승 비율 추이는 시총 상위 500(≈ S&P500)."""
+    p = _j('results/perf_latest.json')
+    us = sorted([s for s in p.get('stocks', []) if s.get('market') == 'US' and s.get('marcap')], key=lambda s: -s['marcap'])
+    if len(us) < 100:
+        return {}
+    sd = (_j('data/sector_detail.json') or {}).get('us') or {}
+    d = _dl([s['sym'] for s in us])
+    c = _clean(d['Close'])
+    if c.empty or len(c) < 60:
+        return {}
+    meta = {s['sym']: (NAME_KO.get(s['sym'], s['sym']), s['marcap']) for s in us if s['sym'] in c.columns}
+    have = [s['sym'] for s in us if s['sym'] in c.columns and c[s['sym']].iloc[-1] == c[s['sym']].iloc[-1]]
+    big = set(have[:top_n])                              # 값이 있는 종목으로 정확히 top_n(옛: 결측 1종 → 499)
+    ind = lambda s: (lambda x: IND_KO.get(x, x) if x else None)((sd.get(s) or {}).get('industry'))
+    fmt = lambda a: f"${a / 1e9:,.1f}B"
+    out = _pack(c, d['High'], d['Volume'], meta, big, fmt, 1e9, ind, n_hist)
+    if out:
+        out['basis'] = 'd1'
+    return out
+
+
+def kr_internals(n_hist=30):
+    """한국 — 시총 1,000억+ (≈ 1,200종) 일봉으로 주간·월간 시장 내부 + 대형주(1조+) 상승 비율 추이.
+    일간은 네이버 전 종목 시세(market_report.kr_stock_facts)가 정본 — 여기 d1 은 화면에서 쓰지 않는다."""
+    import pandas as pd
+    try:
+        df = pd.read_csv(os.path.join(BASE, 'data', 'krx_listing_last.csv'), dtype={'Code': str})
+        df['Marcap'] = pd.to_numeric(df['Marcap'], errors='coerce')
+        df = df[(df['Marcap'] >= 1e11) & df['MarketId'].isin(['STK', 'KSQ'])].sort_values('Marcap', ascending=False)
+        df['y'] = [f"{c.zfill(6)}.{'KS' if m == 'STK' else 'KQ'}" for c, m in zip(df['Code'], df['MarketId'])]
+        d = _dl(df['y'].tolist())
+        ren = dict(zip(df['y'], df['Code'].str.zfill(6)))
+        c, h, v = (d[k].rename(columns=ren) for k in ('Close', 'High', 'Volume'))
+        c = _clean(c)
+        if c.empty or len(c) < 30:
+            return {}
+        meta = {r.Code.zfill(6): (r.Name, r.Marcap) for r in df.itertuples() if r.Code.zfill(6) in c.columns}
+        big = {r.Code.zfill(6) for r in df[df['Marcap'] >= 1e12].itertuples()} & set(c.columns)
+        smap = _j('data/sectors.json') or {}
+        try:
+            from market_report import _sec_short
+        except Exception:
+            _sec_short = lambda x: x
+        ind = lambda s: (_sec_short(smap[s]) if smap.get(s) else None)
+        fmt = lambda a: (f"{a / 1e12:,.1f}조" if a >= 1e12 else f"{a / 1e8:,.0f}억")
+        out = _pack(c, h, v, meta, big, fmt, 1e12, ind, n_hist)
+        if out:
+            out['basis'] = '시총 1,000억+'
+        return out
+    except Exception as e:
+        print('  한국 시장 내부(주간·월간) 생략:', str(e)[:100])
+        return {}

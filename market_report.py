@@ -31,7 +31,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "results", "market_report.json")
 INDICES = [("^KS11", "코스피"), ("^KQ11", "코스닥"), ("^GSPC", "S&P500"), ("^IXIC", "나스닥"), ("^DJI", "다우"),
            ("^SOX", "필라델피아 반도체"), ("^VIX", "VIX"), ("KRW=X", "원/달러"), ("^TNX", "미국 10년물(%)")]
-MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
+MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]   # 2026-11-14 gemini-2.0-flash 는 404(종료)
 
 
 def _j(p):
@@ -509,7 +509,7 @@ def kr_themes(a, min_theme=5):
         lead = sorted(rs, key=lambda x: -x["_r"])[:3]
         rows.append(dict(name=t.split("(")[0].strip()[:16], n=len(rs), ret=_r(sum(rets) / len(rets), 1),
                          up=sum(1 for v in rets if v > 0),
-                         lead=[dict(name=x["Name"], ret=_r(x["_r"], 1)) for x in lead],
+                         lead=[dict(name=x["Name"], sym=str(x.get("Code") or "") or None, ret=_r(x["_r"], 1)) for x in lead],
                          lag=[dict(name=x["Name"], ret=_r(x["_r"], 1)) for x in sorted(rs, key=lambda x: x["_r"])[:3]]))
     rows.sort(key=lambda x: -x["ret"])
     # 같은 이름으로 잘린 테마(예: '코로나19') 중복 제거
@@ -621,6 +621,11 @@ def facts(kind):
                  indices=[x for x in index_facts() if x.get("sym") in KR_INDICES], stocks=kr_today_facts(),
                  signals=dict(market_direction={"KR": sg["market_direction"].get("KR")}))
         f["rule_checks"] = _kr_rule_checks(f)
+        try:   # 2026-11-14 종합 '주간·월간' 보기 + 대형주 상승 비율 추이 — 장 마감 직후 값으로
+            import market_internals as _MI
+            f["internals_kr"] = _MI.kr_internals()
+        except Exception as e:
+            print("  한국 시장 내부(주간·월간) 생략:", str(e)[:100])
         return f
     f = dict(kind=kind, generated=_now_kst(), verdict=verdict_facts(),
              indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
@@ -631,7 +636,7 @@ def facts(kind):
             print("  미국 자산·업종·대장주 생략:", str(e)[:100])
         try:   # 2026-11-14 종합 '오늘의 시장 — 미국' + 한·미 대형주 상승 비율 30거래일
             import market_internals as _MI
-            f["internals"] = dict(US=_MI.us_internals(), KR_trend=_MI.kr_trend())
+            f["internals"] = dict(US=_MI.us_internals(), KR_mkt=_MI.kr_internals())
         except Exception as e:
             print("  시장 내부(미국·추이) 생략:", str(e)[:100])
         try:
@@ -651,10 +656,14 @@ PROMPT = """너는 증권사 데일리 시황을 쓰는 시니어 애널리스�
 - 상투어 금지: "확인할 필요가 있습니다", "주목할 필요", "변동성에 유의", "전반적인 약세를 보였습니다".
 - 문체는 증권사 리포트 — 평서체(~했다/~이다)로 단정하게 쓴다. 대화체("~해요", "~네요", "~것 같습니다"),
   감탄·구어("무섭게", "폭탄", "~군요"), 독자에게 말 거는 문장("~보세요", "~기억하세요")은 쓰지 않는다. 이모지 금지.
-- 한국어, 마크다운. 아래 두 절만:
+- 한국어, 마크다운. 아래 세 절만:
   ## 한 줄 요약
   두 문장, 합쳐 90자 이내. ① 오늘 장을 한 마디로(무엇이 지수를 끌었나: 업종·대장주) ② 시장 폭·쏠림의 특징
   (예: "반도체 대형주가 지수를 끌어내렸지만 하락 종목은 평소의 2배가 아니라 3배 — 투매에 가까운 장.")
+  ## 해설
+  글머리표(-) 3~4개, 각 70자 이내, 줄마다 굵은 꼬리표로 시작: **지수** · **수급**(자료에 있을 때만) · **업종·테마** · **종목**.
+  꼬리표마다 서로 다른 자료를 쓴다. 표에 없는 '관계'를 말한다 — 지수와 시장 폭의 괴리, 대형주와 중소형주의 방향 차이,
+  강한 업종과 약한 업종이 같은 테마로 묶이는지, 거래대금이 몰린 곳과 오른 곳이 같은지. 숫자는 줄마다 최대 2개.
   ## 체크포인트
   번호 목록 3개, 각 60자 이내. **다음 거래일에 볼 구체 조건** — 무엇이 어떤 수준을 넘는지/돌아오는지.
   서로 다른 데이터를 잇는다(지수 vs 시장 폭, 업종 vs 대장주, 1일 vs 5일·1개월, 달러·금리·유가 vs 주식).
@@ -797,7 +806,7 @@ def unbacked_pcts(md, f):
     return bad
 
 
-_AI_DROP = {"heatmap", "members", "breadth_hist", "hist", "turnover_top"}
+_AI_DROP = {"heatmap", "members", "breadth_hist", "hist", "turnover_top", "periods", "KR_mkt", "internals_kr"}
 
 
 def _ai_slim(x):
@@ -837,10 +846,12 @@ def compose(ai_md, f):
     body = template(f).splitlines()
     body = [ln for ln in body[1:] if not ln.startswith("※")]          # 제목·꼬리 줄은 새로
     head = "## " + _TITLE.get(f["kind"], "시황")
-    one, chk = _ai_section(ai_md, "한 줄 요약"), _ai_section(ai_md, "체크포인트")
+    one, chk, why = _ai_section(ai_md, "한 줄 요약"), _ai_section(ai_md, "체크포인트"), _ai_section(ai_md, "해설")
     out = [head, ""]
     if one:
         out += ["## 한 줄 요약", one, ""]
+    if why:
+        out += ["## 해설", why, ""]
     out += ["## 숫자"] + body
     if chk:
         out += ["", "## 체크포인트", chk]

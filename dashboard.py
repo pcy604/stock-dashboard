@@ -741,7 +741,7 @@ if not hasattr(_ac_dil, 'summarize_dilution'):   # 클라우드가 옛 모듈을
     import importlib as _il0
     _ac_dil = _il0.reload(_ac_dil)
 import table_ui as _tui
-_TUI_REQ = 12   # table_ui 를 고치면 그 API_VERSION 으로 같이 올린다 — 2026-11-05: 7 로 두어 v9 모듈이 메모리에 남아 전 표 AgGrid 가 안 먹었다(실화면)
+_TUI_REQ = 13   # table_ui 를 고치면 그 API_VERSION 으로 같이 올린다 — 2026-11-05: 7 로 두어 v9 모듈이 메모리에 남아 전 표 AgGrid 가 안 먹었다(실화면)
 if getattr(_tui, 'API_VERSION', 0) < _TUI_REQ:   # 클라우드가 옛 모듈을 메모리에 들고 있으면 다시 읽는다
     import importlib as _il
     _tui = _il.reload(_tui)
@@ -1226,7 +1226,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or _OB_STEPS[0][0]
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-14a'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-14b'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -9041,7 +9041,10 @@ def _home_top(V):
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof)
     # 시장 추세 판정 + 대형주 상승 비율 30거래일(한·미). 한국은 일봉 추이 + 오늘 장 마감 값(같은 시총 1조+ 기준)
-    _kt = _UH.trend_points((inr.get('KR_trend') or {}).get('hist'))
+    _k1 = ((rep.get('latest_kr') or {}).get('facts') or {}).get('internals_kr') or {}
+    _k2 = inr.get('KR_mkt') or {}
+    _kint = _k1 if str(_k1.get('asof') or '') >= str(_k2.get('asof') or '') else _k2      # 한국 주간·월간·추이 — 더 최근 계산
+    _kt = _UH.trend_points(_kint.get('breadth_hist') or (inr.get('KR_trend') or {}).get('hist'))
     _kfa = krf.get('asof') or (rep.get('latest_kr') or {}).get('date') or '-'
     if _kt and krf.get('breadth_up') is not None and _kfa > _kt[-1][0]:
         _kt.append((_kfa, float(krf['breadth_up'])))
@@ -9051,21 +9054,30 @@ def _home_top(V):
     _UH.pulse_box([idx[n] for n in ('코스피', '코스닥', 'S&P500', '나스닥') if n in idx],
                   [('한국 상승 종목 비율', _kt[-30:], _kb),
                    ('미국 상승 종목 비율', _UH.trend_points(usf.get('breadth_hist'))[-30:],
-                    f" · 시총 상위 {usf.get('universe', 500)}")])
+                    f" · 시총 상위 {usf.get('hist_universe') or 500}")])
     # 오늘의 시장 — 한국·미국 같은 모양(2026-11-14: 옛 '지수 뒤의 체력' + '오늘 무엇이 움직였나' 통합)
-    st.html(_UH.CSS + "<div class='hm'><div class='hm-sec'><b>오늘의 시장</b><span>지수 아래 실제 등락 종목 수 · 돈이 간 업종과 종목 · "
-                      "업종 줄을 누르면 구성 종목</span></div></div>")
-    _mk = st.segmented_control('시장', ['🇰🇷 한국', '🇺🇸 미국'], default='🇰🇷 한국', key='home_mkt',
-                               label_visibility='collapsed') or '🇰🇷 한국'
+    _UH.LINK_BASE = ''                                  # 상대 주소 — 종목 이름 링크가 같은 앱을 새 창으로(?sym= → 종목 분석)
+    _c1, _c2 = st.columns([1, 1])
+    with _c1:
+        _mk = st.segmented_control('시장', ['🇰🇷 한국', '🇺🇸 미국'], default='🇰🇷 한국', key='home_mkt',
+                                   label_visibility='collapsed') or '🇰🇷 한국'
+    with _c2:
+        _pk = st.segmented_control('기간', ['일간', '주간', '월간'], default='일간', key='home_per',
+                                   label_visibility='collapsed') or '일간'
+    _per = {'일간': 'd1', '주간': 'w1', '월간': 'm1'}[_pk]
     _is_kr = _mk.startswith('🇰🇷')
-    _m = krf if _is_kr else usf
+    _ttl = {'d1': '오늘의 시장', 'w1': '이번 주 시장 — 최근 5거래일', 'm1': '이번 달 시장 — 최근 21거래일'}[_per]
+    st.html(_UH.CSS + f"<div class='hm'><div class='hm-sec' style='margin-top:2px'><b>{_ttl}</b><span>지수 아래 실제 등락 종목 수 · 돈이 간 업종과 종목 · "
+                      "업종 줄을 누르면 구성 종목 · 종목 이름을 누르면 새 창에서 종목 분석</span></div></div>")
+    _base = krf if _is_kr else usf
+    _m = _base if _per == 'd1' else (((_kint if _is_kr else usf).get('periods') or {}).get(_per) or {})
     if not _m:
-        st.info("이 시장의 오늘 자료가 아직 없습니다 — 한국은 평일 15:50, 미국은 06:30(KST) 시황 갱신 때 채워집니다.")
+        st.info("이 시장·기간의 자료가 아직 없습니다 — 한국은 평일 15:50, 미국은 06:30(KST) 시황 갱신 때 채워집니다.")
     else:
-        _ma = _kfa if _is_kr else (usf.get('asof') or '-')
+        _ma = (_kfa if _is_kr else (usf.get('asof') or '-')) if _per == 'd1' else (_m.get('asof') or '-')
         _kfl = load_json(Path('results/kr_flow.json')) or {}
         _UH.market_today(_m, _is_kr, _ma, flow=dict(today=krf.get('flow'), today_date=_kfa,
-                                                     summary=_kfl.get('summary') or {}, asof=_kfa) if _is_kr else None)
+                                                     summary=_kfl.get('summary') or {}, asof=_kfa) if _is_kr else None, period=_per)
         _mk2 = 'KR' if _is_kr else 'US'
         _b1, _b2, _b3 = st.columns(3)
         _b1.button("📈 52주 신고가 전체 → 종목 발굴", on_click=_goto_tool, args=("📈 52주 신고가", _mk2),
@@ -9077,12 +9089,13 @@ def _home_top(V):
         _sr = _UH.sector_table(_m)
         if _sr:
             with st.expander(f"업종 전체 {len(_sr)}개 — 강한 순 (위 5개만으로 부족할 때)"):
-                _tsrc(('네이버 금융 전 종목 시세 · 업종 = KSIC(시총 1조+ 3종 이상)' if _is_kr
-                       else 'Yahoo Finance · 업종 = Yahoo industry(시총 상위 500 중 3종 이상)'), path='results/market_report.json', asof=_ma)
+                _tsrc(('네이버 금융 전 종목 시세 · 업종 = KSIC(시총 1조+ 3종 이상)' if (_is_kr and _per == 'd1')
+                       else ('Yahoo Finance 일봉 · 업종 = KSIC(시총 1,000억+ 3종 이상)' if _is_kr
+                             else 'Yahoo Finance · 업종 = Yahoo industry(시총 $3억+ 3종 이상)')), path='results/market_report.json', asof=_ma)
                 st.dataframe(pd.DataFrame(_sr), hide_index=True, filters=False,
-                             column_config={'등락(%)': st.column_config.NumberColumn(format='%+.1f', help='업종 안 종목의 시총가중 1일 등락'),
+                             column_config={'등락(%)': st.column_config.NumberColumn(format='%+.1f', help='업종 안 종목의 시총가중 등락(고른 기간)'),
                                             '종목 수': st.column_config.NumberColumn(format='%d')})
-        if _is_kr and krf.get('heatmap'):
+        if _is_kr and _per == 'd1' and krf.get('heatmap'):
             with st.expander(f"🗺️ 업종 히트맵 — 시총 1조+ {len(krf['heatmap'])}종 (면적 = 시총 · 색 = 등락)", expanded=False):
                 _hf = _UH.heatmap_fig(krf['heatmap'])
                 if _hf is not None:
@@ -9355,57 +9368,12 @@ with tab_rep, guard('시황 리포트'):
                                           ((_kf.get('stocks') or {}).get('KR') or {}),
                                           (load_json(Path('results/kr_flow.json')) or {}).get('summary'),
                                           st.session_state.get('_home_ev'))
+        _wy = re.search(r'##\s*해설\s*\n+(.+?)(?:\n##|\n※|$)', _md, flags=re.S)
+        _wys = [re.sub(r'^\s*[-*•]\s*', '', x).strip() for x in (_wy.group(1).strip().splitlines() if _wy else []) if x.strip()]
         _UH.report_card(_h['date'], _KN.get(_h['kind'], _h['kind']),
-                        _sum.group(1).strip().replace('\n', ' ') if _sum else '', _cks, _rules,
+                        _sum.group(1).strip().replace('\n', ' ') if _sum else '', _wys, _cks, _rules,
                         'AI(' + _h['engine'].split(':')[-1] + ') · 숫자 검증 통과' if _h['engine'].startswith('gemini') else '숫자 템플릿(AI 미사용)')
-        # 리포트에 나온 종목 → 종목 분석
-        _fst = ((_lf.get('facts') or {}).get('stocks') or {}) if _lf.get('date') == _h['date'] else {}
-        _syms = []
-        for _m in ('KR', 'US'):
-            for _k in ('top', 'bottom'):
-                for _x in (_fst.get(_m) or {}).get(_k, [])[:3]:
-                    if _x.get('sym') and _x['sym'] not in [y for y, _ in _syms]:
-                        _syms.append((_x['sym'], f"{'▲' if _k == 'top' else '▼'} {_x.get('name') or _x['sym']} {_x.get('ret', 0):+.1f}%"))
-        if _syms:
-            _BS = {'d1': '1일', 'ret_1w': '1주', 'ret_4w': '4주'}
-            _bsl = ' · '.join(f"{'한국' if _m == 'KR' else '미국'} {_BS.get((_fst.get(_m) or {}).get('basis'), '-')}"
-                              for _m in ('KR', 'US') if _fst.get(_m))
-            st.caption(f"리포트 속 강세·약세 종목({_bsl} 수익률) — 누르면 🔍 종목 분석")
-            _bc = st.columns(6)
-            for _n, (_sy, _lb) in enumerate(_syms[:12]):
-                _bc[_n % 6].button(_lb, key=f"rep_go_{_sy}", on_click=_goto_analysis, args=(_sy,), use_container_width=True)
-        with st.expander("리포트 전문 — 숫자 표 포함"):
-            st.markdown(re.sub(r'^(#{1,4}) ', lambda m: '#' * min(len(m.group(1)) + 2, 6) + ' ', _md, flags=re.M))
-        if _IS_LAB and _lf.get('date') == _h['date']:
-            with st.expander("🔒 근거 숫자(JSON) — 소유자만"):
-                st.json(_lf.get('facts') or {}, expanded=False)
-
-    with st.expander("💬 리포트에 묻기 — 최신 리포트 숫자만 근거로 답변 (세션당 10회)"):
-        st.caption("매수·매도 추천은 하지 않습니다. AI 무료 한도로 세션당 10회까지입니다.")
-        st.session_state.setdefault('chat_log', [])
-        for _role, _msg in st.session_state['chat_log'][-12:]:
-            with st.chat_message(_role):
-                st.markdown(_msg)
-        _qc1, _qc2 = st.columns([5, 1])
-        _q = _qc1.text_input("질문", placeholder="예: 어제 코스피 왜 빠졌어? / 이번 주 미국 강세 종목은? / 티에스이 신호 어때?",
-                             label_visibility="collapsed", key="chat_q")
-        if _qc2.button("묻기", key="chat_go", use_container_width=True) and _q.strip():
-            if sum(1 for r, _ in st.session_state['chat_log'] if r == 'user') >= 10:
-                st.warning("이번 세션 질문 한도(10회)를 다 썼습니다. 새로고침하면 초기화됩니다.")
-            else:
-                _key = _gemini_key_site()
-                if not _key:
-                    _ans = "AI 키가 설정되지 않았습니다 — Streamlit Secrets 에 GEMINI_KEY 가 필요합니다."
-                else:
-                    with st.spinner("답변 작성 중…"):
-                        try:
-                            import market_report as _MR
-                            _ans, _m = _MR.answer(_q.strip(), key=_key, extra_rows=_related_rows(_q))
-                            _ans += f"\n\n_※ AI({_m}) 생성 · 사실 확인 필요 · 투자 권유 아님_"
-                        except Exception as _e:
-                            _ans = f"답변 실패 — AI 한도 초과 또는 일시 오류일 수 있습니다. ({str(_e)[:80]})"
-                st.session_state['chat_log'] += [('user', _q.strip()), ('assistant', _ans)]
-                st.rerun()
+        # 2026-11-14 2차: 리포트 속 종목 버튼 · 전문(숫자 표) · 근거 JSON · 리포트에 묻기 삭제 — 숫자는 위 카드가 정본, 종목은 카드의 이름 링크로
 
 with tab_home, guard('종합 — 바로가기'):
     _lazy(tab_home)
