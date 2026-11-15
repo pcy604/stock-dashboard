@@ -26,7 +26,7 @@ concurrency:
 jobs:
   krfin:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: '1'
