@@ -1,25 +1,25 @@
 {
- "at": "2026-11-15T11:53:49Z",
+ "at": "2026-11-15T19:20:48Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
    "page": "배포 빌드 = main",
-   "ok": false,
+   "ok": true,
    "deployed": {
-    "sha": "11a26be993bd",
-    "ts": 1794735660,
-    "at": "2026-11-15 09:41"
+    "sha": "14850a530054",
+    "ts": 1794769980,
+    "at": "2026-11-15 19:13"
    },
-   "behind": 3,
-   "lag_min": 120.7,
-   "why": "main 보다 커밋 3개 뒤 · 가장 오래된 새 커밋이 121분 전 — 45분 넘게 반영 안 됨(배포 정지 의심 → share.streamlit.io 에서 Reboot)"
+   "why": "최신 main 과 같다",
+   "behind": 0,
+   "lag_min": 0
   },
   {
    "page": "🏠 종합",
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 11504,
+   "text_len": 11972,
    "samples": [],
    "finished": true
   },
@@ -28,16 +28,16 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 6881,
+   "text_len": 6861,
    "samples": [],
    "finished": true
   },
   {
-   "page": "🔎 종목 발굴",
+   "page": "🧭 종목 발굴",
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 2059,
+   "text_len": 2039,
    "samples": [],
    "finished": true
   },
@@ -46,7 +46,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 871,
+   "text_len": 835,
    "samples": [],
    "finished": true
   },
@@ -55,16 +55,18 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 868,
+   "text_len": 848,
    "samples": [],
    "finished": true
   },
   {
    "page": "종목 분석 ?sym=TSLA",
-   "ok": true,
+   "ok": false,
    "exceptions": 0,
-   "error_words": [],
-   "text_len": 13592,
+   "error_words": [
+    "AttributeError"
+   ],
+   "text_len": 10608,
    "samples": [],
    "finished": true
   },
@@ -73,7 +75,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 13915,
+   "text_len": 9958,
    "samples": [],
    "finished": true
   }
