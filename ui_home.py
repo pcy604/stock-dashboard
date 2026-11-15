@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-15e'
+VERSION = '2026-11-16a'
 
 CSS = """
 <style>
@@ -350,7 +350,7 @@ def _rank_box(title: str, rows: list[dict], tag_key: str | None = None, note: st
 
 
 def _go(text: str, go: str, mkt: str) -> str:
-    """상자 제목 → 새 창에서 🔎 종목 발굴의 해당 재료 목록(?go=). 2026-11-15 — 옛 '→ 종목 발굴' 버튼 3개 대체."""
+    """상자 제목 → 새 창에서 🧭 종목 발굴의 해당 재료 목록(?go=). 2026-11-15 — 옛 '→ 종목 발굴' 버튼 3개 대체."""
     return (f"<a class='hm-a' href='{LINK_BASE}?go={go}&mkt={mkt}' target='_blank' rel='noopener' "
             f"title='새 창에서 종목 발굴 목록 전체'>{text} ↗</a>")
 
@@ -826,7 +826,7 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
 # 문구·규칙 값·갱신 시각은 전부 manual.py 한 곳에서 온다(화면과 PDF 가 같은 원천). 여기는 그리기만.
 import manual as MN
 
-_MN_VER = '2026-11-16d'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
+_MN_VER = '2026-11-16e'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
 if getattr(MN, 'VERSION', None) != _MN_VER:
     import importlib as _il
     MN = _il.reload(MN)
@@ -843,7 +843,7 @@ _TOUR_CSS = """<style>
   .mn-tour { transition:border-color .12s, background .12s; }
   .mn-tour.on { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-2); }
   .mn-tour .k b { float:right; font-weight:600; letter-spacing:0; color:var(--accent); }
-  @media (min-width:900px) { .mn-tour { min-height:300px; } }
+  @media (min-width:900px) { .mn-tour { min-height:262px; } }
   .mn-row { display:flex; justify-content:space-between; align-items:center; gap:6px 16px; flex-wrap:wrap; margin:0 2px; }
 </style>"""
 
@@ -857,7 +857,7 @@ def tour_head():
     """한 줄 규칙(굵게) → 풀이 한 줄 → [신뢰 등급 범례 | 텔레그램] 한 줄."""
     st.html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-lead" style="margin-bottom:6px">
       <div style="font-size:16px;font-weight:780;color:var(--ink);letter-spacing:-.02em;line-height:1.5">{_e(MN.lead())}</div>
-      <div style="font-size:13px;margin-top:2px">{_e(MN.LEAD_SUB)}</div></div>
+      <div style="font-size:12.5px;margin-top:2px">{_e(MN.lead_sub())}</div></div>
       <div class="mn-row mn-src" style="margin-top:0"><span>{MN._legend()}</span><span>{_bot_link()}</span></div></div>""")
 
 
@@ -865,24 +865,27 @@ def tour_card(i: int, tab: str, q: str, d: str, feats: list, on: bool):
     """탭 하나 = 카드 하나: 탭 이름 → 질문 → 한 줄 → 기능(등급). 카드를 누르면 그 탭으로(dashboard 가 투명 버튼을 겹친다)."""
     li = ''.join(f"<li>{_e(f.split(' — ')[0])}{MN._tag(g)}</li>" for f, g in feats)
     st.html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-card mn-tour{' on' if on else ''}">
-      <div class="k">{i} · {_e(tab)}<b>{'현재 탭' if on else '이동 →'}</b></div><div class="t">{_e(q)}</div><div class="q">{_e(d)}</div><ul>{li}</ul></div></div>""")
+      <div class="k">{i} · {_e(tab)}<b>{'현재 탭' if on else '이동 →'}</b></div><div class="t">{_e(q)}</div><ul>{li}</ul></div></div>""")
 
 
 def routines_panel():
     st.html(CSS + MN.CSS + f'<div class="mn">{MN.sec_routines()}</div>')
 
 
-def manual_panel():
-    """전체 설명서 — 실전 규칙 · 데이터 · 텔레그램 봇 + PDF. 개요·탭별 기능·루틴은 옆 탭과 같아 화면에서는 뺀다(PDF 에는 들어간다)."""
+# 사용법 상위 탭(2026-11-16 4차) — '전체 설명서' 탭을 없애고 하위 절을 상위로 올렸다. 개요 = 카드 + 운용 루틴 + PDF.
+SECTION_TABS = [('rules', '📐 실전 규칙'), ('data', '🗄️ 데이터'), ('bot', '📲 텔레그램 봇')]
+
+
+def section_panel(sid: str):
+    fn = {x[0]: x[3] for x in MN.SECTIONS}[sid]
+    st.html(CSS + MN.CSS + f'<div class="mn">{fn()}</div>')
+
+
+def pdf_row():
     import os
-    secs = [x for x in MN.SECTIONS if x[0] in MN.SCREEN]
-    tabs = st.tabs([x[1] for x in secs])
     pdf = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docs', 'manual.pdf')
-    for tab, (_sid, title, lead, fn) in zip(tabs, secs):
-        with tab:
-            st.html(CSS + MN.CSS + f'<div class="mn">{fn()}</div>')
-    c1, c2 = st.columns([5, 1.4], vertical_alignment='center')
-    c1.caption("PDF — 개요 · 운용 루틴 · 설명서 합본 · 규칙 값과 백테스트 수치 자동 반영. " + MN.DISCLAIMER)
+    c1, c2 = st.columns([5, 1.2], vertical_alignment='center')
+    c1.caption("PDF — 개요 · 운용 루틴 · 실전 규칙 · 데이터 · 텔레그램 봇 합본, 규칙 값·백테스트 수치 자동 반영. " + MN.DISCLAIMER)
     if os.path.exists(pdf):
         with open(pdf, 'rb') as f:
             c2.download_button("PDF 내려받기", f.read(), file_name="stock-dashboard_사용설명서.pdf",

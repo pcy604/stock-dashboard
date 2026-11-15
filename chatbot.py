@@ -36,8 +36,8 @@ PROMPT = """너는 'STOCK DASHBOARD' 사이트의 AI 도우미다. 아래 [자�
 {q}"""
 
 TABS = ("🏠 종합: 이번 주 시장 신호(한국 주봉 5주선)·글로벌 마켓·오닐 추세·오늘의 시장(한·미 시장 폭·업종·테마·신고가)·시황 리포트 | "
-        "🌍 매크로: 경기 국면·돈의 흐름·한국 수급·신용 | 🔎 종목 발굴: 실전 규칙 후보·52주 신고가·상승 상위·시총 상위·CANSLIM | "
-        "🔍 종목 분석: 종목 코드 입력 → 결론·수급·이익 방향·가격·정체·깨지는 조건·매매 계획 | 🛡️ 내 포트폴리오: 보유 종목 점검(로그인)")
+        "🌍 매크로: 경기 국면·돈의 흐름·한국 수급·신용 | 🧭 종목 발굴: 실전 규칙 후보·52주 신고가·상승 상위·시총 상위·CANSLIM | "
+        "🔍 종목 분석: 종목 코드 입력 → 결론·펀더멘탈·히스토리·수급·깨지는 조건 | 🛡️ 내 포트폴리오: 보유 종목 점검(로그인)")
 
 
 def _j(p):
@@ -110,6 +110,88 @@ def _groq(prompt: str, key: str) -> str:
     return r.json()["choices"][0]["message"]["content"].strip()
 
 
+
+
+# ── 사이트 명령(2026-11-16) — 부자알람 봇 명령 중 사이트 자료만으로 즉시 답할 수 있는 것. AI 호출·질문 한도 없음.
+COMMANDS = [
+    ("/market", "장 마감 시황 요약 — /market kr · /market us"),
+    ("/signal", "실전 규칙 지수 게이트(코스피·코스닥 주봉 5주선)"),
+    ("/dashboard 종목", "종목 분석 결론 — 예: /dashboard 삼성전자 · /dashboard NVDA"),
+    ("/terms", "이용 안내 · 면책"),
+    ("/help", "명령어 목록"),
+]
+TERMS = ("정보 제공 도구이며 투자 권유가 아님. 수치는 사이트 산출물 기준이며 지연·오류 가능. "
+         "백테스트 수치는 과거 성적이며 실현 수익이 아님. 운영자는 화면에 나온 종목을 보유하고 있을 수 있음.")
+
+
+def _md_section(md: str, title: str) -> str:
+    m = re.search(rf"##\s*{re.escape(title)}\s*\n(.*?)(?=\n##\s|\Z)", md or "", flags=re.S)
+    return (m.group(1).strip() if m else "")
+
+
+def _cmd_market(arg: str) -> str:
+    rep = _j("results/market_report.json")
+    key = "latest_daily" if arg.lower() in ("us", "미국") else "latest_kr"
+    r = rep.get(key) or rep.get("latest_kr") or {}
+    if not r:
+        return "시황 리포트 없음 — 🏠 종합 탭 확인."
+    md = r.get("markdown") or ""
+    one = _md_section(md, "한 줄 요약")
+    rule = next((ln for ln in md.splitlines() if ln.startswith("**실전 규칙")), "")
+    head = "한국 장 마감 시황" if key == "latest_kr" else "미국 일간 시황"
+    return f"**{head}** ({r.get('date')})\n\n{one}\n\n{rule}".strip() + "\n\n전문: 🏠 종합 → 시황 리포트"
+
+
+def _cmd_signal() -> str:
+    pl = _j("live/plan_latest.json")
+    rows = []
+    for k, v in (pl.get("index") or {}).items():
+        if not isinstance(v, dict) or v.get("last") is None or v.get("ma200") is None:
+            continue
+        ok = v["last"] > v["ma200"]
+        gap = (v["last"] / v["ma200"] - 1) * 100 if v["ma200"] else 0
+        nm = {"KR": "코스피", "KQ": "코스닥", "US": "S&P500(참고 · 한국 규칙 미적용)"}.get(k, k)
+        rows.append(f"- {nm}: 종가 {v['last']:,.2f} · 5주선 {v['ma200']:,.2f} ({gap:+.1f}%) → {'상회' if ok else '하회'}"
+                    + ("" if k == "US" else f" · 신규 진입 {'가능' if ok else '중지'}"))
+    if not rows:
+        return "지수 게이트 자료 없음 — 🏠 종합 탭 확인."
+    return f"**실전 규칙 v1.9 지수 게이트** (계획표 {pl.get('made') or '-'})\n" + "\n".join(rows)
+
+
+def _cmd_dashboard(arg: str) -> str:
+    if not arg:
+        return "종목을 함께 입력 — 예: /dashboard 삼성전자 · /dashboard 005930 · /dashboard NVDA"
+    hit = _find_syms(arg, limit=1)
+    if not hit:
+        return f"'{arg}' 종목을 찾지 못함 — 🔍 종목 분석 탭에서 코드로 조회."
+    x = hit[0]
+    sym, name = str(x.get("sym")), x.get("name") or ""
+    s = _j(f"results/snap/{sym}.json")
+    v = (s.get("verdict") or {}) if s else {}
+    if not v:
+        return f"**{name} ({sym})** — 스냅샷 없음. 🔍 종목 분석 탭에서 실시간 조회: [열기](?sym={sym})"
+    lines = [f"**{name} ({sym})** — {v.get('head', '')} · 유형 {v.get('type_chip') or '-'} (기준 {s.get('asof')})"]
+    lines += [f"- {c.get('label')}: {c.get('value')} — {c.get('sub')}" for c in (v.get("cards") or [])[:4]]
+    lines.append(f"\n상세: [🔍 종목 분석에서 열기](?sym={sym})")
+    return "\n".join(lines)
+
+
+def command(q: str) -> str | None:
+    """'/' 로 시작하면 사이트 명령으로 처리(AI 미사용). 모르는 명령이면 목록을 돌려준다."""
+    q = (q or "").strip()
+    if not q.startswith("/"):
+        return None
+    cmd, _, arg = q.partition(" ")
+    cmd, arg = cmd.lower(), arg.strip()
+    if cmd == "/market":
+        return _cmd_market(arg)
+    if cmd in ("/signal", "/신호"):
+        return _cmd_signal()
+    if cmd in ("/dashboard", "/분석", "/report"):
+        return _cmd_dashboard(arg)
+    if cmd == "/terms":
+        return TERMS
+    return "**사이트 명령어** (AI 질문 한도 미차감)\n" + "\n".join(f"- `{c}` — {d}" for c, d in COMMANDS)
 
 
 def ask(q: str, history: list[tuple[str, str]] | None = None, gemini_key: str = "", groq_key: str = "") -> tuple[str, str]:

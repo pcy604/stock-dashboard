@@ -1160,7 +1160,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or '🏠 종합'
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-15e'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-16a'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -1185,12 +1185,11 @@ def _owner_seen() -> bool:
 with st.expander("📘 사용법",
                  expanded=_first_visit and not IS_MOBILE and not _owner_seen()
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
-    _gt1, _gt3, _gt4 = st.tabs(["📌 개요", "🗓️ 운용 루틴", "📚 설명서"])
-    with _gt3:
-        _UH.routines_panel()
-    with _gt4:
-        _UH.manual_panel()
-    with _gt1:
+    _gts = st.tabs(["📌 개요"] + [lab for _sid, lab in _UH.SECTION_TABS])   # 2026-11-16 4차 — 설명서 하위 절을 상위로
+    for _gt, (_sid, _lab) in zip(_gts[1:], _UH.SECTION_TABS):
+        with _gt:
+            _UH.section_panel(_sid)
+    with _gts[0]:
         _UH.tour_head()
         _caps = _UH.MN.caps()
         for _i, (_col, (_tab, _q, _d, _feats)) in enumerate(zip(st.columns(len(_caps)), _caps), 1):
@@ -1198,6 +1197,8 @@ with st.expander("📘 사용법",
                 _UH.tour_card(_i, _tab, _q, _d, _feats, _tab == _ob_cur)
                 st.button(f"{_tab} 열기", key=f'ob_go_{_i}', on_click=_ob_go, args=(_tab,),
                           disabled=_tab == _ob_cur, width='stretch')
+        _UH.routines_panel()
+        _UH.pdf_row()
 
 # 탭 순서 = 의사결정 순서. 내 돈이 어떻게 되고 있나(포트폴리오) → 뭘 살까(발굴) →
 # 이게 맞나(분석) → 지금 사도 되나(매크로). 구루 인사이트는 2026-08-11 페이지에서 제거
@@ -1251,7 +1252,7 @@ if _dl_sym and st.session_state.get('_dl_done') != _dl_sym:
 # 2026-11-15 — 종합 '주간 신고가·신저가' 막대 클릭 → 종목 발굴 52주 신고가의 그 주(위젯보다 먼저 적용)
 _pg = st.session_state.pop('_pending_go', None)
 if _pg:
-    st.session_state['main_tab'] = '🔎 종목 발굴'
+    st.session_state['main_tab'] = '🧭 종목 발굴'
     st.session_state['tools_pick'] = _pg[0]
     st.session_state['screen_mkt'] = _pg[1]
     st.session_state['h52_week'] = _pg[2]
@@ -1260,7 +1261,7 @@ if _pg:
 _dl_go = str(st.query_params.get('go') or '')
 if _dl_go in ('h52', 'gain', 'cap') and st.session_state.get('_dl_go_done') != _dl_go:
     st.session_state['_dl_go_done'] = _dl_go
-    st.session_state['main_tab'] = '🔎 종목 발굴'
+    st.session_state['main_tab'] = '🧭 종목 발굴'
     st.session_state['tools_pick'] = {'h52': '📈 52주 신고가', 'gain': '🔥 상승 상위', 'cap': '🏦 시총 상위'}[_dl_go]
     if str(st.query_params.get('mkt') or '') in ('KR', 'US'):
         st.session_state['screen_mkt'] = str(st.query_params.get('mkt'))
@@ -1360,7 +1361,9 @@ try:
 except Exception:
     _IS_LAB = os.environ.get('LAB_OPEN') == '1'
 # 2026-11-12 차니 — 🏛️ 경영실(KPI·로드맵·결정·이슈·회의록·변경 이력) 도 소유자만. 연구실과 같은 판정.
-_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"] + (["🔬 연구실", "🏛️ 경영실"] if _IS_LAB else [])
+_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🧭 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"] + (["🔬 연구실", "🏛️ 경영실"] if _IS_LAB else [])
+if st.session_state.get('main_tab') == '🔎 종목 발굴':          # 2026-11-16 아이콘 변경 — 세션에 남은 옛 이름
+    st.session_state['main_tab'] = '🧭 종목 발굴'
 _mt = st.tabs(key='main_tab', on_change='rerun', tabs=_MAIN_TABS)
 tab_home, tab4, tab_screen, tab7, tab_pf = _mt[:5]
 tab_lab = _mt[5] if _IS_LAB else None
@@ -1368,12 +1371,12 @@ tab_gov = _mt[6] if _IS_LAB else None
 if _IS_LAB:
     with tab_lab:
         st.caption("🔬 **연구실 — 소유자만 보입니다.** 검증 중이거나 기각된 연구 · 퀀트 백테스트. 결론이 난 것만 다른 탭으로 옮깁니다.")
-        # 2026-11-08 차니 정리: 🗂 발굴 도구 → 🔎 종목 발굴 아래 '재료 목록'(소유자만) · 🔭 대박주 역분석 → 퀀트 백테스트 안
+        # 2026-11-08 차니 정리: 🗂 발굴 도구 → 🧭 종목 발굴 아래 '재료 목록'(소유자만) · 🔭 대박주 역분석 → 퀀트 백테스트 안
         #   '🔬 개별 종목 심층 분석'(옛 '종목 하나 전략')으로 · 📈 사이클 비교 → 🔍 종목 분석 탭(검색한 종목 그대로).
         t_lab, t_old = st.tabs(["🧪 퀀트 백테스트", "📚 지난 연구"])
 else:
     t_lab = t_old = None
-_TOOL_IDS = set()          # 🔎 종목 발굴 안 재료 목록 핸들 — 지연 계산 기준이 연구실이 아니라 종목 발굴 탭
+_TOOL_IDS = set()          # 🧭 종목 발굴 안 재료 목록 핸들 — 지연 계산 기준이 연구실이 아니라 종목 발굴 탭
 
 
 def _lab_enter(tab):
@@ -9127,19 +9130,33 @@ def _groq_key_site():
 def _chat_box():
     """💬 사이트 AI 질문(2026-11-15) — 근거 = 사이트 산출물만(chatbot.py), 무료 AI. 세션당 15문항. 추천 금지."""
     import chatbot as _CB
-    with st.popover("💬 AI에게 묻기", use_container_width=True):
-        st.caption("이 사이트의 숫자(시황·매크로·실전 규칙·종목 스냅샷)만 근거로 답합니다. 매수·매도 추천은 하지 않습니다. "
-                   f"무료 AI라 한 번에 {_CB.SESSION_LIMIT}문항까지입니다.")
+    import ui_fab as _FAB
+    # 2026-11-16 — 고정 버튼 → 화면 위를 끌어 옮기는 원형 버튼(위치는 브라우저에 기억). 사이트 명령(/market 등)은 AI 한도 미차감.
+    _FAB.mount()
+    with st.container(key='ai_fab'), st.popover("💬", help="AI 질문 · 사이트 명령어(/help) — 끌어서 위치 이동"), \
+            st.container(key='ai_pane'):
+        st.caption("사이트 자료(시황·매크로·실전 규칙·종목 스냅샷)만 근거로 답변. 매수·매도 추천 없음. "
+                   f"AI 질문은 방문당 {_CB.SESSION_LIMIT}문항, `/` 명령어는 한도 미차감.")
         log = st.session_state.setdefault('ai_log', [])
+        _cmd_pick = None
+        _cc = st.columns(4)
+        for _c, (_lab, _cmd) in zip(_cc, [("📊 시황", "/market"), ("🚦 지수 게이트", "/signal"),
+                                         ("📜 이용 안내", "/terms"), ("❔ 명령어", "/help")]):
+            if _c.button(_lab, key=f'ai_c_{_cmd}', width='stretch'):
+                _cmd_pick = _cmd
         for _r, _m in log[-8:]:
             with st.chat_message(_r):
                 st.markdown(_m)
         with st.form('ai_form', clear_on_submit=True, border=False):
-            _q = st.text_input("질문", placeholder="예: 지금 코스피 신규 매수 신호는? / 삼성전자 이익 방향은? / 이번 주 미국 강한 업종은?",
+            _q = st.text_input("질문", placeholder="질문 또는 명령어 — 예: 코스피 신규 진입 조건 충족 여부 / /dashboard 삼성전자",
                                label_visibility='collapsed')
-            _go = st.form_submit_button("묻기", use_container_width=True)
+            _go = st.form_submit_button("전송", use_container_width=True)
+        if _cmd_pick or (_go and _q.strip().startswith('/')):
+            _cq = _cmd_pick or _q.strip()
+            log += [('user', _cq), ('assistant', _CB.command(_cq) or '')]
+            st.rerun()
         if _go and _q.strip():
-            if sum(1 for r, _ in log if r == 'user') >= _CB.SESSION_LIMIT:
+            if sum(1 for r, m in log if r == 'user' and not str(m).startswith('/')) >= _CB.SESSION_LIMIT:
                 st.warning(f"이번 방문 질문 한도({_CB.SESSION_LIMIT}개)를 다 썼습니다. 새로고침하면 다시 쓸 수 있습니다.")
             else:
                 with st.spinner("답변 작성 중…"):
@@ -9171,8 +9188,8 @@ def _goto_tab(name):
 
 
 def _goto_tool(tool, mkt=None):
-    """종합 → 🔎 종목 발굴 재료 목록(52주 신고가·시총 상위)으로 바로 이동. 2026-11-14."""
-    st.session_state['main_tab'] = '🔎 종목 발굴'
+    """종합 → 🧭 종목 발굴 재료 목록(52주 신고가·시총 상위)으로 바로 이동. 2026-11-14."""
+    st.session_state['main_tab'] = '🧭 종목 발굴'
     st.session_state['tools_pick'] = tool
     if mkt:
         st.session_state['screen_mkt'] = mkt
@@ -9527,7 +9544,7 @@ def _home_todo(V, owner=False):
                   f"계획표 {pl.get('made', '-')}"),
                  ('체결 확인', 'y' if pend else 'g', f"체결 대기 {len(pend)}건" if pend else '대기 없음', f"보유 {len(pos)}종 · 원장 기준")]
     else:
-        rows.append(('매수 후보', 'k', '이번 주 매수 대상은 🔎 종목 발굴 맨 위 표(RS 높은 순 10종)', '운영자 계좌 내역은 체결 후 주간 공개'))
+        rows.append(('매수 후보', 'k', '이번 주 매수 대상은 🧭 종목 발굴 맨 위 표(RS 높은 순 10종)', '운영자 계좌 내역은 체결 후 주간 공개'))
     rows.append(('내 보유 점검', ('g' if pf and not pf['n_vi'] else 'y') if pf else 'k',
                  (f"{pf['grade']} · {pf['n']}종 · 위반 {pf['n_vi']}건" + (' — ' + ' / '.join(pf['top']) if pf['top'] else ''))
                  if pf else '🛡️ 내 포트폴리오에서 보유 종목을 넣으면 손절선·비중 위반을 여기서 같이 봅니다', ''))
@@ -9546,7 +9563,7 @@ def _home_todo(V, owner=False):
         return
     b1, b2, b3 = st.columns(3)
     b1.button("🌍 매크로 근거 보기", on_click=_goto_tab, args=("🌍 매크로",), use_container_width=True, key='home_go_macro')
-    b2.button("🔎 이번 주 후보 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')
+    b2.button("🔎 이번 주 후보 보기", on_click=_goto_tab, args=("🧭 종목 발굴",), use_container_width=True, key='home_go_screen')
     b3.button("🛡️ 보유 점검하기", on_click=_goto_tab, args=("🛡️ 내 포트폴리오",), use_container_width=True, key='home_go_pf')
 
 
@@ -9636,7 +9653,7 @@ with tab_home, guard('종합 — 바로가기'):
     _lazy(tab_home)
     _n1, _n2, _n3 = st.columns(3)
     _n1.button("🌍 매크로 근거 보기", on_click=_goto_tab, args=("🌍 매크로",), use_container_width=True, key='home_go_macro')
-    _n2.button("🔎 이번 주 매수 후보 보기", on_click=_goto_tab, args=("🔎 종목 발굴",), use_container_width=True, key='home_go_screen')
+    _n2.button("🔎 이번 주 매수 후보 보기", on_click=_goto_tab, args=("🧭 종목 발굴",), use_container_width=True, key='home_go_screen')
     _n3.button("🛡️ 내 보유 종목 점검", on_click=_goto_tab, args=("🛡️ 내 포트폴리오",), use_container_width=True, key='home_go_pf')
     _home_events()                                # 🗓️ 다가오는 일정 — 2026-11-15 맨 아래로(차니)
 

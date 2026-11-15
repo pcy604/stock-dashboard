@@ -30,7 +30,7 @@ def _main_commits(n=300):
 URL = (sys.argv[1] if len(sys.argv) > 1 else
        'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/').rstrip('/') + '/'
 APP = URL + '~/+/'          # Cloud 래퍼(iframe) 없이 앱 본체
-TABS = ["🏠 종합", "🌍 매크로", "🔎 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"]
+TABS = ["🏠 종합", "🌍 매크로", "🧭 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"]
 SYMS = ['TSLA', '005930']
 ERR_RE = re.compile(r'Traceback \(most recent call last\)|KeyError|TypeError|ValueError|'
                     r'AttributeError|NameError|IndexError|StreamlitAPIException|ModuleNotFoundError')

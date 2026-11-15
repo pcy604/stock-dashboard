@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16d'
+VERSION = '2026-11-16e'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -37,62 +37,64 @@ TAG_DESC = {'g': '실전 규칙 반영 항목', 'y': '검증 중 · 해석 보�
 
 # 첫 문장 = 실전 규칙 요약(규칙 명세 문체 — 명령형·구어체 금지). 자동매매·운영자 매매 언급은 공개 문구에서 뺀다
 # (따라 하기 요청·규제 노출 — 2026-11-15 차니 결정).
-LEAD = ("실전 규칙 v1.9 — 지수 주봉 {kr_ix_weeks}주선 상회 시에만 신규 진입 · RS {rs_min} 이상 영업이익 흑자전환 종목 편입 · "
-        "보유 중 고점 대비 −{stop}% 손절")
-LEAD_SUB = ("DART · SEC EDGAR 공시와 시장 가격을 매일 반영. 시장 판정 → 후보 선별 → 종목 검증 → 보유 점검 순서로 구성.")
+# 2026-11-16 4차: 리드 = 프로젝트 목표(TSR 최대 · MDD 최소)를 한 문장으로, 근거는 백테스트 숫자(자동)로.
+LEAD = "낙폭은 규칙으로 통제하고, 수익은 주도주에서 취한다."
+LEAD_SUB = ("실전 규칙 v1.9 한국 백테스트({start} ~ {end}) 연 {CAGR}% · 최대 낙폭 {MDD}% — 같은 기간 코스피 연 {BM_CAGR}% · {BM_MDD}%. "
+            "상장폐지 포함 · 거래비용 반영 · 과거 성적.")
 
 # (탭 이름, 답하는 질문, 한 줄 요약, [(기능, 등급)]) — 탭 이름은 dashboard._MAIN_TABS 와 글자까지 같아야 버튼이 작동한다
 CAPS = [
-    ("🏠 종합", "시장 판정", "주간 신규 진입 가부와 당일 시장 동향.", [
+    ("🏠 종합", "시장 국면 판정 · 신규 진입 가부", "", [
         ("주간 시장 신호 — 한국 지수 주봉 5주선 기준 신규 진입 가능/중지", 'g'),
         ("글로벌 마켓 14종 — 일·주·월 등락 · 3개월 추이", 'k'),
         ("시장 추세 판정(오닐 방식) · 주간 52주 신고가·신저가 · 한·미 대형주 상승 비율", 'y'),
         ("당일 시장(한국·미국 × 일·주·월) — 시장 폭·수급·업종별 구성 종목·테마·히트맵", 'k'),
         ("매크로 국면 요약 · 시황 리포트(한·미 동일 양식) · 주요 일정", 'y')]),
-    ("🌍 매크로", "국면 분석", "글로벌 유동성 · 경기 국면과 판정 근거.", [
+    ("🌍 매크로", "유동성 · 경기 국면 분석", "", [
         ("세계 증시 상대강도 순위", 'k'),
         ("축 1 유동성 · 축 2 경기(선행·동행)", 'y'),
         ("실전 판정 — 실전 규칙에 반영되는 유일한 매크로 지표", 'g'),
         ("국면 지도(4계절·코스톨라니 달걀) · 국면 판정 근거 · 신호 적중 이력", 'y'),
         ("한국 수급·신용 · 정책금리·국채·수익률곡선·물가·유동성", 'k')]),
-    ("🔎 종목 발굴", "후보 선별", "실전 규칙 기준 주간 후보와 매수 대상.", [
+    ("🧭 종목 발굴", "주도주 후보 선별", "", [
         ("실전 후보 — RS {rs_min} 이상 × 영업이익 흑자전환 × 주봉 5주선 상회", 'g'),
         ("주간 매수 대상 — RS 상위 {slots}종", 'g'),
         ("스크리닝 목록 — 상승률 상위·52주 신고가·시총 상위·CANSLIM·이익가속·흑자전환·가치", 'k')]),
-    ("🔍 종목 분석", "종목 검증", "종목별 결론과 펀더멘탈 · 히스토리 · 수급 근거.", [
+    ("🔍 종목 분석", "개별 종목 실사", "", [
         ("결론 + 실전 규칙 대조(이익·RS·추세·시총·지수)", 'y'),
         ("펀더멘탈 — 기업 개요·사업부문·이익 방향·재무제표·컨센서스 추세·밸류에이션·희석", 'y'),
         ("히스토리 — 차트(선형/로그·사이클 구간)·사이클·낙폭·멀티플 밴드·정류장", 'y'),
         ("수급 — 업종 강도 × 종목 RS·업종 내 순위·동종업계·내부자 거래", 'y'),
         ("투자 논리 훼손 조건 — 결론 하단 점검(손절 기준 고점 대비 −{stop}%)", 'k')]),
-    ("🛡️ 내 포트폴리오", "보유 점검", "보유 종목의 손절선 · 비중 한도 준수 여부.", [
+    ("🛡️ 내 포트폴리오", "보유 종목 리스크 관리", "", [
         ("보유 종목 입력 · 계정별 저장(구글 로그인)", 'k'),
         ("손절선(보유 중 고점 대비 −{stop}%) · 종목 비중 한도({cap}%) 위반 점검", 'g'),
         ("위반 건수·등급 요약 · 텔레그램 알림 연동", 'k')]),
 ]
 
-# 규칙의 실제 리듬: 금요일 종가로 판정 → 토요일 계획 → 월요일 시가 매수 · 평일엔 가진 종목 손절만. 2026-11-15 재작성.
+# 2026-11-16 4차: 짧은 주기 → 긴 주기(일간 → 주간 → 분기), 수시 항목은 마지막에 다른 상자(kind='o').
+# 텔레그램을 쓰지 않는 사람도 따라 할 수 있게 사이트 화면만으로 적는다.
 ROUTINES = [
-    ("주간 · 토요일", "신규 진입 계획", [
-        "🏠 종합 — 주간 시장 신호 확인(중지 시 신규 진입 없음)",
-        "🔎 종목 발굴 — 매수 대상 {slots}종(RS 순)",
-        "🔍 종목 분석 — 실전 규칙 대조 항목 충족 여부",
-        "진입 전 손절가(고점 대비 −{stop}%) 사전 설정"]),
-    ("일간 · 장 마감 후", "보유 종목 리스크 점검", [
-        "📲 /market — 당일 시황 요약",
+    ("일간 · 장 마감 후", "보유 종목 리스크 점검", 'r', [
+        "🏠 종합 — 당일 시황 리포트",
         "🛡️ 내 포트폴리오 — 손절선 도달 종목",
         "RS {rs_exit} 미만 이탈 종목",
         "해당 종목은 규칙상 익일 매도 대상"]),
-    ("수시 · 관심 종목 발생 시", "개별 종목 검증", [
-        "🔍 종목 코드 입력(005930 · NVDA) → 결론 확인",
-        "실전 규칙 대조 항목 미충족 시 후보 제외",
-        "펀더멘탈 · 히스토리 · 수급 탭에서 근거 확인",
-        "📲 /watch — 공시·주요 뉴스 알림 등록"]),
-    ("분기 · 실적 시즌", "후보군 재편 점검", [
+    ("주간 · 토요일", "신규 진입 계획", 'r', [
+        "🏠 종합 — 주간 시장 신호(중지 시 신규 진입 없음)",
+        "🧭 종목 발굴 — 매수 대상 {slots}종(RS 순)",
+        "🔍 종목 분석 — 실전 규칙 대조 항목 충족 여부",
+        "진입 전 손절가(고점 대비 −{stop}%) 사전 설정"]),
+    ("분기 · 실적 시즌", "후보군 재편 점검", 'r', [
         "실적 발표 후 흑자전환 종목 신규 편입",
         "🌍 매크로 — 국면 전환 여부",
         "신호 적중 이력 — 매크로 신호의 사후 검증",
         "규칙 변경은 백테스트 검증 후에만"]),
+    ("수시 · 관심 종목 발생 시", "개별 종목 실사", 'o', [
+        "🔍 종목 분석 — 종목 코드 입력(005930 · NVDA)",
+        "실전 규칙 대조 항목 미충족 시 후보 제외",
+        "펀더멘탈 · 히스토리 · 수급 근거 확인",
+        "투자 논리 훼손 조건 점검"]),
 ]
 
 # (항목, 값 — {…} 는 RULE 에서 채움, 이유)
@@ -153,7 +155,7 @@ BOT_CMDS = [
 FLOW = [
     ("① 원천", ["가격·시총 — 네이버·KRX·Yahoo", "재무·공시 — DART·SEC EDGAR", "매크로·수급 — FRED·네이버"]),
     ("② 가공 · 점검", ["공통 지표 단일 계산(RS·YoY·PER)", "시장 판정 단일 엔진", "일일 정합성 점검(기준 사실 대조)"]),
-    ("③ 화면", ["🏠 종합 — 시장 판정", "🔎 종목 발굴 → 🔍 종목 분석 — 선별·검증", "🛡️ 내 포트폴리오 — 보유 점검"]),
+    ("③ 화면", ["🏠 종합 — 시장 판정", "🧭 종목 발굴 → 🔍 종목 분석 — 선별·검증", "🛡️ 내 포트폴리오 — 보유 점검"]),
     ("④ 알림", ["주간 계획(토요일)", "텔레그램 알림 봇 @buza_alarm_bot"]),
 ]
 
@@ -232,6 +234,14 @@ def lead() -> str:
     return _f(LEAD)
 
 
+def lead_sub() -> str:
+    b = backtest() or {}
+    try:
+        return LEAD_SUB.format(**{k: b.get(k, '-') for k in ('start', 'end', 'CAGR', 'MDD', 'BM_CAGR', 'BM_MDD')})
+    except Exception:
+        return ''
+
+
 def caps() -> list:
     c = ctx()
     return [(t, q, _f(d, c), [(_f(x, c), g) for x, g in feats]) for t, q, d, feats in CAPS]
@@ -239,7 +249,7 @@ def caps() -> list:
 
 def routines() -> list:
     c = ctx()
-    return [(w, why, [_f(s, c) for s in steps]) for w, why, steps in ROUTINES]
+    return [(w, why, kind, [_f(s, c) for s in steps]) for w, why, kind, steps in ROUTINES]
 
 
 def backtest() -> dict:
@@ -368,10 +378,16 @@ CSS = """
   @media (max-width:720px) { .mn-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } .mn-tbl td:first-child { white-space:normal; } }
   .mn-src { font-size:11.5px; color:var(--ink-3); margin:6px 2px 0; line-height:1.6; }
   .mn-gap { height:14px; }
-  .mn-df { display:grid; grid-template-columns:minmax(120px,170px) 1fr; gap:0 10px; border:1px solid var(--line); border-radius:10px;
+  .mn-df-wrap { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; align-items:start; }
+  .mn-rt.rg { border-left:3px solid var(--accent); }
+  .mn-rt.od { border-left:3px dashed #b45309; background:#fffbeb; }
+  .mn-rt .t { font-size:14px; font-weight:750; color:var(--ink); margin:2px 0 6px; }
+  .mn-sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin:0 4px 0 2px; vertical-align:-1px; }
+  .mn-sw.rg { background:var(--accent); } .mn-sw.od { background:#fbbf24; }
+  .mn-df { display:grid; grid-template-columns:minmax(96px,120px) 1fr; gap:0 10px; border:1px solid var(--line); border-radius:10px;
            background:var(--surface); padding:8px 12px; margin-bottom:8px; }
   .mn-df-src { font-size:13px; font-weight:750; color:var(--ink); padding-top:6px; border-right:2px solid var(--accent-2); }
-  .mn-df-row { display:grid; grid-template-columns:14px minmax(180px,300px) 14px minmax(110px,190px) 14px auto; justify-content:start;
+  .mn-df-row { display:grid; grid-template-columns:12px minmax(120px,1fr) 12px minmax(84px,auto) 12px auto; justify-content:start;
                align-items:center; gap:4px 8px; padding:5px 0; border-top:1px dashed var(--line-2); }
   .mn-df-row:first-child { border-top:0; }
   .mn-df-it { font-size:12.5px; } .mn-df-it b { font-weight:650; color:var(--ink); }
@@ -382,6 +398,7 @@ CSS = """
   .mn-st { font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:999px; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .mn-st.ok { background:var(--pos-bg); color:var(--pos); } .mn-st.bad { background:var(--neg-bg); color:var(--neg); }
   .mn-st.na { background:var(--line-2); color:var(--ink-3); }
+  @media (max-width:980px) { .mn-df-wrap { grid-template-columns:1fr; } }
   @media (max-width:720px) { .mn-df-row { grid-template-columns:14px 1fr; } .mn-df-row > .mn-ar:not(:first-child) { display:none; }
     .mn-df { grid-template-columns:1fr; } .mn-df-src { border-right:0; border-bottom:2px solid var(--accent-2); padding:0 0 4px; } }
 </style>
@@ -406,7 +423,7 @@ def _table(head, rows, cls=None) -> str:
 def sec_overview() -> str:
     flow = ''.join(f"""<div class="mn-card"><div class="k">{_e(k)}</div><ul>{''.join(f'<li>{_e(x)}</li>' for x in xs)}</ul></div>"""
                    for k, xs in FLOW)
-    return f"""<div class="mn-lead"><b style="color:var(--ink)">{_e(lead())}</b><br>{_e(LEAD_SUB)}</div>
+    return f"""<div class="mn-lead"><b style="color:var(--ink)">{_e(lead())}</b><br>{_e(lead_sub())}</div>
       <div class="mn-h"><b>데이터 흐름</b><span>화면 · 백테스트 · 알림 공통 정의</span></div>
       <div class="mn-flow">{flow}</div>
       <div class="mn-src">구분 — {_legend()} · '-' 는 데이터 없음</div>"""
@@ -417,15 +434,16 @@ def sec_features() -> str:
     for t, q, d, feats in caps():
         rows = [((f"<b style='color:var(--ink)'>{_e(f.split(' — ')[0])}</b> — {_e(f.split(' — ', 1)[1])}" if ' — ' in f else
                   f"<b style='color:var(--ink)'>{_e(f)}</b>"), _tag(g)) for f, g in feats]
-        out.append(f'<div class="mn-h"><b>{_e(t)}</b><span>{_e(q)} {_e(d)}</span></div>'
+        out.append(f'<div class="mn-h"><b>{_e(t)}</b><span>{_e(q)}</span></div>'
                    + _table(['기능', '등급'], rows, {0: 'f', 1: 'nw'}) + '<div class="mn-gap"></div>')
     return ''.join(out) + f'<div class="mn-src">{_legend()}</div>'
 
 
 def sec_routines() -> str:
-    cards = ''.join(f"""<div class="mn-card acc"><div class="k">{_e(w)}</div><div class="q">{_e(why)}</div>
-        <ol>{''.join(f'<li>{_e(s)}</li>' for s in steps)}</ol></div>""" for w, why, steps in routines())
-    return f'<div class="mn-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">{cards}</div>'
+    cards = ''.join(f"""<div class="mn-card mn-rt {'od' if kind == 'o' else 'rg'}"><div class="k">{_e(w)}</div><div class="t">{_e(why)}</div>
+        <ol>{''.join(f'<li>{_e(s)}</li>' for s in steps)}</ol></div>""" for w, why, kind, steps in routines())
+    return ('<div class="mn-h"><b>운용 루틴</b><span><i class="mn-sw rg"></i>정기 점검 · <i class="mn-sw od"></i>수시 점검</span></div>'
+            f'<div class="mn-grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">{cards}</div>')
 
 
 def sec_rules() -> str:
@@ -498,7 +516,7 @@ def sec_data(live: bool = True) -> str:
         groups.append(f'<div class="mn-df"><div class="mn-df-src">{_e(src)}</div><div>{"".join(rows)}</div></div>')
     head = ('출처 → 항목 → 갱신 주기(KST) → 최신 데이터 기준일 · ✓ 정상 · ! 지연 · 기준일은 산출물 내부 날짜'
             if live else '출처 → 항목 → 갱신 주기(KST) · 최신 데이터 기준일과 정상 여부는 화면에서 확인')
-    return (f'<div class="mn-src" style="margin:0 2px 10px">{head}</div>' + ''.join(groups)
+    return (f'<div class="mn-src" style="margin:0 2px 10px">{head}</div><div class="mn-df-wrap">' + ''.join(groups) + '</div>'
             + '<div class="mn-src">전 항목 무료 공개 원천 · 각 표 하단에 출처 · 기준일 표기 · 예약 실행은 수 분~수십 분 지연 가능</div>')
 
 
@@ -579,7 +597,7 @@ section{{page-break-before:always}} section:first-of-type{{page-break-before:aut
 </style>{CSS}</head><body><div class="mn">
 <div class="cover"><div class="kick">STOCK DASHBOARD · 사용설명서</div>
 <h1>{_e(lead())}</h1>
-<p>{_e(LEAD_SUB)}<br>실전 규칙 v1.9(한국) 백테스트 연 {b.get('CAGR', '-')}% · 최대 낙폭 {b.get('MDD', '-')}% (같은 기간 코스피 {b.get('BM_CAGR', '-')}% · {b.get('BM_MDD', '-')}%).</p>
+<p>{_e(lead_sub())}<br>시장 국면 판정 → 주도주 후보 선별 → 개별 종목 실사 → 보유 종목 리스크 관리. DART · SEC EDGAR 공시와 시장 가격 매일 반영.</p>
 <ol>{toc}</ol>
 <div class="meta">화면 '📘 사용법 → 설명서'와 동일 원천에서 자동 생성.<br>
 사이트 {SITE}<br>텔레그램 {BOT}</div></div>
