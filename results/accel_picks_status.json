@@ -2,10 +2,10 @@
   "factor_ver": "v1",
   "db_latest_week": "2026-11-09",
   "exported_week": "2026-11-09",
-  "age_days": 5,
+  "age_days": 6,
   "stale": false,
   "signals": 63,
   "excluded": 0,
   "picks": 63,
-  "generated_at": "2026-11-14 13:47 UTC"
+  "generated_at": "2026-11-15 09:41 UTC"
 }
