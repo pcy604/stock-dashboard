@@ -24,13 +24,46 @@ import os
 
 import pandas as pd
 
-VERSION = 1
+VERSION = 2   # 2026-11-16 흐름 카드(spark·dir) · company · verdict 3탭
 BLOCKS = ['수급', '이익 방향', '가격', '정체', '깨지는 조건·촉매', '매매 계획', '원자료']
 SNAP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', 'snap')
 
 
-def C(label, value, sub='', tone='na'):
-    return {'label': label, 'value': value, 'sub': sub, 'tone': tone}
+def _r(v, nd=4):
+    try:
+        f = float(v)
+        return None if pd.isna(f) else round(f, nd)
+    except Exception:
+        return None
+
+
+def _dir(ys, k: int = 4, tol: float = 0.03) -> str | None:
+    """마지막 값 vs k개 전 — 3% 이내면 횡보."""
+    ys = [y for y in (ys or []) if y is not None]
+    if len(ys) <= k:
+        return None
+    a, b = ys[-1 - k], ys[-1]
+    base = max(abs(a), 1e-9)
+    ch = (b - a) / base
+    return 'up' if ch > tol else 'down' if ch < -tol else 'flat'
+
+
+def _money(v, is_kr: bool) -> str:
+    """KR 은 억원 입력, US 는 달러 입력."""
+    if v is None:
+        return '-'
+    if is_kr:
+        return f"{v / 1e4:,.1f}조원" if abs(v) >= 1e4 else f"{v:,.0f}억원"
+    return f"${v / 1e9:,.2f}B" if abs(v) >= 1e9 else f"${v / 1e6:,.0f}M"
+
+
+def C(label, value, sub='', tone='na', spark=None, dir=None):
+    d = {'label': label, 'value': value, 'sub': sub, 'tone': tone}
+    if spark:
+        d['spark'] = spark
+    if dir:
+        d['dir'] = dir
+    return d
 
 
 def _num(v):
@@ -107,6 +140,7 @@ def compute(L: dict, ctx: dict) -> dict:
         pass
 
     # ① 수급 ───────────────────────────────────────────────────────────────
+    #   2026-11-16 — 점 대신 흐름: RS 라인(종목 ÷ 지수, 주봉 1년) · 업종×종목 판정 · 거래량 60일
     try:
         sd = L.get('_sd') or ctx['sector_detail']()
         gsel, glabel = str(L.get('_gsel') or ''), L.get('_glabel')
@@ -126,17 +160,45 @@ def compute(L: dict, ctx: dict) -> dict:
         gpct = float(grow['pct'].iloc[0]) if len(grow) else None
         vr = A2.volume_ratio(hist.get('Volume'))
         q = A2.flow_quadrant(gpct, rs)
+        # RS 라인
+        rs_sp, rs_dir, rs13 = None, None, None
+        try:
+            ix = ctx['index_hist']('KS11' if is_kr else 'SPY', 400) if ctx.get('index_hist') else None
+            if ix is not None and len(ix):
+                ic = pd.to_numeric(ix.iloc[:, 0], errors='coerce')
+                ic.index = pd.to_datetime(ic.index).tz_localize(None) if getattr(pd.to_datetime(ic.index), 'tz', None) else pd.to_datetime(ic.index)
+                sc = pd.to_numeric(hist['Close'], errors='coerce')
+                sc.index = pd.to_datetime(sc.index).tz_localize(None) if getattr(pd.to_datetime(sc.index), 'tz', None) else pd.to_datetime(sc.index)
+                ratio = (sc / ic.reindex(sc.index, method='ffill')).dropna()
+                rw = ratio.resample('W-FRI').last().dropna().tail(52)
+                if len(rw) >= 10:
+                    rwn = rw / rw.iloc[0] * 100
+                    rs_sp = {'y': [_r(v, 2) for v in rwn], 'ref': 100.0}
+                    rs_dir = _dir(list(rwn), k=8, tol=0.02)
+                    rs13 = (rw.iloc[-1] / rw.iloc[-14] - 1) * 100 if len(rw) > 14 else None
+        except Exception:
+            pass
+        ixn = '코스피' if is_kr else 'S&P500'
+        vol_sp = None
+        try:
+            vv = pd.to_numeric(hist['Volume'], errors='coerce').dropna().tail(60)
+            if len(vv) >= 20:
+                vol_sp = {'y': [_r(v / 1e6, 3) for v in vv], 'kind': 'bar', 'ref': _r(vv.tail(20).mean() / 1e6, 3)}
+        except Exception:
+            pass
+        qshort = {'주도 업종의 주도주': '주도 업종 · 주도주', '업종 강세 · 종목 소외': '업종 강세 · 종목 소외',
+                  '업종·종목 동반 약세': '업종·종목 동반 약세'}.get(q['label'],
+                  '종목 단독 강세' if q['label'].startswith('종목 단독') else q['label'])
         cards = [
-            C('업종 온도 (비교군 RS 중앙값 순위)',
-              (f"{glabel} · {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위" if len(grow) else (glabel or '업종 미상')),
-              (f"비교군 RS 중앙값 {grow['med_rs'].iloc[0]:.0f} · 상위 {gpct:.0f}% · {int(grow['n'].iloc[0])}종" if len(grow)
-               else "비교군이 5종 미만이거나 분류 없음 — 아래에서 비교군 범위를 넓혀 주십시오"),
-              'na' if gpct is None else ('good' if gpct <= 30 else 'bad' if gpct >= 70 else 'mid')),
-            C('종목 강도 (RS · 52주 고점)',
-              (f"RS {rs:.0f}" if rs is not None else 'RS -') + (f" · 고점 대비 {h['dd']:+.1f}%" if h else ''),
-              (f"52주 고점 {pxf(h['high'])} ({h['date']}, {h['weeks']}주 전) · 종가 기준" if h else '가격 이력 부족'),
-              'na' if rs is None else ('good' if rs >= 80 else 'bad' if rs < 50 else 'mid')),
-            C('수급 판정', q['label'], q['why'] + (f" · 거래량 {vr:.1f}배(5일÷20일)" if vr else ''), q['tone']),
+            C(f'RS 라인 (대 {ixn} · 1년)', f"RS {rs:.0f}" if rs is not None else 'RS -',
+              (f"13주 지수 대비 {rs13:+.1f}%" if rs13 is not None else '지수 이력 없음')
+              + (f" · 52주 고점 대비 {h['dd']:+.1f}%" if h else ''),
+              'na' if rs is None else ('good' if rs >= 80 else 'bad' if rs < 50 else 'mid'), rs_sp, rs_dir),
+            C('업종 × 종목', qshort,
+              (f"{glabel} · 업종 {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위" if len(grow) else (glabel or '업종 미상')),
+              q['tone']),
+            C('거래량 (5일 ÷ 20일)', f"{vr:.1f}배" if vr else '-', '최근 60거래일 · 점선 = 20일 평균',
+              'na' if not vr else ('good' if vr >= 1.5 else 'mid' if vr >= 0.8 else 'bad'), vol_sp),
         ]
         tone['수급'] = q['tone']
         snap['blocks']['수급'] = {'tone': q['tone'], 'cards': cards, 'detail': [], 'error': None}
@@ -144,10 +206,12 @@ def compute(L: dict, ctx: dict) -> dict:
         tone['수급'] = 'na'
         snap['blocks']['수급'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"}
 
-    # ③ 이익 방향 (+ 정체 계산용 사이클 위치) ─────────────────────────────────
+    # ③ 이익 방향 → 화면 '펀더멘탈' ────────────────────────────────────────────
+    #   이익 경로(TTM 실선 + 컨센서스 점선) · 추정치 흐름(90일) · 이익률 사이클(TTM 영업이익률)
     cyc, fwd, state = {}, {'tone': 'na'}, None
     try:
         ed = L.get('_ed') or {}
+        rows = []
         if is_kr:
             rows = list(ctx['kr_cons_hist'](sym))
             lv = ctx['kr_cons_live'](sym)
@@ -156,17 +220,80 @@ def compute(L: dict, ctx: dict) -> dict:
             fwd = A2.forward_kr(rows)
         else:
             fwd = A2.forward_us(ed.get('eps_trend'), ed.get('eps_revisions'))
-        cyc = A2.cycle_position(ctx['sx'].quarterly_frame(ctx['q_rows_long'](sym, is_kr)[0]))
+        qf = ctx['sx'].quarterly_frame(ctx['q_rows_long'](sym, is_kr)[0])
+        cyc = A2.cycle_position(qf)
         et0, ah0 = L.get('_et0') or {}, L.get('_ah0') or {}
         state = et0.get('state') if is_kr else (f"이익 가속 {ah0['rows'][0]['주차']}" if ah0.get('rows') else '이익 가속 신호 없음')
-        past_val = ' · '.join(x for x in (f"영업익 {oy:+.0f}%" if oy is not None else None,
-                                          f"매출 {ry:+.0f}%" if ry is not None else None) if x) or '-'
         past_tone = ('na' if oy is None and not state else
                      'good' if (oy is not None and oy > 0) or '흑자전환' in str(state) else
                      'bad' if oy is not None and oy < 0 else 'mid')
-        cards = [C('앞으로 (컨센서스·리비전) — 대표', fwd['value'], fwd['sub'], fwd['tone']),
-                 C('사이클 위치 (자기 이익률 분포)', cyc['value'], cyc['sub'], cyc['tone']),
-                 C('지금까지 (최근 분기 YoY)', past_val, f"{state or '-'} · 사이클 기업은 바닥 국면에서 이 수치가 가장 나쁨", past_tone)]
+        # (1) 이익 경로 — KR 영업이익(억원) + 컨센서스 올해·내년 / US 순이익 + EPS 컨센서스 × 주식수
+        path_card = C('이익 경로', '-', '분기 재무 부족', 'na')
+        try:
+            key = 'op_income' if is_kr else 'net_income'
+            t4 = qf[key].astype(float).rolling(4, min_periods=4).sum().dropna().tail(16) if (qf is not None and not qf.empty and key in qf) else pd.Series(dtype=float)
+            if is_kr:
+                t4 = t4 / 1e8
+            if len(t4) >= 4:
+                fw = []
+                if is_kr and rows:
+                    lr = rows[-1]
+                    fw = [_r(lr.get('op_0y'), 1), _r(lr.get('op_1y'), 1)]
+                elif not is_kr:
+                    et = ed.get('eps_trend')
+                    shn = _num(info.get('sharesOutstanding'))
+                    try:
+                        fw = [_r(float(et.loc[p_, 'current']) * shn, 0) for p_ in ('0y', '+1y')] if (et is not None and shn) else []
+                    except Exception:
+                        fw = []
+                fw = [x for x in fw if x is not None]
+                now_v = float(t4.iloc[-1])
+                yoy = (now_v / float(t4.iloc[-5]) - 1) * 100 if len(t4) >= 5 and float(t4.iloc[-5]) > 0 else None
+                nxt = (fw[-1] / now_v - 1) * 100 if fw and now_v > 0 else None
+                lab = '영업이익 경로 (TTM → 컨센서스)' if is_kr else '순이익 경로 (TTM → 컨센서스)'
+                path_card = C(lab, _money(now_v, is_kr) + (f" · YoY {yoy:+.0f}%" if yoy is not None else ''),
+                              (f"내년 컨센서스 {_money(fw[-1], is_kr)} ({nxt:+.0f}%)" if nxt is not None else '컨센서스 없음')
+                              + ' · 실선 실적 · 점선 추정',
+                              'na' if yoy is None else ('good' if yoy > 0 and (nxt is None or nxt > 0) else 'bad' if yoy < 0 and (nxt is None or nxt < 0) else 'mid'),
+                              {'y': [_r(v, 1) for v in t4], 'fwd': fw}, _dir(list(t4) + fw, k=min(4, len(t4)), tol=0.05))
+        except Exception:
+            pass
+        # (2) 추정치 흐름
+        rev_sp, rev_sub = None, fwd.get('sub', '')
+        try:
+            if not is_kr and ed.get('eps_trend') is not None:
+                et = ed['eps_trend']
+                cols = [c_ for c_ in ('90daysAgo', '60daysAgo', '30daysAgo', '7daysAgo', 'current') if c_ in et.columns]
+                ys = [_r(et.loc['+1y', c_], 3) for c_ in cols]
+                if sum(y is not None for y in ys) >= 3:
+                    rev_sp = {'y': ys}
+                n30 = fwd.get('net30')
+                rev_sub = (f"90일 {fwd['rev90']:+.1f}%" if fwd.get('rev90') is not None else '') + \
+                          (f" · 30일 상향−하향 {n30:+.0f}건" if n30 is not None else '')
+            elif is_kr and rows:
+                hh = pd.DataFrame(rows)
+                k_ = 'op_1y' if 'op_1y' in hh else 'eps_1y'
+                ys = [_r(v, 1) for v in pd.to_numeric(hh.get(k_), errors='coerce').dropna().tail(26)]
+                if len(ys) >= 3:
+                    rev_sp = {'y': ys}
+        except Exception:
+            pass
+        rev_card = C('내년 추정치 흐름 (최근 90일)', fwd.get('value', '-'), rev_sub.strip(' ·') or '-', fwd['tone'], rev_sp,
+                     _dir((rev_sp or {}).get('y'), k=min(4, len((rev_sp or {}).get('y') or []) - 1), tol=0.01) if rev_sp else None)
+        # (3) 이익률 사이클
+        cy_sp = None
+        try:
+            qq = qf[['revenue', 'op_income']].astype(float)
+            opm = (qq['op_income'].rolling(4, min_periods=4).sum() / qq['revenue'].rolling(4, min_periods=4).sum() * 100).dropna().tail(40)
+            if len(opm) >= 6:
+                cy_sp = {'y': [_r(v, 2) for v in opm], 'ref': _r(opm.median(), 2)}
+        except Exception:
+            pass
+        cy_card = C('영업이익률 사이클 (TTM)',
+                    (f"{cy_sp['y'][-1]:.1f}%" if cy_sp else '-') + (f" · {cyc['pct']:.0f}%ile" if cyc.get('pct') is not None else ''),
+                    (cyc.get('value') or '-') + (' · 점선 = 자기 중앙값' if cy_sp else ''), cyc.get('tone', 'na'), cy_sp,
+                    _dir((cy_sp or {}).get('y'), k=4, tol=0.05) if cy_sp else None)
+        cards = [path_card, rev_card, cy_card]
         t = fwd['tone'] if fwd['tone'] != 'na' else (cyc['tone'] if cyc.get('cyclical') else past_tone)
         peak = bool(cyc.get('cyclical') and (cyc.get('pct') or 0) >= 80 and t == 'good')   # 린치: 최대 이익·최저 P/E 에서 사면 반토막
         if peak:
@@ -180,7 +307,8 @@ def compute(L: dict, ctx: dict) -> dict:
     # 정체 — 유형은 여기서 확정(가격 해석에 쓴다)
     snap['type'] = lynch_type(cyc.get('cyclical'), ry, state, mcap_usd)
 
-    # ④ 가격 ────────────────────────────────────────────────────────────────
+    # ④ 가격 → 화면 '히스토리' ─────────────────────────────────────────────
+    #   주가 경로(주봉 1년 · 200일선) · 낙폭 경로(전체 고점 대비, 3년) · 밸류 밴드(P/E 등 5년)
     try:
         bm, vb = L.get('_bm') or {}, L.get('_vb') or {}
         peg = _num(L.get('_peg'))
@@ -192,44 +320,78 @@ def compute(L: dict, ctx: dict) -> dict:
         med = next((r['업종중앙'] for r in (pr.get('rows') or []) if r['지표'] == 'PER(배)'), None)
         ratio = (per / med) if (per and med and per > 0 and med > 0) else None
         v = A2.valuation_reading(bm.get('rank'), peg, ratio, cyc.get('cyclical'))
-        cards = [C('밸류 종합 (참고 — 매수 판정 미반영)', v['value'], v['sub'], v['tone']),
-                 C(f"자기 과거 ({bm.get('kind', 'P/E')} 밴드)",
-                   (f"{bm['now']:.1f}배 · {bm['rank']:.0f}% 구간 상회" if bm.get('now') is not None and bm.get('rank') is not None else '-'),
-                   (f"과거 중앙값 {bm['pct'][50]:.1f}배 · 사업 구조 변경 시 과거 비교의 설명력 저하" if bm.get('pct') else '밴드 계산 불가'),
-                   'na' if bm.get('rank') is None else ('good' if bm['rank'] <= 25 else 'bad' if bm['rank'] >= 75 else 'mid')),
-                 C('동종 대비 · 성장 대비',
-                   (f"P/E {per:.1f}배 vs 업종 {med:.1f}배" if per and med else 'P/E -'),
-                   (f"PEG {peg:.2f} — 1 미만은 성장 대비 저평가(피터 린치)" if peg else 'PEG - (적자·컨센서스 없음)'),
-                   'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.25 else 'mid'))]
-        tone['가격'] = v['tone']
+        cl = pd.to_numeric(hist['Close'], errors='coerce').dropna()
+        cl.index = pd.to_datetime(cl.index)
+        wk = cl.resample('W-FRI').last().dropna()
+        ma200 = float(cl.tail(200).mean()) if len(cl) >= 200 else None
+        px_sp = {'y': [_r(x, 4) for x in wk.tail(52)], 'ref': _r(ma200, 4)} if len(wk) >= 10 else None
+        above = (float(cl.iloc[-1]) >= ma200) if ma200 else None
+        p_tone = 'na' if not h else ('good' if h['dd'] > -10 and above else 'bad' if h['dd'] <= -20 or above is False else 'mid')
+        dd_all = (cl / cl.cummax() - 1) * 100
+        ddw = dd_all.resample('W-FRI').last().dropna().tail(156)
+        dd_sp = {'y': [_r(x, 2) for x in ddw], 'ref': -20.0} if len(ddw) >= 10 else None
+        # 과거 30%+ 하락 — cycle_compare 와 같은 지그재그
+        ndn, avg_dn = 0, None
+        try:
+            import cycle_compare as _cc
+            sw = _cc.swing_rows(cl, 30)
+            dn = [(cl.loc[:pd.Timestamp(r_['종료일'])].iloc[-1] / cl.loc[:pd.Timestamp(r_['시작일'])].iloc[-1] - 1) * 100
+                  for r_ in sw.to_dict('records') if str(r_['라벨']).startswith('하락') and '진행' not in str(r_['라벨'])]
+            ndn, avg_dn = len(dn), (sum(dn) / len(dn) if dn else None)
+        except Exception:
+            pass
+        dd_now = float(dd_all.iloc[-1]) if len(dd_all) else None
+        bser = bm.get('series')
+        b_sp = None
+        try:
+            if bser is not None and len(bser) >= 8:
+                bs = bser.resample('ME').last().dropna().tail(60) if hasattr(bser, 'resample') else bser
+                b_sp = {'y': [_r(x, 2) for x in bs], 'ref': _r((bm.get('pct') or {}).get(50), 2)}
+        except Exception:
+            b_sp = None
+        cards = [C('주가 경로 (주봉 1년)', (f"고점 대비 {h['dd']:+.1f}%" if h else '-'),
+                   (f"52주 고점 {pxf(h['high'])} ({h['date']})" if h else '가격 이력 부족')
+                   + ('' if above is None else (' · 200일선 위' if above else ' · 200일선 아래')),
+                   p_tone, px_sp, _dir((px_sp or {}).get('y'), k=8, tol=0.03) if px_sp else None),
+                 C('낙폭 경로 (전체 고점 대비 · 3년)', (f"{dd_now:.1f}%" if dd_now is not None else '-'),
+                   (f"과거 30%+ 하락 {ndn}회 · 평균 {avg_dn:.0f}%" if avg_dn is not None else '과거 30%+ 하락 없음') + ' · 점선 −20%',
+                   'na' if dd_now is None else ('good' if dd_now > -10 else 'bad' if dd_now <= -30 else 'mid'), dd_sp),
+                 C(f"밸류 밴드 ({bm.get('kind', 'P/E')} · 5년)",
+                   (f"{bm['now']:.1f}배 · {bm['rank']:.0f}%ile" if bm.get('now') is not None and bm.get('rank') is not None else '-'),
+                   (f"중앙값 {bm['pct'][50]:.1f}배" if bm.get('pct') else '밴드 계산 불가')
+                   + (f" · 업종 P/E {med:.1f}배" if med else '') + (f" · PEG {peg:.2f}" if peg else ''),
+                   'na' if bm.get('rank') is None else ('good' if bm['rank'] <= 25 else 'bad' if bm['rank'] >= 75 else 'mid'), b_sp)]
+        tone['가격'], tone['_px'] = v['tone'], p_tone
         snap['blocks']['가격'] = {'tone': v['tone'], 'cards': cards, 'detail': [], 'error': None, 'peer_rank': pr}
     except Exception as e:
         pr = {}
         tone['가격'] = 'na'
         snap['blocks']['가격'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"}
 
-    # ② 정체 (읽는 순서 5번째) ──────────────────────────────────────────────
+    # ② 정체 → 펀더멘탈 맨 위 '기업 요약 카드'(A안). 문장은 AI 카드(짧은 필드) — 잘라 쓰지 않는다.
     try:
         ty = snap['type']
         prr = {r['지표']: r for r in (pr.get('rows') or [])}
         mc = prr.get('시총') or {}
-        rsr = prr.get('RS') or {}
-        pos_val = (f"{pr.get('sector')} · 시총 {mc['순위']}/{mc['비교수']}위" if mc.get('순위') else (pr.get('sector') or '업종 미상'))
-        pos_sub = (f"RS {rsr['순위']}/{rsr['비교수']}위 · 산업 내 1위·과점 여부가 1차 점검 항목" if rsr.get('순위') else '업종 내 순위 계산 불가')
-        pos_tone = 'na' if not mc.get('순위') else ('good' if mc['순위'] <= 2 else 'mid' if mc['순위'] <= 5 else 'na')
-        prof = L.get('_prof') or {}
-        seg = L.get('_seg_ai') or {}
-        story = None
-        for cand in (seg.get('one_liner') if isinstance(seg, dict) else None,
-                     seg.get('summary') if isinstance(seg, dict) else None, prof.get('summary')):
-            if isinstance(cand, str) and cand.strip():
-                story = cand.strip()
-                break
-        cards = [C('유형 (피터 린치 6유형 · v1 규칙 — 사이클 여부는 이익률 분포로 자동 판정하며 오분류 가능)', ty['label'], ty['sub'], 'na'),
-                 C('업종 내 위치', pos_val, pos_sub, pos_tone),
-                 C('이 회사는 무엇인가', (story[:90] + '…') if story and len(story) > 90 else (story or '-'),
-                   '사업부문·고객 구성은 아래 상세 · 서사는 숫자로 확인될 때만 근거가 됨(다모다란)', 'na')]
-        snap['blocks']['정체'] = {'tone': 'na', 'cards': cards, 'detail': [], 'error': None}
+        card = L.get('_ai_card') or {}
+        kp = []
+        if ry is not None:
+            kp.append({'label': '매출 YoY (최근 분기)', 'value': f"{ry:+.0f}%", 'tone': 'good' if ry > 0 else 'bad'})
+        if (snap['blocks'].get('이익 방향') or {}).get('cards'):
+            c3 = snap['blocks']['이익 방향']['cards'][2]
+            if c3.get('spark'):
+                kp.append({'label': 'TTM 영업이익률', 'value': f"{c3['spark']['y'][-1]:.1f}%", 'tone': c3['tone']})
+        bmm = L.get('_bm') or {}
+        if bmm.get('now') is not None and bmm.get('rank') is not None:
+            kp.append({'label': f"{bmm.get('kind', 'P/E')} (5년 밴드)", 'value': f"{bmm['now']:.0f}배",
+                       'sub': f"{bmm['rank']:.0f}%ile", 'tone': 'good' if bmm['rank'] <= 25 else 'bad' if bmm['rank'] >= 75 else 'mid'})
+        if mc.get('순위'):
+            kp.append({'label': '업종 내 시총', 'value': f"{mc['순위']}/{mc['비교수']}위", 'sub': str(pr.get('sector') or ''), 'tone': 'na'})
+        snap['company'] = {'name': snap['name'], 'definition': card.get('definition') or L.get('_one') or '',
+                           'revenue': card.get('revenue'), 'moat': card.get('moat'), 'risk': card.get('risk'),
+                           'type': f"린치 유형 · {ty['label']}", 'kpis': kp,
+                           'src': card.get('src') or ''}
+        snap['blocks']['정체'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': None}
     except Exception as e:
         snap['blocks']['정체'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"}
 
@@ -278,12 +440,23 @@ def compute(L: dict, ctx: dict) -> dict:
     if tone.get('_cyc_peak'):
         fw = '이익 사이클 천장권 — 해석 주의'
     fl = {'good': '수급 유입', 'mid': '수급 부분 유입', 'bad': '수급 이탈', 'na': '수급 판단 불가'}[s_t]
+    px_t = tone.get('_px', 'na')
+    pw = {'good': '주가 상승 추세', 'mid': '주가 조정 구간', 'bad': '주가 하락 추세', 'na': ''}[px_t]
+
+    def _first(block):
+        cs = (snap['blocks'].get(block) or {}).get('cards') or []
+        return cs[0] if cs else {}
+    f0, p0, s0 = _first('이익 방향'), _first('가격'), _first('수급')
     snap['verdict'] = {
-        'head': f"{fw}, {fl}",
+        'head': ', '.join(x for x in (fw, pw, fl) if x),
         'type_chip': snap['type']['label'],
-        'cards': [C('🌊 수급·관심', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[s_t], fl, s_t),
-                  C('🏭 이익 방향 (앞으로 우선)', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[f_t], fw, f_t),
-                  C('⚖️ 가격 (참고)', {'good': '저평가', 'mid': '중립', 'bad': '고평가', 'na': '-'}[p_t], '사이클 기업·적자 종목은 판정 보류', p_t)],
+        # 2026-11-16 — 세 탭과 같은 순서·같은 대표 카드(값 + 흐름선). 밸류는 히스토리 탭의 밴드 카드로.
+        'cards': [C('🏭 펀더멘탈', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[f_t],
+                    f"{fw} · {f0.get('value', '-')}", f_t, f0.get('spark'), f0.get('dir')),
+                  C('📈 히스토리', {'good': '상승 추세', 'mid': '조정', 'bad': '하락 추세', 'na': '-'}[px_t],
+                    p0.get('sub', '-'), px_t, p0.get('spark'), p0.get('dir')),
+                  C('🌊 수급', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[s_t],
+                    f"{fl} · {s0.get('value', '-')}", s_t, s0.get('spark'), s0.get('dir'))],
         'rules': rules,
     }
     return snap

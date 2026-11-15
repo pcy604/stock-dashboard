@@ -10,7 +10,7 @@ from datetime import timedelta
 import streamlit as st
 
 
-def period_range(label: str, presets: dict, key: str, lo, hi, default: str | None = None):
+def period_range(label: str, presets: dict, key: str, lo, hi, default: str | None = None, where=None):
     """프리셋(일수 또는 None=전체) + '직접'. 반환 (start_date, end_date) — 둘 다 date.
 
     presets: {'3개월': 91, '1년': 365, '전체': None, ...} — 값이 None 이면 그 프리셋은 lo 부터.
@@ -18,7 +18,8 @@ def period_range(label: str, presets: dict, key: str, lo, hi, default: str | Non
     """
     opts = list(presets) + ['직접']
     dflt = default if default in opts else opts[0]
-    pick = st.segmented_control(label, opts, default=dflt, key=key) or dflt
+    tgt = where if where is not None else st          # 2026-11-16 — 다른 버튼과 한 줄에 놓을 수 있게(공간 절약)
+    pick = tgt.segmented_control(label, opts, default=dflt, key=key) or dflt
     if pick == '직접':
         c1, c2, _sp = st.columns([1, 1, 3])     # 2026-11-15 — 두 칸이 화면 폭 전체를 먹었다 → 날짜 폭만큼만
         days0 = next((v for v in presets.values() if v), 365)

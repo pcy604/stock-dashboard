@@ -5409,6 +5409,58 @@ def _ai_summary_auto(sym, is_kr, name, fallback_text):
     return out
 
 
+def _ai_card(sym, ais: dict) -> dict:
+    """기업 요약 카드(A안, 2026-11-16) — 긴 AI 요약에서 짧은 필드 4개만 뽑는다. 같은 요약이면 디스크 재사용.
+    화면·봇은 이 필드를 잘라 쓰지 않는다(줄바꿈) — 그래서 길이 제한은 여기 프롬프트에서 건다."""
+    import json as _j
+    txt = str((ais or {}).get('text') or '')
+    if not txt or txt.startswith('('):
+        return {}
+    p = Path('results/ai_summary') / f'{sym}.json'
+    try:
+        d = _j.loads(p.read_text(encoding='utf-8'))
+    except Exception:
+        d = dict(ais)
+    c = d.get('card')
+    if isinstance(c, dict) and c.get('definition') and c.get('_of') == (ais.get('generated') or ''):
+        return c
+    try:
+        import config
+        from google import genai
+        key = getattr(config, 'GEMINI_KEY', '') or ''
+        if not key:
+            try:
+                key = st.secrets.get('GEMINI_KEY', '')
+            except Exception:
+                key = ''
+        if not key:
+            return {}
+        prompt = ("아래는 한 기업의 사업 요약이다. 증권사 리포트 요약 박스에 들어갈 문구 4개를 JSON 으로만 출력하라.\n"
+                  '{"definition": "...", "revenue": "...", "moat": "...", "risk": "..."}\n'
+                  "definition = 기업 정의 한 문장(35자 이내) · revenue = 매출원(사업부·제품, 비중 숫자가 있으면 포함, 35자 이내) · "
+                  "moat = 경쟁 우위 핵심 하나(30자 이내) · risk = 투자 판단상 가장 큰 리스크 하나(30자 이내).\n"
+                  "문체: 명사형 종결(…기업, …중심, …지연). 수식어·홍보 문구·이모지·따옴표 인용 금지. 요약에 없는 사실 금지.\n\n" + txt[:6000])
+        client = genai.Client(api_key=key)
+        r = client.models.generate_content(model='gemini-2.5-flash-lite', contents=prompt)
+        raw = (r.text or '').strip().strip('`')
+        raw = raw[raw.find('{'): raw.rfind('}') + 1]
+        c = {k: str(v).strip() for k, v in _j.loads(raw).items() if k in ('definition', 'revenue', 'moat', 'risk') and v}
+        if not c.get('definition'):
+            return {}
+        c['_of'] = ais.get('generated') or ''
+        c['src'] = f"AI 요약 · 원천 {ais.get('src', '')} · 수치는 공시 기준"
+        d['card'] = c
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(_j.dumps(d, ensure_ascii=False), encoding='utf-8')
+        except Exception:
+            pass
+        return c
+    except Exception as e:
+        print(f'[ai card] {sym}: {e}')
+        return {}
+
+
 @st.cache_data(ttl=6 * 3600, show_spinner=False, max_entries=48)
 def _seg_xbrl_cached(sym):
     import segment_xbrl
@@ -5852,7 +5904,7 @@ def _an_axes_pick(A2) -> list:
                 _usm.save(_em, blob)
         except Exception:
             pass
-    st.pills('펼칠 축 — 누른 것만 아래에 펼친다 (결론은 항상)', A2.AXES, selection_mode='multi',
+    st.pills('펼칠 탭', A2.AXES, selection_mode='multi', label_visibility='collapsed',
              default=st.session_state['an_axes'], key='an_axes_w', on_change=_save,
              format_func=lambda a: f"{A2.AXIS_ICON[a]} {a}")
     return list(st.session_state.get('an_axes_w', st.session_state['an_axes']) or [])
@@ -5870,9 +5922,13 @@ def _an_v2_fill(L: dict):
     """v2 — 각 축의 '첫 줄 판정' 카드와 맨 위 결론. 계산은 stock_snapshot.compute 한 곳(봇 /report 가 읽을 정본과 같은 dict),
     여기선 그리기만 한다. 없는 값은 '-'·판정 불가로 정직하게(여기서 새로 추정하지 않는다)."""
     import stock_snapshot as _ss
+    import flow_cards as _FC
     _ss = _fresh_module(_ss)
+    _FC = _fresh_module(_FC)
     ctx = {'A2': L['_A2'], 'CMB': _CMB, 'cm': _cm, 'sector_detail': _sector_detail, 'kr_cons_hist': _kr_cons_hist,
-           'kr_cons_live': _kr_cons_live, 'sx': _sx, 'q_rows_long': _q_rows_long, 'live_plan': _live_plan}
+           'kr_cons_live': _kr_cons_live, 'sx': _sx, 'q_rows_long': _q_rows_long, 'live_plan': _live_plan,
+           'index_hist': fetch_index_history}
+    L.setdefault('_ai_card', L.get('_ai_card_') or {})
     try:
         snap = _ss.compute(L, ctx)
     except Exception as e:
@@ -5895,8 +5951,10 @@ def _an_v2_fill(L: dict):
         if b.get('error'):
             box.caption(f"`{ax} 판정 실패: {b['error']}`")
             continue
+        if ax == '이익 방향' and snap.get('company'):
+            box.markdown(_FC.CSS + _FC.company_html(snap['company']), unsafe_allow_html=True)
         if b.get('cards'):
-            box.markdown(_an_cards(b['cards']), unsafe_allow_html=True)
+            box.markdown(_FC.CSS + _FC.cards_html(b['cards']), unsafe_allow_html=True)
         if ax == '깨지는 조건·촉매' and b.get('detail'):
             with box.expander('근거 — 깨지는 조건의 지금 거리 · 리스크 점검 · 데이터 점검', expanded=bool(b.get('expand'))):
                 ico = {'ok': '✅', 'warn': '⚠️', 'na': '·'}
@@ -5906,12 +5964,10 @@ def _an_v2_fill(L: dict):
         with L['_V2C']:
             st.markdown(f"#### 🧭 결론 — {vd['head']} &nbsp;<span style='font-size:.8em;color:#6B7280'>🪪 {vd['type_chip']}</span>",
                         unsafe_allow_html=True)
-            st.markdown(_an_cards(vd['cards']), unsafe_allow_html=True)
+            st.markdown(_FC.CSS + _FC.cards_html(vd['cards']), unsafe_allow_html=True)
             rl = vd.get('rules')
-            if L.get('_IS_LAB') and rl:
-                st.caption(f"🤖 실전 규칙 {rl['pass']}/{rl['total']} 통과 · 봇 상태: {rl['bot']} — 자세한 대조는 🎯 매매 계획 축(소유자에게만 보임)")
-            st.caption("세 신호는 아래 각 축 첫 줄 카드의 대표값이다(수급 = 업종 온도 × 종목 RS · 이익 방향 = 컨센서스 리비전 우선, "
-                       "없으면 사이클 위치·최근 분기 · 유형 = 린치 6유형 v1 규칙). 규칙 계산이며 투자 권유가 아니다.")
+            st.caption("세 카드 = 아래 각 탭 첫 카드의 대표값 · 선 = 지나온 흐름(실선)과 컨센서스(점선) · 규칙 계산이며 투자 권유가 아님"
+                       + (f" · 실전 규칙 {rl['pass']}/{rl['total']} 통과(봇: {rl['bot']})" if (L.get('_IS_LAB') and rl) else ''))
     except Exception as e:
         L['_V2C'].caption(f"`결론 그리기 실패: {type(e).__name__}: {str(e)[:100]}`")
 
@@ -6238,7 +6294,8 @@ def _tab_analysis():
                             _en = re.split(r'(?<!Inc)(?<!Corp)(?<!Co)(?<!Ltd)(?<!Mr)(?<!U\.S)\.\s+(?=[A-Z])', _en)[0].rstrip('.') + '.'
                             _one = '(영문 원문 · 한글 요약 실패) ' + (_en if len(_en) <= 200 else _en[:197].rsplit(' ', 1)[0] + '…')
                     _hero(_one if len(_one) <= 240 else _one[:237] + '…')
-                    with st.container(border=True):
+                    _ai_card_ = _ai_card(sym8_clean, _ais)      # 2026-11-16 기업 요약 카드(A안) — 결론 아래 펀더멘탈 첫 줄
+                    with st.expander("사업 요약 전문 (AI · 공식 문서 기반)", expanded=False):   # 공간 절약 — 핵심은 위 카드
                         st.markdown(_ais['text'])
                     st.caption(f"🤖 AI 요약 · 원천: {_ais['src']}{(' (' + _ais['src_key'] + ' 공시)') if _ais.get('src_key') and not is_kr_sym else ''}"
                                f" · 생성 {str(_ais.get('generated', ''))[:10]}. 문장은 AI 가 원문에서 요약한 것 — "
@@ -7031,7 +7088,7 @@ def _tab_analysis():
                     # 기본 = 주봉 · 가격+이동평균+거래량만. RSI·MACD·낙폭은 골라서 켠다(패널 5개가 늘 떠서 난잡했다).
                     # 피보나치는 뺐다 — 예측력 근거가 약하고 매매 원칙(이익 가속 진입 · 고점 대비 −20% 청산)에 안 쓰인다.
                     # 대신 원칙에 쓰이는 선: 52주 고점, 그 −20%(청산 기준선).
-                    _cc1, _cc2, _cc3 = st.columns([1, 1.4, 1.4])
+                    _cc1, _ccp, _cc2, _cc3 = st.columns([1, 1.3, 0.8, 1.3])     # 2026-11-16 봉·기간·축·보조지표 한 줄
                     _bar = _cc1.segmented_control("봉", ['일봉', '주봉', '월봉'], default='주봉',
                                                   key=f"bar_{sym8_clean}") or '주봉'
                     # 2026-11-07 — 프리셋만 있으면 원하는 구간을 못 짚는다는 지적 → '직접'(날짜 두 칸) 추가(date_picker.py 공용)
@@ -7039,7 +7096,7 @@ def _tab_analysis():
                     _per_opts = {'1년': 365, '3년': 1095, '전체': None}
                     _plo, _phi = (hist.index.min().date(), hist.index.max().date()) if len(hist) else (datetime.today().date(), datetime.today().date())
                     _pstart, _pend = _dpk.period_range("기간", _per_opts, key=f"per_{sym8_clean}_{_bar}", lo=_plo, hi=_phi,
-                                                       default={'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar])
+                                                       default={'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar], where=_ccp)
                     _pk_now = st.session_state.get(f"per_{sym8_clean}_{_bar}") or {'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar]
                     _scale = _cc2.segmented_control("축", ['선형', '로그'], default='로그' if _pk_now == '전체' else '선형',
                                                     key=f"scale_{sym8_clean}_{_bar}_{_pk_now}") or '선형'
