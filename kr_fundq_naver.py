@@ -121,6 +121,12 @@ def merge(old: pd.DataFrame, new_rows: list[dict], today: str):
         m.loc[sel, 'fs_div'] = m.loc[sel, 'fs_div'].astype(str).str.replace('-NAVERFX', '') + '-NAVERFX'
         bad_syms = bad_syms - fx_syms
     filled = 0
+    # 2026-11-16 — 네이버가 넣은 행(fs_div NAVER…)은 네이버 새 값으로 갱신(잠정 → 확정). DART 행은 여전히 덮지 않는다.
+    nav = m['fs_div'].astype(str).str.startswith('NAVER')
+    for c in FLOWS:
+        upd = nav & m[f'{c}_n'].notna() & (m[c] != m[f'{c}_n'])
+        filled += int(upd.sum())
+        m.loc[upd, c] = m.loc[upd, f'{c}_n']
     for c in FLOWS + BAL:
         fill = m[c].isna() & m[f'{c}_n'].notna()
         filled += int(fill.sum())

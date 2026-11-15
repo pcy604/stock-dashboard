@@ -59,7 +59,10 @@ def _period(yymm, freq):
 def parse(report_json, rpt, freq):
     """cF3002 응답 1개 → {period: {key: value}} (실적 열만 — 추정(E)·증감 열 제외)."""
     yymm = [re.sub(r'<.*', '', str(y)).strip() for y in report_json.get('YYMM') or []]
-    idx = [i for i, y in enumerate(yymm) if re.fullmatch(r'\d{4}/\d{2}', y)]
+    # 2026-11-16 — 잠정실적 열('2026/09(P)')도 실적으로 받는다. 3분기 발표 종목이 저장본에 2분기까지만 있었다
+    #   (SK하이닉스 실측: 3분기 10월 발표 → 11-15 갱신에도 3분기 없음 · 2026.3Q 보유 189종/2,287종).
+    #   추정 '(E)' 열은 계속 뺀다. 잠정 값은 확정 공시 뒤 kr_fundq_naver.merge 가 NAVER 행을 다시 덮는다.
+    idx = [i for i, y in enumerate(yymm) if re.fullmatch(r'\d{4}/\d{2}(\(P\))?', y)]
     rows = report_json.get('DATA') or []
     by_name = {}
     for d in rows:                                    # 같은 이름이면 윗단계(LVL 작은 쪽)가 이긴다
