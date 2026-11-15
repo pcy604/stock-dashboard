@@ -114,11 +114,14 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         return
     K = f"cyc2|{sym}"
     # 2026-11-15 — 기간 버튼 삭제(통계는 가진 이력 전체) · 기준 10~80% · 가격 차트는 위 '차트'에 구간 색으로 합침
-    c2, c3 = st.columns([3, 1])
-    x = c2.slider('꼭짓점 기준 — 이만큼 되돌려야 고점·저점으로 인정(%)', 10, 80, 30, 5, key=f'{K}|x',
-                  help='작게 하면 작은 출렁임까지 잘게 쪼개고, 크게 하면 큰 사이클만 남는다. 정상 종목은 60% 넘게 빠지는 일이 드물다 — '
-                       '경기민감주는 30~40%, 큰 사이클만 보려면 50% 이상')
-    manual = c3.toggle('✏️ 구간 직접 고치기', key=f'{K}|man', help='켜면 지금 자동 구간이 표로 복사되고, 그 표를 고친 대로 계산합니다')
+    # 2026-11-16 — 한 줄: 구간 판정 기준(좁게) · 그림 보기 · 직접 고치기
+    c2, cv, c3 = st.columns([1.6, 1.6, 0.9], vertical_alignment='bottom')
+    x = c2.slider('구간 판정 기준(%)', 10, 80, 30, 5, key=f'{K}|x',
+                  help='고점에서 이 비율 이상 하락하면 하락 구간, 저점에서 이 비율 이상 상승하면 상승 구간으로 끊는다. '
+                       '값이 작으면 작은 등락까지 나뉘고, 크면 큰 사이클만 남는다(경기민감주 30~40% · 장기 사이클 50% 이상).')
+    view = cv.segmented_control('그림', ['구간 비교', '기간 추이'], default='구간 비교', key=f'{K}|view2',
+                                help='구간 비교 = 모든 구간을 같은 출발점(0일·0%)에 겹침 · 기간 추이 = 날짜축 위 고점 대비 낙폭(MDD)') or '구간 비교'
+    manual = c3.toggle('구간 직접 수정', key=f'{K}|man', help='켜면 자동 구간이 표로 복사되고, 고친 표대로 계산합니다')
     per = '전체'
     cl = close
 
@@ -168,9 +171,7 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
                 unsafe_allow_html=True)
 
     # ── 구간 그림: 겹쳐 보기(같은 출발점) / 날짜순(MDD 차트) — 2026-11-10 차니 요구: 가로 전체 폭, 종료일 표기, 구간별 색 ──
-    view = st.segmented_control('보기', ['겹쳐 보기 — 같은 출발점', '날짜순 — 낙폭(MDD) 차트'],
-                                default='겹쳐 보기 — 같은 출발점', key=f'{K}|view') or '겹쳐 보기 — 같은 출발점'
-    by_date = view.startswith('날짜순')
+    by_date = view == '기간 추이'
     for dirn, color, title in (('하락', _RED, '📉 하락 구간 (고점 → 저점)'), ('상승', _GREEN, '📈 상승 구간 (저점 → 고점)')):
         sub = [s_ for s_ in segs if s_['direction'] == dirn]
         up = dirn == '상승'
@@ -212,13 +213,13 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         st.plotly_chart(fig, use_container_width=True)
 
     asof = str(cl.index[-1].date())
-    st.markdown("**방향별 통계** (진행 중 구간 제외)")
+    st.markdown("**상승·하락 요약** — 방향별 횟수·평균 기간·평균 폭(진행 중 구간 제외)")
     tsrc(src + ' · cycle_compare.py', asof=asof)
     summ = C.summarize(segs)
     if len(summ):
         st.dataframe(summ, hide_index=True, use_container_width=True, filters=False)
     # 2026-11-15 — 접힌 상자 안 표(AgGrid)가 빈칸으로 그려지는 문제 → 상자 없이 바로(최근 순)
-    st.markdown(f"**구간 목록 {len(segs)}개** (최근 순)")
+    st.markdown(f"**구간별 상세 {len(segs)}개** — 각 구간의 날짜·기간·수익률(최근 순)")
     tsrc(src + ' · cycle_compare.py', asof=asof)
     st.dataframe(C.detail_table(segs).iloc[::-1].reset_index(drop=True), hide_index=True, use_container_width=True, filters=False)
     st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림이 나온 고점·저점(지그재그) — 나중에야 확정되므로 진행 중 구간의 끝은 아직 모릅니다. "

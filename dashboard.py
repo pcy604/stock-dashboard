@@ -4076,8 +4076,9 @@ def _macro_detail_charts():
        → 일본·한국은 익일물 콜금리(OECD, 매월), 영국 SONIA, 유로존 M2 는 ECB Data Portal, 유동성은 G3 중앙은행 총자산."""
     with st.expander("📊 상세 지표 차트 — 정책금리 · 장기금리 · 수익률곡선 · 물가 · 유동성"):
         # 2026-11-07 — '2·5·10년'만 있으면 원하는 구간을 못 짚는다는 지적 → '직접'(date_picker.py 공용) 추가
-        _mstart, _mend = _dpk.period_range('기간', {'2년': 730, '5년': 1826, '10년': 3652, '20년': 7305, '전체': None},
-                                           key='det_rng', lo=pd.Timestamp('1960-01-01').date(), hi=pd.Timestamp.today().date(), default='5년')
+        _mstart, _mend = _dpk.period_range('기간', {'1년': 365, '3년': 1095, '5년': 1826, '10년': 3652, '20년': 7305, '전체': None},
+                                           key='det_rng', lo=pd.Timestamp('1960-01-01').date(), hi=pd.Timestamp.today().date(), default='5년',
+                                           where=st.columns([3.6, 1.4])[0])
         _mstart, _mend = pd.Timestamp(_mstart), pd.Timestamp(_mend)
         _cut = lambda x: x[(x.index >= _mstart) & (x.index <= _mend)] if len(x) else x
         F = lambda sid, n: _cut(_mf.to_series(fetch_fred(sid, n)))
@@ -5898,13 +5899,14 @@ _resolve_symbol = _symsrch.resolve_symbol
 # 2026-11-15 재구조(차니 확정): 결론 + 펀더멘탈 → 히스토리 → 수급. 매매 계획 삭제(종목 발굴 자동매매가 맡는다).
 #   ref(월별 통계·이평 크로스)는 숨김 유지, 내부자=ins(수급), 희석=dil(펀더멘탈), 정류장=stn(히스토리).
 _AN_AXMAP = [('펀더멘탈', ('profile', 'seg', 'flow', 'earn', 'fin', 'cons', 'val0', 'dil')),
-             ('히스토리', ('price', 'val', 'stn')),
+             ('히스토리', ('price', 'val', 'stn', 'mstat')),
              ('수급', ('peer', 'ins'))]
 _AN_SECKEYS = ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val', 'canslim', 'fin', 'profile', 'ref',
-               'cons', 'val0', 'ins', 'dil', 'stn')
+               'cons', 'val0', 'ins', 'dil', 'stn', 'mstat')
 
 
 def _an_v2_on() -> bool:
+    return True          # 2026-11-16 차니: 옛 화면 폐지 — 새 화면(결론 + 3탭)만. 옛 코드 경로는 다음 정리 때 걷어낸다.
     qp = st.query_params.get('layout')
     if qp in ('v1', 'v2'):
         st.session_state['an_layout'] = qp
@@ -5912,6 +5914,7 @@ def _an_v2_on() -> bool:
 
 
 def _an_layout_switch():
+    return               # 2026-11-16 옛 화면 폐지 — 전환 버튼 없음
     cur = '옛 화면' if not _an_v2_on() else '새 화면'
 
     def _chg():
@@ -6012,9 +6015,19 @@ def _an_v2_fill(L: dict):
         if b.get('cards'):
             box.markdown(_FC.CSS + _FC.cards_html(b['cards']), unsafe_allow_html=True)
         if ax == '깨지는 조건·촉매' and b.get('detail'):
-            with box.expander('근거 — 깨지는 조건의 지금 거리 · 리스크 점검 · 데이터 점검', expanded=bool(b.get('expand'))):
+            with box.expander('근거 — 깨지는 조건 · 리스크 점검 · 데이터 점검', expanded=bool(b.get('expand'))):
                 ico = {'ok': '✅', 'warn': '⚠️', 'na': '·'}
-                st.markdown('\n'.join(f"- {ico.get(r.get('state'), '·')} **{r['name']}** · {r.get('detail', '')}" for r in b['detail']))
+                rank = {'warn': 0, 'na': 2, 'ok': 1}
+                grp_help = {'깨지는 조건': '판단을 거둘 조건 4개 — 실전 규칙(RS 70·고점 −20%·지수 5주선)과 컨센서스 방향',
+                            '리스크 점검': '재무·밸류·변동성·사업 집중 등 보유 리스크',
+                            '데이터 점검': '화면 숫자를 믿어도 되는지 — 최신성·교차 검증'}
+                cols = st.columns(3)
+                for col, g in zip(cols, ('깨지는 조건', '리스크 점검', '데이터 점검')):
+                    rs = sorted([r for r in b['detail'] if r.get('grp', '리스크 점검') == g], key=lambda r: rank.get(r.get('state'), 2))
+                    nw = sum(1 for r in rs if r.get('state') == 'warn')
+                    col.markdown(f"**{g}** · 해당 {nw}/{len(rs)}")
+                    col.caption(grp_help[g])
+                    col.markdown('\n'.join(f"- {ico.get(r.get('state'), '·')} **{r['name']}** · {r.get('detail', '')}" for r in rs) or '-')
     try:
         vd = snap['verdict']
         with L['_V2C']:
@@ -7125,8 +7138,7 @@ def _tab_analysis():
 
                 with _SEC['price']:
                     st.divider()
-                    st.markdown("### 📈 차트")
-                    pass
+                    _chart_head = st.empty()      # 2026-11-16 — 제목 옆 한 줄에 기술 신호(따로 큰 줄을 먹던 것 정리)
 
                     closes = hist['Close']
                     hist['MA20']  = closes.rolling(20).mean()
@@ -7142,24 +7154,26 @@ def _tab_analysis():
                         last['MA20'] if not pd.isna(last['MA20']) else None,
                         last['MA50'] if not pd.isna(last['MA50']) else None,
                     )
-                    col_sig, col_score = st.columns([2, 3])
-                    col_sig.markdown(f"### {label}")
-                    col_score.markdown("**신호 근거:** " + " · ".join(reasons))
+                    _chart_head.markdown(f"### 📈 차트 <span style='font-size:13px;font-weight:400;color:#6B7280'>"
+                                         f"&nbsp; 기술 신호 {_html.escape(str(label))} — {_html.escape(' · '.join(reasons))}</span>",
+                                         unsafe_allow_html=True)
 
                     # ── 차트 (2026-10-20 단순화) ─────────────────────────────────
                     # 기본 = 주봉 · 가격+이동평균+거래량만. RSI·MACD·낙폭은 골라서 켠다(패널 5개가 늘 떠서 난잡했다).
                     # 피보나치는 뺐다 — 예측력 근거가 약하고 매매 원칙(이익 가속 진입 · 고점 대비 −20% 청산)에 안 쓰인다.
                     # 대신 원칙에 쓰이는 선: 52주 고점, 그 −20%(청산 기준선).
-                    _cc1, _ccp, _cc2, _cc3 = st.columns([1, 1.3, 0.8, 1.3])     # 2026-11-16 봉·기간·축·보조지표 한 줄
+                    # 2026-11-16 — 1줄: 봉·축·보조지표(왼쪽에 모음) / 2줄: 기간 버튼 + 시작일·종료일(사이트 공통 date_picker)
+                    _cc1, _cc2, _cc3, _ = st.columns([1.1, 0.8, 1.5, 2.4])
                     _bar = _cc1.segmented_control("봉", ['일봉', '주봉', '월봉'], default='주봉',
                                                   key=f"bar_{sym8_clean}") or '주봉'
                     # 2026-11-07 — 프리셋만 있으면 원하는 구간을 못 짚는다는 지적 → '직접'(날짜 두 칸) 추가(date_picker.py 공용)
                     # 2026-11-15 — 기간 버튼 간소화(1년·3년·전체·직접) + 선형/로그. 사이클 구간 색을 이 차트에 깐다(아래 사이클 차트 삭제).
-                    _per_opts = {'1년': 365, '3년': 1095, '전체': None}
+                    _per_opts = None                     # 사이트 공통 STD(1·3·5·10년·전체)
+                    _ccp, _ = st.columns([3.4, 1.6])
                     _plo, _phi = (hist.index.min().date(), hist.index.max().date()) if len(hist) else (datetime.today().date(), datetime.today().date())
                     _pstart, _pend = _dpk.period_range("기간", _per_opts, key=f"per_{sym8_clean}_{_bar}", lo=_plo, hi=_phi,
                                                        default={'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar], where=_ccp)
-                    _pk_now = st.session_state.get(f"per_{sym8_clean}_{_bar}") or {'일봉': '1년', '주봉': '3년', '월봉': '전체'}[_bar]
+                    _pk_now = st.session_state.get(f"per_{sym8_clean}_{_bar}") or ('전체' if (_pend - _pstart).days > 1900 else '1년')
                     _scale = _cc2.segmented_control("축", ['선형', '로그'], default='로그' if _pk_now == '전체' else '선형',
                                                     key=f"scale_{sym8_clean}_{_bar}_{_pk_now}") or '선형'
                     _ind = _cc3.pills("보조지표", ['RSI', 'MACD', '낙폭(MDD)'], selection_mode='multi',
@@ -7315,12 +7329,11 @@ def _tab_analysis():
                     # ════════════════════════════════════════════════════════════
                     # 📆 월별 상승률 통계 + ⚡ 골든/데드크로스 매매 성과 (item 8)
                     # ════════════════════════════════════════════════════════════
-                    st.divider()
-                    _mstat = _HID.container() if _V2 else st.container()    # 2026-11-10 v2: 월별 상승률·이평 크로스 삭제 합의 → 숨김
+                    _mstat = _SEC['mstat']      # 2026-11-16 차니: 월별 추이를 퀀트로 → 히스토리 탭에 복귀(이평 크로스는 숨김 유지)
                     _gcdc = _HID.container() if _V2 else st.container()
 
                     with _mstat:
-                        st.subheader("📆 월별 상승률 통계 (연도 × 월)")
+                        st.markdown("#### 📆 월별 계절성")
                         # 차트 기간과 무관하게 전체 상장 히스토리 사용 (엑셀 '주가 추이 분석' 방식)
                         _fullc = full_close_history(sym8_clean, is_kr_sym)
                         _basec = _fullc if (_fullc is not None and len(_fullc) > len(hist)) else hist['Close']
@@ -7336,14 +7349,46 @@ def _tab_analysis():
                                 return cfg
                             # 2026-11-06 — Styler 표 → AgGrid(머리글 정렬·No. 1부터). 색은 table_ui 가 부호로 칠한다.
                             #   승률은 부호에 뜻이 없어(항상 +) 따로 떼어 색 없이 둔다(표 규칙: 부호에 뜻이 있는 열만 칠한다).
-                            _tsrc('FinanceDataReader(일봉 주가)', live=True)
-                            st.dataframe(_mraw, column_config=_mcfg('연도'), filters=False, footer=False)
-                            _mavg = _msum[_msum['구분'].str.endswith('평균')].reset_index(drop=True)
-                            _mwin = _msum[_msum['구분'].str.endswith('승률')].reset_index(drop=True)
-                            if len(_mavg):
-                                st.dataframe(_mavg, column_config=_mcfg('구분'), filters=False)
-                            if len(_mwin):
-                                st.dataframe(_mwin, column_config=_mcfg('구분'), filters=False, color=False)
+                            # 2026-11-16 — 퀀트 요약 먼저: 월별 평균(막대) · 승률(선) · t값(평균 ÷ 표준오차, |t|≥2 = 우연 아닐 가능성)
+                            _mq = []
+                            for _mm in _ms.MONTHS:
+                                _v = pd.to_numeric(_mraw[_mm], errors='coerce').dropna() if _mm in _mraw else pd.Series(dtype=float)
+                                if len(_v) >= 2:
+                                    _sd = float(_v.std())
+                                    _mq.append({'월': _mm, '표본(년)': len(_v), '평균(%)': round(float(_v.mean()), 2),
+                                                '중앙값(%)': round(float(_v.median()), 2), '승률(%)': round(float((_v > 0).mean() * 100), 1),
+                                                't값': round(float(_v.mean()) / (_sd / len(_v) ** .5), 2) if _sd > 0 else None})
+                            if _mq:
+                                _mqd = pd.DataFrame(_mq)
+                                _cm = datetime.today().month
+                                _fm = make_subplots(specs=[[{'secondary_y': True}]])
+                                _fm.add_trace(go.Bar(x=_mqd['월'], y=_mqd['평균(%)'], name='평균 수익률(%)',
+                                                     marker_color=[('#16A34A' if v > 0 else '#DC2626') if abs(t or 0) >= 2 else
+                                                                   ('#86EFAC' if v > 0 else '#FCA5A5') for v, t in zip(_mqd['평균(%)'], _mqd['t값'])],
+                                                     marker_line=dict(width=[2.5 if i == _cm - 1 else 0 for i in range(len(_mqd))], color='#111827')),
+                                              secondary_y=False)
+                                _fm.add_trace(go.Scatter(x=_mqd['월'], y=_mqd['승률(%)'], name='승률(%)', mode='lines+markers',
+                                                         line=dict(color='#475569', width=1.6)), secondary_y=True)
+                                _fm.add_hline(y=50, line_dash='dot', line_color='#CBD5E1', secondary_y=True)
+                                _fm.update_layout(height=260, margin=dict(l=8, r=8, t=8, b=8), paper_bgcolor='rgba(0,0,0,0)',
+                                                  plot_bgcolor='rgba(0,0,0,0)', legend=dict(orientation='h', y=1.12, x=0))
+                                _fm.update_yaxes(title_text='평균(%)', secondary_y=False, gridcolor='#EEF0F3')
+                                _fm.update_yaxes(title_text='승률(%)', range=[0, 100], secondary_y=True, showgrid=False)
+                                st.plotly_chart(_fm, use_container_width=True, config={'displayModeBar': False})
+                                _tsrc('FinanceDataReader(일봉 주가) · 월말 종가 수익률', live=True)
+                                st.dataframe(_mqd, filters=False)
+                                _sig = [r['월'] for r in _mq if r['t값'] is not None and abs(r['t값']) >= 2]
+                                st.caption(f"진한 막대 = |t| ≥ 2(표본 대비 우연일 가능성 낮음) · 테두리 = 이번 달 · "
+                                           + (f"유의한 달: {', '.join(_sig)}" if _sig else "유의한 달 없음 — 계절성은 참고만"))
+                            with st.expander("연도 × 월 원자료"):
+                                _tsrc('FinanceDataReader(일봉 주가)', live=True)
+                                st.dataframe(_mraw, column_config=_mcfg('연도'), filters=False, footer=False)
+                                _mavg = _msum[_msum['구분'].str.endswith('평균')].reset_index(drop=True)
+                                _mwin = _msum[_msum['구분'].str.endswith('승률')].reset_index(drop=True)
+                                if len(_mavg):
+                                    st.dataframe(_mavg, column_config=_mcfg('구분'), filters=False)
+                                if len(_mwin):
+                                    st.dataframe(_mwin, column_config=_mcfg('구분'), filters=False, color=False)
                             st.caption("연도×월 수익률(%) — 위는 연도별 RAW(오래된 해→최근 해), 아래는 요약. "
                                        "**평균**=월별 계절성(+ 초록 / − 빨강), **승률**=그 달(연간은 그 해)이 오른 비율(%, 50 이 반반). "
                                        "홀수해/짝수해는 대선·중간선거 주기 같은 격년 패턴 확인용. "
@@ -7640,7 +7685,7 @@ def _tab_analysis():
                     # ── 🔁 사이클 비교 (2026-11-08 연구실 → 여기로 · 고도화) — 검색한 종목 일봉(_cl, 최대 20년) 그대로 ──
                     try:
                         st.divider()
-                        st.markdown("#### 🔁 사이클·낙폭 — 얼마나 자주, 깊이, 오래 오르내렸고 지금은 어디쯤인가")
+                        st.markdown("#### 🔁 상승·하락 사이클")
                         import ui_cycle as _uic
                         _uic = _fresh_module(_uic)
                         _uic.render_for(sym8_clean, _cl, _tsrc)
@@ -7729,8 +7774,8 @@ def _tab_analysis():
                     _bstart = (_band_all or {}).get('start')
                     # 2026-11-07 — 1/2/3/5/7/10/15년 버튼만 있으면 원하는 구간을 못 짚는다는 지적 → '직접' 추가(date_picker.py 공용)
                     _blo = _bstart.date() if _bstart is not None else _cl.index.min().date()
-                    _bstart_sel, _bend_sel = _dpk.period_range("기간", {'1년': 365, '2년': 730, '3년': 1095, '5년': 1826, '7년': 2557, '10년': 3652, '전체': None},
-                                                               key=f"band_y_{sym8_clean}", lo=_blo, hi=_cl.index.max().date(), default='5년')
+                    _bstart_sel, _bend_sel = _dpk.period_range("기간", None, key=f"band_y_{sym8_clean}", lo=_blo, hi=_cl.index.max().date(),
+                                                               default='5년', where=st.columns([3.4, 1.6])[0])
                     _cl_band = _cl[(_cl.index >= pd.Timestamp(_bstart_sel)) & (_cl.index <= pd.Timestamp(_bend_sel))]
                     _band = _sx.multiple_band(_cl_band, _shn, _qf, None) if _shn else None
                     _bm = (_band or {}).get('main')
@@ -7746,6 +7791,8 @@ def _tab_analysis():
                     else:
                         # 흑자면 P/E·P/S·P/B 전부, 적자면 P/S·P/B (판단 카드는 main = P/E 또는 P/S)
                         _bt = [(k, _band[k]) for k in ('pe', 'ps', 'pb') if _band.get(k)]
+                        # 2026-11-16 — 멀티플과 주가를 한 차트에(오른쪽 축 = 주가). 가격이 멀티플 확장 덕인지 이익 덕인지가 보인다.
+                        _bov = st.toggle("주가 겹쳐 보기", value=True, key=f"band_px_{sym8_clean}")
                         _tabs = st.tabs([f"{b['kind']} 밴드" for _, b in _bt])
                         for (_bk, _b), _tb in zip(_bt, _tabs):
                             with _tb:
@@ -7755,9 +7802,19 @@ def _tab_analysis():
                                                            hovertemplate='%{x|%Y-%m}<br>%{y:.1f}배<extra></extra>'))
                                 for _pp, _dash in ((10, 'dot'), (25, 'dash'), (50, 'solid'), (75, 'dash'), (90, 'dot')):
                                     _fb.add_hline(y=_b['pct'][_pp], line_dash=_dash, line_width=1, line_color='#7c8290',
-                                                  annotation_text=f"{_pp}분위 {_b['pct'][_pp]:.1f}", annotation_position='right')
+                                                  annotation_text=f"{_pp}분위 {_b['pct'][_pp]:.1f}",
+                                                  annotation_position='top left' if _bov else 'right', annotation_font_size=10)
                                 _fb.update_layout(height=300, margin=dict(l=8, r=90, t=10, b=8),
                                                   yaxis_title=f"{_b['kind']}(배)", showlegend=False)
+                                if _bov and len(_ser):
+                                    _pxm = _cl_band.resample('ME').last().dropna()
+                                    _pxm = _pxm[(_pxm.index >= _ser.index.min()) & (_pxm.index <= _ser.index.max() + pd.Timedelta(days=31))]
+                                    _fb.add_trace(go.Scatter(x=_pxm.index, y=_pxm.values, mode='lines', name='주가', yaxis='y2',
+                                                             line=dict(color='#D97706', width=1.6),
+                                                             hovertemplate='%{x|%Y-%m}<br>주가 %{y:,.2f}<extra></extra>'))
+                                    _fb.update_layout(yaxis2=dict(overlaying='y', side='right', showgrid=False, title=f"주가({_cur_u})",
+                                                                  title_standoff=4), margin=dict(l=8, r=70, t=10, b=8),
+                                                      showlegend=True, legend=dict(orientation='h', y=1.08, x=0))
                                 st.plotly_chart(_fb, use_container_width=True)
                                 # 2026-10-19 — 지표 3개 줄 + 그 아래 좁은 표 → 한 줄에 나란히(왼쪽 지표 · 오른쪽 분위표)
                                 _bL, _bR = st.columns([1, 2.2], gap='medium')

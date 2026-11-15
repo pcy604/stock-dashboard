@@ -935,7 +935,16 @@ def render_grid(st, df: pd.DataFrame, cfg: dict, key: str, height: int, color=Tr
             "catch(x){try{u=window.parent.location.origin+window.parent.location.pathname;}catch(y){u=(document.referrer||'').split('?')[0];}}"
             "window.open(u+'?sym='+encodeURIComponent(String(c)),'_blank');}")
     h = G_HEAD + G_ROW * min(len(data), 25) + 4 if len(data) <= 25 else int(height)
-    resp = AgGrid(data, gridOptions=go, height=h, allow_unsafe_jscode=True, theme='streamlit', key=key,
+    # 2026-11-16 — 작은 표인데 세로 스크롤이 생겼다(구간 목록 4행 중 1행만 보임, 실측):
+    #   ① 열 폭 합이 화면보다 넓으면 가로 스크롤바가 마지막 행을 덮는다 → 그 높이만큼 더한다
+    #   ② 같은 key 로 행 수만 바뀌면 iframe 높이가 처음 값에 머문다 → key 에 행 수를 넣는다
+    _tot = 58 + sum(int(min(360, 7.4 * max([_dw(str(c))] + [_fmt_len(v) for v in df[c].head(200)]) + 30))
+                    for c in df.columns if c != 'No.')
+    if len(data) <= 25 and _tot > 1000:
+        h += 18
+    if _tot <= 1000:          # 좁은 표는 화면 폭에 맞춰 늘린다(오른쪽 빈 공간·가로 스크롤 없음)
+        go['autoSizeStrategy'] = {'type': 'fitGridWidth'}
+    resp = AgGrid(data, gridOptions=go, height=h, allow_unsafe_jscode=True, theme='streamlit', key=f"{key}|{len(data)}",
                   update_on=['selectionChanged'] if select else [], show_toolbar=False, show_search=False,
                   show_download_button=False,
                   custom_css={'#gridToolBar': {'display': 'none !important'},

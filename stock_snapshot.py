@@ -420,7 +420,11 @@ def compute(L: dict, ctx: dict) -> dict:
                  C('리스크 점검', (f"{len(nr)}개 해당" if risk else '-') + (f" · 데이터 이상 {len(nc)}건" if nc else ''),
                    ' · '.join(r['name'] for r in nr)[:80] or '해당 없음',
                    'na' if not risk else ('good' if not nr and not nc else 'mid' if len(nr) <= 2 and not nc else 'bad'))]
-        detail = [{'state': 'warn' if r[1] else 'ok', 'name': r[0], 'detail': r[2]} for r in bc['rows']] + list(risk) + list(chk)
+        # 2026-11-16 — 세 묶음(grp)으로: 깨지는 조건(판단 철회 4개) · 리스크 점검(재무·밸류·변동성) · 데이터 점검(숫자 신뢰도).
+        #   화면은 묶음별 열 · 묶음 안에서 해당(warn) 먼저. '청산선 아래(보유 시)'는 깨지는 조건의 고점 −20% 와 같은 뜻이라 뺀다.
+        detail = ([{'grp': '깨지는 조건', 'state': 'warn' if r[1] else 'ok', 'name': r[0], 'detail': r[2]} for r in bc['rows']]
+                  + [dict(r, grp='리스크 점검') for r in risk if not str(r.get('name', '')).startswith('청산선')]
+                  + [dict(r, grp='데이터 점검') for r in chk])
         tone['리스크'] = cards[2]['tone']
         snap['blocks']['깨지는 조건·촉매'] = {'tone': bc['tone'], 'cards': cards, 'detail': detail, 'error': None,
                                         'expand': bool(nc)}
