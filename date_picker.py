@@ -12,9 +12,12 @@ from datetime import date, timedelta
 import streamlit as st
 
 STD = {'1년': 365, '3년': 1095, '5년': 1826, '10년': 3652, '전체': None}
+PRICE = {'YTD': 'ytd', '1년': 365, '전체': None}          # 2026-11-16 가격 차트(차니): YTD·1년·전체, 기본 1년
 
 
 def _span(lo: date, hi: date, days) -> tuple[date, date]:
+    if days == 'ytd':                    # 올해 1월 1일부터
+        return max(lo, date(hi.year, 1, 1)), hi
     return (lo if days is None else max(lo, hi - timedelta(days=days))), hi
 
 
@@ -23,13 +26,16 @@ def period_range(label: str, presets: dict | None, key: str, lo, hi, default: st
     where = 이 줄을 넣을 자리(열·컨테이너). 기본은 현재 위치."""
     presets = dict(presets or STD)
     yrs = (hi - lo).days / 365.25 if hi and lo else 99
-    opts = [k for k, v in presets.items() if v is None or v <= (hi - lo).days + 31] or list(presets)   # 이력보다 긴 프리셋은 숨김
+    opts = [k for k, v in presets.items() if v is None or v == 'ytd' or v <= (hi - lo).days + 31] or list(presets)   # 이력보다 긴 프리셋은 숨김
     dflt = default if default in opts else opts[min(1, len(opts) - 1)]
     ks, ke = f'{key}_s', f'{key}_e'
     ss = st.session_state
     if ks not in ss or ke not in ss or not (lo <= ss[ks] <= hi) or not (lo <= ss[ke] <= hi):
         ss[ks], ss[ke] = _span(lo, hi, presets[dflt])
         ss[key] = dflt
+
+    if ss.get(key) not in opts and ss.get(key) is not None:   # 옛 프리셋 값('3년'·'직접' 등)이 세션에 남은 경우
+        ss[key] = None
 
     def _on_pick():
         p = ss.get(key)

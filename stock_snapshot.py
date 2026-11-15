@@ -24,8 +24,8 @@ import os
 
 import pandas as pd
 
-VERSION = 2   # 2026-11-16 흐름 카드(spark·dir) · company · verdict 3탭
-BLOCKS = ['수급', '이익 방향', '가격', '정체', '깨지는 조건·촉매', '매매 계획', '원자료']
+VERSION = 3   # 2026-11-16 v3: 밸류에이션 블록 · verdict 4축+판단 철회 · halt·data_check·events
+BLOCKS = ['수급', '이익 방향', '가격', '밸류에이션', '정체', '깨지는 조건·촉매', '매매 계획', '원자료']
 SNAP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', 'snap')
 
 
@@ -186,20 +186,36 @@ def compute(L: dict, ctx: dict) -> dict:
                 vol_sp = {'y': [_r(v / 1e6, 3) for v in vv], 'kind': 'bar', 'ref': _r(vv.tail(20).mean() / 1e6, 3)}
         except Exception:
             pass
-        qshort = {'주도 업종의 주도주': '주도 업종 · 주도주', '업종 강세 · 종목 소외': '업종 강세 · 종목 소외',
-                  '업종·종목 동반 약세': '업종·종목 동반 약세'}.get(q['label'],
-                  '종목 단독 강세' if q['label'].startswith('종목 단독') else q['label'])
+        # 2026-11-16 — '종목 단독 강세'가 '업종 안에서 1등'으로 읽혔다(실제: 업종은 하위, 종목 RS 만 높음). 두 축을 그대로 적는다.
+        g_hot = None if gpct is None else gpct >= 50
+        s_hot = None if rs is None else rs >= 70
+        qshort = ('-' if g_hot is None or s_hot is None else
+                  f"업종 {'강세' if g_hot else '약세'} · 종목 {'강세' if s_hot else '약세'}")
         cards = [
-            C(f'RS 라인 (대 {ixn} · 1년)', f"RS {rs:.0f}" if rs is not None else 'RS -',
+            C(f'RS 라인 (대 {ixn} · 1년)', f"RS {rs:.0f} (상위 {max(1, 100 - int(rs))}%)" if rs is not None else 'RS -',
               (f"13주 지수 대비 {rs13:+.1f}%" if rs13 is not None else '지수 이력 없음')
               + (f" · 52주 고점 대비 {h['dd']:+.1f}%" if h else ''),
               'na' if rs is None else ('good' if rs >= 80 else 'bad' if rs < 50 else 'mid'), rs_sp, rs_dir),
-            C('업종 × 종목', qshort,
-              (f"{glabel} · 업종 {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위" if len(grow) else (glabel or '업종 미상')),
+            C('업종 온도 × 종목 강도', qshort,
+              (f"{glabel} — 업종 온도 {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위 · 종목 RS {rs:.0f}"
+               if len(grow) and rs is not None else (glabel or '업종 미상')),
               q['tone']),
             C('거래량 (5일 ÷ 20일)', f"{vr:.1f}배" if vr else '-', '최근 60거래일 · 점선 = 20일 평균',
               'na' if not vr else ('good' if vr >= 1.5 else 'mid' if vr >= 0.8 else 'bad'), vol_sp),
         ]
+        if is_kr and ctx.get('kr_inv'):          # 2026-11-16 — 한국: 외국인·기관 순매매 20일(네이버) + 외국인 보유율 흐름
+            try:
+                iv = ctx['kr_inv'](sym)
+                if iv:
+                    fg, ins = iv['frgn'], iv['inst']
+                    cards.append(C('외국인·기관 (20일 순매매)', f"외국인 {fg:+,.0f}억 · 기관 {ins:+,.0f}억",
+                                   (f"외국인 보유율 {iv['hold_now']:.1f}% ({iv['hold_chg']:+.2f}%p) · " if iv.get('hold_now') is not None else '')
+                                   + f"{iv['asof']} 기준 · 금액 = 주식수 × 종가 근사",
+                                   'good' if fg > 0 and ins > 0 else 'bad' if fg < 0 and ins < 0 else 'mid',
+                                   {'y': iv['hold_series']} if len(iv.get('hold_series') or []) >= 5 else None,
+                                   _dir(iv.get('hold_series'), k=10, tol=0.002) if iv.get('hold_series') else None))
+            except Exception:
+                pass
         tone['수급'] = q['tone']
         snap['blocks']['수급'] = {'tone': q['tone'], 'cards': cards, 'detail': [], 'error': None}
     except Exception as e:
@@ -307,8 +323,9 @@ def compute(L: dict, ctx: dict) -> dict:
     # 정체 — 유형은 여기서 확정(가격 해석에 쓴다)
     snap['type'] = lynch_type(cyc.get('cyclical'), ry, state, mcap_usd)
 
-    # ④ 가격 → 화면 '히스토리' ─────────────────────────────────────────────
-    #   주가 경로(주봉 1년 · 200일선) · 낙폭 경로(전체 고점 대비, 3년) · 밸류 밴드(P/E 등 5년)
+    # ④ 가격 → 화면 '히스토리' · ④' 밸류에이션 (2026-11-16 차니: 밸류에이션을 펀더멘탈과 양대 축으로 분리)
+    #   히스토리 = 주가 경로(주봉 1년·200일선) · 사이클 위치(진행 중 구간 vs 과거 중앙) · 이번 달 계절성
+    #   밸류에이션 = 주 멀티플 밴드(흑자 P/E · 적자 P/S) · P/B 밴드 · 업종 대비(P/E·PEG)
     try:
         bm, vb = L.get('_bm') or {}, L.get('_vb') or {}
         peg = _num(L.get('_peg'))
@@ -327,46 +344,80 @@ def compute(L: dict, ctx: dict) -> dict:
         px_sp = {'y': [_r(x, 4) for x in wk.tail(52)], 'ref': _r(ma200, 4)} if len(wk) >= 10 else None
         above = (float(cl.iloc[-1]) >= ma200) if ma200 else None
         p_tone = 'na' if not h else ('good' if h['dd'] > -10 and above else 'bad' if h['dd'] <= -20 or above is False else 'mid')
-        dd_all = (cl / cl.cummax() - 1) * 100
-        ddw = dd_all.resample('W-FRI').last().dropna().tail(156)
-        dd_sp = {'y': [_r(x, 2) for x in ddw], 'ref': -20.0} if len(ddw) >= 10 else None
-        # 과거 30%+ 하락 — cycle_compare 와 같은 지그재그
-        ndn, avg_dn = 0, None
+        # 사이클 위치 — cycle_compare 와 같은 지그재그(30%) · 진행 중 구간을 과거 같은 방향 중앙값과 비교
+        cy_card = C('사이클 위치 (30% 지그재그)', '-', '구간 계산 불가', 'na')
         try:
             import cycle_compare as _cc
-            sw = _cc.swing_rows(cl, 30)
-            dn = [(cl.loc[:pd.Timestamp(r_['종료일'])].iloc[-1] / cl.loc[:pd.Timestamp(r_['시작일'])].iloc[-1] - 1) * 100
-                  for r_ in sw.to_dict('records') if str(r_['라벨']).startswith('하락') and '진행' not in str(r_['라벨'])]
-            ndn, avg_dn = len(dn), (sum(dn) / len(dn) if dn else None)
+            sw = _cc.swing_rows(cl, 30).to_dict('records')
+            def _rr(r_):
+                a_, b_ = pd.Timestamp(r_['시작일']), pd.Timestamp(r_['종료일'])
+                return ((cl.loc[:b_].iloc[-1] / cl.loc[:a_].iloc[-1] - 1) * 100,
+                        int(((cl.index >= a_) & (cl.index <= b_)).sum()))
+            live = next((r_ for r_ in sw if '진행' in str(r_['라벨'])), None)
+            if live:
+                up = str(live['라벨']).startswith('상승')
+                lr, ld = _rr(live)
+                past = [_rr(r_) for r_ in sw if '진행' not in str(r_['라벨']) and str(r_['라벨']).startswith('상승' if up else '하락')]
+                mret = float(pd.Series([x[0] for x in past]).median()) if past else None
+                mday = float(pd.Series([x[1] for x in past]).median()) if past else None
+                cy_card = C('사이클 위치 (30% 지그재그)', f"{'상승' if up else '하락'} {ld}일째 {lr:+.0f}%",
+                            (f"과거 {'상승' if up else '하락'} {len(past)}회 중앙 {mday:.0f}일·{mret:+.0f}%" if past else '과거 같은 방향 구간 없음'),
+                            ('good' if up else ('bad' if (mret is not None and lr > mret) else 'mid')))
         except Exception:
             pass
-        dd_now = float(dd_all.iloc[-1]) if len(dd_all) else None
-        bser = bm.get('series')
-        b_sp = None
+        # 이번 달 계절성 — 월말 종가 기준 같은 달 수익률 평균·승률
+        se_card = C('이번 달 계절성', '-', '이력 부족', 'na')
         try:
-            if bser is not None and len(bser) >= 8:
-                bs = bser.resample('ME').last().dropna().tail(60) if hasattr(bser, 'resample') else bser
-                b_sp = {'y': [_r(x, 2) for x in bs], 'ref': _r((bm.get('pct') or {}).get(50), 2)}
+            mr = cl.resample('ME').last().pct_change().dropna() * 100
+            cur = pd.Timestamp.today().month
+            same = mr[mr.index.month == cur]
+            if len(same) >= 3:
+                win = float((same > 0).mean() * 100)
+                se_card = C(f'이번 달 계절성 ({cur}월)', f"평균 {same.mean():+.1f}% · 승률 {win:.0f}%",
+                            f"{len(same)}년 표본 · 중앙값 {same.median():+.1f}%",
+                            'good' if win >= 60 and same.mean() > 0 else 'bad' if win <= 40 and same.mean() < 0 else 'mid',
+                            {'y': [_r(x, 2) for x in same.tail(12)], 'kind': 'bar', 'ref': 0.0})
         except Exception:
-            b_sp = None
+            pass
         cards = [C('주가 경로 (주봉 1년)', (f"고점 대비 {h['dd']:+.1f}%" if h else '-'),
                    (f"52주 고점 {pxf(h['high'])} ({h['date']})" if h else '가격 이력 부족')
                    + ('' if above is None else (' · 200일선 위' if above else ' · 200일선 아래')),
                    p_tone, px_sp, _dir((px_sp or {}).get('y'), k=8, tol=0.03) if px_sp else None),
-                 C('낙폭 경로 (전체 고점 대비 · 3년)', (f"{dd_now:.1f}%" if dd_now is not None else '-'),
-                   (f"과거 30%+ 하락 {ndn}회 · 평균 {avg_dn:.0f}%" if avg_dn is not None else '과거 30%+ 하락 없음') + ' · 점선 −20%',
-                   'na' if dd_now is None else ('good' if dd_now > -10 else 'bad' if dd_now <= -30 else 'mid'), dd_sp),
-                 C(f"밸류 밴드 ({bm.get('kind', 'P/E')} · 5년)",
-                   (f"{bm['now']:.1f}배 · {bm['rank']:.0f}%ile" if bm.get('now') is not None and bm.get('rank') is not None else '-'),
-                   (f"중앙값 {bm['pct'][50]:.1f}배" if bm.get('pct') else '밴드 계산 불가')
-                   + (f" · 업종 P/E {med:.1f}배" if med else '') + (f" · PEG {peg:.2f}" if peg else ''),
-                   'na' if bm.get('rank') is None else ('good' if bm['rank'] <= 25 else 'bad' if bm['rank'] >= 75 else 'mid'), b_sp)]
-        tone['가격'], tone['_px'] = v['tone'], p_tone
-        snap['blocks']['가격'] = {'tone': v['tone'], 'cards': cards, 'detail': [], 'error': None, 'peer_rank': pr}
+                 cy_card, se_card]
+        tone['_px'] = p_tone
+        snap['blocks']['가격'] = {'tone': p_tone, 'cards': cards, 'detail': [], 'error': None, 'peer_rank': pr}
+        # ── 밸류에이션 ──
+        bands = L.get('_band') or {}
+
+        def _bcard(b, title):
+            if not b or b.get('now') is None or b.get('rank') is None:
+                return None
+            ser = b.get('series')
+            sp = None
+            try:
+                if ser is not None and len(ser) >= 8:
+                    bs = ser.resample('ME').last().dropna().tail(60) if hasattr(ser, 'resample') else ser
+                    sp = {'y': [_r(x, 2) for x in bs], 'ref': _r((b.get('pct') or {}).get(50), 2)}
+            except Exception:
+                sp = None
+            return C(title, f"{b['now']:.1f}배 · {b['rank']:.0f}%ile",
+                     (f"중앙값 {b['pct'][50]:.1f}배" + (f" · 10~90% {b['pct'][10]:.1f}~{b['pct'][90]:.1f}배"
+                                                        if (10 in b['pct'] and 90 in b['pct']) else '')) if (b.get('pct') or {}).get(50) else '-',
+                     'good' if b['rank'] <= 25 else 'bad' if b['rank'] >= 75 else 'mid', sp,
+                     _dir((sp or {}).get('y'), k=6, tol=0.05) if sp else None)
+        main_b = bands.get('pe') if (bands.get('pe') and (per or 0) > 0) else bands.get('ps')
+        vcards = [c_ for c_ in (_bcard(main_b or bm, f"{(main_b or bm).get('kind', 'P/E')} 밴드 (TTM)"),
+                                _bcard(bands.get('pb'), 'P/B 밴드')) if c_]
+        vcards.append(C('업종 대비', (f"P/E {per:.1f}배 vs 업종 {med:.1f}배" if (per and med) else '비교 불가'),
+                        (f"업종 대비 {ratio:.2f}배" if ratio else '') + (f" · PEG {peg:.2f}" if peg else ''),
+                        'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.3 else 'mid')))
+        tone['가격'] = v['tone']
+        snap['blocks']['밸류에이션'] = {'tone': v['tone'], 'cards': vcards, 'detail': [], 'error': None, 'reading': v.get('label')}
     except Exception as e:
         pr = {}
         tone['가격'] = 'na'
-        snap['blocks']['가격'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"}
+        snap['blocks'].setdefault('가격', {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"})
+        snap['blocks']['밸류에이션'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"}
 
     # ② 정체 → 펀더멘탈 맨 위 '기업 요약 카드'(A안). 문장은 AI 카드(짧은 필드) — 잘라 쓰지 않는다.
     try:
@@ -416,16 +467,22 @@ def compute(L: dict, ctx: dict) -> dict:
         risk, chk = L.get('_risk') or [], L.get('_chk_') or []
         nr = [r for r in risk if r.get('state') == 'warn']
         nc = [r for r in chk if r.get('state') == 'warn']
-        cards = [C('판단이 깨지는 조건', bc['value'], bc['sub'], bc['tone']), ev,
-                 C('리스크 점검', (f"{len(nr)}개 해당" if risk else '-') + (f" · 데이터 이상 {len(nc)}건" if nc else ''),
-                   ' · '.join(r['name'] for r in nr)[:80] or '해당 없음',
-                   'na' if not risk else ('good' if not nr and not nc else 'mid' if len(nr) <= 2 and not nc else 'bad'))]
+        # 2026-11-16 — 첫 줄 카드 = 보유 리스크(종목 리스크)만. 데이터 점검은 종목 리스크와 섞지 않고 따로(data_check).
+        #   '판단 철회 조건'은 결론 줄(4축과 나란히)로 · 다음 실적 발표는 첫 줄에서 내림(events).
+        nr2 = [r for r in nr if not str(r.get('name', '')).startswith('청산선')]
+        rsk = [r for r in risk if not str(r.get('name', '')).startswith('청산선')]
+        cards = [C('보유 리스크', (f"{len(nr2)}/{len(rsk)} 해당" if rsk else '-'),
+                   ' · '.join(r['name'] for r in nr2) or '해당 없음',
+                   'na' if not rsk else ('good' if not nr2 else 'mid' if len(nr2) <= 2 else 'bad'))]
+        snap['halt'] = C('판단 철회 조건', bc['value'], bc['sub'], bc['tone'])
+        snap['data_check'] = {'warn': [r['name'] for r in nc], 'n': len(chk)}
+        snap['events'] = {'next_earnings': ev['value'], 'sub': ev['sub']}
         # 2026-11-16 — 세 묶음(grp)으로: 깨지는 조건(판단 철회 4개) · 리스크 점검(재무·밸류·변동성) · 데이터 점검(숫자 신뢰도).
         #   화면은 묶음별 열 · 묶음 안에서 해당(warn) 먼저. '청산선 아래(보유 시)'는 깨지는 조건의 고점 −20% 와 같은 뜻이라 뺀다.
-        detail = ([{'grp': '깨지는 조건', 'state': 'warn' if r[1] else 'ok', 'name': r[0], 'detail': r[2]} for r in bc['rows']]
-                  + [dict(r, grp='리스크 점검') for r in risk if not str(r.get('name', '')).startswith('청산선')]
+        detail = ([{'grp': '판단 철회 조건', 'state': 'warn' if r[1] else 'ok', 'name': r[0], 'detail': r[2]} for r in bc['rows']]
+                  + [dict(r, grp='보유 리스크') for r in risk if not str(r.get('name', '')).startswith('청산선')]
                   + [dict(r, grp='데이터 점검') for r in chk])
-        tone['리스크'] = cards[2]['tone']
+        tone['리스크'] = cards[0]['tone']
         snap['blocks']['깨지는 조건·촉매'] = {'tone': bc['tone'], 'cards': cards, 'detail': detail, 'error': None,
                                         'expand': bool(nc)}
     except Exception as e:
@@ -447,20 +504,24 @@ def compute(L: dict, ctx: dict) -> dict:
     px_t = tone.get('_px', 'na')
     pw = {'good': '주가 상승 추세', 'mid': '주가 조정 구간', 'bad': '주가 하락 추세', 'na': ''}[px_t]
 
-    def _first(block):
+    def _first(block, i=0):
         cs = (snap['blocks'].get(block) or {}).get('cards') or []
-        return cs[0] if cs else {}
-    f0, p0, s0 = _first('이익 방향'), _first('가격'), _first('수급')
+        return cs[i] if len(cs) > i else {}
+    f0, v0, p0, s0 = _first('이익 방향'), _first('밸류에이션'), _first('가격'), _first('수급')
+    vw = {'good': '밸류 매력', 'mid': '밸류 중립', 'bad': '밸류 부담', 'na': ''}[p_t]
     snap['verdict'] = {
-        'head': ', '.join(x for x in (fw, pw, fl) if x),
+        'head': ', '.join(x for x in (fw, vw, pw, fl) if x),
         'type_chip': snap['type']['label'],
-        # 2026-11-16 — 세 탭과 같은 순서·같은 대표 카드(값 + 흐름선). 밸류는 히스토리 탭의 밴드 카드로.
+        # 2026-11-16 — 4축(펀더멘탈·밸류에이션·히스토리·수급) + 판단 철회 조건을 한 줄에. 탭과 같은 순서·같은 대표 카드.
         'cards': [C('🏭 펀더멘탈', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[f_t],
                     f"{fw} · {f0.get('value', '-')}", f_t, f0.get('spark'), f0.get('dir')),
+                  C('⚖️ 밸류에이션', {'good': '저평가', 'mid': '중립', 'bad': '고평가', 'na': '-'}[p_t],
+                    v0.get('value', '-'), p_t, v0.get('spark'), v0.get('dir')),
                   C('📈 히스토리', {'good': '상승 추세', 'mid': '조정', 'bad': '하락 추세', 'na': '-'}[px_t],
-                    p0.get('sub', '-'), px_t, p0.get('spark'), p0.get('dir')),
+                    p0.get('value', '-'), px_t, p0.get('spark'), p0.get('dir')),
                   C('🌊 수급', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[s_t],
-                    f"{fl} · {s0.get('value', '-')}", s_t, s0.get('spark'), s0.get('dir'))],
+                    s0.get('value', '-'), s_t, s0.get('spark'), s0.get('dir'))]
+                 + ([dict(snap['halt'], label='🛑 판단 철회 조건')] if snap.get('halt') else []),
         'rules': rules,
     }
     return snap

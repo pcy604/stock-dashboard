@@ -213,15 +213,72 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         st.plotly_chart(fig, use_container_width=True)
 
     asof = str(cl.index[-1].date())
-    st.markdown("**상승·하락 요약** — 방향별 횟수·평균 기간·평균 폭(진행 중 구간 제외)")
-    tsrc(src + ' · cycle_compare.py', asof=asof)
+    # 2026-11-16 — 요약 표 + 상세 표 → 한 표(차니): 구간 행(최근 순) 아래에 방향별 평균·중앙값 행
+    det = C.detail_table(segs).iloc[::-1].reset_index(drop=True)
     summ = C.summarize(segs)
-    if len(summ):
-        st.dataframe(summ, hide_index=True, use_container_width=True, filters=False)
-    # 2026-11-15 — 접힌 상자 안 표(AgGrid)가 빈칸으로 그려지는 문제 → 상자 없이 바로(최근 순)
-    st.markdown(f"**구간별 상세 {len(segs)}개** — 각 구간의 날짜·기간·수익률(최근 순)")
+    extra = []
+    for r_ in summ.to_dict('records'):
+        extra.append({'라벨': f"▶ {r_['방향']} 평균 ({r_['구간수']}회)", '시작': '', '종료': '',
+                      '기간(거래일)': r_['평균 기간(거래일)'], '수익률(%)': r_['평균 수익률(%)'], '회복까지(거래일)': None, '방향': r_['방향']})
+        extra.append({'라벨': f"▶ {r_['방향']} 중앙값", '시작': '', '종료': '',
+                      '기간(거래일)': r_['중앙 기간(거래일)'], '수익률(%)': r_['중앙 수익률(%)'], '회복까지(거래일)': None, '방향': r_['방향']})
+    st.markdown(f"**구간 {len(segs)}개 + 방향별 평균·중앙값**(맨 아래 ▶ 행, 진행 중 구간 제외)")
     tsrc(src + ' · cycle_compare.py', asof=asof)
-    st.dataframe(C.detail_table(segs).iloc[::-1].reset_index(drop=True), hide_index=True, use_container_width=True, filters=False)
-    st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림이 나온 고점·저점(지그재그) — 나중에야 확정되므로 진행 중 구간의 끝은 아직 모릅니다. "
-               "검은 굵은 선 = 지금, 회색 굵은 점선 = 과거 완료 구간의 중앙 경로. 날짜순 보기의 회색 바탕 = 기간 고점 대비 낙폭(MDD), 점선 = 손절선(고점 −20%). 표본이 적으면(3회 미만) 우연일 수 있고, "
-               "같은 종목도 사이클 성격(메모리·파운드리·장비 등)이 바뀌면 직접 비교가 어긋납니다.")
+    st.dataframe(pd.concat([det, pd.DataFrame(extra)], ignore_index=True), hide_index=True, use_container_width=True, filters=False)
+    _dd_backtest(K, cl, tsrc, src, asof)
+    st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림 · 진행 중 구간의 끝은 확정 전 · 표본 3회 미만은 우연일 수 있음.")
+
+
+def _dd_backtest(K: str, cl: pd.Series, tsrc, src: str, asof: str):
+    """낙폭 매수 백테스트(2026-11-16 차니) — '고점 대비 −X% 도달' 또는 '−X% 밑까지 갔다가 다시 −X% 위로 회복한 다음 날' 매수.
+    한 하락 회차(고점 갱신 전까지)에 신호 1번. 수익률은 그 뒤 N거래일 종가 기준 · 수수료 미반영 · 같은 종목 과거만."""
+    import numpy as np
+    st.markdown("#### 🧪 낙폭 매수 백테스트")
+    b1, b2, b3 = st.columns([1.2, 2.2, 2.2], vertical_alignment='bottom')
+    th = b1.number_input('기준 낙폭(%)', 5, 90, 30, 5, key=f'{K}|bt_x', help='고점 대비 이만큼 빠진 지점을 기준으로 삼는다')
+    mode = b2.segmented_control('매수 시점', ['도달한 날', '회복한 다음 날'], default='도달한 날', key=f'{K}|bt_m',
+                                help='도달한 날 = 낙폭이 처음 −X% 를 넘은 날 종가 · 회복한 다음 날 = −X% 밑까지 갔다가 다시 −X% 위로 올라온 다음 날 종가') or '도달한 날'
+    hz = b3.pills('보유 기간', ['1개월', '3개월', '6개월', '1년'], selection_mode='multi', default=['3개월', '6개월', '1년'], key=f'{K}|bt_h') or ['6개월']
+    H = {'1개월': 21, '3개월': 63, '6개월': 126, '1년': 252}
+    c = cl.dropna()
+    peak = c.cummax()
+    dd = (c / peak - 1) * 100
+    v, ix, pk = c.values, c.index, peak.values
+    events, armed_peak, below = [], None, False
+    for i in range(1, len(v)):
+        if pk[i] > pk[i - 1]:                 # 새 고점 = 새 하락 회차
+            armed_peak, below = None, False
+        if armed_peak is not None:
+            continue
+        if mode == '도달한 날':
+            if dd.iloc[i] <= -th:
+                events.append(i); armed_peak = pk[i]
+        else:
+            if dd.iloc[i] <= -th:
+                below = True
+            elif below and dd.iloc[i] > -th and i + 1 < len(v):
+                events.append(i + 1); armed_peak = pk[i]
+    if not events:
+        st.caption(f'고점 대비 −{th}% 신호가 이력에 없음.')
+        return
+    rows = []
+    for i in events:
+        r_ = {'매수일': str(ix[i].date()), '매수가': round(float(v[i]), 2), '당시 낙폭(%)': round(float(dd.iloc[i]), 1)}
+        for h in hz:
+            j = i + H[h]
+            r_[f'{h} 뒤(%)'] = round(float(v[j] / v[i] - 1) * 100, 1) if j < len(v) else None
+        j_end = min(len(v) - 1, i + max(H[h] for h in hz))
+        r_['이후 최대 추가 하락(%)'] = round(float((v[i:j_end + 1].min() / v[i] - 1) * 100), 1)
+        rows.append(r_)
+    df = pd.DataFrame(rows)
+    stat = []
+    for h in hz:
+        col = df[f'{h} 뒤(%)'].dropna()
+        if len(col):
+            stat.append(f"{h} 뒤 평균 {col.mean():+.1f}% · 승률 {(col > 0).mean() * 100:.0f}% ({len(col)}회)")
+    bh = (v[-1] / v[0] - 1) * 100
+    st.markdown(' &nbsp;│&nbsp; '.join(stat) + f" &nbsp;│&nbsp; 이후 최대 추가 하락 평균 {df['이후 최대 추가 하락(%)'].mean():.1f}%")
+    tsrc(src + ' · 낙폭 매수 백테스트(이 화면 계산)', asof=asof)
+    st.dataframe(df.iloc[::-1].reset_index(drop=True), hide_index=True, use_container_width=True, filters=False)
+    st.caption(f"신호 = 하락 회차(전고점 갱신 전)마다 1번 · 종가 체결 · 수수료·세금 미반영 · 같은 기간 보유만 했을 때 {bh:+,.0f}% · "
+               "표본이 적으면 우연일 수 있음.")
