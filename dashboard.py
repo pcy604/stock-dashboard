@@ -301,6 +301,18 @@ hr { margin: 1.8rem 0 !important; border: none !important;
      border-top: 1px solid var(--line) !important; }
 div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem !important; }
 [data-testid="stRadio"] > label { margin-bottom: 0 !important; }
+/* 2026-11-16 사이트 공통 컨트롤 표준 — 택1 = segmented_control · 다중 = pills · 목록 많음 = selectbox.
+   버튼·칩 높이 30px · 라벨 12px · 위젯 사이 간격 축소(모든 탭 같은 밀도) */
+[data-testid="stWidgetLabel"] p { font-size: 12px !important; color: #6B7280 !important; margin-bottom: 0 !important; }
+[data-testid="stWidgetLabel"] { min-height: 0 !important; margin-bottom: 2px !important; }
+[data-testid="stButtonGroup"] button, [data-testid="stBaseButton-segmented_control"],
+[data-testid="stBaseButton-segmented_controlActive"], [data-testid="stBaseButton-pills"], [data-testid="stBaseButton-pillsActive"] {
+  min-height: 30px !important; height: 30px !important; padding: 0 12px !important; font-size: 13px !important; }
+.stButton > button, .stDownloadButton > button, .stLinkButton > a { min-height: 32px !important; padding: 2px 14px !important; font-size: 13px !important; }
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div, [data-testid="stNumberInput"] input,
+[data-testid="stDateInput"] input, [data-testid="stTextInput"] input { min-height: 32px !important; font-size: 13px !important; }
+[data-testid="stHeadingWithActionElements"] h3, [data-testid="stHeading"] h3 { font-size: 19px !important; margin: 0.2rem 0 0 !important; }
+hr { margin: 0.6rem 0 !important; }
 [data-testid="stExpander"] details { padding: 0 !important;
   border: 1px solid var(--line) !important; border-radius: 6px !important; }
 [data-testid="stExpander"] summary { font-weight: 560 !important; }
@@ -1388,7 +1400,7 @@ except Exception:
 _MDDM = {}
 
 with tab_screen:                           # 데이터를 건드리지 않는 순수 레이아웃 → 가드 불필요
-    _GMKT = st.radio("시장", ["전체", "KR", "US"], horizontal=True, key="screen_mkt")
+    _GMKT = st.segmented_control("시장", ["전체", "KR", "US"], default="전체", key="screen_mkt") or "전체"   # 2026-11-16 표준: 택1 = segmented
     # 2026-10-21 매크로 요약 스트립 삭제 — 같은 판정이 모든 탭 위 상단 배지에 있다(중복 제거)
     # 서브탭 순서 = 신뢰도 순서. 검증된 규칙(주도주·CANSLIM)을 앞에, 참고용 탐색을 뒤에.
     # 성적표는 2026-08-11 포트폴리오 탭으로 이관했다(실적 공시는 한 곳에서).
@@ -1661,7 +1673,7 @@ with (t_old or st.empty()), guard('연구실 — 지난 연구'):
                             ('리밸런싱', _ru.get('rebalance')), ('현금', _ru.get('cash')),
                             ('비용', _ru.get('cost')), ('대표 회차', _ru.get('seeds'))] if v))
             _vk = {v['label']: k for k, v in sorted(_dt['variants'].items(), key=lambda kv: kv[0] != 'rs80_fund')}
-            _vsel = _vk[st.radio("전략", list(_vk), horizontal=True, key="core_bt_v")]
+            _vsel = _vk[st.segmented_control("전략", list(_vk), default=list(_vk)[0], key="core_bt_v") or list(_vk)[0]]
             _V = _dt['variants'][_vsel]; _sm = _V['summary']; _sp = _dt['spy']
             _m = st.columns(6)
             _m[0].metric("100 →", f"{_sm['final']:,.0f}", f"SPY {_sm['spy_final']:,.0f}", delta_color="off")
@@ -1746,8 +1758,8 @@ with (t_old or st.empty()), guard('연구실 — 지난 연구'):
             _m[2].metric("조합 중앙 CAGR", f"{_sm['median_cagr']:.1f}%", f"충격 후 {_sm['median_shock']:.1f}%", delta_color="off")
             _m[3].metric("RS순 − 무작위 순서", f"{_sm['rs_minus_ref']:+.1f}%p", "같은 정의·슬롯, 고점 -20% 기준 중앙", delta_color="off")
             _ex = _rb['exits']; _rsn = _rb['rs_defs']
-            _met = st.radio("표에 보일 값", ["SPY 대비 CAGR 차이(%p)", "상폐충격 후 SPY 대비(%p)", "MDD(%)", "샤프"],
-                            horizontal=True, key="rb_met")
+            _met = st.segmented_control("표에 보일 값", ["SPY 대비 CAGR 차이(%p)", "상폐충격 후 SPY 대비(%p)", "MDD(%)", "샤프"],
+                                        default="SPY 대비 CAGR 차이(%p)", key="rb_met") or "SPY 대비 CAGR 차이(%p)"
             _G = pd.DataFrame(_rb['grid'])
             _val = {"SPY 대비 CAGR 차이(%p)": _G.CAGR - _spc, "상폐충격 후 SPY 대비(%p)": _G.shock1 - _spc,
                     "MDD(%)": _G.MDD, "샤프": _G.Sharpe}[_met]
@@ -2582,9 +2594,8 @@ with (t_lead or st.empty()), guard('주도주'):
             # 기간별 성적 — 표 셋을 따로 두면 화면이 지저분해진다. 한 곳에서 전환한다.
             if _ac.get('by_year') or _ac.get('by_moy'):
                 with st.expander("📅 기간별 성적 — 신호 1건당 1년 후"):
-                    _per = st.radio("기간", ["연도별", "달별", "연-월"],
-                                    horizontal=True, key="accel_period",
-                                    label_visibility="collapsed")
+                    _per = st.segmented_control("기간", ["연도별", "달별", "연-월"], default="연도별", key="accel_period",
+                                                label_visibility="collapsed") or "연도별"
                     if _per == "연도별" and _ac.get('by_year'):
                         _tsrc('Yahoo Finance(주가)·SEC EDGAR(분기재무) → leaders_accel.json', path='results/leaders_accel.json')
                         st.dataframe(pd.DataFrame([{

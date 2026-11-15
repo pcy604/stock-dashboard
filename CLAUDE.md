@@ -118,3 +118,10 @@
 
 ## 변경 이력 (2026-11-15)
 - 작업 종료 시 **`docs/changelog.md` 맨 아래에 한 줄**(날짜·사건·의미)을 추가한다 — 정본. claude.ai 프로젝트 `claude/02_changelog.md` 는 11-14 까지의 동결 아카이브(다시 쓰지 말 것).
+
+## 화면 표준 — 사이트 전체 (2026-11-16, 차니: "공간·버튼 표준화는 전체 사이트 대상")
+- 컨트롤: **택1 = `st.segmented_control`**(라디오 쓰지 말 것 · `or 기본값`으로 None 처리) · 다중 = `st.pills` · 항목 10개+ = `selectbox`.
+  관련 컨트롤은 **한 줄**(`st.columns`)에 — 봉·기간·축·보조지표처럼. 기간 버튼은 `date_picker.period_range(where=열)`.
+- 크기는 전역 CSS 한 곳(dashboard.py `stWidgetLabel`·`stButtonGroup` 블록) — 탭에서 따로 키우지 말 것. 버튼·칩 30px · 라벨 12px.
+- 판정 카드는 `flow_cards`(라벨 · 값+화살표 · 흐름선 · 한 줄 보조). 글자를 `…`로 자르지 말 것(줄바꿈). 문장 길이는 생성 단계에서 제한.
+- 긴 설명문·AI 전문은 접기(expander), 화면 첫 줄은 핵심만. 일상 안내는 `st.caption` — `st.info` 큰 상자는 경고·빈 상태에만.
