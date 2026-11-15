@@ -54,6 +54,8 @@ def _dart_reachable(timeout=6) -> bool:
 
 def main():
     if not _dart_reachable():
+        if os.environ.get("FUNDQ_FROM"):
+            raise SystemExit("⛔ 과거 소급은 DART 로만 가능한데 이 서버에서 DART 가 닿지 않는다 — 다시 실행하거나 집 PC 에서 실행")
         # 2026-10-19 — 예전엔 여기서 그냥 끝났다(집 PC 에 맡김). PC 가 안 돌면 몇 주씩 멈췄다.
         #   이제 해외에서도 닿는 네이버 기업분석으로 새 분기·빈칸·대차 잔액을 채운다(DART 값은 안 덮음).
         import kr_fundq_naver
@@ -81,10 +83,17 @@ def main():
     uni.to_sql("universe", con, if_exists="replace", index=False)
     con.commit(); con.close()
 
-    syms = sorted(set(old.sym.astype(str)) | set(krx.loc[krx.Marcap >= 1e11, "Code"]))
     y1 = date.today().year
+    # 2026-11-16 과거 소급(차니: 2015 사업연도부터) — kr-fin 수동 실행 입력 from_year/to_year → 환경변수.
+    #   소급 때는 시총 하한 없이 지금 상장된 전 종목(그때 작았던 종목도 포함). 상장폐지 종목은 DART 종목코드 매핑이
+    #   없어 빠진다 — 생존편향 크기는 소급 뒤 패널 종목 수 대비 재무 채움률로 잰다.
+    fy0 = int(os.environ.get("FUNDQ_FROM") or (y1 - 1))
+    fy1 = int(os.environ.get("FUNDQ_TO") or y1)
+    backfill = fy0 < y1 - 1
+    syms = sorted(set(old.sym.astype(str)) | set(krx.loc[(krx.Marcap >= (0 if backfill else 1e11)), "Code"]))
+    print(f"DART 적재 {fy0}~{fy1} · 종목 {len(syms):,}", flush=True)
     Q.DB = str(TMP)
-    Q.ingest(y1 - 1, y1, syms=syms)
+    Q.ingest(fy0, fy1, syms=syms)
 
     E.DB = TMP
     chk = sqlite3.connect(TMP)

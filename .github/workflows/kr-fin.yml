@@ -4,6 +4,15 @@ name: kr-fin
 
 on:
   workflow_dispatch:
+    inputs:
+      from_year:
+        description: 'DART 적재 시작 사업연도(비우면 작년) — 과거 소급 예: 2015'
+        required: false
+        default: ''
+      to_year:
+        description: 'DART 적재 끝 사업연도(비우면 올해) — 소급은 한 해씩(DART 하루 2만 건 한도)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -35,6 +44,8 @@ jobs:
       - name: KR 분기재무 갱신
         env:
           DART_KEY: ${{ secrets.DART_KEY }}
+          FUNDQ_FROM: ${{ inputs.from_year }}
+          FUNDQ_TO: ${{ inputs.to_year }}
         run: python tools/refresh_kr_fundq.py
       - name: KR 잠재 희석(CB·BW·EB) 저장본
         env:
