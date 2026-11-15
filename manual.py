@@ -384,6 +384,14 @@ CSS = """
   .mn-flow { display:grid; grid-template-columns:repeat(4,minmax(150px,1fr)); gap:8px; }
   .mn-flow .mn-card { position:relative; }
   @media (max-width:720px) { .mn-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } .mn-tbl td:first-child { white-space:normal; } }
+  /* 2026-11-16 모바일 — 3열 이상 표는 행마다 세로로 쌓는다(390px 에서 '후보 조건'이 글자 단위로 깨짐) */
+  @media (max-width:600px) {
+    .mn-tbl thead { display:none; }
+    .mn-tbl, .mn-tbl tbody, .mn-tbl tr, .mn-tbl td { display:block; width:100% !important; }
+    .mn-tbl tr { border-top:1px solid var(--line-2); padding:6px 10px; }
+    .mn-tbl td { border-top:0; padding:1px 0; white-space:normal !important; }
+    .mn-tbl td:first-child { font-size:13px; }
+  }
   .mn-src { font-size:11.5px; color:var(--ink-3); margin:6px 2px 0; line-height:1.6; }
   .mn-gap { height:14px; }
   .mn-df-wrap { column-count:2; column-gap:8px; }

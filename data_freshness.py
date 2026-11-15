@@ -59,6 +59,21 @@ def _fundq_quarter(p):
         return None
 
 
+def _us_shares_checked(p):
+    """2026-11-16 — us_shares.csv 는 공시 행이 같으면 다시 쓰지 않는다(매일 19.6MB 재커밋 중단).
+    점검 날짜는 옆 파일 us_shares_checked.json 에 남는다. 없으면 옛 방식(as_of 열)."""
+    try:
+        side = p.with_name('us_shares_checked.json')
+        if side.exists():
+            import json as _js
+            v = _js.loads(side.read_text(encoding='utf-8')).get('checked')
+            if v:
+                return str(v)[:10]
+    except Exception:
+        pass
+    return _csv_col('as_of')(p)
+
+
 def _mtime(p):
     """내용에 날짜 컬럼이 없는 산출물(parquet 등)용 — 파일 수정시각을 신선도로 쓴다.
     raw=True 와 함께 쓴다. 내용 기반 날짜가 있으면 그쪽이 항상 낫다(파일을 건드리기만
@@ -139,7 +154,7 @@ SOURCES = [
          cycle='주 1회 (일 08:00)', max_age=10,
          producer='marketcap_refresh.py frames+shares',
          job='weekly-profile', used_by='시총·PER·PSR 계산 전체 (point-in-time)',
-         getter=_csv_col('as_of'), raw=True),
+         getter=_us_shares_checked, raw=True),
     dict(path='results/screener_latest.json', label='주봉 신호 스크리너',
          cycle='매일 06:00 (평일)', max_age=4, producer='weekly_run.py',
          job='daily-refresh', used_by='🔥 상승 상위',

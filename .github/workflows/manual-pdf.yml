@@ -5,8 +5,8 @@ on:
     branches: [main]
     paths:
       - 'manual.py'
-      - 'docs/release_notes.json'
       - 'live/plan.py'
+      - 'results/quant_panel_info.json'
       - 'results/v19_bt.json'
       - '.github/workflows/*.yml'
       - 'tools/build_manual_pdf.sh'
@@ -31,8 +31,11 @@ jobs:
         run: |
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
-          git add docs/manual.pdf docs/manual.html
-          git diff --staged --quiet && { echo "변경 없음"; exit 0; }
+          # 2026-11-16 경량화 — PDF 는 만들 때마다 바이트가 달라져(생성 시각) 내용이 같아도 매번 커밋됐다(한 달 25회).
+          #   HTML(결정적)이 바뀐 때만 PDF 를 같이 커밋한다.
+          git add docs/manual.html
+          git diff --staged --quiet && { echo "설명서 내용 변화 없음 — PDF 커밋 안 함"; exit 0; }
+          git add docs/manual.pdf
           git commit -m "auto: 사용설명서 PDF $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
           echo "::error::푸시 실패" && exit 1

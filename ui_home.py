@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-16a'
+VERSION = '2026-11-16b'
 
 CSS = """
 <style>
@@ -843,7 +843,7 @@ _TOUR_CSS = """<style>
   .mn-tour { transition:border-color .12s, background .12s; }
   .mn-tour.on { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-2); }
   .mn-tour .k b { float:right; font-weight:600; letter-spacing:0; color:var(--accent); }
-  @media (min-width:900px) { .mn-tour { min-height:262px; } }
+  @media (min-width:900px) { .mn-tour { min-height:224px; } }
   .mn-row { display:flex; justify-content:space-between; align-items:center; gap:6px 16px; flex-wrap:wrap; margin:0 2px; }
 </style>"""
 
@@ -877,8 +877,9 @@ SECTION_TABS = [('rules', '📐 실전 규칙'), ('data', '🗄️ 데이터'), 
 
 
 def section_panel(sid: str):
-    fn = {x[0]: x[3] for x in MN.SECTIONS}[sid]
-    st.html(CSS + MN.CSS + f'<div class="mn">{fn()}</div>')
+    """상위 탭 하나 = 설명서 절 하나. 맨 위 제목 줄 형식은 개요의 '운용 루틴'과 같다(2026-11-16 디자인 일관성)."""
+    sec = {x[0]: x for x in MN.SECTIONS}[sid]
+    st.html(CSS + MN.CSS + f'<div class="mn"><div class="mn-h"><b>{_e(sec[1])}</b><span>{_e(sec[2])}</span></div>{sec[3]()}</div>')
 
 
 def pdf_row():

@@ -60,6 +60,7 @@ CACHE = os.path.join(DATA, "leaders_cache")
 SHDIR = os.path.join(DATA, "shares_cache")
 OUT_MC = os.path.join(DATA, "us_marketcap.csv")
 OUT_SH = os.path.join(DATA, "us_shares.csv")
+OUT_SH_CHECK = os.path.join(DATA, "us_shares_checked.json")   # 2026-11-16 점검 날짜(공시 행이 같아도 매일 갱신)
 SPLITS = os.path.join(DATA, "us_splits.csv")
 
 SUA = {"User-Agent": "leaders-research pcy604604@gmail.com",
@@ -764,7 +765,24 @@ def cmd_build(net_price=False):
     if _prev_n >= 100 and ts.sym.nunique() < _prev_n * 0.7:
         print(f"::error title=us_shares 급감::{_prev_n:,} → {ts.sym.nunique():,}종 — 기존 파일을 지킨다", flush=True)
     else:
-        ts.to_csv(OUT_SH, index=False)
+        # 2026-11-16 경량화 — as_of(오늘 날짜)가 32만 행 전부에 찍혀 내용이 같아도 매일 19.6MB 파일 전체가 다시 커밋됐다
+        #   (한 달 20회 → 저장소 이력 비대). 공시 행이 같으면 파일은 그대로 두고, 점검 날짜만 옆 파일에 남긴다.
+        _same = False
+        if os.path.exists(OUT_SH):
+            try:
+                _old = pd.read_csv(OUT_SH)
+                _c = ["sym", "filed", "end", "shares", "shares_adj"]
+                _same = (_old[_c].sort_values(["sym", "filed"]).to_csv(index=False)
+                         == ts[_c].sort_values(["sym", "filed"]).to_csv(index=False))
+            except Exception:
+                _same = False
+        if not _same:
+            ts.to_csv(OUT_SH, index=False)
+        else:
+            print("us_shares.csv 공시 행 변화 없음 — 파일 유지(점검 날짜만 갱신)", flush=True)
+        with open(OUT_SH_CHECK, "w", encoding="utf-8") as _f:
+            json.dump({"checked": str(pd.Timestamp.today().date()), "rows": int(len(ts)),
+                       "syms": int(ts.sym.nunique()), "changed": not _same}, _f, ensure_ascii=False)
     print(f"→ {OUT_SH}  ({len(ts_rows):,}행 · {len(sh)}종)", flush=True)
 
     m = pd.DataFrame(mc_rows)
