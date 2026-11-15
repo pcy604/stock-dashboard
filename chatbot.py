@@ -114,10 +114,10 @@ def _groq(prompt: str, key: str) -> str:
 
 # ── 사이트 명령(2026-11-16) — 부자알람 봇 명령 중 사이트 자료만으로 즉시 답할 수 있는 것. AI 호출·질문 한도 없음.
 COMMANDS = [
-    ("/market", "장 마감 시황 요약 — /market kr · /market us"),
-    ("/signal", "실전 규칙 지수 게이트(코스피·코스닥 주봉 5주선)"),
-    ("/dashboard 종목", "종목 분석 결론 — 예: /dashboard 삼성전자 · /dashboard NVDA"),
-    ("/terms", "이용 안내 · 면책"),
+    ("/market (/시황)", "장 마감 시황 요약 — /market kr · /market us"),
+    ("/signal (/신호)", "신규 진입 가능 여부 — 코스피·코스닥 주봉이 5주 이동평균 위인지"),
+    ("/dashboard 종목 (/분석)", "종목 분석 결론 — 예: /dashboard 삼성전자 · /dashboard NVDA"),
+    ("/terms (/안내)", "이용 안내 · 면책 고지"),
     ("/help", "명령어 목록"),
 ]
 TERMS = ("정보 제공 도구이며 투자 권유가 아님. 수치는 사이트 산출물 기준이며 지연·오류 가능. "
@@ -183,13 +183,13 @@ def command(q: str) -> str | None:
         return None
     cmd, _, arg = q.partition(" ")
     cmd, arg = cmd.lower(), arg.strip()
-    if cmd == "/market":
+    if cmd in ("/market", "/시황"):
         return _cmd_market(arg)
-    if cmd in ("/signal", "/신호"):
+    if cmd in ("/signal", "/신호", "/게이트"):
         return _cmd_signal()
     if cmd in ("/dashboard", "/분석", "/report"):
         return _cmd_dashboard(arg)
-    if cmd == "/terms":
+    if cmd in ("/terms", "/안내", "/면책"):
         return TERMS
     return "**사이트 명령어** (AI 질문 한도 미차감)\n" + "\n".join(f"- `{c}` — {d}" for c, d in COMMANDS)
 

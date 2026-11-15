@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16e'
+VERSION = '2026-11-16f'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -38,7 +38,7 @@ TAG_DESC = {'g': '실전 규칙 반영 항목', 'y': '검증 중 · 해석 보�
 # 첫 문장 = 실전 규칙 요약(규칙 명세 문체 — 명령형·구어체 금지). 자동매매·운영자 매매 언급은 공개 문구에서 뺀다
 # (따라 하기 요청·규제 노출 — 2026-11-15 차니 결정).
 # 2026-11-16 4차: 리드 = 프로젝트 목표(TSR 최대 · MDD 최소)를 한 문장으로, 근거는 백테스트 숫자(자동)로.
-LEAD = "낙폭은 규칙으로 통제하고, 수익은 주도주에서 취한다."
+LEAD = "총수익은 키우고 최대 낙폭은 줄이는 규칙만 운용한다."
 LEAD_SUB = ("실전 규칙 v1.9 한국 백테스트({start} ~ {end}) 연 {CAGR}% · 최대 낙폭 {MDD}% — 같은 기간 코스피 연 {BM_CAGR}% · {BM_MDD}%. "
             "상장폐지 포함 · 거래비용 반영 · 과거 성적.")
 
@@ -75,26 +75,26 @@ CAPS = [
 # 2026-11-16 4차: 짧은 주기 → 긴 주기(일간 → 주간 → 분기), 수시 항목은 마지막에 다른 상자(kind='o').
 # 텔레그램을 쓰지 않는 사람도 따라 할 수 있게 사이트 화면만으로 적는다.
 ROUTINES = [
-    ("일간 · 장 마감 후", "보유 종목 리스크 점검", 'r', [
-        "🏠 종합 — 당일 시황 리포트",
-        "🛡️ 내 포트폴리오 — 손절선 도달 종목",
-        "RS {rs_exit} 미만 이탈 종목",
-        "해당 종목은 규칙상 익일 매도 대상"]),
-    ("주간 · 토요일", "신규 진입 계획", 'r', [
-        "🏠 종합 — 주간 시장 신호(중지 시 신규 진입 없음)",
-        "🧭 종목 발굴 — 매수 대상 {slots}종(RS 순)",
-        "🔍 종목 분석 — 실전 규칙 대조 항목 충족 여부",
-        "진입 전 손절가(고점 대비 −{stop}%) 사전 설정"]),
-    ("분기 · 실적 시즌", "후보군 재편 점검", 'r', [
-        "실적 발표 후 흑자전환 종목 신규 편입",
-        "🌍 매크로 — 국면 전환 여부",
-        "신호 적중 이력 — 매크로 신호의 사후 검증",
+    ("일간 · 장 마감 후", "보유 종목 손절 점검", 'r', [
+        "🏠 종합 — 당일 시황 리포트(한국 15:50 · 미국 익일 06:30)",
+        "🛡️ 내 포트폴리오 — 손절가(보유 중 고점 대비 −{stop}%) 도달 종목",
+        "고점 갱신 종목은 손절가 상향",
+        "도달 종목은 규칙상 매도 대상"]),
+    ("주간 · 토요일", "다음 주 매매 계획", 'r', [
+        "🏠 종합 — 지수 게이트(주봉 {kr_ix_weeks}주선) · 하회 시 신규 진입 중지",
+        "보유 종목 RS {rs_exit} 미만 → 다음 거래일 매도",
+        "🧭 종목 발굴 — 빈 자리만큼 매수 대상(RS 순, 최대 {slots}종)",
+        "추가 매수 조건 — 첫 매수가 대비 +10% · +20%"]),
+    ("분기 · 실적 시즌", "후보군 변동 점검", 'r', [
+        "보유 종목 실적 발표일 확인",
+        "흑자전환 판정 변경 → 다음 토요일 후보에 자동 반영",
+        "🧭 종목 발굴 — 후보 편입·탈락 확인",
         "규칙 변경은 백테스트 검증 후에만"]),
-    ("수시 · 관심 종목 발생 시", "개별 종목 실사", 'o', [
-        "🔍 종목 분석 — 종목 코드 입력(005930 · NVDA)",
-        "실전 규칙 대조 항목 미충족 시 후보 제외",
+    ("수시 · 필요 시", "종목 실사 · 국면 해석", 'o', [
+        "🔍 종목 분석 — 결론 · 실전 규칙 대조 · 투자 논리 훼손 조건",
         "펀더멘탈 · 히스토리 · 수급 근거 확인",
-        "투자 논리 훼손 조건 점검"]),
+        "🌍 매크로 — 유동성 · 경기 국면 해석(참고 · 매매 규칙 미반영)",
+        "국면 전환은 주간 지수 게이트가 매매에 반영"]),
 ]
 
 # (항목, 값 — {…} 는 RULE 에서 채움, 이유)
@@ -119,27 +119,34 @@ DATA_FLOW = [
     ("네이버 금융 · KRX", [
         ("한국 가격 · 시총 · RS", ['daily-refresh'], 'results/screener_latest.json', ""),
         ("한국 수급 · 신용", ['kr-flow'], 'results/kr_flow.json', "비공식 API"),
-        ("한국 컨센서스", "주 1회(월요일)", 'results/consensus_history.jsonl', ""),
-        ("한국 분기 재무 보충", ['weekly-profile'], 'data/kr_fundamentals_q.parquet', "DART 가 닿지 않을 때"),
+        ("한국 컨센서스", "주 1회(월요일)", 'results/consensus_history.jsonl', "네이버 기업분석(WiseReport)"),
+        ("한국 분기 재무 보충", ['weekly-profile'], 'data/kr_fundamentals_q.parquet', "DART 미수신 시"),
         ("업종 · 테마", ['sector-detail'], 'data/sector_detail.json', "시장 통용 분류"),
     ]),
-    ("DART (한국 공시)", [
-        ("한국 재무 원문", ['weekly-profile'], 'results/value_kr.json', "해외 서버 접속을 자주 거부"),
+    ("DART · 한국 공시", [
+        ("한국 재무 원문", ['weekly-profile'], 'results/value_kr.json', "해외 서버 접속 자주 거부"),
     ]),
-    ("SEC EDGAR (미국 공시)", [
+    ("SEC EDGAR · 미국 공시", [
         ("미국 재무 · 주식수", ['fin-daily'], 'data/us_shares.csv', "실적 발표 후 공시까지 1~3주"),
     ]),
     ("Yahoo Finance", [
-        ("미국 가격 · 시총", ['daily-refresh'], 'data/us_marketcap.csv', "비공식 — 끊기면 빈칸"),
+        ("미국 가격 · 시총", ['daily-refresh'], 'data/us_marketcap.csv', "비공식 — 수신 실패 시 빈칸"),
     ]),
-    ("FRED (미 연준)", [
+    ("FRED · 미 연준", [
         ("금리 · 물가 · 신용 스프레드", ['macro-long'], 'data/research/macro_long_fred.parquet', "하루 지연"),
     ]),
-    ("자체 계산 (위 원천을 가공)", [
+    ("World Bank", [
+        ("국가별 증시 시가총액", "매월 2일", None, "연간 통계"),
+    ]),
+    ("Google Gemini · Groq (AI)", [
+        ("시황 해설 · 기업 요약 · AI 질문 문장", "리포트 생성 시", None, "숫자는 규칙 계산, 문장만 AI"),
+    ]),
+    ("STOCK DASHBOARD", [
         ("실전 후보(주도주)", "주 1회(토요일)", 'results/leaders_accel.json', "금요일 종가 기준"),
         ("다음 주 계획표", ['live-plan'], 'live/plan_latest.json', "토요일 저녁 확정"),
-        ("시황 리포트", ['market-report'], 'results/market_report.json', "숫자는 규칙 계산, 문장만 AI"),
-        ("공통 재무 (매출·영업익 YoY·PER)", ['snap'], 'results/fund_snapshot.json', ""),
+        ("한국 시황 리포트", "평일 15:50", 'results/market_report.json', "한국 장 마감 후"),
+        ("미국 시황 리포트", "화~토 06:30", 'results/market_report.json', "미국 장 마감 후"),
+        ("공통 재무(매출·영업익 YoY·PER)", ['snap'], 'results/fund_snapshot.json', ""),
     ]),
 ]
 
@@ -378,17 +385,19 @@ CSS = """
   @media (max-width:720px) { .mn-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } .mn-tbl td:first-child { white-space:normal; } }
   .mn-src { font-size:11.5px; color:var(--ink-3); margin:6px 2px 0; line-height:1.6; }
   .mn-gap { height:14px; }
-  .mn-df-wrap { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; align-items:start; }
+  .mn-df-wrap { column-count:2; column-gap:8px; }
   .mn-rt.rg { border-left:3px solid var(--accent); }
   .mn-rt.od { border-left:3px dashed #b45309; background:#fffbeb; }
   .mn-rt .t { font-size:14px; font-weight:750; color:var(--ink); margin:2px 0 6px; }
   .mn-sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin:0 4px 0 2px; vertical-align:-1px; }
   .mn-sw.rg { background:var(--accent); } .mn-sw.od { background:#fbbf24; }
-  .mn-df { display:grid; grid-template-columns:minmax(96px,120px) 1fr; gap:0 10px; border:1px solid var(--line); border-radius:10px;
-           background:var(--surface); padding:8px 12px; margin-bottom:8px; }
-  .mn-df-src { font-size:13px; font-weight:750; color:var(--ink); padding-top:6px; border-right:2px solid var(--accent-2); }
-  .mn-df-row { display:grid; grid-template-columns:12px minmax(120px,1fr) 12px minmax(84px,auto) 12px auto; justify-content:start;
-               align-items:center; gap:4px 8px; padding:5px 0; border-top:1px dashed var(--line-2); }
+  .mn-df { break-inside:avoid; border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:8px 12px 4px; margin:0 0 8px; }
+  .mn-df-src { font-size:13px; font-weight:750; color:var(--ink); padding:0 0 4px; border-bottom:2px solid var(--accent-2); }
+  .mn-df-row { display:grid; grid-template-columns:minmax(0,1fr) 112px 74px; align-items:center; gap:2px 10px; padding:5px 0; border-top:1px dashed var(--line-2); }
+  .mn-df-row.pdf { grid-template-columns:minmax(0,1fr) 120px; }
+  .mn-df-hd { border-top:0; padding:4px 0 2px; font-size:11px; color:var(--ink-3); }
+  .mn-df-hd + .mn-df-row { border-top:1px solid var(--line-2); }
+  .mn-df-row > .mn-st { justify-self:start; }
   .mn-df-row:first-child { border-top:0; }
   .mn-df-it { font-size:12.5px; } .mn-df-it b { font-weight:650; color:var(--ink); }
   .mn-df-it small, .mn-df-row small { display:block; font-size:11px; color:var(--ink-3); }
@@ -398,9 +407,7 @@ CSS = """
   .mn-st { font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:999px; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .mn-st.ok { background:var(--pos-bg); color:var(--pos); } .mn-st.bad { background:var(--neg-bg); color:var(--neg); }
   .mn-st.na { background:var(--line-2); color:var(--ink-3); }
-  @media (max-width:980px) { .mn-df-wrap { grid-template-columns:1fr; } }
-  @media (max-width:720px) { .mn-df-row { grid-template-columns:14px 1fr; } .mn-df-row > .mn-ar:not(:first-child) { display:none; }
-    .mn-df { grid-template-columns:1fr; } .mn-df-src { border-right:0; border-bottom:2px solid var(--accent-2); padding:0 0 4px; } }
+  @media (max-width:980px) { .mn-df-wrap { column-count:1; } }
 </style>
 """
 
@@ -491,9 +498,31 @@ def fresh(path) -> dict | None:
     return fresh_all().get(path) if path else None
 
 
+def panel_info() -> list:
+    """과거 데이터(백테스트 패널) — results/quant_panel_info.json(quant-panel 워크플로) + 한국 분기 재무 시작 연도."""
+    try:
+        info = json.loads((ROOT / 'results' / 'quant_panel_info.json').read_text(encoding='utf-8'))
+    except Exception:
+        return []
+    try:
+        import pandas as _pd
+        fq = _pd.read_parquet(ROOT / 'data' / 'kr_fundamentals_q.parquet', columns=['year'])
+        kr_fin = f"{int(fq.year.min())}년~"
+    except Exception:
+        kr_fin = '-'
+    out = []
+    for mk, lab, fin in (('KR', '한국', kr_fin + ' (DART · 네이버)'), ('US', '미국', '2014년~ (SEC EDGAR · 공시일 기준)')):
+        x = info.get(mk) or {}
+        if x:
+            out.append((lab, f"{x.get('start')} ~ {x.get('end')}", f"{x.get('syms', 0):,}종", fin))
+    return out
+
+
 def sec_data(live: bool = True) -> str:
-    """출처 → 항목 → 주기 → 마지막 갱신. live=False(PDF)는 마지막 갱신 칸을 뺀다 — PDF 는 만든 날의 사진이라."""
+    """출처 → 항목 → 주기 → 기준일(2열 · 출처 상자 위에서부터 채움). live=False(PDF)는 기준일 칸을 뺀다."""
     groups = []
+    hd = ('<div class="mn-df-row mn-df-hd"><span>항목</span><span>갱신 주기(KST)</span>'
+          + ('<span>기준일</span>' if live else '') + '</div>')
     for src, items in DATA_FLOW:
         rows = []
         for item, wf, path, lim in items:
@@ -503,21 +532,24 @@ def sec_data(live: bool = True) -> str:
                 if r and r.get('date'):
                     ok = r['state'] == 'ok'
                     d = r['date']
-                    lab = (f"{d[2:4]}Q{(int(d[5:7]) + 2) // 3} 분기" if str(path).endswith('fundamentals_q.parquet')   # 분기 재무 = 담긴 최신 분기
+                    lab = (f"{d[2:4]}Q{(int(d[5:7]) + 2) // 3} 분기" if str(path).endswith('fundamentals_q.parquet')
                            else d[5:].replace('-', '/'))
-                    st_ = (f'<span class="mn-st {"ok" if ok else "bad"}">{"✓" if ok else "!"} {_e(lab)}</span>'
-                           + ('' if ok else f'<small>{_e(r.get("note"))}</small>'))
+                    st_ = f'<span class="mn-st {"ok" if ok else "bad"}">{"✓" if ok else "!"} {_e(lab)}</span>'
                 else:
                     st_ = '<span class="mn-st na">-</span>'
-                st_ = f'<span class="mn-ar">→</span>{st_}'
-            rows.append(f"""<div class="mn-df-row"><span class="mn-ar">→</span>
-              <div class="mn-df-it"><b>{_e(item)}</b>{f'<small>{_e(lim)}</small>' if lim else ''}</div>
-              <span class="mn-ar">→</span><span class="mn-df-cy">{_e(schedule(wf))}</span>{st_}</div>""")
-        groups.append(f'<div class="mn-df"><div class="mn-df-src">{_e(src)}</div><div>{"".join(rows)}</div></div>')
-    head = ('출처 → 항목 → 갱신 주기(KST) → 최신 데이터 기준일 · ✓ 정상 · ! 지연 · 기준일은 산출물 내부 날짜'
-            if live else '출처 → 항목 → 갱신 주기(KST) · 최신 데이터 기준일과 정상 여부는 화면에서 확인')
-    return (f'<div class="mn-src" style="margin:0 2px 10px">{head}</div><div class="mn-df-wrap">' + ''.join(groups) + '</div>'
-            + '<div class="mn-src">전 항목 무료 공개 원천 · 각 표 하단에 출처 · 기준일 표기 · 예약 실행은 수 분~수십 분 지연 가능</div>')
+            rows.append(f"""<div class="mn-df-row{'' if live else ' pdf'}"><div class="mn-df-it"><b>{_e(item)}</b>{f'<small>{_e(lim)}</small>' if lim else ''}</div>
+              <span class="mn-df-cy">{_e(schedule(wf))}</span>{st_}</div>""")
+        groups.append(f'<div class="mn-df"><div class="mn-df-src">{_e(src)}</div>{hd}{"".join(rows)}</div>')
+    head = ('출처별 항목 · 갱신 주기 · 기준일 · ✓ 정상 · ! 지연 · 기준일은 산출물 내부 날짜'
+            if live else '출처별 항목 · 갱신 주기 · 기준일과 정상 여부는 화면에서 확인')
+    pin = panel_info()
+    past = ''
+    if pin:
+        past = ('<div class="mn-h" style="margin-top:14px"><b>과거 데이터 — 백테스트 패널</b>'
+                '<span>주봉 · 상장폐지 종목 포함 · 매주 토요일 갱신</span></div>'
+                + _table(['시장', '가격 기간', '종목 수', '재무'], [(_e(a), _e(b), _e(c), _e(d)) for a, b, c, d in pin]))
+    return (f'<div class="mn-src" style="margin:0 2px 8px">{head}</div><div class="mn-df-wrap">' + ''.join(groups) + '</div>'
+            + '<div class="mn-src">전 항목 무료 공개 원천 · 각 표 하단에 출처 · 기준일 표기 · 예약 실행은 수 분~수십 분 지연 가능</div>' + past)
 
 
 def sec_bot() -> str:

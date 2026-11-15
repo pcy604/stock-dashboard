@@ -10,18 +10,22 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-VERSION = '2026-11-16a'
+VERSION = '2026-11-16b'
 
 CSS = """<style>
   .st-key-ai_fab { position:fixed !important; right:24px; bottom:24px; z-index:1000; width:56px !important;
                    min-width:0 !important; touch-action:none; }
   .st-key-ai_fab [data-testid="stPopover"], .st-key-ai_fab [data-testid="stPopover"] > div { width:56px !important; }
   .st-key-ai_fab [data-testid="stPopoverButton"], .st-key-ai_fab button {
-      width:56px !important; height:56px !important; min-height:56px !important; border-radius:50% !important; padding:0 !important;
-      background:#1d4ed8 !important; color:#fff !important; border:0 !important; font-size:24px !important;
-      box-shadow:0 6px 18px rgba(15,23,42,.28) !important; justify-content:center !important; cursor:grab; }
-  .st-key-ai_fab button:hover { background:#1e40af !important; }
-  .st-key-ai_fab button p { font-size:24px !important; line-height:1 !important; margin:0 !important; }
+      position:relative; width:56px !important; height:56px !important; min-height:56px !important; border-radius:50% !important;
+      padding:0 !important; border:2px solid #7cb342 !important; color:transparent !important;
+      background:#fff url("__LOGO__") center / 78% no-repeat !important;
+      box-shadow:0 6px 18px rgba(15,23,42,.22) !important; cursor:grab; overflow:visible !important; }
+  .st-key-ai_fab button:hover { box-shadow:0 8px 22px rgba(15,23,42,.32) !important; transform:translateY(-1px); }
+  .st-key-ai_fab button > div { position:static !important; }
+  .st-key-ai_fab button p { position:absolute; right:-6px; bottom:-4px; margin:0 !important; padding:1px 6px; border-radius:999px;
+      background:#1b1f24; color:#fff !important; font-size:11px !important; font-weight:800; line-height:16px !important;
+      letter-spacing:.02em; border:2px solid #fff; }
   .st-key-ai_fab button [data-testid="stIconMaterial"], .st-key-ai_fab button svg { display:none !important; }
   .st-key-ai_fab.dragging button { cursor:grabbing; }
   [data-testid="stPopoverBody"]:has(.st-key-ai_pane) { width:min(480px, 94vw) !important; max-width:94vw !important; }
@@ -81,9 +85,19 @@ JS = """<script>
 </script>"""
 
 
+def _logo_uri() -> str:
+    """assets/studian_mark.png(스터디언 로고 96px) → data URI. 없으면 빈 문자열(흰 원 + AI 배지만)."""
+    import base64, os
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'studian_mark.png')
+    try:
+        return 'data:image/png;base64,' + base64.b64encode(open(p, 'rb').read()).decode()
+    except Exception:
+        return ''
+
+
 def mount():
     """CSS 와 끌기 스크립트를 한 번 심는다. 실패해도 버튼은 고정 위치로 동작."""
-    st.html(CSS)
+    st.html(CSS.replace('__LOGO__', _logo_uri()))
     try:
         components.html(JS, height=0)
     except Exception:

@@ -9186,18 +9186,23 @@ def _groq_key_site():
 
 def _chat_box():
     """💬 사이트 AI 질문(2026-11-15) — 근거 = 사이트 산출물만(chatbot.py), 무료 AI. 세션당 15문항. 추천 금지."""
+    import importlib
     import chatbot as _CB
     import ui_fab as _FAB
-    # 2026-11-16 — 고정 버튼 → 화면 위를 끌어 옮기는 원형 버튼(위치는 브라우저에 기억). 사이트 명령(/market 등)은 AI 한도 미차감.
+    if getattr(_FAB, 'VERSION', None) != '2026-11-16b':      # 클라우드가 옛 모듈을 들고 있을 때
+        _FAB = importlib.reload(_FAB)
+    if not hasattr(_CB, 'command'):
+        _CB = importlib.reload(_CB)
+    # 2026-11-16 — 고정 버튼 → 화면 위를 끌어 옮기는 원형 버튼(스터디언 로고 + AI 배지, 위치는 브라우저에 기억).
     _FAB.mount()
-    with st.container(key='ai_fab'), st.popover("💬", help="AI 질문 · 사이트 명령어(/help) — 끌어서 위치 이동"), \
+    with st.container(key='ai_fab'), st.popover("AI", help="AI 질문 · 사이트 명령어(/help) — 끌어서 위치 이동"), \
             st.container(key='ai_pane'):
         st.caption("사이트 자료(시황·매크로·실전 규칙·종목 스냅샷)만 근거로 답변. 매수·매도 추천 없음. "
                    f"AI 질문은 방문당 {_CB.SESSION_LIMIT}문항, `/` 명령어는 한도 미차감.")
         log = st.session_state.setdefault('ai_log', [])
         _cmd_pick = None
         _cc = st.columns(4)
-        for _c, (_lab, _cmd) in zip(_cc, [("📊 시황", "/market"), ("🚦 지수 게이트", "/signal"),
+        for _c, (_lab, _cmd) in zip(_cc, [("📊 시황", "/market"), ("🚦 진입 신호", "/signal"),
                                          ("📜 이용 안내", "/terms"), ("❔ 명령어", "/help")]):
             if _c.button(_lab, key=f'ai_c_{_cmd}', width='stretch'):
                 _cmd_pick = _cmd
