@@ -260,7 +260,7 @@ def render(st, actor: str, owner_uid: str):
         st.caption(_GUIDE['kpi'])
         _items(st, 'kpi', actor)
     with tabs[7]:                                  # 2026-11-15 — 공개 설명서에서 뺀 개선 내역 · 검증·한계
-        st.caption('공개 사용설명서에서 뺀 절입니다. 개선 내역은 화면이 바뀌는 작업마다 docs/release_notes.json 에 한 줄 — 배포 공지는 안정화 뒤.')
+        st.caption('공개 설명서 제외 절 · 변경 사항은 화면 변경 작업마다 docs/release_notes.json 에 한 줄 추가 · 배포 공지는 안정화 후')
         try:
             import ui_home as _UH
             _UH.manual_internal()

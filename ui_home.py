@@ -4,7 +4,7 @@
   1층 결론(5초)  : 이번 주 실전 규칙(v1.9)이 신규 매수를 허락하나 + 오늘 시장 한 줄
   2층 상태(30초) : 지수·환율·금리·원자재 카드, 한국 시장 폭·업종 강약
   3층 근거(필요 시): 할 일 표 · 시황 리포트 원문 · 챗봇 (dashboard.py)
-사용법은 3탭(한눈에 · 활용 루틴 · 전체 설명서) — 문구·숫자는 manual.py 단일 원천(2026-11-14).
+사용법은 3탭(개요 · 운용 루틴 · 설명서) — 문구·숫자는 manual.py 단일 원천(2026-11-14).
 
 데이터는 전부 파일에서만 읽는다(results/market_report.json · live/plan_latest.json). 여기서 외부 호출 없음.
 숫자 없으면 '-' — 지어내지 않는다.
@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-15d'
+VERSION = '2026-11-15e'
 
 CSS = """
 <style>
@@ -826,7 +826,7 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
 # 문구·규칙 값·갱신 시각은 전부 manual.py 한 곳에서 온다(화면과 PDF 가 같은 원천). 여기는 그리기만.
 import manual as MN
 
-_MN_VER = '2026-11-16c'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
+_MN_VER = '2026-11-16d'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
 if getattr(MN, 'VERSION', None) != _MN_VER:
     import importlib as _il
     MN = _il.reload(MN)
@@ -865,7 +865,7 @@ def tour_card(i: int, tab: str, q: str, d: str, feats: list, on: bool):
     """탭 하나 = 카드 하나: 탭 이름 → 질문 → 한 줄 → 기능(등급). 카드를 누르면 그 탭으로(dashboard 가 투명 버튼을 겹친다)."""
     li = ''.join(f"<li>{_e(f.split(' — ')[0])}{MN._tag(g)}</li>" for f, g in feats)
     st.html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-card mn-tour{' on' if on else ''}">
-      <div class="k">{i} · {_e(tab)}<b>{'지금 여기' if on else '열기 →'}</b></div><div class="t">{_e(q)}</div><div class="q">{_e(d)}</div><ul>{li}</ul></div></div>""")
+      <div class="k">{i} · {_e(tab)}<b>{'현재 탭' if on else '이동 →'}</b></div><div class="t">{_e(q)}</div><div class="q">{_e(d)}</div><ul>{li}</ul></div></div>""")
 
 
 def routines_panel():
@@ -882,7 +882,7 @@ def manual_panel():
         with tab:
             st.html(CSS + MN.CSS + f'<div class="mn">{fn()}</div>')
     c1, c2 = st.columns([5, 1.4], vertical_alignment='center')
-    c1.caption("PDF 는 한눈에 · 활용 루틴 · 이 설명서를 한 권으로 묶은 것 · 규칙 값과 백테스트 숫자는 원천에서 자동으로 따라옵니다. " + MN.DISCLAIMER)
+    c1.caption("PDF — 개요 · 운용 루틴 · 설명서 합본 · 규칙 값과 백테스트 수치 자동 반영. " + MN.DISCLAIMER)
     if os.path.exists(pdf):
         with open(pdf, 'rb') as f:
             c2.download_button("PDF 내려받기", f.read(), file_name="stock-dashboard_사용설명서.pdf",

@@ -1148,7 +1148,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or '🏠 종합'
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-15d'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-15e'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -1173,7 +1173,7 @@ def _owner_seen() -> bool:
 with st.expander("📘 사용법",
                  expanded=_first_visit and not IS_MOBILE and not _owner_seen()
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
-    _gt1, _gt3, _gt4 = st.tabs(["⚡ 한눈에", "🗓️ 활용 루틴", "📚 전체 설명서"])
+    _gt1, _gt3, _gt4 = st.tabs(["📌 개요", "🗓️ 운용 루틴", "📚 설명서"])
     with _gt3:
         _UH.routines_panel()
     with _gt4:
