@@ -19,7 +19,7 @@ from pathlib import Path
 DATA = Path('data')
 _CIK_CACHE = DATA / 'edgar_cik.json'
 # 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
-API_VERSION = 4   # 4: earnings_release_quarter(8-K 보도자료 손익, 2026-11-06)
+API_VERSION = 5   # 5: filings() 에 8-K items(구간 메모, 2026-11-16) · 4: earnings_release_quarter
 # SEC는 연락처 포함 User-Agent 요구 (없으면 403)
 UA = {'User-Agent': 'stock-screener research pcy604604@gmail.com',
       'Accept-Encoding': 'gzip, deflate'}
@@ -283,6 +283,7 @@ def filings(ticker, form=None, limit=15):
         doc = r['primaryDocument'][i]
         out.append({'date': r['filingDate'][i], 'form': r['form'][i],
                     'title': r.get('primaryDocDescription', [''] * (i + 1))[i],
+                    'items': (r.get('items') or [''] * (i + 1))[i] if i < len(r.get('items') or []) else '',
                     'url': f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{acc}/{doc}"})
         if len(out) >= limit:
             break

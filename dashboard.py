@@ -825,7 +825,7 @@ try:
     import importlib                            # 처음 본 프로세스인데 옛 모듈인 경우(위 시각 비교가 못 잡음)
     if getattr(_dc, 'API_VERSION', 0) < 4:
         _dc = importlib.reload(_dc)
-    if getattr(_ec, 'API_VERSION', 0) < 4:      # 4: earnings_release_quarter — edgar_client 를 올리면 같이 올린다(11-05 table_ui 사고)
+    if getattr(_ec, 'API_VERSION', 0) < 5:      # 4: earnings_release_quarter — edgar_client 를 올리면 같이 올린다(11-05 table_ui 사고)
         _ec = importlib.reload(_ec)
     _dc.set_interactive(True)
     _ec.set_interactive(True)
@@ -5409,6 +5409,48 @@ def _ai_summary_auto(sym, is_kr, name, fallback_text):
     return out
 
 
+def _fin_chart(stm, est, efreq, is_kr, freq_label):
+    """재무제표 차트(2026-11-16) — 매출·영업이익 막대 + 영업이익률 선. 실적은 진하게, 컨센서스(E)는 옅게·빗금.
+    표와 같은 자리에 택1로 그린다. 영업이익 E 가 없는 미국 종목은 매출 E 만(무료 출처 한계 — 캡션)."""
+    rows = list(reversed([r for r in (stm or []) if r.get('period')]))
+    if not rows:
+        return
+    per = [str(r['period']) for r in rows]
+    rev = [r.get('revenue') for r in rows]
+    op = [r.get('op_income') for r in rows]
+    epairs = (('올해E', '0y'), ('내년E', '1y')) if efreq == 'annual' else (('이번분기E', '0q'), ('다음분기E', '1q'))
+    eper, erev, eop = [], [], []
+    for lab, sfx in epairs:
+        rv, ov = (est or {}).get(f'revenue_{sfx}'), (est or {}).get(f'op_income_{sfx}')
+        if rv or ov:
+            eper.append(lab); erev.append(rv); eop.append(ov)
+    vals = [abs(v) for v in rev + op + erev + eop if isinstance(v, (int, float)) and v]
+    med = float(np.median(vals)) if vals else 0
+    if is_kr:
+        div, unit = (1e12, '조원') if med >= 1e12 else (1e8, '억원')
+    else:
+        div, unit = (1e9, '$B') if med >= 1e9 else (1e6, '$M')
+    sc = lambda xs: [(v / div if isinstance(v, (int, float)) else None) for v in xs]
+    opm = [(o / r * 100 if (isinstance(o, (int, float)) and isinstance(r, (int, float)) and r) else None) for o, r in zip(op, rev)]
+    eopm = [(o / r * 100 if (o and r) else None) for o, r in zip(eop, erev)]
+    from plotly.subplots import make_subplots
+    f = make_subplots(specs=[[{'secondary_y': True}]])
+    f.add_trace(go.Bar(x=per, y=sc(rev), name='매출', marker_color='#9DB4D3'), secondary_y=False)
+    f.add_trace(go.Bar(x=per, y=sc(op), name='영업이익', marker_color='#1F4E79'), secondary_y=False)
+    if eper:
+        f.add_trace(go.Bar(x=eper, y=sc(erev), name='매출 E', marker=dict(color='#9DB4D3', opacity=.45, pattern=dict(shape='/'))), secondary_y=False)
+        f.add_trace(go.Bar(x=eper, y=sc(eop), name='영업이익 E', marker=dict(color='#1F4E79', opacity=.45, pattern=dict(shape='/'))), secondary_y=False)
+    f.add_trace(go.Scatter(x=per + eper, y=opm + eopm, name='영업이익률(%)', mode='lines+markers',
+                           line=dict(color='#D97706', width=2), connectgaps=False), secondary_y=True)
+    f.update_layout(barmode='group', height=300, margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)', legend=dict(orientation='h', y=1.12, x=0, font=dict(size=11)), bargap=.25)
+    f.update_yaxes(title_text=unit, secondary_y=False, gridcolor='#EEF0F3')
+    f.update_yaxes(title_text='%', secondary_y=True, showgrid=False)
+    st.plotly_chart(f, use_container_width=True, config={'displayModeBar': False})
+    st.caption(f"{freq_label} · 막대 = 매출·영업이익({unit}) · 선 = 영업이익률 · 빗금 = 컨센서스(E)"
+               + ("" if is_kr else " · 미국 영업이익 컨센서스는 무료 출처 없음 → 매출 E 만") + " · 세부 항목은 '표'")
+
+
 def _ai_card(sym, ais: dict) -> dict:
     """기업 요약 카드(A안, 2026-11-16) — 긴 AI 요약에서 짧은 필드 4개만 뽑는다. 같은 요약이면 디스크 재사용.
     화면·봇은 이 필드를 잘라 쓰지 않는다(줄바꿈) — 그래서 길이 제한은 여기 프롬프트에서 건다."""
@@ -6322,7 +6364,10 @@ def _tab_analysis():
                             return f"{v*100:.1f}%" if isinstance(v, (int, float)) else '-'
 
 
-                        _freq = st.radio("기준", ["연간", "분기"], horizontal=True, key=f"fin_freq_{sym8_clean}")
+                        # 2026-11-16 — 차트 기본 · 표는 택1(같은 자리 — 세로 공간 절약). 기준·보기 한 줄.
+                        _ff1, _ff2, _ = st.columns([1, 1, 3])
+                        _freq = _ff1.segmented_control("기준", ["연간", "분기"], default="연간", key=f"fin_freq_{sym8_clean}") or "연간"
+                        _fview = _ff2.segmented_control("보기", ["차트", "표"], default="차트", key=f"fin_view_{sym8_clean}") or "차트"
                         # 2026-10-21 — 폰(390px)에서는 13열 표가 3~4열만 보였다 → 최근 3개 기간만, 필요하면 펼친다
                         _fin_all = (not IS_MOBILE) or st.toggle("전체 기간 보기", value=False, key=f"fin_all_{sym8_clean}")
                         _stm = unified_statements(sym8_clean, is_kr_sym, 'annual' if _freq == "연간" else 'quarter')
@@ -6572,13 +6617,16 @@ def _tab_analysis():
                                          (f'PSR (현시총÷{_tt.strip()}매출)', 'rev_basis', 'mult')]
                             _cf_items = [('영업활동', 'op_cf', 'amt'), ('투자활동', 'inv_cf', 'flow'),
                                          ('재무활동', 'fin_cf', 'flow'), ('Capex', 'capex', 'flow')]
-                            if _stored:                # 저장본은 손익 3항목뿐 — 빈 행('-')을 늘어놓지 않는다
+                            if _fview == "차트":
+                                _fin_chart(_stm, _est, _est_freq, is_kr_sym, _freq)
+                            elif _stored:                # 저장본은 손익 3항목뿐 — 빈 행('-')을 늘어놓지 않는다
                                 _is_items = [it for it in _is_items
                                              if it[1] in ('revenue', 'op_income', 'opm', 'net_income', 'ni_basis', 'rev_basis')]
                             else:
                                 _stmt_table("① 대차대조표 (E=컨센서스)", _bs_items, est=_est, freq=_est_freq)
-                            _stmt_table("② 손익계산서 (E=컨센서스)", _is_items, est=_est, freq=_est_freq)
-                            if not _stored:
+                            if _fview == "표":
+                                _stmt_table("② 손익계산서 (E=컨센서스)", _is_items, est=_est, freq=_est_freq)
+                            if not _stored and _fview == "표":
                                 _stmt_table("③ 현금흐름표 (Capex=유출, 음수)", _cf_items)
                             _qn = "3개월 환산" if _freq == "분기" else "회계연도"
                             _src_txt = (f"DART 공시 저장본(갱신 {_stored})" if _stored else
@@ -7189,7 +7237,35 @@ def _tab_analysis():
                             fig.add_vrect(x0=max(_a, _d0), x1=min(_b, _d1), line_width=0, layer='below', row=1, col=1,
                                           fillcolor='#16A34A' if _upw else '#D9363E',
                                           opacity=(0.14 if '진행' in str(_rw['라벨']) else 0.07))
+                        # 2026-11-16 P3 — 구간 메모: 같은 기간 지수 · 실적 서프라이즈 · 주요 공시(사실 집계, AI 문장 없음)
+                        _memos = []
+                        try:
+                            import event_memo as _evm
+                            _evm = _fresh_module(_evm)
+                            _span = max(400, int((hist.index[-1] - hist.index[0]).days) + 30)
+                            _ixh = fetch_index_history('KS11' if is_kr_sym else 'SPY', min(_span, 7300))
+                            _ixs = _ixh.iloc[:, 0] if len(_ixh) else None
+                            _fl8 = []
+                            if not is_kr_sym:
+                                try:
+                                    import edgar_client as _ec8
+                                    _fl8 = _ec8.filings(sym8_clean, form='8-K', limit=300)
+                                except Exception:
+                                    _fl8 = []
+                            _memos = _evm.build(hist['Close'], _crow, (_earn_data(sym8_clean, is_kr_sym) or {}).get('dates'),
+                                                _ixs, _fl8, '코스피' if is_kr_sym else 'S&P500', since=_d0)
+                            for _mo in _memos:
+                                _me = pd.Timestamp(_mo['end'])
+                                if _d0 is not None and _d0 <= _me <= _d1:
+                                    _y = disp['High'].loc[:_me].iloc[-1] if _mo['ret'] > 0 else disp['Low'].loc[:_me].iloc[-1]
+                                    fig.add_annotation(x=_me, y=_y, text=f"<b>{_mo['no']}</b>", showarrow=True, arrowhead=0,
+                                                       ay=-22 if _mo['ret'] > 0 else 22, ax=0, row=1, col=1,
+                                                       font=dict(size=11, color='#fff'),
+                                                       bgcolor='#15803D' if _mo['ret'] > 0 else '#B91C1C', borderpad=2)
+                        except Exception as _e_mo:
+                            print(f'[event memo] {_e_mo}')
                     except Exception as _e_cs:
+                        _memos = []
                         print(f'[cycle shade] {_e_cs}')
                     if _scale == '로그':
                         fig.update_yaxes(type='log', row=1, col=1)
@@ -7209,6 +7285,13 @@ def _tab_analysis():
                                f"조회기간({_yrs:.1f}년) 최대 {_dd_all:.1f}%. 빨간 점선 = 52주 고점의 −20% — "
                                "보유 중이면 매매 원칙상 청산을 검토하는 선(정확한 기준은 '보유 후 고점'). "
                                "바탕 초록·빨강 = 아래 사이클 기준(%)으로 자른 상승·하락 구간(진한 색 = 진행 중).")
+                    if _memos:
+                        _tsrc('yfinance 실적 발표일·서프라이즈 · ' + ('SEC EDGAR 8-K 항목 · ' if not is_kr_sym else '')
+                              + ('KOSPI' if is_kr_sym else 'SPY') + ' · event_memo.py — 차트 번호 = 구간 끝', live=True)
+                        st.dataframe(pd.DataFrame([{'구간': m['label'], '시작': str(m['start']), '끝': str(m['end']),
+                                                    '수익률(%)': round(m['ret'], 1), '거래일(일)': m['days'], '그동안': m['memo']}
+                                                   for m in _memos]),          # No. = 차트 번호(오래된 순)
+                                     hide_index=True, filters=False, use_container_width=True)
                     if sym8_clean.replace('.KS','').replace('.KQ','').isdigit() and _yrs < 15:
                         st.caption("ℹ️ 한국 종목은 무료 데이터소스 한계로 최근 ~12년까지만 조회됨 (실제 상장일과 무관한 소스 제약)")
 
