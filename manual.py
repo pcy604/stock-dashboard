@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16f'
+VERSION = '2026-11-16g'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -38,7 +38,7 @@ TAG_DESC = {'g': '실전 규칙 반영 항목', 'y': '검증 중 · 해석 보�
 # 첫 문장 = 실전 규칙 요약(규칙 명세 문체 — 명령형·구어체 금지). 자동매매·운영자 매매 언급은 공개 문구에서 뺀다
 # (따라 하기 요청·규제 노출 — 2026-11-15 차니 결정).
 # 2026-11-16 4차: 리드 = 프로젝트 목표(TSR 최대 · MDD 최소)를 한 문장으로, 근거는 백테스트 숫자(자동)로.
-LEAD = "총수익은 키우고 최대 낙폭은 줄이는 규칙만 운용한다."
+LEAD = "수익은 시장보다 크게, 낙폭은 시장보다 작게."
 LEAD_SUB = ("실전 규칙 v1.9 한국 백테스트({start} ~ {end}) 연 {CAGR}% · 최대 낙폭 {MDD}% — 같은 기간 코스피 연 {BM_CAGR}% · {BM_MDD}%. "
             "상장폐지 포함 · 거래비용 반영 · 과거 성적.")
 
@@ -498,6 +498,19 @@ def fresh(path) -> dict | None:
     return fresh_all().get(path) if path else None
 
 
+def _world_year() -> str:
+    """World Bank 국가별 시총 — 파일 안에 날짜가 없고 통계 연도만 있다(연간 통계)."""
+    try:
+        d = json.loads((ROOT / 'data' / 'world_mcap.json').read_text(encoding='utf-8'))
+        return f"{max(int(v.get('year')) for v in d.values() if isinstance(v, dict) and v.get('year'))}년 통계"
+    except Exception:
+        return '-'
+
+
+# 레지스트리(data_freshness)에 날짜가 없는 항목의 갱신일 표시 — 2026-11-16 차니
+FIXED_DATE = {'국가별 증시 시가총액': _world_year, '시황 해설 · 기업 요약 · AI 질문 문장': lambda: '해당 없음'}
+
+
 def panel_info() -> list:
     """과거 데이터(백테스트 패널) — results/quant_panel_info.json(quant-panel 워크플로) + 한국 분기 재무 시작 연도."""
     try:
@@ -514,7 +527,8 @@ def panel_info() -> list:
     for mk, lab, fin in (('KR', '한국', kr_fin + ' (DART · 네이버)'), ('US', '미국', '2014년~ (SEC EDGAR · 공시일 기준)')):
         x = info.get(mk) or {}
         if x:
-            out.append((lab, f"{x.get('start')} ~ {x.get('end')}", f"{x.get('syms', 0):,}종", fin))
+            out.append((lab, f"{x.get('start')} ~ {x.get('end')}", f"{x.get('syms', 0):,}종",
+                        '500억원+' if mk == 'KR' else '$0.2B+', fin))
     return out
 
 
@@ -522,14 +536,16 @@ def sec_data(live: bool = True) -> str:
     """출처 → 항목 → 주기 → 기준일(2열 · 출처 상자 위에서부터 채움). live=False(PDF)는 기준일 칸을 뺀다."""
     groups = []
     hd = ('<div class="mn-df-row mn-df-hd"><span>항목</span><span>갱신 주기(KST)</span>'
-          + ('<span>기준일</span>' if live else '') + '</div>')
+          + ('<span>갱신일</span>' if live else '') + '</div>')
     for src, items in DATA_FLOW:
         rows = []
         for item, wf, path, lim in items:
             st_ = ''
             if live:
                 r = fresh(path)
-                if r and r.get('date'):
+                if item in FIXED_DATE:
+                    st_ = f'<span class="mn-st na">{_e(FIXED_DATE[item]())}</span>'
+                elif r and r.get('date'):
                     ok = r['state'] == 'ok'
                     d = r['date']
                     lab = (f"{d[2:4]}Q{(int(d[5:7]) + 2) // 3} 분기" if str(path).endswith('fundamentals_q.parquet')
@@ -540,14 +556,16 @@ def sec_data(live: bool = True) -> str:
             rows.append(f"""<div class="mn-df-row{'' if live else ' pdf'}"><div class="mn-df-it"><b>{_e(item)}</b>{f'<small>{_e(lim)}</small>' if lim else ''}</div>
               <span class="mn-df-cy">{_e(schedule(wf))}</span>{st_}</div>""")
         groups.append(f'<div class="mn-df"><div class="mn-df-src">{_e(src)}</div>{hd}{"".join(rows)}</div>')
-    head = ('출처별 항목 · 갱신 주기 · 기준일 · ✓ 정상 · ! 지연 · 기준일은 산출물 내부 날짜'
-            if live else '출처별 항목 · 갱신 주기 · 기준일과 정상 여부는 화면에서 확인')
+    head = ('출처별 항목 · 갱신 주기 · 갱신일(마지막으로 반영된 데이터의 날짜) · ✓ 주기 내 정상 · ! 지연'
+            if live else '출처별 항목 · 갱신 주기 · 갱신일과 정상 여부는 화면에서 확인')
     pin = panel_info()
     past = ''
     if pin:
         past = ('<div class="mn-h" style="margin-top:14px"><b>과거 데이터 — 백테스트 패널</b>'
-                '<span>주봉 · 상장폐지 종목 포함 · 매주 토요일 갱신</span></div>'
-                + _table(['시장', '가격 기간', '종목 수', '재무'], [(_e(a), _e(b), _e(c), _e(d)) for a, b, c, d in pin]))
+                '<span>주봉 · 매주 토요일 갱신</span></div>'
+                + _table(['시장', '가격 기간', '종목 수', '편입 시총', '재무'], [tuple(_e(v) for v in r) for r in pin])
+                + '<div class="mn-src">편입 = 그 주 시가총액이 기준 이상인 종목 · 한 번 편입되면 이후 시총이 줄어도 제외하지 않음 · '
+                  '상장폐지 종목 포함, 상장폐지 시 마지막 거래 가격으로 청산 처리 · 재무는 공시 다음 날부터 사용(한국 DART 제출일 · 없으면 분기말 +45일·4분기 +90일, 미국 SEC 공시일).</div>')
     return (f'<div class="mn-src" style="margin:0 2px 8px">{head}</div><div class="mn-df-wrap">' + ''.join(groups) + '</div>'
             + '<div class="mn-src">전 항목 무료 공개 원천 · 각 표 하단에 출처 · 기준일 표기 · 예약 실행은 수 분~수십 분 지연 가능</div>' + past)
 

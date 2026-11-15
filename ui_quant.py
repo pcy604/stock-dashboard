@@ -805,6 +805,101 @@ def render(mkt_sel: str, tsrc):
     with st.expander('🧾 명세 보기 (복사해 두면 고급 → 명세 붙여넣기로 되살림)'):
         st.code(json.dumps(spec, ensure_ascii=False), language='json')
     st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 숫자가 부풀려집니다 — 다른 시작 연도·인접 값에서도 결과가 유지되는지 확인해 주십시오.')
+    _strategy_box(m, spec, S, eq)
+
+
+# ── 💾 전략 저장 · 🌐 공개 게시판 (2026-11-16) ─────────────────────────────
+NOTICE = ("**고지** — 백테스트는 과거 데이터에 대한 가상 시뮬레이션이며 실제 투자 성과가 아닙니다. "
+          "같은 데이터로 여러 설정을 시험해 고른 전략은 과적합으로 과거 성과가 부풀려지는 경향이 있고, 미래 수익을 보장하지 않습니다. "
+          "공개 전략은 이용자가 직접 만든 것으로 운영자의 추천·검증·투자 권유가 아니며, 투자 판단과 결과의 책임은 투자자 본인에게 있습니다. "
+          "거래비용(편도 0.3%)·체결 가정(주봉 종가 판단 → 다음 주 시가)이 실제와 다를 수 있습니다.")
+
+
+def _load_spec(spec):
+    st.session_state['qb_adv'] = True
+    st.session_state['qb_json_in'] = json.dumps(spec, ensure_ascii=False)
+
+
+def _stat_rows(rows):
+    out = []
+    for x in rows:
+        s = x.get('stats') or {}
+        out.append({'전략': x.get('name'), '작성자': x.get('display') or '-', '시장': _MK.get(x.get('market'), x.get('market')),
+                    '기간': f"{s.get('start') or '-'} ~ {s.get('end') or '-'}",
+                    '연수익(%)': s.get('CAGR'), '최대낙폭(%)': s.get('MDD'), '수익÷낙폭(배)': s.get('Calmar'),
+                    '샤프': s.get('Sharpe'), '매도(건)': s.get('매도건수'), '등록일': str(x.get('created_at') or '')[:10]})
+    return pd.DataFrame(out)
+
+
+def _strategy_box(m, spec, S, eq):
+    import access as _acc
+    import strategy_store as SS
+    st.markdown('##### 💾 내 전략 · 🌐 공개 전략')
+    st.caption(NOTICE)
+    if not SS.ready():
+        st.caption('`전략 저장소 미설정 — Secrets [store] 확인`')
+        return
+    em = _acc.email() if hasattr(_acc, 'email') else ''
+    t_save, t_mine, t_pub = st.tabs(['💾 저장', '📂 내 전략', '🌐 공개 전략'])
+    with t_save:
+        if not em:
+            st.caption('구글 로그인 후 저장할 수 있습니다(계정별 보관 · 이메일 원문은 저장하지 않음).')
+        else:
+            with st.form('qs_save', border=False):
+                c1, c2, c3 = st.columns([3, 1.4, 2])
+                nm = c1.text_input('전략 이름', max_chars=60, placeholder='예: RS 80 + 흑자전환 + 5주선')
+                pub = c2.toggle('전체 공개', value=False)
+                who = c3.segmented_control('공개 이름', ['익명 번호', '닉네임'], default='익명 번호') or '익명 번호'
+                nick = st.text_input('닉네임(공개 이름 = 닉네임일 때)', max_chars=24)
+                ok = st.form_submit_button('저장', width='stretch')
+            if ok:
+                disp = nick.strip() if (who == '닉네임' and nick.strip()) else SS.anon_name(em)
+                try:
+                    SS.save(em, nm, m, spec, SS.slim_stats(S, eq.index[0] if len(eq) else None, eq.index[-1] if len(eq) else None), pub, disp)
+                    st.success(f"저장 완료{' · 공개(' + disp + ')' if pub else ' · 비공개'}")
+                except Exception as e:
+                    st.error(f'저장 실패: {str(e)[:160]}')
+    with t_mine:
+        if not em:
+            st.caption('구글 로그인 후 사용할 수 있습니다.')
+        else:
+            try:
+                rows = SS.mine(em)
+            except Exception as e:
+                rows = None
+                st.caption(f'`내 전략 불러오기 실패: {str(e)[:120]}`')
+            if rows == []:
+                st.caption('저장한 전략이 없습니다.')
+            elif rows:
+                df = _stat_rows(rows)
+                df.insert(2, '공개', ['공개' if x.get('public') else '비공개' for x in rows])
+                st.dataframe(df, hide_index=True, src='strategy_store(Supabase) · 성과는 저장 시점 서버 계산', asof=df['등록일'].max())
+                lab = {f"{x['name']} · {str(x['created_at'])[:10]} (#{x['id']})": x for x in rows}
+                c1, c2, c3, c4 = st.columns([3, 1, 1, 1])
+                pick = lab[c1.selectbox('전략 선택', list(lab), key='qs_mine_pick')]
+                c2.button('불러오기', key='qs_mine_load', on_click=_load_spec, args=(pick['spec'],), width='stretch')
+                if c3.button('공개 전환' if not pick.get('public') else '비공개 전환', key='qs_mine_pub', width='stretch'):
+                    SS.update(em, pick['id'], public=not pick.get('public'), display=pick.get('display') or SS.anon_name(em))
+                    st.rerun()
+                if c4.button('삭제', key='qs_mine_del', width='stretch'):
+                    SS.delete(em, pick['id'])
+                    st.rerun()
+    with t_pub:
+        try:
+            rows = SS.public_list(m)
+        except Exception as e:
+            rows = None
+            st.caption(f'`공개 전략 불러오기 실패: {str(e)[:120]}`')
+        if rows == []:
+            st.caption('아직 공개된 전략이 없습니다.')
+        elif rows:
+            st.caption('최신 등록순 · 열 머리를 눌러 정렬 · 순위 기준은 준비 중(과거 성과 순위는 과적합 경쟁이 되기 쉬워 별도 검증 구간 기준을 검토 중)')
+            df = _stat_rows(rows)
+            st.dataframe(df, hide_index=True, src='strategy_store(Supabase) · 이용자 공개 전략 · 성과는 등록 시점 서버 계산', asof=df['등록일'].max())
+            lab = {f"{x['name']} — {x.get('display') or '-'} (#{x['id']})": x for x in rows}
+            c1, c2 = st.columns([4, 1])
+            pick = lab[c1.selectbox('전략 선택', list(lab), key='qs_pub_pick')]
+            c2.button('불러와 다시 계산', key='qs_pub_load', on_click=_load_spec, args=(pick['spec'],), width='stretch')
 
 
 def _monthly_frame(eq):
