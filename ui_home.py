@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-16c'
+VERSION = '2026-11-16d'
 
 CSS = """
 <style>
@@ -881,7 +881,8 @@ def tab_icon_css() -> str:
     u = MN.tg_icon_uri()
     if not u:
         return ''
-    return ('<style>.st-key-mn_tabs [data-baseweb="tab-list"] > button[role="tab"]:nth-of-type(4) [data-testid="stMarkdownContainer"] p::before'
+    # Streamlit 탭은 div[role=tab](react-aria) — 옛 button[data-baseweb] 선택자는 안 맞았다(2026-11-16 배포 확인)
+    return ('<style>.st-key-mn_tabs [role="tab"]:nth-child(4) [data-testid="stMarkdownContainer"] p::before'
             '{content:"";display:inline-block;width:15px;height:15px;margin-right:6px;vertical-align:-2px;'
             f'background:url("{u}") center / contain no-repeat;}}</style>')
 
