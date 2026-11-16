@@ -5702,7 +5702,7 @@ def forward_estimates(sym, is_kr):
                 if c.get(f'eps_{lab}') is not None:
                     out[f'eps_{lab}'] = c[f'eps_{lab}']
                 if c.get(f'op_{lab}') is not None:
-                    out[f'op_income_{lab}'] = c[f'op_{lab}']
+                    out[f'op_income_{lab}'] = c[f'op_{lab}'] * 1e8   # FnGuide 연간 영업이익은 억원 → 원(매출 E 와 단위 맞춤)
         except Exception:
             pass
     try:
