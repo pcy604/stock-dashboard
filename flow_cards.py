@@ -19,6 +19,9 @@ CSS = """<style>
 .fc .v{font-size:19px;font-weight:700;line-height:1.25;word-break:keep-all}
 .fc .s{font-size:12px;color:#6B7280;line-height:1.35;word-break:keep-all}
 .fc svg{display:block;width:100%;height:42px;margin:4px 0 2px}
+.fc .x{font-size:11px;color:#94A3B8;line-height:1.3}
+a.fc.lk{text-decoration:none;color:inherit;cursor:pointer;transition:box-shadow .15s}
+a.fc.lk:hover{box-shadow:0 2px 10px rgba(15,23,42,.12);border-color:#93C5FD}
 .fc.good{border-top:3px solid #16A34A}.fc.mid{border-top:3px solid #F59E0B}.fc.bad{border-top:3px solid #DC2626}.fc.na{border-top:3px solid #D1D5DB}
 .cc{background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;margin:4px 0 10px}
 .cc .hd{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -33,52 +36,101 @@ CSS = """<style>
 </style>"""
 
 
+def _fmt(v, unit=''):
+    if v is None:
+        return '-'
+    a = abs(v)
+    t = f"{v:,.0f}" if a >= 100 else (f"{v:,.1f}" if a >= 10 else f"{v:,.2f}")
+    return t + (unit or '')
+
+
 def spark_svg(sp: dict | None, tone: str = 'na', w: int = 220, h: int = 42) -> str:
+    """선(또는 막대) + 마우스 올리면 그 점의 날짜·값(2026-11-16 차니: hover 숫자).
+    sp['x'] = 실적 구간 라벨, sp['xf'] = 추정(점선) 라벨, sp['unit'] = 값 단위. None 값은 자리를 지키되 그리지 않는다."""
     if not sp or not sp.get('y'):
         return ''
-    ys = [v for v in sp['y'] if v is not None]
+    yr = list(sp['y'])
     fw = [v for v in (sp.get('fwd') or []) if v is not None]
+    ys = [v for v in yr if v is not None]
     if len(ys) < 2:
         return ''
     allv = ys + fw + ([sp['ref']] if sp.get('ref') is not None else [])
     lo, hi = min(allv), max(allv)
     if hi == lo:
         hi, lo = hi + 1, lo - 1
-    n = len(ys) + len(fw)
+    n = len(yr) + len(fw)
     pad = 3
-    X = lambda i: pad + (w - 2 * pad) * i / max(1, n - 1)
+    if sp.get('kind') == 'bar':             # 막대는 칸 가운데 — 양 끝 막대가 잘리지 않게
+        X = lambda i: pad + (w - 2 * pad) * (i + 0.5) / n
+    else:
+        X = lambda i: pad + (w - 2 * pad) * i / max(1, n - 1)
     Y = lambda v: pad + (h - 2 * pad) * (1 - (v - lo) / (hi - lo))
     col = TONE_COLOR.get(tone, '#475569')
     out = [f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="none" role="img">']
     if sp.get('ref') is not None:
         out.append(f'<line x1="0" x2="{w}" y1="{Y(sp["ref"]):.1f}" y2="{Y(sp["ref"]):.1f}" stroke="#CBD5E1" stroke-dasharray="2 3" stroke-width="1"/>')
+    last = max(i for i, v in enumerate(yr) if v is not None)
     if sp.get('kind') == 'bar':
         bw = max(1.0, (w - 2 * pad) / n * 0.7)
-        base = Y(max(lo, 0))
-        for i, v in enumerate(ys):
+        base = Y(min(max(lo, 0), hi))
+        for i, v in enumerate(yr):
+            if v is None:
+                continue
             y = Y(v)
-            out.append(f'<rect x="{X(i) - bw / 2:.1f}" y="{min(y, base):.1f}" width="{bw:.1f}" height="{abs(base - y):.1f}" '
-                       f'fill="{col if i >= len(ys) - 5 else "#CBD5E1"}"/>')
+            c_ = (col if v >= 0 else '#B91C1C') if sp.get('signed') else (col if i >= len(yr) - 5 else "#CBD5E1")
+            out.append(f'<rect x="{X(i) - bw / 2:.1f}" y="{min(y, base):.1f}" width="{bw:.1f}" height="{max(0.8, abs(base - y)):.1f}" fill="{c_}"/>')
     else:
-        pts = ' '.join(f'{X(i):.1f},{Y(v):.1f}' for i, v in enumerate(ys))
-        out.append(f'<polyline points="{pts}" fill="none" stroke="{col}" stroke-width="1.8" vector-effect="non-scaling-stroke"/>')
+        seg = []
+        for i, v in enumerate(yr):           # None 에서 선을 끊는다
+            if v is None:
+                if len(seg) > 1:
+                    out.append(f'<polyline points="{" ".join(seg)}" fill="none" stroke="{col}" stroke-width="1.8" vector-effect="non-scaling-stroke"/>')
+                seg = []
+            else:
+                seg.append(f'{X(i):.1f},{Y(v):.1f}')
+        if len(seg) > 1:
+            out.append(f'<polyline points="{" ".join(seg)}" fill="none" stroke="{col}" stroke-width="1.8" vector-effect="non-scaling-stroke"/>')
         if fw:
-            i0 = len(ys) - 1
-            fp = ' '.join(f'{X(i0 + k):.1f},{Y(v):.1f}' for k, v in enumerate([ys[-1]] + fw))
+            fp = ' '.join(f'{X(last + k):.1f},{Y(v):.1f}' for k, v in enumerate([yr[last]] + fw))
             out.append(f'<polyline points="{fp}" fill="none" stroke="{col}" stroke-width="1.6" stroke-dasharray="4 3" '
                        f'vector-effect="non-scaling-stroke"/>')
-        out.append(f'<circle cx="{X(len(ys) - 1):.1f}" cy="{Y(ys[-1]):.1f}" r="2.6" fill="{col}"/>')
+        out.append(f'<circle cx="{X(last):.1f}" cy="{Y(yr[last]):.1f}" r="2.6" fill="{col}"/>')
+    # hover — 점마다 투명 세로 띠 + <title>(브라우저 기본 툴팁)
+    xs = list(sp.get('x') or []) + list(sp.get('xf') or [])
+    vals = yr + fw
+    if xs or sp.get('unit') is not None:
+        step = (w - 2 * pad) / (n if sp.get('kind') == 'bar' else max(1, n - 1))
+        for i, v in enumerate(vals):
+            lab = xs[i] if i < len(xs) else ''
+            out.append(f'<rect x="{X(i) - step / 2:.1f}" y="0" width="{step:.1f}" height="{h}" fill="transparent">'
+                       f'<title>{_h.escape(str(lab))}{" · " if lab else ""}{_fmt(v, sp.get("unit") or "")}</title></rect>')
     out.append('</svg>')
     return ''.join(out)
+
+
+def span_text(sp: dict | None) -> str:
+    """선의 기간 — '2024.3Q ~ 2026.2Q' (+ 점선 추정)."""
+    if not sp or not sp.get('x'):
+        return ''
+    x = [str(v) for v in sp['x'] if v is not None]
+    if not x:
+        return ''
+    return f"{x[0]} ~ {x[-1]}" + (f" + {sp['xf'][-1]}" if sp.get('xf') else '')
 
 
 def card_html(c: dict) -> str:
     t = c.get('tone', 'na')
     arr = ARROW.get(c.get('dir') or '', '')
-    return (f'<div class="fc {t}"><span class="l">{_h.escape(c["label"])}</span>'
+    sp = c.get('spark')
+    line = ' · '.join(x for x in (c.get('src') or '', span_text(sp)) if x)
+    body = (f'<span class="l">{_h.escape(c["label"])}</span>'
             f'<span class="v" style="color:{TONE_COLOR.get(t)}">{_h.escape(str(c["value"]))}{(" " + arr) if arr else ""}</span>'
-            f'{spark_svg(c.get("spark"), t)}'
-            f'<span class="s">{_h.escape(str(c.get("sub") or ""))}</span></div>')
+            f'{spark_svg(sp, t) or "<div style=\'height:48px\'></div>"}'   # 선 없는 카드도 같은 높이·같은 줄(11-16)
+            + (f'<span class="x">{_h.escape(line)}</span>' if line else '')
+            + f'<span class="s">{_h.escape(str(c.get("sub") or ""))}</span>')
+    if c.get('href'):                      # 2026-11-16 — 결론 카드를 누르면 그 섹션으로(사용법 카드와 같은 방식)
+        return f'<a class="fc {t} lk" href="{_h.escape(c["href"])}" target="_self">{body}</a>'
+    return f'<div class="fc {t}">{body}</div>'
 
 
 def cards_html(cards: list[dict]) -> str:

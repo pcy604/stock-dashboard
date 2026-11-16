@@ -78,11 +78,13 @@ def group_heat(base: pd.DataFrame, groups: dict, market: str | None = None, min_
     return df
 
 
-def flow_quadrant(group_pct: float | None, stock_rs: float | None, top_pct: float = 30, rs_strong: float = 80) -> dict:
-    """2×2 — 업종 상위 top_pct% 안 & 종목 RS ≥ rs_strong."""
+def flow_quadrant(group_pct: float | None, stock_rs: float | None, top_pct: float = 30, rs_strong: float = 80,
+                  dd52: float | None = None, dd_max: float = -20) -> dict:
+    """2×2 — 업종 상위 top_pct% 안 & 종목 강세(RS ≥ rs_strong 이고 52주 고점 대비 dd_max% 이내).
+    2026-11-16 — RS 만 보면 고점 −35% 종목도 '강세'였다(차니). 낙폭이 손절선(−20%)을 넘으면 강세가 아니다."""
     if stock_rs is None or pd.isna(stock_rs):
         return {'label': '판정 불가', 'tone': 'na', 'why': '종목 RS 없음(공통 지표 명단 밖)'}
-    s = stock_rs >= rs_strong
+    s = stock_rs >= rs_strong and (dd52 is None or dd52 > dd_max)
     if group_pct is None or pd.isna(group_pct):
         return {'label': '종목 강함 · 업종 미상' if s else '종목 약함 · 업종 미상', 'tone': 'mid' if s else 'bad',
                 'why': '업종 분류 없음 — 업종 강도 산출 불가'}

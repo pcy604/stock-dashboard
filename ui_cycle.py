@@ -119,8 +119,9 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
     x = c2.slider('구간 판정 기준(%)', 10, 80, 30, 5, key=f'{K}|x',
                   help='고점에서 이 비율 이상 하락하면 하락 구간, 저점에서 이 비율 이상 상승하면 상승 구간으로 끊는다. '
                        '값이 작으면 작은 등락까지 나뉘고, 크면 큰 사이클만 남는다(경기민감주 30~40% · 장기 사이클 50% 이상).')
-    view = cv.segmented_control('그림', ['구간 비교', '기간 추이'], default='구간 비교', key=f'{K}|view2',
-                                help='구간 비교 = 모든 구간을 같은 출발점(0일·0%)에 겹침 · 기간 추이 = 날짜축 위 고점 대비 낙폭(MDD)') or '구간 비교'
+    # 2026-11-16 차니 — 기본 = 기간 추이(날짜축)
+    view = cv.segmented_control('그림', ['기간 추이', '구간 비교'], default='기간 추이', key=f'{K}|view3',
+                                help='기간 추이 = 날짜축 위 고점 대비 낙폭(MDD) · 구간 비교 = 모든 구간을 같은 출발점(0일·0%)에 겹침') or '기간 추이'
     manual = c3.toggle('구간 직접 수정', key=f'{K}|man', help='켜면 자동 구간이 표로 복사되고, 고친 표대로 계산합니다')
     per = '전체'
     cl = close
@@ -172,6 +173,9 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
 
     # ── 구간 그림: 겹쳐 보기(같은 출발점) / 날짜순(MDD 차트) — 2026-11-10 차니 요구: 가로 전체 폭, 종료일 표기, 구간별 색 ──
     by_date = view == '기간 추이'
+    ddall = (cl / cl.cummax() - 1) * 100
+    # 2026-11-16 차니 — 하락·상승 두 그림의 가로축을 같게(날짜 = 전체 이력 · 경과일 = 가장 긴 구간)
+    xr = ([cl.index[0], cl.index[-1]] if by_date else [0, max(len(s_['series']) for s_ in segs)])
     for dirn, color, title in (('하락', _RED, '📉 하락 구간 (고점 → 저점)'), ('상승', _GREEN, '📈 상승 구간 (저점 → 고점)')):
         sub = [s_ for s_ in segs if s_['direction'] == dirn]
         up = dirn == '상승'
@@ -184,7 +188,6 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
         fig = go.Figure()
         tf = (lambda v: 100 + v) if up else (lambda v: v)          # 상승은 '시작=100' 로그 축 — 초대형 상승 한 번이 나머지를 납작하게 누르지 않게
         if by_date and not up:                                      # 바탕 = 기간 전체 낙폭(고점 대비) — 구간 밖 흐름도 보이게
-            ddall = (cl / cl.cummax() - 1) * 100
             fig.add_trace(go.Scatter(x=ddall.index, y=ddall.values, fill='tozeroy', mode='lines', name='기간 고점 대비',
                                      line=dict(color='rgba(120,120,120,0.35)', width=0.8), fillcolor='rgba(120,120,120,0.10)',
                                      hovertemplate='%{x|%Y-%m-%d} 고점 대비 %{y:.1f}%<extra></extra>'))
@@ -194,7 +197,12 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
             nm = f"{s_['label']} ({s_['start']}~{'진행 중' if lv else s_['end']})".replace(' (진행 중) (', ' (')
             xs = s_['dates'] if by_date else list(s_['series'].index)
             hov = ('%{x|%Y-%m-%d} ' if by_date else '%{x}일째 ') + '%{customdata:+.1f}%<extra>' + s_['label'] + '</extra>'
-            fig.add_trace(go.Scatter(x=xs, y=tf(s_['series'].values), name=nm, mode='lines',
+            # 2026-11-16 차니 — 날짜축 하락선은 바탕(전체 고점 대비)과 같은 기준으로: 구간 시작 고점이 전고점보다 낮으면
+            #   '구간 기준 %'는 바탕과 어긋났다(하락2·3). y = 전체 고점 대비 · 마우스 = 구간 시작 대비.
+            yv = (ddall.reindex(pd.DatetimeIndex(s_['dates'])).values if (by_date and not up) else tf(s_['series'].values))
+            hov = (('%{x|%Y-%m-%d} 전고점 대비 %{y:.1f}% · 구간 시작 대비 %{customdata:+.1f}%<extra>' + s_['label'] + '</extra>')
+                   if (by_date and not up) else hov)
+            fig.add_trace(go.Scatter(x=xs, y=yv, name=nm, mode='lines',
                                      line=dict(color=c_, width=3 if lv else 1.6), customdata=s_['series'].values, hovertemplate=hov))
         if not by_date:
             mp = C.median_path([s_ for s_ in sub if not s_.get('live')])
@@ -207,7 +215,7 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
                           annotation_position='bottom right')
         fig.update_layout(height=340, margin=dict(l=52, r=8, t=8, b=8),
                           legend=dict(orientation='h', y=-0.12, yanchor='top', font=dict(size=10)),
-                          xaxis=dict(title=None),
+                          xaxis=dict(title=None, range=xr),
                           yaxis=(_logaxis(100 + min(float(s_['series'].min()) for s_ in sub), 100 + max(float(s_['series'].max()) for s_ in sub)) if up
                                  else dict(title=None, ticksuffix='%')))
         st.plotly_chart(fig, use_container_width=True)
@@ -225,8 +233,8 @@ def render_for(sym: str, close: pd.Series, tsrc, src: str = 'FinanceDataReader·
     st.markdown(f"**구간 {len(segs)}개 + 방향별 평균·중앙값**(맨 아래 ▶ 행, 진행 중 구간 제외)")
     tsrc(src + ' · cycle_compare.py', asof=asof)
     st.dataframe(pd.concat([det, pd.DataFrame(extra)], ignore_index=True), hide_index=True, use_container_width=True, filters=False)
+    st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림 · 진행 중 구간의 끝은 미확정")
     _dd_backtest(K, cl, tsrc, src, asof)
-    st.caption(f"꼭짓점 = 그 뒤 {int(x)}% 이상 되돌림 · 진행 중 구간의 끝은 확정 전 · 표본 3회 미만은 우연일 수 있음.")
 
 
 def _dd_backtest(K: str, cl: pd.Series, tsrc, src: str, asof: str):
@@ -236,10 +244,13 @@ def _dd_backtest(K: str, cl: pd.Series, tsrc, src: str, asof: str):
     st.markdown("#### 🧪 낙폭 매수 백테스트")
     b1, b2, b3 = st.columns([1.2, 2.2, 2.2], vertical_alignment='bottom')
     th = b1.number_input('기준 낙폭(%)', 5, 90, 30, 5, key=f'{K}|bt_x', help='고점 대비 이만큼 빠진 지점을 기준으로 삼는다')
-    mode = b2.segmented_control('매수 시점', ['도달한 날', '회복한 다음 날'], default='도달한 날', key=f'{K}|bt_m',
-                                help='도달한 날 = 낙폭이 처음 −X% 를 넘은 날 종가 · 회복한 다음 날 = −X% 밑까지 갔다가 다시 −X% 위로 올라온 다음 날 종가') or '도달한 날'
+    # 2026-11-16 차니 — 둘 다 '다음 날 종가'(장중 감시 없이 따라 할 수 있게) · 버튼 이름 정식 표현
+    mode = b2.segmented_control('매수 시점', ['하향 돌파 익일', '재상향 돌파 익일'], default='하향 돌파 익일', key=f'{K}|bt_m2',
+                                help='하향 돌파 익일 = 종가가 처음 고점 대비 −X% 아래로 내려간 다음 거래일 종가 · '
+                                     '재상향 돌파 익일 = −X% 아래에 있다가 종가가 다시 −X% 위로 올라선 다음 거래일 종가') or '하향 돌파 익일'
     hz = b3.pills('보유 기간', ['1개월', '3개월', '6개월', '1년'], selection_mode='multi', default=['3개월', '6개월', '1년'], key=f'{K}|bt_h') or ['6개월']
     H = {'1개월': 21, '3개월': 63, '6개월': 126, '1년': 252}
+    hz = sorted(hz, key=lambda h: H[h])           # 누른 순서가 아니라 짧은 기간부터(표 열 순서)
     c = cl.dropna()
     peak = c.cummax()
     dd = (c / peak - 1) * 100
@@ -250,9 +261,9 @@ def _dd_backtest(K: str, cl: pd.Series, tsrc, src: str, asof: str):
             armed_peak, below = None, False
         if armed_peak is not None:
             continue
-        if mode == '도달한 날':
-            if dd.iloc[i] <= -th:
-                events.append(i); armed_peak = pk[i]
+        if mode == '하향 돌파 익일':
+            if dd.iloc[i] <= -th and i + 1 < len(v):
+                events.append(i + 1); armed_peak = pk[i]
         else:
             if dd.iloc[i] <= -th:
                 below = True
@@ -263,7 +274,7 @@ def _dd_backtest(K: str, cl: pd.Series, tsrc, src: str, asof: str):
         return
     rows = []
     for i in events:
-        r_ = {'매수일': str(ix[i].date()), '매수가': round(float(v[i]), 2), '당시 낙폭(%)': round(float(dd.iloc[i]), 1)}
+        r_ = {'매수일': str(ix[i].date()), '매수가': round(float(v[i]), 2), '매수일 낙폭(%)': round(float(dd.iloc[i]), 1)}
         for h in hz:
             j = i + H[h]
             r_[f'{h} 뒤(%)'] = round(float(v[j] / v[i] - 1) * 100, 1) if j < len(v) else None
@@ -280,5 +291,4 @@ def _dd_backtest(K: str, cl: pd.Series, tsrc, src: str, asof: str):
     st.markdown(' &nbsp;│&nbsp; '.join(stat) + f" &nbsp;│&nbsp; 이후 최대 추가 하락 평균 {df['이후 최대 추가 하락(%)'].mean():.1f}%")
     tsrc(src + ' · 낙폭 매수 백테스트(이 화면 계산)', asof=asof)
     st.dataframe(df.iloc[::-1].reset_index(drop=True), hide_index=True, use_container_width=True, filters=False)
-    st.caption(f"신호 = 하락 회차(전고점 갱신 전)마다 1번 · 종가 체결 · 수수료·세금 미반영 · 같은 기간 보유만 했을 때 {bh:+,.0f}% · "
-               "표본이 적으면 우연일 수 있음.")
+    st.caption(f"신호 다음 거래일 종가 매수 · 하락 회차(전고점 갱신 전)마다 1번 · 수수료 미반영 · 같은 기간 보유만 {bh:+,.0f}% · 3회 미만은 우연 가능")

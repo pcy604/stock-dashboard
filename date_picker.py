@@ -21,7 +21,8 @@ def _span(lo: date, hi: date, days) -> tuple[date, date]:
     return (lo if days is None else max(lo, hi - timedelta(days=days))), hi
 
 
-def period_range(label: str, presets: dict | None, key: str, lo, hi, default: str | None = None, where=None):
+def period_range(label: str, presets: dict | None, key: str, lo, hi, default: str | None = None, where=None,
+                 compact: bool = False):
     """반환 (start_date, end_date). presets=None 이면 STD. lo·hi = 고를 수 있는 전체 범위(date).
     where = 이 줄을 넣을 자리(열·컨테이너). 기본은 현재 위치."""
     presets = dict(presets or STD)
@@ -47,9 +48,11 @@ def period_range(label: str, presets: dict | None, key: str, lo, hi, default: st
 
     box = where if where is not None else st
     c0, c1, c2 = box.columns([max(1.2, 0.45 * len(opts)), 1, 1], vertical_alignment='bottom')
-    c0.segmented_control(label, opts, key=key, on_change=_on_pick)
-    c1.date_input('시작일', min_value=lo, max_value=hi, key=ks, on_change=_on_date)
-    c2.date_input('종료일', min_value=lo, max_value=hi, key=ke, on_change=_on_date)
+    # compact(2026-11-16) — 라벨 숨김: 버튼 줄 한 줄 정렬(라벨 위 빈 공간 제거). 기간 의미는 버튼·날짜 칸 자체로 읽힌다.
+    lv = 'collapsed' if compact else 'visible'
+    c0.segmented_control(label, opts, key=key, on_change=_on_pick, label_visibility=lv)
+    c1.date_input('시작일', min_value=lo, max_value=hi, key=ks, on_change=_on_date, label_visibility=lv, format='YYYY-MM-DD')
+    c2.date_input('종료일', min_value=lo, max_value=hi, key=ke, on_change=_on_date, label_visibility=lv, format='YYYY-MM-DD')
     s, e = ss[ks], ss[ke]
     if s > e:
         s, e = e, s

@@ -5918,10 +5918,10 @@ _resolve_symbol = _symsrch.resolve_symbol
 #   ref(월별 통계·이평 크로스)는 숨김 유지, 내부자=ins(수급), 희석=dil(펀더멘탈), 정류장=stn(히스토리).
 # 2026-11-16 4축(차니): 밸류에이션 분리(멀티플 밴드 + 밸류 지표) · 정류장(stn) 숨김(쓰임 불명 → 사이클 백테스트로 대체) ·
 #   수급 → '수급·업종'(업종 순위 + 동종 비교 한 표 · 내부자).
-_AN_AXMAP = [('펀더멘탈', ('profile', 'seg', 'flow', 'earn', 'fin', 'cons', 'dil')),
-             ('밸류에이션', ('val', 'val0')),
+_AN_AXMAP = [('펀더멘탈', ('profile', 'seg', 'flow', 'earn', 'fin', 'cons')),
+             ('밸류에이션', ('val', 'val0')),             # 2026-11-16 — 밴드(val) → 목표주가·멀티플·재무(val0)
              ('히스토리', ('price', 'mstat')),
-             ('수급·업종', ('peer', 'ins'))]
+             ('수급·업종', ('peer', 'dil', 'ins'))]       # 2026-11-16 차니 — 잠재 희석은 수급(물량) 쪽
 _AN_SECKEYS = ('summary', 'plan', 'peer', 'price', 'flow', 'earn', 'seg', 'val', 'canslim', 'fin', 'profile', 'ref',
                'cons', 'val0', 'ins', 'dil', 'stn', 'mstat')
 
@@ -6016,6 +6016,11 @@ def _an_v2_fill(L: dict):
         L['_V2C'].caption(f"`결론 계산 실패: {type(e).__name__}: {str(e)[:100]}`")
         return
     L['_snap'] = snap
+    try:                                            # AI 질문이 '지금 보는 종목'을 알게(차니 11-16: RS 95 설명 못 함)
+        import chatbot as _CBm
+        st.session_state['_an_snap_ctx'] = _CBm.snap_text(snap)
+    except Exception:
+        pass
     if os.environ.get('SNAP_SAVE') == '1':          # CI 사전 계산(봇 정본)에서만 파일로 — 배포 서버 디스크엔 안 쓴다
         try:
             _ss.save(snap)
@@ -6034,23 +6039,29 @@ def _an_v2_fill(L: dict):
             continue
         if ax == '이익 방향' and snap.get('company'):
             box.markdown(_FC.CSS + _FC.company_html(snap['company']), unsafe_allow_html=True)
+        if b.get('qcards'):                         # 2026-11-16 차니 — 분기 매출·영업이익 YoY·OPM 을 펀더멘탈 맨 위에
+            box.markdown(_FC.CSS + _FC.cards_html(b['qcards']), unsafe_allow_html=True)
+        if ax == '깨지는 조건·촉매':                # 보유 리스크 큰 카드는 없앤다(공간) — 근거 펼침 안에만
+            b = dict(b, cards=[])
         if b.get('cards'):
             box.markdown(_FC.CSS + _FC.cards_html(b['cards']), unsafe_allow_html=True)
         if ax == '깨지는 조건·촉매' and b.get('detail'):
             _dc = snap.get('data_check') or {}
             _ev = snap.get('events') or {}
-            with box.expander('근거 — 판단 철회 조건 · 보유 리스크  |  데이터 점검'
+            _rk_n = sum(1 for r in b['detail'] if r.get('grp') == '보유 리스크' and r.get('state') == 'warn')
+            _rk_t = sum(1 for r in b['detail'] if r.get('grp') == '보유 리스크')
+            with box.expander(f'근거 — 매도 점검 · 보유 리스크 {_rk_n}/{_rk_t}  |  데이터 점검'
                               + (f" (이상 {len(_dc.get('warn') or [])}건)" if _dc.get('warn') else ' (이상 없음)')
                               + (f"  |  다음 실적 {_ev['next_earnings']}" if _ev.get('next_earnings') not in (None, '-') else ''),
                               expanded=False):
                 ico = {'ok': '✅', 'warn': '⚠️', 'na': '·'}
                 rank = {'warn': 0, 'na': 2, 'ok': 1}
-                grp_help = {'판단 철회 조건': '실전 규칙(RS 70·고점 −20%·지수 5주선)과 컨센서스 방향',
+                grp_help = {'매도 점검': '실전 규칙(RS 70·고점 −20%·지수 5주선)과 컨센서스 방향',
                             '보유 리스크': '종목 자체의 재무·밸류·변동성·사업 집중',
                             '데이터 점검': '종목 리스크가 아님 — 화면 숫자의 최신성·교차 검증'}
                 cols = st.columns(3)
-                for col, g in zip(cols, ('판단 철회 조건', '보유 리스크', '데이터 점검')):
-                    rs = sorted([r for r in b['detail'] if {'깨지는 조건': '판단 철회 조건', '리스크 점검': '보유 리스크'}.get(
+                for col, g in zip(cols, ('매도 점검', '보유 리스크', '데이터 점검')):
+                    rs = sorted([r for r in b['detail'] if {'깨지는 조건': '매도 점검', '판단 철회 조건': '매도 점검', '리스크 점검': '보유 리스크'}.get(
                         r.get('grp', '보유 리스크'), r.get('grp', '보유 리스크')) == g], key=lambda r: rank.get(r.get('state'), 2))
                     nw = sum(1 for r in rs if r.get('state') == 'warn')
                     col.markdown(f"**{g}** · 해당 {nw}/{len(rs)}")
@@ -6064,7 +6075,18 @@ def _an_v2_fill(L: dict):
                         f"{_html.escape(vd['head'])} <span style='font-size:13px;font-weight:600;color:#475569;background:#EEF2F6;"
                         f"padding:2px 8px;border-radius:6px;vertical-align:middle'>유형 · {_html.escape(vd['type_chip'])}</span></div>",
                         unsafe_allow_html=True)
-            st.markdown(_FC.CSS + _FC.cards_html(vd['cards']), unsafe_allow_html=True)
+            # 2026-11-16 차니 — 4축 카드(누르면 해당 섹션) + 오른쪽 작은 '매도 점검' 주석(같은 비중 X)
+            _hl = vd.get('halt')
+            _vc1, _vc2 = st.columns([5, 1.15], gap='small') if _hl else (st.container(), None)
+            _vc1.markdown(_FC.CSS + _FC.cards_html(vd['cards']), unsafe_allow_html=True)
+            if _vc2 is not None:
+                _hc = _FC.TONE_COLOR.get(_hl.get('tone'), '#475569')
+                _hr = ''.join(f"<div style='margin-top:3px'>{'⚠️' if r['hit'] else '✅'} {_html.escape(r['name'].split(' (')[0])}"
+                              f"<span style='color:#94A3B8'> · {_html.escape(str(r['now']))}</span></div>" for r in _hl.get('rows') or [])
+                _vc2.markdown(f"<div style='border-left:3px solid {_hc};padding:4px 0 4px 10px;margin-top:4px;font-size:12px;"
+                              f"line-height:1.35;color:#475569'><div style='font-size:12px;font-weight:700;color:#6B7280'>🛑 매도 점검</div>"
+                              f"<div style='font-size:15px;font-weight:800;color:{_hc};margin:2px 0'>해당 {sum(1 for r in _hl.get('rows') or [] if r['hit'])}/{len(_hl.get('rows') or [])}</div>"
+                              f"{_hr}</div>", unsafe_allow_html=True)
             rl = vd.get('rules')
             if vd.get('criteria'):
                 with st.expander("판정 기준 — 항목별 선택지와 이 종목의 위치", expanded=False):
@@ -6073,7 +6095,7 @@ def _an_v2_fill(L: dict):
                         _ops = ' / '.join((f"<b style='color:#111827'>▶ {o}</b>" if o == c_['now'] else o) + f" ({r})" for o, r in c_['opts'])
                         _rows.append(f"- **{c_['axis']} → {c_['now']}** — {c_.get('why') or ''}  \n  <span style='font-size:12.5px;color:#6B7280'>{_ops}</span>")
                     st.markdown('\n'.join(_rows), unsafe_allow_html=True)
-            st.caption("각 카드 = 아래 탭 첫 카드의 대표값 · 실선 = 지나온 흐름 · 점선 = 컨센서스 · 규칙 계산, 투자 권유 아님"
+            st.caption("카드를 누르면 해당 섹션 · 선에 마우스를 올리면 날짜·값 · 점선 = 컨센서스 추정"
                        + (f" · 실전 규칙 {rl['pass']}/{rl['total']} 통과(봇: {rl['bot']})" if (L.get('_IS_LAB') and rl) else ''))
     except Exception as e:
         L['_V2C'].caption(f"`결론 그리기 실패: {type(e).__name__}: {str(e)[:100]}`")
@@ -6086,9 +6108,8 @@ def _tab_analysis():
     _tui.begin_run(st)       # 표 필터 키 순번을 프래그먼트 실행마다 0부터 — 키가 바뀌면 필터가 풀린다
     with guard('종목 분석'):
         # 2026-11-16 — 한 줄: 제목 · 검색창 · 분석 버튼 · 탭 선택(펀더멘탈·밸류에이션·히스토리·수급)
-        _h1, _h2, _h3 = st.columns([1.0, 2.7, 3.3], vertical_alignment='center', gap='small')
+        _h1, _h2, _h3 = st.columns([1.0, 3.6, 2.4], vertical_alignment='center', gap='small')
         _h1.markdown("<div class='an-title'>🔍 종목 분석</div>", unsafe_allow_html=True)
-        st.session_state['_an_ax_slot'] = _h3
 
         # 2026-10-15 — 모바일에서 검색이 안 되던 문제. 키보드의 '이동/검색'(Enter)은 입력칸만
         #   반영하고 '분석' 버튼은 안 눌린 상태라 아무 일도 없었다. 폼으로 묶어 Enter 도 제출로 친다
@@ -6258,13 +6279,16 @@ def _tab_analysis():
                     _A2 = _fresh_module(_A2)
                     _V2C = st.container()                                   # 결론 (맨 끝에 채운다)
                     _V2REF = st.container()                                 # 2026-11-15 깨지는 조건 — 결론 바로 아래
-                    _AXSEL = _an_axes_pick(_A2)
+                    # 2026-11-16 차니 — 상단 축 선택 버튼 폐지: 4축 모두 펼치고 결론 카드를 누르면 그 섹션으로 이동
+                    _AXSEL = list(_A2.AXES)
                     _SEC = {}
+                    import stock_snapshot as _ssA
                     for _ax, _keys in _AN_AXMAP:
                         if _ax in _AXSEL:
                             _box = st.container()
                             with _box:
-                                st.markdown(f'<div class="mo-axis">{_A2.AXIS_ICON[_ax]} {_ax}</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="mo-axis" id="{getattr(_ssA, "AXIS_ANCHOR", {}).get(_ax, "")}" '
+                                            f'style="scroll-margin-top:70px">{_A2.AXIS_ICON[_ax]} {_ax}</div>', unsafe_allow_html=True)
                                 _AXH[_ax] = st.container()                  # 블록 첫 줄 판정 카드(맨 끝에 채운다)
                             for _k in _keys:
                                 _SEC[_k] = _box.container()
@@ -6377,7 +6401,7 @@ def _tab_analysis():
                     st.divider()
                     # ── 🏢 기업 개요 · IR · 공식 공시 (item 7) ──
                     _prof = company_profile(sym8_clean, is_kr_sym)
-                    st.subheader("🏢 기업 개요 · IR")
+                    _pf_box = st.container()            # 2026-11-16 — 설명 데이터가 없으면 제목·펼침·캡션 없이 공시 링크 한 줄만
                     _lnk = []
                     if _prof.get('website'):
                         _lnk.append(f"[🌐 홈페이지/IR]({_prof['website']})")
@@ -6387,12 +6411,15 @@ def _tab_analysis():
                         _lnk.append(f"[👤 EDGAR Form4(내부자)]({_prof['form4_url']})")
                     if _prof.get('dart_url'):
                         _lnk.append(f"[📄 DART 공시]({_prof['dart_url']})")
-                    if _lnk:
-                        st.markdown("**공식 공시·IR**: " + "  ·  ".join(_lnk))
                     # 2026-10-20: 버튼 없이 검색 즉시. 같은 10-K 면 저장된 요약을 재사용(보고서당 AI 1회).
                     with st.spinner("공식 문서(10-K/사업설명)에서 사업·비전 요약 중…"):
                         _ais = _ai_summary_auto(sym8_clean, is_kr_sym, info.get('longName', sym8_clean),
                                                 _prof.get('summary'))
+                    _has_desc = bool(_prof.get('summary')) and '데이터 없음' not in str(_ais.get('text') or '')[:40]
+                    if _has_desc:
+                        _pf_box.subheader("🏢 기업 개요 · IR")
+                    if _lnk:
+                        _pf_box.markdown("**공식 공시·IR**: " + "  ·  ".join(_lnk))
                     _one = ''
                     # '**🎯 한 줄 정의**: …' 와 '### 🎯 한 줄 정의\n\n…'(제목 다음 줄) 두 형식 모두 — 후자를 놓쳐 영문이 떴다(10-21 실화면)
                     _m1 = re.search(r'한 줄 정의[*:：\s]*([^\s#*][^\n]*)', str(_ais.get('text') or ''))
@@ -6405,12 +6432,11 @@ def _tab_analysis():
                             _one = '(영문 원문 · 한글 요약 실패) ' + (_en if len(_en) <= 200 else _en[:197].rsplit(' ', 1)[0] + '…')
                     _hero(_one if len(_one) <= 240 else _one[:237] + '…')
                     _ai_card_ = _ai_card(sym8_clean, _ais)      # 2026-11-16 기업 요약 카드(A안) — 결론 아래 펀더멘탈 첫 줄
-                    with st.expander("사업 요약 전문 (AI · 공식 문서 기반)", expanded=False):   # 공간 절약 — 핵심은 위 카드
-                        st.markdown(_ais['text'])
-                    st.caption(f"🤖 AI 요약 · 원천: {_ais['src']}{(' (' + _ais['src_key'] + ' 공시)') if _ais.get('src_key') and not is_kr_sym else ''}"
-                               f" · 생성 {str(_ais.get('generated', ''))[:10]}. 문장은 AI 가 원문에서 요약한 것 — "
-                               "숫자 판단은 위·아래 공시 표(재무제표·부문 XBRL)를 기준으로 할 것.")
-                    st.divider()
+                    if _has_desc:
+                        with st.expander("사업 요약 전문 (AI · 공식 문서 기반)", expanded=False):   # 공간 절약 — 핵심은 위 카드
+                            st.markdown(_ais['text'])
+                            st.caption(f"AI 요약 · 원천 {_ais['src']}{(' (' + _ais['src_key'] + ' 공시)') if _ais.get('src_key') and not is_kr_sym else ''}"
+                                       f" · 생성 {str(_ais.get('generated', ''))[:10]} · 숫자는 공시 표 기준")
 
                 with _SEC['fin']:
                     # ── 📊 공식 재무제표 통합표 (연도 가로 × 3표 세로 · 연간/분기 토글) ──
@@ -6720,8 +6746,7 @@ def _tab_analysis():
                     # ── 🏭 사업부문별 매출 구조 (2026-10-20 개편) ─────────────────────
                     # 숫자: US = SEC XBRL 원본(최신 10-Q/10-K, AI 관여 없음) · KR = DART 사업보고서 → Gemini 추출(검산 표시)
                     # 검색하면 바로 그린다(버튼 없음). AI 는 US 에선 '주요제품' 설명만 — 실패해도 숫자는 나온다.
-                    st.divider()
-                    st.subheader("🏭 사업부문별 매출 구조")
+                    _seg_hd = st.empty()              # 2026-11-16 — 부문 데이터가 있을 때만 제목(없으면 한 줄 안내)
                     _segs, _seg_meta = [], {}
                     _seg_ai = None
                     _seg_chk_pct, _seg_chk_ai = None, False      # → 요약의 데이터 점검
@@ -6785,10 +6810,11 @@ def _tab_analysis():
                         if 'RESOURCE_EXHAUSTED' in _emsg or '429' in _emsg:
                             st.info("부문 데이터: 오늘의 AI 분석 한도(Gemini 무료 등급)를 다 썼습니다 — 날짜가 바뀌면 다시 됩니다.")
                         elif is_kr_sym:
-                            st.caption("부문 데이터 없음 — DART 사업보고서 원문을 이 서버에서 읽지 못했거나 부문표가 없습니다.")
+                            st.caption("🏭 사업부문 구조 — 없음(DART 사업보고서 원문 미수신 또는 부문표 없음)")
                         else:
-                            st.caption("부문 데이터 없음 — 최신 10-Q/10-K XBRL 에 부문 태그가 없습니다(단일 부문 회사일 수 있음).")
+                            st.caption("🏭 사업부문 구조 — 없음(10-Q/10-K XBRL 부문 태그 없음 · 단일 부문 가능)")
                     else:
+                        _seg_hd.subheader("🏭 사업부문별 매출 구조")
                         _tot_rev = sum(x['revenue'] for x in _segs if x.get('revenue')) or None
                         for x in _segs:
                             if x.get('revenue') and _tot_rev:
@@ -6936,14 +6962,12 @@ def _tab_analysis():
                             st.plotly_chart(_sank, use_container_width=True)
                             if _frow.get('src'):
                                 st.caption(f"ℹ️ {_frow['period']} 분기는 {_frow['src']} — SEC 10-Q 가 나오면 공시 값으로 바뀝니다.")
-                            st.caption(f"{_frow.get('period','')} 분기 · 단위 {_uu}{'원' if is_kr_sym else '$'} · "
-                                       "파랑=남은 이익(%는 매출 대비 마진) · 빨강=차감 · 초록=가산(영업외수익 등). "
-                                       "위 버튼으로 최근 4개 분기를 바꿔 본다.")
+                            st.caption(f"단위 {_uu}{'원' if is_kr_sym else '$'} · 파랑 = 남은 이익(% = 매출 대비) · 빨강 = 차감 · 초록 = 가산(영업외수익 등)")
                         # 마진 궤적 스트립
                         _mq = [r for r in _flowq if r.get('revenue')][:8][::-1]     # 오래된→최신
                         with _fc2:
                           if len(_mq) >= 3:
-                            st.markdown("###### 📈 마진 궤적 (GPM·OPM·NPM) — 최근 8분기")
+                            st.markdown(f"###### 📈 마진 궤적 (GPM·OPM·NPM) — 최근 {len(_mq)}분기")   # 라벨 = 실제 분기 수(11-16)
                             _mfig = go.Figure()
                             _mx = [r.get('period', '') for r in _mq]
                             for _mk, _mlab, _mcol in [('gross', 'GPM', '#7C8AA5'), ('op_income', 'OPM', '#2453C8'),
@@ -6957,8 +6981,7 @@ def _tab_analysis():
                                                 yaxis_ticksuffix='%')
                             _mfig.update_yaxes(gridcolor='#F3F4F6', zeroline=True, zerolinecolor='#D1D5DB')
                             st.plotly_chart(_mfig, use_container_width=True)
-                            st.caption("**마진**이 '성장이 이익으로 이어지는가'를 드러냄 — 우상향=규모의 경제·가격결정력, "
-                                       "우하향=경쟁 심화·원가 압박.")
+                            st.caption("매출총이익률·영업이익률·순이익률 분기 추이 · 상승 = 규모의 경제·가격 결정력, 하락 = 경쟁·원가 압박")
 
                 with _SEC['canslim']:
                     st.divider()
@@ -7050,9 +7073,7 @@ def _tab_analysis():
                                    "N·S·I=정성 입력(체슬리 엑셀 방식) · M=시장국면. ⚠️ 점수는 참고용, 정성 판단이 핵심.")
                         st.divider()
                 with _SEC['val0']:
-                    st.divider()
-                    st.markdown("### ⚖️ 밸류에이션 — 목표주가·멀티플")
-                    st.caption("공식 멀티플(시총÷공식실적) · BEAR/BASE/BULL 목표주가 · 밸류에이션")
+                    st.markdown("##### 🎯 목표주가 · 멀티플")
 
 
                     yr1  = hist.tail(252)
@@ -7067,42 +7088,47 @@ def _tab_analysis():
                     _fest = forward_estimates(sym8_clean, is_kr_sym)
                     _vb = valuation_basis(sym8_clean, is_kr_sym, _mc, price_now, _fest, info)
                     _x = lambda v: f"{v:.1f}x" if v else '-'
+                    # 2026-11-16 차니('진짜 중요한 곳인데 허접') — 문장 두 줄 → 한 눈금 위의 위치:
+                    #   52주 범위 · 현재가 · 컨센서스 BEAR~BULL 띠 · BASE. 오른쪽에 멀티플 4칸(TTM → 12MF 변화가 곧 이익 성장).
+                    _pfmt = (lambda v: f"₩{v:,.0f}") if is_kr_sym else (lambda v: f"${v:,.2f}")
+                    _tv = [v for v in (_cons.get('bear'), _cons.get('base'), _cons.get('bull')) if v]
+                    _ax_lo = min([yr_l, price_now] + _tv)
+                    _ax_hi = max([yr_h, price_now] + _tv)
+                    _P = lambda v: 0 if _ax_hi == _ax_lo else (v - _ax_lo) / (_ax_hi - _ax_lo) * 100
+                    _band_h = (f"<div style='position:absolute;left:{_P(min(_tv)):.1f}%;width:{max(0.8, _P(max(_tv)) - _P(min(_tv))):.1f}%;"
+                               f"top:10px;height:12px;background:#BFDBFE;border-radius:3px' title='컨센서스 BEAR~BULL'></div>") if _tv else ''
+                    _mk = lambda v, col, lab, up: (f"<div style='position:absolute;left:{_P(v):.1f}%;top:{'0' if up else '22px'};transform:translateX(-50%);"
+                                                   f"font-size:11px;color:{col};white-space:nowrap;text-align:center'>"
+                                                   + (f"{lab}<br>▼" if up else f"▲<br>{lab}") + "</div>")
+                    _rng = (f"<div style='position:relative;height:64px;margin:6px 8% 2px'>"
+                            f"<div style='position:absolute;left:0;right:0;top:15px;height:2px;background:#E5E7EB'></div>"
+                            f"<div style='position:absolute;left:{_P(yr_l):.1f}%;width:{_P(yr_h) - _P(yr_l):.1f}%;top:14px;height:4px;background:#CBD5E1;border-radius:2px' title='52주 범위'></div>"
+                            f"<div style='position:absolute;top:-2px;left:0;right:0;height:0'>{_band_h}</div>"
+                            + _mk(price_now, '#111827', f"<b>현재 {_pfmt(price_now)}</b>", True)
+                            + (_mk(_cons['base'], '#1D4ED8', f"BASE {_pfmt(_cons['base'])} ({(_cons['base'] / price_now - 1) * 100:+.0f}%)", False) if _cons.get('base') else '')
+                            + _mk(yr_l, '#94A3B8', f"52주 저 {_pfmt(yr_l)}", False) * (abs(_P(yr_l) - _P(_cons.get('base') or -1e18)) > 18)
+                            + _mk(yr_h, '#94A3B8', f"52주 고 {_pfmt(yr_h)}", False) * (abs(_P(yr_h) - _P(_cons.get('base') or -1e18)) > 18)
+                            + "</div>")
+                    _w = _vb.get('w_fy0')
+                    _mult = [('PER TTM', _x(_vb.get('per_ttm')), f"최근 4분기 {_vb.get('ttm_label', '-')}"),
+                             ('PER 12MF', _x(_vb.get('per_12mf')), (f"올해E {_w*100:.0f}% + 내년E {100-_w*100:.0f}%" if _w is not None else '컨센서스 없음')),
+                             ('PBR', _x(_vb.get('pbr')), f"{_vb.get('equity_label', '-')} 자본"),
+                             ('PSR TTM', _x(_vb.get('psr_ttm')), '시총 ÷ 최근 4분기 매출')]
+                    _mh = ''.join(f"<div style='background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:6px 9px'>"
+                                  f"<div style='font-size:11.5px;color:#6B7280'>{a}</div><div style='font-size:17px;font-weight:700'>{b}</div>"
+                                  f"<div style='font-size:11px;color:#94A3B8'>{c}</div></div>" for a, b, c in _mult)
+                    _tg1, _tg2 = st.columns([1.35, 1], gap='medium')
+                    with _tg1:
+                        if _tv:
+                            st.markdown(f"<div style='background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px'>"
+                                        f"<div style='font-size:12px;color:#6B7280;font-weight:600'>컨센서스 목표주가 · 애널 {_cons.get('n') or '?'}명"
+                                        f" — BEAR {_pfmt(min(_tv))} · BASE {_pfmt(_cons['base'])} · BULL {_pfmt(max(_tv))}</div>{_rng}"
+                                        f"<div style='font-size:11px;color:#94A3B8'>파란 띠 = BEAR~BULL · 회색 굵은 선 = 52주 범위</div></div>",
+                                        unsafe_allow_html=True)
+                        else:
+                            st.caption("컨센서스 목표주가 없음(무료 출처 미제공 — 한국 소형주 등)")
                     if _mc:
-                        _w = _vb.get('w_fy0')
-                        _bl = (f"올해E {_w*100:.0f}% + 내년E {100-_w*100:.0f}%" if _w is not None else '컨센서스 없음')
-                        st.markdown(
-                            f"⚖️ **PER** TTM **{_x(_vb.get('per_ttm'))}** "
-                            f"<sub>최근 4분기 {_vb.get('ttm_label', '-')}</sub> · "
-                            f"12MF **{_x(_vb.get('per_12mf'))}** <sub>{_bl}</sub> · "
-                            f"PBR **{_x(_vb.get('pbr'))}** <sub>{_vb.get('equity_label', '-')} 자본</sub> · "
-                            f"PSR **{_x(_vb.get('psr_ttm'))}** <sub>TTM</sub> "
-                            f"<span style='color:#6B7280;font-size:11px'>· 시총·주가는 실시간 · "
-                            f"TTM=공시 확정 4분기 합 · 12MF=앞으로 12개월 컨센서스 EPS</span>",
-                            unsafe_allow_html=True)
-                    # 🎯 컨센서스 BEAR / BASE / BULL (목표주가)
-                    if _cons.get('base'):
-                        _cu = '₩' if is_kr_sym else '\\$'      # markdown 에서 '$…$' 가 수식으로 먹혀 글자가 깨졌다(2026-10-20)
-                        def _pr(t):
-                            try:
-                                return f"{_cu}{t:,.0f}" if t else '-'
-                            except Exception:
-                                return '-'
-                        def _up(t):
-                            try:
-                                return f" ({(t/price_now-1)*100:+.0f}%)" if t else ''
-                            except Exception:
-                                return ''
-                        _fpe = _x(_vb.get('per_12mf'))
-                        st.markdown(
-                            f"🎯 **컨센서스 목표주가** · 🐻 BEAR {_pr(_cons.get('bear'))}{_up(_cons.get('bear'))} · "
-                            f"⚖️ BASE {_pr(_cons.get('base'))}{_up(_cons.get('base'))} · "
-                            f"🐂 BULL {_pr(_cons.get('bull'))}{_up(_cons.get('bull'))} "
-                            f"<span style='color:#6B7280;font-size:11px'>· 애널 {_cons.get('n') or '?'}명 · 12MF PER {_fpe}</span>",
-                            unsafe_allow_html=True)
-                    else:
-                        st.caption("🎯 컨센서스: 데이터 없음 (yfinance 제한 · KR 소형주 등).")
-                    st.divider()
-                    st.subheader("💹 밸류에이션 · 재무")
+                        _tg2.markdown(f"<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'>{_mh}</div>", unsafe_allow_html=True)
                     yi2 = {}
                     try:
                         t_yf = yf.Ticker(_yf_code(sym8_clean, is_kr_sym))
@@ -7162,13 +7188,14 @@ def _tab_analysis():
                     # 2026-10-19 — 2열 세로 표(20행) → 묶음별 칩 격자. 세로 길이 ⅓.
                     _VR = dict(val_rows)      # 2026-10-23 — 이름이 _V 였을 때 verdict 모듈(_V)을 가려 CANSLIM M 이 늘 '—' 였다
                     _sg = lambda ks, signed=(): [(k, _VR[k], k in signed) for k in ks]
+                    # 2026-11-16 — 위 눈금·멀티플 칸과 겹치는 칸(52주 고저·PER·PBR·PSR·목표가)은 뺀다
                     _stat_grid([
-                        ('가격', _sg(['52주 고점', '52주 저점', '52주 저점 대비', '연간 변동성', '애널 목표가', '목표가 여력'], ('목표가 여력',))),
-                        ('멀티플', _sg(['PER (TTM)', 'PER (12MF)', 'PBR', 'PSR (TTM)', 'PEG', '배당수익률'])),
+                        ('가격·기타', _sg(['52주 저점 대비', '연간 변동성', 'PEG', '배당수익률', '목표가 여력'], ('목표가 여력',))),
                         ('이익·수익성', _sg(['EPS (TTM)', 'EPS (12MF)', 'ROE', 'ROA', '영업마진', '순이익률',
                                          '매출성장(YoY)', '부채비율(D/E)'], ('ROE', 'ROA', '영업마진', '순이익률', '매출성장(YoY)'))),
                     ])
-                    st.caption(f"기준 — PER·PSR(TTM)·EPS(TTM): 공시 확정 최근 4분기({_vb.get('ttm_label', '-')}) 합 · "
+                    with st.expander("산출 기준", expanded=False):
+                      st.caption(f"기준 — PER·PSR(TTM)·EPS(TTM): 공시 확정 최근 4분기({_vb.get('ttm_label', '-')}) 합 · "
                                f"PBR: {_vb.get('equity_label', '-')} 분기말 자본 · 12MF: 컨센서스 올해E·내년E를 남은 기간으로 가중 · "
                                f"주가 실시간 · 시총 {info.get('_mc_src') or '야후 실시간'}. "
                                f"ROE·ROA·마진·매출성장·부채비율 = 공시 분기 재무 자체 계산({_pf.get('basis', '-')}, ROE·ROA 분모는 최신 분기말 잔액, "
@@ -7180,10 +7207,11 @@ def _tab_analysis():
                 with _SEC['price']:
                     st.divider()
                     # 2026-11-16 — 제목 오른쪽에 버튼 전부: 1줄 [차트 | 봉 | 축 | 보조지표] · 2줄 [기술 신호 | 기간 + 시작일·종료일]
-                    _cr1 = st.columns([1.4, 0.9, 0.75, 1.45], vertical_alignment='bottom')
-                    _cr2 = st.columns([1.4, 3.1], vertical_alignment='bottom')
-                    _cr1[0].markdown("### 📈 차트")
-                    _chart_head = _cr2[0].empty()
+                    # 2026-11-16 차니 — 한 줄로: [차트 | 봉 | 축 | 보조지표 | 기간 + 시작일·종료일], 라벨 숨김(위 빈 공간 제거)
+                    _cr1 = st.columns([0.8, 0.85, 0.75, 1.35, 3.4], vertical_alignment='center', gap='small')
+                    _cr2 = [st.empty(), None]
+                    _cr1[0].markdown("<div class='an-title' style='font-size:20px'>📈 차트</div>", unsafe_allow_html=True)
+                    _chart_head = _cr2[0]
 
                     closes = hist['Close']
                     hist['MA20']  = closes.rolling(20).mean()
@@ -7199,7 +7227,7 @@ def _tab_analysis():
                         last['MA20'] if not pd.isna(last['MA20']) else None,
                         last['MA50'] if not pd.isna(last['MA50']) else None,
                     )
-                    _chart_head.markdown(f"<span style='font-size:12.5px;color:#6B7280'>기술 신호 {_html.escape(str(label))}<br>"
+                    _chart_head.markdown(f"<span style='font-size:12.5px;color:#6B7280'>기술 신호 <b>{_html.escape(str(label))}</b> · "
                                          f"{_html.escape(' · '.join(reasons))}</span>", unsafe_allow_html=True)
 
                     # ── 차트 (2026-10-20 단순화) ─────────────────────────────────
@@ -7208,19 +7236,19 @@ def _tab_analysis():
                     # 대신 원칙에 쓰이는 선: 52주 고점, 그 −20%(청산 기준선).
                     # 2026-11-16 — 1줄: 봉·축·보조지표(왼쪽에 모음) / 2줄: 기간 버튼 + 시작일·종료일(사이트 공통 date_picker)
                     _cc1, _cc2, _cc3 = _cr1[1], _cr1[2], _cr1[3]
-                    _bar = _cc1.segmented_control("봉", ['일봉', '주봉', '월봉'], default='주봉', format_func=lambda b: b[0],
-                                                  key=f"bar_{sym8_clean}") or '주봉'
+                    _bar = _cc1.segmented_control("봉", ['일봉', '주봉', '월봉'], default='주봉', format_func=lambda b: b[0] + '봉',
+                                                  key=f"bar_{sym8_clean}", label_visibility='collapsed') or '주봉'
                     # 2026-11-16 — 기간 YTD·1년·전체(기본 1년) + 시작일·종료일(date_picker.PRICE)
                     _per_opts = _dpk.PRICE
-                    _ccp = _cr2[1]
+                    _ccp = _cr1[4]
                     _plo, _phi = (hist.index.min().date(), hist.index.max().date()) if len(hist) else (datetime.today().date(), datetime.today().date())
                     _pstart, _pend = _dpk.period_range("기간", _per_opts, key=f"px_{sym8_clean}_{_bar}", lo=_plo, hi=_phi,
-                                                       default='1년', where=_ccp)
+                                                       default='1년', where=_ccp, compact=True)
                     _pk_now = st.session_state.get(f"px_{sym8_clean}_{_bar}") or ('전체' if (_pend - _pstart).days > 1900 else '1년')
                     _scale = _cc2.segmented_control("축", ['선형', '로그'], default='로그' if _pk_now == '전체' else '선형',
-                                                    key=f"scale_{sym8_clean}_{_bar}_{_pk_now}") or '선형'
+                                                    key=f"scale_{sym8_clean}_{_bar}_{_pk_now}", label_visibility='collapsed') or '선형'
                     _ind = _cc3.pills("보조지표", ['RSI', 'MACD', '낙폭(MDD)'], selection_mode='multi',
-                                      default=[], key=f"ind_{sym8_clean}") or []
+                                      default=[], key=f"ind_{sym8_clean}", label_visibility='collapsed') or []
                     _rule = {'일봉': None, '주봉': 'W-FRI', '월봉': 'ME'}[_bar]
                     if _rule:
                         disp = hist[['Open', 'High', 'Low', 'Close', 'Volume']].resample(_rule).agg(
@@ -7376,7 +7404,11 @@ def _tab_analysis():
                     _gcdc = _HID.container() if _V2 else st.container()
 
                     with _mstat:
-                        st.markdown("#### 📆 월별 계절성")
+                        # 2026-11-16 차니 — 요약은 차트/표 택1(같은 내용) · 원자료는 아래 가로 전체
+                        _mh1, _mh2, _ = st.columns([1.4, 1.2, 3], vertical_alignment='bottom')
+                        _mh1.markdown("#### 📆 월별 계절성")
+                        _mview = _mh2.segmented_control("요약 보기", ["차트", "표"], default="차트", key=f"msv_{sym8_clean}",
+                                                        label_visibility='collapsed') or "차트"
                         # 차트 기간과 무관하게 전체 상장 히스토리 사용 (엑셀 '주가 추이 분석' 방식)
                         _fullc = full_close_history(sym8_clean, is_kr_sym)
                         _basec = _fullc if (_fullc is not None and len(_fullc) > len(hist)) else hist['Close']
@@ -7385,10 +7417,9 @@ def _tab_analysis():
                         if _mraw is not None:
                             # 두 표의 열 폭을 같게 고정 — 위아래 칸이 한 줄로 맞아야 RAW 와 요약을 견줘 읽는다
                             def _mcfg(first):
-                                cfg = {first: st.column_config.TextColumn(first, width=92)}
-                                cfg.update({c: st.column_config.NumberColumn(c, format='%.1f', width=58)
-                                            for c in _ms.MONTHS})
-                                cfg['연간'] = st.column_config.NumberColumn('연간', format='%.1f', width=74)
+                                cfg = {first: st.column_config.TextColumn(first)}       # 폭 고정 해제 — 가로 전체(11-16)
+                                cfg.update({c: st.column_config.NumberColumn(c, format='%.1f') for c in _ms.MONTHS})
+                                cfg['연간'] = st.column_config.NumberColumn('연간', format='%.1f')
                                 return cfg
                             # 2026-11-06 — Styler 표 → AgGrid(머리글 정렬·No. 1부터). 색은 table_ui 가 부호로 칠한다.
                             #   승률은 부호에 뜻이 없어(항상 +) 따로 떼어 색 없이 둔다(표 규칙: 부호에 뜻이 있는 열만 칠한다).
@@ -7401,7 +7432,7 @@ def _tab_analysis():
                                     _mq.append({'월': _mm, '표본(년)': len(_v), '평균(%)': round(float(_v.mean()), 2),
                                                 '중앙값(%)': round(float(_v.median()), 2), '승률(%)': round(float((_v > 0).mean() * 100), 1),
                                                 't값': round(float(_v.mean()) / (_mstd / len(_v) ** .5), 2) if _mstd > 0 else None})
-                            if _mq:
+                            if _mq and _mview == "차트":
                                 _mqd = pd.DataFrame(_mq)
                                 _cur_mo = datetime.today().month
                                 _fm = make_subplots(specs=[[{'secondary_y': True}]])
@@ -7421,29 +7452,29 @@ def _tab_analysis():
                                 _sig = [r['월'] for r in _mq if r['t값'] is not None and abs(r['t값']) >= 2]
                                 st.caption(f"진한 막대 = |t| ≥ 2(우연일 가능성 낮음) · 테두리 = 이번 달 · "
                                            + (f"유의한 달: {', '.join(_sig)}" if _sig else "유의한 달 없음 — 참고만"))
-                            # 2026-11-16 — 원자료(연도 × 월)를 차트 바로 아래, 오른쪽에 월별 요약(세로) — 접기 없음
-                            _mL, _mR = st.columns([2.7, 1.3], gap='small')
-                            with _mL:
-                                _tsrc('FinanceDataReader(일봉 주가) · 월말 종가', live=True)
-                                st.dataframe(_mraw, column_config=_mcfg('연도'), filters=False, footer=False)
-                            with _mR:
+                            if _mview == "표":
                                 def _mrow(lbl):
                                     r_ = _msum[_msum['구분'] == lbl]
                                     return [float(r_[m].iloc[0]) if len(r_) and pd.notna(r_[m].iloc[0]) else None for m in _ms.MONTHS]
+                                _tmap = {r['월']: r['t값'] for r in _mq}
                                 _vt = pd.DataFrame({'월': _ms.MONTHS, '평균(%)': _mrow('전체 평균'), '승률(%)': _mrow('전체 승률'),
-                                                    '홀수해(%)': _mrow('홀수해 평균'), '짝수해(%)': _mrow('짝수해 평균')})
+                                                    '홀수해(%)': _mrow('홀수해 평균'), '짝수해(%)': _mrow('짝수해 평균'),
+                                                    't값': [_tmap.get(m) for m in _ms.MONTHS]})
 
                                 def _bgc(v, mid=0.0, span=10.0):
                                     if v is None or pd.isna(v):
                                         return ''
                                     a = min(1.0, abs(v - mid) / span) * 0.55 + 0.08
                                     return f"background-color: rgba({'22,163,74' if v > mid else '220,38,38'},{a:.2f})" if v != mid else ''
-                                _sty = (_vt.style.format({c: '{:+.1f}' for c in ('평균(%)', '홀수해(%)', '짝수해(%)')} | {'승률(%)': '{:.0f}'}, na_rep='-')
+                                _sty = (_vt.style.format({c: '{:+.1f}' for c in ('평균(%)', '홀수해(%)', '짝수해(%)')}
+                                                         | {'승률(%)': '{:.0f}', 't값': '{:+.2f}'}, na_rep='-')
                                         .map(lambda v: _bgc(v, 50.0, 30.0), subset=['승률(%)'])
                                         .map(lambda v: _bgc(v, 0.0, 10.0), subset=['평균(%)', '홀수해(%)', '짝수해(%)']))
                                 _tsrc('월별 요약 · 승률 50% 기준 색', live=True)
                                 st.dataframe(_sty, hide_index=True, use_container_width=True, height=36 * 13)
-                            st.caption("연간 = 전년 말 대비(올해는 YTD) · 승률 = 그 달이 오른 해의 비율(50% 기준 초록·빨강) · 홀수해/짝수해 = 격년 패턴 확인용.")
+                            _tsrc('FinanceDataReader(일봉 주가) · 월말 종가', live=True)
+                            st.dataframe(_mraw, column_config=_mcfg('연도'), filters=False, footer=False, use_container_width=True)
+                            st.caption("연간 = 전년 말 대비(올해 YTD) · 승률 = 그 달이 오른 해 비율 · 홀수·짝수해 = 격년 패턴")
                         else:
                             st.info("월별 통계 표본 부족 — 기간을 '3y' 또는 '5y'로 늘려 주십시오.")
 
@@ -7747,7 +7778,7 @@ def _tab_analysis():
                 _ed = _earn_data(sym8_clean, is_kr_sym)
                 with _SEC['earn']:
                     st.divider()
-                    st.markdown("## 📅 실적 발표 · 서프라이즈")
+                    st.markdown("##### 📅 실적 발표 · 서프라이즈")
                     # 2026-10-23 개편 — ① '미정'이면 전년 같은 분기 발표일로 시기 추정 ② 최근 4개 분기를 순서대로
                     #   실적 vs 발표 직전 컨센서스 ③ yfinance 의 띄엄띄엄한 옛 기록(KR 2011·2015…)은 본 표에서 뺐다.
                     _edf = _ed.get('dates')
@@ -7772,19 +7803,17 @@ def _tab_analysis():
                     _cq = _kr_cons_q(sym8_clean) if is_kr_sym else {}
                     _eq = _sx.earnings_quarters(_qf_e, _ev_kr, _cq, _eps_hist)
                     _nx = _eq['next']
-                    _e1, _e2 = st.columns(2)
+                    # 2026-11-16 차니 — 큰 카드 2개 → 한 줄(내용 대비 공간 과다)
                     if _next_us is not None:
-                        _e1.metric("다음 발표", _next_us[0].strftime('%Y-%m-%d'), f"D-{(_next_us[0] - _now).days}")
+                        _nxt_s = f"**{_next_us[0]:%Y-%m-%d}** (D-{(_next_us[0] - _now).days})"
                     elif _nx.get('예상') is not None:
-                        _e1.metric("다음 발표", f"{_nx['예상']:%m월 %d일} 전후(추정)",
-                                   f"전년 {_nx['전년 동기']} {_nx['전년 발표일']:%Y-%m-%d} {_nx['전년 근거'] or ''}", delta_color='off')
+                        _nxt_s = f"**{_nx['예상']:%m월 %d일} 전후**(추정 · 전년 {_nx['전년 동기']} {_nx['전년 발표일']:%m-%d})"
                     else:
-                        _e1.metric("다음 발표", "미정", (f"법정 마감 {_nx['법정 마감(KR)']:%Y-%m-%d}" if is_kr_sym and _nx else None),
-                                   delta_color='off')
+                        _nxt_s = "**미정**" + (f"(법정 마감 {_nx['법정 마감(KR)']:%Y-%m-%d})" if is_kr_sym and _nx else '')
                     _cmp = _eq['wins'] + _eq['losses']
-                    _e2.metric("최근 4분기 컨센서스 대비", f"상회 {_eq['wins']} · 하회 {_eq['losses']}" if _cmp else "비교 불가",
-                               (f"{len(_eq['rows']) - _cmp}개 분기는 컨센서스 기록 없음" if _cmp < len(_eq['rows']) else None),
-                               delta_color='off')
+                    st.markdown(f"다음 발표 {_nxt_s}  ·  최근 4분기 컨센서스 대비 "
+                                + (f"**상회 {_eq['wins']} · 하회 {_eq['losses']}**" if _cmp else "**비교 불가**")
+                                + (f" ({len(_eq['rows']) - _cmp}개 분기 컨센서스 기록 없음)" if 0 < len(_eq['rows']) - _cmp else ''))
                     if _eq['rows']:
                         _amt0 = max([abs(r['매출'] or 0) for r in _eq['rows']] + [0])
                         _eu2 = (('조원', 1e12) if _amt0 >= 1e12 else ('억원', 1e8)) if is_kr_sym else (('$B', 1e9) if _amt0 >= 1e9 else ('$M', 1e6))
@@ -7799,11 +7828,10 @@ def _tab_analysis():
                         _tsrc(('DART 공시(실적·발표일) · 네이버 FnGuide 분기 컨센서스(주간 저장본)' if is_kr_sym else
                                'SEC EDGAR(실적) · yfinance(EPS 컨센서스·발표일)'), live=True)
                         st.dataframe(_etb, filters=False)
-                    st.caption("최근 4개 분기, 최신이 위. 차이 = (실적 − 발표 직전 컨센서스) ÷ |컨센서스|. 판정은 EPS 가 있으면 EPS, 없으면 영업이익. "
-                               + ("⚠️ 한국 분기 컨센서스는 2026-10 부터 매주 저장을 시작했다 — 발표 후엔 추정치가 사라져 과거분을 만들 수 없다. "
-                                  "2026.3Q 실적부터 비교가 채워진다. 발표일은 DART 잠정실적 공정공시(없으면 분기·반기·사업보고서) 접수일."
-                                  + (f" (DART 조회 실패: {_ev_err} — 발표일 '-')" if _ev_err else '')
-                                  if is_kr_sym else "EPS 는 회사 발표 기준(조정 EPS 일 수 있음)."))
+                    st.caption("차이 = (실적 − 발표 직전 컨센서스) ÷ |컨센서스| · 판정 = EPS(없으면 영업이익) "
+                               + ("· 한국 분기 컨센서스 저장은 2026-10 시작 → 2026.3Q 부터 비교"
+                                  + (f" · 발표일 조회 실패({_ev_err})" if _ev_err else '')
+                                  if is_kr_sym else "· EPS = 회사 발표 기준(조정 EPS 가능)"))
                     if not is_kr_sym and _eps_hist:
                         _old = [h for h in _eps_hist if h['rep'] is not None and h['date'] >= _now - pd.DateOffset(years=3)]
                         if len(_old) > 4:
@@ -7817,8 +7845,8 @@ def _tab_analysis():
                 with _SEC['val']:
                     st.divider()
                     # 2026-11-16 — 제목 오른쪽에 기간·주가 겹쳐 보기(차트와 같은 배치)
-                    _bh1, _bh2, _bh3 = st.columns([1.4, 3.1, 0.9], vertical_alignment='bottom')
-                    _bh1.markdown("### 📏 멀티플 밴드")
+                    _bh1, _bh2, _bh3 = st.columns([1.2, 3.3, 0.9], vertical_alignment='center')
+                    _bh1.markdown("<div class='an-title' style='font-size:20px'>📏 멀티플 밴드</div>", unsafe_allow_html=True)
                     _qr, _qsrc = _q_rows_long(sym8_clean, is_kr_sym)
                     _qf = _sx.quarterly_frame(_qr)
                     _shn = _shares_now(sym8_clean, is_kr_sym, info)
@@ -7829,16 +7857,19 @@ def _tab_analysis():
                     _blo = _bstart.date() if _bstart is not None else _cl.index.min().date()
                     _bstart_sel, _bend_sel = _dpk.period_range("기간", {'1년': 365, '3년': 1095, '5년': 1826, '전체': None},
                                                                key=f"bandp_{sym8_clean}", lo=_blo, hi=_cl.index.max().date(),
-                                                               default='5년', where=_bh2)
+                                                               default='5년', where=_bh2, compact=True)
                     _cl_band = _cl[(_cl.index >= pd.Timestamp(_bstart_sel)) & (_cl.index <= pd.Timestamp(_bend_sel))]
                     _band = _sx.multiple_band(_cl_band, _shn, _qf, None) if _shn else None
                     _bm = (_band or {}).get('main')
                     if _qf is not None and not _qf.empty:
                         _q0, _q1 = _qf.index.min(), _qf.index.max()
                         _eqn = int(_qf['equity'].notna().sum()) if 'equity' in _qf else 0
-                        st.caption(f"보유 분기 재무: **{_q0:%Y.%m} ~ {_q1:%Y.%m}** ({len(_qf)}개 분기 · 출처 {_qsrc})"
-                                   + (f" · 자본(P/B용) {_eqn}개 시점" if _eqn else " · 자본 이력 없음(P/B 불가)")
-                                   + ". TTM 은 4개 분기가 쌓인 뒤부터라 밴드는 그보다 1년 늦게 시작한다.")
+                        _eq0 = _qf['equity'].dropna().index.min() if _eqn else None
+                        # 2026-11-16 차니 — 한 줄로 · P/B 탭이 사라지는 이유(자본 이력 시작 전 기간)를 같이
+                        _pb_why = ('' if (_band_all or {}).get('pb') is None and not _eqn else
+                                   (f" · P/B 는 자본 이력 {_eq0:%Y.%m}~ 구간만" if _eq0 is not None else ''))
+                        st.caption(f"재무 {_q0:%Y.%m}~{_q1:%Y.%m} ({len(_qf)}분기 · {_qsrc}) · 밴드는 TTM(4분기)이 쌓인 뒤부터{_pb_why}"
+                                   + ('' if _eqn else ' · 자본 이력 없음 → P/B 없음'))
                     if not _bm:
                         st.info("멀티플 밴드를 그릴 수 없습니다 — 분기 재무가 1년 이상 연속으로 없거나 주식수를 모릅니다. "
                                 + ("KR 은 저장된 DART 손익이 있는 종목만 됩니다." if is_kr_sym else ""))
@@ -7870,13 +7901,31 @@ def _tab_analysis():
                                                                   title_standoff=4), margin=dict(l=8, r=70, t=10, b=8),
                                                       showlegend=True, legend=dict(orientation='h', y=1.08, x=0))
                                 st.plotly_chart(_fb, use_container_width=True)
-                                # 2026-10-19 — 지표 3개 줄 + 그 아래 좁은 표 → 한 줄에 나란히(왼쪽 지표 · 오른쪽 분위표)
-                                _bL, _bR = st.columns([1, 2.2], gap='medium')
-                                with _bL:
-                                    _stat_grid([('', [(f"현재 {_b['kind']}", f"{_b['now']:.1f}배"),
-                                                      ("과거 대비", f"{_b['rank']:.0f}%의 구간 상회"),
-                                                      ("10분위 아래였던 기간", f"{_b['below10']:.0f}%")])], one=True)
-                                with _bR:
+                                # 2026-11-16 차니 — '멀티플과 주가를 겹쳐 보면 무엇을 얻나' → 조회 기간 주가 변화를
+                                #   멀티플 변화 × 이익(분모) 변화로 나눈다(주식수 고정: 주가 비 = 멀티플 비 × 분모 비). + 월간 변화 상관계수.
+                                _ins = ''
+                                try:
+                                    _pxa = _cl_band.resample('ME').last().reindex(_ser.index, method='nearest').astype(float)
+                                    _ms_ = _ser.astype(float)
+                                    if len(_ms_) >= 6 and _ms_.iloc[0] > 0 and _ms_.iloc[-1] > 0:
+                                        _pr_ = _pxa.iloc[-1] / _pxa.iloc[0]
+                                        _mr_ = _ms_.iloc[-1] / _ms_.iloc[0]
+                                        _er_ = _pr_ / _mr_
+                                        _cor = _pxa.pct_change().corr(_ms_.pct_change())
+                                        _den = {'P/E': '이익(TTM 순이익)', 'P/S': '매출(TTM)', 'P/B': '자본'}.get(_b['kind'], '분모')
+                                        _drv = ('멀티플 확장' if abs(np.log(_mr_)) > abs(np.log(_er_)) else f"{_den.split('(')[0]} 증가") \
+                                            if _pr_ >= 1 else ('멀티플 축소' if abs(np.log(_mr_)) > abs(np.log(_er_)) else f"{_den.split('(')[0]} 감소")
+                                        _ins = (f"**{_ser.index[0]:%Y.%m}~{_ser.index[-1]:%Y.%m} 주가 {(_pr_ - 1) * 100:+.0f}%** = "
+                                                f"{_b['kind']} {(_mr_ - 1) * 100:+.0f}% × {_den} {(_er_ - 1) * 100:+.0f}% → 주된 동력 **{_drv}**"
+                                                f" · 월간 변화 상관 {_cor:.2f}"
+                                                + (" (주가가 멀티플을 따라 움직임 — 이익보다 기대 변화)" if _cor >= 0.7 else
+                                                   " (멀티플과 주가가 따로 — 이익이 주가를 설명)" if _cor <= 0.3 else ''))
+                                except Exception:
+                                    _ins = ''
+                                # 2026-11-16 — 지표 3칸(세로) → 한 줄 · 표 옆이 아니라 위
+                                st.markdown(f"현재 **{_b['now']:.1f}배** · 백분위 **{_b['rank']:.0f}**(과거 {_b['rank']:.0f}% 기간보다 비쌈)"
+                                            f" · 10분위 아래였던 기간 {_b['below10']:.0f}%" + (f"  \n{_ins}" if _ins else ''))
+                                with st.container():
                                     if _b['implied']:
                                         _tsrc(f"{_qsrc} TTM · 종가×현재 주식수", live=True)
                                         st.dataframe(pd.DataFrame([{
@@ -7884,14 +7933,9 @@ def _tab_analysis():
                                             f"환산주가({_cur_u})": round(_b['implied'][_pp], 2 if not is_kr_sym else 0),
                                             '현재가대비(%)': round((_b['implied'][_pp] / price_now - 1) * 100, 1)}
                                             for _pp in (10, 25, 50, 75, 90)]), filters=False, color=True)
-                                st.caption(f"표본 {_b['n']}개월{' ⚠️ 2년 미만 — 분위가 불안정하다' if _b['n'] < 24 else ''}. {_b['why']}. 월말 시가총액(종가 × **현재** 발행주식수) ÷ 그 시점에 공시돼 있던 TTM "
-                                           f"({'순이익' if _b['kind']=='P/E' else '매출' if _b['kind']=='P/S' else '자본'}, 분기말+45일). "
-                                           "⚠️ 증자·자사주로 주식수가 크게 변한 종목은 과거 멀티플이 왜곡된다. "
-                                           "⚠️ **10분위는 '바닥'이 아니다** — 이익이 꺾이는 구간에서는 분모가 줄어 밴드 하단도 뚫린다. "
-                                           "환산주가는 '최근 TTM 이 유지된다면'의 가정이다.")
-                        if is_kr_sym and not _band.get('pb'):
-                            st.caption("P/B 밴드: KR 자본(잔액) 이력이 아직 짧다. 매주 네이버 기업분석으로 쌓는 중"
-                                       "(2026-10-19 시작) — 과거분은 DART 를 한국 IP 에서 한 번 돌리면 채워진다.")
+                                st.caption(f"표본 {_b['n']}개월{' (2년 미만 — 분위 불안정)' if _b['n'] < 24 else ''} · 월말 시총(종가 × 현재 주식수) ÷ 당시 공시 TTM "
+                                           f"{'순이익' if _b['kind']=='P/E' else '매출' if _b['kind']=='P/S' else '자본'} · 환산주가 = 최근 TTM 유지 가정 · "
+                                           "10분위는 바닥이 아님(이익 감소 시 하단도 이탈) · 주식수 급변 종목은 과거 왜곡")
 
                     with _SEC['cons']:
                         # 컨센서스 추세
@@ -9210,8 +9254,7 @@ else:
         _ka_n, _st_n = _ops_counts()          # 상단 배지와 같은 캐시(10분) — 두 번 읽지 않는다
         _ka_n, _st_n = _ka_n or 0, _st_n or 0
         if (_ka_n or _st_n) and _IS_LAB:           # 2026-11-14 운영 점검은 소유자만(고객 화면에 내부 점검 문구 노출 X)
-            st.caption(f"🔴 운영 점검 — 정답 점검 틀림 {_ka_n}건 · 갱신 정지 {_st_n}건. "
-                       "자세히는 주소 끝에 `?diag=admin`.")
+            st.caption(f"🔴 운영 점검 틀림 {_ka_n} · 정지 {_st_n} (`?diag=admin`)")
 # 2026-11-16 — 사이트 공통 '출처' 줄 삭제(차니: 코멘트는 제자리로). 출처는 표마다 · 전체 목록은 📘 사용법 > 🗄️ 데이터.
 
 
@@ -9276,8 +9319,14 @@ def _chat_box():
             else:
                 with st.spinner("답변 작성 중…"):
                     try:
-                        _a, _md = _CB.ask(_q, log, gemini_key=_gemini_key_site(), groq_key=_groq_key_site())
-                        _a += f"\n\n<span style='font-size:11px;color:#9CA3AF'>AI({_md}) · 사이트 자료 기준 · 투자 권유 아님</span>"
+                        # 2026-11-16 — 지금 보고 있는 종목 분석 스냅샷을 같이 넘긴다(질문 속 종목명이 없어도 '이 종목' 질문에 답하게)
+                        _pg = st.session_state.get('_an_snap_ctx') or ''
+                        try:
+                            _a, _md = _CB.ask(_q, log, gemini_key=_gemini_key_site(), groq_key=_groq_key_site(), page_ctx=_pg)
+                        except TypeError:          # 클라우드가 옛 chatbot 모듈을 들고 있을 때
+                            _a, _md = importlib.reload(_CB).ask(_q, log, gemini_key=_gemini_key_site(), groq_key=_groq_key_site(), page_ctx=_pg)
+                        # HTML 태그는 chat_message 에서 글자로 보였다(차니 11-16) → 마크다운 색 문법
+                        _a += f"\n\n:gray[AI({_md}) · 사이트 자료 기준 · 투자 권유 아님]"
                     except Exception as _e:
                         _a = f"지금은 답할 수 없습니다 — 무료 AI 한도 초과 또는 일시 오류입니다. 잠시 뒤 다시 시도해 주십시오. ({str(_e)[:80]})"
                 log += [('user', _q.strip()), ('assistant', _a)]
@@ -9791,17 +9840,12 @@ if tab_gov is not None:
 DISCLAIMER_VER = 1
 st.divider()
 # 2026-11-16 — 한 줄 요약만 펼쳐 두고 전문은 접기(차니: 탭 내용보다 고지가 더 커 보였다). 문구 원문은 그대로 유지.
-st.caption("ⓘ 정보 도구이며 투자 권유가 아닙니다 · 가격은 15분 이상 지연될 수 있습니다 · 과거 성과는 미래를 보장하지 않습니다.")
-with st.expander("이용 안내 전문 (데이터 지연 · 백테스트·목표가 · 이해상충)", expanded=False):
+# 2026-11-16 차니 — 한 줄로 줄이고 전문도 필요한 것만(투자 권유 아님 · 지연 · 목표가 출처 · 이해상충)
+with st.expander("ⓘ 정보 도구 · 투자 권유 아님 · 가격 15분+ 지연 — 이용 안내", expanded=False):
   st.caption(
-    "**ⓘ 이용 안내** · 이 사이트는 공개 데이터와 정해진 규칙으로 계산한 결과, AI 요약을 보여주는 "
-    "**정보 도구이며 투자 권유가 아닙니다.** 모든 투자 판단과 책임은 이용자 본인에게 있습니다.\n\n"
-    "**데이터 지연** · 한국 시장 요약은 평일 15:50(KST) 장 마감 기준, 미국·신호·점수는 매일 06:00 갱신되는 **전일 종가 기준**입니다. "
-    "종목 분석의 현재가도 무료 API 기준이라 **최소 15분 이상 지연**되거나 오류가 있을 수 있습니다.\n\n"
-    "**백테스트·목표가** · 상승 확률·평균 상승률은 표시된 기간의 과거 성과이며 미래 수익을 보장하지 않습니다. "
-    "목표가는 증권사 컨센서스를 옮긴 것으로, 이 사이트의 의견이 아닙니다.\n\n"
-    "**이해상충** · 운영자는 화면에 나온 종목을 보유하고 있을 수 있습니다. "
-    "점수·신호는 운영자의 보유 여부와 무관하게 모든 종목에 같은 규칙으로 계산되며, 규칙을 바꾸면 변경 이력에 남깁니다."
+    "공개 데이터·정해진 규칙·AI 요약으로 만든 정보 도구이며 투자 권유가 아닙니다. 투자 판단과 책임은 이용자에게 있습니다.  \n"
+    "한국 요약 = 평일 15:50(KST) 장 마감 기준 · 미국·신호 = 매일 06:00 전일 종가 기준 · 현재가는 무료 API(15분+ 지연·오류 가능).  \n"
+    "목표가 = 증권사 컨센서스 · 운영자는 화면 종목을 보유할 수 있으나 모든 종목에 같은 규칙을 적용합니다."
 )
 # 2026-11-06 — 배포가 10-31 에 멈춘 채 일주일을 몰랐다. 이 줄을 keepalive 가 GitHub main 과 대조한다(build_info).
 try:

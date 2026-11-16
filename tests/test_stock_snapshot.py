@@ -73,10 +73,12 @@ def test_compute_contract_and_public(tmp_path):
     assert snap['blocks']['수급']['cards'][0]['value'].startswith('RS 92')
     assert any(k['value'] == '1/6위' for k in snap['company']['kpis'])          # 2026-11-16 정체 → 기업 요약 카드
     assert snap['blocks']['가격']['cards'][0].get('spark', {}).get('y')            # 흐름선(주봉 1년)
-    assert [c['label'].split(' ', 1)[1] for c in snap['verdict']['cards']] == ['펀더멘탈', '밸류에이션', '히스토리', '수급', '판단 철회 조건']
+    assert [c['label'].split(' ', 1)[1] for c in snap['verdict']['cards']] == ['펀더멘탈', '밸류에이션', '히스토리', '수급']
+    assert snap['verdict']['halt']['label'] == '매도 점검' and snap['verdict']['cards'][0]['href'] == '#ax-fund'
+    assert snap['verdict']['cards'][2]['spark'].get('x')                           # 선 기간 라벨(hover·회색 줄)
     assert snap['blocks']['깨지는 조건·촉매']['cards'][0]['label'] == '보유 리스크' and 'data_check' in snap
     assert snap['verdict']['rules'] == {'pass': 2, 'total': 2, 'bot': '후보'}
     p = S.save(snap, str(tmp_path))
     pub = json.load(open(p, encoding='utf-8'))
     assert '매매 계획' not in pub['blocks'] and 'rules' not in pub['verdict']       # 소유자 전용은 공개 파일에 없다
-    assert pub['sym'] == 'AAA' and pub['v'] == 3 and 'peer_rank' not in pub['blocks']['가격']
+    assert pub['sym'] == 'AAA' and pub['v'] == 4 and 'peer_rank' not in pub['blocks']['가격']

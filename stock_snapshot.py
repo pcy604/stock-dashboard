@@ -24,7 +24,7 @@ import os
 
 import pandas as pd
 
-VERSION = 3   # 2026-11-16 v3: 밸류에이션 블록 · verdict 4축+판단 철회 · halt·data_check·events
+VERSION = 4   # 2026-11-16 v4: 매도 점검(halt → verdict.halt) · 분기 YoY qcards · 스파크 x 라벨 / v3: 밸류에이션 블록 · verdict 4축+판단 철회 · halt·data_check·events
 BLOCKS = ['수급', '이익 방향', '가격', '밸류에이션', '정체', '깨지는 조건·촉매', '매매 계획', '원자료']
 SNAP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results', 'snap')
 
@@ -117,6 +117,31 @@ def break_conditions(rs: float | None, dd52: float | None, fwd_tone: str | None,
             'tone': 'bad' if len(hit) >= 2 else ('mid' if hit else 'good'), 'rows': rows}
 
 
+def _ql(ix) -> list[str]:
+    """분기 끝 날짜 → '2026.2Q'."""
+    out = []
+    for t in ix:
+        try:
+            t = pd.Timestamp(t)
+            out.append(f"{t.year}.{(t.month - 1) // 3 + 1}Q")
+        except Exception:
+            out.append(str(t))
+    return out
+
+
+def _dl(ix, f='%y.%m.%d') -> list[str]:
+    out = []
+    for t in ix:
+        try:
+            out.append(pd.Timestamp(t).strftime(f))
+        except Exception:
+            out.append(str(t))
+    return out
+
+
+AXIS_ANCHOR = {'펀더멘탈': 'ax-fund', '밸류에이션': 'ax-val', '히스토리': 'ax-hist', '수급·업종': 'ax-flow'}
+
+
 # ── 본체 ─────────────────────────────────────────────────────────────────
 def compute(L: dict, ctx: dict) -> dict:
     """L: 탭 locals · ctx: {'A2','CMB','sector_detail','kr_cons_hist','kr_cons_live','sx','q_rows_long','cm'}."""
@@ -161,7 +186,7 @@ def compute(L: dict, ctx: dict) -> dict:
         grow = gh[gh['group'] == glabel] if glabel is not None and len(gh) else gh.iloc[0:0]
         gpct = float(grow['pct'].iloc[0]) if len(grow) else None
         vr = A2.volume_ratio(hist.get('Volume'))
-        q = A2.flow_quadrant(gpct, rs)
+        q = A2.flow_quadrant(gpct, rs, dd52=h['dd'] if h else None)
         # RS 라인
         rs_sp, rs_dir, rs13 = None, None, None
         try:
@@ -175,7 +200,7 @@ def compute(L: dict, ctx: dict) -> dict:
                 rw = ratio.resample('W-FRI').last().dropna().tail(52)
                 if len(rw) >= 10:
                     rwn = rw / rw.iloc[0] * 100
-                    rs_sp = {'y': [_r(v, 2) for v in rwn], 'ref': 100.0}
+                    rs_sp = {'y': [_r(v, 2) for v in rwn], 'ref': 100.0, 'x': _dl(rwn.index), 'unit': ''}
                     rs_dir = _dir(list(rwn), k=8, tol=0.02)
                     rs13 = (rw.iloc[-1] / rw.iloc[-14] - 1) * 100 if len(rw) > 14 else None
         except Exception:
@@ -185,12 +210,12 @@ def compute(L: dict, ctx: dict) -> dict:
         try:
             vv = pd.to_numeric(hist['Volume'], errors='coerce').dropna().tail(60)
             if len(vv) >= 20:
-                vol_sp = {'y': [_r(v / 1e6, 3) for v in vv], 'kind': 'bar', 'ref': _r(vv.tail(20).mean() / 1e6, 3)}
+                vol_sp = {'y': [_r(v / 1e6, 3) for v in vv], 'kind': 'bar', 'ref': _r(vv.tail(20).mean() / 1e6, 3), 'x': _dl(vv.index), 'unit': '백만주'}
         except Exception:
             pass
         # 2026-11-16 — '종목 단독 강세'가 '업종 안에서 1등'으로 읽혔다(실제: 업종은 하위, 종목 RS 만 높음). 두 축을 그대로 적는다.
         g_hot = None if gpct is None else gpct <= 30        # flow_quadrant 와 같은 기준(업종 상위 30% · 종목 RS 80)
-        s_hot = None if rs is None else rs >= 80
+        s_hot = None if rs is None else (rs >= 80 and (not h or h['dd'] > -20))   # RS 80 + 고점 −20% 이내
         qshort = ('-' if g_hot is None or s_hot is None else
                   f"업종 {'강세' if g_hot else '약세'} · 종목 {'강세' if s_hot else '약세'}")
         cards = [
@@ -199,7 +224,8 @@ def compute(L: dict, ctx: dict) -> dict:
               + (f" · 52주 고점 대비 {h['dd']:+.1f}%" if h else ''),
               'na' if rs is None else ('good' if rs >= 80 else 'bad' if rs < 50 else 'mid'), rs_sp, rs_dir),
             C('업종 온도 × 종목 강도', qshort,
-              (f"{glabel} — 업종 온도 {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위 · 종목 RS {rs:.0f}"
+              (f"{glabel} — 업종 온도 {int(grow['rank'].iloc[0])}/{int(grow['of'].iloc[0])}위(업종 RS 중앙값 순) · 종목 RS {rs:.0f}"
+               + (f" · 고점 대비 {h['dd']:+.0f}%" if h else '')
                if len(grow) and rs is not None else (glabel or '업종 미상')),
               q['tone']),
             C('거래량 (5일 ÷ 20일)', f"{vr:.1f}배" if vr else '-', '최근 60거래일 · 점선 = 20일 평균',
@@ -273,7 +299,7 @@ def compute(L: dict, ctx: dict) -> dict:
                               (f"내년 컨센서스 {_money(fw[-1], is_kr)} ({nxt:+.0f}%)" if nxt is not None else '컨센서스 없음')
                               + ' · 실선 실적 · 점선 추정',
                               'na' if yoy is None else ('good' if yoy > 0 and (nxt is None or nxt > 0) else 'bad' if yoy < 0 and (nxt is None or nxt < 0) else 'mid'),
-                              {'y': [_r(v, 1) for v in t4], 'fwd': fw}, _dir(list(t4) + fw, k=min(4, len(t4)), tol=0.05))
+                              {'y': [_r(v, 1) for v in t4], 'fwd': fw, 'x': _ql(t4.index), 'xf': ['올해E', '내년E'][:len(fw)], 'unit': '억원' if is_kr else ''}, _dir(list(t4) + fw, k=min(4, len(t4)), tol=0.05))
         except Exception:
             pass
         # (2) 추정치 흐름
@@ -293,7 +319,8 @@ def compute(L: dict, ctx: dict) -> dict:
                 k_ = 'op_1y' if 'op_1y' in hh else 'eps_1y'
                 ys = [_r(v, 1) for v in pd.to_numeric(hh.get(k_), errors='coerce').dropna().tail(26)]
                 if len(ys) >= 3:
-                    rev_sp = {'y': ys}
+                    rev_sp = {'y': ys, 'x': ([str(d)[2:10].replace('-', '.') for d in hh.loc[pd.to_numeric(hh.get(k_), errors='coerce').notna(), 'date'].tail(26)]
+                                             if 'date' in hh else None)}
         except Exception:
             pass
         rev_card = C('내년 추정치 흐름 (최근 90일)', fwd.get('value', '-'), rev_sub.strip(' ·') or '-', fwd['tone'], rev_sp,
@@ -304,20 +331,51 @@ def compute(L: dict, ctx: dict) -> dict:
             qq = qf[['revenue', 'op_income']].astype(float)
             opm = (qq['op_income'].rolling(4, min_periods=4).sum() / qq['revenue'].rolling(4, min_periods=4).sum() * 100).dropna().tail(40)
             if len(opm) >= 6:
-                cy_sp = {'y': [_r(v, 2) for v in opm], 'ref': _r(opm.median(), 2)}
+                cy_sp = {'y': [_r(v, 2) for v in opm], 'ref': _r(opm.median(), 2), 'x': _ql(opm.index), 'unit': '%'}
         except Exception:
             pass
         cy_card = C('영업이익률 사이클 (TTM)',
-                    (f"{cy_sp['y'][-1]:.1f}%" if cy_sp else '-') + (f" · {cyc['pct']:.0f}%ile" if cyc.get('pct') is not None else ''),
+                    (f"{cy_sp['y'][-1]:.1f}%" if cy_sp else '-') + (f" · 백분위 {cyc['pct']:.0f}" if cyc.get('pct') is not None else ''),
                     (cyc.get('value') or '-') + (' · 점선 = 자기 중앙값' if cy_sp else ''), cyc.get('tone', 'na'), cy_sp,
                     _dir((cy_sp or {}).get('y'), k=4, tol=0.05) if cy_sp else None)
         cards = [path_card, rev_card, cy_card]
+        # 2026-11-16 차니 — 펀더멘탈 맨 위: 분기 매출 YoY · 영업이익 YoY · OPM (최근 8분기, 막대·선 + hover 숫자)
+        qcards = []
+        try:
+            qq2 = qf[['revenue', 'op_income']].astype(float)
+            prv_r, prv_o = qq2['revenue'].shift(4), qq2['op_income'].shift(4)
+            yr_ = ((qq2['revenue'] / prv_r - 1) * 100).where(prv_r > 0)
+            yo_ = ((qq2['op_income'] / prv_o - 1) * 100).where(prv_o > 0)
+            om_ = (qq2['op_income'] / qq2['revenue'] * 100).where(qq2['revenue'] > 0)
+            for ttl, ser, kind in (('매출 YoY (분기)', yr_, 'bar'), ('영업이익 YoY (분기)', yo_, 'bar'), ('영업이익률 (분기)', om_, 'line')):
+                sr = ser.tail(8)
+                if sr.notna().sum() < 2:
+                    continue
+                lv = sr.dropna()
+                last_v, prev_v = float(lv.iloc[-1]), (float(lv.iloc[-2]) if len(lv) >= 2 else None)
+                if kind == 'line':
+                    base = float(lv.iloc[:-1].tail(4).mean()) if len(lv) >= 3 else None
+                    tn = 'na' if base is None else ('good' if last_v >= base + 1 else 'bad' if last_v <= base - 1 else 'mid')
+                    val = f"{last_v:.1f}%"
+                    sub = f"직전 4분기 평균 {base:.1f}%" if base is not None else ''
+                else:
+                    tn = 'good' if last_v >= 10 else 'bad' if last_v < 0 else 'mid'
+                    val = f"{last_v:+.0f}%"
+                    sub = f"직전 분기 {prev_v:+.0f}%" if prev_v is not None else ''
+                if ttl.startswith('영업이익 YoY') and sr.isna().any():
+                    sub += (' · ' if sub else '') + '빈칸 = 전년 같은 분기 적자'
+                qcards.append(C(ttl, val, sub, tn,
+                                {'y': [_r(v, 1) if pd.notna(v) else None for v in sr], 'kind': kind, 'signed': kind == 'bar',
+                                 'ref': 0.0 if kind == 'bar' else None, 'x': _ql(sr.index), 'unit': '%'},
+                                _dir([v for v in sr if pd.notna(v)], k=min(3, int(sr.notna().sum()) - 1), tol=0.05)))
+        except Exception:
+            qcards = []
         t = fwd['tone'] if fwd['tone'] != 'na' else (cyc['tone'] if cyc.get('cyclical') else past_tone)
         peak = bool(cyc.get('cyclical') and (cyc.get('pct') or 0) >= 80 and t == 'good')   # 린치: 최대 이익·최저 P/E 에서 사면 반토막
         if peak:
             t = 'mid'
         tone['이익 방향'], tone['_cyc_peak'] = t, peak
-        snap['blocks']['이익 방향'] = {'tone': t, 'cards': cards, 'detail': [], 'error': None}
+        snap['blocks']['이익 방향'] = {'tone': t, 'cards': cards, 'qcards': qcards, 'detail': [], 'error': None}
     except Exception as e:
         tone['이익 방향'] = 'na'
         snap['blocks']['이익 방향'] = {'tone': 'na', 'cards': [], 'detail': [], 'error': f"{type(e).__name__}: {str(e)[:100]}"}
@@ -343,7 +401,7 @@ def compute(L: dict, ctx: dict) -> dict:
         cl.index = pd.to_datetime(cl.index)
         wk = cl.resample('W-FRI').last().dropna()
         ma200 = float(cl.tail(200).mean()) if len(cl) >= 200 else None
-        px_sp = {'y': [_r(x, 4) for x in wk.tail(52)], 'ref': _r(ma200, 4)} if len(wk) >= 10 else None
+        px_sp = {'y': [_r(x, 4) for x in wk.tail(52)], 'ref': _r(ma200, 4), 'x': _dl(wk.tail(52).index), 'unit': ''} if len(wk) >= 10 else None
         above = (float(cl.iloc[-1]) >= ma200) if ma200 else None
         p_tone = 'na' if not h else ('good' if h['dd'] > -10 and above else 'bad' if h['dd'] <= -20 or above is False else 'mid')
         # 사이클 위치 — cycle_compare 와 같은 지그재그(30%) · 진행 중 구간을 과거 같은 방향 중앙값과 비교
@@ -378,7 +436,7 @@ def compute(L: dict, ctx: dict) -> dict:
                 se_card = C(f'이번 달 계절성 ({cur}월)', f"평균 {same.mean():+.1f}% · 승률 {win:.0f}%",
                             f"{len(same)}년 표본 · 중앙값 {same.median():+.1f}%",
                             'good' if win >= 60 and same.mean() > 0 else 'bad' if win <= 40 and same.mean() < 0 else 'mid',
-                            {'y': [_r(x, 2) for x in same.tail(12)], 'kind': 'bar', 'ref': 0.0})
+                            {'y': [_r(x, 2) for x in same.tail(12)], 'kind': 'bar', 'ref': 0.0, 'signed': True, 'x': [f'{d.year}년' for d in same.tail(12).index], 'unit': '%'})
         except Exception:
             pass
         cards = [C('주가 경로 (주봉 1년)', (f"고점 대비 {h['dd']:+.1f}%" if h else '-'),
@@ -399,10 +457,10 @@ def compute(L: dict, ctx: dict) -> dict:
             try:
                 if ser is not None and len(ser) >= 8:
                     bs = ser.resample('ME').last().dropna().tail(60) if hasattr(ser, 'resample') else ser
-                    sp = {'y': [_r(x, 2) for x in bs], 'ref': _r((b.get('pct') or {}).get(50), 2)}
+                    sp = {'y': [_r(x, 2) for x in bs], 'ref': _r((b.get('pct') or {}).get(50), 2), 'x': _dl(bs.index, '%y.%m') if hasattr(bs, 'index') else None, 'unit': '배'}
             except Exception:
                 sp = None
-            return C(title, f"{b['now']:.1f}배 · {b['rank']:.0f}%ile",
+            return C(title, f"{b['now']:.1f}배 · 백분위 {b['rank']:.0f}",
                      (f"중앙값 {b['pct'][50]:.1f}배" + (f" · 10~90% {b['pct'][10]:.1f}~{b['pct'][90]:.1f}배"
                                                         if (10 in b['pct'] and 90 in b['pct']) else '')) if (b.get('pct') or {}).get(50) else '-',
                      'good' if b['rank'] <= 25 else 'bad' if b['rank'] >= 75 else 'mid', sp,
@@ -412,7 +470,9 @@ def compute(L: dict, ctx: dict) -> dict:
                                 _bcard(bands.get('pb'), 'P/B 밴드')) if c_]
         vcards.append(C('업종 대비', (f"P/E {per:.1f}배 vs 업종 {med:.1f}배" if (per and med) else '비교 불가'),
                         (f"업종 대비 {ratio:.2f}배" if ratio else '') + (f" · PEG {peg:.2f}" if peg else ''),
-                        'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.3 else 'mid')))
+                        'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.3 else 'mid'),
+                        ({'y': [_r(per, 1), _r(med, 1)], 'kind': 'bar', 'x': ['이 종목', '업종 중앙'], 'unit': '배', 'ref': 0.0}
+                         if (per and med) else None)))
         tone['가격'] = v['tone']
         snap['blocks']['밸류에이션'] = {'tone': v['tone'], 'cards': vcards, 'detail': [], 'error': None, 'reading': v.get('value')}
     except Exception as e:
@@ -437,7 +497,7 @@ def compute(L: dict, ctx: dict) -> dict:
         bmm = L.get('_bm') or {}
         if bmm.get('now') is not None and bmm.get('rank') is not None:
             kp.append({'label': f"{bmm.get('kind', 'P/E')} (5년 밴드)", 'value': f"{bmm['now']:.0f}배",
-                       'sub': f"{bmm['rank']:.0f}%ile", 'tone': 'good' if bmm['rank'] <= 25 else 'bad' if bmm['rank'] >= 75 else 'mid'})
+                       'sub': f"백분위 {bmm['rank']:.0f}", 'tone': 'good' if bmm['rank'] <= 25 else 'bad' if bmm['rank'] >= 75 else 'mid'})
         if mc.get('순위'):
             kp.append({'label': '업종 내 시총', 'value': f"{mc['순위']}/{mc['비교수']}위", 'sub': str(pr.get('sector') or ''), 'tone': 'na'})
         snap['company'] = {'name': snap['name'], 'definition': card.get('definition') or L.get('_one') or '',
@@ -476,12 +536,13 @@ def compute(L: dict, ctx: dict) -> dict:
         cards = [C('보유 리스크', (f"{len(nr2)}/{len(rsk)} 해당" if rsk else '-'),
                    ' · '.join(r['name'] for r in nr2) or '해당 없음',
                    'na' if not rsk else ('good' if not nr2 else 'mid' if len(nr2) <= 2 else 'bad'))]
-        snap['halt'] = C('판단 철회 조건', bc['value'], bc['sub'], bc['tone'])
+        snap['halt'] = C('매도 점검', bc['value'], bc['sub'], bc['tone'])     # 2026-11-16 '판단 철회 조건' → '매도 점검'(차니)
+        snap['halt']['rows'] = [{'name': r[0], 'hit': bool(r[1]), 'now': r[2]} for r in bc['rows']]
         snap['data_check'] = {'warn': [r['name'] for r in nc], 'n': len(chk)}
         snap['events'] = {'next_earnings': ev['value'], 'sub': ev['sub']}
         # 2026-11-16 — 세 묶음(grp)으로: 깨지는 조건(판단 철회 4개) · 리스크 점검(재무·밸류·변동성) · 데이터 점검(숫자 신뢰도).
         #   화면은 묶음별 열 · 묶음 안에서 해당(warn) 먼저. '청산선 아래(보유 시)'는 깨지는 조건의 고점 −20% 와 같은 뜻이라 뺀다.
-        detail = ([{'grp': '판단 철회 조건', 'state': 'warn' if r[1] else 'ok', 'name': r[0], 'detail': r[2]} for r in bc['rows']]
+        detail = ([{'grp': '매도 점검', 'state': 'warn' if r[1] else 'ok', 'name': r[0], 'detail': r[2]} for r in bc['rows']]
                   + [dict(r, grp='보유 리스크') for r in risk if not str(r.get('name', '')).startswith('청산선')]
                   + [dict(r, grp='데이터 점검') for r in chk])
         tone['리스크'] = cards[0]['tone']
@@ -524,8 +585,9 @@ def compute(L: dict, ctx: dict) -> dict:
                   C('📈 히스토리', {'good': '상승 추세', 'mid': '조정', 'bad': '하락 추세', 'na': '-'}[px_t],
                     p0.get('value', '-'), px_t, p0.get('spark'), p0.get('dir')),
                   C('🌊 수급', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[s_t],
-                    s0.get('value', '-'), s_t, s0.get('spark'), s0.get('dir'))]
-                 + ([dict(snap['halt'], label='🛑 판단 철회 조건')] if snap.get('halt') else []),
+                    s0.get('value', '-'), s_t, s0.get('spark'), s0.get('dir'))],
+        # 2026-11-16 차니 — 매도 점검은 4축과 같은 비중이 아니라 결론 오른쪽 작은 주석(화면) · 봇은 halt 를 그대로 읽는다
+        'halt': snap.get('halt'),
         'rules': rules,
         # 2026-11-16 — 축마다 '가능한 판정'과 기준, 이 종목이 어디에 해당하는지(차니: 선택지 설명이 어딘가 있어야)
         'criteria': [
@@ -547,13 +609,17 @@ def compute(L: dict, ctx: dict) -> dict:
                       ('하락 추세', '52주 고점 대비 −20% 이하 또는 200일선 아래')]},
             {'axis': '수급·업종', 'now': {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '판단 불가'}[s_t],
              'why': fl,
-             'opts': [('강함', '업종 온도 상위 30% + 종목 RS 80 이상(주도 업종의 주도주)'),
+             'opts': [('강함', '업종 온도 상위 30% + 종목 강세(RS 80 이상 · 52주 고점 대비 −20% 이내)'),
                       ('보통', '둘 중 하나만 충족(업종 강세·종목 약세 / 업종 약세·종목 강세)'),
                       ('약함', '둘 다 미충족')]},
-            {'axis': '판단 철회 조건', 'now': (snap.get('halt') or {}).get('value', '-'), 'why': (snap.get('halt') or {}).get('sub', ''),
-             'opts': [('해당 0개', '판단 유지'), ('1개 이상', '해당 조건이 규칙상 매도·신규 매수 중지·판단 재검토 신호')]},
+            {'axis': '매도 점검', 'now': (snap.get('halt') or {}).get('value', '-'), 'why': (snap.get('halt') or {}).get('sub', ''),
+             'opts': [('해당 0개', '규칙상 매도 신호 없음'), ('1개 이상', '해당 조건 = 실전 규칙의 매도(RS 70·고점 −20%)·신규 매수 중지(지수 5주선)·재검토(컨센서스 하향) 신호')]},
         ],
     }
+    # 2026-11-16 차니 — 결론 선이 무엇이고 언제부터인지(카드 안 회색 줄) · 누르면 해당 섹션으로
+    for c_, src_, href_ in zip(snap['verdict']['cards'], (f0, v0, p0, s0), AXIS_ANCHOR.values()):
+        c_['src'] = '선 = ' + str(src_.get('label') or '-') if src_.get('spark') else ''
+        c_['href'] = '#' + href_
     return snap
 
 
