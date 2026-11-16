@@ -93,6 +93,8 @@
   예외 BRK-A(주식수가 A주 환산). `marketcap_refresh.primary_ticker_rank()`.
 - 유니버스는 **한 번 들어온 종목을 빼지 않는다**(`data/universe_ever.csv`) — 오늘 시총으로 고르면 쪼그라든 종목의
   과거가 사라져 백테스트가 낙관적이 된다.
+- **`kr_fundamentals_q.parquet` 의 q=4 는 연간 합계다**(2026-11-16 — 퀀트 패널이 그대로 써서 v1.9 백테스트가 틀렸다). 분기로 쓸 땐 `research/quant_panel.kr_quarterize`(연간−1~3Q · 빠진 분기 펼친 뒤 전년 비교).
+  재무를 '오늘 큰 종목'만 채우면 백테스트가 약 10%p 부풀었다 — 커버리지는 그 시점 유니버스 기준으로.
 - KR 12월 결산 아닌 종목은 분기재무에서 뺀다(`data/kr_nondec.json`) — DART 사업연도 분기를 달력 분기로 저장하면 미래 분기가 생긴다.
 
 ## 데이터 원칙
