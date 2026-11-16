@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16k'
+VERSION = '2026-11-16l'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -175,7 +175,7 @@ METHOD = [
 ]
 LIMITS = [
     "과거 성적은 미래를 보장하지 않습니다. 같은 기간에 규칙을 여러 번 시험하면 우연히 좋은 조합을 고를 위험(과적합)이 남습니다.",
-    "한국 분기 재무가 2018-06 부터라 하락장 표본이 적습니다.",
+    "한국 분기 재무가 2016년부터라 백테스트는 2017-06 부터입니다 — 하락장 표본이 적습니다.",
     "실적이 아직 안 나온 '기대 선반영 랠리'는 흑자전환 조건으로 잡지 못합니다.",
     "손절은 하루 1회 판정 — 장중 급락 때는 −{stop}% 보다 깊게 체결될 수 있습니다.",
     "백테스트는 주봉 체결 가정 — 소액 계좌의 정수 주문·호가 차이는 반영되지 않습니다.",

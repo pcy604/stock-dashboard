@@ -20,7 +20,7 @@ import quant_engine as Q
 REL = 'https://github.com/pcy604/stock-dashboard/releases/download/quant-panel/quant_panel_{m}.parquet'
 _MK = {'US': '🇺🇸 미국', 'KR': '🇰🇷 한국'}
 _IDX = {'US': ['SPX', 'NDX'], 'KR': ['MKT', 'KOSPI']}   # 첫 번째 = 기본 지수 게이트
-KR_FIN_START = '2018-06-01'   # 한국 분기 재무 2017Q1~ → 전년 동분기 비교는 2018Q1(공시 +45일) 부터
+KR_FIN_START = '2017-06-01'   # 한국 분기 재무 2016Q1~(2026-11-16 DART 백필) → 전년 동분기 비교는 2017Q1(공시 +45일) 부터
 # 2026-11-08 점검: 미국 패널 종가는 배당 반영 수정주가(AAPL 2024-11 219.2 vs 원가격 ~222) → 가격지수 SPX 와 비교하면 전략이 연 1.5%p 안팎 공짜로 앞섬.
 #   비교 지수는 배당 포함 SPXTR. 한국은 패널(marcap 원가격·배당 미반영)과 코스피 가격지수가 같은 기준이라 그대로.
 _BM = {'US': 'SPXTR', 'KR': 'KOSPI'}                      # 비교 지수(게이트와 별개)
@@ -141,7 +141,7 @@ def _run(m, spec_json):
     spec = json.loads(spec_json)
     P = _panel(m)
     pre = ''
-    # 2026-11-05 — 한국 분기 재무(흑자전환·이익 증가율·PER)는 2017년부터라 쓸 수 있는 신호가 2018-05 부터 생긴다.
+    # 2026-11-05 — 한국 분기 재무(흑자전환·이익 증가율·PER) 첫해에는 전년 비교가 없어 신호가 없다(2026-11-16 백필로 2016~ → 2017-06~).
     #   그 전 구간을 넣으면 몇 년치 현금 대기가 연 수익률을 깎는다(실전 규칙 2015~ 20.3% = 실제론 2018-08 첫 매매).
     _fin = {'op_turn', 'op_yoy', 'rev_yoy', 'per', 'pbr', 'psr', 'roe', 'opm', 'debt', 'rev_qoq', 'gpm'}
     if m == 'KR' and any(f.get('field', '').split(':')[0] in _fin for f in spec.get('filters', [])) \
@@ -338,7 +338,7 @@ def _easy(m):
     # 2026-11-08 차니 "목록으로 하드코딩하지 말고 숫자를 치게" — 숫자 선택은 전부 직접 입력(number_input)
     y_max = pd.Timestamp.today().year
     y0 = min(max(2014, pd.Timestamp(base['start']).year), y_max)
-    yr = c[0].number_input('시작 연도', 2014, y_max, int(y0), 1, key=f'qb_easy_y|{pname}', help='2014~ (한국 재무 조건은 2018-06부터 자동)')
+    yr = c[0].number_input('시작 연도', 2014, y_max, int(y0), 1, key=f'qb_easy_y|{pname}', help='2014~ (한국 재무 조건은 2017-06부터 자동)')
     npos = c[1].number_input('종목 수', 1, 100, int(base['max_pos']), 1, key=f'qb_easy_n|{pname}')
     tr = base['exit'].get('trail') or []
     cur = int(tr[0][1]) if len(tr) == 1 and float(tr[0][0]) == 0 else (int(base['exit'].get('stop') or 0) if not tr else None)
