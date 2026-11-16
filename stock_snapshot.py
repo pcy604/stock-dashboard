@@ -142,7 +142,9 @@ def compute(L: dict, ctx: dict) -> dict:
     # ① 수급 ───────────────────────────────────────────────────────────────
     #   2026-11-16 — 점 대신 흐름: RS 라인(종목 ÷ 지수, 주봉 1년) · 업종×종목 판정 · 거래량 60일
     try:
-        sd = L.get('_sd') or ctx['sector_detail']()
+        sd = L.get('_sd')
+        if not isinstance(sd, dict):      # 탭 locals 의 같은 이름이 다른 값으로 덮인 적이 있다(11-16 월별 표준편차)
+            sd = ctx['sector_detail']()
         gsel, glabel = str(L.get('_gsel') or ''), L.get('_glabel')
         mkt = 'KR' if is_kr else 'US'
         if is_kr and gsel.startswith('테마'):

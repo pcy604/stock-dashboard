@@ -7397,10 +7397,10 @@ def _tab_analysis():
                             for _mm in _ms.MONTHS:
                                 _v = pd.to_numeric(_mraw[_mm], errors='coerce').dropna() if _mm in _mraw else pd.Series(dtype=float)
                                 if len(_v) >= 2:
-                                    _sd = float(_v.std())
+                                    _mstd = float(_v.std())   # _sd(업종 분류 dict)를 가리지 않게 — 수급 판정이 깨졌다(11-16)
                                     _mq.append({'월': _mm, '표본(년)': len(_v), '평균(%)': round(float(_v.mean()), 2),
                                                 '중앙값(%)': round(float(_v.median()), 2), '승률(%)': round(float((_v > 0).mean() * 100), 1),
-                                                't값': round(float(_v.mean()) / (_sd / len(_v) ** .5), 2) if _sd > 0 else None})
+                                                't값': round(float(_v.mean()) / (_mstd / len(_v) ** .5), 2) if _mstd > 0 else None})
                             if _mq:
                                 _mqd = pd.DataFrame(_mq)
                                 _cur_mo = datetime.today().month
