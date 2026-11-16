@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09",
+ "generated": "2026-11-16",
  "rule": "미국 규칙⑥ 원문 이식 — RS13>1.5 AND (흑자전환 OR 이익폭증) AND OPM>0, 시총 2.8조↑·거래대금 70억↑ · 고점대비 -30% 트레일링 · 재진입 허용",
  "params": {
   "rs_min": 1.5,
@@ -8,7 +8,7 @@
   "adv_min_eok": 70,
   "fx": 1400.0
  },
- "period": "2018-06-01 ~ 2026-11-09",
+ "period": "2018-06-01 ~ 2026-11-16",
  "backtest": {
   "trail20": {
    "US그대로": {
@@ -70,84 +70,84 @@
    "name": "삼성에스디에스",
    "entry_date": "2026-09-28",
    "entry_px": 218000.0,
-   "close": 221500.0,
-   "ret": 1.6,
-   "stop": 156450.0,
-   "adv_eok": 425,
-   "marcap_jo": 17.14,
-   "days": 42
+   "close": 231000.0,
+   "ret": 6.0,
+   "stop": 164850.0,
+   "adv_eok": 529,
+   "marcap_jo": 17.87,
+   "days": 49
   },
   {
    "sym": "021240",
    "name": "코웨이",
    "entry_date": "2026-09-16",
    "entry_px": 107600.0,
-   "close": 104500.0,
-   "ret": -2.9,
+   "close": 103100.0,
+   "ret": -4.2,
    "stop": 77840.0,
-   "adv_eok": 190,
-   "marcap_jo": 7.4,
-   "days": 54
+   "adv_eok": 169,
+   "marcap_jo": 7.3,
+   "days": 61
   },
   {
    "sym": "222800",
    "name": "심텍",
    "entry_date": "2026-11-03",
    "entry_px": 118100.0,
-   "close": 101400.0,
-   "ret": -14.1,
-   "stop": 87430.0,
-   "adv_eok": 1140,
-   "marcap_jo": 3.96,
-   "days": 6
+   "close": 112500.0,
+   "ret": -4.7,
+   "stop": 88410.0,
+   "adv_eok": 1153,
+   "marcap_jo": 4.39,
+   "days": 13
   },
   {
-   "sym": "047050",
-   "name": "포스코인터내셔널",
-   "entry_date": "2026-09-28",
-   "entry_px": 56900.0,
-   "close": 48150.0,
-   "ret": -15.4,
-   "stop": 40810.0,
-   "adv_eok": 181,
-   "marcap_jo": 8.47,
-   "days": 42
-  },
-  {
-   "sym": "004020",
-   "name": "현대제철",
-   "entry_date": "2026-09-21",
-   "entry_px": 35400.0,
-   "close": 28450.0,
-   "ret": -19.6,
-   "stop": 24920.0,
-   "adv_eok": 113,
-   "marcap_jo": 3.8,
-   "days": 49
-  },
-  {
-   "sym": "006400",
-   "name": "삼성SDI",
-   "entry_date": "2026-10-08",
-   "entry_px": 567000.0,
-   "close": 431000.0,
-   "ret": -24.0,
-   "stop": 417200.0,
-   "adv_eok": 3942,
-   "marcap_jo": 34.73,
-   "days": 32
+   "sym": "031980",
+   "name": "피에스케이홀딩스",
+   "entry_date": "2026-11-11",
+   "entry_px": 152700.0,
+   "close": 139600.0,
+   "ret": -8.6,
+   "stop": 106960.0,
+   "adv_eok": 354,
+   "marcap_jo": 3.01,
+   "days": 5
   },
   {
    "sym": "000500",
    "name": "가온전선",
    "entry_date": "2026-11-02",
    "entry_px": 241500.0,
-   "close": 179200.0,
-   "ret": -25.8,
+   "close": 218000.0,
+   "ret": -9.7,
    "stop": 170800.0,
-   "adv_eok": 344,
-   "marcap_jo": 5.34,
-   "days": 7
+   "adv_eok": 282,
+   "marcap_jo": 6.49,
+   "days": 14
+  },
+  {
+   "sym": "047050",
+   "name": "포스코인터내셔널",
+   "entry_date": "2026-09-28",
+   "entry_px": 56900.0,
+   "close": 49400.0,
+   "ret": -13.2,
+   "stop": 40810.0,
+   "adv_eok": 169,
+   "marcap_jo": 8.69,
+   "days": 49
+  },
+  {
+   "sym": "004020",
+   "name": "현대제철",
+   "entry_date": "2026-09-21",
+   "entry_px": 35400.0,
+   "close": 28550.0,
+   "ret": -19.4,
+   "stop": 24920.0,
+   "adv_eok": 100,
+   "marcap_jo": 3.81,
+   "days": 56
   }
  ],
  "caveats": [
