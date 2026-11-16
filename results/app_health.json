@@ -1,14 +1,14 @@
 {
- "at": "2026-11-15T19:20:48Z",
+ "at": "2026-11-16T01:53:49Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
    "page": "배포 빌드 = main",
    "ok": true,
    "deployed": {
-    "sha": "14850a530054",
-    "ts": 1794769980,
-    "at": "2026-11-15 19:13"
+    "sha": "6993899b3e63",
+    "ts": 1794792840,
+    "at": "2026-11-16 01:34"
    },
    "why": "최신 main 과 같다",
    "behind": 0,
@@ -19,7 +19,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 11972,
+   "text_len": 11656,
    "samples": [],
    "finished": true
   },
@@ -28,7 +28,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 6861,
+   "text_len": 6451,
    "samples": [],
    "finished": true
   },
@@ -37,7 +37,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 2039,
+   "text_len": 1629,
    "samples": [],
    "finished": true
   },
@@ -46,7 +46,7 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 835,
+   "text_len": 327,
    "samples": [],
    "finished": true
   },
@@ -55,18 +55,16 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 848,
+   "text_len": 438,
    "samples": [],
    "finished": true
   },
   {
    "page": "종목 분석 ?sym=TSLA",
-   "ok": false,
+   "ok": true,
    "exceptions": 0,
-   "error_words": [
-    "AttributeError"
-   ],
-   "text_len": 10608,
+   "error_words": [],
+   "text_len": 10064,
    "samples": [],
    "finished": true
   },
@@ -75,10 +73,10 @@
    "ok": true,
    "exceptions": 0,
    "error_words": [],
-   "text_len": 9958,
+   "text_len": 8500,
    "samples": [],
    "finished": true
   }
  ],
- "ok": false
+ "ok": true
 }
