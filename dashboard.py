@@ -6721,7 +6721,7 @@ def _tab_analysis():
                     # 숫자: US = SEC XBRL 원본(최신 10-Q/10-K, AI 관여 없음) · KR = DART 사업보고서 → Gemini 추출(검산 표시)
                     # 검색하면 바로 그린다(버튼 없음). AI 는 US 에선 '주요제품' 설명만 — 실패해도 숫자는 나온다.
                     st.divider()
-                    st.subheader("🏭 사업부문별 매출 구조 — 이 회사는 어디서 돈을 버나")
+                    st.subheader("🏭 사업부문별 매출 구조")
                     _segs, _seg_meta = [], {}
                     _seg_ai = None
                     _seg_chk_pct, _seg_chk_ai = None, False      # → 요약의 데이터 점검
@@ -6900,7 +6900,7 @@ def _tab_analysis():
                 with _SEC['flow']:
                     # ── 💵 손익 흐름(Sankey) + 마진 궤적 (App Economy Insights 스타일) ──
                     st.divider()
-                    st.subheader("💵 손익 흐름 — 매출이 순이익까지 어떻게 흐르나")
+                    st.subheader("💵 손익 구조 — 매출 → 영업이익 → 순이익")
                     _flowq = unified_statements(sym8_clean, is_kr_sym, 'quarter')      # 분기 시계열
                     if not _flowq or len(_flowq) < 1:
                         _flowq = unified_statements(sym8_clean, is_kr_sym, 'annual')
@@ -7403,12 +7403,12 @@ def _tab_analysis():
                                                 't값': round(float(_v.mean()) / (_sd / len(_v) ** .5), 2) if _sd > 0 else None})
                             if _mq:
                                 _mqd = pd.DataFrame(_mq)
-                                _cm = datetime.today().month
+                                _cur_mo = datetime.today().month
                                 _fm = make_subplots(specs=[[{'secondary_y': True}]])
                                 _fm.add_trace(go.Bar(x=_mqd['월'], y=_mqd['평균(%)'], name='평균 수익률(%)',
                                                      marker_color=[('#16A34A' if v > 0 else '#DC2626') if abs(t or 0) >= 2 else
                                                                    ('#86EFAC' if v > 0 else '#FCA5A5') for v, t in zip(_mqd['평균(%)'], _mqd['t값'])],
-                                                     marker_line=dict(width=[2.5 if i == _cm - 1 else 0 for i in range(len(_mqd))], color='#111827')),
+                                                     marker_line=dict(width=[2.5 if i == _cur_mo - 1 else 0 for i in range(len(_mqd))], color='#111827')),
                                               secondary_y=False)
                                 _fm.add_trace(go.Scatter(x=_mqd['월'], y=_mqd['승률(%)'], name='승률(%)', mode='lines+markers',
                                                          line=dict(color='#475569', width=1.6)), secondary_y=True)
