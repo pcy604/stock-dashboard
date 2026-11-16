@@ -7106,8 +7106,8 @@ def _tab_analysis():
                             f"<div style='position:absolute;top:-2px;left:0;right:0;height:0'>{_band_h}</div>"
                             + _mk(price_now, '#111827', f"<b>현재 {_pfmt(price_now)}</b>", True)
                             + (_mk(_cons['base'], '#1D4ED8', f"BASE {_pfmt(_cons['base'])} ({(_cons['base'] / price_now - 1) * 100:+.0f}%)", False) if _cons.get('base') else '')
-                            + _mk(yr_l, '#94A3B8', f"52주 저 {_pfmt(yr_l)}", False) * (abs(_P(yr_l) - _P(_cons.get('base') or -1e18)) > 18)
-                            + _mk(yr_h, '#94A3B8', f"52주 고 {_pfmt(yr_h)}", False) * (abs(_P(yr_h) - _P(_cons.get('base') or -1e18)) > 18)
+                            + (_mk(yr_l, '#94A3B8', f"52주 저 {_pfmt(yr_l)}", False) if abs(float(_P(yr_l)) - float(_P(_cons.get('base') or -1e18))) > 18 else '')
+                            + (_mk(yr_h, '#94A3B8', f"52주 고 {_pfmt(yr_h)}", False) if abs(float(_P(yr_h)) - float(_P(_cons.get('base') or -1e18))) > 18 else '')
                             + "</div>")
                     _w = _vb.get('w_fy0')
                     _mult = [('PER TTM', _x(_vb.get('per_ttm')), f"최근 4분기 {_vb.get('ttm_label', '-')}"),
