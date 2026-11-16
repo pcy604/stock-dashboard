@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16i'
+VERSION = '2026-11-16j'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -579,9 +579,23 @@ def sec_data(live: bool = True) -> str:
             + '<div class="mn-src">전 항목 무료 공개 원천 · 각 표 하단에 출처 · 기준일 표기 · 예약 실행은 수 분~수십 분 지연 가능</div>' + past)
 
 
+def tg_icon_uri() -> str:
+    """assets/telegram.png(텔레그램 로고, 차니 제공 2026-11-16) → data URI. 없으면 빈 문자열."""
+    import base64
+    try:
+        return 'data:image/png;base64,' + base64.b64encode((ROOT / 'assets' / 'telegram.png').read_bytes()).decode()
+    except Exception:
+        return ''
+
+
+def tg_icon(px: int = 16) -> str:
+    u = tg_icon_uri()
+    return (f'<img src="{u}" alt="Telegram" style="width:{px}px;height:{px}px;vertical-align:-3px;margin-right:4px">' if u else '📲 ')
+
+
 def sec_bot() -> str:
     rows = [(f'<b style="color:var(--ink)">{_e(c)}</b>', _e(d)) for c, d in BOT_CMDS]
-    return (f'<div class="mn-lead">텔레그램 알림 봇 <a href="{BOT}" target="_blank" '
+    return (f'<div class="mn-lead">{tg_icon(18)}텔레그램 알림 봇 <a href="{BOT}" target="_blank" '
             f'style="color:var(--accent);font-weight:700;text-decoration:none">@buza_alarm_bot</a>(부자알람). '
             '종목 입력은 티커 · 6자리 코드 · 한글 종목명 지원.</div>'
             + _table(['명령', '하는 일'], rows, {1: 'v'})

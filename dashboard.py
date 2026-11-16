@@ -1166,7 +1166,7 @@ def _ob_go(name):
 _ob_cur = st.session_state.get('main_tab') or '🏠 종합'
 import ui_home as _UH
 import html as _html
-_UH_VER = '2026-11-16b'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
+_UH_VER = '2026-11-16c'                     # ui_home.VERSION 과 같아야 함(tests/test_ui_home_version)
 if getattr(_UH, 'VERSION', None) != _UH_VER:
     import importlib as _il
     _UH = _il.reload(_UH)
@@ -1191,6 +1191,8 @@ def _owner_seen() -> bool:
 with st.expander("📘 사용법",
                  expanded=_first_visit and not IS_MOBILE and not _owner_seen()
                  and not (st.query_params.get('sym') or st.query_params.get('watch'))):   # 봇 링크로 온 사람은 바로 종목 화면
+  with st.container(key='mn_tabs'):                         # 2026-11-16 — 텔레그램 탭 로고 CSS 의 기준점
+    st.html(_UH.tab_icon_css())
     _gts = st.tabs(["📌 개요"] + [lab for _sid, lab in _UH.SECTION_TABS])   # 2026-11-16 4차 — 설명서 하위 절을 상위로
     for _gt, (_sid, _lab) in zip(_gts[1:], _UH.SECTION_TABS):
         with _gt:

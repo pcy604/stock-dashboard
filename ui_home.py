@@ -18,7 +18,7 @@ import streamlit as st
 
 # dashboard.py 가 이 값과 다르면 importlib.reload — 클라우드가 옛 모듈을 메모리에 들고 있던 사고(2026-11-12 배포 화면
 # 'module ui_home has no attribute account') 재발 방지. 이 파일을 고치면 반드시 올린다.
-VERSION = '2026-11-16b'
+VERSION = '2026-11-16c'
 
 CSS = """
 <style>
@@ -826,7 +826,7 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
 # 문구·규칙 값·갱신 시각은 전부 manual.py 한 곳에서 온다(화면과 PDF 가 같은 원천). 여기는 그리기만.
 import manual as MN
 
-_MN_VER = '2026-11-16i'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
+_MN_VER = '2026-11-16j'                     # manual.VERSION 과 같아야 함(tests/test_manual) — 클라우드 옛 모듈 재적재
 if getattr(MN, 'VERSION', None) != _MN_VER:
     import importlib as _il
     MN = _il.reload(MN)
@@ -849,7 +849,7 @@ _TOUR_CSS = """<style>
 
 
 def _bot_link() -> str:
-    return (f'📲 텔레그램 <a href="{MN.BOT}" target="_blank" style="color:var(--accent);font-weight:650;text-decoration:none">'
+    return (f'{MN.tg_icon(15)}텔레그램 <a href="{MN.BOT}" target="_blank" style="color:var(--accent);font-weight:650;text-decoration:none">'
             '@buza_alarm_bot</a> — 장 마감 시황 · 관심 종목 공시 알림')
 
 
@@ -873,7 +873,17 @@ def routines_panel():
 
 
 # 사용법 상위 탭(2026-11-16 4차) — '전체 설명서' 탭을 없애고 하위 절을 상위로 올렸다. 개요 = 카드 + 운용 루틴 + PDF.
-SECTION_TABS = [('rules', '📐 실전 규칙'), ('data', '🗄️ 데이터'), ('bot', '📲 텔레그램 봇')]
+SECTION_TABS = [('rules', '📐 실전 규칙'), ('data', '🗄️ 데이터'), ('bot', '텔레그램 봇')]   # 봇 탭 아이콘 = 로고(tab_icon_css)
+
+
+def tab_icon_css() -> str:
+    """사용법 상위 탭 4번째(텔레그램 봇) 이름 앞에 공식 로고 — 탭 이름은 글자만 받으므로 CSS 로 붙인다."""
+    u = MN.tg_icon_uri()
+    if not u:
+        return ''
+    return ('<style>.st-key-mn_tabs [data-baseweb="tab-list"] > button[role="tab"]:nth-of-type(4) [data-testid="stMarkdownContainer"] p::before'
+            '{content:"";display:inline-block;width:15px;height:15px;margin-right:6px;vertical-align:-2px;'
+            f'background:url("{u}") center / contain no-repeat;}}</style>')
 
 
 def section_panel(sid: str):
