@@ -144,7 +144,7 @@ def kr():
     from tools.kr_filing_dates import known as _known
     q["known"], _real = _known(q.sym, q.year, q.q)
     print(f"[KR] 재무 공시일: 실제 제출일 {_real.mean():.0%} · 가정 {1 - _real.mean():.0%}", flush=True)
-    q = q.sort_values(["sym", "end"])
+    q = kr_quarterize(q)
     g = q.groupby("sym")
     for k in ("revenue", "op_income", "net_income"):
         q[f"ttm_{k}"] = g[k].transform(lambda s: s.rolling(4, min_periods=4).sum())
@@ -156,6 +156,7 @@ def kr():
     q["oi_g"] = kr_oi_g(q)                     # 2026-11-08: 이익 개선폭(%p of 매출) — 적자 축소·흑자전환·급증
     q["opm"] = (q.ttm_op_income / q.ttm_revenue * 100).where(q.ttm_revenue > 0)
     q["debt"] = (q.liabilities / q.equity * 100).where(q.equity > 0)
+    q = q[q._orig & q.known.notna()]
     q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn", "acc", "oi_g", "opm", "debt"]].sort_values("known")
     w = w.sort_values("date")
     w = pd.merge_asof(w, q, left_on="date", right_on="known", by="sym", direction="backward")
@@ -175,7 +176,29 @@ def kr():
     return _f32(w)
 
 
-KR_MIN_QREV = 1e10     # 분기 매출 100억원 — 이 아래는 이익가속이 발산(미국 $10M 과 같은 취지)
+def kr_quarterize(q: pd.DataFrame) -> pd.DataFrame:
+    """2026-11-16 패널 정합 — 두 가지를 고친다(v1.9 한국 백테스트가 둘 다에 걸려 있었다).
+    ① 파일의 q=4 는 **연간 합계**다(dashboard·leader_anatomy 는 변환하는데 패널만 안 했다) → 손익 3열을 연간 − (1~3Q) 로.
+       1~3Q 가 하나라도 없으면 빈값. 잔액(자산·부채·자본)은 기말이라 그대로.
+    ② shift(4)·rolling(4) 는 '행 4개 전'이라 분기가 빠진 종목은 엉뚱한 분기와 비교했다(행의 5~13%).
+       → 종목마다 분기를 빈칸 없이 펼친 뒤 계산하고, 원래 없던 분기는 마지막에 빼도록 _real 표시."""
+    q = q.copy()
+    flow = [c for c in ("revenue", "op_income", "net_income") if c in q.columns]
+    s3 = q[q.q < 4].groupby(["sym", "year"])[flow].agg(["sum", "count"])
+    m = q.q == 4
+    k = pd.MultiIndex.from_arrays([q.loc[m, "sym"], q.loc[m, "year"]])
+    for c in flow:
+        sm_, ct_ = s3[(c, "sum")].reindex(k).values, s3[(c, "count")].reindex(k).values
+        q.loc[m, c] = np.where(ct_ == 3, q.loc[m, c].values - sm_, np.nan)
+    q["pi"] = q.year.astype(int) * 4 + q.q.astype(int) - 1
+    rng = q.groupby("sym").pi.agg(["min", "max"])
+    full = pd.DataFrame([(s, p) for s, a, b in zip(rng.index, rng["min"], rng["max"]) for p in range(a, b + 1)], columns=["sym", "pi"])
+    q = full.merge(q.assign(_orig=True), on=["sym", "pi"], how="left")
+    q["_orig"] = q["_orig"].eq(True)
+    return q.sort_values(["sym", "pi"]).reset_index(drop=True)
+
+
+KR_MIN_QREV = 1e10    # 분기 매출 100억원 — 이 아래는 이익가속이 발산(미국 $10M 과 같은 취지)
 MAX_OIA = 10.0
 
 
