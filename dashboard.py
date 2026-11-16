@@ -313,6 +313,11 @@ div[data-testid="stSlider"] { padding-top: 0 !important; padding-bottom: 0.1rem 
 [data-testid="stDateInput"] input, [data-testid="stTextInput"] input { min-height: 32px !important; font-size: 13px !important; }
 [data-testid="stHeadingWithActionElements"] h3, [data-testid="stHeading"] h3 { font-size: 19px !important; margin: 0.2rem 0 0 !important; }
 hr { margin: 0.6rem 0 !important; }
+/* 2026-11-16 검색 줄 — 제목·입력칸·버튼·탭 칩을 같은 높이(38px)·같은 중심선에 */
+[data-testid="stForm"] { padding: 0 !important; border: 0 !important; }
+[data-testid="stFormSubmitButton"] button { min-height: 38px !important; height: 38px !important; padding: 0 14px !important; }
+[data-testid="stTextInput"] input { min-height: 38px !important; height: 38px !important; }
+.an-title { font-size: 22px; font-weight: 700; line-height: 38px; margin: 0; white-space: nowrap; }
 [data-testid="stExpander"] details { padding: 0 !important;
   border: 1px solid var(--line) !important; border-radius: 6px !important; }
 [data-testid="stExpander"] summary { font-weight: 560 !important; }
@@ -6051,10 +6056,20 @@ def _an_v2_fill(L: dict):
     try:
         vd = snap['verdict']
         with L['_V2C']:
-            st.markdown(f"#### 🧭 결론 — {vd['head']} &nbsp;<span style='font-size:.8em;color:#6B7280'>🪪 {vd['type_chip']}</span>",
+            # 2026-11-16 — 결론은 탭 제목(20px)보다 커야 한다(차니) → 24px · 유형 칩은 옆 작은 배지
+            st.markdown(f"<div style='font-size:24px;font-weight:800;line-height:1.35;margin:6px 0 8px'>🧭 결론 — "
+                        f"{_html.escape(vd['head'])} <span style='font-size:13px;font-weight:600;color:#475569;background:#EEF2F6;"
+                        f"padding:2px 8px;border-radius:6px;vertical-align:middle'>유형 · {_html.escape(vd['type_chip'])}</span></div>",
                         unsafe_allow_html=True)
             st.markdown(_FC.CSS + _FC.cards_html(vd['cards']), unsafe_allow_html=True)
             rl = vd.get('rules')
+            if vd.get('criteria'):
+                with st.expander("판정 기준 — 항목별 선택지와 이 종목의 위치", expanded=False):
+                    _rows = []
+                    for c_ in vd['criteria']:
+                        _ops = ' / '.join((f"<b style='color:#111827'>▶ {o}</b>" if o == c_['now'] else o) + f" ({r})" for o, r in c_['opts'])
+                        _rows.append(f"- **{c_['axis']} → {c_['now']}** — {c_.get('why') or ''}  \n  <span style='font-size:12.5px;color:#6B7280'>{_ops}</span>")
+                    st.markdown('\n'.join(_rows), unsafe_allow_html=True)
             st.caption("각 카드 = 아래 탭 첫 카드의 대표값 · 실선 = 지나온 흐름 · 점선 = 컨센서스 · 규칙 계산, 투자 권유 아님"
                        + (f" · 실전 규칙 {rl['pass']}/{rl['total']} 통과(봇: {rl['bot']})" if (L.get('_IS_LAB') and rl) else ''))
     except Exception as e:
@@ -6068,15 +6083,15 @@ def _tab_analysis():
     _tui.begin_run(st)       # 표 필터 키 순번을 프래그먼트 실행마다 0부터 — 키가 바뀌면 필터가 풀린다
     with guard('종목 분석'):
         # 2026-11-16 — 한 줄: 제목 · 검색창 · 분석 버튼 · 탭 선택(펀더멘탈·밸류에이션·히스토리·수급)
-        _h1, _h2, _h3 = st.columns([1.15, 2.6, 3.6], vertical_alignment='center')
-        _h1.markdown("### 🔍 종목 분석")
+        _h1, _h2, _h3 = st.columns([1.0, 2.7, 3.3], vertical_alignment='center', gap='small')
+        _h1.markdown("<div class='an-title'>🔍 종목 분석</div>", unsafe_allow_html=True)
         st.session_state['_an_ax_slot'] = _h3
 
         # 2026-10-15 — 모바일에서 검색이 안 되던 문제. 키보드의 '이동/검색'(Enter)은 입력칸만
         #   반영하고 '분석' 버튼은 안 눌린 상태라 아무 일도 없었다. 폼으로 묶어 Enter 도 제출로 친다
         #   (폼 안에서는 입력 중 재실행이 없어, iOS 에서 첫 탭이 입력칸 반영에 먹히는 일도 없다).
         with _h2.form("sym8_form", border=False, enter_to_submit=True):
-            c_in, c_btn = st.columns([3, 1])
+            c_in, c_btn = st.columns([4.2, 1], gap='small', vertical_alignment='center')
             with c_in:
                 sym8 = st.text_input("종목명 또는 코드", placeholder="ex) KR : 005930 삼성전자 | US : AAPL",
                                      label_visibility="collapsed", key="sym8")
@@ -8434,7 +8449,7 @@ def _tab_analysis():
                         _HID_PH.empty()
 
         else:
-            st.caption("예: TSLA · NVDA · 005930(삼성전자) · 000660(SK하이닉스)")
+            pass        # 2026-11-16 예시 문구 삭제(검색창 안내로 충분)
 
 
 with tab7, guard('종목 분석'):
@@ -9194,8 +9209,7 @@ else:
         if (_ka_n or _st_n) and _IS_LAB:           # 2026-11-14 운영 점검은 소유자만(고객 화면에 내부 점검 문구 노출 X)
             st.caption(f"🔴 운영 점검 — 정답 점검 틀림 {_ka_n}건 · 갱신 정지 {_st_n}건. "
                        "자세히는 주소 끝에 `?diag=admin`.")
-st.caption("출처: DART·SEC EDGAR(공식 재무) · FinanceDataReader/KRX(가격) · "
-           "FRED(매크로) · 네이버금융·yfinance(컨센서스, 참고)")
+# 2026-11-16 — 사이트 공통 '출처' 줄 삭제(차니: 코멘트는 제자리로). 출처는 표마다 · 전체 목록은 📘 사용법 > 🗄️ 데이터.
 
 
 # ── 📰 시황 리포트 + 챗봇 (2026-10-14) ─────────────────────────────────
@@ -9773,7 +9787,10 @@ if tab_gov is not None:
 # 탭마다 따로 두지 않는다(모든 탭 같은 UI). 문구를 바꾸면 buza-bot 의 DISCLAIMER 와 같이 바꾼다.
 DISCLAIMER_VER = 1
 st.divider()
-st.caption(
+# 2026-11-16 — 한 줄 요약만 펼쳐 두고 전문은 접기(차니: 탭 내용보다 고지가 더 커 보였다). 문구 원문은 그대로 유지.
+st.caption("ⓘ 정보 도구이며 투자 권유가 아닙니다 · 가격은 15분 이상 지연될 수 있습니다 · 과거 성과는 미래를 보장하지 않습니다.")
+with st.expander("이용 안내 전문 (데이터 지연 · 백테스트·목표가 · 이해상충)", expanded=False):
+  st.caption(
     "**ⓘ 이용 안내** · 이 사이트는 공개 데이터와 정해진 규칙으로 계산한 결과, AI 요약을 보여주는 "
     "**정보 도구이며 투자 권유가 아닙니다.** 모든 투자 판단과 책임은 이용자 본인에게 있습니다.\n\n"
     "**데이터 지연** · 한국 시장 요약은 평일 15:50(KST) 장 마감 기준, 미국·신호·점수는 매일 06:00 갱신되는 **전일 종가 기준**입니다. "

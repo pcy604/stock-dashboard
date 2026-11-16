@@ -53,7 +53,7 @@ def test_no_error_box(app):
 def test_reached_last_line(app):
     """푸터(스크립트 마지막 블록)가 그려졌다 = 끝까지 실행됐다."""
     texts = [c.value for c in app.caption] + [m.value for m in app.markdown]
-    assert any('출처: DART' in (t or '') for t in texts), '푸터 미도달 — 중간에서 죽었다'
+    assert any('배포 빌드' in (t or '') for t in texts), '푸터 미도달 — 중간에서 죽었다'   # 2026-11-16 공통 출처 줄 삭제 → 마지막 줄 = 배포 빌드
 
 
 def test_tab_structure(app):

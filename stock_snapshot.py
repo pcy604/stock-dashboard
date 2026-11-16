@@ -187,8 +187,8 @@ def compute(L: dict, ctx: dict) -> dict:
         except Exception:
             pass
         # 2026-11-16 — '종목 단독 강세'가 '업종 안에서 1등'으로 읽혔다(실제: 업종은 하위, 종목 RS 만 높음). 두 축을 그대로 적는다.
-        g_hot = None if gpct is None else gpct >= 50
-        s_hot = None if rs is None else rs >= 70
+        g_hot = None if gpct is None else gpct <= 30        # flow_quadrant 와 같은 기준(업종 상위 30% · 종목 RS 80)
+        s_hot = None if rs is None else rs >= 80
         qshort = ('-' if g_hot is None or s_hot is None else
                   f"업종 {'강세' if g_hot else '약세'} · 종목 {'강세' if s_hot else '약세'}")
         cards = [
@@ -515,14 +515,41 @@ def compute(L: dict, ctx: dict) -> dict:
         # 2026-11-16 — 4축(펀더멘탈·밸류에이션·히스토리·수급) + 판단 철회 조건을 한 줄에. 탭과 같은 순서·같은 대표 카드.
         'cards': [C('🏭 펀더멘탈', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[f_t],
                     f"{fw} · {f0.get('value', '-')}", f_t, f0.get('spark'), f0.get('dir')),
-                  C('⚖️ 밸류에이션', {'good': '저평가', 'mid': '중립', 'bad': '고평가', 'na': '-'}[p_t],
-                    v0.get('value', '-'), p_t, v0.get('spark'), v0.get('dir')),
+                  C('⚖️ 밸류에이션', {'good': '저평가', 'mid': '중립', 'bad': '고평가', 'na': '판정 보류'}[p_t],
+                    v0.get('value', '-') + (f" · {(snap['blocks'].get('밸류에이션') or {}).get('reading') or ''}" if p_t == 'na' else ''),
+                    p_t, v0.get('spark'), v0.get('dir')),
                   C('📈 히스토리', {'good': '상승 추세', 'mid': '조정', 'bad': '하락 추세', 'na': '-'}[px_t],
                     p0.get('value', '-'), px_t, p0.get('spark'), p0.get('dir')),
                   C('🌊 수급', {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '-'}[s_t],
                     s0.get('value', '-'), s_t, s0.get('spark'), s0.get('dir'))]
                  + ([dict(snap['halt'], label='🛑 판단 철회 조건')] if snap.get('halt') else []),
         'rules': rules,
+        # 2026-11-16 — 축마다 '가능한 판정'과 기준, 이 종목이 어디에 해당하는지(차니: 선택지 설명이 어딘가 있어야)
+        'criteria': [
+            {'axis': '펀더멘탈', 'now': {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '판단 불가'}[f_t],
+             'why': fw,
+             'opts': [('개선', '내년 추정치 90일 상향 + 상향 건수 ≥ 하향 건수(추정치 없으면 사이클 위치·최근 분기 이익)'),
+                      ('엇갈림', '신호 혼재, 또는 사이클 기업 이익률 상위 20%(천장권 — 린치: 최대 이익에서 사면 반토막)'),
+                      ('악화', '내년 추정치 90일 −3% 이하 또는 하향 건수 > 상향 건수')]},
+            {'axis': '밸류에이션', 'now': {'good': '저평가', 'mid': '중립', 'bad': '고평가', 'na': '판정 보류'}[p_t],
+             'why': (snap['blocks'].get('밸류에이션') or {}).get('reading') or '',
+             'opts': [('저평가', 'PEG < 1 · 자기 밴드 25% 이하 · 업종 대비 0.8배 이하 중 찬성이 우세'),
+                      ('중립', '찬반 균형'),
+                      ('고평가', 'PEG > 2 · 자기 밴드 75% 이상 · 업종 대비 1.25배 이상 중 반대가 우세'),
+                      ('판정 보류', '사이클 기업(P/E 가 이익 천장에서 낮고 바닥에서 높음 — P/B·밴드 병행) 또는 데이터 없음')]},
+            {'axis': '히스토리', 'now': {'good': '상승 추세', 'mid': '조정', 'bad': '하락 추세', 'na': '판단 불가'}[px_t],
+             'why': p0.get('sub', ''),
+             'opts': [('상승 추세', '52주 고점 대비 −10% 이내 + 200일선 위'),
+                      ('조정', '그 사이'),
+                      ('하락 추세', '52주 고점 대비 −20% 이하 또는 200일선 아래')]},
+            {'axis': '수급·업종', 'now': {'good': '강함', 'mid': '보통', 'bad': '약함', 'na': '판단 불가'}[s_t],
+             'why': fl,
+             'opts': [('강함', '업종 온도 상위 30% + 종목 RS 80 이상(주도 업종의 주도주)'),
+                      ('보통', '둘 중 하나만 충족(업종 강세·종목 약세 / 업종 약세·종목 강세)'),
+                      ('약함', '둘 다 미충족')]},
+            {'axis': '판단 철회 조건', 'now': (snap.get('halt') or {}).get('value', '-'), 'why': (snap.get('halt') or {}).get('sub', ''),
+             'opts': [('해당 0개', '판단 유지'), ('1개 이상', '해당 조건이 규칙상 매도·신규 매수 중지·판단 재검토 신호')]},
+        ],
     }
     return snap
 
