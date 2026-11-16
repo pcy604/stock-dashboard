@@ -412,7 +412,7 @@ def compute(L: dict, ctx: dict) -> dict:
                         (f"업종 대비 {ratio:.2f}배" if ratio else '') + (f" · PEG {peg:.2f}" if peg else ''),
                         'na' if ratio is None else ('good' if ratio <= 0.8 else 'bad' if ratio >= 1.3 else 'mid')))
         tone['가격'] = v['tone']
-        snap['blocks']['밸류에이션'] = {'tone': v['tone'], 'cards': vcards, 'detail': [], 'error': None, 'reading': v.get('label')}
+        snap['blocks']['밸류에이션'] = {'tone': v['tone'], 'cards': vcards, 'detail': [], 'error': None, 'reading': v.get('value')}
     except Exception as e:
         pr = {}
         tone['가격'] = 'na'
@@ -516,7 +516,8 @@ def compute(L: dict, ctx: dict) -> dict:
         'cards': [C('🏭 펀더멘탈', {'good': '개선', 'mid': '엇갈림', 'bad': '악화', 'na': '-'}[f_t],
                     f"{fw} · {f0.get('value', '-')}", f_t, f0.get('spark'), f0.get('dir')),
                   C('⚖️ 밸류에이션', {'good': '저평가', 'mid': '중립', 'bad': '고평가', 'na': '판정 보류'}[p_t],
-                    v0.get('value', '-') + (f" · {(snap['blocks'].get('밸류에이션') or {}).get('reading') or ''}" if p_t == 'na' else ''),
+                    v0.get('value', '-') + (" · 사이클 기업 — P/E 해석 보류(P/B·밴드 병행)" if (p_t == 'na' and cyc.get('cyclical')) else
+                                            (" · 멀티플 자료 부족" if p_t == 'na' else '')),
                     p_t, v0.get('spark'), v0.get('dir')),
                   C('📈 히스토리', {'good': '상승 추세', 'mid': '조정', 'bad': '하락 추세', 'na': '-'}[px_t],
                     p0.get('value', '-'), px_t, p0.get('spark'), p0.get('dir')),

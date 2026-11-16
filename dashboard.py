@@ -317,6 +317,7 @@ hr { margin: 0.6rem 0 !important; }
 [data-testid="stForm"] { padding: 0 !important; border: 0 !important; }
 [data-testid="stFormSubmitButton"] button { min-height: 38px !important; height: 38px !important; padding: 0 14px !important; }
 [data-testid="stTextInput"] input { min-height: 38px !important; height: 38px !important; }
+[data-testid="stTextInput"] [data-baseweb="input"], [data-testid="stTextInput"] [data-baseweb="base-input"] { min-height: 38px !important; height: 38px !important; }
 .an-title { font-size: 22px; font-weight: 700; line-height: 38px; margin: 0; white-space: nowrap; }
 [data-testid="stExpander"] details { padding: 0 !important;
   border: 1px solid var(--line) !important; border-radius: 6px !important; }
