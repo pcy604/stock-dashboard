@@ -16,7 +16,7 @@
     "stop": 10720.0,
     "added": false,
     "adds": 0,
-    "last_px": 12730.0,
+    "last_px": 12840.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -29,7 +29,7 @@
     "stop": 6088.0,
     "added": false,
     "adds": 0,
-    "last_px": 7300.0,
+    "last_px": 7340.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -42,7 +42,7 @@
     "stop": 5720.0,
     "added": true,
     "adds": 1,
-    "last_px": 6170.0,
+    "last_px": 5860.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -55,7 +55,7 @@
     "stop": 8008.0,
     "added": false,
     "adds": 0,
-    "last_px": 8160.0,
+    "last_px": 7860.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -68,7 +68,7 @@
     "stop": 11336.0,
     "added": false,
     "adds": 0,
-    "last_px": 12460.0,
+    "last_px": 11850.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -81,7 +81,7 @@
     "stop": 5600.0,
     "added": true,
     "adds": 1,
-    "last_px": 6230.0,
+    "last_px": 6030.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -94,7 +94,7 @@
     "stop": 6632.0,
     "added": false,
     "adds": 0,
-    "last_px": 6770.0,
+    "last_px": 6740.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -107,7 +107,7 @@
     "stop": 5640.0,
     "added": false,
     "adds": 0,
-    "last_px": 6160.0,
+    "last_px": 5950.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -120,7 +120,7 @@
     "stop": 3668.0,
     "added": false,
     "adds": 0,
-    "last_px": 4400.0,
+    "last_px": 4140.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    }
@@ -150,10 +150,24 @@
   "446540-2026-11-09-ADD2",
   "2026-11-16-446540-STOP"
  ],
- "pending": {},
+ "pending": {
+  "2026-11-17-046890-STOP": {
+   "orderId": "_P5XdB18YiQ4f-sRhm5Fx2_lCLlqycDXh6_qzvn9fwEWH1vdy-Vx3-Ox_B0dsfkPOIgO3aJjibpKo8XDrX_V0g",
+   "o": {
+    "sym": "046890",
+    "name": "서울반도체",
+    "side": "SELL",
+    "quantity": 2,
+    "px": 7860.0,
+    "why": "손절: 2026-11-17 종가 7,860 ≤ 손절선 8,008(최고 10,010)",
+    "cid": "2026-11-17-046890-STOP"
+   },
+   "at": "2026-11-18"
+  }
+ },
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-17 09:10 KST",
+  "at": "2026-11-18 08:40 KST",
   "cash_krw": 73674.0,
   "holdings": [
    {
@@ -161,75 +175,86 @@
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 13030.0,
-    "pnl_pct": 17.169999999999998
+    "last_price": 12930.0,
+    "pnl_pct": 16.27
    },
    {
     "sym": "228850",
     "name": "레이언스",
     "qty": 3.0,
     "avg_cost": 7356.666666,
-    "last_price": 7330.0,
-    "pnl_pct": -0.36
+    "last_price": 7230.0,
+    "pnl_pct": -1.72
    },
    {
     "sym": "092190",
     "name": "서울바이오시스",
     "qty": 5.0,
     "avg_cost": 6556.0,
-    "last_price": 6010.0,
-    "pnl_pct": -8.32
+    "last_price": 5860.0,
+    "pnl_pct": -10.61
    },
    {
     "sym": "046890",
     "name": "서울반도체",
     "qty": 2.0,
     "avg_cost": 8960.0,
-    "last_price": 8040.0,
-    "pnl_pct": -10.26
+    "last_price": 8160.0,
+    "pnl_pct": -8.92
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 12140.0,
-    "pnl_pct": -8.03
+    "last_price": 11920.0,
+    "pnl_pct": -9.69
    },
    {
     "sym": "046970",
     "name": "우리로",
     "qty": 5.0,
     "avg_cost": 6364.0,
-    "last_price": 6170.0,
-    "pnl_pct": -3.04
+    "last_price": 6040.0,
+    "pnl_pct": -5.09
    },
    {
     "sym": "317400",
     "name": "자이에스앤디",
     "qty": 3.0,
     "avg_cost": 7566.666666,
-    "last_price": 6720.0,
-    "pnl_pct": -11.18
+    "last_price": 6750.0,
+    "pnl_pct": -10.79
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 6090.0,
-    "pnl_pct": -8.28
+    "last_price": 5960.0,
+    "pnl_pct": -10.24
    },
    {
     "sym": "024840",
     "name": "KBI메탈",
     "qty": 8.0,
     "avg_cost": 3400.0,
-    "last_price": 4290.0,
-    "pnl_pct": 26.169999999999998
+    "last_price": 4145.0,
+    "pnl_pct": 21.91
    }
   ],
-  "open_orders": [],
+  "open_orders": [
+   {
+    "orderId": "_P5XdB18YiQ4f-sRhm5Fx2_lCLlqycDXh6_qzvn9fwEWH1vdy-Vx3-Ox_B0dsfkPOIgO3aJjibpKo8XDrX_V0g",
+    "symbol": "046890",
+    "side": "SELL",
+    "orderType": "MARKET",
+    "price": null,
+    "quantity": "2",
+    "status": "PENDING",
+    "orderedAt": "2026-11-18T08:40:26.937+09:00"
+   }
+  ],
   "tx": [
    {
     "transactionTime": null,
