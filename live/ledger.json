@@ -5,7 +5,7 @@
   "deposits": []
  },
  "KR": {
-  "cash_krw": 33166.0,
+  "cash_krw": 69101.0,
   "positions": {
    "010170": {
     "name": "대한광통신",
@@ -30,19 +30,6 @@
     "added": false,
     "adds": 0,
     "last_px": 7300.0,
-    "opened": "2026-11-09",
-    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
-   },
-   "446540": {
-    "name": "메가터치",
-    "shares": 6.0,
-    "avg": 6190.0,
-    "first_px": 5690.0,
-    "peak": 7490.0,
-    "stop": 5992.0,
-    "added": true,
-    "adds": 2,
-    "last_px": 5990.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -160,122 +147,103 @@
   "446540-2026-11-09-ADD1",
   "092190-2026-11-09-ADD1",
   "046970-2026-11-09-ADD1",
-  "446540-2026-11-09-ADD2"
+  "446540-2026-11-09-ADD2",
+  "2026-11-16-446540-STOP"
  ],
- "pending": {
-  "2026-11-16-446540-STOP": {
-   "orderId": "q5tWFD19kzvyHv2o1-qpcnhUtGxOAlLcc9Ljzgimge1RXJ2WUmHnoSqP9-RoIz4pTtS8zBGBMpy4mPCO3RAEVg",
-   "o": {
-    "sym": "446540",
-    "name": "메가터치",
-    "side": "SELL",
-    "quantity": 6,
-    "px": 5990.0,
-    "why": "손절: 2026-11-16 종가 5,990 ≤ 손절선 5,992(최고 7,490)",
-    "cid": "2026-11-16-446540-STOP"
-   },
-   "at": "2026-11-17"
-  }
- },
+ "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-17 08:40 KST",
-  "cash_krw": 37810.0,
+  "at": "2026-11-17 09:10 KST",
+  "cash_krw": 73674.0,
   "holdings": [
    {
     "sym": "010170",
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 12910.0,
-    "pnl_pct": 16.09
+    "last_price": 13030.0,
+    "pnl_pct": 17.169999999999998
    },
    {
     "sym": "228850",
     "name": "레이언스",
     "qty": 3.0,
     "avg_cost": 7356.666666,
-    "last_price": 7350.0,
-    "pnl_pct": -0.09
-   },
-   {
-    "sym": "446540",
-    "name": "메가터치",
-    "qty": 6.0,
-    "avg_cost": 6190.0,
-    "last_price": 6600.0,
-    "pnl_pct": 6.619999999999999
+    "last_price": 7330.0,
+    "pnl_pct": -0.36
    },
    {
     "sym": "092190",
     "name": "서울바이오시스",
     "qty": 5.0,
     "avg_cost": 6556.0,
-    "last_price": 6170.0,
-    "pnl_pct": -5.88
+    "last_price": 6010.0,
+    "pnl_pct": -8.32
    },
    {
     "sym": "046890",
     "name": "서울반도체",
     "qty": 2.0,
     "avg_cost": 8960.0,
-    "last_price": 7960.0,
-    "pnl_pct": -11.16
+    "last_price": 8040.0,
+    "pnl_pct": -10.26
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 12480.0,
-    "pnl_pct": -5.45
+    "last_price": 12140.0,
+    "pnl_pct": -8.03
    },
    {
     "sym": "046970",
     "name": "우리로",
     "qty": 5.0,
     "avg_cost": 6364.0,
-    "last_price": 6300.0,
-    "pnl_pct": -1.0
+    "last_price": 6170.0,
+    "pnl_pct": -3.04
    },
    {
     "sym": "317400",
     "name": "자이에스앤디",
     "qty": 3.0,
     "avg_cost": 7566.666666,
-    "last_price": 6860.0,
-    "pnl_pct": -9.33
+    "last_price": 6720.0,
+    "pnl_pct": -11.18
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 6310.0,
-    "pnl_pct": -4.96
+    "last_price": 6090.0,
+    "pnl_pct": -8.28
    },
    {
     "sym": "024840",
     "name": "KBI메탈",
     "qty": 8.0,
     "avg_cost": 3400.0,
-    "last_price": 4280.0,
-    "pnl_pct": 25.88
+    "last_price": 4290.0,
+    "pnl_pct": 26.169999999999998
    }
   ],
-  "open_orders": [
-   {
-    "orderId": "q5tWFD19kzvyHv2o1-qpcnhUtGxOAlLcc9Ljzgimge1RXJ2WUmHnoSqP9-RoIz4pTtS8zBGBMpy4mPCO3RAEVg",
-    "symbol": "446540",
-    "side": "SELL",
-    "orderType": "MARKET",
-    "price": null,
-    "quantity": "6",
-    "status": "PENDING",
-    "orderedAt": "2026-11-17T08:40:25.059+09:00"
-   }
-  ],
+  "open_orders": [],
   "tx": [
+   {
+    "transactionTime": null,
+    "transactionType": "SELL",
+    "symbol": "446540",
+    "quantity": "6",
+    "filledPrice": null,
+    "amount": "35940",
+    "commission": "5",
+    "tax": "71",
+    "settled": false,
+    "settlementDate": "2026-11-19",
+    "isCancellation": false
+   },
    {
     "transactionTime": "2026-11-16T00:07:27.289+09:00",
     "transactionType": "BUY",
@@ -602,5 +570,8 @@
     "isCancellation": false
    }
   ]
+ },
+ "cooldown": {
+  "446540": "2026-11-17"
  }
 }
