@@ -5,7 +5,7 @@
   "deposits": []
  },
  "KR": {
-  "cash_krw": 69101.0,
+  "cash_krw": 85299.0,
   "positions": {
    "010170": {
     "name": "대한광통신",
@@ -43,19 +43,6 @@
     "added": true,
     "adds": 1,
     "last_px": 5860.0,
-    "opened": "2026-11-09",
-    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
-   },
-   "046890": {
-    "name": "서울반도체",
-    "shares": 2,
-    "avg": 8960.0,
-    "first_px": 8960.0,
-    "peak": 10010.0,
-    "stop": 8008.0,
-    "added": false,
-    "adds": 0,
-    "last_px": 7860.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -148,35 +135,22 @@
   "092190-2026-11-09-ADD1",
   "046970-2026-11-09-ADD1",
   "446540-2026-11-09-ADD2",
-  "2026-11-16-446540-STOP"
+  "2026-11-16-446540-STOP",
+  "2026-11-17-046890-STOP"
  ],
- "pending": {
-  "2026-11-17-046890-STOP": {
-   "orderId": "_P5XdB18YiQ4f-sRhm5Fx2_lCLlqycDXh6_qzvn9fwEWH1vdy-Vx3-Ox_B0dsfkPOIgO3aJjibpKo8XDrX_V0g",
-   "o": {
-    "sym": "046890",
-    "name": "서울반도체",
-    "side": "SELL",
-    "quantity": 2,
-    "px": 7860.0,
-    "why": "손절: 2026-11-17 종가 7,860 ≤ 손절선 8,008(최고 10,010)",
-    "cid": "2026-11-17-046890-STOP"
-   },
-   "at": "2026-11-18"
-  }
- },
+ "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-18 08:40 KST",
-  "cash_krw": 73674.0,
+  "at": "2026-11-18 09:10 KST",
+  "cash_krw": 89840.0,
   "holdings": [
    {
     "sym": "010170",
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 12930.0,
-    "pnl_pct": 16.27
+    "last_price": 13540.0,
+    "pnl_pct": 21.759999999999998
    },
    {
     "sym": "228850",
@@ -191,71 +165,65 @@
     "name": "서울바이오시스",
     "qty": 5.0,
     "avg_cost": 6556.0,
-    "last_price": 5860.0,
-    "pnl_pct": -10.61
-   },
-   {
-    "sym": "046890",
-    "name": "서울반도체",
-    "qty": 2.0,
-    "avg_cost": 8960.0,
-    "last_price": 8160.0,
-    "pnl_pct": -8.92
+    "last_price": 6000.0,
+    "pnl_pct": -8.48
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 11920.0,
-    "pnl_pct": -9.69
+    "last_price": 12880.0,
+    "pnl_pct": -2.42
    },
    {
     "sym": "046970",
     "name": "우리로",
     "qty": 5.0,
     "avg_cost": 6364.0,
-    "last_price": 6040.0,
-    "pnl_pct": -5.09
+    "last_price": 6270.0,
+    "pnl_pct": -1.47
    },
    {
     "sym": "317400",
     "name": "자이에스앤디",
     "qty": 3.0,
     "avg_cost": 7566.666666,
-    "last_price": 6750.0,
-    "pnl_pct": -10.79
+    "last_price": 6970.0,
+    "pnl_pct": -7.88
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 5960.0,
-    "pnl_pct": -10.24
+    "last_price": 6090.0,
+    "pnl_pct": -8.28
    },
    {
     "sym": "024840",
     "name": "KBI메탈",
     "qty": 8.0,
     "avg_cost": 3400.0,
-    "last_price": 4145.0,
-    "pnl_pct": 21.91
+    "last_price": 4290.0,
+    "pnl_pct": 26.169999999999998
    }
   ],
-  "open_orders": [
-   {
-    "orderId": "_P5XdB18YiQ4f-sRhm5Fx2_lCLlqycDXh6_qzvn9fwEWH1vdy-Vx3-Ox_B0dsfkPOIgO3aJjibpKo8XDrX_V0g",
-    "symbol": "046890",
-    "side": "SELL",
-    "orderType": "MARKET",
-    "price": null,
-    "quantity": "2",
-    "status": "PENDING",
-    "orderedAt": "2026-11-18T08:40:26.937+09:00"
-   }
-  ],
+  "open_orders": [],
   "tx": [
+   {
+    "transactionTime": null,
+    "transactionType": "SELL",
+    "symbol": "046890",
+    "quantity": "2",
+    "filledPrice": null,
+    "amount": "16200",
+    "commission": "2",
+    "tax": "32",
+    "settled": false,
+    "settlementDate": "2026-11-20",
+    "isCancellation": false
+   },
    {
     "transactionTime": null,
     "transactionType": "SELL",
@@ -597,6 +565,7 @@
   ]
  },
  "cooldown": {
-  "446540": "2026-11-17"
+  "446540": "2026-11-17",
+  "046890": "2026-11-18"
  }
 }
