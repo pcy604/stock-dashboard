@@ -16,7 +16,7 @@
     "stop": 10720.0,
     "added": false,
     "adds": 0,
-    "last_px": 12840.0,
+    "last_px": 13390.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -29,7 +29,7 @@
     "stop": 6088.0,
     "added": false,
     "adds": 0,
-    "last_px": 7340.0,
+    "last_px": 7250.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -42,7 +42,7 @@
     "stop": 5720.0,
     "added": true,
     "adds": 1,
-    "last_px": 5860.0,
+    "last_px": 6050.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -55,7 +55,7 @@
     "stop": 11336.0,
     "added": false,
     "adds": 0,
-    "last_px": 11850.0,
+    "last_px": 12860.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -68,7 +68,7 @@
     "stop": 5600.0,
     "added": true,
     "adds": 1,
-    "last_px": 6030.0,
+    "last_px": 6150.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -81,7 +81,7 @@
     "stop": 6632.0,
     "added": false,
     "adds": 0,
-    "last_px": 6740.0,
+    "last_px": 6760.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -94,7 +94,7 @@
     "stop": 5640.0,
     "added": false,
     "adds": 0,
-    "last_px": 5950.0,
+    "last_px": 6520.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -107,7 +107,7 @@
     "stop": 3668.0,
     "added": false,
     "adds": 0,
-    "last_px": 4140.0,
+    "last_px": 4075.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    }
@@ -141,7 +141,7 @@
  "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-18 09:10 KST",
+  "at": "2026-11-19 08:40 KST",
   "cash_krw": 89840.0,
   "holdings": [
    {
@@ -149,64 +149,64 @@
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 13540.0,
-    "pnl_pct": 21.759999999999998
+    "last_price": 13390.0,
+    "pnl_pct": 20.41
    },
    {
     "sym": "228850",
     "name": "레이언스",
     "qty": 3.0,
     "avg_cost": 7356.666666,
-    "last_price": 7230.0,
-    "pnl_pct": -1.72
+    "last_price": 7250.0,
+    "pnl_pct": -1.44
    },
    {
     "sym": "092190",
     "name": "서울바이오시스",
     "qty": 5.0,
     "avg_cost": 6556.0,
-    "last_price": 6000.0,
-    "pnl_pct": -8.48
+    "last_price": 6050.0,
+    "pnl_pct": -7.71
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 12880.0,
-    "pnl_pct": -2.42
+    "last_price": 12860.0,
+    "pnl_pct": -2.5700000000000003
    },
    {
     "sym": "046970",
     "name": "우리로",
     "qty": 5.0,
     "avg_cost": 6364.0,
-    "last_price": 6270.0,
-    "pnl_pct": -1.47
+    "last_price": 6150.0,
+    "pnl_pct": -3.36
    },
    {
     "sym": "317400",
     "name": "자이에스앤디",
     "qty": 3.0,
     "avg_cost": 7566.666666,
-    "last_price": 6970.0,
-    "pnl_pct": -7.88
+    "last_price": 6760.0,
+    "pnl_pct": -10.66
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 6090.0,
-    "pnl_pct": -8.28
+    "last_price": 6520.0,
+    "pnl_pct": -1.7999999999999998
    },
    {
     "sym": "024840",
     "name": "KBI메탈",
     "qty": 8.0,
     "avg_cost": 3400.0,
-    "last_price": 4290.0,
-    "pnl_pct": 26.169999999999998
+    "last_price": 4075.0,
+    "pnl_pct": 19.85
    }
   ],
   "open_orders": [],
@@ -225,15 +225,15 @@
     "isCancellation": false
    },
    {
-    "transactionTime": null,
+    "transactionTime": "2026-11-19T00:06:45.222+09:00",
     "transactionType": "SELL",
     "symbol": "446540",
     "quantity": "6",
-    "filledPrice": null,
+    "filledPrice": "5990",
     "amount": "35940",
     "commission": "5",
     "tax": "71",
-    "settled": false,
+    "settled": true,
     "settlementDate": "2026-11-19",
     "isCancellation": false
    },
