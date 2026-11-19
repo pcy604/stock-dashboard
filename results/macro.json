@@ -1,54 +1,54 @@
 {
- "generated": "2026-11-18 03:24",
- "asof": "2026-11-17",
+ "generated": "2026-11-19 03:24",
+ "asof": "2026-11-18",
  "rule": "코어 = SPY 종가가 200일 이평 위면 보유, 아래면 현금 (원칙 v1.3 §3) · 위성은 시장 필터 없음 (§4)",
  "core": {
-  "on": true,
-  "close": 732.44,
-  "ma": 732.34,
-  "gap": 0.01,
-  "date": "2026-11-17",
-  "pos52": 68,
-  "mom12": 10.0
+  "on": false,
+  "close": 730.2,
+  "ma": 732.55,
+  "gap": -0.32,
+  "date": "2026-11-18",
+  "pos52": 67,
+  "mom12": 10.6
  },
  "kr_core": {
   "on": false,
-  "close": 4968.48,
-  "ma": 6523.99,
-  "gap": -23.84,
-  "date": "2026-11-17",
-  "pos52": 21,
-  "mom12": 23.4
+  "close": 5067.44,
+  "ma": 6524.57,
+  "gap": -22.33,
+  "date": "2026-11-18",
+  "pos52": 23,
+  "mom12": 28.2
  },
  "alloc": {
   "core": 50,
   "satellite": 30,
   "buffer": 20,
-  "core_now": 50,
-  "cash_total": 20
+  "core_now": 0,
+  "cash_total": 70
  },
  "canslim_m": {
-  "US": "상승추세 ✅ (200일선 +0.0%)",
-  "KR": "하락추세 ⚠️ (200일선 -23.8%)"
+  "US": "하락추세 ⚠️ (200일선 -0.3%)",
+  "KR": "하락추세 ⚠️ (200일선 -22.3%)"
  },
  "phase": {
   "key": "EARN",
   "name": "실적장세",
   "emoji": "☀️",
-  "conf": 3,
+  "conf": 0,
   "rate_dir": "횡보",
   "growth": "개선",
   "ver": "v2",
   "months": 4,
   "since": "2026-08",
-  "pos": 52,
-  "stage": "중반",
+  "pos": 68,
+  "stage": "전환 대기",
   "next": "RFIN",
-  "next_n": 2,
+  "next_n": 3,
   "infl": "과열"
  },
  "greed": {
-  "word": "평소대로",
+  "word": "줄여라",
   "n": 1,
   "ref": {
    "C1": false,
@@ -165,8 +165,13 @@
    "date": "2026-11-17",
    "on": true,
    "gap": 0.01
+  },
+  {
+   "date": "2026-11-18",
+   "on": false,
+   "gap": -0.32
   }
  ],
- "changed": false,
+ "changed": true,
  "prev_on": true
 }
