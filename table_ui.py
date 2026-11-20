@@ -366,6 +366,34 @@ def _head_unit(name: str, col: pd.Series):
     return None
 
 
+_TIME_COL = re.compile(r'^(연도|연월|날짜|일자|관측일|기준일|매수일|매도일|체결.*|월|date|Date)(\(.*\))?$')
+
+
+def time_desc(df: pd.DataFrame) -> pd.DataFrame:
+    """B2 정렬 표준(2026-11-20) — 시계열 표는 최신이 위. 첫 데이터 열(No.·종목·코드·시총 다음)이 시간 열이고
+    오름차순이면 뒤집고 No. 를 다시 매긴다. 숫자로만 된 '연도' 문자열은 정수로(문자열은 정렬·필터를 깨뜨린다).
+    합계·평균 행이 섞여 단조가 아니면 건드리지 않는다."""
+    lead = {'No.', '종목', '코드'}
+    first = next((c for c in df.columns if c not in lead and not str(c).startswith('시총')), None)
+    if first is None or not _TIME_COL.match(str(first)) or len(df) < 3:
+        return df
+    s = df[first]
+    if s.dtype == object and s.dropna().astype(str).str.fullmatch(r'\d{4}').all():
+        df = df.copy()
+        df[first] = s = pd.to_numeric(s, errors='coerce').astype('Int64')
+    if s.dtype == object and not s.dropna().astype(str).str.match(r'\d{2,4}[-./년]').all():
+        return df                                           # '평균'·'합계' 같은 글자 행 → 날짜 열이 아님
+    try:
+        if s.isna().any() or not s.is_monotonic_increasing or s.is_monotonic_decreasing:
+            return df
+    except TypeError:
+        return df
+    df = df.iloc[::-1].reset_index(drop=True)
+    if 'No.' in df.columns:
+        df['No.'] = range(1, len(df) + 1)
+    return df
+
+
 def normalize(df: pd.DataFrame):
     """(새 df, 이름 변환표 old→new, 단위를 걷어낸 열 집합)."""
     df = df.copy()
@@ -1003,6 +1031,8 @@ def install(st):
 
             # 표 형식(행번호·좌측 열 순서·단위는 머리행) — 2026-10-19
             df, ren, conv = normalize(df)
+            if kw.pop('time_desc', True) and sty is None:      # Styler 는 행 위치에 서식이 묶여 있어 뒤집지 않는다
+                df = time_desc(df)
             # 2026-10-24 행 높이 하나로 — 표마다 25·31px 가 섞여 탭마다 표 밀도가 달랐다
             kw.pop('row_height', None)
             if sty is not None:

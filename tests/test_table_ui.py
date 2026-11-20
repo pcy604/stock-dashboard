@@ -150,3 +150,16 @@ def test_dashboard_requires_current_table_ui():
     src = (Path(__file__).resolve().parents[1] / 'dashboard.py').read_text(encoding='utf-8')
     req = int(re.search(r'^_TUI_REQ = (\d+)', src, re.M).group(1))
     assert req == T.API_VERSION
+
+
+def test_time_desc_latest_on_top():
+    """B2 정렬 표준 — 시계열 표는 최신이 위, '연도' 문자열은 정수로, 합계 행이 섞이면 그대로."""
+    import pandas as pd
+    import table_ui as T
+    d, _, _ = T.normalize(pd.DataFrame({'연도': ['2023', '2024', '2025'], '전략(%)': [1.0, 2.0, 3.0]}))
+    out = T.time_desc(d)
+    assert out['연도'].tolist() == [2025, 2024, 2023] and out['No.'].tolist() == [1, 2, 3] and out['전략(%)'].tolist() == [3.0, 2.0, 1.0]
+    d2, _, _ = T.normalize(pd.DataFrame({'연도': ['2023', '2024', '평균'], 'x': [1, 2, 3]}))
+    assert T.time_desc(d2)['연도'].tolist() == ['2023', '2024', '평균']
+    d3, _, _ = T.normalize(pd.DataFrame({'업종': ['A', 'B', 'C'], '연도': [1, 2, 3]}))
+    assert T.time_desc(d3)['업종'].tolist() == ['A', 'B', 'C']          # 첫 데이터 열이 시간 열이 아니면 그대로
