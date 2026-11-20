@@ -141,7 +141,7 @@
  "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-20 08:40 KST",
+  "at": "2026-11-20 09:10 KST",
   "cash_krw": 89840.0,
   "holdings": [
    {
@@ -149,8 +149,8 @@
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 14260.0,
-    "pnl_pct": 28.23
+    "last_price": 13960.0,
+    "pnl_pct": 25.53
    },
    {
     "sym": "228850",
@@ -165,48 +165,48 @@
     "name": "서울바이오시스",
     "qty": 5.0,
     "avg_cost": 6556.0,
-    "last_price": 6200.0,
-    "pnl_pct": -5.43
+    "last_price": 5890.0,
+    "pnl_pct": -10.15
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 13420.0,
-    "pnl_pct": 1.66
+    "last_price": 12910.0,
+    "pnl_pct": -2.19
    },
    {
     "sym": "046970",
     "name": "우리로",
     "qty": 5.0,
     "avg_cost": 6364.0,
-    "last_price": 6030.0,
-    "pnl_pct": -5.24
+    "last_price": 5690.0,
+    "pnl_pct": -10.59
    },
    {
     "sym": "317400",
     "name": "자이에스앤디",
     "qty": 3.0,
     "avg_cost": 7566.666666,
-    "last_price": 6840.0,
-    "pnl_pct": -9.6
+    "last_price": 6340.0,
+    "pnl_pct": -16.21
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 6510.0,
-    "pnl_pct": -1.95
+    "last_price": 6150.0,
+    "pnl_pct": -7.37
    },
    {
     "sym": "024840",
     "name": "KBI메탈",
     "qty": 8.0,
     "avg_cost": 3400.0,
-    "last_price": 4050.0,
-    "pnl_pct": 19.11
+    "last_price": 3790.0,
+    "pnl_pct": 11.469999999999999
    }
   ],
   "open_orders": [],
