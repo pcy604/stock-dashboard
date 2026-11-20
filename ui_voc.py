@@ -5,10 +5,33 @@
 소유자 화면에서 '진행' 으로 바꾼 건은 개발 작업 목록이 된다(경영실 이슈와 별개 — 사용자 목소리 원문 보관용).
 """
 import pandas as pd
+import streamlit.components.v1 as components
 
 import voc_store as V
 
-VERSION = '2026-11-20a'
+VERSION = '2026-11-20b'   # b: 이미지 첨부 · Ctrl+V 붙여넣기
+
+# 캡처 → Ctrl+V: 화면 어디서 붙여도 클립보드 이미지를 첨부칸(.st-key-voc_img)의 파일 입력에 넣는다.
+# components.html 은 같은 출처 iframe 이라 부모 문서에 붙을 수 있다. 리스너는 창당 한 번만(재실행마다 쌓이지 않게).
+# 이미지가 없는 붙여넣기(글자)는 건드리지 않는다.
+_PASTE_JS = """<script>
+(function(){
+  const w = window.parent, d = w.document;
+  if (w.__vocPaste) return; w.__vocPaste = true;
+  d.addEventListener('paste', function(e){
+    const inp = d.querySelector('.st-key-voc_img input[type=file]');
+    if (!inp || !e.clipboardData) return;
+    const files = [...e.clipboardData.items].filter(i => i.kind === 'file' && i.type.startsWith('image/')).map(i => i.getAsFile());
+    if (!files.length) return;
+    e.preventDefault();
+    const dt = new DataTransfer();
+    const ts = new Date().toISOString().slice(11,19).replace(/:/g,'');
+    files.forEach((f, n) => dt.items.add(new File([f], `capture_${ts}_${n+1}.png`, {type: f.type || 'image/png'})));
+    inp.files = dt.files;
+    inp.dispatchEvent(new Event('change', {bubbles: true}));
+  }, true);
+})();
+</script>"""
 
 
 def render(st, areas: list, is_owner: bool, uid: str):
@@ -25,14 +48,20 @@ def render(st, areas: list, is_owner: bool, uid: str):
         title = st.text_input('제목', max_chars=V.MAX_TITLE, placeholder='예) 종목 발굴 표에 배당수익률 열 추가')
         body = st.text_area('내용 (선택)', max_chars=V.MAX_BODY, height=100,
                             placeholder='어떤 화면에서 · 무엇이 · 어떻게 되면 좋겠는지. 버그면 재현 순서.')
+        imgs = st.file_uploader(f'이미지 첨부 — 캡처 후 이 화면에서 Ctrl+V (최대 {V.MAX_IMG}장)', type=['png', 'jpg', 'jpeg', 'webp'],
+                                accept_multiple_files=True, key='voc_img')
+        st.caption('공개 게시판입니다 — 계좌번호·잔고·개인정보가 보이는 캡처는 가리고 올려 주십시오.')
         if st.form_submit_button('📨 보내기'):
             try:
-                V.submit(uid, display, area, kind, title, body)
+                V.clean(area, kind, title, body)                 # 이미지 올리기 전에 글 검증(헛업로드 방지)
+                urls = [V.upload(f.getvalue()) for f in (imgs or [])[:V.MAX_IMG]]
+                V.submit(uid, display, area, kind, title, body, images=urls)
                 st.success('접수했습니다. 아래 목록에서 상태를 확인할 수 있습니다.')
             except ValueError as e:
                 st.warning(str(e))
             except Exception as e:
                 st.error(f'접수 실패: {type(e).__name__}')
+    components.html(_PASTE_JS, height=0)
     try:
         rows = V.items()
     except Exception as e:
@@ -60,6 +89,10 @@ def render(st, areas: list, is_owner: bool, uid: str):
     st.markdown(f"**#{vid} {r['title']}** · {r['kind']} · {r['area']} · {r['status']} · {r['display'] or '익명'} · {r['등록일']}")
     if r.get('body'):
         st.markdown(f"> {r['body']}")
+    pics = [u for u in (r.get('images') if isinstance(r.get('images'), list) else []) if u]
+    if pics:
+        for col, u in zip(st.columns(V.MAX_IMG), pics):
+            col.image(u)
     if r.get('reply'):
         st.markdown(f"**답변** — {r['reply']}")
     voted = st.session_state.setdefault('voc_voted', set())

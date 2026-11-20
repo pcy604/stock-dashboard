@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-20a'
+VERSION = '2026-11-20b'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -73,6 +73,7 @@ CAPS = [
         ("위반 건수·등급 요약 · 텔레그램 알림 연동", 'k')]),
     ("💬 VOC", "기능 요청 · 개선 · 버그 제보", "", [
         ("영역·분류·제목·내용 접수 — 로그인 없이도 가능", 'k'),
+        ("화면 캡처 첨부 — Ctrl+V 붙여넣기 · 최대 3장", 'k'),
         ("처리 상태(접수 → 검토 → 진행 → 완료) · 운영 답변 공개 · 공감 수", 'g')]),
 ]
 
