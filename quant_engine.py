@@ -134,7 +134,9 @@ class Panel:
         for c in cols:                                  # 열 하나씩 채움 → 일시 메모리도 행렬 1개분(나중 행이 이김 = keep last)
             a = np.full((len(self.dates), len(self.syms)), np.nan, dtype='float32')
             a[ri, ci] = df[c].to_numpy(dtype='float32', na_value=np.nan)
-            self._base[c] = pd.DataFrame(a, index=self.dates, columns=self.syms)
+            if c in ('open', 'high', 'low'):            # 2026-11-20 거래정지 주(KRX 시가·고가·저가 0) → 빈값. 0 이면 저가 ≤ 스탑으로
+                a[a <= 0] = np.nan                      #   손절이 '가격 0'에 체결됐다(-100%, KR 39,830행) — 정지 중엔 못 팔고 재개 시가에 판다
+            self._base[c] =pd.DataFrame(a, index=self.dates, columns=self.syms)
         self._m = {}
         # 2026-11-12: 패널이 '한 번 하한을 넘은 종목'의 이후 행을 남기게 바뀌었다(research/quant_panel._keep_once_in).
         #   RS 백분위는 그 주 유니버스(시총 ≥ 하한) 안에서만 매긴다 — 화면·실전 RS(returns.json, 현재 시총 기준 목록)와 같은 분모.

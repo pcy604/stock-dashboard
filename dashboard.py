@@ -1369,13 +1369,14 @@ try:
 except Exception:
     _IS_LAB = os.environ.get('LAB_OPEN') == '1'
 # 2026-11-12 차니 — 🏛️ 경영실(KPI·로드맵·결정·이슈·회의록·변경 이력) 도 소유자만. 연구실과 같은 판정.
-_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🧭 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"] + (["🔬 연구실", "🏛️ 경영실"] if _IS_LAB else [])
+_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🧭 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오", "💬 VOC"] + (["🔬 연구실", "🏛️ 경영실"] if _IS_LAB else [])   # 2026-11-20 VOC(전원)
 if st.session_state.get('main_tab') == '🔎 종목 발굴':          # 2026-11-16 아이콘 변경 — 세션에 남은 옛 이름
     st.session_state['main_tab'] = '🧭 종목 발굴'
 _mt = st.tabs(key='main_tab', on_change='rerun', tabs=_MAIN_TABS)
 tab_home, tab4, tab_screen, tab7, tab_pf = _mt[:5]
-tab_lab = _mt[5] if _IS_LAB else None
-tab_gov = _mt[6] if _IS_LAB else None
+tab_voc = _mt[5]
+tab_lab = _mt[6] if _IS_LAB else None
+tab_gov = _mt[7] if _IS_LAB else None
 if _IS_LAB:
     with tab_lab:
         st.caption("🔬 **연구실 — 소유자만 보입니다.** 검증 중이거나 기각된 연구 · 퀀트 백테스트. 결론이 난 것만 다른 탭으로 옮깁니다.")
@@ -9820,6 +9821,17 @@ with tab_home, guard('종합 — 바로가기'):
     _n2.button("🔎 이번 주 매수 후보 보기", on_click=_goto_tab, args=("🧭 종목 발굴",), use_container_width=True, key='home_go_screen')
     _n3.button("🛡️ 내 보유 종목 점검", on_click=_goto_tab, args=("🛡️ 내 포트폴리오",), use_container_width=True, key='home_go_pf')
     _home_events()                                # 🗓️ 다가오는 일정 — 2026-11-15 맨 아래로(차니)
+
+
+# ── 💬 VOC (2026-11-20, 전원) — 기능 요청·버그 접수, 상태·답변 공개 ─────────
+with tab_voc, guard('VOC'):
+    _lazy(tab_voc)
+    import ui_voc as _UV
+    if getattr(_UV, 'VERSION', None) != '2026-11-20a':
+        import importlib as _il, voc_store as _VS
+        _il.reload(_VS); _UV = _il.reload(_UV)
+    import access as _accv
+    _UV.render(st, list(_MAIN_TABS[:5]), _IS_LAB, _accv.uid())
 
 
 # ── 🏛️ 경영실 (2026-11-12, 소유자만) — 열려 있을 때만 그린다 ─────────

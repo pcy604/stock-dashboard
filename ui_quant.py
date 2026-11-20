@@ -138,8 +138,13 @@ def _index_daily(name):
 
 @st.cache_data(ttl=3600, show_spinner=False, max_entries=4)
 def _run(m, spec_json):
-    spec = json.loads(spec_json)
-    P = _panel(m)
+    return run_raw(m, json.loads(spec_json))
+
+
+def run_raw(m, spec, P=None):
+    """캐시 없는 실행 — 🤖 자동 탐색(quant_search)이 수백 번 부른다(결과를 캐시에 피클하지 않게). P 를 주면 그 패널로."""
+    spec = json.loads(json.dumps(spec))      # 아래에서 spec['exposure'] 등을 고친다 — 호출자 dict 를 건드리지 않게(공유 dict 로 연속 실행하면 결과가 바뀌었다)
+    P = P if P is not None else _panel(m)
     pre = ''
     # 2026-11-05 — 한국 분기 재무(흑자전환·이익 증가율·PER) 첫해에는 전년 비교가 없어 신호가 없다(2026-11-16 백필로 2016~ → 2017-06~).
     #   그 전 구간을 넣으면 몇 년치 현금 대기가 연 수익률을 깎는다(실전 규칙 2015~ 20.3% = 실제론 2018-08 첫 매매).
@@ -806,6 +811,78 @@ def render(mkt_sel: str, tsrc):
         st.code(json.dumps(spec, ensure_ascii=False), language='json')
     st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 숫자가 부풀려집니다 — 다른 시작 연도·인접 값에서도 결과가 유지되는지 확인해 주십시오.')
     _strategy_box(m, spec, S, eq)
+    with st.expander('🤖 자동 탐색 — 조건을 하나씩 바꿔 가며 우수 전략 찾기 (과적합 판정 포함)'):
+        _auto(m, spec)
+
+
+_SPLIT = {'KR': '2022-07-01', 'US': '2021-01-04'}       # 학습/검증 경계 기본값 — 결과 보기 전에 고정(research/opt_search 와 같은 KR 경계)
+
+
+def _auto(m, spec):
+    """2026-11-20 차니 요구 6 — 사람이 하나씩 바꾸는 대신 전 조합을 돌리고, 학습에서 고른 것을 검증 구간에서 채점."""
+    import quant_search as QS
+    st.caption('지금 위에 설정된 전략을 출발점으로, 고른 축의 전 조합을 **학습 구간**에서 돌려 1등(수익÷낙폭)을 고르고 '
+               '**검증 구간**(빈 계좌에서 새로 시작)에서 4가지 기준으로 채점합니다. 고르는 법·기준은 고정 — 결과를 보고 바꾸지 않습니다.')
+    keys = st.pills('탐색할 축', list(QS.AXES), selection_mode='multi', default=['max_pos', 'trail', 'rs_min'],
+                    format_func=lambda k: QS.AXES[k][0], key=f'qs_ax|{m}') or []
+    axes = {}
+    cols = st.columns(max(1, min(4, len(keys)))) if keys else []
+    for i, k in enumerate(keys):
+        txt = cols[i % len(cols)].text_input(QS.AXES[k][0], ', '.join(str(v) for v in QS.AXES[k][1]), key=f'qs_v|{m}|{k}')
+        try:
+            vals = [float(x) for x in txt.replace(' ', '').split(',') if x != '']
+            axes[k] = sorted(set(int(v) if v.is_integer() and k != 'init' else v for v in vals))
+        except ValueError:
+            st.caption(f'`{QS.AXES[k][0]}: 숫자를 쉼표로 구분해 주십시오`')
+    c1, c2 = st.columns([1, 2])
+    split = str(c1.date_input('학습/검증 경계', pd.Timestamp(_SPLIT[m]), key=f'qs_split|{m}'))
+    n = len(QS.combos(axes)) if axes else 0
+    c2.caption(f'조합 **{n}개** · 예상 약 {n * 2 // 60 + 1}분 (상한 {QS.MAX_COMBOS}개) · 시작 {spec.get("start")} · 학습 ~{split} · 검증 {split}~')
+    if st.button('🤖 탐색 실행', disabled=not axes or n > QS.MAX_COMBOS, key=f'qs_go|{m}'):
+        bar = st.progress(0.0, '조합 계산 중…')
+        try:
+            P = _panel(m)
+            res = QS.search(spec, axes, lambda s: run_raw(m, s, P), split, idx=_IDX[m][0],
+                            progress=lambda f, t: bar.progress(f, f'조합 {t}'))
+            st.session_state[f'qs_res|{m}'] = (res, spec)
+        except Exception as e:
+            st.error(f'탐색 실패: {type(e).__name__}: {e}')
+        bar.empty()
+    got = st.session_state.get(f'qs_res|{m}')
+    if not got:
+        return
+    res, spec0 = got
+    v, df = res['verdict'], res['df']
+    sel = df.loc[v['pick']]
+    bt, be = res['base_tr'], res['base_te']
+    if v['passed']:
+        st.success(f"✅ 실전 후보 — 4개 기준 모두 통과 ({v['n']}개 조합 중 학습 1등)")
+    else:
+        st.warning(f"🟡 관찰 — {sum(c[1] for c in v['crit'])}/4 통과. 출발 전략을 바꿀 근거가 부족합니다 ({v['n']}개 조합 중 학습 1등 기준)")
+    for name, ok, why in v['crit']:
+        st.markdown(f"{'✅' if ok else '❌'} **{name}** — {why}")
+    extra = []
+    if v.get('dsr'):
+        extra.append(f"DSR {v['dsr']['dsr']:.2f}(시도 {v['dsr']['n_trials']}회 보정 후 샤프>0 확률 · 0.95+ 권장)")
+    if v.get('pbo'):
+        extra.append(f"PBO {v['pbo']['pbo']:.2f}(학습 1등이 검증 중앙 이하일 확률 · 0.5 이상이면 고르기가 운)")
+    if extra:
+        st.caption('다중 시도 보정 — ' + ' · '.join(extra))
+    if v.get('overfit_err'):
+        st.caption(f"`과적합 지표 계산 실패: {v['overfit_err']}`")
+    st.caption(f"출발 전략 — 학습 {bt['CAGR']:.1f}% / {bt['MDD']:.1f}% · 검증 {be['CAGR']:.1f}% / {be['MDD']:.1f}% · "
+               f"고른 조합 = " + ' · '.join(f"{QS.AXES[k][0].split('(')[0]} {sel[k]:g}" for k in res['axes']))
+    ren = {k: QS.AXES[k][0].split('(')[0] for k in res['axes']}
+    show = df.sort_values('학습_Calmar', ascending=False).head(30)
+    show = show[list(res['axes']) + ['학습_CAGR', '학습_MDD', '학습_Calmar', '검증_CAGR', '검증_MDD', '검증_Calmar', '검증_BM']]
+    show = show.rename(columns={**ren, '학습_CAGR': '학습 CAGR(%)', '학습_MDD': '학습 MDD(%)', '학습_Calmar': '학습 수익÷낙폭(배)',
+                                '검증_CAGR': '검증 CAGR(%)', '검증_MDD': '검증 MDD(%)', '검증_Calmar': '검증 수익÷낙폭(배)', '검증_BM': '검증 지수 CAGR(%)'})
+    st.dataframe(show.round(2), hide_index=True, src=f'quant_search.py · 패널 quant_panel_{m} (화면에서 계산) · 학습 수익÷낙폭 순 상위 30',
+                 asof=res['split'])
+    best = QS.apply(spec0, {k: sel[k] for k in res['axes']}, _IDX[m][0])
+    if st.button('↩ 고른 조합을 위 백테스트에 불러오기', key=f'qs_load|{m}'):
+        _load_spec(best)
+        st.rerun()
 
 
 # ── 💾 전략 저장 · 🌐 공개 게시판 (2026-11-16) ─────────────────────────────

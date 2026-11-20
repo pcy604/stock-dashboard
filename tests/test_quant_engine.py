@@ -98,3 +98,18 @@ def test_market_block_by_own_market():
     blk = Q.market_block(P, sm, {'KOSPI': up, 'KOSDAQ': down}, ma=5)
     assert not blk[:, 0].any()                 # 코스피 종목: 지수 상승 → 안 막음
     assert blk[4:, 1].all() and not blk[:4, 1].any()   # 코스닥 종목: 5주 쌓인 뒤부터 막음
+
+
+def test_halted_week_does_not_fill_stop_at_zero():
+    """2026-11-20 — KRX 거래정지 주는 시가·고가·저가가 0. 저가 0 ≤ 스탑 → '가격 0' 손절(-100%)이 나던 버그."""
+    d = pd.date_range('2020-01-06', periods=12, freq='W-MON')
+    px = [100.0] * 12
+    rows = [dict(sym='A', name='A', date=t, open=p, high=p, low=p, close=p, volume=1e6, marcap=1e10) for t, p in zip(d, px)]
+    for i in (5, 6):                                            # 정지 2주: 시가·고가·저가 0, 종가는 직전 값 유지
+        rows[i].update(open=0.0, high=0.0, low=0.0, volume=0)
+    for i in range(7, 12):                                      # 재개 후 90
+        rows[i].update(open=90.0, high=90.0, low=90.0, close=90.0)
+    P = Q.Panel(pd.DataFrame(rows))
+    r = Q.run(P, dict(BASE, exit=dict(stop=0, trail=[[0, 5]], signals=[])))
+    s = r['trades'][r['trades'].구분 == '매도']
+    assert len(s) == 1 and s.iloc[0].가격 == 90.0               # 재개 시가에 판다 — 0 이 아니다

@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-16l'
+VERSION = '2026-11-20a'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -71,6 +71,9 @@ CAPS = [
         ("보유 종목 입력 · 계정별 저장(구글 로그인)", 'k'),
         ("손절선(보유 중 고점 대비 −{stop}%) · 종목 비중 한도({cap}%) 위반 점검", 'g'),
         ("위반 건수·등급 요약 · 텔레그램 알림 연동", 'k')]),
+    ("💬 VOC", "기능 요청 · 개선 · 버그 제보", "", [
+        ("영역·분류·제목·내용 접수 — 로그인 없이도 가능", 'k'),
+        ("처리 상태(접수 → 검토 → 진행 → 완료) · 운영 답변 공개 · 공감 수", 'g')]),
 ]
 
 # 2026-11-16 4차: 짧은 주기 → 긴 주기(일간 → 주간 → 분기), 수시 항목은 마지막에 다른 상자(kind='o').
