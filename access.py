@@ -125,6 +125,16 @@ def track_session(tab: str | None):
         track('session_start')
         if _gov:
             _gov.log_usage(uid(), 'session_start', tab or '')
+            # 2026-11-15 유입 출처 — SNS 링크에 ?src=threads|instagram|x|naver|bot 를 붙여 보낸다.
+            # 어느 채널이 사람을 보내는지 첫 달부터 세기 위해서(usage_events.event='inbound', tab=src).
+            # ⚠️ 집계 하나 때문에 화면이 멈추면 안 된다 — query_params 는 스크립트 실행 문맥이
+            #    없으면(헤드리스·bare 모드) 던진다. 이 파일의 다른 집계와 같이 조용히 넘긴다.
+            try:
+                _src = str(st.query_params.get('src') or '').strip().lower()[:24]
+                if _src:
+                    _gov.log_usage(uid(), 'inbound', _src)
+            except Exception:
+                pass
     if tab and st.session_state.get('_trk_tab') != tab:
         st.session_state['_trk_tab'] = tab
         track('tab_view', tab=tab)
