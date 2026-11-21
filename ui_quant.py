@@ -387,6 +387,25 @@ def _unit(base, m):
     return u
 
 
+@st.cache_data(ttl=3600 * 12, show_spinner=False)
+def _avail(m):
+    """2026-11-22 0값 버그 원인 — 화면에 있는 지표인데 그 시장 패널에 값이 없는 것(전부 빈값 → 조건 전부 거짓 → 매매 0건).
+    실측(11-22): 미국 PBR·ROE·부채비율·이익 개선폭 0% · 한국 이익 개선폭·매출총이익률·매출 QoQ 0%, 한국 PBR·ROE·부채비율은 2021-04~.
+    반환 {기본 필드: (값 있는 비율 %, 첫 값 'YYYY-MM' 또는 None)} — 체크박스에 '데이터 없음'·'YYYY-MM~' 표시."""
+    P = _panel(m)
+    live = np.isfinite(P.base('close').values)
+    n = max(int(live.sum()), 1)
+    out = {}
+    for b in Q._BASE:
+        if b in ('open', 'high', 'low', 'close', 'volume', 'marcap'):
+            continue
+        h = np.isfinite(P.base(b).values) & live
+        fw = np.where(h.any(1))[0]
+        out[b] = (float(h.sum() / n * 100), P.dates[fw[0]].strftime('%Y-%m') if len(fw) else None)
+    out['_start'] = P.dates[0].strftime('%Y-%m')
+    return out
+
+
 def _filter_bar(m, base, pname):
     """📐 상단 필터 바 (2026-11-08 차니 "PER·PBR·RS 강도 등 쓸 수 있는 지표를 전부 취사선택") —
     엔진이 아는 지표(quant_engine.FIELDS) 전부를 골라 범위를 넣는다. 고른 전략의 필터가 처음 값으로 깔린다.
@@ -406,14 +425,29 @@ def _filter_bar(m, base, pname):
         for k in keys:                                          # 처음 한 번: 전략 필터를 체크해 둔다
             if ck(k) not in st.session_state:
                 st.session_state[ck(k)] = k.split(':')[0] in orig
-        _nm = lambda k: Q.FIELDS[k][0] + (f" ({_unit(k.split(':')[0], m)})" if _unit(k.split(':')[0], m) else '')
+        try:
+            av = _avail(m)
+        except Exception:
+            av = {}
+
+        def _cov_tag(k):
+            a = av.get(k.split(':')[0])
+            if not a:
+                return ''
+            if a[0] == 0:
+                return ' · 데이터 없음'
+            st0 = av.get('_start')
+            return f" · {a[1]}~" if a[1] and st0 and a[1][:4] > st0[:4] else ''
+        _nm = lambda k: Q.FIELDS[k][0] + (f" ({_unit(k.split(':')[0], m)})" if _unit(k.split(':')[0], m) else '') + _cov_tag(k)
         n_on = sum(1 for v in grp.values() for k in v if st.session_state.get(ck(k)))
         with st.popover(f"➕ 지표 고르기 · {n_on}개 선택", use_container_width=True):
             gc = st.columns(len(grp))
             for col, (g, ks) in zip(gc, grp.items()):
                 col.markdown(f"**{g}**")
                 for k in ks:
-                    col.checkbox(_nm(k), key=ck(k), help=Q.FIELDS[k][2])
+                    _none = _cov_tag(k) == ' · 데이터 없음'
+                    col.checkbox(_nm(k), key=ck(k), disabled=_none and not st.session_state.get(ck(k)),
+                                 help=Q.FIELDS[k][2] + (' — 이 시장 패널에 값이 없어 조건으로 쓰면 매매가 0건이 됩니다' if _none else ''))
         sel = [k for ks in grp.values() for k in ks if st.session_state.get(ck(k))]
         out, txt, pos = [], [], {}      # pos: 화면 번호 → 실제 조건 번호(범위 빈 칸은 빠지므로)
         cols = st.columns(3)
@@ -597,6 +631,110 @@ def _halves(eq, bm, bmn, tsrc):
         st.dataframe(pd.DataFrame(rows), filters=False)
 
 
+@st.cache_data(ttl=3600, show_spinner=False, max_entries=4)
+def _diag(m, spec_json):
+    """조건 진단 — run_raw 와 같은 시작일 보정(한국 재무 조건은 KR_FIN_START 부터)을 거친 명세로."""
+    spec = json.loads(spec_json)
+    _fin = {'op_turn', 'op_yoy', 'rev_yoy', 'per', 'pbr', 'psr', 'roe', 'opm', 'debt', 'rev_qoq', 'gpm'}
+    if m == 'KR' and any(f.get('field', '').split(':')[0] in _fin for f in spec.get('filters', [])) \
+            and pd.Timestamp(spec.get('start') or '2000-01-01') < pd.Timestamp(KR_FIN_START):
+        spec['start'] = KR_FIN_START
+    return Q.diagnose(_panel(m), spec)
+
+
+def _diag_box(m, spec, tsrc, eq_last=None, expanded=False):
+    """2026-11-22 — 결과가 0 일 때 어느 단계에서 0 이 되는지: 조건별 · 결합식 · 순위 지표 순으로 '주 평균 충족 종목 수'."""
+    with st.expander('🩺 조건 진단 — 단계별 충족 종목 수 (결과가 0 이면 여기서 원인 확인)', expanded=expanded):
+        try:
+            D, why = _diag(m, json.dumps(spec, sort_keys=True))
+        except Exception as e:
+            st.caption(f'진단 실패: {type(e).__name__}: {str(e)[:160]}')
+            return
+        for w in why:
+            st.markdown(f'- ⚠️ {w}')
+        if not why:
+            st.caption('막히는 단계 없음 — 후보가 있는 주에는 순위대로 매수합니다.')
+        tsrc(f'quant_engine.diagnose · 패널 quant_panel_{m} · 충족 = 그 주 조건을 만족한 종목 수(가격 있는 종목 중)', asof=eq_last)
+        st.dataframe(D, filters=False)
+
+
+def _cards(S, R, bmn):
+    """상단 카드 6개(2026-11-22 승인): 수익 · 낙폭 · 지수 대비 · 하락장 포착 · −20% 낙폭 횟수 · 신뢰."""
+    c = st.columns(6)
+    c[0].metric('연 수익률(CAGR)', f"{S['CAGR']:.1f}%", f"{S['CAGR'] - S.get('BM_CAGR', 0):+.1f}%p vs {bmn}")
+    c[1].metric('최대 낙폭(MDD)', f"{S['MDD']:.1f}%", f"{S['MDD'] - S.get('BM_MDD', 0):+.1f}%p vs {bmn}")
+    c[2].metric('지수 이긴 연도', f"{R.get('이긴연도', 0)}/{R.get('전체연도', 0)}년" if R.get('전체연도') else '-',
+                help=f'달력 연도별 수익률이 {bmn} 보다 높았던 해의 수')
+    dc = R.get('하락포착')
+    c[3].metric('하락장 포착률', f'{dc:.0f}%' if dc is not None else '-',
+                f"상승장 {R['상승포착']:.0f}%" if R.get('상승포착') is not None else None, delta_color='off',
+                help=f'{bmn} 이 떨어진 주에 전략이 떨어진 비율(평균). 100% 미만 = 지수보다 덜 빠짐. 상승장은 높을수록 좋음')
+    c[4].metric('−20% 낙폭', f"{R.get('낙폭20회', 0)}회", f"{bmn} {R.get('지수낙폭20회', 0)}회" if '지수낙폭20회' in R else None,
+                delta_color='off', help='고점 대비 −20% 이상 빠진 사건 수(회복 전까지 한 번으로 셈)')
+    g = R['신뢰']
+    c[5].metric('신뢰 등급', g['등급'], f"진입 {g['진입건수']:,}건", delta_color='off', help=g['설명'])
+
+
+def _yearly_vs(R, bmn, eq, tsrc):
+    Y = R['yearly']
+    if not len(Y):
+        return
+    cols = ['연도', '전략 수익(%)'] + ([c for c in ('지수 수익(%)', '차이(%p)') if c in Y.columns])
+    t = Y[cols].rename(columns={'지수 수익(%)': f'{bmn} 수익(%)'}).sort_values('연도', ascending=False).round(2)
+    rl = R.get('롤링1년')
+    line = f"**연도별 수익** — {bmn} 이긴 해 {R.get('이긴연도', 0)}/{R.get('전체연도', 0)}" if R.get('전체연도') else '**연도별 수익**'
+    if rl:
+        line += (f" · 아무 때나 1년 보유 시 최악 {rl['최악']:.1f}% · 중앙 {rl['중앙']:.1f}% · 최고 {rl['최고']:.1f}%"
+                 f" · 플러스 {rl['플러스비율']:.0f}%" + (f" · {bmn} 상회 {rl['지수상회비율']:.0f}%" if rl.get('지수상회비율') is not None else ''))
+    st.markdown(line)
+    tsrc('quant_engine.report (화면에서 계산) · 연도 수익 = 전년 마지막 주 → 그해 마지막 주 · 단위 %', asof=str(eq.index[-1].date()))
+    st.dataframe(t, filters=False)
+
+
+def _dd_tab(R, eq, bm, bmn, tsrc):
+    lv = ' · '.join(f"−{k}%: {R.get(f'낙폭{k}회', 0)}회" + (f" ({bmn} {R[f'지수낙폭{k}회']}회)" if f'지수낙폭{k}회' in R else '')
+                    for k in Q.DD_LEVELS)
+    st.markdown(f"**낙폭 사건** — {lv} · 최장 수중 {R.get('최장수중주', 0)}주")
+    uw = R['underwater']
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=uw.index, y=uw.values, name='전략 낙폭', line=dict(color='#D9363E', width=1.2),
+                             fill='tozeroy', fillcolor='rgba(217,54,62,0.10)'))
+    if bm is not None and len(bm.dropna()) > 1:
+        b = bm.dropna()
+        fig.add_trace(go.Scatter(x=b.index, y=(b / b.cummax() - 1) * 100, name=f'{bmn} 낙폭', line=dict(color='#7C8AA5', width=1)))
+    fig.update_layout(height=260, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=1.12, x=0),
+                      yaxis=dict(title='고점 대비 %'))
+    st.plotly_chart(fig, use_container_width=True)
+    Y = R['yearly']
+    if len(Y):
+        cols = ['연도', '전략 MDD(%)'] + (['지수 MDD(%)'] if '지수 MDD(%)' in Y.columns else [])
+        tsrc('quant_engine.report · 그해 안의 최대 낙폭 · 단위 %', asof=str(eq.index[-1].date()))
+        st.dataframe(Y[cols].rename(columns={'지수 MDD(%)': f'{bmn} MDD(%)'}).sort_values('연도', ascending=False).round(2), filters=False)
+    ev = R['dd_events']
+    if len(ev):
+        t = ev.sort_values('깊이(%)').head(15).copy()
+        for c in ('고점일', '바닥일', '회복일'):
+            t[c] = t[c].map(lambda d: d.strftime('%Y-%m-%d') if pd.notna(d) else '미회복')
+        tsrc('quant_engine.dd_events · −5% 이상 낙폭, 깊은 순 15개 · 기간 단위 주', asof=str(eq.index[-1].date()))
+        st.dataframe(t, filters=False)
+
+
+def _trade_tab(S, R, eq, tsrc):
+    c = st.columns(4)
+    c[0].metric('샤프', f"{S['Sharpe']:.2f}" if S.get('Sharpe') is not None else '-',
+                f"수익÷낙폭 {S['Calmar']:.2f}" if S.get('Calmar') else None, delta_color='off')
+    c[1].metric('승률 · 손익비', f"{S.get('승률') or 0:.0f}% · {S.get('손익비') or 0:.2f}", f"매도 {S.get('매도건수', 0):,}건", delta_color='off')
+    c[2].metric('평균 보유', f"{R['평균보유주']:.0f}주" if R.get('평균보유주') is not None else '-',
+                f"중앙 {R['중앙보유주']:.0f}주" if R.get('중앙보유주') is not None else None, delta_color='off')
+    c[3].metric('최대 연속 손실', f"{R.get('최대연속손실', 0)}회")
+    if R.get('상위기여') is not None:
+        sh = R.get('상위5비중')
+        st.markdown('**수익 기여 상위 5종목**' + (f' — 이익 합계의 {sh:.0f}%' if sh is not None else ''))
+        tsrc('quant_engine.report · 실현 기여 = 매도 금액(자산 대비 %) × 수익률 ÷ (1+수익률), 매도 시점 자산 기준 근사 · 단위 %p',
+             asof=str(eq.index[-1].date()))
+        st.dataframe(R['상위기여'], filters=False)
+
+
 def _verdict(S, bmn):
     dc, dm = S['CAGR'] - S.get('BM_CAGR', 0), S['MDD'] - S.get('BM_MDD', 0)    # MDD 는 음수 — 클수록(0에 가까울수록) 좋음
     if dc >= 0 and dm >= 0:
@@ -777,38 +915,45 @@ def render(mkt_sel: str, tsrc):
         return
     S, eq, bm, T, Hd = r['stats'], r['equity'], r['bench'], r['trades'], r['holdings']
     if not S:
-        st.info('결과가 없습니다 — 시작일·필터를 확인해 주십시오.')
+        st.info('결과가 없습니다 — 아래 조건 진단에서 어느 단계에서 0 이 되는지 확인해 주십시오.')
+        _diag_box(m, spec, tsrc, eq_last=None, expanded=True)
         return
-
-    # ── 결과 ──
     bmn = _IDXN[_BM[m]]
     if r.get('note'):
         st.caption(r['note'])
+    if T is None or not len(T):                     # 2026-11-22 차니 제보 — 성립 가능한 조건인데 전부 0: 원인을 결과 맨 위에
+        st.warning('매매가 한 건도 없습니다 — 조건 진단(아래 🧪 신뢰·진단 탭)에 0 이 된 단계와 이유가 있습니다.')
     st.markdown(_verdict(S, bmn))
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric('연 수익률(CAGR)', f"{S['CAGR']:.1f}%", f"{S['CAGR'] - S.get('BM_CAGR', 0):+.1f}%p vs {bmn}")
-    k2.metric('최대 낙폭(MDD)', f"{S['MDD']:.1f}%", f"{S['MDD'] - S.get('BM_MDD', 0):+.1f}%p vs {bmn}")
-    k3.metric('샤프', f"{S['Sharpe']:.2f}" if S.get('Sharpe') is not None else '-', f"수익÷낙폭 {S['Calmar']:.2f}" if S.get('Calmar') else None, delta_color='off')
-    k4.metric('승률 · 손익비', f"{S.get('승률') or 0:.0f}% · {S.get('손익비') or 0:.2f}", f"매도 {S.get('매도건수', 0):,}건", delta_color='off')
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=eq.index, y=eq.values * 100, name='전략', line=dict(color='#D9363E', width=2)))
-    if bm is not None:
-        fig.add_trace(go.Scatter(x=bm.index, y=bm.values * 100, name=bmn, line=dict(color='#7C8AA5', width=1.5)))
-    fig.add_trace(go.Scatter(x=r['exposure'].index, y=r['exposure'].values * 100, name='주식 비중(%)', yaxis='y2',
-                             line=dict(color='#2453C8', width=0.8), fill='tozeroy', fillcolor='rgba(36,83,200,0.08)'))
-    fig.update_layout(height=360, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=1.08, x=0),
-                      yaxis=dict(type='log', title='100에서 시작'), yaxis2=dict(overlaying='y', side='right', range=[0, 300], showgrid=False, title=None))
-    st.plotly_chart(fig, use_container_width=True)
-    _halves(eq, bm, bmn, tsrc)
-
-    with st.expander('📅 월별·연도별 수익', expanded=True):
+    R = Q.report(eq, bm, T)
+    _cards(S, R, bmn)
+    tabs = st.tabs(['📈 수익', '📉 낙폭', '🔁 거래', '🧪 신뢰·진단'])
+    with tabs[0]:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=eq.index, y=eq.values * 100, name='전략', line=dict(color='#D9363E', width=2)))
+        if bm is not None:
+            fig.add_trace(go.Scatter(x=bm.index, y=bm.values * 100, name=bmn, line=dict(color='#7C8AA5', width=1.5)))
+        fig.add_trace(go.Scatter(x=r['exposure'].index, y=r['exposure'].values * 100, name='주식 비중(%)', yaxis='y2',
+                                 line=dict(color='#2453C8', width=0.8), fill='tozeroy', fillcolor='rgba(36,83,200,0.08)'))
+        fig.update_layout(height=360, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=1.08, x=0),
+                          yaxis=dict(type='log', title='100에서 시작'), yaxis2=dict(overlaying='y', side='right', range=[0, 300], showgrid=False, title=None))
+        st.plotly_chart(fig, use_container_width=True)
+        _yearly_vs(R, bmn, eq, tsrc)
         _yearly(eq, bm, bmn, m, tsrc)
-    with st.expander(f"📜 매매 내역 · 매도 {S.get('매도건수', 0):,}건"):
-        _trades(T, eq, m, tsrc)
-    with st.expander('📦 마지막 주 보유'):
-        _holdings(Hd, eq, tsrc)
-    with st.expander('🧾 명세 보기 (복사해 두면 고급 → 명세 붙여넣기로 되살림)'):
-        st.code(json.dumps(spec, ensure_ascii=False), language='json')
+    with tabs[1]:
+        _dd_tab(R, eq, bm, bmn, tsrc)
+    with tabs[2]:
+        _trade_tab(S, R, eq, tsrc)
+        with st.expander(f"📜 매매 내역 · 매도 {S.get('매도건수', 0):,}건"):
+            _trades(T, eq, m, tsrc)
+        with st.expander('📦 마지막 주 보유'):
+            _holdings(Hd, eq, tsrc)
+    with tabs[3]:
+        g = R['신뢰']
+        st.markdown(f"**신뢰 등급 {g['등급']}** — {g['설명']}")
+        _halves(eq, bm, bmn, tsrc)
+        _diag_box(m, spec, tsrc, eq_last=str(eq.index[-1].date()), expanded=not (T is not None and len(T)))
+        with st.expander('🧾 명세 보기 (복사해 두면 고급 → 명세 붙여넣기로 되살림)'):
+            st.code(json.dumps(spec, ensure_ascii=False), language='json')
     st.caption('⚠️ 백테스트는 과거 한 경로입니다. 여러 설정을 돌려 가장 좋은 것을 고르면 숫자가 부풀려집니다 — 다른 시작 연도·인접 값에서도 결과가 유지되는지 확인해 주십시오.')
     _strategy_box(m, spec, S, eq)
     with st.expander('🤖 자동 탐색 — 조건을 하나씩 바꿔 가며 우수 전략 찾기 (과적합 판정 포함)'):

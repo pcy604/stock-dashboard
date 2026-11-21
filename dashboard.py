@@ -3030,7 +3030,7 @@ if _LEAD_KR and _show_rej:
 # ── 종목 프로파일 (계절성 + MDD 통합) ──
 # ── 💎 가치 발굴 — 기본적 분석 기준 (뭘 살까) ──
 # ── 🧪 전략 실험실 (2026-11-01) — 🪜 익절 래칫 + 🎮 매매 실험실 통합(차니: 너무 복잡). 코드 ui_lab.py · 엔진 quant_lab.py ─────
-#   옛 화면 모듈(ui_ratchet·ui_trade)과 엔진(stock_rules·trade_rules)은 연구 스크립트가 쓰므로 남겨 둔다.
+#   엔진(stock_rules·trade_rules)은 연구 스크립트가 쓰므로 남겨 둔다. 옛 화면 모듈 ui_ratchet·ui_trade 는 참조 0 이라 2026-11-22 삭제(D2).
 with (t_lab or st.empty()), guard('전략 실험실'):
     _lab_enter(t_lab)
     # 2026-11-01 차니 요구 1~8 — 포트폴리오 단위 퀀트 백테스트(ui_quant · quant_engine)가 기본, 종목 하나 실험은 옆 칸

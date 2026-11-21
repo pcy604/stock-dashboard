@@ -745,3 +745,232 @@ def stats(eq, bench=None, T=None):
         w, l_ = s[s.수익률 > 0].수익률, s[s.수익률 <= 0].수익률
         out['손익비'] = float(w.mean() / -l_.mean()) if len(w) and len(l_) and l_.mean() < 0 else None
     return out
+
+
+# ── 결과 리포트 확장 (2026-11-22 차니 승인: "TSR·MDD 말고 연도별 수익·MDD, −n% 몇 번 맞았나") ─────────
+#   화면(ui_quant)은 이 dict 를 그리기만 한다. 엔진 쪽 순수 함수라 합성 곡선으로 정답 테스트를 건다.
+DD_LEVELS = (10, 20, 30)
+
+
+def dd_events(eq, min_depth=5.0):
+    """낙폭 사건 — 고점 → 바닥 → (회복) 한 덩어리씩. 깊이 min_depth% 미만은 버린다.
+    반환 DataFrame: 고점일·바닥일·회복일(None=미회복)·깊이(%)·바닥까지(주)·회복까지(주)·수중(주)."""
+    e = eq.dropna()
+    if len(e) < 2:
+        return pd.DataFrame(columns=['고점일', '바닥일', '회복일', '깊이(%)', '바닥까지(주)', '회복까지(주)', '수중(주)'])
+    peak = e.cummax()
+    dd = e / peak - 1
+    rows, i, n = [], 0, len(e)
+    while i < n:
+        if dd.iloc[i] >= 0:
+            i += 1
+            continue
+        s = i - 1                                   # 고점 = 수중 직전 주
+        j = i
+        while j < n and dd.iloc[j] < 0:
+            j += 1
+        seg = dd.iloc[i:j]
+        b = int(np.argmin(seg.values)) + i
+        depth = float(dd.iloc[b]) * 100
+        if -depth >= min_depth:
+            rec = j if j < n else None
+            rows.append({'고점일': e.index[s], '바닥일': e.index[b], '회복일': e.index[rec] if rec is not None else None,
+                         '깊이(%)': round(depth, 2), '바닥까지(주)': b - s,
+                         '회복까지(주)': (rec - b) if rec is not None else None, '수중(주)': (rec if rec is not None else n - 1) - s})
+        i = j
+    return pd.DataFrame(rows, columns=['고점일', '바닥일', '회복일', '깊이(%)', '바닥까지(주)', '회복까지(주)', '수중(주)'])
+
+
+def _yr_ret(e):
+    return (float(e.iloc[-1] / e.iloc[0]) - 1) * 100 if len(e) >= 2 else None
+
+
+def _yr_mdd(e):
+    return float((e / e.cummax() - 1).min()) * 100 if len(e) >= 2 else None
+
+
+def report(eq, bench=None, T=None):
+    """확장 리포트. eq·bench = 주봉 자산곡선(같은 날짜축), T = run() 의 trades.
+    연도 수익은 '전년 마지막 주 → 그해 마지막 주'(첫해는 시작 주부터) — 월별 표(monthly_stats)와 같은 기준."""
+    e = eq.dropna()
+    out = {}
+    b = bench.reindex(e.index).ffill() if bench is not None and len(bench.dropna()) > 1 else None
+    # ① 연도별 수익·MDD
+    rows = []
+    for y in sorted(set(e.index.year)):
+        prev = e[e.index.year < y]
+        seg = e[e.index.year == y]
+        es = pd.concat([prev.iloc[-1:], seg]) if len(prev) else seg
+        r = {'연도': int(y), '전략 수익(%)': _yr_ret(es), '전략 MDD(%)': _yr_mdd(es)}
+        if b is not None:
+            bs = b.loc[es.index].dropna()
+            r['지수 수익(%)'] = _yr_ret(bs)
+            r['지수 MDD(%)'] = _yr_mdd(bs)
+            r['차이(%p)'] = (r['전략 수익(%)'] - r['지수 수익(%)']) if r['전략 수익(%)'] is not None and r['지수 수익(%)'] is not None else None
+        rows.append(r)
+    Y = pd.DataFrame(rows)
+    out['yearly'] = Y
+    if b is not None and len(Y):
+        v = Y.dropna(subset=['차이(%p)'])
+        out['이긴연도'], out['전체연도'] = int((v['차이(%p)'] > 0).sum()), int(len(v))
+    # ② 낙폭 사건
+    ev = dd_events(e)
+    out['dd_events'] = ev
+    for k in DD_LEVELS:
+        out[f'낙폭{k}회'] = int((ev['깊이(%)'] <= -k).sum()) if len(ev) else 0
+    out['최장수중주'] = int(ev['수중(주)'].max()) if len(ev) else 0
+    if b is not None:
+        bev = dd_events(b.dropna())
+        for k in DD_LEVELS:
+            out[f'지수낙폭{k}회'] = int((bev['깊이(%)'] <= -k).sum()) if len(bev) else 0
+    out['underwater'] = (e / e.cummax() - 1) * 100
+    # ③ 시장 대비 — 주간 수익 기준 상승·하락장 포착률(평균 비율)과 베타
+    if b is not None:
+        rs, rb = e.pct_change(), b.pct_change()
+        m = rs.notna() & rb.notna()
+        rs, rb = rs[m], rb[m]
+        up, dn = rb > 0, rb < 0
+        out['상승포착'] = float(rs[up].mean() / rb[up].mean() * 100) if up.sum() >= 5 and rb[up].mean() != 0 else None
+        out['하락포착'] = float(rs[dn].mean() / rb[dn].mean() * 100) if dn.sum() >= 5 and rb[dn].mean() != 0 else None
+        out['베타'] = float(np.cov(rs, rb)[0, 1] / np.var(rb, ddof=1)) if len(rb) > 10 and np.var(rb, ddof=1) > 0 else None
+    # ④ 롤링 1년(52주) 수익 분포
+    if len(e) > 60:
+        r52 = (e / e.shift(52) - 1).dropna() * 100
+        out['롤링1년'] = dict(최악=float(r52.min()), 중앙=float(r52.median()), 최고=float(r52.max()),
+                            플러스비율=float((r52 > 0).mean() * 100))
+        if b is not None:
+            b52 = (b / b.shift(52) - 1).reindex(r52.index) * 100
+            mm = b52.notna()
+            out['롤링1년']['지수상회비율'] = float((r52[mm] > b52[mm]).mean() * 100) if mm.any() else None
+    # ⑤ 거래 — 보유 기간 · 연속 손실 · 종목별 실현 기여(근사)
+    if T is not None and len(T):
+        T = T.sort_values('날짜', kind='stable')
+        opened, holds, seq, best_seq, contrib = {}, [], 0, 0, {}
+        for _, r in T.iterrows():
+            k = r['코드']
+            if r['구분'] in ('매수', '불타기'):
+                opened.setdefault(k, r['날짜'])
+            elif r['구분'] == '매도':
+                if k in opened:
+                    holds.append((r['날짜'] - opened.pop(k)).days / 7)
+                ret = r['수익률']
+                if ret is not None and np.isfinite(ret):
+                    seq = seq + 1 if ret <= 0 else 0
+                    best_seq = max(best_seq, seq)
+                    # 매도 금액(자산 대비 %) × 수익률/(1+수익률) = 실현 손익(자산 대비 %p, 그 시점 자산 기준 근사)
+                    g = float(r['금액비중']) * (ret / 100) / (1 + ret / 100) if ret > -100 else -float(r['금액비중'])
+                    nm = f"{r['종목']} ({k})"
+                    contrib[nm] = contrib.get(nm, 0.0) + g
+        out['평균보유주'] = float(np.mean(holds)) if holds else None
+        out['중앙보유주'] = float(np.median(holds)) if holds else None
+        out['최대연속손실'] = int(best_seq)
+        if contrib:
+            c = pd.Series(contrib).sort_values(ascending=False)
+            pos = c[c > 0].sum()
+            out['상위기여'] = pd.DataFrame({'종목': c.index[:5], '실현 기여(%p)': c.values[:5].round(2)})
+            out['상위5비중'] = float(c.iloc[:5].clip(lower=0).sum() / pos * 100) if pos > 0 else None
+    # ⑥ 신뢰 — 거래 수 · 구간 일관성
+    # 표본 = 진입(신규 매수) 횟수 — 오래 들고 가는 전략은 매도가 거의 없어 매도 수로 세면 늘 '표본 부족'이 된다
+    n_sell = int((T['구분'] == '매수').sum()) if T is not None and len(T) else 0
+    halves = []
+    if len(e) >= 40:
+        mid = e.index[len(e) // 2]
+        for a_, z_ in ((e.index[0], mid), (mid, e.index[-1])):
+            s_ = e.loc[a_:z_]
+            yrs = (s_.index[-1] - s_.index[0]).days / 365.25
+            sc = (float(s_.iloc[-1] / s_.iloc[0]) ** (1 / yrs) - 1) * 100 if yrs > 0 else None
+            bc = None
+            if b is not None:
+                bb = b.loc[a_:z_].dropna()
+                bc = (float(bb.iloc[-1] / bb.iloc[0]) ** (1 / yrs) - 1) * 100 if len(bb) >= 2 and yrs > 0 else None
+            halves.append(None if sc is None or bc is None else sc > bc)
+    both = len(halves) == 2 and all(h is True for h in halves)
+    one = any(h is True for h in halves)
+    if n_sell >= 100 and both:
+        grade = 'A'
+    elif n_sell >= 30 and (both or one):
+        grade = 'B'
+    elif n_sell >= 30:
+        grade = 'C'
+    else:
+        grade = 'D'
+    out['신뢰'] = dict(등급=grade, 진입건수=n_sell, 두구간상회=both,
+                     설명={'A': '진입 100건 이상 · 기간을 반으로 나눠도 두 구간 모두 지수 상회',
+                           'B': '진입 30건 이상 · 한 구간 이상 지수 상회',
+                           'C': '진입 30건 이상이나 두 구간 모두 지수 미달',
+                           'D': '진입 30건 미만 — 통계로 판단하기에 표본 부족'}[grade])
+    return out
+
+
+# ── 조건 진단 (2026-11-22 차니 제보: "성립 가능한 조건인데 결과가 전부 0") ─────────────────────────────
+#   0 이 나오는 길은 넷이다 — ① 그 시장 패널에 없는 필드(base() 가 전부 빈값 → 전부 거짓) ② 값 범위 밖(단위 % vs 소수 등)
+#   ③ 조건 하나하나는 맞는데 같은 주에 겹치지 않음 ④ 순위 지표가 빈값이라 후보에서 빠짐(run() 650행 isfinite(rk)).
+#   결과 위에 단계별 '주 평균 충족 종목 수'를 보여 주면 어느 단계에서 0 이 되는지 바로 보인다.
+def diagnose(panel, spec):
+    S = merged(spec)
+    P = panel
+    dates = P.dates
+    t0 = int(np.searchsorted(dates, pd.Timestamp(S['start'])))
+    t1 = len(dates) if not S.get('end') else int(np.searchsorted(dates, pd.Timestamp(S['end']), side='right'))
+    sl = slice(t0, t1)
+    C = P.base('close').values[sl]
+    live = np.isfinite(C)
+    n_live = max(int(live.sum()), 1)
+    rows, masks, why = [], [], []
+    for i, f in enumerate(S['filters'], 1):
+        lab = f"{f['field']} {f['op']} {f['value']}"
+        try:
+            M = P.get(f['field'])
+        except KeyError:
+            rows.append({'No.': i, '단계': f'조건 {i}', '내용': lab, '데이터 보유(%)': 0.0, '첫 데이터': None,
+                         '값 하위5%': None, '값 중앙': None, '값 상위5%': None, '주 평균 충족(종목)': 0.0, '충족 주 비율(%)': 0.0})
+            masks.append(np.zeros(C.shape, bool))
+            why.append(f'조건 {i}: 모르는 필드 `{f["field"]}`')
+            continue
+        V = M.values[sl]
+        if V.dtype.kind in 'fc':
+            has = np.isfinite(V)
+        else:
+            has = pd.DataFrame(V).astype(str).ne('').values & pd.DataFrame(V).notna().values
+        cov = float((has & live).sum() / n_live * 100)
+        fw = np.where(has.any(1))[0]
+        first = dates[t0 + fw[0]].date() if len(fw) else None
+        q5 = q50 = q95 = None
+        if V.dtype.kind in 'fc' and has.any():
+            q5, q50, q95 = (float(x) for x in np.nanpercentile(V[has], [5, 50, 95]))
+        hit = np.asarray(_cond(M, f['op'], f['value']).fillna(False).values, bool)[sl] & live
+        per = hit.sum(1)
+        masks.append(hit)
+        rows.append({'No.': i, '단계': f'조건 {i}', '내용': lab, '데이터 보유(%)': round(cov, 1), '첫 데이터': first,
+                     '값 하위5%': None if q5 is None else round(q5, 2), '값 중앙': None if q50 is None else round(q50, 2),
+                     '값 상위5%': None if q95 is None else round(q95, 2),
+                     '주 평균 충족(종목)': round(float(per.mean()), 1), '충족 주 비율(%)': round(float((per > 0).mean() * 100), 1)})
+        if cov == 0:
+            why.append(f'조건 {i}: `{f["field"]}` 값이 이 시장·기간에 하나도 없음(이 시장에 없는 데이터) → 전부 거짓')
+        elif per.sum() == 0:
+            why.append(f'조건 {i}: 값은 있으나 기준을 넘는 종목이 한 번도 없음 — 값 분포 {q5:.2f} ~ {q95:.2f} 와 기준 {f["value"]} 의 단위(% / 소수 / 원)를 확인'
+                       if q5 is not None else f'조건 {i}: 충족 종목 0')
+    ok = eval(parse_logic(S.get('logic', ''), len(masks)), {'__builtins__': {}}, {'c': masks, 'True': np.ones(C.shape, bool)}) \
+        if masks else live.copy()
+    ok = np.asarray(ok, bool) & live
+    k = len(rows) + 1
+    rows.append({'No.': k, '단계': '결합식 적용', '내용': S.get('logic') or '모두 AND', '데이터 보유(%)': None, '첫 데이터': None,
+                 '값 하위5%': None, '값 중앙': None, '값 상위5%': None,
+                 '주 평균 충족(종목)': round(float(ok.sum(1).mean()), 1), '충족 주 비율(%)': round(float((ok.sum(1) > 0).mean() * 100), 1)})
+    try:
+        rk = P.get(S['rank']['field']).values[sl]
+        rk_ok = np.isfinite(rk)
+    except KeyError:
+        rk_ok = np.zeros(C.shape, bool)
+        why.append(f"순위 지표: 모르는 필드 `{S['rank']['field']}`")
+    cand = ok & rk_ok
+    rows.append({'No.': k + 1, '단계': '순위 지표 값 있음(최종 후보)', '내용': S['rank']['field'],
+                 '데이터 보유(%)': round(float((rk_ok & live).sum() / n_live * 100), 1), '첫 데이터': None,
+                 '값 하위5%': None, '값 중앙': None, '값 상위5%': None,
+                 '주 평균 충족(종목)': round(float(cand.sum(1).mean()), 1), '충족 주 비율(%)': round(float((cand.sum(1) > 0).mean() * 100), 1)})
+    if not why:
+        if masks and all(m.any() for m in masks) and not ok.any():
+            why.append('조건 하나하나는 충족되지만 같은 주·같은 종목에서 동시에 충족된 적이 없음 → 결합식(AND)을 OR 로 바꾸거나 기준 완화')
+        elif ok.any() and not cand.any():
+            why.append(f"조건은 충족되지만 순위 지표 `{S['rank']['field']}` 가 그 종목·주에 빈값 → 후보에서 빠짐. 다른 순위 지표를 고를 것")
+    return pd.DataFrame(rows), why
