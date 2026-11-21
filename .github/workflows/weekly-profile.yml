@@ -25,6 +25,8 @@ jobs:
   profile:
     runs-on: ubuntu-latest
     timeout-minutes: 180
+    env:
+      SEC_CONTACT: ${{ secrets.SEC_CONTACT }}   # SEC EDGAR User-Agent 연락처(없으면 403)
     steps:
       - uses: actions/checkout@v4
 

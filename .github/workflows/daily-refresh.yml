@@ -33,6 +33,7 @@ jobs:
     env:
       FRED_KEY: ${{ secrets.FRED_KEY }}
       DART_KEY: ${{ secrets.DART_KEY }}
+      SEC_CONTACT: ${{ secrets.SEC_CONTACT }}   # SEC EDGAR User-Agent 연락처(없으면 403)
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:

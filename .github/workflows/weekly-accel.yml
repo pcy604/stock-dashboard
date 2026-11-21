@@ -56,6 +56,7 @@ jobs:
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: '1'
+      SEC_CONTACT: ${{ secrets.SEC_CONTACT }}   # SEC EDGAR User-Agent 연락처(없으면 403)
       # 2026-10-14 — 실패를 알리려고 추가(아래 '유니버스 붕괴 차단'·'실패 시 텔레그램')
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

@@ -11,6 +11,7 @@ CLI:
   python edgar_client.py facts AAPL
   python edgar_client.py filings AAPL 8-K
 """
+import os
 import time
 import json
 import requests
@@ -19,10 +20,50 @@ from pathlib import Path
 DATA = Path('data')
 _CIK_CACHE = DATA / 'edgar_cik.json'
 # 대시보드가 이 값으로 '옛 모듈이 메모리에 남았는지' 판단해 다시 읽는다(코드만 바뀐 배포 대비). 동작을 바꾸면 올릴 것.
-API_VERSION = 5   # 5: filings() 에 8-K items(구간 메모, 2026-11-16) · 4: earnings_release_quarter
-# SEC는 연락처 포함 User-Agent 요구 (없으면 403)
-UA = {'User-Agent': 'stock-screener research pcy604604@gmail.com',
-      'Accept-Encoding': 'gzip, deflate'}
+API_VERSION = 6   # 6: 연락처를 설정에서 읽음(2026-11-22) · 5: filings() 에 8-K items · 4: earnings_release_quarter
+
+# SEC는 연락처 포함 User-Agent 요구 (없으면 403). 주소를 코드에 박지 않는다(2026-11-22 백로그 #4).
+#   찾는 순서: 환경변수 SEC_CONTACT → st.secrets['sec']['contact'] → .streamlit/secrets.toml [sec] contact
+#   둘 다 없으면 RuntimeError. 단 import 시점에 터지면 대시보드 전체가 죽으므로 '요청할 때' 읽는다.
+_UA_CACHE = {}
+
+
+def contact():
+    """SEC 에 밝힐 연락처. 없으면 RuntimeError(조용히 403 맞는 것보다 낫다)."""
+    c = (os.environ.get('SEC_CONTACT') or '').strip()
+    if c:
+        return c
+    try:
+        import streamlit as st
+        s = st.secrets.get('sec') or {}
+        c = str(s.get('contact') or '').strip()
+        if c:
+            return c
+    except Exception:
+        pass
+    try:
+        import tomllib
+        f = Path(__file__).resolve().parent / '.streamlit' / 'secrets.toml'
+        if f.exists():
+            s = tomllib.loads(f.read_text(encoding='utf-8')).get('sec') or {}
+            c = str(s.get('contact') or '').strip()
+            if c:
+                return c
+    except Exception:
+        pass
+    raise RuntimeError(
+        'SEC 연락처 없음 → 환경변수 SEC_CONTACT 또는 .streamlit/secrets.toml 의 [sec] contact '
+        '를 설정하세요. SEC 는 연락 가능한 이메일이 담긴 User-Agent 를 요구합니다(없으면 403).')
+
+
+def _ua():
+    """요청 헤더. 연락처가 없으면 RuntimeError."""
+    c = contact()
+    if _UA_CACHE.get('c') != c:
+        _UA_CACHE.clear()
+        _UA_CACHE.update({'c': c, 'h': {'User-Agent': f'stock-screener research {c}',
+                                        'Accept-Encoding': 'gzip, deflate'}})
+    return _UA_CACHE['h']
 
 # 매출은 회사마다 개념 태그가 다름 → 우선순위대로 시도
 _REV = ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues',
@@ -40,10 +81,11 @@ def set_interactive(on=True):
 
 def _get(url, tries=None):
     tries = tries or _MODE['tries']
+    hdr = _ua()          # 설정 누락은 즉시 터뜨린다 — 재시도로 기다릴 일이 아니다
     last = None
     for i in range(tries):
         try:
-            r = requests.get(url, headers=UA, timeout=_MODE['timeout'])
+            r = requests.get(url, headers=hdr, timeout=_MODE['timeout'])
             r.raise_for_status()
             return r
         except Exception as e:

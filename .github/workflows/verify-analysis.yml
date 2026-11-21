@@ -13,6 +13,7 @@ jobs:
     timeout-minutes: 60
     env:
       DART_KEY: ${{ secrets.DART_KEY }}
+      SEC_CONTACT: ${{ secrets.SEC_CONTACT }}   # SEC EDGAR User-Agent 연락처(없으면 403)
       GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
       FRED_KEY: ${{ secrets.FRED_KEY }}
       PYTHONIOENCODING: utf-8
