@@ -17,12 +17,14 @@ sys.path.insert(0, ROOT)
 OUT = os.path.join(ROOT, "results")
 COLS = ["sym", "name", "market", "date", "open", "high", "low", "close", "volume", "marcap",
         "per", "pbr", "psr", "rev_yoy", "op_yoy", "op_turn", "acc", "sector",
-        "opm", "gpm", "rev_qoq", "roe", "debt"]       # 2026-11-01 확장 — 시장에 없는 열은 빈 값
+        "opm", "gpm", "rev_qoq", "roe", "debt", "oi_g"]   # 2026-11-01 확장 — 시장에 없는 열은 빈 값
+#   ⚠️ 2026-11-22: oi_g(이익 개선폭)는 kr() 가 줄곧 계산했는데 COLS 에 없어 _f32 가 버렸다.
+#      엔진 _BASE 에는 있어 화면에 지표는 뜨고 패널엔 열이 없어 조건이 전부 거짓 → 매매 0건.
 
 
 def _f32(d):
     for c in ("open", "high", "low", "close", "volume", "marcap", "per", "pbr", "psr", "rev_yoy", "op_yoy",
-              "opm", "gpm", "rev_qoq", "roe", "debt"):
+              "opm", "gpm", "rev_qoq", "roe", "debt", "oi_g"):
         if c not in d:
             d[c] = np.nan
         d[c] = pd.to_numeric(d[c], errors="coerce").astype("float32")
@@ -40,6 +42,39 @@ def _keep_once_in(d, floor):
     return d[hit].copy()
 
 
+# 2026-11-22 — 그 시장에서 **반드시 값이 있어야 하는** 열. 0% 면 빌드를 실패시킨다.
+#   왜: oi_g 는 kr() 가 계산해 놓고도 COLS 에 없어 통째로 버려졌고, 미국 sector·KR rev_qoq 는
+#   아무도 채우지 않았다. 셋 다 화면엔 지표로 떠 있어서 '조건을 걸면 매매 0건'으로만 보였다.
+#   빠진 열은 조용히 NaN 이 되고, 조건이 전부 거짓이 되며, 백테스트는 오류 없이 0건을 낸다.
+MUST = {
+    "US": ("per", "psr", "rev_yoy", "op_yoy", "opm", "gpm", "rev_qoq", "oi_g", "sector"),
+    "KR": ("per", "pbr", "psr", "rev_yoy", "op_yoy", "opm", "rev_qoq", "oi_g", "roe", "debt", "sector"),
+}
+#   아직 소스가 없는 열(채우면 MUST 로 옮긴다):
+#     US pbr·roe·debt — SEC 자본총계·부채총계 미수집(leaders_build TAGS 에 재무상태표 항목 없음)
+#     KR gpm          — kr_fundamentals_q 에 gross_profit 없음(DART 손익계산서 매출총이익 수집 필요)
+NOT_YET = {"US": ("pbr", "roe", "debt"), "KR": ("gpm",)}
+
+
+def report_coverage(d, m):
+    """열별 값 있는 비율·첫 값 날짜를 찍고, MUST 열이 비면 SystemExit."""
+    rows, dead = [], []
+    for c in COLS:
+        if c in ("sym", "name", "market", "date"):
+            continue
+        nn = int(d[c].notna().sum())
+        p = nn / max(len(d), 1) * 100
+        first = d.loc[d[c].notna(), "date"].min() if nn else None
+        tag = "" if c in MUST.get(m, ()) else ("  (소스 없음)" if c in NOT_YET.get(m, ()) else "  (참고)")
+        rows.append(f"    {c:9s} {p:6.2f}%  첫값 {str(first.date()) if nn else '-'}{tag}")
+        if c in MUST.get(m, ()) and nn == 0:
+            dead.append(c)
+    print(f"[{m}] 열 커버리지\n" + "\n".join(rows), flush=True)
+    if dead:
+        raise SystemExit(f"[{m}] 반드시 값이 있어야 하는 열이 0%: {', '.join(dead)} — "
+                         f"COLS 에 있는지 · 계산·merge 가 실제로 붙는지 확인하라")
+
+
 def coverage(d, probes):
     """정답 점검용 — 종목별 첫 주. known_answers 가 읽는다."""
     out = {}
@@ -55,7 +90,11 @@ def us():
     import leaders_accel as A
     d = A.load()                                         # ACC 계산 포함
     c = sqlite3.connect(os.path.join(ROOT, "data", "market.db"))
-    extra = pd.read_sql(f"SELECT as_of, sym, sector, pbr, op_turn, op_income, rev_qoq FROM factor_weekly WHERE factor_ver='{ver}'", c)
+    # 2026-11-22: roe·debt 추가(leaders_build 가 SEC 재무상태표를 받기 시작했다). 아직 안 받은 DB 도 돌게 열 존재를 확인한다.
+    _fw = {x[1] for x in c.execute("PRAGMA table_info(factor_weekly)")}
+    _opt = [x for x in ("roe", "debt") if x in _fw]
+    extra = pd.read_sql(f"SELECT as_of, sym, sector, pbr, op_turn, op_income, rev_qoq"
+                        f"{(', ' + ', '.join(_opt)) if _opt else ''} FROM factor_weekly WHERE factor_ver='{ver}'", c)
     extra["as_of"] = pd.to_datetime(extra.as_of)
     d = d.merge(extra, on=["as_of", "sym"], how="left", suffixes=("", "_x"))
     px = pd.read_sql("SELECT sym, date, open, high, low, volume FROM prices WHERE market='US'", c)
@@ -79,11 +118,28 @@ def us():
     d = d.drop(columns=["_capfix", "_capbad"])
     d = _keep_once_in(d, 2e8)
     # 영업이익 YoY: 같은 종목 4분기 전 값(분기 패널에서)
-    q = d.dropna(subset=["period_end"]).drop_duplicates(["sym", "period_end"])[["sym", "period_end", "op_income"]].sort_values(["sym", "period_end"])
+    # 2026-11-22: 이익 개선폭(oi_g)도 같은 분기 패널에서 — 한국만 있던 지표(kr_oi_g)를 미국에도.
+    #   정의·하한은 leaders_accel 과 같다(분기 매출 $10M 미만은 발산하므로 빈값), 단위는 %p 로 맞춘다.
+    q = (d.dropna(subset=["period_end"]).drop_duplicates(["sym", "period_end"])
+          [["sym", "period_end", "op_income", "revenue"]].sort_values(["sym", "period_end"]))
     q["op4"] = q.groupby("sym").op_income.shift(4)
     q["op_yoy"] = np.where(q.op4 > 0, (q.op_income / q.op4 - 1) * 100, np.nan)
-    d = d.merge(q[["sym", "period_end", "op_yoy"]], on=["sym", "period_end"], how="left")
+    _rev = q.revenue.where(q.revenue.abs() >= A.MIN_QREV)
+    q["oi_g"] = ((q.op_income - q.op4) / _rev.abs() * 100).replace([np.inf, -np.inf], np.nan)
+    d = d.merge(q[["sym", "period_end", "op_yoy", "oi_g"]], on=["sym", "period_end"], how="left")
     d["market"] = "US"
+    # 2026-11-22: 업종 — leaders_build 가 factor_weekly.sector 에 None 을 박아 미국 업종이 0% 였다.
+    #   SEC SIC 설명(data/us_domicile.csv)을 쓴다. 대시보드·common_metrics 도 같은 파일을 본다.
+    d = d.drop(columns=[c for c in ("sector", "sector_x") if c in d.columns])
+    try:
+        #   keep_default_na=False — 티커 'NA'(Nabors) 가 NaN 으로 읽혀 매핑에서 사라진다
+        dom = pd.read_csv(os.path.join(ROOT, "data", "us_domicile.csv"), usecols=["sym", "sic_desc"],
+                          keep_default_na=False, na_values=[""])
+        dom = dom[dom.sic_desc.notna() & (dom.sic_desc.astype(str).str.strip() != "")]
+        d["sector"] = d.sym.map(dict(zip(dom.sym.astype(str), dom.sic_desc.astype(str).str.strip())))
+    except Exception as e:
+        print(f"[US] 업종 매핑 실패({e}) — sector 빈 값", flush=True)
+        d["sector"] = None
     d["acc"] = d["ACC"]
     for k in ("open", "high", "low"):
         d[k] = d[k].fillna(d["close"])
@@ -149,6 +205,10 @@ def kr():
     for k in ("revenue", "op_income", "net_income"):
         q[f"ttm_{k}"] = g[k].transform(lambda s: s.rolling(4, min_periods=4).sum())
     q["rev_yoy"] = np.where(g.revenue.shift(4) > 0, (q.revenue / g.revenue.shift(4) - 1) * 100, np.nan)
+    # 2026-11-22: 매출 QoQ — 열은 COLS 에 있었는데 한국은 계산을 안 해 0% 였다(미국만 91.5%).
+    #   kr_quarterize 가 빠진 분기를 채워 둔 뒤라 shift(1) 이 '직전 분기'다(건너뛴 분기를 직전으로 오인하지 않는다).
+    _r1 = g.revenue.shift(1)
+    q["rev_qoq"] = np.where(_r1 > 0, (q.revenue / _r1 - 1) * 100, np.nan)
     o4 = g.op_income.shift(4)
     q["op_yoy"] = np.where(o4 > 0, (q.op_income / o4 - 1) * 100, np.nan)
     q["op_turn"] = ((q.op_income > 0) & (o4 <= 0)).astype(int)
@@ -157,7 +217,8 @@ def kr():
     q["opm"] = (q.ttm_op_income / q.ttm_revenue * 100).where(q.ttm_revenue > 0)
     q["debt"] = (q.liabilities / q.equity * 100).where(q.equity > 0)
     q = q[q._orig & q.known.notna()]
-    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "op_yoy", "op_turn", "acc", "oi_g", "opm", "debt"]].sort_values("known")
+    q = q[["sym", "known", "ttm_revenue", "ttm_net_income", "equity", "rev_yoy", "rev_qoq", "op_yoy",
+           "op_turn", "acc", "oi_g", "opm", "debt"]].sort_values("known")
     w = w.sort_values("date")
     w = pd.merge_asof(w, q, left_on="date", right_on="known", by="sym", direction="backward")
     w["per"] = (w.marcap / w.ttm_net_income).where(w.ttm_net_income > 0)
@@ -230,9 +291,12 @@ def main(markets=("US", "KR")):
             continue
         try:
             d = fn()
+            report_coverage(d, m)          # MUST 열이 0% 면 여기서 SystemExit — 빈 패널을 올리지 않는다
             d.to_parquet(os.path.join(OUT, f"quant_panel_{m}.parquet"), index=False, compression="zstd")
             info[m] = dict(rows=int(len(d)), syms=int(d.sym.nunique()), start=str(d.date.min().date()), end=str(d.date.max().date()),
                            cap_nan_rows=int(d.marcap.isna().sum()),
+                           cover={c: round(float(d[c].notna().mean() * 100), 2) for c in COLS
+                                  if c not in ("sym", "name", "market", "date")},
                            first_week=coverage(d, ("NVDA", "PLTR", "TSLA") if m == "US" else ("005930", "086520", "247540")))
         except Exception as e:
             info[m] = dict(error=f"{type(e).__name__}: {e}")

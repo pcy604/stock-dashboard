@@ -52,6 +52,15 @@ REV = ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues', 'Sales
 TAGS = {'revenue': REV, 'gross': ['GrossProfit'],
         'opinc': ['OperatingIncomeLoss'], 'netinc': ['NetIncomeLoss']}
 
+# 2026-11-22 — 재무상태표(순간값). 여기까지 안 받아서 미국 PBR·ROE·부채비율이 패널에서 0% 였다.
+#   ⚠️ 손익계산서(TAGS)는 기간(start~end) 사실이고 이쪽은 **시점(end) 사실**이라 추출 함수가 다르다(_inst).
+#   ⚠️ Liabilities 를 아예 태깅하지 않는 제출자가 많다(총부채를 따로 안 적고
+#      LiabilitiesAndStockholdersEquity = 총자산만 적는다) → 없으면 자산 − 자본으로 메운다.
+TAGS_INST = {'equity': ['StockholdersEquity',
+                        'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest'],
+             'liab':   ['Liabilities'],
+             'assets': ['Assets']}
+
 
 _SESS = requests.Session()
 
@@ -255,7 +264,31 @@ def qseries(facts, tags):
     return m
 
 
-def _cache_due(p, col, gap_days, min_age_days=7):
+def _inst(facts, tags):
+    """재무상태표 같은 **시점(instant) 사실** → {end: (val, filed)} (2026-11-22).
+
+    duration 사실과 달리 start 가 없다. 같은 end 가 분기보고서·연차보고서·수정분으로 여러 번
+    나오는데 값은 같은 날짜의 잔액이라 같다 → **가장 먼저 제출된 것**을 쓴다(look-ahead 방지:
+    늦게 수정 제출된 값을 그 주에 알았다고 하면 안 된다). tags 는 우선순위 순 — 앞 태그가 있으면 그걸 쓴다."""
+    us = facts.get('facts', {}).get('us-gaap', {})
+    out = {}
+    for t in tags:                          # 우선순위: 앞 태그가 채운 end 는 덮지 않는다
+        got = {}
+        for unit, arr in us.get(t, {}).get('units', {}).items():
+            if unit != 'USD':
+                continue
+            for e in arr:
+                en, fl = e.get('end'), e.get('filed')
+                if not (en and fl) or e.get('start'):
+                    continue
+                if en not in got or fl < got[en][1]:
+                    got[en] = (e['val'], fl)
+        for en, v in got.items():
+            out.setdefault(en, v)
+    return out
+
+
+def _cache_due(p, col, gap_days, min_age_days=7, need_cols=()):
     """캐시 파일을 다시 받을 때가 됐나.
 
     2026-10-14 — fq_(EDGAR 분기재무)·ek_(실적 발표일)는 **파일이 있으면 영원히
@@ -266,10 +299,16 @@ def _cache_due(p, col, gap_days, min_age_days=7):
 
     규칙: 파일의 최신 기간(col)이 gap_days 보다 오래됐으면 새 분기가 나왔을 때다.
           그래도 min_age_days 안에 받은 파일은 건드리지 않는다(매주 SEC 를 두드리지 않게).
+
+    2026-11-22 — need_cols: 캐시에 **없는 열**이 생기면(수집 항목을 늘렸을 때) 나이와 무관하게 다시 받는다.
+    이게 없으면 TAGS 에 항목을 추가해도 기존 2,800개 캐시가 그대로 쓰여 새 열이 영원히 빈다.
     """
     if not os.path.exists(p):
         return True
     try:
+        head = pd.read_csv(p, nrows=0).columns
+        if need_cols and any(c not in head for c in need_cols):
+            return True
         if (time.time() - os.path.getmtime(p)) / 86400 < min_age_days:
             return False
         last = pd.to_datetime(pd.read_csv(p, usecols=[col])[col], errors="coerce").max()
@@ -282,7 +321,7 @@ def fetch_fund(sym, cik):
     p = os.path.join(CACHE, f"fq_{sym}.csv")
     # 최신 분기 말 + 다음 분기(91일) + 대부분의 10-Q 제출(~30일) ≈ 120일.
     #   그 전에 다시 받아도 같은 내용이라 SEC 요청만 낭비한다.
-    if not _cache_due(p, "period_end", gap_days=120):
+    if not _cache_due(p, "period_end", gap_days=120, need_cols=("equity", "liabilities")):
         return True
     raw = get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json", _sua())
     if not raw:
@@ -290,14 +329,31 @@ def fetch_fund(sym, cik):
     try:
         facts = json.loads(raw)
         ser = {k: qseries(facts, v) for k, v in TAGS.items()}
+        bs = {k: _inst(facts, v) for k, v in TAGS_INST.items()}      # 2026-11-22 재무상태표
         ends = sorted(ser['revenue'])
         if len(ends) < 8:
             return False
         rows = []
         for en in ends:
             fl = min(x[1] for x in (ser[k].get(en) for k in TAGS) if x)
-            rows.append(dict(period_end=en, filed_at=fl,
-                             **{k: (ser[k][en][0] if en in ser[k] else None) for k in TAGS}))
+            r = dict(period_end=en, filed_at=fl,
+                     **{k: (ser[k][en][0] if en in ser[k] else None) for k in TAGS})
+            eq = bs['equity'].get(en)
+            lb = bs['liab'].get(en)
+            at = bs['assets'].get(en)
+            r['equity'] = None if eq is None else float(eq[0])
+            if lb is not None:
+                r['liabilities'] = float(lb[0])
+            elif at is not None and eq is not None:
+                r['liabilities'] = float(at[0]) - float(eq[0])       # 총부채 미태깅 제출자 보정
+            else:
+                r['liabilities'] = None
+            #   재무상태표는 손익계산서와 같은 보고서에 실린다 → 제출일도 같은 날이어야 한다.
+            #   늦게 수정 제출된 잔액(filed > filed_at)은 그 주에 알 수 없었으므로 버린다.
+            for _k, _v in (('equity', eq), ('liabilities', lb if lb is not None else at)):
+                if _v is not None and str(_v[1]) > str(fl):
+                    r[_k] = None
+            rows.append(r)
         pd.DataFrame(rows).to_csv(p, index=False)
         return True
     except Exception:
@@ -519,6 +575,22 @@ def load_shares():
     return _SHARES
 
 
+#   2026-11-22 — leaders_schema.sql 은 CREATE TABLE IF NOT EXISTS 라서 표가 이미 있으면 새 열을 만들지 않는다.
+#   그런데 적재부는 `PRAGMA table_info` 로 표의 열만 골라 넣는다 → DDL 에만 추가하면 새 열이 **조용히 버려진다.**
+#   SQLite 에 ADD COLUMN IF NOT EXISTS 가 없으므로 직접 확인하고 붙인다.
+_NEW_COLS = (("equity", "REAL"), ("liabilities", "REAL"), ("debt", "REAL"), ("roe", "REAL"))
+
+
+def _add_cols(con):
+    have = {x[1] for x in con.execute("PRAGMA table_info(factor_weekly)")}
+    add = [(c, t) for c, t in _NEW_COLS if c not in have]
+    for c, t in add:
+        con.execute(f"ALTER TABLE factor_weekly ADD COLUMN {c} {t}")
+    if add:
+        con.commit()
+        print(f"factor_weekly 열 추가: {', '.join(c for c, _ in add)}", flush=True)
+
+
 def shares_at(sym, when):
     """그 주차 시점에 **이미 제출돼 있던** 가장 최근 공시의 주식수.
 
@@ -550,6 +622,7 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
     spy = bench()
     con = sqlite3.connect(DB)
     con.executescript(open(os.path.join(BASE, "leaders_schema.sql"), encoding="utf-8").read())
+    _add_cols(con)
     if newsyms:
         # 2026-10-19 — '있다'의 기준을 **52주 이상 이력**으로 바꿨다.
         #   Actions 캐시의 market.db 는 10-10 사고 때 243종 이력만 남았고, 그 뒤 증분은
@@ -719,6 +792,12 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
                              ("gpm", "gpm"), ("opm", "opm"), ("npm", "npm")]:
                     v = f[b][k]
                     r[a] = None if pd.isna(v) else float(v)
+                # 2026-11-22 재무상태표 — 자본·부채와 부채비율. PBR·ROE 는 아래 P 블록(시총이 필요)
+                for _c in ("equity", "liabilities"):
+                    v = f[_c][k] if _c in f.columns else np.nan
+                    r[_c] = None if pd.isna(v) else float(v)
+                r["debt"] = (None if (r["equity"] is None or r["liabilities"] is None or r["equity"] <= 0)
+                             else r["liabilities"] / r["equity"] * 100)
                 for m_, tag in [("gpm", "gpm"), ("opm", "opm"), ("npm", "npm")]:
                     v0, v1 = f[m_][k], (f[m_][k-1] if k >= 1 else np.nan)
                     r[tag + "_qoq"] = None if (pd.isna(v0) or pd.isna(v1)) else float(v0 - v1)
@@ -769,6 +848,11 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
                 ni = f.netinc[max(0, k-3):k+1].sum() if len(av) >= 5 else None
                 r["psr"] = mc / ttm if ttm and ttm > 0 else None
                 r["per"] = mc / ni if ni and ni > 0 else None
+                # 2026-11-22 — PBR·ROE. 자본총계가 음수(결손 누적)면 둘 다 뜻이 없어 빈값으로 둔다
+                #   ('싸 보이는 자본잠식'을 만들지 않는다). ROE 는 PER 과 같은 TTM 순이익 ÷ 자본.
+                eq = r.get("equity")
+                r["pbr"] = mc / eq if eq and eq > 0 else None
+                r["roe"] = (ni / eq * 100) if (eq and eq > 0 and ni is not None and ni == ni) else None
             rec.append(r)
         if not rec:
             continue

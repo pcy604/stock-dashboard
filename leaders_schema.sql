@@ -43,6 +43,10 @@ CREATE TABLE IF NOT EXISTS factor_weekly (
   op_pos_streak      INTEGER,  -- 연속 영업흑자 분기수
   rev_q_count        INTEGER,  -- 매출 인식 분기수  ← 4 미만이면 배제
   eps_yoy            REAL,     -- 저장만. 게이트 금지 (일회성 오염)
+  equity             REAL,     -- 자본총계 (2026-11-22, SEC StockholdersEquity · 시점값)
+  liabilities        REAL,     -- 부채총계 (미태깅 제출자는 총자산 − 자본으로 메움)
+  debt               REAL,     -- 부채비율 % = 부채 ÷ 자본  (자본 ≤ 0 은 빈값)
+  roe                REAL,     -- % = TTM 순이익 ÷ 자본총계  (자본 ≤ 0 은 빈값)
 
   -- ── T: 추세 (시장의 투표) ─────────────────────────────────────
   close              REAL,
