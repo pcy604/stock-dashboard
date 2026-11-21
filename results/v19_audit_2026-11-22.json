@@ -1,0 +1,237 @@
+{
+ "made": "2026-11-22",
+ "rule": "v1.9",
+ "market": "KR",
+ "panel": "quant_panel_KR.parquet",
+ "spec": {
+  "market": "KR",
+  "start": "2017-06-05",
+  "filters": [
+   {
+    "field": "marcap",
+    "op": ">=",
+    "value": 100000000000.0
+   },
+   {
+    "field": "rs",
+    "op": ">=",
+    "value": 80
+   },
+   {
+    "field": "op_turn",
+    "op": "==",
+    "value": 1
+   },
+   {
+    "field": "ma_gap:5",
+    "op": ">",
+    "value": 0
+   }
+  ],
+  "rank": {
+   "field": "rs",
+   "desc": true
+  },
+  "rebalance": 1,
+  "max_pos": 10,
+  "max_w": 0.3,
+  "trim": "cap",
+  "entry": {
+   "init": 0.5,
+   "pyramid": [
+    [
+     10,
+     0.25
+    ],
+    [
+     20,
+     0.25
+    ]
+   ]
+  },
+  "exposure": {
+   "index": "",
+   "ma": 5,
+   "below": 0.0,
+   "mode": "entry"
+  },
+  "exit": {
+   "stop": 0,
+   "trail": [
+    [
+     0,
+     20
+    ]
+   ],
+   "cooldown": 2,
+   "signals": [
+    {
+     "type": "field",
+     "field": "rs",
+     "op": "<",
+     "value": 70
+    }
+   ]
+  }
+ },
+ "full": {
+  "CAGR": 17.74,
+  "MDD": -29.7,
+  "weeks": 492,
+  "years": 9.43
+ },
+ "kospi": {
+  "CAGR": 8.83,
+  "MDD": -44.11,
+  "weeks": 492,
+  "years": 9.43
+ },
+ "walkforward": {
+  "periods": [
+   {
+    "start": "2017-06-05",
+    "end": "2019-07-01",
+    "strat": {
+     "CAGR": 13.36,
+     "MDD": -26.56,
+     "weeks": 107,
+     "years": 2.05
+    },
+    "kospi": {
+     "CAGR": -5.29,
+     "MDD": -21.92,
+     "weeks": 107,
+     "years": 2.05
+    },
+    "beat": true
+   },
+   {
+    "start": "2019-07-01",
+    "end": "2021-07-01",
+    "strat": {
+     "CAGR": 3.7,
+     "MDD": -25.84,
+     "weeks": 105,
+     "years": 1.99
+    },
+    "kospi": {
+     "CAGR": 24.79,
+     "MDD": -30.41,
+     "weeks": 105,
+     "years": 1.99
+    },
+    "beat": false
+   },
+   {
+    "start": "2021-07-01",
+    "end": "2023-07-01",
+    "strat": {
+     "CAGR": 17.3,
+     "MDD": -17.97,
+     "weeks": 104,
+     "years": 1.97
+    },
+    "kospi": {
+     "CAGR": -10.87,
+     "MDD": -34.22,
+     "weeks": 104,
+     "years": 1.97
+    },
+    "beat": true
+   },
+   {
+    "start": "2023-07-01",
+    "end": "2026-11-09",
+    "strat": {
+     "CAGR": 31.01,
+     "MDD": -29.7,
+     "weeks": 175,
+     "years": 3.33
+    },
+    "kospi": {
+     "CAGR": 23.15,
+     "MDD": -44.11,
+     "weeks": 175,
+     "years": 3.33
+    },
+    "beat": true
+   }
+  ],
+  "beat": 3,
+  "of": 4
+ },
+ "shock": {
+  "table": {
+   "0.000": {
+    "CAGR": 17.74,
+    "MDD": -29.7,
+    "weeks": 492,
+    "years": 9.43
+   },
+   "0.005": {
+    "CAGR": 17.15,
+    "MDD": -30.11,
+    "weeks": 492,
+    "years": 9.43
+   },
+   "0.010": {
+    "CAGR": 16.56,
+    "MDD": -30.52,
+    "weeks": 492,
+    "years": 9.43
+   },
+   "0.020": {
+    "CAGR": 15.38,
+    "MDD": -31.35,
+    "weeks": 492,
+    "years": 9.43
+   },
+   "0.030": {
+    "CAGR": 14.2,
+    "MDD": -32.17,
+    "weeks": 492,
+    "years": 9.43
+   },
+   "0.050": {
+    "CAGR": 11.84,
+    "MDD": -33.8,
+    "weeks": 492,
+    "years": 9.43
+   },
+   "0.080": {
+    "CAGR": 8.31,
+    "MDD": -36.53,
+    "weeks": 492,
+    "years": 9.43
+   }
+  },
+  "breakeven_default_rate": 0.08,
+  "note": "알파가 KOSPI 와 같아지는 연 부도율. 평시 실제 부도율 0.3~0.5%"
+ },
+ "cost": {
+  "zero": {
+   "CAGR": 20.02,
+   "MDD": -28.04,
+   "weeks": 492,
+   "years": 9.43
+  },
+  "base": {
+   "CAGR": 17.74,
+   "MDD": -29.7,
+   "weeks": 492,
+   "years": 9.43
+  },
+  "one_pct": {
+   "CAGR": 11.67,
+   "MDD": -33.69,
+   "weeks": 492,
+   "years": 9.43
+  },
+  "base_minus_zero": 2.28
+ },
+ "delay": {
+  "all_trades_on_panel_weeks": true,
+  "note": "체결가는 판정 다음 주 시가 — tests/test_quant_engine_golden.py 가 정확한 값으로 검증"
+ },
+ "trades": 1294
+}
