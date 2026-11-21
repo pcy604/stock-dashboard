@@ -1,8 +1,8 @@
 {
   "date": "2026-11-21",
-  "total": 346,
+  "total": 344,
   "kr": 121,
-  "us": 225,
+  "us": 223,
   "skipped": {
     "분기_누락": 136,
     "최신분기_영업익_공란": 89,
@@ -3924,35 +3924,6 @@
       "q2_ni": "$-8M",
       "q3_ni": "$40M",
       "ttm_ni": "$66M"
-    },
-    {
-      "sym": "ASH",
-      "name": "ASHLAND INC.",
-      "market": "US",
-      "marcap": 3275370859,
-      "status": "흑자전환완료",
-      "basis": "영업이익",
-      "op": [
-        43000000,
-        39000000,
-        -6000000,
-        61000000,
-        -708000000
-      ],
-      "op_ttm": 137000000,
-      "op_ttm_1y": -804000000,
-      "profit_streak": 2,
-      "loss_run_before": 1,
-      "yoy_imp_pct": 100.0,
-      "rev_growth": 7.3,
-      "opm_chg": 161.6,
-      "q0_date": "2026-06-30",
-      "score": 5,
-      "q0_ni": "$43M",
-      "q1_ni": "$39M",
-      "q2_ni": "$-6M",
-      "q3_ni": "$61M",
-      "ttm_ni": "$137M"
     },
     {
       "sym": "UNFI",
@@ -8361,35 +8332,6 @@
       "q2_ni": "$30M",
       "q3_ni": "$-24M",
       "ttm_ni": "$-34M"
-    },
-    {
-      "sym": "IIIV",
-      "name": "i3 Verticals, Inc.",
-      "market": "US",
-      "marcap": 417831853,
-      "status": "흑자전환임박",
-      "basis": "영업이익",
-      "op": [
-        -892000,
-        3743000,
-        1609000,
-        1476000,
-        -4813000
-      ],
-      "op_ttm": 5936000,
-      "op_ttm_1y": 5404000,
-      "profit_streak": 0,
-      "loss_run_before": null,
-      "yoy_imp_pct": 81.5,
-      "rev_growth": 2.2,
-      "opm_chg": 7.6,
-      "q0_date": "2026-06-30",
-      "score": 3,
-      "q0_ni": "$-1M",
-      "q1_ni": "$4M",
-      "q2_ni": "$2M",
-      "q3_ni": "$1M",
-      "ttm_ni": "$6M"
     },
     {
       "sym": "MASS",
