@@ -32,3 +32,9 @@ jobs:
           git add -f data/research/macro_long_fred.parquet data/research/macro_long_px.parquet
           git commit -m "auto: 매크로 장기 시계열 $(date -u +%F)" || exit 0
           git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      # 2026-11-22 감시 커버리지 — 이 산출물에는 CI 감시자가 없었다(화면엔 빨간불, CI 는 초록불).
+      #   `tools/check_freshness_ci.py --audit` 가 공백을 세며, 새 산출물을 등록하면 거기서 걸린다.
+      - name: 산출물 신선도 검증
+        if: always()
+        run: python tools/check_freshness_ci.py --job macro-long

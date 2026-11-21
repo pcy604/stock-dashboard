@@ -355,6 +355,17 @@ jobs:
             git log origin/main..HEAD --oneline | grep -q . && { echo "::error::결과 push 3회 실패"; exit 1; } || true
           fi
 
+      # 2026-11-22 신설 — 주간 산출물에 신선도 감시가 **없었다.**
+      #   check_freshness_ci 머리말은 "주간은 leaders_weekly 가 따로 검사한다"고 적고 있었는데
+      #   그 leaders_weekly 를 11-22 에 폐기했고, 폐기 전에도 /tmp 경로 버그로 죽어 있었다.
+      #   → 한동안 주간 산출물의 날짜를 아무도 보지 않았다.
+      #   ⚠️ `always()` 다. 왜 건너뛰었는지(주차 미완성·단계 실패)는 묻지 않고 **산출물이
+      #      실제로 낡았는지만** 본다 — 2주 연속 못 돌면 허용 9일을 넘겨 여기서 울린다.
+      #      (날짜는 파일 내부 generated 필드로 잰다 — 체크아웃 mtime 은 늘 오늘이라 쓸 수 없다.)
+      - name: 주간 산출물 신선도 검증 (조용한 고장 차단)
+        if: always() && steps.due.outputs.skip != 'true'
+        run: python tools/check_freshness_ci.py --job weekly-accel
+
       # 계약 위반으로 잡이 실패해도 갱신된 DB·캐시는 남긴다(위 ⚠️ 참조).
       # 단, 이익 가속 신호 발행까지 성공했을 때만 — 반쯤 쓴 DB 를 저장하지 않게.
       - name: market.db 저장

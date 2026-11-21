@@ -192,7 +192,8 @@ SOURCES = [
     # ★ 2026-08-23 신설 — 이익 가속 신호. 주도주 탭의 첫 화면이라 밀리면 바로 보인다.
     dict(path='results/leaders_accel.json', label='이익 가속 신호',
          cycle='주 1회 (토 08:00)', max_age=9, producer='leaders_accel.py',
-         job='leaders_weekly (로컬 스케줄러)', used_by='💎 펀더멘털 → 이익가속 → ⚡ 이익 가속',
+         job='weekly-accel',   # 2026-11-22: leaders_weekly(로컬) 폐기 — 실제 생산자는 weekly-accel 이다
+         used_by='💎 펀더멘털 → 이익가속 → ⚡ 이익 가속',
          getter=_key('generated')),
     # ★ 2026-08-25 신설 — 두 심층조회가 같은 곡선을 각자 갖고 있어 합쳤다(674종 중복).
     # 이게 밀리면 차트의 ▲ 는 최신인데 곡선만 지난주까지 그려진다 — 조용히 어긋난다.
@@ -206,7 +207,7 @@ SOURCES = [
          getter=_key('generated')),
     dict(path='results/price_curves.json', label='가격 곡선 (L/S·가속 공용)',
          cycle='주 1회 (토 08:00)', max_age=9, producer='curves_build.py',
-         job='weekly-accel + leaders_weekly(로컬)',
+         job='weekly-accel',   # 2026-11-22: leaders_weekly(로컬) 폐기
          used_by='💎 펀더멘털 → 이익가속 → 심층조회 차트 (L/S·이익가속 양쪽)',
          getter=_key('generated')),
     # 종료된 규칙이지만 화면에 기록으로 남아 있어 계속 감시한다.
@@ -338,6 +339,14 @@ SOURCES = [
          cycle='평일 07:53', max_age=6, producer='tools/fetch_macro_long.py',
          job='macro-long', used_by='🌍 매크로 · 🏠 종합 글로벌 마켓(하이일드 스프레드)',
          getter=_parquet_max('date'), raw=True),
+    # ★ 2026-11-22 — **감시자 자신을 감시한다.** 플랫폼 감시(platform-watch)는 매일 도는 크론이고,
+    #   GitHub 은 저장소가 조용하면 크론을 끈다. 그러면 '경보가 안 온다 = 괜찮다'가 되어
+    #   가장 나쁜 종류의 조용한 고장이 된다. 이 파일이 낡으면 daily-refresh 의 게이트가 잡는다
+    #   (그래서 daily-refresh.yml 에 `--job platform-watch` 도 같이 걸려 있다).
+    dict(path='results/platform_status.json', label='플랫폼 상태 감시 (L1)',
+         cycle='매일 06:20', max_age=3, producer='tools/platform_watch.py --l1',
+         job='platform-watch', used_by='감시 — SEC·DART·GitHub·Streamlit·Supabase 등 13개 플랫폼',
+         getter=_key('asof')),
 ]
 
 

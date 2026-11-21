@@ -31,3 +31,9 @@ jobs:
           git commit -m "auto: 한국 수급 $(date -u +%Y-%m-%d)"
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
           exit 1
+
+      # 2026-11-22 감시 커버리지 — 이 산출물에는 CI 감시자가 없었다(화면엔 빨간불, CI 는 초록불).
+      #   `tools/check_freshness_ci.py --audit` 가 공백을 세며, 새 산출물을 등록하면 거기서 걸린다.
+      - name: 산출물 신선도 검증
+        if: always()
+        run: python tools/check_freshness_ci.py --job kr-flow

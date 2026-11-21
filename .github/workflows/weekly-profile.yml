@@ -232,21 +232,18 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python output_contracts.py --fail-if-violated
 
+      # 2026-11-22 — 여기 박혀 있던 heredoc 을 공용 도구로 바꿨다. 두 가지가 틀려 있었다:
+      #   ① `r['job'] == 'weekly-profile'` 완전일치라 'weekly-profile (tools/refresh_kr_fundq.py)' ·
+      #      'daily-refresh · weekly-profile' 두 개를 **놓쳤다**(9개 중 7개만 봤다).
+      #   ② always() 가 없어 앞 단계가 죽으면 감시자가 같이 건너뛰었다 — 고장 날 안 도는 감시.
       - name: 신선도 검증 (정지면 실패 처리)
+        if: always()
         env:
           TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python pipeline_health.py
-          python - <<'PY'
-          import sys
-          from data_freshness import statuses
-          bad = [r for r in statuses()
-                 if r['job'] == 'weekly-profile' and r['state'] != 'ok']
-          for r in bad:
-              print(f"::error::{r['label']} — {r['note']} (마지막 {r['date']})")
-          sys.exit(1 if bad else 0)
-          PY
+          python tools/check_freshness_ci.py --job weekly-profile
 
       - name: KR 분기재무 실패 보고
         if: always() && steps.krfq.outcome == 'failure'

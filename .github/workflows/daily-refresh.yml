@@ -321,6 +321,21 @@ jobs:
       - name: 산출물 신선도 검증 (조용한 고장 차단)
         run: python tools/check_freshness_ci.py
 
+      # 2026-11-22 — 위 스텝은 하드코딩된 6개를 **mtime**(= 이 잡에서 방금 썼나)으로만 본다.
+      #   레지스트리(data_freshness.SOURCES)에 daily-refresh 로 등록된 건 12개다 — 나머지
+      #   6개(new_high_ai·consensus 3종·macro·market_report)는 화면에 빨간불만 그리고
+      #   CI 를 실패시키지 않았다. 여기서 **파일 내부 날짜**로 같이 본다.
+      - name: 산출물 신선도 검증 — 레지스트리 (내부 날짜 기준)
+        if: always()
+        run: python tools/check_freshness_ci.py --job daily-refresh
+
+      # 감시자 자신을 감시한다 — platform-watch 는 매일 도는 크론이고, GitHub 은 저장소가
+      #   조용하면 크론을 끈다. 그러면 '경보가 안 온다 = 괜찮다' 가 되어 가장 나쁜 고장이 된다.
+      #   매일 확실히 도는 이 잡에서 그 기록(results/platform_status.json)의 날짜를 본다.
+      - name: 플랫폼 감시가 살아 있는지 (감시자의 감시자)
+        if: always()
+        run: python tools/check_freshness_ci.py --job platform-watch
+
       - name: 정답 점검 — 하나라도 틀리면 실패 (빨간불 + 텔레그램)
         if: always()
         run: python tools/known_answers.py --strict --no-write
