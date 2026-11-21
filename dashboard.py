@@ -957,6 +957,15 @@ if st.query_params.get('diag') == 'net':
         _dk = _dc._key() if _dc else ''
     except Exception:
         _dk = ''
+
+    def _sec_ua():
+        """SEC 연락처 — 설정에 없으면 진단 줄만 비우고 나머지 소스는 그대로 검사한다."""
+        try:
+            import edgar_client
+            return {'User-Agent': f'stock-screener research {edgar_client.contact()}'}
+        except Exception:
+            return {'User-Agent': 'stock-screener research (SEC_CONTACT 미설정)'}
+
     st.subheader('🩺 외부 소스 연결 진단 — 이 서버(Streamlit Cloud) 기준')
     # 병렬 + 전체 마감 20초: DNS·TLS 단계 정지는 requests 타임아웃이 못 잡는다(2026-10-17 진단이 2분+ 멈춤)
     import concurrent.futures as _cf
@@ -967,7 +976,7 @@ if st.query_params.get('diag') == 'net':
          {'params': {'crtfc_key': _dk, 'corp_code': '00126380'}}),
         ('DART 웹', 'https://dart.fss.or.kr/', {}),
         ('SEC EDGAR', 'https://data.sec.gov/submissions/CIK0001318605.json',
-         {'headers': {'User-Agent': 'stock-screener research pcy604604@gmail.com'}}),
+         {'headers': _sec_ua()}),      # 2026-11-22 — 연락처는 설정에서(edgar_client.contact)
         ('네이버 금융', 'https://finance.naver.com/item/main.naver?code=005930', {'headers': _UA}),
         ('FRED', 'https://api.stlouisfed.org/fred/series/observations',
          {'params': {'series_id': 'SP500', 'api_key': FRED_KEY, 'file_type': 'json', 'limit': 1}}),
@@ -1187,6 +1196,12 @@ def _owner_seen() -> bool:
     except Exception:
         return False
 
+
+try:                                   # 2026-11-15 SNS·봇 연결 띠 — 실패해도 화면을 막지 않는다
+    import ui_social as _USOC
+    _USOC.strip()
+except Exception:
+    pass
 
 with st.expander("📘 사용법",
                  expanded=_first_visit and not IS_MOBILE and not _owner_seen()

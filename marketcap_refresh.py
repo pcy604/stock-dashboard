@@ -63,8 +63,21 @@ OUT_SH = os.path.join(DATA, "us_shares.csv")
 OUT_SH_CHECK = os.path.join(DATA, "us_shares_checked.json")   # 2026-11-16 점검 날짜(공시 행이 같아도 매일 갱신)
 SPLITS = os.path.join(DATA, "us_splits.csv")
 
-SUA = {"User-Agent": "leaders-research pcy604604@gmail.com",
-       "Accept-Encoding": "gzip, deflate"}
+# SEC 연락처는 설정에서 읽는다(2026-11-22 백로그 #4 — 공개 저장소에 이메일을 박지 않는다).
+#   edgar_client.contact(): 환경변수 SEC_CONTACT → st.secrets['sec']['contact'] → secrets.toml
+#   없으면 RuntimeError. import 시점이 아니라 '요청할 때' 읽는다.
+_SUA_CACHE = {}
+
+
+def _sua():
+    from edgar_client import contact
+    c = contact()
+    if _SUA_CACHE.get('c') != c:
+        _SUA_CACHE.clear()
+        _SUA_CACHE.update({'c': c, 'h': {'User-Agent': f'leaders-research {c}',
+                                         'Accept-Encoding': 'gzip, deflate'}})
+    return _SUA_CACHE['h']
+
 YUA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                      "(KHTML, like Gecko) Chrome/122.0 Safari/537.36"}
 STALE_DAYS = 20          # 주식수는 분기 공시라 20일이면 충분하다
@@ -151,7 +164,7 @@ def _pull_shares(sym, cik):
                    [("us-gaap", t) for t in FALLBACK]:
         try:
             raw = get(f"https://data.sec.gov/api/xbrl/companyconcept/"
-                      f"CIK{cik}/{ns}/{tag}.json", SUA)
+                      f"CIK{cik}/{ns}/{tag}.json", _sua())
         except Missing:
             hit = True                    # 404 = 확정 부재. 조회 자체는 성공한 셈.
             continue
@@ -219,7 +232,7 @@ def cmd_frames(since=2017):
     def work(a):
         ns, tag, q = a
         try:
-            raw = get(f"https://data.sec.gov/api/xbrl/frames/{ns}/{tag}/shares/{q}.json", SUA)
+            raw = get(f"https://data.sec.gov/api/xbrl/frames/{ns}/{tag}/shares/{q}.json", _sua())
         except Missing:
             raw = None
         n["i"] += 1
@@ -328,7 +341,7 @@ FPI_FORMS = {"20-F", "40-F", "6-K"}
 
 def _domicile(sym, cik):
     try:
-        raw = get(f"https://data.sec.gov/submissions/CIK{cik}.json", SUA, tries=3)
+        raw = get(f"https://data.sec.gov/submissions/CIK{cik}.json", _sua(), tries=3)
     except Missing:
         return None
     if not raw:

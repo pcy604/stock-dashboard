@@ -37,8 +37,21 @@ from pathlib import Path
 
 import requests
 
-UA = {'User-Agent': 'stock-screener research pcy604604@gmail.com',
-      'Accept-Encoding': 'gzip, deflate'}
+# SEC 연락처는 설정에서 읽는다(2026-11-22 백로그 #4 — 공개 저장소에 이메일을 박지 않는다).
+#   edgar_client.contact(): 환경변수 SEC_CONTACT → st.secrets['sec']['contact'] → secrets.toml
+#   없으면 RuntimeError. import 시점이 아니라 '요청할 때' 읽는다.
+_SUA_CACHE = {}
+
+
+def _ua():
+    from edgar_client import contact
+    c = contact()
+    if _SUA_CACHE.get('c') != c:
+        _SUA_CACHE.clear()
+        _SUA_CACHE.update({'c': c, 'h': {'User-Agent': f'stock-screener research {c}',
+                                         'Accept-Encoding': 'gzip, deflate'}})
+    return _SUA_CACHE['h']
+
 OUT = Path('data/us_float.csv')
 TAG = 'https://data.sec.gov/api/xbrl/frames/dei/EntityPublicFloat/USD/{q}.json'
 
@@ -55,7 +68,7 @@ def fetch(years=2, sleep=0.2):
     best, calls = {}, 0
     for q in quarters(years):
         try:
-            r = requests.get(TAG.format(q=q), headers=UA, timeout=45)
+            r = requests.get(TAG.format(q=q), headers=_ua(), timeout=45)
             calls += 1
             if r.status_code != 200:
                 continue

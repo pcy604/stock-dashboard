@@ -32,7 +32,21 @@ VER = os.environ.get("FACTOR_VER", "v1")
 
 YUA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                      '(KHTML, like Gecko) Chrome/124.0 Safari/537.36'}
-SUA = {'User-Agent': 'leaders-research pcy604604@gmail.com', 'Accept-Encoding': 'gzip, deflate'}
+# SEC 연락처는 설정에서 읽는다(2026-11-22 백로그 #4 — 공개 저장소에 이메일을 박지 않는다).
+#   edgar_client.contact(): 환경변수 SEC_CONTACT → st.secrets['sec']['contact'] → secrets.toml
+#   없으면 RuntimeError. import 시점이 아니라 '요청할 때' 읽는다.
+_SUA_CACHE = {}
+
+
+def _sua():
+    from edgar_client import contact
+    c = contact()
+    if _SUA_CACHE.get('c') != c:
+        _SUA_CACHE.clear()
+        _SUA_CACHE.update({'c': c, 'h': {'User-Agent': f'leaders-research {c}',
+                                         'Accept-Encoding': 'gzip, deflate'}})
+    return _SUA_CACHE['h']
+
 REV = ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues', 'SalesRevenueNet',
        'RevenueFromContractWithCustomerIncludingAssessedTax']
 TAGS = {'revenue': REV, 'gross': ['GrossProfit'],
@@ -270,7 +284,7 @@ def fetch_fund(sym, cik):
     #   그 전에 다시 받아도 같은 내용이라 SEC 요청만 낭비한다.
     if not _cache_due(p, "period_end", gap_days=120):
         return True
-    raw = get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json", SUA)
+    raw = get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json", _sua())
     if not raw:
         return False
     try:
@@ -296,7 +310,7 @@ def fetch_8k(sym, cik):
     # 실적 발표는 대략 91일 간격 → 마지막 발표가 80일 넘었으면 다음 발표를 확인
     if not _cache_due(p, "earn_date", gap_days=80):
         return True
-    raw = get(f"https://data.sec.gov/submissions/CIK{cik}.json", SUA)
+    raw = get(f"https://data.sec.gov/submissions/CIK{cik}.json", _sua())
     if not raw:
         return False
     try:
@@ -304,7 +318,7 @@ def fetch_8k(sym, cik):
         recent = j.get('filings', {}).get('recent', {})
         frames = [recent]
         for f in j.get('filings', {}).get('files', [])[:4]:
-            r2 = get(f"https://data.sec.gov/submissions/{f['name']}", SUA)
+            r2 = get(f"https://data.sec.gov/submissions/{f['name']}", _sua())
             if r2:
                 frames.append(json.loads(r2))
         rows = []

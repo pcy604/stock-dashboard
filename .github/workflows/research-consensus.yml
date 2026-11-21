@@ -20,6 +20,7 @@ jobs:
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUNBUFFERED: '1'
+      SEC_CONTACT: ${{ secrets.SEC_CONTACT }}   # leaders_build 가 SEC EDGAR 를 친다(없으면 403)
     steps:
       - uses: actions/checkout@v4
         with:
