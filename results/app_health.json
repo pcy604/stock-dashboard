@@ -1,14 +1,14 @@
 {
- "at": "2026-11-22T02:06:54Z",
+ "at": "2026-11-22T12:29:18Z",
  "url": "https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/",
  "checks": [
   {
    "page": "배포 빌드 = main",
    "ok": true,
    "deployed": {
-    "sha": "1cb3249930cf",
-    "ts": 1795301820,
-    "at": "2026-11-21 22:57"
+    "sha": "bf45710ae2d3",
+    "ts": 1795347660,
+    "at": "2026-11-22 11:41"
    },
    "why": "최신 main 과 같다",
    "behind": 0,
