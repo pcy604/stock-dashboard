@@ -84,17 +84,80 @@ def coverage(d, probes):
     return out
 
 
+# 2026-11-22 — 미국 시계열은 **통째로 쌓은 판을 앞에, 증분 판을 뒤에** 이어 붙인다.
+#   v1(증분)은 과거 행을 고치지 않아 분할이 일어난 종목의 과거 가격이 분할 전 값으로 남는다.
+#   실측: 겹침 959,977행 중 105,618행(11.0%)·252종이 일봉 원본과 0.5% 넘게 어긋났고,
+#   v13y(통째)가 어긋난 종목은 0 이었다 — AAPL·BAC·AMGN·ADM·AEP 가 그 252종에 있다.
+#   접합부(2017-12 → 2018-01) 주간 변동률은 중앙 1.018 · 99%분위 1.228 · ×5 초과 0종이라
+#   이어 붙여도 가짜 손익이 생기지 않는다.
+#   FACTOR_VER 로 하나만 지정하면 그것만 쓴다(기존 동작 유지).
+US_VERS = ("v13y", "v1")
+
+
+def _us_vers():
+    """DB 에 있는 ver 만, US_VERS 우선순위로. FACTOR_VER 가 주어지면 그 하나만."""
+    env = (os.environ.get("FACTOR_VER") or "").strip()
+    c = sqlite3.connect(f"file:{os.path.join(ROOT, 'data', 'market.db')}?mode=ro", uri=True)
+    have = {r[0] for r in c.execute("SELECT DISTINCT factor_ver FROM factor_weekly")}
+    c.close()
+    if env:
+        return (env,) if env in have else ()
+    got = tuple(v for v in US_VERS if v in have)
+    return got or (tuple(sorted(have))[:1] if have else ())
+
+
+SEAM = {}          # us() 가 접합 상태를 남긴다 → main() 이 info.json 에 기록
+
+
+def _seam_note(vers):
+    """접합에 쓴 ver 별 기간·행수와 **통째 판이 얼마나 낡았나**를 기록한다.
+
+    왜 기록하나: 통째 판(v13y)이 낡으면 그만큼 긴 구간을 증분 판(v1)이 메우고,
+    증분 판은 분할을 과거로 전파하지 않으므로 **썩은 구간이 그만큼 늘어난다.**
+    데이터는 최신이라 어떤 경보도 울리지 않는다 — 그래서 숫자로 남겨 둔다."""
+    c = sqlite3.connect(f"file:{os.path.join(ROOT, 'data', 'market.db')}?mode=ro", uri=True)
+    rows = {v: c.execute("SELECT COUNT(*), MIN(as_of), MAX(as_of) FROM factor_weekly WHERE factor_ver=?",
+                         (v,)).fetchone() for v in vers}
+    c.close()
+    out = dict(vers=list(vers),
+               by_ver={v: dict(rows=int(n or 0), start=a, end=b) for v, (n, a, b) in rows.items()})
+    if len(vers) > 1:
+        base, inc = vers[0], vers[-1]
+        be, ie = rows[base][2], rows[inc][2]
+        if be and ie:
+            gap = (pd.Timestamp(ie[:10]) - pd.Timestamp(be[:10])).days
+            out["base_stale_days"] = int(gap)
+            out["filled_by_incremental"] = f"{be} ~ {ie}"
+            out["note"] = (f"통째 판 {base} 가 {gap}일 낡았다 — 그 구간({be}~{ie})은 증분 판 {inc} 이 메운다. "
+                           f"증분 판은 분할을 과거로 전파하지 않으므로 이 구간에 분할이 있었던 종목의 "
+                           f"가격은 틀릴 수 있다. {base} 를 다시 쌓으면(약 48분) 사라진다.")
+            if gap > 56:
+                print(f"[US] ⚠️ {out['note']}", flush=True)
+    return out
+
+
 def us():
-    ver = os.environ.get("FACTOR_VER", "v1")
+    vers = _us_vers()
+    if not vers:
+        raise SystemExit("factor_weekly 가 비어 있다 — 미국 패널을 만들 수 없다")
+    SEAM.clear()
+    SEAM.update(_seam_note(vers))
+    ver = vers[0]
     os.environ["FACTOR_VER"] = ver
     import leaders_accel as A
-    d = A.load()                                         # ACC 계산 포함
+    d = A.load(vers=vers)                                # ACC 계산 포함 · 여러 ver 접합
     c = sqlite3.connect(os.path.join(ROOT, "data", "market.db"))
     # 2026-11-22: roe·debt 추가(leaders_build 가 SEC 재무상태표를 받기 시작했다). 아직 안 받은 DB 도 돌게 열 존재를 확인한다.
     _fw = {x[1] for x in c.execute("PRAGMA table_info(factor_weekly)")}
     _opt = [x for x in ("roe", "debt") if x in _fw]
-    extra = pd.read_sql(f"SELECT as_of, sym, sector, pbr, op_turn, op_income, rev_qoq"
-                        f"{(', ' + ', '.join(_opt)) if _opt else ''} FROM factor_weekly WHERE factor_ver='{ver}'", c)
+    _ph = ", ".join("?" * len(vers))
+    extra = pd.read_sql(f"SELECT factor_ver, as_of, sym, sector, pbr, op_turn, op_income, rev_qoq"
+                        f"{(', ' + ', '.join(_opt)) if _opt else ''} FROM factor_weekly "
+                        f"WHERE factor_ver IN ({_ph})", c, params=vers)
+    #   d 와 같은 우선순위로 중복을 걷어야 한다 — 안 그러면 merge 가 행을 불린다
+    extra["_pri"] = extra.factor_ver.map({v: i for i, v in enumerate(vers)})
+    extra = (extra.sort_values("_pri").drop_duplicates(["sym", "as_of"], keep="first")
+                  .drop(columns=["_pri", "factor_ver"]))
     extra["as_of"] = pd.to_datetime(extra.as_of)
     d = d.merge(extra, on=["as_of", "sym"], how="left", suffixes=("", "_x"))
     px = pd.read_sql("SELECT sym, date, open, high, low, volume FROM prices WHERE market='US'", c)
@@ -153,7 +216,7 @@ def us():
     bad_syms = sorted(d.loc[bad, "sym"].unique())
     d = d[~d.sym.isin(bad_syms)]
     print(f"[US] 주간 ×5↑·÷5↓ 급변 {int(bad.sum())}칸 → {len(bad_syms)}종 제외 {bad_syms[:20]} · $1 미만 행 제외")
-    print(f"[US] {ver} {d.date.min().date()}~{d.date.max().date()} · {d.sym.nunique():,}종 · {len(d):,}행")
+    print(f"[US] {'+'.join(vers)} {d.date.min().date()}~{d.date.max().date()} · {d.sym.nunique():,}종 · {len(d):,}행")
     return _f32(d)
 
 
@@ -298,6 +361,8 @@ def main(markets=("US", "KR")):
                            cover={c: round(float(d[c].notna().mean() * 100), 2) for c in COLS
                                   if c not in ("sym", "name", "market", "date")},
                            first_week=coverage(d, ("NVDA", "PLTR", "TSLA") if m == "US" else ("005930", "086520", "247540")))
+            if m == "US" and SEAM:
+                info[m]["seam"] = dict(SEAM)
         except Exception as e:
             info[m] = dict(error=f"{type(e).__name__}: {e}")
             print(f"[{m}] 실패: {e}")

@@ -134,15 +134,39 @@ MAX_OIA = 10.0        # 이익가속 절대값 상한. 매출이 사업 규모�
                       # 측정: 상한을 걸어도 평균 32.6% · 알파 13.1% 로 변화 없다.
 
 
-def load():
+#   2026-11-22 — factor_weekly 의 ver 을 **여러 개 이어 붙일 수 있게** 했다.
+#   왜: v1 은 증분 적재라 과거 행을 한 번 쓰고 고치지 않는다. 그 뒤 분할이 일어난 종목은
+#   과거 가격이 분할 전 기준으로 남는다(prices 일봉은 수정주가로 과거까지 보정되는데
+#   factor_weekly 의 과거 행은 그대로). 실측(겹침 2018-01~2026-08, 959,977행):
+#     · v1 이 일봉 원본과 0.5% 넘게 어긋난 행 105,618 (11.0%) · 252종 — AAPL·BAC·AMGN·ADM·AEP 포함
+#     · v13y 가 어긋난 종목 0 — 2026-08 에 2014-02-24 부터 통째로 다시 쌓아 전 구간이 일관된다
+#     · 접합부(2017-12 v13y → 2018-01 v1) 주간 변동률 중앙 1.018 · 99%분위 1.228 · ×5 초과 0종
+#   → 통째로 쌓은 ver 을 **앞에** 두고, 그게 끝난 뒤 구간만 증분 ver 으로 메운다.
+#   ⚠️ 이건 증상 완화다. 뿌리는 '증분 적재가 분할을 과거로 전파하지 않는다'이고,
+#      통째로 쌓은 판(v13y)이 낡으면 썩은 구간이 다시 늘어난다 → split_rot() 로 감시한다.
+def load(vers=None):
+    """vers: ('v13y','v1') 처럼 **우선순위 순**. 같은 (sym, as_of)는 앞 ver 이 이긴다.
+    기본은 환경변수로 정해진 VER 하나 — 기존 호출부(대시보드·발행)는 동작이 바뀌지 않는다."""
+    vers = tuple(vers or (VER,))
     c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
-    d = pd.read_sql(f"""SELECT as_of,sym,name,close,marcap,adv_20d,ret_1w,dist_52w,
-                               ret_ytd,hi_52w,low_52w_dist,days_since_hi52,
-                               mdd_52w,rs_4w,rs_13w,vol_x_20w,per,psr,net_income,
-                               period_end,
-                               revenue,op_income,gross_profit,rev_yoy,gpm,opm,opm_qoq
-                        FROM factor_weekly WHERE factor_ver='{VER}'""", c)
+    sql = """SELECT as_of,sym,name,close,marcap,adv_20d,ret_1w,dist_52w,
+                    ret_ytd,hi_52w,low_52w_dist,days_since_hi52,
+                    mdd_52w,rs_4w,rs_13w,vol_x_20w,per,psr,net_income,
+                    period_end,
+                    revenue,op_income,gross_profit,rev_yoy,gpm,opm,opm_qoq
+             FROM factor_weekly WHERE factor_ver=?"""
+    parts = [pd.read_sql(sql, c, params=(v,)) for v in vers]
     c.close()
+    parts = [p for p in parts if len(p)]
+    if not parts:
+        raise SystemExit(f"factor_weekly 에 {vers} 가 없다")
+    if len(parts) > 1:
+        n0 = [len(p) for p in parts]
+        d = pd.concat(parts, ignore_index=True).drop_duplicates(["sym", "as_of"], keep="first")
+        print(f"[접합] {' + '.join(f'{v}({n:,}행)' for v, n in zip(vers, n0))} → {len(d):,}행 "
+              f"(앞 ver 우선, 겹침 {sum(n0) - len(d):,}행은 앞 ver 값을 썼다)", flush=True)
+    else:
+        d = parts[0]
     d["as_of"] = pd.to_datetime(d.as_of)
 
     # 분기 패널에서 가속을 만든다 — period_end 기준이라 그 주차에 알 수 있던 값만 쓴다
@@ -168,6 +192,38 @@ def load():
     q["ACC"] = ((q.rv_a > 0) & (q.oi_a > 0) & (q.oi_a.abs() <= MAX_OIA)).astype(int)
     return d.merge(q[["sym", "period_end", "oi_a", "rv_a", "dgpm", "dopm", "ni_yoy", "ACC"]],
                    on=["sym", "period_end"], how="left")
+
+
+def split_rot(ver=None, since=None, tol=0.005):
+    """**분할 썩음 측정** — 증분 ver 의 주봉 종가가 일봉 원본(prices)과 얼마나 어긋났나 (2026-11-22).
+
+    왜 필요한가: 증분 적재는 새 주차만 붙이고 과거 행을 고치지 않는다. 분할이 일어나면
+    `prices` 는 수정주가로 **과거까지** 보정되는데 factor_weekly 의 과거 행은 분할 전 값으로 남는다.
+    그 차이는 조용하다 — 오류도, 결측도 없이 그냥 틀린 가격으로 백테스트가 돌아간다.
+    실측(2026-11-22): v1 의 겹침 구간 959,977행 중 105,618행(11.0%)·252종이 그 상태였다.
+
+    반환 dict(rows, rot_rows, rot_syms, pct, syms) — 감시·테스트가 읽는다.
+    ⚠️ 비교는 '그 주에 거래가 있던 주차'만 한다(일봉이 없으면 판정하지 않는다 — 결측을 썩음으로 세면 안 된다).
+    """
+    ver = ver or VER
+    since = since or "2018-01-01"
+    c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+    d = pd.read_sql("""
+        SELECT f.sym, f.as_of, f.close,
+               (SELECT p.close FROM prices p
+                WHERE p.sym = f.sym AND p.market = 'US'
+                  AND p.date >= f.as_of AND p.date < date(f.as_of, '+7 day')
+                ORDER BY p.date DESC LIMIT 1) AS real
+        FROM factor_weekly f
+        WHERE f.factor_ver = ? AND f.as_of >= ?""", c, params=(ver, since))
+    c.close()
+    d = d[d.real.notna() & (d.real > 0) & d.close.notna()]
+    if not len(d):
+        return dict(rows=0, rot_rows=0, rot_syms=0, pct=0.0, syms=[])
+    rel = (d.close - d.real).abs() / d.real.abs()
+    rot = d[rel > tol]
+    return dict(rows=int(len(d)), rot_rows=int(len(rot)), rot_syms=int(rot.sym.nunique()),
+                pct=float(len(rot) / len(d)), syms=sorted(rot.sym.unique())[:50])
 
 
 def matrices(d, cols):

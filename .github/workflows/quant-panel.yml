@@ -43,21 +43,29 @@ jobs:
           key: fw-v13y-none
           restore-keys: |
             fw-v13y-
-      - name: 장기판 v13y 붙이기(있으면)
+      # 2026-11-22 — v13y 를 **하나만 골라 쓰지 않고** DB 에 붙여 두기만 한다.
+      #   왜 바꿨나: 전에는 v13y 가 있으면 `FACTOR_VER=v13y` 로 못 박았다. 그런데 v13y 는
+      #   누가 주기적으로 다시 쌓지 않아 2026-08-31 에 멈춰 있었고, 그래서 미국 패널이
+      #   10-26 에 정지 → 정답 점검 '최신 3주 이내'를 11-17 에 넘겨 daily-refresh 가
+      #   예정 실행 4회 연속 실패했다(산출물은 최신이라 아무도 몰랐다).
+      #   이제 quant_panel 이 v13y(통째) + v1(증분)을 **이어 붙인다** — 과거는 통째 판이,
+      #   통째 판이 끝난 뒤는 증분 판이 채운다. 그래서 FACTOR_VER 를 넘기지 않는다.
+      - name: 장기판 v13y DB 에 붙이기(있으면)
         run: |
           python - <<'PY'
           import os, sqlite3, pandas as pd
-          ver = 'v1'
           if os.path.exists('data/fw_v13y.parquet') and os.path.exists('data/market.db'):
               c = sqlite3.connect('data/market.db')
               if not c.execute("SELECT COUNT(*) FROM factor_weekly WHERE factor_ver='v13y'").fetchone()[0]:
                   pd.read_parquet('data/fw_v13y.parquet').to_sql('factor_weekly', c, if_exists='append', index=False); c.commit()
-              ver = 'v13y'
-          open('/tmp/ver', 'w').write(ver)
-          print(f"::notice title=미국 시계열::{ver}")
+              c.close()
+          c = sqlite3.connect('file:data/market.db?mode=ro', uri=True)
+          rows = c.execute("SELECT factor_ver, COUNT(*), MIN(as_of), MAX(as_of) FROM factor_weekly GROUP BY factor_ver").fetchall()
+          print("::notice title=미국 시계열::" + " · ".join(f"{v} {n:,}행 {a}~{b}" for v, n, a, b in rows))
           PY
+      # FACTOR_VER 를 **주지 않는다** — 주면 quant_panel 이 그 하나만 쓰고 접합이 꺼진다.
       - name: 패널 만들기
-        run: FACTOR_VER=$(cat /tmp/ver) python research/quant_panel.py
+        run: python research/quant_panel.py
       - name: Release 에 올리기
         run: |
           ls -la results/quant_panel_*.parquet
