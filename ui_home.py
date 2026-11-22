@@ -387,7 +387,10 @@ def _theme_box(m: dict) -> str:
     tt, tb = m.get('themes_top') or [], m.get('themes_bottom') or []
 
     def lead(t):
-        return ' · '.join(f"{_a(x['name'], x.get('sym'))} {_pct(x.get('ret'), nd=1)}" for x in (t.get('lead') or [])[:3])
+        # 2026-11-23 — '현대백화점'과 '+0.3%' 사이에서 줄이 바뀌어 보기 싫었다.
+        #   종목명+등락률을 한 덩어리(nowrap)로 묶어 **덩어리 단위로** 넘어가게 한다.
+        return ' · '.join(f"<span style='white-space:nowrap'>{_a(x['name'], x.get('sym'))} {_pct(x.get('ret'), nd=1)}</span>"
+                          for x in (t.get('lead') or [])[:3])
     th = ''.join(f"<div class='hm-row' style='display:block'><b>{_e(t['name'])}</b> {_pct(t.get('ret'), nd=1)} "
                  f"<em>{t.get('up', '-')}/{t.get('n', '-')}종 상승</em><br><span style='font-size:11.5px'>{lead(t)}</span></div>"
                  for t in tt[:3]) or "<div class='hm-kv'>-</div>"
@@ -398,8 +401,8 @@ def _theme_box(m: dict) -> str:
 
 def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period: str = 'd1', extra: dict | None = None):
     """시장 내부(한국·미국 × 일간·주간·월간 같은 모양). 2026-11-15 재배치.
-    한국: 시장 폭 · 수급 · 강한 업종 · 약한 업종 / 강세 테마 · 52주 신고가 · 특징주(일간)·급등주 · 대형주 상승 상위
-    미국: 시장 폭 · 돈이 몰린 종목 · 강한 업종 · 약한 업종 / 급등주 · 52주 신고가 · 대형주 상승 상위 · 대형주 하락 상위
+    한국: 시장 폭 · 수급 · 강세 업종 · 약세 업종 / 강세 테마 · 52주 신고가 · 특징주(일간)·급등주 · 대형주 상승 상위
+    미국: 시장 폭 · 돈이 몰린 종목 · 강세 업종 · 약세 업종 / 급등주 · 52주 신고가 · 대형주 상승 상위 · 대형주 하락 상위
     마지막 줄: 시총 상위 10(한 줄). 상자 제목 ↗ = 새 창 종목 발굴 목록. extra = 한국 일간 네이버 전 종목 숫자(보조)."""
     mk = 'KR' if kr else 'US'
     sec = sorted([s for s in (m.get('sectors') or []) if s.get('ret') is not None], key=lambda s: -s['ret'])
@@ -410,8 +413,8 @@ def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period:
                         [dict(x, tag=x.get('tag') or (f"${x['amt_b']:,.1f}B" if x.get('amt_b') is not None else None))
                          for x in (m.get('turnover_top') or [])[:6]], 'tag')
     row1 = (_breadth_box(m, kr, extra) + mid +
-            f"<div class='hm-box'><h5>강한 업종 {_SUB.format('(시총가중 · 누르면 구성 종목)')}</h5>{_sec_rows(sec[:5])}</div>"
-            f"<div class='hm-box'><h5>약한 업종 {_SUB.format('(시총가중)')}</h5>{_sec_rows(sorted(sec[-5:], key=lambda s: s['ret']))}</div>")
+            f"<div class='hm-box'><h5>강세 업종 {_SUB.format('(시총가중 · 누르면 구성 종목)')}</h5>{_sec_rows(sec[:5])}</div>"
+            f"<div class='hm-box'><h5>약세 업종 {_SUB.format('(시총가중)')}</h5>{_sec_rows(sorted(sec[-5:], key=lambda s: s['ret']))}</div>")
     nh = m.get('new_high_52w') or {}
     nh_t = _go(f"52주 신고가 {nh.get('n', '-')}종", 'h52', mk) + (
         f" <span style='font-weight:500;color:var(--ink-3)'>/ {nh['universe']:,}종</span>" if isinstance(nh.get('universe'), int) else '')
