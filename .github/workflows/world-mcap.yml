@@ -30,3 +30,7 @@ jobs:
           git add data/world_mcap.json
           git commit -m "auto: 국가별 시총(세계은행) $(date -u +%F)" || exit 0
           git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"
+      # 2026-11-22 — 이 산출물은 레지스트리에 **등록조차 안 돼** 감시 밖이었다.
+      - name: 산출물 신선도 검증
+        if: always()
+        run: python tools/check_freshness_ci.py --job world-mcap

@@ -25,6 +25,11 @@ jobs:
       FRED_KEY:       ${{ secrets.FRED_KEY }}
       GEMINI_KEY:     ${{ secrets.GEMINI_KEY }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      GITHUB_TOKEN:   ${{ github.token }}          # R3 — 워크플로 state·마지막 성공 조회
+      # R4 — Supabase 무료 티어 7일 일시정지 감시. **차니가 등록해야 실제로 감시된다.**
+      #   없으면 L1 이 'unchecked' 로 보고한다(조용히 통과시키지 않는다).
+      SUPABASE_URL:   ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY:   ${{ secrets.SUPABASE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

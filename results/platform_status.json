@@ -1,6 +1,10 @@
 {
  "asof": "2026-11-22",
  "fail_streak_alarm": 3,
+ "freshness": {
+  "bad": [],
+  "total": 43
+ },
  "platforms": {
   "DART (금융감독원)": {
    "breaks": "한국 분기재무 전체 → 한국 백테스트 패널·흑자전환·이익가속",
@@ -67,10 +71,10 @@
    "breaks": "퀀트 전략 저장·공개 게시판·VOC 접수·유입 집계",
    "checked": "2026-11-22",
    "fallback": "없음 (화면은 떠도 저장 기능이 죽는다)",
-   "kind": "probe",
-   "state": "ok",
+   "kind": "project",
+   "state": "reachable",
    "streak": 0,
-   "why": "HTTP 200"
+   "why": "비밀값 SUPABASE_URL·SUPABASE_KEY 가 없다 — 차니가 GitHub Secrets 에 넣어야 R4(7일 일시정지)를 실제로 감시할 수 있다"
   },
   "Telegram Bot API": {
    "breaks": "봇 알림·실패 경보 전달(경보가 안 오면 고장을 모른다)",
@@ -115,5 +119,96 @@
    "streak": 0,
    "why": "산출물 최신"
   }
+ },
+ "risks": [
+  {
+   "cover": "ok",
+   "id": "R1",
+   "note": "⏸ 보류(11-22) — 대가 = 거래일 10일 중 1일 전체 결행",
+   "watch": "l1:indirect",
+   "what": "토스 봇 노트북 의존"
+  },
+  {
+   "cover": "closed",
+   "id": "R2",
+   "note": "✅ 해결",
+   "watch": "none",
+   "what": "Streamlit 12h 재시작"
+  },
+  {
+   "cover": "unchecked",
+   "id": "R3",
+   "note": "워크플로 목록을 못 받았다(403) — 토큰이 없거나 한도",
+   "watch": "l1:workflows",
+   "what": "GitHub 60일 무활동 → 크론 중단"
+  },
+  {
+   "cover": "unchecked",
+   "id": "R4",
+   "note": "비밀값 SUPABASE_URL·SUPABASE_KEY 가 없다 — 차니가 GitHub Secrets 에 넣어야 R4(7일 일시정지)를 실제로 감시할 수 있다",
+   "watch": "l1:supabase",
+   "what": "Supabase 7일 무활동 → 일시정지"
+  },
+  {
+   "cover": "ok",
+   "id": "R5",
+   "note": "프로브 + L2 약관 diff",
+   "watch": "l1:probe",
+   "what": "출처 차단(Yahoo·네이버)"
+  },
+  {
+   "cover": "unchecked",
+   "id": "R6",
+   "note": "429 를 자격 거부와 따로 센다",
+   "watch": "l1:quota",
+   "what": "Gemini·유튜브 한도"
+  },
+  {
+   "cover": "ok",
+   "id": "R7",
+   "note": "getMe + L2 FAQ diff",
+   "watch": "l1:probe",
+   "what": "텔레그램 전송 한도"
+  },
+  {
+   "cover": "closed",
+   "id": "R8",
+   "note": "✅ 코드에서 제거(이력엔 남음)",
+   "watch": "none",
+   "what": "공개 이메일"
+  },
+  {
+   "cover": "human",
+   "id": "R9",
+   "note": "사람 판단 — 분기 재평가 항목",
+   "watch": "l3",
+   "what": "투자 조언 규제"
+  },
+  {
+   "cover": "ok",
+   "id": "R10",
+   "note": "요금 문서 diff + L3 소진율",
+   "watch": "l2",
+   "what": "무료 한도 소진"
+  },
+  {
+   "cover": "ok",
+   "id": "R11",
+   "note": "known_answers · 리포트 감사",
+   "watch": "test",
+   "what": "틀린 숫자 발행"
+  },
+  {
+   "cover": "ok",
+   "id": "R12",
+   "note": "⚠️ Meta·X 정책 문서가 JS 렌더라 L2 가 못 읽는다 — 부분 감시",
+   "watch": "l2",
+   "what": "자동 게시 제재"
+  }
+ ],
+ "workflows": {
+  "bad": [],
+  "error": "워크플로 목록을 못 받았다(403) — 토큰이 없거나 한도",
+  "total": 0
  }
 }

@@ -38,12 +38,140 @@ def test_every_platform_declares_impact_and_fallback():
 
 def test_kinds_have_the_fields_they_need():
     for p in P.PLATFORMS:
-        if p["kind"] == "probe":
+        assert p["kind"] in ("probe", "project", "indirect", "manual"), p["kind"]
+        if p["kind"] in ("probe", "project"):
             assert p.get("probe", "").startswith("https://"), p["name"]
         elif p["kind"] == "indirect":
             assert p.get("indirect"), f"{p['name']}: 간접 판정에 쓸 산출물 경로가 없다"
-        else:
-            assert p["kind"] == "manual", p["kind"]
+
+
+# ──────────────────────────────────────────────────────────────────────
+# R3 — 크론이 아직 도나 (주기별 허용 일수)
+# ──────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("dow,n", [("*", 7), ("0-4", 5), ("1-5", 5), ("1,4", 2), ("6", 1), ("5-6", 2)])
+def test_dow_days(dow, n):
+    assert P._dow_days(dow) == n
+
+
+@pytest.mark.parametrize("cron,lo,hi", [
+    ("30 21 * * 0-4", 4, 4),      # 평일 = 사실상 매일 → 주말 + 한 번까지만
+    ("7 22 * * *", 4, 4),         # 매일
+    ("0 3 * * 6", 17, 17),        # 주 1회
+    ("0 3 2 * *", 45, 45),        # 월 1회
+    ("0 22 1 1,4,7,10 *", 120, 120),   # 분기
+])
+def test_cron_tolerance(cron, lo, hi):
+    """⚠️ 두 방향으로 다 틀릴 수 있다 — 11-22 에 둘 다 실측했다.
+    월 1회(world-mcap)를 매일 기준으로 재면 매일 오경보 · 평일 잡(daily-refresh)을
+    주 1회로 뭉개면 예정 실행 4회 연속 실패를 17일간 못 본다."""
+    assert lo <= P._cron_tolerance(f"  schedule:\n    - cron: '{cron}'\n") <= hi
+
+
+def test_cron_tolerance_takes_the_loosest_of_several():
+    """크론이 여러 개면(본 실행 + 예비) 가장 느슨한 주기를 기준으로 봐야 오경보가 없다."""
+    y = "cron: '0 3 * * 6'\ncron: '0 3 2 * *'\n"
+    assert P._cron_tolerance(y) == 45
+
+
+def test_cron_tolerance_defaults_when_unparsable():
+    assert P._cron_tolerance("schedule:\n  - cron: 'nonsense'\n") == P.MAX_WF_IDLE_DAYS
+
+
+def test_workflow_self_is_not_reported(monkeypatch):
+    """platform-watch 가 스스로를 '성공 기록 없음'으로 신고하면, 그 경보 때문에 잡이 실패해
+    성공 기록이 안 생기고 → 다음 날 또 신고한다. **자기 봉인**이다."""
+    monkeypatch.setenv("GITHUB_WORKFLOW", "platform-watch")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "x/y")
+    monkeypatch.setattr(P, "_api", lambda u, token=None: (
+        (True, 200, {"workflows": [{"id": 1, "name": "platform-watch",
+                                    "path": ".github/workflows/platform-watch.yml", "state": "active"}]})
+        if "actions/workflows?" in u else (True, 200, {"workflow_runs": []})))
+    rows, bad, err = P.workflows()
+    assert not bad, bad
+
+
+def test_workflow_disabled_by_inactivity_is_reported(monkeypatch):
+    """R3 직격 — GitHub 이 60일 무활동으로 끈 상태. 이땐 실패 메일조차 오지 않는다."""
+    monkeypatch.delenv("GITHUB_WORKFLOW", raising=False)
+    monkeypatch.setenv("GITHUB_REPOSITORY", "x/y")
+    monkeypatch.setattr(P, "_api", lambda u, token=None: (
+        (True, 200, {"workflows": [{"id": 1, "name": "daily-refresh",
+                                    "path": ".github/workflows/daily-refresh.yml",
+                                    "state": "disabled_inactivity"}]})
+        if "actions/workflows?" in u else (True, 200, {"workflow_runs": []})))
+    rows, bad, err = P.workflows()
+    assert bad and "disabled_inactivity" in bad[0][1]
+
+
+def test_workflow_api_failure_is_not_silent(monkeypatch):
+    """목록을 못 받았으면 '문제 없음'이 아니라 '못 봤다'로 말해야 한다."""
+    monkeypatch.setenv("GITHUB_REPOSITORY", "x/y")
+    monkeypatch.setattr(P, "_api", lambda u, token=None: (False, 403, None))
+    rows, bad, err = P.workflows()
+    assert err and not rows
+
+
+# ──────────────────────────────────────────────────────────────────────
+# R4 — Supabase 프로젝트 (홈페이지 200 과 구분)
+# ──────────────────────────────────────────────────────────────────────
+def test_supabase_unchecked_without_secrets(monkeypatch):
+    """비밀값이 없으면 '감시 중'이라고 말하면 안 된다 — 레지스터에 적어 둔 게 거짓이 된다."""
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_KEY", raising=False)
+    state, why = P.supabase()
+    assert state == "unchecked" and "SUPABASE_URL" in why
+
+
+def test_supabase_homepage_state_does_not_leak_into_project(monkeypatch):
+    """supabase.com 이 200 인 것은 우리 프로젝트가 안 멈췄다는 뜻이 전혀 아니다(R4 7일 일시정지)."""
+    sb = [p for p in P.PLATFORMS if p["name"] == "Supabase"][0]
+    assert sb["kind"] == "project"
+
+
+# ──────────────────────────────────────────────────────────────────────
+# R6 — 한도 소진은 자격 거부와 다르다
+# ──────────────────────────────────────────────────────────────────────
+def test_429_is_quota_not_authfail(monkeypatch):
+    """429(한도)와 403(자격)은 대응이 다르다 — 기다리기 vs 키 재발급."""
+    monkeypatch.setenv("TESTKEY", "abc")
+    monkeypatch.setattr(P, "_get", lambda u, want_text=False, ua=None: (True, 429, ""))
+    assert P._probe(_p(auth=("TESTKEY", "https://x/?key={key}")))[0] == "quota"
+
+
+def test_quota_alarms_immediately(tmp_path, monkeypatch):
+    monkeypatch.setattr(P, "STATUS", str(tmp_path / "s.json"))
+    monkeypatch.setattr(P, "PLATFORMS", [_p()])
+    monkeypatch.setattr(P, "_probe", lambda p: ("quota", "HTTP 429"))
+    monkeypatch.setattr(P, "workflows", lambda: ([], [], ""))
+    assert P.l1() == 1
+
+
+# ──────────────────────────────────────────────────────────────────────
+# 리스크 레지스터 — '감시하기로 했다'와 '감시한다'가 갈라지지 않게
+# ──────────────────────────────────────────────────────────────────────
+def test_risk_register_covers_r1_to_r12():
+    assert [r["id"] for r in P.RISKS] == [f"R{i}" for i in range(1, 13)]
+
+
+def test_every_risk_names_its_watcher():
+    ok = {"l1:probe", "l1:workflows", "l1:supabase", "l1:quota", "l1:indirect", "l2", "l3", "test", "none"}
+    for r in P.RISKS:
+        assert r["watch"] in ok, f"{r['id']}: watch={r['watch']}"
+        assert r.get("note"), r["id"]
+
+
+def test_risk_table_marks_unchecked_when_watch_did_not_run():
+    """감시가 못 돌았으면 'ok' 가 아니라 'unchecked' 다 — 못 본 것을 괜찮다고 하면 감시가 아니다."""
+    rows = {"Supabase": {"state": "reachable", "why": "비밀값 없음"}}
+    t = {r["id"]: r["cover"] for r in P.risk_table(rows, [], "")}
+    assert t["R4"] == "unchecked"
+    t2 = {r["id"]: r["cover"] for r in P.risk_table({}, [], "목록 실패")}
+    assert t2["R3"] == "unchecked"
+
+
+def test_risk_table_marks_alarm_on_workflow_problem():
+    t = {r["id"]: r["cover"] for r in P.risk_table({}, [("daily-refresh", "state=disabled")], "")}
+    assert t["R3"] == "alarm"
 
 
 def test_indirect_paths_are_registered_outputs():

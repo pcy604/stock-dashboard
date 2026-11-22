@@ -34,6 +34,14 @@ def _key(*names):
     return get
 
 
+def _key2(outer, inner):
+    """중첩 한 단계(예: _meta.checked)."""
+    def get(d):
+        v = (d or {}).get(outer) or {}
+        return str(v.get(inner))[:10] if isinstance(v, dict) and v.get(inner) else None
+    return get
+
+
 def _paper_max_log(d):
     """원장은 created(시작일)가 아니라 마지막 기록일이 신선도다."""
     return max((t.get('log_date') for t in d.get('trades', []) if t.get('log_date')),
@@ -339,6 +347,13 @@ SOURCES = [
          cycle='평일 07:53', max_age=6, producer='tools/fetch_macro_long.py',
          job='macro-long', used_by='🌍 매크로 · 🏠 종합 글로벌 마켓(하이일드 스프레드)',
          getter=_parquet_max('date'), raw=True),
+    # ★ 2026-11-22 — 월 1회 세계은행 시총. `--audit` 이 못 잡던 구멍이었다: 감사는 **등록된 것**만
+    #   세므로, 등록조차 안 된 산출물은 '감시 공백 0' 안에서도 보이지 않는다(platform_watch 의
+    #   워크플로 검사 R3 가 먼저 잡아냈다). 내용은 연간치라 몇 달 그대로여서 _meta.checked 를 본다.
+    dict(path='data/world_mcap.json', label='국가별 시총 (세계은행 연간)',
+         cycle='월 1회 (2일 03:00 UTC)', max_age=40, producer='tools/fetch_world_mcap.py',
+         job='world-mcap', used_by='🌍 매크로 → 국가별 시총 비교',
+         getter=_key2('_meta', 'checked')),
     # ★ 2026-11-22 — **감시자 자신을 감시한다.** 플랫폼 감시(platform-watch)는 매일 도는 크론이고,
     #   GitHub 은 저장소가 조용하면 크론을 끈다. 그러면 '경보가 안 온다 = 괜찮다'가 되어
     #   가장 나쁜 종류의 조용한 고장이 된다. 이 파일이 낡으면 daily-refresh 의 게이트가 잡는다

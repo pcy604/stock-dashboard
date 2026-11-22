@@ -57,7 +57,11 @@ def main():
     if len(out) < 6:
         print('::error::세계은행 시총이 6개국 미만 — 저장하지 않는다')
         return 1
-    out['_meta'] = {'source': 'World Bank CM.MKT.LCAP.CD', 'missing': miss}
+    # 2026-11-22 checked — 이 산출물은 세계은행 연간치라 내용이 몇 달씩 그대로다.
+    #   그래서 '내용 날짜'로는 파이프라인이 죽은 걸 알 수 없다 → 점검일을 따로 남겨
+    #   data_freshness 가 그걸 본다(CI 는 매번 clone 하므로 파일 mtime 은 쓸 수 없다).
+    out['_meta'] = {'source': 'World Bank CM.MKT.LCAP.CD', 'missing': miss,
+                    'checked': __import__('datetime').date.today().isoformat()}
     with open(OUT, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
     return 0

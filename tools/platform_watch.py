@@ -55,6 +55,7 @@ TIMEOUT = 20
 FAIL_STREAK = 3            # 이만큼 연속 실패해야 경보 — 외부 일시 장애로 빨간불을 켜지 않는다
 MIN_DOC_LINES = 20         # 이보다 짧게 읽히면 JS 렌더로 보고 기준선을 저장하지 않는다(감시하는 척 금지)
 MAX_LINE = 300             # 저장하는 줄의 길이 상한 — 약관 한 문장이 수천 자인 곳이 있다
+MAX_WF_IDLE_DAYS = 14      # 예정 워크플로의 마지막 성공이 이보다 오래면 경보(R3)
 
 #   L2 에서 '주의'로 올릴 말. 이 말이 **바뀐 줄 안에** 있을 때만 사람을 부른다.
 KEYWORDS = [
@@ -118,7 +119,9 @@ PLATFORMS = [
          fallback="없음 (자체 호스팅 이전 필요)",
          docs=["https://streamlit.io/cloud", "https://docs.streamlit.io/deploy/streamlit-community-cloud"],
          review="무료 앱 수·자원 한도 · 비활성 일시정지 규칙 · 유료 전환 시점"),
-    dict(name="Supabase", kind="probe", used_for="전략 저장소·VOC·사용 로그·이미지 버킷",
+    #   ⚠️ kind='project' — supabase.com 이 200 인 것은 **우리 프로젝트가 살아 있다는 뜻이 아니다.**
+    #      무료 티어는 7일 조용하면 프로젝트를 일시정지한다(R4) → REST 엔드포인트를 직접 두드린다.
+    dict(name="Supabase", kind="project", used_for="전략 저장소·VOC·사용 로그·이미지 버킷",
          probe="https://supabase.com/",
          breaks="퀀트 전략 저장·공개 게시판·VOC 접수·유입 집계",
          fallback="없음 (화면은 떠도 저장 기능이 죽는다)",
@@ -168,6 +171,31 @@ PLATFORMS = [
          fallback="수동 게시",
          docs=["https://developer.x.com/en/docs/x-api"],
          review="무료 티어 월 게시 한도 · 요금 변화"),
+]
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 리스크 레지스터 R1~R12 (01_현황 11-22) — **어느 검사가 이걸 보고 있나**를 같이 적는다.
+#   왜 여기 두나: 레지스터를 문서에만 두면 '감시하기로 했다'와 '감시한다'가 갈라진다.
+#   L1 이 매일 이 표를 찍으므로, 감시가 없는 항목은 매일 눈에 보인다.
+#   watch: 'l1:<검사>' | 'l2' | 'l3' | 'test' | 'none'(사람 판단·해결됨)
+# ──────────────────────────────────────────────────────────────────────────────
+RISKS = [
+    dict(id="R1", what="토스 봇 노트북 의존", watch="l1:indirect",
+         note="⏸ 보류(11-22) — 대가 = 거래일 10일 중 1일 전체 결행"),
+    dict(id="R2", what="Streamlit 12h 재시작", watch="none", note="✅ 해결"),
+    dict(id="R3", what="GitHub 60일 무활동 → 크론 중단", watch="l1:workflows",
+         note="워크플로 state 와 마지막 성공 시각을 본다"),
+    dict(id="R4", what="Supabase 7일 무활동 → 일시정지", watch="l1:supabase",
+         note="프로젝트 REST 엔드포인트. 비밀값 SUPABASE_URL·SUPABASE_KEY 필요"),
+    dict(id="R5", what="출처 차단(Yahoo·네이버)", watch="l1:probe", note="프로브 + L2 약관 diff"),
+    dict(id="R6", what="Gemini·유튜브 한도", watch="l1:quota", note="429 를 자격 거부와 따로 센다"),
+    dict(id="R7", what="텔레그램 전송 한도", watch="l1:probe", note="getMe + L2 FAQ diff"),
+    dict(id="R8", what="공개 이메일", watch="none", note="✅ 코드에서 제거(이력엔 남음)"),
+    dict(id="R9", what="투자 조언 규제", watch="l3", note="사람 판단 — 분기 재평가 항목"),
+    dict(id="R10", what="무료 한도 소진", watch="l2", note="요금 문서 diff + L3 소진율"),
+    dict(id="R11", what="틀린 숫자 발행", watch="test", note="known_answers · 리포트 감사"),
+    dict(id="R12", what="자동 게시 제재", watch="l2",
+         note="⚠️ Meta·X 정책 문서가 JS 렌더라 L2 가 못 읽는다 — 부분 감시"),
 ]
 
 
@@ -226,6 +254,179 @@ def _noteworthy(lines):
     return [lines[i][:MAX_LINE] for i, l in enumerate(low) if any(k in l for k in KEYWORDS)]
 
 
+def _api(url, token=None):
+    """JSON 을 받는다. (ok, 코드, dict|None)"""
+    h = {"User-Agent": UA, "Accept": "application/vnd.github+json"}
+    if token:
+        h["Authorization"] = f"Bearer {token}"
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=h), timeout=TIMEOUT) as r:
+            return True, r.status, json.loads(r.read().decode("utf-8", "replace"))
+    except urllib.error.HTTPError as e:
+        return False, e.code, None
+    except Exception as e:
+        return False, type(e).__name__, None
+
+
+def workflows():
+    """R3 — **크론이 아직 도나.**
+
+    GitHub 은 저장소가 60일 조용하면 예정된 워크플로를 끈다(`state='disabled_inactivity'`).
+    그러면 수집·발행·봇이 전부 멈추는데 **실패 메일조차 오지 않는다** — 돌지 않으니까.
+    '경보가 없다 = 괜찮다' 가 되는 가장 나쁜 고장이라 상태를 직접 읽는다.
+
+    두 가지를 본다: ① 워크플로가 active 인가 ② schedule 트리거가 있는데 마지막 성공이
+    MAX_WF_IDLE_DAYS 넘게 전인가. 반환 (rows, 문제 목록, 사유).
+    """
+    repo = os.environ.get("GITHUB_REPOSITORY") or "pcy604/stock-dashboard"
+    tok = (os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or "").strip()
+    ok, code, j = _api(f"https://api.github.com/repos/{repo}/actions/workflows?per_page=100", tok)
+    if not ok or not j:
+        return [], [], f"워크플로 목록을 못 받았다({code}) — 토큰이 없거나 한도"
+    wfs = {w["id"]: w for w in j.get("workflows", []) if not str(w.get("path", "")).startswith(".github/workflows/_")}
+    #   성공한 실행을 한 번에 받아 워크플로별 최신만 남긴다(워크플로마다 호출하면 30번이다).
+    #   ⚠️ 이 창은 최근 200건뿐이다 — 매일 도는 잡이 많으면 **며칠치밖에 안 들어온다.**
+    #      여기 없는 워크플로를 '성공 기록 없음'으로 처리하면 월 1회·분기 1회 잡이 전부
+    #      오경보가 된다(11-22 실측: world-mcap 이 월 1회라 바로 걸렸다).
+    #      → 창에 없는 것만 워크플로별로 한 번 더 묻는다(토큰이 있으면 시간당 5,000건이라 넉넉하다).
+    last = {}
+    for page in (1, 2):
+        ok2, _, r2 = _api(f"https://api.github.com/repos/{repo}/actions/runs"
+                          f"?status=success&per_page=100&page={page}", tok)
+        if not ok2 or not r2:
+            break
+        for run in r2.get("workflow_runs", []):
+            wid, t = run.get("workflow_id"), run.get("updated_at") or run.get("created_at")
+            if wid and t and (wid not in last or t > last[wid]):
+                last[wid] = t
+    for wid in wfs:
+        if wid in last:
+            continue
+        ok3, _, r3 = _api(f"https://api.github.com/repos/{repo}/actions/workflows/{wid}"
+                          f"/runs?status=success&per_page=1", tok)
+        runs = (r3 or {}).get("workflow_runs") or []
+        if ok3 and runs:
+            last[wid] = runs[0].get("updated_at") or runs[0].get("created_at")
+
+    today = dt.datetime.now(dt.timezone.utc)
+    self_wf = (os.environ.get("GITHUB_WORKFLOW") or "").strip()
+    rows, bad = [], []
+    for wid, w in sorted(wfs.items(), key=lambda kv: kv[1]["name"]):
+        state = w.get("state") or "?"
+        t = last.get(wid)
+        age = None if not t else (today - dt.datetime.fromisoformat(t.replace("Z", "+00:00"))).days
+        f = os.path.join(BASE, w.get("path", ""))
+        txt = open(f, encoding="utf-8", errors="replace").read() if os.path.exists(f) else ""
+        sched = "schedule:" in txt
+        tol = _cron_tolerance(txt)                 # 주기에 맞는 허용 일수(월 1회를 3일로 재면 안 된다)
+        why = ""
+        if state != "active":
+            why = f"state={state}"                 # ← R3 직격(disabled_inactivity)
+        elif sched and w["name"] != self_wf:
+            #   성공 기록이 아예 없는데 파일이 방금 생겼으면 '새 워크플로'다 — 아직 돌 차례가 안 왔다.
+            #   (이 가드가 없으면 platform-watch 가 스스로를 영원히 신고하고, 그 경보 때문에
+            #    잡이 실패해 성공 기록이 안 생겨 **자기 봉인**에 걸린다.)
+            if age is None:
+                if _file_age_days(w.get("path", "")) > tol:
+                    why = f"예정 워크플로인데 성공 기록이 한 번도 없다 (파일은 {_file_age_days(w.get('path', ''))}일 전)"
+            elif age > tol:
+                why = f"예정 워크플로인데 마지막 성공이 {age}일 전 (허용 {tol}일)"
+        rows.append(dict(name=w["name"], state=state, sched=sched, last=t, age=age, tol=tol, why=why))
+        if why:
+            bad.append((w["name"], why))
+    return rows, bad, ""
+
+
+def _dow_days(dow):
+    """cron 요일 필드가 주당 몇 번 터지나. '*'=7 · '1-5'=5 · '1,4'=2 · '6'=1."""
+    if dow == "*":
+        return 7
+    n = 0
+    for part in dow.split(","):
+        part = part.split("/")[0]
+        if "-" in part:
+            try:
+                a, b = (int(x) % 7 for x in part.split("-")[:2])
+                n += (b - a) % 7 + 1
+            except ValueError:
+                n += 1
+        else:
+            n += 1
+    return max(min(n, 7), 1)
+
+
+def _cron_tolerance(yml_text):
+    """cron 식에서 주기를 읽어 허용 일수를 정한다.
+
+    ⚠️ 두 방향으로 다 틀릴 수 있다 — 11-22 에 둘 다 실측했다:
+      · 월 1회 잡(world-mcap)을 매일 기준으로 재면 **매일 오경보**가 된다.
+      · 평일 잡(daily-refresh, `* * 0-4`)을 '주 1회'로 뭉개면 **예정 실행 4회 연속 실패를
+        17일간 못 본다** — 실제로 11-17부터 그 상태였고 산출물은 최신이라 아무도 몰랐다.
+    그래서 요일 필드가 주당 몇 번 터지는지까지 센다.
+    """
+    crons = re.findall(r"cron:\s*['\"]([^'\"]+)['\"]", yml_text)
+    tol = 0
+    for c in crons:
+        f = c.split()
+        if len(f) < 5:
+            continue
+        dom, mon, dow = f[2], f[3], f[4]
+        if mon != "*":
+            t = 120                     # 분기·연 1회
+        elif dom != "*":
+            t = 45                      # 월 1회
+        else:
+            d = _dow_days(dow)
+            #   주 5회 이상 = 사실상 매일 → 주말 + 한 번 건너뛰기까지만 봐 준다
+            t = 4 if d >= 5 else (8 if d >= 2 else 17)
+        tol = max(tol, t)
+    return tol or MAX_WF_IDLE_DAYS
+
+
+def _file_age_days(rel):
+    """그 워크플로 파일이 저장소에 들어온 지 며칠 됐나(git 기준). 못 알면 크게 돌려
+    '새 파일'로 봐 주지 않는다 — 모른다고 경보를 끄면 감시가 사라진다."""
+    import subprocess
+    try:
+        out = subprocess.run(["git", "log", "--diff-filter=A", "--format=%cI", "-1", "--", rel],
+                             cwd=BASE, capture_output=True, text=True, timeout=20)
+        t = (out.stdout or "").strip().splitlines()
+        if not t:
+            return 10_000
+        return (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(t[0])).days
+    except Exception:
+        return 10_000
+
+
+def supabase():
+    """R4 — Supabase 무료 티어는 7일 조용하면 프로젝트를 일시정지한다.
+
+    supabase.com 홈페이지가 200 인 것은 **우리 프로젝트가 살아 있다는 뜻이 전혀 아니다.**
+    프로젝트의 REST 엔드포인트를 직접 두드려야 한다. 비밀값이 Actions 에 없으면 그 사실을 말한다
+    (조용히 통과시키면 '감시한다'고 적어 둔 것이 거짓이 된다)."""
+    url = (os.environ.get("SUPABASE_URL") or "").strip().rstrip("/")
+    key = (os.environ.get("SUPABASE_KEY") or "").strip()
+    if not (url and key):
+        return "unchecked", ("비밀값 SUPABASE_URL·SUPABASE_KEY 가 없다 — 차니가 GitHub Secrets 에 "
+                             "넣어야 R4(7일 일시정지)를 실제로 감시할 수 있다")
+    base = url
+    for suf in ("/rest/v1", "/rest"):
+        if base.endswith(suf):
+            base = base[: -len(suf)]
+    req = urllib.request.Request(base + "/rest/v1/", headers={"User-Agent": UA, "apikey": key,
+                                                              "Authorization": f"Bearer {key}"})
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            return "ok", f"프로젝트 REST HTTP {r.status}"
+    except urllib.error.HTTPError as e:
+        #   401/403 = 키 문제, 404 = 경로, 5xx·타임아웃 = 일시정지 의심
+        if e.code in (200, 400, 404):
+            return "ok", f"프로젝트 REST HTTP {e.code} (응답함)"
+        return ("authfail" if e.code in (401, 403) else "down"), f"프로젝트 REST HTTP {e.code}"
+    except Exception as e:
+        return "down", f"프로젝트 REST {type(e).__name__} — 일시정지 의심"
+
+
 def _probe(p):
     """(state, why). state: 'ok'(인증된 200) · 'reachable'(비밀값 없음 — 서버만 살아 있음)
     · 'authfail'(비밀값은 있는데 거부) · 'down'.
@@ -251,7 +452,10 @@ def _probe(p):
         ok, code, _ = _get(url.format(key=urllib.parse.quote(key, safe="")))
     if code == 200:
         return "ok", "HTTP 200 (인증 확인)"
-    if code in (401, 403, 429):
+    if code == 429:
+        #   R6 — 한도 소진. 자격 거부와 섞으면 대응이 갈린다(기다리기 vs 키 재발급)
+        return "quota", f"HTTP 429 — 한도 소진({env})"
+    if code in (401, 403):
         return "authfail", f"HTTP {code} — 비밀값은 있는데 거부됐다({env})"
     return ("reachable" if ok else "down"), f"HTTP {code}"
 
@@ -275,6 +479,12 @@ def l1(warn_only=False):
             state = "ok" if not bad else "down"
             why = "산출물 최신" if not bad else "산출물 " + " · ".join(
                 f"{r['path']}: {r['note'] or r['state']}" for r in bad)
+        elif p["kind"] == "project":
+            state, why = supabase()          # R4 — 홈페이지 200 은 우리 프로젝트와 무관하다
+            if state == "unchecked":
+                rows[name] = dict(kind=p["kind"], state="reachable", why=why, streak=0, checked=today,
+                                  breaks=p["breaks"], fallback=p["fallback"])
+                continue
         else:
             rows[name] = dict(kind=p["kind"], state="manual", why="프로브 수단 없음 — L3 에서 본다",
                               streak=0, checked=today)
@@ -282,31 +492,106 @@ def l1(warn_only=False):
         #   'authfail'(우리 자격이 끊겼다)과 'down'(서버가 안 뜬다)만 연속 실패로 센다.
         #   'reachable' 은 "비밀값이 없어 못 재 봤다" 이므로 실패로 세지 않는다 — 안 그러면
         #   비밀값이 없는 로컬 실행이 매번 빨간불이 되어 경보가 쓰레기가 된다.
-        streak = int(was.get("streak") or 0) + 1 if state in ("down", "authfail") else 0
+        streak = int(was.get("streak") or 0) + 1 if state in ("down", "authfail", "quota") else 0
         rows[name] = dict(kind=p["kind"], state=state, why=why, streak=streak, checked=today,
                           breaks=p["breaks"], fallback=p["fallback"])
         #   자격 거부는 일시 장애가 아니다 — 1회로 바로 올린다. 서버 미응답만 streak 를 기다린다.
-        if state == "authfail" or streak >= FAIL_STREAK:
+        #   자격 거부·한도 소진은 일시 장애가 아니다 — 1회로 바로 올린다.
+        if state in ("authfail", "quota") or streak >= FAIL_STREAK:
             alarms.append((name, state, streak, why, p["breaks"], p["fallback"]))
-    _save(STATUS, dict(asof=today, fail_streak_alarm=FAIL_STREAK, platforms=rows))
-
+    print("── 플랫폼 ──")
     for name, r in sorted(rows.items()):
-        mark = {"ok": "OK  ", "reachable": "REACH", "authfail": "AUTH", "down": "DOWN",
-                "manual": "--  "}[r["state"]]
+        mark = {"ok": "OK  ", "reachable": "REACH", "authfail": "AUTH", "quota": "QUOTA",
+                "down": "DOWN", "manual": "--  "}.get(r["state"], r["state"])
         extra = f"  연속실패 {r['streak']}회" if r["streak"] else ""
         print(f"  [{mark:<5s}] {name:<30s} {r['why']}{extra}")
     unchecked = [n for n, r in rows.items() if r["state"] in ("reachable", "manual")]
     if unchecked:
-        print(f"\n못 재 본 플랫폼 {len(unchecked)}개(비밀값 없음·프로브 없음): {', '.join(unchecked)}")
+        print(f"  못 재 본 것 {len(unchecked)}개(비밀값 없음·프로브 없음): {', '.join(unchecked)}")
+
+    # ── R3: 크론이 아직 도나 ──────────────────────────────────────────────
+    wf_rows, wf_bad, wf_err = workflows()
+    print("\n── 워크플로 (R3 · 60일 무활동이면 GitHub 이 끈다) ──")
+    if wf_err:
+        print(f"  {wf_err}")
+    else:
+        print(f"  {len(wf_rows)}개 중 active {sum(1 for w in wf_rows if w['state'] == 'active')} · "
+              f"예정 {sum(1 for w in wf_rows if w['sched'])} · 문제 {len(wf_bad)}")
+        for w in wf_rows:
+            if w["why"]:
+                print(f"  [BAD ] {w['name']:<28s} {w['why']}")
+    for n_, why_ in wf_bad:
+        alarms.append((f"워크플로 {n_}", "workflow", 0, why_,
+                       "그 워크플로의 산출물 전부", "없음 — 직접 켜거나 수동 실행"))
+
+    # ── 신선도 요약 — 01_현황 명세: L1 에 '일간+주간 신선도' 포함 ────────────
+    print("\n── 산출물 신선도 (일간+주간) ──")
+    fr = F.statuses()
+    fr_bad = [r for r in fr if r["state"] != "ok"]
+    print(f"  등록 {len(fr)}개 중 최신 {len(fr) - len(fr_bad)} · 문제 {len(fr_bad)}")
+    for r in fr_bad:
+        print(f"  [{r['state'].upper():<7s}] {r['path']:<44s} {r['note'] or ''}")
+    #   ⚠️ 여기서는 경보로 올리지 않는다 — 각 워크플로의 check_freshness_ci 게이트가 이미
+    #      그 잡을 실패시킨다. 두 곳에서 울리면 같은 고장에 메일이 두 번 온다. L1 은 '한 장에
+    #      다 보이게' 하는 역할이고, 판정은 산출물을 만든 잡이 한다.
+
+    _save(STATUS, dict(asof=today, fail_streak_alarm=FAIL_STREAK, platforms=rows,
+                       workflows=dict(total=len(wf_rows), bad=[n_ for n_, _ in wf_bad], error=wf_err),
+                       freshness=dict(total=len(fr), bad=[r["path"] for r in fr_bad]),
+                       risks=risk_table(rows, wf_bad, wf_err)))
+
+    print("\n── 리스크 레지스터 ──")
+    for r in risk_table(rows, wf_bad, wf_err):
+        print(f"  {r['id']:<4s} [{r['cover']:<9s}] {r['what']:<28s} {r['note']}")
+
     if not alarms:
         pend = [n for n, r in rows.items() if r["state"] == "down"]
-        print("경보 없음" + (f" (1~{FAIL_STREAK - 1}회 실패 관찰 중: {', '.join(pend)})" if pend else ""))
+        print("\n경보 없음" + (f" (1~{FAIL_STREAK - 1}회 실패 관찰 중: {', '.join(pend)})" if pend else ""))
         return 0
     print("\n경보:")
     for name, state, streak, why, breaks, fb in alarms:
-        head = "자격 거부" if state == "authfail" else f"{streak}회 연속 실패"
+        head = {"authfail": "자격 거부", "quota": "한도 소진",
+                "workflow": "실행되지 않음"}.get(state, f"{streak}회 연속 실패")
         print(f"  ::error::{name} {head} ({why}) — 멈추는 것: {breaks} / 대체: {fb}")
     return 0 if warn_only else 1
+
+
+def risk_table(rows, wf_bad, wf_err):
+    """리스크 레지스터 R1~R12 에 '지금 그 감시가 실제로 돌았나'를 붙여 돌려준다.
+    cover: 'ok' · 'alarm' · 'unchecked'(감시가 못 돌았다) · 'human'(사람 판단) · 'closed'(해결)."""
+    def _state_of(name):
+        return (rows.get(name) or {}).get("state")
+    out = []
+    for r in RISKS:
+        w, cover, note = r["watch"], "ok", r["note"]
+        if w == "none":
+            cover = "closed"
+        elif w == "l3":
+            cover = "human"
+        elif w == "test":
+            cover = "ok"
+        elif w == "l2":
+            cover = "ok"
+        elif w == "l1:workflows":
+            cover = "unchecked" if wf_err else ("alarm" if wf_bad else "ok")
+            if wf_err:
+                note = wf_err
+        elif w == "l1:supabase":
+            s = _state_of("Supabase")
+            cover = {"ok": "ok", "reachable": "unchecked"}.get(s, "alarm")
+            if cover == "unchecked":
+                note = (rows.get("Supabase") or {}).get("why") or note
+        elif w == "l1:quota":
+            cover = "alarm" if _state_of("Google Gemini") == "quota" else (
+                "unchecked" if _state_of("Google Gemini") == "reachable" else "ok")
+        elif w == "l1:indirect":
+            cover = "alarm" if _state_of("토스증권") == "down" else "ok"
+        elif w == "l1:probe":
+            bad = [n for n in ("Yahoo Finance (yfinance)", "네이버 금융", "Telegram Bot API")
+                   if _state_of(n) in ("down", "authfail", "quota")]
+            cover = "alarm" if bad else "ok"
+        out.append(dict(id=r["id"], what=r["what"], watch=w, cover=cover, note=note))
+    return out
 
 
 # ──────────────────────────────────────────────────────────────────────────────
