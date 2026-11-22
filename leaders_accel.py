@@ -219,11 +219,15 @@ def split_rot(ver=None, since=None, tol=0.005):
     c.close()
     d = d[d.real.notna() & (d.real > 0) & d.close.notna()]
     if not len(d):
-        return dict(rows=0, rot_rows=0, rot_syms=0, pct=0.0, syms=[])
+        return dict(rows=0, rot_rows=0, rot_syms=0, pct=0.0, syms=[], by_sym={})
     rel = (d.close - d.real).abs() / d.real.abs()
     rot = d[rel > tol]
+    #   by_sym: 종목 → 어긋난 행 수. **영향이 큰 것부터** 고치려면 이 순서가 필요하다
+    by_sym = rot.sym.value_counts().to_dict()
     return dict(rows=int(len(d)), rot_rows=int(len(rot)), rot_syms=int(rot.sym.nunique()),
-                pct=float(len(rot) / len(d)), syms=sorted(rot.sym.unique())[:50])
+                pct=float(len(rot) / len(d)),
+                syms=[s for s, _ in sorted(by_sym.items(), key=lambda kv: (-kv[1], kv[0]))],
+                by_sym={k: int(v) for k, v in by_sym.items()})
 
 
 def matrices(d, cols):

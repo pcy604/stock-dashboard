@@ -507,6 +507,53 @@ def _():
     return not bad, ' · '.join(f"{m} {(i.get(m) or {}).get('rows', 0):,}행 ~{(i.get(m) or {}).get('end', '-')}" for m in ('US', 'KR')) + (f" · 문제 {bad}" if bad else '')
 
 
+@check('퀀트 백테스트', '분할 썩음이 줄고 있는가 — 증분 적재가 과거 가격을 썩히던 것(2026-11-23)')
+def _():
+    """왜 이 검사가 있나 — 증분 적재는 새 주차만 붙이고 과거 행을 고치지 않는다. 그 뒤 분할이
+    일어나면 일봉은 수정주가로 과거까지 보정되는데 주봉 판의 과거 행은 분할 전 값으로 남는다.
+    **오류도 결측도 없이 틀린 가격이 백테스트·주도주 신호로 흘러간다** — 그래서 숫자로 감시한다.
+
+    weekly-accel 의 수리 단계가 results/split_rot.json 에 남긴 기록을 본다(측정 쿼리는 100만 행에
+    상관 서브쿼리라 무거워 매 검사마다 다시 재지 않는다).
+    실패 조건: ① 기록이 10일 넘게 낡았다(수리가 안 돌고 있다) ② 남은 종목이 상한을 넘는다
+    (= 새로 썩는 속도가 고치는 속도를 앞질렀다 → REPAIR_MAX 를 올려야 한다).
+    ⚠️ 여기서 보는 건 **분할급(10% 초과)만**이다. 0.5~10% 는 배당 조정 누적이고(681종·23%),
+    재적재로는 못 고친다 — 그건 패널이 가격을 어디서 읽는지의 문제다."""
+    #   파일이 없을 수 있다(수리가 아직 한 번도 안 돌았거나 REPAIR_MAX=0). 그건
+    #   '문제 없음'이 아니라 '감시가 안 돌고 있다'다 → 예외로 터지지 않게 직접 읽고 실패로 답한다.
+    try:
+        d = _j('results/split_rot.json')
+    except Exception:
+        d = {}
+    r = d.get('latest') or {}
+    if not r:
+        #   도입 유예 — 기록은 weekly-accel 이 처음 돌 때 생긴다(주 1회). 그 전에 실패시키면
+        #   **내가 만든 검사가 daily-refresh 를 빨간불로 만든다.** 단 기한을 박아 영구 면제는 안 된다:
+        #   유예가 지나도 기록이 없으면 수리 단계가 아예 안 도는 것이므로 실패가 맞다.
+        grace = _age('2026-11-23') <= 14
+        return grace, ('기록 없음 — weekly-accel 의 수리 단계가 아직 돌지 않았다(주 1회). '
+                       f"도입 유예 {'안' if grace else '만료 — REPAIR_MAX 가 0 이거나 weekly-accel 이 안 돌고 있다'}")
+    age = _age(r.get('asof'))
+    rem, cap = int(r.get('remaining') or 0), int(r.get('repair_max') or 0)
+    hist = d.get('history') or []
+    trend = ' → '.join(f"{h.get('asof', '?')[5:]} {h.get('syms', '?')}종" for h in hist[-4:])
+    #   mode='measure' = 측정만 하고 고치지 않은 기록(leaders_build.py rot --log) → 상한 비교 제외.
+    #   그래도 낡음은 본다 — 측정조차 멈추면 감시가 사라진다.
+    measure = r.get('mode') == 'measure'
+    ok = age <= 10 and (measure or cap <= 0 or rem <= cap)
+    why = (f"기준 {r.get('asof')}({age}일) · 임계 {r.get('tol')} · 썩음 {r.get('syms')}종 {r.get('rows'):,}행 · "
+           f"이번 수리 {r.get('repaired_n')}종 · 남음 {rem}종(상한 {cap}) · 유니버스 밖 {r.get('skipped_not_in_universe', 0)}종")
+    if trend:
+        why += f" · 추이 {trend}"
+    if measure:
+        why += ' · 측정만(수리 미실행) — weekly-accel 이 돌면 수리 기록으로 바뀐다'
+    if age > 10:
+        why += ' — 수리가 안 돌고 있다'
+    elif cap > 0 and rem > cap:
+        why += ' — 새로 썩는 속도가 고치는 속도를 앞질렀다. REPAIR_MAX 를 올려라'
+    return ok, why
+
+
 @check('퀀트 백테스트', '패널이 종목 첫 주를 잃지 않았나 — TSLA·삼성전자는 2014 초부터 (NVDA·PLTR 첫 주는 참고 표시, 2026-11-12)')
 def _():
     i = _j('results/quant_panel_info.json')

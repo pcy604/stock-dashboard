@@ -13,6 +13,7 @@
 
 이 테스트가 지키는 것: 접합 우선순위 · 행이 불어나지 않음 · 접합이 꺼지는 경로 · 낡음 기록.
 """
+import json
 import os
 import sqlite3
 import sys
@@ -180,3 +181,128 @@ def test_split_rot_tolerance(tmp_path, monkeypatch):
         tmp_path, [("v1", "2019-05-13", "X", "100.3")],
         [("X", "US", "2019-05-17", 100.0)])))
     assert A.split_rot(ver="v1", since="2018-01-01")["rot_rows"] == 0
+
+
+# ──────────────────────────────────────────────────────────────────────
+# 분할 썩음 수리 (2026-11-23) — 증분 적재가 과거를 썩히던 것의 근본 수리
+# ──────────────────────────────────────────────────────────────────────
+import leaders_build as B      # noqa: E402
+
+
+def _rotdb(tmp_path, fw, px):
+    p = _db(tmp_path / "data", fw)
+    c = sqlite3.connect(str(p))
+    c.execute("CREATE TABLE IF NOT EXISTS prices (sym TEXT, market TEXT, date TEXT, close REAL)")
+    c.executemany("INSERT INTO prices VALUES (?,?,?,?)", px)
+    c.commit()
+    return p, c
+
+
+def test_find_rot_ranks_by_affected_rows(tmp_path):
+    """영향이 큰 종목부터 고쳐야 한다 — 회당 상한이 있으므로 순서가 곧 우선순위다."""
+    _, c = _rotdb(tmp_path,
+                  [("v1", "2019-01-07", "BIG", "30"), ("v1", "2019-01-14", "BIG", "30"),
+                   ("v1", "2019-01-07", "SMALL", "30"), ("v1", "2019-01-07", "OK", "10")],
+                  [("BIG", "US", "2019-01-11", 10.0), ("BIG", "US", "2019-01-18", 10.0),
+                   ("SMALL", "US", "2019-01-11", 10.0), ("OK", "US", "2019-01-11", 10.0)])
+    syms, rows, n = B.find_rot(c, "v1", since="2018-01-01")
+    assert syms == ["BIG", "SMALL"] and rows == 3 and n == 2
+
+
+def test_find_rot_respects_tolerance(tmp_path):
+    """임계 10% — 0.5~10% 는 배당 조정 누적(11-23 실측 681종·23%)이고 재적재로 못 고친다.
+    임계를 낮추면 회당 상한이 배당주로 꽉 차 **정작 2~3배 틀린 분할이 뒤로 밀린다.**"""
+    _, c = _rotdb(tmp_path, [("v1", "2019-01-07", "DIV", "10.3")],
+                  [("DIV", "US", "2019-01-11", 10.0)])
+    assert B.find_rot(c, "v1", since="2018-01-01")[2] == 0          # 3% → 넘긴다
+    assert B.find_rot(c, "v1", since="2018-01-01", tol=0.005)[2] == 1
+
+
+def test_find_rot_ignores_weeks_without_daily(tmp_path):
+    """일봉이 없는 주차(상장 전·거래정지·상장폐지)를 썩음으로 세면 전 종목이 걸린다."""
+    _, c = _rotdb(tmp_path, [("v1", "2019-01-07", "X", "999")], [])
+    assert B.find_rot(c, "v1", since="2018-01-01")[2] == 0
+
+
+def test_find_rot_limit(tmp_path):
+    _, c = _rotdb(tmp_path,
+                  [("v1", "2019-01-07", s, "30") for s in ("A", "B", "C")],
+                  [(s, "US", "2019-01-11", 10.0) for s in ("A", "B", "C")])
+    syms, _, n = B.find_rot(c, "v1", since="2018-01-01", limit=2)
+    assert len(syms) == 2 and n == 3       # 상한은 목록만 자르고, 전체 수는 그대로 보고한다
+
+
+def test_find_rot_only_its_own_ver(tmp_path):
+    """다른 ver 의 행을 섞으면 통째로 쌓은 판까지 지우게 된다."""
+    _, c = _rotdb(tmp_path, [("v13y", "2019-01-07", "X", "30")],
+                  [("X", "US", "2019-01-11", 10.0)])
+    assert B.find_rot(c, "v1", since="2018-01-01")[2] == 0
+    assert B.find_rot(c, "v13y", since="2018-01-01")[2] == 1
+
+
+def test_rot_log_appends_and_trims(tmp_path, monkeypatch):
+    """추이가 보여야 '상한이 모자란지'를 알 수 있다 — 한 회차만 남기면 판단이 안 된다."""
+    monkeypatch.setattr(B, "BASE", str(tmp_path))
+    for i in range(1, 5):
+        B._rot_log(dict(asof=f"2026-11-{i:02d}", syms=30 - i * 5, remaining=0, repair_max=60), keep=3)
+    d = json.load(open(tmp_path / B.ROT_LOG, encoding="utf-8"))
+    assert len(d["history"]) == 3                      # keep 으로 잘린다
+    assert d["latest"]["asof"] == "2026-11-04"
+    assert [h["syms"] for h in d["history"]] == [20, 15, 10]
+
+
+def test_rot_log_same_day_replaces(tmp_path, monkeypatch):
+    """같은 날 두 번 돌면(예비 실행) 이력이 두 줄이 되어 추이가 왜곡된다."""
+    monkeypatch.setattr(B, "BASE", str(tmp_path))
+    B._rot_log(dict(asof="2026-11-23", syms=30, remaining=0, repair_max=60))
+    B._rot_log(dict(asof="2026-11-23", syms=12, remaining=0, repair_max=60))
+    d = json.load(open(tmp_path / B.ROT_LOG, encoding="utf-8"))
+    assert len(d["history"]) == 1 and d["latest"]["syms"] == 12
+
+
+def test_known_answer_fails_when_repair_stalls(monkeypatch, tmp_path):
+    """남은 종목이 상한을 넘으면 = 새로 썩는 속도가 고치는 속도를 앞질렀다 → 실패해야 한다."""
+    sys.path.insert(0, os.path.join(ROOT, "tools"))
+    import known_answers as K
+    monkeypatch.setattr(K, "BASE", str(tmp_path))
+    (tmp_path / "results").mkdir(parents=True, exist_ok=True)
+    fn = next(f for a, q, f in K.CHECKS if "분할 썩음" in q)
+
+    def _write(**kw):
+        rec = dict(asof=__import__("datetime").date.today().isoformat(), tol=0.1, syms=30,
+                   rows=6881, repaired_n=30, remaining=0, repair_max=60,
+                   skipped_not_in_universe=0)
+        rec.update(kw)
+        (tmp_path / "results" / "split_rot.json").write_text(
+            json.dumps({"latest": rec, "history": [rec]}, ensure_ascii=False), encoding="utf-8")
+
+    _write()
+    assert fn()[0] is True
+    _write(remaining=99)
+    assert fn()[0] is False                       # 상한 초과 → 실패
+    _write(asof="2026-01-01")
+    assert fn()[0] is False                       # 기록이 낡음 → 실패
+
+
+def test_known_answer_grace_then_fails_without_record(monkeypatch, tmp_path):
+    """기록은 weekly-accel 이 처음 돌 때 생긴다(주 1회). 그 전에 실패시키면 **새로 만든 검사가
+    daily-refresh 를 빨간불로 만든다** → 도입 14일은 유예. 단 영구 면제는 아니다:
+    유예가 지나도 기록이 없으면 수리 단계가 아예 안 도는 것이므로 실패가 맞다."""
+    import datetime as _dt
+    sys.path.insert(0, os.path.join(ROOT, "tools"))
+    import known_answers as K
+    monkeypatch.setattr(K, "BASE", str(tmp_path))
+    fn = next(f for a, q, f in K.CHECKS if "분할 썩음" in q)
+
+    monkeypatch.setattr(K, "TODAY", _dt.date(2026, 11, 25))      # 도입 +2일 → 유예 안
+    assert fn()[0] is True
+    monkeypatch.setattr(K, "TODAY", _dt.date(2026, 12, 20))      # 도입 +27일 → 만료
+    ok, why = fn()
+    assert ok is False and "만료" in why
+
+
+def test_workflow_wires_the_repair():
+    """도구만 있고 워크플로가 안 부르면 수리는 0 이다."""
+    y = open(os.path.join(ROOT, ".github", "workflows", "weekly-accel.yml"), encoding="utf-8").read()
+    assert "REPAIR_MAX" in y, "weekly-accel 에 수리 상한이 없다"
+    assert "results/split_rot.json" in y, "수리 기록이 커밋되지 않으면 정답 점검이 못 읽는다"

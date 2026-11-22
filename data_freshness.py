@@ -347,6 +347,12 @@ SOURCES = [
          cycle='평일 07:53', max_age=6, producer='tools/fetch_macro_long.py',
          job='macro-long', used_by='🌍 매크로 · 🏠 종합 글로벌 마켓(하이일드 스프레드)',
          getter=_parquet_max('date'), raw=True),
+    # ★ 2026-11-23 — 분할 썩음 수리 기록. 이게 낡으면 '증분 적재가 과거를 썩히는' 수리가
+    #   돌지 않고 있다는 뜻이고, 틀린 가격이 조용히 쌓인다(오류도 결측도 안 난다).
+    dict(path='results/split_rot.json', label='분할 썩음 수리 기록',
+         cycle='주 1회 (weekly-accel)', max_age=10, producer='leaders_build.py update',
+         job='weekly-accel', used_by='감시 — 주봉 과거 가격이 일봉 원본과 맞는가',
+         getter=_key('asof')),
     # ★ 2026-11-22 — 월 1회 세계은행 시총. `--audit` 이 못 잡던 구멍이었다: 감사는 **등록된 것**만
     #   세므로, 등록조차 안 된 산출물은 '감시 공백 0' 안에서도 보이지 않는다(platform_watch 의
     #   워크플로 검사 R3 가 먼저 잡아냈다). 내용은 연간치라 몇 달 그대로여서 _meta.checked 를 본다.

@@ -147,8 +147,17 @@ jobs:
           fi
           python leaders_build.py fetch 2900 $FULL
 
-      - name: factor_weekly 증분 적재
+      # 2026-11-23 — `update` 는 증분 적재 **전에 분할 썩음을 수리**한다(leaders_build.find_rot):
+      #   저장된 주봉 종가를 일봉 원본과 대조해 10% 넘게 어긋난 종목의 행을 지우면,
+      #   종목별 시작 주차 로직이 그 종목만 전 기간을 다시 쌓는다.
+      #   왜 필요: 증분 적재는 과거 행을 고치지 않아 나중에 분할이 나면 과거 가격이 분할 전 값으로
+      #   남는다 — 오류도 결측도 없이 틀린 가격이 백테스트·주도주 신호로 흘러간다(11-23 실측 30종).
+      #   REPAIR_MAX 로 회당 상한을 둔다(기본 60종). 결과는 results/split_rot.json 에 남고
+      #   정답 점검이 매주 추이를 본다 — 남은 종목이 상한을 넘으면 실패한다.
+      - name: factor_weekly 증분 적재 (분할 썩음 수리 포함)
         if: steps.due.outputs.skip != 'true'
+        env:
+          REPAIR_MAX: '60'
         run: python leaders_build.py update
 
       # 2026-10-19 — 캐시 market.db 에 243종 이력만 남아 있던 고장의 복구 경로.
@@ -336,7 +345,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git pull --rebase --autostash -X theirs origin main || git rebase --abort || true
-          for f in exports/accel_picks.csv results/accel_picks_status.json results/leaders_accel.json results/price_curves.json results/turnaround_latest.json results/fund_snapshot.json results/known_answers.json data/universe_ever.csv; do
+          for f in exports/accel_picks.csv results/accel_picks_status.json results/leaders_accel.json results/price_curves.json results/turnaround_latest.json results/fund_snapshot.json results/known_answers.json results/split_rot.json data/universe_ever.csv; do
             [ -f "$f" ] && git add -f "$f"
           done
           git add -f exports/accel_picks_*.csv 2>/dev/null || true

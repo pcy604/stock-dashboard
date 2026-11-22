@@ -1,0 +1,32 @@
+{
+ "history": [
+  {
+   "asof": "2026-11-23",
+   "mode": "measure",
+   "remaining": 30,
+   "repair_max": 0,
+   "repaired": [],
+   "repaired_n": 0,
+   "rows": 6881,
+   "since": "2018-01-01",
+   "skipped_not_in_universe": 0,
+   "syms": 30,
+   "tol": 0.1,
+   "ver": "v1"
+  }
+ ],
+ "latest": {
+  "asof": "2026-11-23",
+  "mode": "measure",
+  "remaining": 30,
+  "repair_max": 0,
+  "repaired": [],
+  "repaired_n": 0,
+  "rows": 6881,
+  "since": "2018-01-01",
+  "skipped_not_in_universe": 0,
+  "syms": 30,
+  "tol": 0.1,
+  "ver": "v1"
+ }
+}

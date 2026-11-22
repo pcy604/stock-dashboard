@@ -591,6 +591,89 @@ def _add_cols(con):
         print(f"factor_weekly 열 추가: {', '.join(c for c, _ in add)}", flush=True)
 
 
+# 2026-11-23 — **증분 적재가 과거를 썩히는 것**을 고친다(근본 수리).
+#   증상: 증분 적재는 새 주차만 붙이고 과거 행을 고치지 않는다. 그 뒤 분할이 일어나면
+#   `prices`(일봉)는 수정주가로 **과거까지** 보정되는데 factor_weekly 의 과거 행은 분할 전 값으로 남는다.
+#   오류도 결측도 없이 틀린 가격이 백테스트·주도주 신호로 흘러간다.
+#   실측(11-22): 겹침 959,977행 중 105,618행(11.0%)·252종 — AAPL·BAC·AMGN·ADM·AEP 포함.
+#   수리: 증분을 시작하기 **전에** 저장값과 일봉 원본을 대조해 어긋난 종목을 찾고,
+#   그 종목의 행을 지운다 → build 의 종목별 시작 주차 로직(_last 없음 = start 부터)이 전 기간을 다시 쌓는다.
+#
+#   ⚠️ 깨지는 지점 — 먼저 적는다:
+#     ① 한 번에 다 고치면 주간 파이프라인이 몇 시간 늘어난다 → 회당 상한(REPAIR_MAX)을 둔다.
+#        그러면 **새로 썩는 속도가 고치는 속도를 앞지를 수 있다** → 어긋난 행 수가 많은 종목부터
+#        고치고, 썩음 추이를 정답 점검이 매주 재서 줄고 있는지 본다(줄지 않으면 상한을 올려야 한다).
+#     ② 분할이 아니라 **일봉 쪽이 틀린** 경우도 이 대조에 걸린다. 그때는 재적재가 틀린 값을
+#        베껴 온다 — 일봉이 정본이라는 전제 위에 서 있다(us_capfix·kr_adjust 가 그 전제를 지킨다).
+#     ③ 상장폐지·거래정지로 일봉이 없는 주차는 판정하지 않는다(결측을 썩음으로 세면 전 종목이 걸린다).
+REPAIR_MAX = int(os.environ.get("REPAIR_MAX", "60"))     # 회당 재적재 종목 수 상한
+#   ⚠️ 임계를 10% 로 둔 이유 — 11-23 전수 측정에서 **두 가지 다른 문제가 섞여 있었다**:
+#
+#     어긋남        행              종목    정체
+#     10% 초과      6,736 (0.66%)   30종    분할 보정 미전파 (APH·MNST 2:1 · SUPN·WLFC 3:1 정수배)
+#     0.5~10%       237,732 (23%)   681종   배당 조정 누적 (DOC·EPR·LAND·ADM 등 고배당·REIT)
+#
+#   재적재로 고칠 수 있는 건 **앞쪽뿐**이다. 배당은 지급될 때마다 과거 조정값이 바뀌므로
+#   매주 새로 어긋나고, 681종을 매주 다시 쌓는 것은 사실상 전체 재적재다(회당 상한으로는
+#   영원히 못 따라간다). 임계를 0.5% 로 두면 매주 상한이 배당주로 꽉 차고 **분할이 밀린다** —
+#   정작 2~3배 틀린 30종이 뒤로 가는, 가장 나쁜 우선순위가 된다.
+#   배당 쪽 해결은 재적재가 아니다 → docs/research/2026-11-22_미국_시계열_접합.md 의 '남은 일'.
+REPAIR_TOL = 0.10
+
+
+ROT_LOG = "results/split_rot.json"
+
+
+def _rot_log(rec, keep=26):
+    """분할 썩음 측정·수리 이력을 추가만 한다(최근 keep 회차). 정답 점검이 추이를 본다."""
+    p = os.path.join(BASE, ROT_LOG)
+    try:
+        old = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+    except Exception:
+        old = {}
+    hist = [h for h in (old.get("history") or []) if h.get("asof") != rec["asof"]]
+    hist.append(rec)
+    out = dict(latest=rec, history=hist[-keep:])
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, sort_keys=True)
+    print(f"썩음 기록 → {ROT_LOG} (최근 {len(out['history'])}회차)", flush=True)
+
+
+def find_rot(con, ver, since="2018-01-01", tol=REPAIR_TOL, limit=None):
+    """저장된 주봉 종가가 일봉 원본과 어긋난 종목 — (목록, 어긋난 행 수 합계, 전체 종목 수).
+    어긋난 행이 많은 종목부터. limit 로 회당 상한을 건다.
+
+    `recent_split_syms()` 와 **역할이 다르다 — 지우지 말 것.**
+      · `recent_split_syms()` = `us_splits.csv` 목록 기반. **가격 캐시(prices)** 를 전수 재수집한다.
+      · 여기(`find_rot`) = 결과 기반. **factor_weekly 의 과거 행**이 그 일봉과 맞는지 직접 본다.
+    앞쪽이 prices 를 고쳐도 factor_weekly 과거는 그대로이므로 둘 다 필요하다.
+
+    왜 목록이 아니라 결과로 판정하나 — 11-23 실측. 썩은 30종을 `us_splits.csv` 와 대조하니:
+      · 목록에 **아예 없음 22종** (그 파일이 2026-08-14 이후 멈춰 있다 — 감시 밖이었다)
+      · 목록엔 있으나 400일 창 밖 6종
+      · 최근 400일 창 안 = 기존 방어가 잡는 것 **2종**
+    목록을 믿으면 30종 중 2종만 고친다. 결과를 보면 원인이 분할이든 단위 오류든 다 걸린다.
+    """
+    rows = con.execute("""
+        SELECT f.sym, COUNT(*) n FROM factor_weekly f
+        WHERE f.factor_ver = ? AND f.as_of >= ? AND f.close IS NOT NULL
+          AND EXISTS (SELECT 1 FROM prices p
+                      WHERE p.sym = f.sym AND p.market = 'US'
+                        AND p.date >= f.as_of AND p.date < date(f.as_of, '+7 day'))
+          AND abs(f.close - (SELECT p.close FROM prices p
+                             WHERE p.sym = f.sym AND p.market = 'US'
+                               AND p.date >= f.as_of AND p.date < date(f.as_of, '+7 day')
+                             ORDER BY p.date DESC LIMIT 1))
+              > ? * abs((SELECT p.close FROM prices p
+                         WHERE p.sym = f.sym AND p.market = 'US'
+                           AND p.date >= f.as_of AND p.date < date(f.as_of, '+7 day')
+                         ORDER BY p.date DESC LIMIT 1))
+        GROUP BY f.sym ORDER BY n DESC, f.sym""", (ver, since, tol)).fetchall()
+    syms = [s for s, _ in rows]
+    return (syms[:limit] if limit else syms), sum(n for _, n in rows), len(syms)
+
+
 def shares_at(sym, when):
     """그 주차 시점에 **이미 제출돼 있던** 가장 최근 공시의 주식수.
 
@@ -607,7 +690,7 @@ def shares_at(sym, when):
     return float(v[k]) if len(v) else None
 
 
-def build(start="2018-01-01", incremental=False, newsyms=False):
+def build(start="2018-01-01", incremental=False, newsyms=False, repair=True):
     """newsyms=True: 아직 factor_weekly 에 없는 종목만 전 기간 적재한다.
 
     2026-08-18 유니버스 재구축용. 시총 버그를 고치고 유니버스를 3,181종으로 넓혔는데,
@@ -623,6 +706,8 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
     con = sqlite3.connect(DB)
     con.executescript(open(os.path.join(BASE, "leaders_schema.sql"), encoding="utf-8").read())
     _add_cols(con)
+    base_start = start      # 증분 모드에서 start 가 덮어써지기 전 원래 시작일(수리 종목이 쓴다)
+    _repair = set()         # 이번 회차에 **전 기간 다시 쌓을** 종목(분할 썩음 수리)
     if newsyms:
         # 2026-10-19 — '있다'의 기준을 **52주 이상 이력**으로 바꿨다.
         #   Actions 캐시의 market.db 는 10-10 사고 때 243종 이력만 남았고, 그 뒤 증분은
@@ -655,6 +740,40 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
         print(f"신규 종목 모드 — 기존 {len(have):,}종 건너뜀, "
               f"{len(u):,}종만 적재 (유니버스 {before:,})", flush=True)
     elif incremental:
+        # 2026-11-23 — 증분 **전에** 분할 썩음을 수리한다. 여기 둔 이유: 수리 종목의 행을
+        #   지우면 아래 `_last` 조회에서 그 종목이 빠지고, 종목별 시작 주차 로직이
+        #   base_start 부터 전 기간을 다시 쌓는다(별도 패스가 필요 없다).
+        if repair and REPAIR_MAX > 0:
+            rot, rot_rows, rot_syms = find_rot(con, VER, since=base_start, limit=None)
+            #   ⚠️ 유니버스에 없는 종목은 **지우면 안 된다.** 아래 루프가 u 만 돌기 때문에
+            #      다시 쌓이지 않고 행만 사라진다(상장폐지·유니버스 축소 종목이 그렇다).
+            #      썩은 값이라도 지우는 것보다는 남기는 게 낫다 — 지우면 복구 수단이 없다.
+            _univ = set(u.sym.astype(str))
+            _skip = [s for s in rot if s not in _univ]
+            rot = [s for s in rot if s in _univ][:REPAIR_MAX]
+            if _skip:
+                print(f"분할 썩음이지만 유니버스에 없어 건드리지 않는 종목 {len(_skip)}: "
+                      f"{_skip[:15]}{' …' if len(_skip) > 15 else ''}", flush=True)
+            if rot_syms:
+                print(f"분할 썩음 {rot_syms}종 · {rot_rows:,}행 — 이번 회차는 영향 큰 {len(rot)}종 재적재 "
+                      f"(상한 REPAIR_MAX={REPAIR_MAX}): {rot[:15]}{' …' if len(rot) > 15 else ''}", flush=True)
+                con.executemany("DELETE FROM factor_weekly WHERE factor_ver=? AND sym=?",
+                                [(VER, s) for s in rot])
+                con.commit()
+                _repair = set(rot)
+                if rot_syms > len(rot):
+                    print(f"  남은 {rot_syms - len(rot)}종은 다음 회차에 — 정답 점검이 썩음 추이를 "
+                          f"매주 재니 줄지 않으면 REPAIR_MAX 를 올려야 한다", flush=True)
+            else:
+                print("분할 썩음 없음", flush=True)
+            #   다음 주기부터 **계속 검증**하기 위한 기록. known_answers 가 이 파일을 읽는다.
+            #   (썩음 측정 쿼리는 100만 행에 상관 서브쿼리라 무겁다 → 매 검사마다 다시 재지 않고
+            #    수리한 쪽이 남긴 숫자를 본다. 추이가 보여야 상한이 모자란지 알 수 있다.)
+            _rot_log(dict(asof=time.strftime("%Y-%m-%d"), ver=VER, tol=REPAIR_TOL,
+                          since=base_start, syms=rot_syms, rows=rot_rows,
+                          repaired=sorted(rot), repaired_n=len(rot),
+                          remaining=max(rot_syms - len(rot) - len(_skip), 0),
+                          skipped_not_in_universe=len(_skip), repair_max=REPAIR_MAX))
         last = con.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver=?",
                            (VER,)).fetchone()[0]
         if last:
@@ -709,8 +828,11 @@ def build(start="2018-01-01", incremental=False, newsyms=False):
             why["주봉 없음/80주 미만"] += 1
             continue
         _tail[s] = w.index[-1]
-        _st = ((pd.Timestamp(_last[s]) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
-               if s in _last and _last[s] else start)
+        #   수리 종목은 행을 지웠으므로 _last 에 없다 → base_start 부터 전 기간을 다시 쌓는다.
+        #   (start 는 증분 모드에서 '최신 주차+1'로 덮어써져 있어 그대로 쓰면 아무것도 안 쌓인다.)
+        _st = (base_start if s in _repair else
+               ((pd.Timestamp(_last[s]) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+                if s in _last and _last[s] else start))
         # ★ 계산할 새 주차가 없으면 일봉·재무 로드 전에 바로 스킵
         if w.index[-1] < pd.Timestamp(_st):
             why["새 주차 없음"] += 1
@@ -961,7 +1083,24 @@ if __name__ == "__main__":
         # --full: 분할 소급조정을 전부 반영하는 전수 재수집(분기 1회면 충분하다)
         cmd_fetch(int(_args[0]) if _args else 250, full='--full' in sys.argv)
     elif cmd == "update":
-        build(incremental=True)
+        # --no-repair: 분할 썩음 수리를 건너뛴다(시간이 급할 때. 썩음은 다음 회차로 밀린다)
+        build(incremental=True, repair='--no-repair' not in sys.argv)
+    elif cmd == "rot":
+        # 측정만 — 고치지 않는다. `python leaders_build.py rot [since] [--log]`
+        #   --log: 측정 결과를 results/split_rot.json 에 남긴다(repaired_n=0, mode=measure).
+        #   정답 점검은 mode=measure 기록을 '수리 전 측정'으로 보고 상한 비교를 하지 않는다.
+        _c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        _since = next((a for a in sys.argv[2:] if not a.startswith('--')), "2018-01-01")
+        _rot, _n, _k = find_rot(_c, VER, since=_since)
+        _tot = _c.execute("SELECT COUNT(*) FROM factor_weekly WHERE factor_ver=? AND as_of>=?",
+                          (VER, _since)).fetchone()[0]
+        _c.close()
+        print(f"[{VER}] {_since}~ 분할 썩음: {_k}종 · {_n:,}행 / 전체 {_tot:,}행 ({_n / max(_tot, 1):.2%})")
+        print(f"  영향 큰 순 상위 30: {_rot[:30]}")
+        if '--log' in sys.argv:
+            _rot_log(dict(asof=time.strftime("%Y-%m-%d"), ver=VER, tol=REPAIR_TOL, since=_since,
+                          syms=_k, rows=_n, repaired=[], repaired_n=0, remaining=_k,
+                          skipped_not_in_universe=0, repair_max=0, mode="measure"))
     elif cmd == "newsyms":
         build(newsyms=True)
     elif cmd == "fixcap":
