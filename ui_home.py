@@ -336,9 +336,16 @@ def _breadth_box(m: dict, kr: bool, extra: dict | None = None) -> str:
         kv.append(f"대형주({'시총 1조+' if kr else '시총 상위 500'}) {m['big_n']:,}종 중 상승 {m.get('breadth_up', '-')}%")
     eb = (extra or {}).get('breadth_all') or {}
     if eb.get('up') is not None:      # 한국 일간 — 네이버 전 종목(1,000억 미만 포함) 보조 숫자
-        kv.append(f"<em>참고 · 코스피+코스닥 전 종목: 상승 {eb['up']:,} · 하락 {eb.get('down', 0):,} · "
+        # 2026-11-23 — 한 카드 안에 분모가 셋(1,212 · 286 · 2,611)인데 관계를 안 적어
+        #   "종목 수가 안 맞는다"는 지적을 받았다. 전부 맞는 숫자지만 **포함 관계와 출처가 다르다.**
+        #   위 두 줄 = Yahoo 일봉 · 시총 1,000억+ / 이 줄 = 네이버 전 종목. 그걸 글로 밝힌다.
+        _en = (eb['up'] or 0) + (eb.get('down') or 0) + (eb.get('flat') or 0)
+        kv.append(f"<em>참고 · 코스피+코스닥 <b>전</b> 종목{f' {_en:,}종' if _en else ''}(네이버 · 위 {tot:,}종을 포함한 더 넓은 집합): "
+                  f"상승 {eb['up']:,} · 하락 {eb.get('down', 0):,} · "
                   f"상한가 {eb.get('limit_up', '-')} · 하한가 {eb.get('limit_down', '-')}</em>")
-    lab = f"시장 폭 — {'시총 1,000억+' if kr else '시총 $3억+'} {tot:,}종"
+    lab = (f"시장 폭 — {'시총 1,000억+' if kr else '시총 $3억+'} {tot:,}종"
+           + (' <span style="font-weight:500;color:var(--ink-3);font-size:11.5px">'
+              '(Yahoo 일봉 · 우선주 포함)</span>' if kr else ''))
     return f"<div class='hm-box'><h5>{lab}</h5>{bar}<div class='hm-kv'>{'<br>'.join(kv)}</div></div>"
 
 
