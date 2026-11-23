@@ -661,6 +661,20 @@ def _kr_rule_checks(f):
         return []
 
 
+def _fresher_kr(rows, db=None):
+    """2026-11-24: 미국판(06:10 KST)이 Yahoo ^KS11 의 당일 봉 지연으로 코스피·코스닥을 전 거래일(11-20) 값으로 실었다.
+    같은 날 15:45 한국판은 이미 11-23 종가를 갖고 있었다 → 한국판 지수 행이 더 새로우면 그것으로 바꾼다."""
+    db = db if db is not None else (_j("results/market_report.json") or {})
+    kr = {x.get("sym"): x for x in ((db.get("latest_kr") or {}).get("facts") or {}).get("indices", [])}
+    out = []
+    for x in rows:
+        y = kr.get(x.get("sym"))
+        if x.get("sym") in ("^KS11", "^KQ11") and y and str(y.get("date", "")) > str(x.get("date", "")):
+            x = dict(y)
+        out.append(x)
+    return out
+
+
 def facts(kind):
     if kind == "kr":
         sg = signal_facts()
@@ -675,7 +689,7 @@ def facts(kind):
             print("  한국 시장 내부(주간·월간) 생략:", str(e)[:100])
         return f
     f = dict(kind=kind, generated=_now_kst(), verdict=verdict_facts(),
-             indices=index_facts(), stocks=stock_facts(kind), signals=signal_facts())
+             indices=_fresher_kr(index_facts()), stocks=stock_facts(kind), signals=signal_facts())
     if kind == "daily":
         try:
             f["us"] = us_extra_facts()
@@ -777,7 +791,7 @@ def template(f):
         s = f["stocks"].get(m) or {}
         if not s:
             continue
-        L += ["", f"**{m}** ({_BASIS.get(s['basis'], s['basis'])} 수익률, 대형주 {s['universe']}종 · 상승 비율 {s['breadth_up']}%)",
+        L += ["", f"**{m}** ({_BASIS.get(s['basis'], s['basis'])} 수익률{(' · ' + str(f['stocks'].get('perf_date'))[5:] + ' 기준') if f['stocks'].get('perf_date') else ''}, 대형주 {s['universe']}종 · 상승 비율 {s['breadth_up']}%)",
               "강세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["top"]),
               "약세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["bottom"])]
         if "near_52w" in s:
