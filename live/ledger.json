@@ -5,7 +5,7 @@
   "deposits": []
  },
  "KR": {
-  "cash_krw": 85299.0,
+  "cash_krw": 183967.0,
   "positions": {
    "010170": {
     "name": "대한광통신",
@@ -33,19 +33,6 @@
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
-   "092190": {
-    "name": "서울바이오시스",
-    "shares": 5.0,
-    "avg": 6556.0,
-    "first_px": 6480.0,
-    "peak": 7150.0,
-    "stop": 5720.0,
-    "added": true,
-    "adds": 1,
-    "last_px": 5560.0,
-    "opened": "2026-11-09",
-    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
-   },
    "356680": {
     "name": "엑스게이트",
     "shares": 2,
@@ -59,32 +46,6 @@
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
-   "046970": {
-    "name": "우리로",
-    "shares": 5.0,
-    "avg": 6364.0,
-    "first_px": 6215.0,
-    "peak": 7000.0,
-    "stop": 5600.0,
-    "added": true,
-    "adds": 1,
-    "last_px": 5410.0,
-    "opened": "2026-11-09",
-    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
-   },
-   "317400": {
-    "name": "자이에스앤디",
-    "shares": 3,
-    "avg": 7566.7,
-    "first_px": 7566.7,
-    "peak": 8290.0,
-    "stop": 6632.0,
-    "added": false,
-    "adds": 0,
-    "last_px": 6050.0,
-    "opened": "2026-11-09",
-    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
-   },
    "396300": {
     "name": "HT로보틱스",
     "shares": 4,
@@ -95,19 +56,6 @@
     "added": false,
     "adds": 0,
     "last_px": 5820.0,
-    "opened": "2026-11-09",
-    "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
-   },
-   "024840": {
-    "name": "KBI메탈",
-    "shares": 8,
-    "avg": 3400.0,
-    "first_px": 3400.0,
-    "peak": 4585.0,
-    "stop": 3668.0,
-    "added": false,
-    "adds": 0,
-    "last_px": 3570.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    }
@@ -136,175 +84,105 @@
   "046970-2026-11-09-ADD1",
   "446540-2026-11-09-ADD2",
   "2026-11-16-446540-STOP",
-  "2026-11-17-046890-STOP"
+  "2026-11-17-046890-STOP",
+  "2026-11-20-092190-STOP",
+  "2026-11-20-046970-STOP",
+  "2026-11-20-317400-STOP",
+  "2026-11-20-024840-STOP"
  ],
- "pending": {
-  "2026-11-20-092190-STOP": {
-   "orderId": "y4hYA_jNjG4xb73AdleAEB2vkjpSTD4AjE2zkJh2ylnYdj3NaYZ4dx1QP4FHoWU2QOaKqs6aDZKsbzR44QMhDg",
-   "o": {
-    "sym": "092190",
-    "name": "서울바이오시스",
-    "side": "SELL",
-    "quantity": 5,
-    "px": 5560.0,
-    "why": "손절: 2026-11-20 종가 5,560 ≤ 손절선 5,720(최고 7,150)",
-    "cid": "2026-11-20-092190-STOP"
-   },
-   "at": "2026-11-23"
-  },
-  "2026-11-20-046970-STOP": {
-   "orderId": "MogdA3a11PMxu1qswoMXNfSUSUuqkFF0S5xNwfLnfGTlcXfYWIGbZNXHvMV2jGRlDqZknktGf_41D3LINtv8zw",
-   "o": {
-    "sym": "046970",
-    "name": "우리로",
-    "side": "SELL",
-    "quantity": 5,
-    "px": 5410.0,
-    "why": "손절: 2026-11-20 종가 5,410 ≤ 손절선 5,600(최고 7,000)",
-    "cid": "2026-11-20-046970-STOP"
-   },
-   "at": "2026-11-23"
-  },
-  "2026-11-20-317400-STOP": {
-   "orderId": "DsjxGyChWnKvchwGdp5mWQqCa-VOR9UxZz6qs4StZKgR32LjmxPFNhVOrRCER-cOjxWuxaVvub74Bl0Im2uoDQ",
-   "o": {
-    "sym": "317400",
-    "name": "자이에스앤디",
-    "side": "SELL",
-    "quantity": 3,
-    "px": 6050.0,
-    "why": "손절: 2026-11-20 종가 6,050 ≤ 손절선 6,632(최고 8,290)",
-    "cid": "2026-11-20-317400-STOP"
-   },
-   "at": "2026-11-23"
-  },
-  "2026-11-20-024840-STOP": {
-   "orderId": "OVKKMiQzjIDUb9KN3GHAGY2SHLfoacmGM9Rk9S8S82jcWJQeOroIviVyUvXnpmxEigSDt9LB7H38JYdpAgXZVQ",
-   "o": {
-    "sym": "024840",
-    "name": "KBI메탈",
-    "side": "SELL",
-    "quantity": 8,
-    "px": 3570.0,
-    "why": "손절: 2026-11-20 종가 3,570 ≤ 손절선 3,668(최고 4,585)",
-    "cid": "2026-11-20-024840-STOP"
-   },
-   "at": "2026-11-23"
-  }
- },
+ "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-23 08:40 KST",
-  "cash_krw": 89840.0,
+  "at": "2026-11-23 09:10 KST",
+  "cash_krw": 188314.0,
   "holdings": [
    {
     "sym": "010170",
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 13980.0,
-    "pnl_pct": 25.71
+    "last_price": 13770.0,
+    "pnl_pct": 23.830000000000002
    },
    {
     "sym": "228850",
     "name": "레이언스",
     "qty": 3.0,
     "avg_cost": 7356.666666,
-    "last_price": 7330.0,
-    "pnl_pct": -0.36
-   },
-   {
-    "sym": "092190",
-    "name": "서울바이오시스",
-    "qty": 5.0,
-    "avg_cost": 6556.0,
-    "last_price": 5560.0,
-    "pnl_pct": -15.190000000000001
+    "last_price": 7020.0,
+    "pnl_pct": -4.569999999999999
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 12420.0,
-    "pnl_pct": -5.8999999999999995
-   },
-   {
-    "sym": "046970",
-    "name": "우리로",
-    "qty": 5.0,
-    "avg_cost": 6364.0,
-    "last_price": 5480.0,
-    "pnl_pct": -13.889999999999999
-   },
-   {
-    "sym": "317400",
-    "name": "자이에스앤디",
-    "qty": 3.0,
-    "avg_cost": 7566.666666,
-    "last_price": 6270.0,
-    "pnl_pct": -17.130000000000003
+    "last_price": 12180.0,
+    "pnl_pct": -7.720000000000001
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 5970.0,
-    "pnl_pct": -10.09
-   },
-   {
-    "sym": "024840",
-    "name": "KBI메탈",
-    "qty": 8.0,
-    "avg_cost": 3400.0,
-    "last_price": 3665.0,
-    "pnl_pct": 7.79
+    "last_price": 5820.0,
+    "pnl_pct": -12.34
    }
   ],
-  "open_orders": [
-   {
-    "orderId": "OVKKMiQzjIDUb9KN3GHAGY2SHLfoacmGM9Rk9S8S82jcWJQeOroIviVyUvXnpmxEigSDt9LB7H38JYdpAgXZVQ",
-    "symbol": "024840",
-    "side": "SELL",
-    "orderType": "MARKET",
-    "price": null,
-    "quantity": "8",
-    "status": "PENDING",
-    "orderedAt": "2026-11-23T08:40:19.036+09:00"
-   },
-   {
-    "orderId": "DsjxGyChWnKvchwGdp5mWQqCa-VOR9UxZz6qs4StZKgR32LjmxPFNhVOrRCER-cOjxWuxaVvub74Bl0Im2uoDQ",
-    "symbol": "317400",
-    "side": "SELL",
-    "orderType": "MARKET",
-    "price": null,
-    "quantity": "3",
-    "status": "PENDING",
-    "orderedAt": "2026-11-23T08:40:18.709+09:00"
-   },
-   {
-    "orderId": "MogdA3a11PMxu1qswoMXNfSUSUuqkFF0S5xNwfLnfGTlcXfYWIGbZNXHvMV2jGRlDqZknktGf_41D3LINtv8zw",
-    "symbol": "046970",
-    "side": "SELL",
-    "orderType": "MARKET",
-    "price": null,
-    "quantity": "5",
-    "status": "PENDING",
-    "orderedAt": "2026-11-23T08:40:18.400+09:00"
-   },
-   {
-    "orderId": "y4hYA_jNjG4xb73AdleAEB2vkjpSTD4AjE2zkJh2ylnYdj3NaYZ4dx1QP4FHoWU2QOaKqs6aDZKsbzR44QMhDg",
-    "symbol": "092190",
-    "side": "SELL",
-    "orderType": "MARKET",
-    "price": null,
-    "quantity": "5",
-    "status": "PENDING",
-    "orderedAt": "2026-11-23T08:40:18.100+09:00"
-   }
-  ],
+  "open_orders": [],
   "tx": [
+   {
+    "transactionTime": null,
+    "transactionType": "SELL",
+    "symbol": "024840",
+    "quantity": "8",
+    "filledPrice": null,
+    "amount": "28040",
+    "commission": "4",
+    "tax": "56",
+    "settled": false,
+    "settlementDate": "2026-11-25",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": null,
+    "transactionType": "SELL",
+    "symbol": "092190",
+    "quantity": "5",
+    "filledPrice": null,
+    "amount": "26400",
+    "commission": "3",
+    "tax": "52",
+    "settled": false,
+    "settlementDate": "2026-11-25",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": null,
+    "transactionType": "SELL",
+    "symbol": "046970",
+    "quantity": "5",
+    "filledPrice": null,
+    "amount": "26450",
+    "commission": "3",
+    "tax": "52",
+    "settled": false,
+    "settlementDate": "2026-11-25",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": null,
+    "transactionType": "SELL",
+    "symbol": "317400",
+    "quantity": "3",
+    "filledPrice": null,
+    "amount": "17790",
+    "commission": "2",
+    "tax": "34",
+    "settled": false,
+    "settlementDate": "2026-11-25",
+    "isCancellation": false
+   },
    {
     "transactionTime": "2026-11-20T00:07:00.965+09:00",
     "transactionType": "SELL",
@@ -660,6 +538,10 @@
  },
  "cooldown": {
   "446540": "2026-11-17",
-  "046890": "2026-11-18"
+  "046890": "2026-11-18",
+  "092190": "2026-11-23",
+  "046970": "2026-11-23",
+  "317400": "2026-11-23",
+  "024840": "2026-11-23"
  }
 }
