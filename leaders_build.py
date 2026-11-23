@@ -621,6 +621,43 @@ REPAIR_MAX = int(os.environ.get("REPAIR_MAX", "60"))     # 회당 재적재 종�
 REPAIR_TOL = 0.10
 
 
+# 2026-11-23 — 통째로 쌓은 판(v13y)에 **반드시 있어야 하는 열**.
+#   왜: 수집 항목을 늘려도(SEC 재무상태표 → equity·liabilities) 증분 적재는 **새 주차에만** 값을 쓴다.
+#   이미 쌓인 과거 행은 UPDATE 되지 않는다. 게다가 패널 접합은 통째 판을 앞에 두므로,
+#   통째 판에 그 열이 없으면 **겹침 구간 전체가 빈 채로 남는다** — 실측 11-23:
+#   weekly-accel·quant-panel 을 둘 다 성공시켜도 미국 PBR·ROE·부채비율이 0% 그대로였다.
+#   낡음(일수)만 보던 재생성 조건으로는 이걸 영원히 못 잡는다.
+VER_MUST_COLS = ("equity", "liabilities")
+
+
+def ver_needs_rebuild(con, ver, ref_ver="v1", max_stale_days=56, must=VER_MUST_COLS):
+    """(재생성 필요?, 사유) — 낡음과 **내용 결손**을 둘 다 본다.
+
+    낡음: ref_ver 의 최신 주차보다 max_stale_days 넘게 뒤처졌나.
+    결손: must 열이 표에 없거나, 있어도 값이 **통째로 0건**인가.
+    """
+    have = {x[1] for x in con.execute("PRAGMA table_info(factor_weekly)")}
+    n = con.execute("SELECT COUNT(*) FROM factor_weekly WHERE factor_ver=?", (ver,)).fetchone()[0]
+    if not n:
+        return True, f"{ver} 가 비어 있다"
+    missing = [c for c in must if c not in have]
+    if missing:
+        return True, f"{ver}: 표에 열이 없다 — {', '.join(missing)}"
+    empty = [c for c in must
+             if not con.execute(f"SELECT COUNT({c}) FROM factor_weekly WHERE factor_ver=?", (ver,)).fetchone()[0]]
+    if empty:
+        return True, (f"{ver} {n:,}행에 {', '.join(empty)} 가 **한 건도 없다** — 수집 항목이 늘어난 뒤로 "
+                      f"다시 쌓은 적이 없다는 뜻이다(증분 적재는 과거 행을 고치지 않는다)")
+    a = con.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver=?", (ver,)).fetchone()[0]
+    b = con.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver=?", (ref_ver,)).fetchone()[0]
+    if a and b:
+        gap = (pd.Timestamp(str(b)[:10]) - pd.Timestamp(str(a)[:10])).days
+        if gap > max_stale_days:
+            return True, f"{ver} 가 {ref_ver} 보다 {gap}일 뒤처졌다(허용 {max_stale_days}일)"
+        return False, f"{ver} 최신 {a} · {ref_ver} 보다 {gap}일 뒤 · 필수 열 있음"
+    return False, f"{ver} 최신 {a}"
+
+
 ROT_LOG = "results/split_rot.json"
 
 
@@ -1085,6 +1122,15 @@ if __name__ == "__main__":
     elif cmd == "update":
         # --no-repair: 분할 썩음 수리를 건너뛴다(시간이 급할 때. 썩음은 다음 회차로 밀린다)
         build(incremental=True, repair='--no-repair' not in sys.argv)
+    elif cmd == "needs_rebuild":
+        # `python leaders_build.py needs_rebuild [ver]` → 필요하면 exit 1 + 사유.
+        #   워크플로가 이걸로 '통째 판을 다시 쌓을지'를 정한다(낡음 + 내용 결손 둘 다 본다).
+        _v = next((a for a in sys.argv[2:] if not a.startswith('--')), "v13y")
+        _c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        _need, _why = ver_needs_rebuild(_c, _v)
+        _c.close()
+        print(f"{'재생성 필요' if _need else '재생성 불필요'}: {_why}")
+        sys.exit(1 if _need else 0)
     elif cmd == "rot":
         # 측정만 — 고치지 않는다. `python leaders_build.py rot [since] [--log]`
         #   --log: 측정 결과를 results/split_rot.json 에 남긴다(repaired_n=0, mode=measure).

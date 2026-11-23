@@ -137,6 +137,27 @@ def _seam_note(vers):
                            f"가격은 틀릴 수 있다. {base} 를 다시 쌓으면(약 48분) 사라진다.")
             if gap > 56:
                 print(f"[US] ⚠️ {out['note']}", flush=True)
+        # 2026-11-23 — **통째 판에 필수 열이 비었는지**도 본다. 수집 항목을 늘려도 증분 적재는
+        #   새 주차에만 값을 쓰므로, 통째 판을 다시 쌓기 전에는 겹침 구간이 통째로 빈다.
+        #   그러면 커버리지가 0% 인데 **아무 경보도 울리지 않는다**(NOT_YET 에 적혀 있어서).
+        #   실측 11-23: weekly-accel·quant-panel 을 둘 다 성공시켜도 미국 PBR·ROE·부채비율이
+        #   0% 그대로였고, 이유를 아무도 말해 주지 않았다.
+        try:
+            sys.path.insert(0, ROOT)
+            import leaders_build as _LB
+            _c2 = sqlite3.connect(f"file:{os.path.join(ROOT, 'data', 'market.db')}?mode=ro", uri=True)
+            _need, _why = _LB.ver_needs_rebuild(_c2, base)
+            _c2.close()
+            out["base_rebuild_needed"], out["base_rebuild_why"] = bool(_need), _why
+            if _need:
+                msg = (f"통째 판 {base} 를 다시 쌓아야 한다 — {_why}. "
+                       f"그 전까지 미국 PBR·ROE·부채비율은 0% 로 남는다"
+                       f"(research-consensus 를 돌리면 재생성된다, 약 48분).")
+                print(f"[US] ⚠️ {msg}", flush=True)
+                if os.environ.get("GITHUB_ACTIONS"):
+                    print(f"::warning title=패널 US 통째 판::{msg}", flush=True)
+        except Exception as e:
+            out["base_rebuild_why"] = f"판정 실패: {type(e).__name__}"
     return out
 
 

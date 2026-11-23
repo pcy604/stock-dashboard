@@ -306,3 +306,64 @@ def test_workflow_wires_the_repair():
     y = open(os.path.join(ROOT, ".github", "workflows", "weekly-accel.yml"), encoding="utf-8").read()
     assert "REPAIR_MAX" in y, "weekly-accel 에 수리 상한이 없다"
     assert "results/split_rot.json" in y, "수리 기록이 커밋되지 않으면 정답 점검이 못 읽는다"
+
+
+# ──────────────────────────────────────────────────────────────────────
+# 통째 판 재생성 판정 (2026-11-23) — 낡음만 보면 '내용이 빈 것'을 영원히 못 잡는다
+# ──────────────────────────────────────────────────────────────────────
+def _db_cols(tmp_path, rows, add_cols=True):
+    p = _db(tmp_path / "data", rows)
+    c = sqlite3.connect(str(p))
+    if add_cols:
+        B._add_cols(c)
+    return c
+
+
+def test_rebuild_needed_when_column_missing(tmp_path):
+    """표에 열 자체가 없는 경우 — **DDL 추가 전에 만들어진 옛 DB** 가 이 상태다.
+    (새 DB 는 leaders_schema.sql 이 열을 만들어 주므로 여기서는 지워서 재현한다.)"""
+    c = _db_cols(tmp_path, [("v13y", "2026-11-16", "A", "1"), ("v1", "2026-11-16", "A", "1")])
+    for col, _ in B._NEW_COLS:
+        c.execute(f"ALTER TABLE factor_weekly DROP COLUMN {col}")
+    c.commit()
+    need, why = B.ver_needs_rebuild(c, "v13y")
+    assert need and "열이 없다" in why
+
+
+def test_rebuild_needed_when_column_all_empty(tmp_path):
+    """⚠️ **11-23 의 고장 그 자체.** 열은 있는데 값이 한 건도 없다 — 증분 적재는 과거 행을
+    고치지 않으므로, 통째 판을 다시 쌓기 전에는 겹침 구간이 통째로 빈다.
+    낡음(일수)만 보던 조건은 이걸 영원히 못 잡았다(21일이라 '최신'으로 통과)."""
+    c = _db_cols(tmp_path, [("v13y", "2026-11-16", "A", "1"), ("v1", "2026-11-16", "A", "1")])
+    need, why = B.ver_needs_rebuild(c, "v13y")
+    assert need and "한 건도 없다" in why
+
+
+def test_no_rebuild_when_columns_filled_and_fresh(tmp_path):
+    c = _db_cols(tmp_path, [("v13y", "2026-11-16", "A", "1"), ("v1", "2026-11-16", "A", "1")])
+    c.execute("UPDATE factor_weekly SET equity=1e9, liabilities=5e8 WHERE factor_ver='v13y'")
+    c.commit()
+    need, why = B.ver_needs_rebuild(c, "v13y")
+    assert not need and "필수 열 있음" in why
+
+
+def test_rebuild_needed_when_stale_even_if_filled(tmp_path):
+    """내용이 차 있어도 너무 뒤처지면 재생성 — 두 조건은 OR 다."""
+    c = _db_cols(tmp_path, [("v13y", "2026-01-05", "A", "1"), ("v1", "2026-11-16", "A", "1")])
+    c.execute("UPDATE factor_weekly SET equity=1e9, liabilities=5e8 WHERE factor_ver='v13y'")
+    c.commit()
+    need, why = B.ver_needs_rebuild(c, "v13y")
+    assert need and "뒤처졌다" in why
+
+
+def test_rebuild_needed_when_ver_empty(tmp_path):
+    c = _db_cols(tmp_path, [("v1", "2026-11-16", "A", "1")])
+    need, why = B.ver_needs_rebuild(c, "v13y")
+    assert need and "비어 있다" in why
+
+
+def test_workflow_uses_content_aware_rebuild_check():
+    """워크플로가 낡음만 보는 옛 조건으로 돌아가면 같은 고장이 반복된다."""
+    y = open(os.path.join(ROOT, ".github", "workflows", "research-consensus.yml"), encoding="utf-8").read()
+    assert "ver_needs_rebuild" in y, "내용까지 보는 판정을 쓰지 않는다"
+    assert "<= 56" not in y, "낡음만 보던 옛 조건이 남아 있다"

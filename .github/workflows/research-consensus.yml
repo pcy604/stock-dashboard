@@ -77,13 +77,20 @@ jobs:
           have = c.execute("SELECT COUNT(*) FROM factor_weekly WHERE factor_ver='v13y'").fetchone()[0]
           if not have and os.path.exists('data/fw_v13y.parquet'):
               f = pd.read_parquet('data/fw_v13y.parquet')
-              last_v1 = c.execute("SELECT MAX(as_of) FROM factor_weekly WHERE factor_ver='v1'").fetchone()[0]
-              if (pd.Timestamp(str(last_v1)[:10]) - pd.Timestamp(str(f.as_of.max())[:10])).days <= 56:   # 8주 이내면 사용(연구용, 48분 재생성 방지)
-                  f.to_sql('factor_weekly', c, if_exists='append', index=False); c.commit()
-                  print(f"::notice title=v13y 캐시 사용::{len(f):,}행 · 최신 {str(f.as_of.max())[:10]}")
-                  open('/tmp/ver', 'w').write('v13y'); open('/tmp/fresh', 'w').write('0')
+              f.to_sql('factor_weekly', c, if_exists='append', index=False); c.commit()
+              # 2026-11-23 — 전에는 '8주 이내면 쓴다'로 **낡음만** 봤다. 그래서 수집 항목이 늘어도
+              #   (SEC 재무상태표 → equity·liabilities) 통째 판은 영원히 다시 쌓이지 않았고,
+              #   증분 적재는 과거 행을 고치지 않으므로 **미국 PBR·ROE·부채비율이 0% 로 남았다**
+              #   (weekly-accel·quant-panel 을 둘 다 성공시켜도 그대로였다).
+              #   이제 leaders_build.ver_needs_rebuild 가 낡음 + 필수 열 결손을 같이 본다.
+              import leaders_build as LB
+              need, why = LB.ver_needs_rebuild(c, 'v13y')
+              if need:
+                  print(f"::notice title=v13y 재생성::{why}")
+                  c.execute("DELETE FROM factor_weekly WHERE factor_ver='v13y'"); c.commit()
               else:
-                  print(f"v13y 캐시가 낡음({str(f.as_of.max())[:10]} < {last_v1}) → 다시 쌓는다")
+                  print(f"::notice title=v13y 캐시 사용::{len(f):,}행 · {why}")
+                  open('/tmp/ver', 'w').write('v13y'); open('/tmp/fresh', 'w').write('0')
           PY
           if [ "$(cat /tmp/ver)" != "v13y" ] && [ "$(cat /tmp/deep)" = "1" ]; then
             FACTOR_VER=v13y python leaders_build.py build 2014-02-24 && echo v13y > /tmp/ver && echo 1 > /tmp/fresh
