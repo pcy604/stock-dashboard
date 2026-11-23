@@ -1,6 +1,6 @@
 {
  "started": "2026-08-22",
- "updated": "2026-11-16",
+ "updated": "2026-11-23",
  "positions": {
   "KR-P1": {
    "317400": {
@@ -64,10 +64,10 @@
     "state": "open",
     "entry_date": "2026-08-11",
     "entry_px": 83000.0,
-    "close": 102100.0,
-    "ret": 23.0,
+    "close": 83000.0,
+    "ret": 0.0,
     "peak_gain": 40.0,
-    "days": 97
+    "days": 104
    },
    "044820": {
     "name": "코스맥스비티아이",
@@ -76,10 +76,10 @@
     "state": "open",
     "entry_date": "2026-08-12",
     "entry_px": 28000.0,
-    "close": 22650.0,
-    "ret": -19.1,
+    "close": 22900.0,
+    "ret": -18.2,
     "peak_gain": 0.0,
-    "days": 96,
+    "days": 103,
     "note": "가격 데이터 없음 — 판정 보류"
    },
    "415640": {
@@ -89,10 +89,10 @@
     "state": "open",
     "entry_date": "2026-07-06",
     "entry_px": 10610.0,
-    "close": 9860.0,
-    "ret": -7.1,
+    "close": 9930.0,
+    "ret": -6.4,
     "peak_gain": 5.1,
-    "days": 133
+    "days": 140
    },
    "439090": {
     "name": "마녀공장",
@@ -154,10 +154,10 @@
     "state": "open",
     "entry_date": "2026-08-20",
     "entry_px": 87200.0,
-    "close": 75600.0,
-    "ret": -13.3,
+    "close": 76200.0,
+    "ret": -12.6,
     "peak_gain": 8.1,
-    "days": 88
+    "days": 95
    },
    "278470": {
     "name": "에이피알",
@@ -348,22 +348,23 @@
     "state": "open",
     "entry_date": "2026-09-23",
     "entry_px": 9150.0,
-    "close": 13310.0,
-    "ret": 45.5,
+    "close": 9710.0,
+    "ret": 6.1,
     "peak_gain": 47.5,
-    "days": 54
+    "days": 61
    },
    "105740": {
     "name": "디케이락",
     "first_seen": "2026-10-19",
     "signal_entry": "2026-10-02",
-    "state": "open",
+    "state": "closed",
     "entry_date": "2026-10-02",
     "entry_px": 11680.0,
-    "close": 11120.0,
-    "ret": -4.8,
+    "close": 9400.0,
+    "ret": -19.5,
     "peak_gain": 17.0,
-    "days": 45
+    "days": 49,
+    "exit_date": "2026-11-20"
    },
    "053260": {
     "name": "금강철강",
@@ -385,10 +386,46 @@
     "state": "open",
     "entry_date": "2026-10-28",
     "entry_px": 27300.0,
-    "close": 33500.0,
-    "ret": 22.7,
-    "peak_gain": 25.1,
-    "days": 19
+    "close": 37250.0,
+    "ret": 36.4,
+    "peak_gain": 41.2,
+    "days": 26
+   },
+   "180640": {
+    "name": "한진칼",
+    "first_seen": "2026-11-23",
+    "signal_entry": "2026-11-20",
+    "state": "open",
+    "entry_date": "2026-11-20",
+    "entry_px": 237000.0,
+    "close": 228000.0,
+    "ret": -3.8,
+    "peak_gain": 0.0,
+    "days": 3
+   },
+   "003490": {
+    "name": "대한항공",
+    "first_seen": "2026-11-23",
+    "signal_entry": "2026-11-19",
+    "state": "open",
+    "entry_date": "2026-11-19",
+    "entry_px": 32650.0,
+    "close": 30200.0,
+    "ret": -7.5,
+    "peak_gain": 0.0,
+    "days": 4
+   },
+   "089590": {
+    "name": "제주항공",
+    "first_seen": "2026-11-23",
+    "signal_entry": "2026-11-19",
+    "state": "open",
+    "entry_date": "2026-11-19",
+    "entry_px": 8500.0,
+    "close": 7830.0,
+    "ret": -7.9,
+    "peak_gain": 0.0,
+    "days": 4
    }
   },
   "KR-U6": {
@@ -555,10 +592,10 @@
     "state": "open",
     "entry_date": "2026-08-31",
     "entry_px": 133000.0,
-    "close": 209500.0,
-    "ret": 57.5,
-    "peak_gain": 77.8,
-    "days": 77
+    "close": 228000.0,
+    "ret": 71.4,
+    "peak_gain": 78.2,
+    "days": 84
    },
    "000500": {
     "name": "가온전선",
@@ -632,10 +669,10 @@
     "state": "open",
     "entry_date": "2026-08-20",
     "entry_px": 260500.0,
-    "close": 286000.0,
-    "ret": 9.8,
+    "close": 279500.0,
+    "ret": 7.3,
     "peak_gain": 19.2,
-    "days": 88
+    "days": 95
    },
    "222800": {
     "name": "심텍",
@@ -735,10 +772,10 @@
     "state": "open",
     "entry_date": "2026-09-17",
     "entry_px": 108400.0,
-    "close": 103100.0,
-    "ret": -4.9,
+    "close": 98600.0,
+    "ret": -9.0,
     "peak_gain": 2.6,
-    "days": 60
+    "days": 67
    },
    "443060": {
     "name": "HD현대마린솔루션",
@@ -760,10 +797,10 @@
     "state": "open",
     "entry_date": "2026-09-28",
     "entry_px": 56900.0,
-    "close": 49400.0,
-    "ret": -13.2,
+    "close": 45350.0,
+    "ret": -20.3,
     "peak_gain": 2.5,
-    "days": 49
+    "days": 56
    },
    "103590": {
     "name": "일진전기",
@@ -811,10 +848,10 @@
     "state": "open",
     "entry_date": "2026-09-21",
     "entry_px": 35400.0,
-    "close": 28550.0,
-    "ret": -19.4,
+    "close": 26550.0,
+    "ret": -25.0,
     "peak_gain": 0.6,
-    "days": 56
+    "days": 63
    },
    "039030": {
     "name": "이오테크닉스",
@@ -888,10 +925,10 @@
     "state": "open",
     "entry_date": "2026-09-28",
     "entry_px": 218000.0,
-    "close": 231000.0,
-    "ret": 6.0,
+    "close": 174700.0,
+    "ret": -19.9,
     "peak_gain": 8.0,
-    "days": 49
+    "days": 56
    },
    "357780": {
     "name": "솔브레인",
