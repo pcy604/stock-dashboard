@@ -961,14 +961,30 @@ def chat_context(extra_rows=None, max_chars=12000):
     12,600자라 한국 장 마감(latest_kr — 테마·수급·업종)이 통째로 잘려 챗봇이 본 적이 없었다.
     → 최신 한국 장 마감을 맨 앞에, 히트맵(2.2만 자) 같은 큰 목록은 빼고, 리포트마다 상한을 둔다."""
     db = _j("results/market_report.json") or {}
-    drop = {"heatmap", "turnover_top", "limit_up", "breadth_hist"}
+    # 2026-11-23: internals_kr(22만 자 — periods·heatmap·업종 구성종목)가 stocks 밖에 붙으면서 다시 themes_top 이
+    #   6,000자 밖으로 밀려 잘렸다 → stocks.* 와 internals_* 모두 같은 규칙으로 줄이고, 업종은 구성종목을 뺀다.
+    drop = {"heatmap", "turnover_top", "limit_up", "breadth_hist", "breadth_hist_w", "breadth_hist_m", "periods"}
+    first = ("themes_top", "themes_bottom", "new_high_52w", "breadth_all", "top", "bottom")
+
+    def _thin(m):
+        for k in drop:
+            m.pop(k, None)
+        if isinstance(m.get("sectors"), list):
+            m["sectors"] = [{k: s.get(k) for k in ("name", "n", "ret", "lead", "lead_ret")}
+                            for s in m["sectors"] if isinstance(s, dict)]
+        head = {k: m.pop(k) for k in first if k in m}
+        return {**head, **m}                        # 잘려도 테마·신고가가 앞에 남게
 
     def _slim(v):
         f = json.loads(json.dumps(v.get("facts") or {}, ensure_ascii=False))
-        for m in ((f.get("stocks") or {}).values()):
+        st = f.get("stocks") or {}
+        for mk, m in list(st.items()):
             if isinstance(m, dict):
-                for k in drop:
-                    m.pop(k, None)
+                st[mk] = _thin(m)
+        for k in [k for k in f if k.startswith("internals")]:
+            if isinstance(f[k], dict):
+                f[k] = _thin(f[k])
+        f = {**{k: f.pop(k) for k in [k for k in f if k.startswith("internals")]}, **f}
         return {"date": v.get("date"), "facts": f}
 
     order = [("latest_kr", "한국 장 마감(가장 최신 한국 숫자)", 6000), ("latest_daily", "일간 — 미국 마감", 4000),

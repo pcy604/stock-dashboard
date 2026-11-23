@@ -33,6 +33,7 @@ jobs:
       PYTHONUNBUFFERED: '1'
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      SEC_CONTACT: ${{ secrets.SEC_CONTACT }}   # us_fq_daily 가 SEC EDGAR 색인을 친다(없으면 RuntimeError)
     steps:
       - uses: actions/checkout@v4
         with:

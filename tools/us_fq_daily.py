@@ -28,7 +28,7 @@ def filers(day: date) -> set:
     import leaders_build as LB
     q = (day.month - 1) // 3 + 1
     url = f"https://www.sec.gov/Archives/edgar/daily-index/{day.year}/QTR{q}/form.{day:%Y%m%d}.idx"
-    raw = LB.get(url, LB.SUA, tries=3)
+    raw = LB.get(url, LB._sua(), tries=3)   # 11-22 SUA 상수 → 설정 지연 읽기(_sua)
     if raw is None:
         return set()
     out = set()

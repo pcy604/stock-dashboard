@@ -68,6 +68,7 @@ def test_due_quarter():
 def test_multiclass_shares_fall_back_to_weighted_average(monkeypatch):
     """dei·CommonStock 태그가 비면(복수 종류주식) 가중평균 기본주식수로 채운다."""
     import marketcap_refresh as M
+    monkeypatch.setenv('SEC_CONTACT', 'test@example.com')   # 11-22 부터 연락처는 설정에서 읽는다(get 은 가짜)
     calls = []
 
     def fake_get(url, hdr, tries=4):
