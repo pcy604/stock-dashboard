@@ -352,7 +352,9 @@ SOURCES = [
     dict(path='results/split_rot.json', label='분할 썩음 수리 기록',
          cycle='주 1회 (weekly-accel)', max_age=10, producer='leaders_build.py update',
          job='weekly-accel', used_by='감시 — 주봉 과거 가격이 일봉 원본과 맞는가',
-         getter=_key('asof')),
+         #   구조가 {latest:{asof}, history:[…]} 다 — 최상위 asof 를 찾으면 'nodate' 가 된다.
+         #   (11-23 실측: 그렇게 등록해 weekly-accel 게이트를 바로 빨간불로 만들었다)
+         getter=_key2('latest', 'asof')),
     # ★ 2026-11-22 — 월 1회 세계은행 시총. `--audit` 이 못 잡던 구멍이었다: 감사는 **등록된 것**만
     #   세므로, 등록조차 안 된 산출물은 '감시 공백 0' 안에서도 보이지 않는다(platform_watch 의
     #   워크플로 검사 R3 가 먼저 잡아냈다). 내용은 연간치라 몇 달 그대로여서 _meta.checked 를 본다.

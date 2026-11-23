@@ -40,6 +40,26 @@ import sys
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
+def _annotate(title, lines):
+    """실패 이유를 GitHub 어노테이션으로 남긴다 (2026-11-23 신설).
+
+    왜: 이 게이트가 exit 1 로 잡을 죽였는데 어노테이션에는 'Process completed with exit code 1'
+    만 남아, **로그를 볼 수 없는 쪽에서는 원인을 전혀 알 수 없었다**(weekly-accel #33).
+    Actions 로그는 비공개 저장소에서 로그인이 필요하지만, `::error::` 는 run 요약과
+    어노테이션 API 에 남아 로그인 없이도 읽힌다.
+    '조용한 고장 차단'이라는 이름을 달고 자기 고장이 조용하면 안 된다.
+    한 줄로 합친다 — 여러 줄 ::error:: 는 각각 별도 어노테이션이 되어 요약이 길어진다.
+    """
+    if not os.environ.get("GITHUB_ACTIONS"):
+        return
+    msg = " / ".join(str(x) for x in lines)[:3500].replace("\n", " ")
+    #   ::error:: 안에서 % \r \n 은 이스케이프해야 잘리지 않는다
+    for a, b in (("%", "%25"), ("\r", "%0D"), ("\n", "%0A")):
+        msg = msg.replace(a, b)
+    print(f"::error title={title}::{msg}", flush=True)
+
+
 # (경로, 허용 일수) — **같은 잡에서 방금 쓰였는지**를 mtime 으로 보는 목록(일간 전용).
 #   주간·타 워크플로 산출물은 여기 넣지 말 것 — 위 머리말의 mtime 함정에 걸린다. --job 을 쓴다.
 CHECK = [
@@ -92,6 +112,7 @@ def audit(strict=False):
     if not holes:
         print("\n감시 공백 없음")
         return 0
+    _annotate("감시 커버리지", [f"{s['path']}(job={s['job']})" for s in holes])
     print(f"\n감시자가 없는 산출물 {len(holes)}개 — 화면엔 빨간불이 떠도 CI 는 초록불로 지나간다:")
     for s in holes:
         print(f"  - {s['path']} (job={s['job']}) → 그 워크플로 끝에 "
@@ -109,8 +130,10 @@ def by_job(job_substr, warn_only=False):
     want = None if job_substr is None else {
         s["path"] for s in F.SOURCES if job_substr.lower() in (s["job"] or "").lower()}
     if want is not None and not want:
-        print(f"[freshness] job '{job_substr}' 에 해당하는 등록 산출물이 없다 — "
-              f"이름이 바뀌었는지 data_freshness.SOURCES 의 job 을 확인하라")
+        why = (f"job '{job_substr}' 에 해당하는 등록 산출물이 0개 — data_freshness.SOURCES 의 "
+               f"job 이름이 바뀌었는지 확인하라(워크플로의 --job 인자와 맞아야 한다)")
+        print(f"[freshness] {why}")
+        _annotate(f"신선도 — {job_substr}", [why])
         return 0 if warn_only else 1          # 조용히 통과시키면 감시가 사라진다
     rows = F.statuses(only=want)
     bad = []
@@ -127,6 +150,12 @@ def by_job(job_substr, warn_only=False):
     print("\n낡거나 없는 산출물 — 이 워크플로의 어느 단계가 조용히 실패했다:")
     for b in bad:
         print("  -", b)
+    #   ⚠️ 2026-11-23 — 여기서 ::error:: 를 찍지 않아 **이 게이트 자신이 조용한 고장이 됐다.**
+    #      weekly-accel #33 이 이 단계에서 exit 1 로 죽었는데 어노테이션에는
+    #      "Process completed with exit code 1" 만 남아, 로그를 볼 수 없는 쪽에서는
+    #      원인을 전혀 알 수 없었다(Actions 로그는 비공개 저장소에서 로그인이 필요하다).
+    #      ::error:: 는 run 요약·어노테이션 API 에 남으므로 로그 없이도 읽힌다.
+    _annotate(f"신선도 — {job_substr or '전체'}", bad)
     return 0 if warn_only else 1
 
 
@@ -162,6 +191,7 @@ def main():
     print("\n낡은 산출물이 있다 — 위 단계 중 하나가 조용히 실패했다:")
     for b in bad:
         print("  -", b)
+    _annotate("신선도 — 일간(mtime)", bad)
     print("\nActions 로그에서 해당 단계의 에러를 확인해라. "
           "continue-on-error 때문에 실패해도 초록불로 지나간다.")
     return 0 if warn_only else 1

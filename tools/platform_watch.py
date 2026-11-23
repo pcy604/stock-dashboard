@@ -299,13 +299,22 @@ def workflows():
             wid, t = run.get("workflow_id"), run.get("updated_at") or run.get("created_at")
             if wid and t and (wid not in last or t > last[wid]):
                 last[wid] = t
+    #   ⚠️ 연속 실패가 쌓이면 포기한다. 한도 소진(403)·장애면 워크플로 수만큼 타임아웃을
+    #      먹어 L1 이 잡 제한시간을 넘긴다(11-23 실측: 테스트가 7초 → 8분이 됐다).
+    miss = 0
     for wid in wfs:
         if wid in last:
             continue
+        if miss >= 3:
+            return [], [], f"워크플로별 조회가 연속 실패 — 한도 소진이나 장애로 보인다(토큰 {'있음' if tok else '없음'})"
         ok3, _, r3 = _api(f"https://api.github.com/repos/{repo}/actions/workflows/{wid}"
                           f"/runs?status=success&per_page=1", tok)
         runs = (r3 or {}).get("workflow_runs") or []
-        if ok3 and runs:
+        if not ok3:
+            miss += 1
+            continue
+        miss = 0
+        if runs:
             last[wid] = runs[0].get("updated_at") or runs[0].get("created_at")
 
     today = dt.datetime.now(dt.timezone.utc)

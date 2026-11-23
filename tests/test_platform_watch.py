@@ -24,6 +24,16 @@ import platform_watch as P        # noqa: E402
 import check_freshness_ci as C    # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def _no_network(monkeypatch):
+    """⚠️ l1() 은 안에서 workflows()(GitHub API)를 부른다. 테스트가 그걸 막지 않으면
+    **실제 네트워크를 친다** — 토큰이 없으면 403 이 나고, 창에 없는 워크플로마다 개별 조회를
+    수십 번 반복하며 타임아웃을 먹는다(11-23 실측: 7초짜리 파일이 8분 15초가 됐다).
+    네트워크를 쓰는 테스트는 이 저장소에 두지 않는다 — 각 테스트가 필요한 것만 monkeypatch 로 돌려준다."""
+    monkeypatch.setattr(P, "_api", lambda u, token=None: (False, "BlockedInTest", None))
+    monkeypatch.setattr(P, "_get", lambda u, want_text=False, ua=None: (False, "BlockedInTest", ""))
+
+
 # ──────────────────────────────────────────────────────────────────────
 # 레지스트리 자체의 일관성
 # ──────────────────────────────────────────────────────────────────────
@@ -410,3 +420,41 @@ def test_weekly_workflows_call_the_gate():
 def test_registry_module_reloads_clean():
     importlib.reload(P)
     assert len(P.PLATFORMS) >= 10
+
+
+# ──────────────────────────────────────────────────────────────────────
+# 감시자가 실패 이유를 남기는가 (2026-11-23)
+# ──────────────────────────────────────────────────────────────────────
+def test_annotate_only_inside_actions(monkeypatch, capsys):
+    """로컬 실행에서 ::error:: 를 찍으면 사람 눈에 가짜 에러로 보인다."""
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    C._annotate("t", ["x"])
+    assert "::error" not in capsys.readouterr().out
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    C._annotate("t", ["x"])
+    assert "::error title=t::x" in capsys.readouterr().out
+
+
+def test_annotate_escapes_and_joins(monkeypatch, capsys):
+    """줄바꿈·% 를 그대로 넣으면 어노테이션이 거기서 잘린다. 여러 줄은 한 어노테이션으로 합친다."""
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    C._annotate("t", ["a\nb", "50% 감소"])
+    out = capsys.readouterr().out
+    assert out.count("::error") == 1
+    assert "%0A" not in out and "%25" in out      # \n 은 공백으로 먼저 바뀌고, % 는 이스케이프
+    assert " / " in out
+
+
+def test_every_exit1_path_annotates(monkeypatch, capsys):
+    """**이 게이트 자신이 조용한 고장이었다.** weekly-accel #33 이 여기서 exit 1 로 죽었는데
+    어노테이션에는 'Process completed with exit code 1' 만 남아 원인을 알 수 없었다
+    (Actions 로그는 비공개 저장소에서 로그인이 필요하다). 모든 실패 경로가 이유를 남겨야 한다."""
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    assert C.by_job("존재하지않는잡") == 1
+    assert "::error" in capsys.readouterr().out
+
+
+def test_panel_build_failure_annotates():
+    """패널 빌드의 SystemExit 경로도 같은 구멍이었다."""
+    src = open(os.path.join(ROOT, "research", "quant_panel.py"), encoding="utf-8").read()
+    assert src.count("::error title=패널") >= 3, "MUST 빈 열 · 시총 점검 · 빌드 예외 세 경로"

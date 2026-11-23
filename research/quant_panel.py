@@ -71,6 +71,10 @@ def report_coverage(d, m):
             dead.append(c)
     print(f"[{m}] 열 커버리지\n" + "\n".join(rows), flush=True)
     if dead:
+        #   ::error:: 를 같이 찍는다 — Actions 로그는 비공개 저장소에서 로그인이 필요해
+        #   로그를 볼 수 없는 쪽에는 'exit code 1' 만 보인다(11-23 weekly-accel #33 교훈).
+        if os.environ.get("GITHUB_ACTIONS"):
+            print(f"::error title=패널 {m} 빈 열::값이 있어야 하는 열이 0%: {', '.join(dead)}", flush=True)
         raise SystemExit(f"[{m}] 반드시 값이 있어야 하는 열이 0%: {', '.join(dead)} — "
                          f"COLS 에 있는지 · 계산·merge 가 실제로 붙는지 확인하라")
 
@@ -175,7 +179,11 @@ def us():
     for (s_, dt), (lo, hi) in _chk.items():
         v = d.loc[(d.sym == s_) & (d.date == pd.Timestamp(dt)), "marcap"]
         if len(v) and not (lo <= float(v.iloc[0]) <= hi):
-            raise SystemExit(f"[US] 시총 정답 점검 실패: {s_} {dt} = {float(v.iloc[0]) / 1e9:,.0f}B (기대 {lo / 1e9:,.0f}~{hi / 1e9:,.0f}B)")
+            _m = (f"시총 정답 점검 실패: {s_} {dt} = {float(v.iloc[0]) / 1e9:,.0f}B "
+                  f"(기대 {lo / 1e9:,.0f}~{hi / 1e9:,.0f}B)")
+            if os.environ.get("GITHUB_ACTIONS"):
+                print(f"::error title=패널 US 시총::{_m}", flush=True)
+            raise SystemExit(f"[US] {_m}")
     # 거래 없는 주(거래량 0 — 비상장 리츠 IVT 처럼 호가만 멈춰 있는 값)는 체결할 수 없다 → 뺀다
     d = d[~(d.volume == 0)]
     d = d.drop(columns=["_capfix", "_capbad"])
@@ -366,6 +374,8 @@ def main(markets=("US", "KR")):
         except Exception as e:
             info[m] = dict(error=f"{type(e).__name__}: {e}")
             print(f"[{m}] 실패: {e}")
+            if os.environ.get("GITHUB_ACTIONS"):
+                print(f"::error title=패널 {m} 빌드 실패::{type(e).__name__}: {str(e)[:500]}", flush=True)
     info["asof"] = str(pd.Timestamp.today().date())
     json.dump(info, open(os.path.join(OUT, "quant_panel_info.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(info)
