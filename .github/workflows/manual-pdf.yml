@@ -37,5 +37,5 @@ jobs:
           git diff --staged --quiet && { echo "설명서 내용 변화 없음 — PDF 커밋 안 함"; exit 0; }
           git add docs/manual.pdf
           git commit -m "auto: 사용설명서 PDF $(date -u +%Y-%m-%d)"
-          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
+          for i in 1 2 3; do git pull --rebase --autostash -X theirs origin main && git push && exit 0; sleep 5; done
           echo "::error::푸시 실패" && exit 1

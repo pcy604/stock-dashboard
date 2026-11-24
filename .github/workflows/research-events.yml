@@ -76,4 +76,4 @@ jobs:
           git add results/earnings_event_summary.json results/pead_recheck.json results/diag_lost.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "auto: 실적 이벤트·PEAD 재검증·사라진 종목 진단 $(date -u +%F)"
-          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
+          for i in 1 2 3; do git pull --rebase --autostash -X theirs origin main && git push && break; sleep 5; done

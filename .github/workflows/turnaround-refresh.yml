@@ -55,7 +55,7 @@ jobs:
             git commit -m "auto: 흑자전환·공통 재무 스냅샷 $(date -u +%Y-%m-%d)"
             for i in 1 2 3; do
               git push origin main && break
-              git pull --rebase -X theirs origin main
+              git pull --rebase --autostash -X theirs origin main
               sleep 5
             done
           fi

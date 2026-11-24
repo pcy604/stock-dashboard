@@ -43,7 +43,7 @@ jobs:
           git add results/swing_stations.json
           git diff --cached --quiet && { echo "변경 없음"; exit 0; }
           git commit -m "auto: 스윙 역 지도 $(date -u +%F)"
-          for i in 1 2 3; do git push origin HEAD:main && exit 0; git pull --rebase origin main; sleep 5; done
+          for i in 1 2 3; do git push origin HEAD:main && exit 0; git pull --rebase --autostash origin main; sleep 5; done
           echo "::error::push 3회 실패"; exit 1
 
       # 2026-11-22 감시 커버리지 — 이 산출물에는 CI 감시자가 없었다(화면엔 빨간불, CI 는 초록불).

@@ -163,4 +163,4 @@ jobs:
           git add results/rs_accel_bt.json results/rs_accel_detail.json results/lifecycle_study.json results/master_specs.json results/robust_rs.json results/loss_cut_grid.json results/pyramid_grid.json results/confirm_ab.json results/rs_accel_turn.json results/winners_reverse.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "auto: RS×이익가속 백테스트 $(date -u +%F)"
-          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
+          for i in 1 2 3; do git pull --rebase --autostash -X theirs origin main && git push && break; sleep 5; done

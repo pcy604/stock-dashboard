@@ -64,4 +64,4 @@ jobs:
           git add results/stock_ratchet.json results/stock_ratchet_px.parquet results/trade_px.parquet results/trade_idx.parquet results/trade_px_info.json results/trade_lab.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "auto: 종목별 익절 래칫 $(date -u +%F)"
-          for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && break; sleep 5; done
+          for i in 1 2 3; do git pull --rebase --autostash -X theirs origin main && git push && break; sleep 5; done

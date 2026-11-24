@@ -358,7 +358,7 @@ jobs:
             for i in 1 2 3; do
               git push origin main && break
               echo "push 거절 — 재시도 $i"
-              git pull --rebase origin main || { git rebase --abort; git pull --rebase -X theirs origin main; }
+              git pull --rebase --autostash origin main || { git rebase --abort; git pull --rebase -X theirs origin main; }
               sleep 5
             done
             git log origin/main..HEAD --oneline | grep -q . && { echo "::error::결과 push 3회 실패"; exit 1; } || true
