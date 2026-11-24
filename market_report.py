@@ -18,7 +18,7 @@
 import json
 import os
 import sys
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 
 
 def _now_kst() -> str:
@@ -748,7 +748,7 @@ def events_next(days=7):
     try:
         import events as _EV
         from datetime import timedelta as _td
-        today = (datetime.utcnow() + _td(hours=9)).date()
+        today = (datetime.now(timezone.utc) + _td(hours=9)).date()
         ev = _EV.build(today, days, None, None)
         return [dict(date=e["date"], wd=e.get("wd"), time=e.get("time"), name=e["name"], kind=e.get("kind")) for e in ev
                 if e.get("kind") != "보유"][:6]
@@ -779,7 +779,7 @@ def ledger_facts():
                          to_stop=_r((p["stop"] / c - 1) * 100, 1) if p.get("stop") else None))
     if not rows:
         return {}
-    today = (datetime.utcnow() + timedelta(hours=9)).date().isoformat()
+    today = (datetime.now(timezone.utc) + timedelta(hours=9)).date().isoformat()
     trades = [i for i in led.get("done_ids", []) if today in str(i)]
     return dict(n=len(rows), d1_avg=_r(sum(r["d1"] or 0 for r in rows) / len(rows), 1),
                 pnl_avg=_r(sum(r["pnl"] for r in rows) / len(rows), 1),
@@ -792,7 +792,7 @@ def anomalies(f):
     """대형주 하루 ±15% — 사실일 수도 있지만 두 번째 출처로 확인 전까지 '확인 필요' 표시."""
     out = []
     us = (f.get("internals") or {}).get("US") or {}
-    for r in (us.get("megacaps") or []) + ((f.get("us") or {}).get("megacaps") or []):
+    for r in (us.get("megacaps") or []) or ((f.get("us") or {}).get("megacaps") or []):   # 같은 종목 두 이름(NVDA·엔비디아) 중복 방지
         v = r.get("ret", r.get("d1"))
         if v is not None and abs(v) >= ANOMALY_D1 and r.get("name") not in {a["name"] for a in out}:
             out.append(dict(name=r.get("name"), d1=v))
@@ -910,13 +910,20 @@ def ask_gemini(prompt, models=MODELS, key=None):
     from google import genai
     cl = genai.Client(api_key=key)
     last = None
-    for m in models:                      # 무료 한도는 모델별로 따로다 — 막히면 다음 모델
-        try:
-            r = cl.models.generate_content(model=m, contents=prompt)
-            if (r.text or "").strip():
-                return r.text.strip(), m
-        except Exception as e:
-            last = e
+    import time as _time
+    for rnd in range(3):                  # 2026-11-24 503(수요 폭주)으로 두 모델 다 실패 → 숫자 템플릿만 나갔다. 20·40초 쉬고 다시
+        for m in models:                  # 무료 한도는 모델별로 따로다 — 막히면 다음 모델
+            try:
+                r = cl.models.generate_content(model=m, contents=prompt)
+                if (r.text or "").strip():
+                    return r.text.strip(), m
+            except Exception as e:
+                last = e
+        if rnd < 2 and any(c in str(last) for c in ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED", "500")):
+            print(f"  Gemini 일시 오류 → {20 * (rnd + 1)}초 뒤 재시도: {str(last)[:80]}")
+            _time.sleep(20 * (rnd + 1))
+        else:
+            break
     raise RuntimeError(f"Gemini 실패: {str(last)[:120]}")
 
 
@@ -1011,18 +1018,18 @@ def template(f):
     if kr.get("sectors") and kind == "kr":
         sc = kr["sectors"]
         L.append("- 업종(시총가중) 강세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[:3])
-                 + " · 약세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3]))
+                 + " · 약세 " + (", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3] if r['ret'] < 0) or "없음"))
     if kr.get("themes_top") and kind == "kr":
         L.append("- 강세 테마 " + ", ".join(f"{t_['name']} {t_['ret']:+.1f}%({'·'.join(x['name'] for x in t_['lead'][:2])})" for t_ in kr["themes_top"][:3])
                  + " · 약세 " + ", ".join(f"{t_['name']} {t_['ret']:+.1f}%" for t_ in kr.get("themes_bottom", [])[:2]))
     if us.get("sectors"):
         sc = us["sectors"]
         L.append("- 미국 섹터 ETF 강세 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[:3])
-                 + " · 약세 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[::-1][:3]))
+                 + " · 약세 " + (", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[::-1][:3] if r['d1'] < 0) or "없음"))
     if usi.get("sectors"):
         sc = usi["sectors"]
         L.append("- 미국 업종(종목 집계) 강세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[:3])
-                 + " · 약세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3]))
+                 + " · 약세 " + (", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3] if r['ret'] < 0) or "없음"))
 
     # ⑥ 종목
     L += ["", "**⑥ 종목**"]
