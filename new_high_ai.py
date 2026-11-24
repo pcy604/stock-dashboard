@@ -48,6 +48,19 @@ def week_items(stocks, week, mkt='전체'):
     return out
 
 
+def c_growth_map():
+    """sym → '분기 영업익 YoY' 문자열. 2026-11-25 CANSLIM 폐기 → 공통 재무 원천 fund_snapshot."""
+    try:
+        st = json.load(open('results/fund_snapshot.json', encoding='utf-8')).get('stocks', {})
+    except Exception:
+        return {}
+    out = {}
+    for k, x in st.items():
+        v = x.get('op_yoy')
+        out[k] = '흑자전환' if x.get('op_turn') else (f"{v:+.0f}%" if isinstance(v, (int, float)) else '-')
+    return out
+
+
 def payload(items, secs=None, c_growth=None, limit=80):
     """AI 에 넘길 표 — 업종 분포 + 종목별 한 줄."""
     import collections
@@ -60,7 +73,7 @@ def payload(items, secs=None, c_growth=None, limit=80):
         cap = (x.get('marcap') or 0) / (1e8 if kr else 1e9)
         lines.append(f"{x.get('name')}({x.get('sym')}, {'KR' if kr else 'US'}) | 업종 {secs.get(x.get('sym'), '-')} | "
                      f"시총 {cap:,.0f}{'억원' if kr else '$B'} | 12주 {(x.get('ret_12w') or 0):+.0f}% | "
-                     f"연속경신 {x.get('nh_streak') or 0}주 | 분기실적 {c_growth.get(x.get('sym'), '-')}"
+                     f"연속경신 {x.get('nh_streak') or 0}주 | 분기 영업익YoY {c_growth.get(x.get('sym'), '-')}"
                      f"{' | 상장 1년 미만' if x.get('young') else ''}")
     return "업종 분포: " + ", ".join(f"{k} {v}" for k, v in cnt.most_common(10)) + "\n\n" + "\n".join(lines)
 
@@ -115,14 +128,7 @@ def main():
     if not weeks:
         print("::warning title=신고가 AI 요약::주간 이력(nh)이 없다 — 건너뜀")
         return
-    cg = {}
-    for f in ('results/canslim_latest.json', 'results/canslim_us_latest.json'):
-        try:
-            for x in json.load(open(f, encoding='utf-8')).get('stocks', []):
-                v = x.get('c_growth_pct')
-                cg[x['sym']] = v if isinstance(v, str) else (f"{v:+.0f}%" if v is not None else '-')
-        except Exception:
-            pass
+    cg = c_growth_map()
     secs = sector_map()
     try:
         old = json.load(open(OUT, encoding='utf-8'))

@@ -262,12 +262,11 @@ def stock_facts(kind):
 
 
 def signal_facts():
-    ck, cu = _j("results/canslim_latest.json"), _j("results/canslim_us_latest.json")
+    md = _j("results/macro.json").get("canslim_m") or {}   # 지수 200일선 판정(verdict) — 2026-11-25 CANSLIM 산출물 폐기
     acc = _j("results/leaders_accel.json")
     ta = _j("results/turnaround_latest.json")
     return dict(
-        market_direction={"KR": ck.get("market_dir"), "US": cu.get("market_dir")},
-        canslim_candidates={"KR": len(ck.get("stocks", [])), "US": len(cu.get("stocks", []))},
+        market_direction={"KR": md.get("KR"), "US": md.get("US")},
         accel_week=acc.get("signal_week"),
         accel_new=[dict(sym=c.get("sym"), name=c.get("name"), up=c.get("up"), mc_b=c.get("mc"))
                    for c in (acc.get("candidates") or [])[:10]],

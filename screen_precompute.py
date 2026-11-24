@@ -30,7 +30,7 @@ MDD_OUT = Path('results/mdd.json')
 def _enrich_maps():
     """sym → (name, marcap) 보강: JSON + FDR 리스팅."""
     names, caps = {}, {}
-    for f in ['perf_latest', 'screener_latest', 'canslim_latest']:
+    for f in ['perf_latest', 'screener_latest']:
         p = Path(f'results/{f}.json')
         if p.exists():
             try:
@@ -130,7 +130,7 @@ def _universe():
         print(f"::warning title=커버 기준 명단 실패::{e} — 캐시·JSON 만으로 진행")
     syms |= set(f.stem for f in CACHE_DIR.glob('*.parquet') if not f.stem.startswith('_benchmark'))
     syms |= set(f.stem for f in LONG_CACHE.glob('*.parquet')) if LONG_CACHE.exists() else set()
-    for f in ['perf_latest', 'screener_latest', 'canslim_latest']:
+    for f in ['perf_latest', 'screener_latest']:
         p = Path(f'results/{f}.json')
         if p.exists():
             try:

@@ -534,7 +534,6 @@ IS_CLOUD = str(Path(__file__).resolve()).replace('\\', '/').startswith('/mount/s
 
 PERF_JSON        = Path('results/perf_latest.json')
 SCREENER_JSON    = Path('results/screener_latest.json')
-CANSLIM_JSON     = Path('results/canslim_latest.json')
 # TURNAROUND_JSON 제거: 정의만 있고 쓰는 화면이 없었다. 파일도 06-01에
 # 멈춰 있어, 남겨두면 '살아 있는 데이터'로 오인돼 감시 목록만 오염시킨다.
 MDD_JSON         = Path('results/mdd.json')
@@ -1441,7 +1440,7 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     #   🔬 연구실 → 🗂 발굴 도구로(소유자만). 핸들 이름은 그대로 두고, 공개 시점엔 None → 각 블록이 _lab_enter 로 건너뛴다.
     # 2026-11-08 차니: 맨 위 = 실전 규칙 v1.9 후보, 그 아래 = 재료 목록(공개 — 가격·재무 사실 목록이라 숨길 이유 없음). 후보 바구니 제거.
     t_core = st.container()
-t_cap = t_gain = t_52 = tab3 = t_lead = t_turn = t_value = None
+t_cap = t_gain = t_52 = t_lead = t_turn = t_value = None
 if True:                                          # 2026-11-08 공개(옛: 소유자만)
     # 2026-11-08 차니 "발굴 도구는 종목 발굴이랑 뭐가 다르지?" — 다른 건 '재료'(교집합 이전 목록)라는 것뿐이고,
     #   보는 이유도 '교집합에 왜 들어왔나/빠졌나' 확인이라 종목 발굴 아래가 제자리. 연구실 서브탭에서 내린다.
@@ -1449,14 +1448,14 @@ if True:                                          # 2026-11-08 공개(옛: 소�
     with tab_screen:
         st.divider()
         st.markdown("##### 🗂 재료 목록")
-        st.caption("교집합 후보를 만드는 재료 — 가격이 먼저 말하는 목록(상승 상위·52주 신고가·CANSLIM)과 숫자가 먼저 말하는 목록(이익가속·흑자전환·가치). "
+        st.caption("교집합 후보를 만드는 재료 — 가격이 먼저 말하는 목록(상승 상위·52주 신고가)과 숫자가 먼저 말하는 목록(이익가속·흑자전환·가치). "
                    "위 후보에 왜 들어왔는지·왜 빠졌는지 확인할 때 엽니다. 고른 목록 하나만 계산합니다.")
-        _TOOLS = ["🏦 시총 상위", "🔥 상승 상위", "📈 52주 신고가", "🏆 CANSLIM", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
+        _TOOLS = ["🏦 시총 상위", "🔥 상승 상위", "📈 52주 신고가", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
         _tool = st.segmented_control('재료 목록', _TOOLS, default=None, key='tools_pick', label_visibility='collapsed')
         if _tool:
             _tc = st.container()
             _TOOL_IDS.add(id(_tc))
-            t_cap, t_gain, t_52, tab3, t_lead, t_turn, t_value = [(_tc if _tool == _t else None) for _t in _TOOLS]
+            t_cap, t_gain, t_52, t_lead, t_turn, t_value = [(_tc if _tool == _t else None) for _t in _TOOLS]
 
 # 서브탭 공통 조회맵 — 실패해도 빈 맵으로 진행(표의 부가 열만 '-'가 된다)
 try:
@@ -1559,7 +1558,7 @@ def _cand_register(rows, key: str):
             st.rerun()
 
 
-_CAND_FROM = {'core': '교집합', 'gain': '상승 상위', 'h52': '52주 신고가', 'canslim': 'CANSLIM',
+_CAND_FROM = {'core': '교집합', 'gain': '상승 상위', 'h52': '52주 신고가',
               'accel': '이익가속', 'turn': '흑자전환', 'value': '가치 발굴', 'peer': '종목 분석·업종 순위'}
 
 
@@ -3095,14 +3094,10 @@ with (t_52 or st.empty()), guard('52주 신고가'):
     _has_nh = any('nh' in x for x in _s52)
     _mk52 = _GMKT
     _SEC52 = _sector_map()
-    _cs52 = {}
-    for _f in (CANSLIM_JSON, Path('results/canslim_us_latest.json')):
-        for _x in (load_json(_f) or {}).get('stocks', []):
-            _cs52[_x['sym']] = _x
-
+    import new_high_ai as _nha0
+    _cs52 = _nha0.c_growth_map()   # 2026-11-25 CANSLIM 폐기 → fund_snapshot 분기 영업익 YoY
     def _cg(sym):
-        cg = (_cs52.get(sym) or {}).get('c_growth_pct')
-        return cg if isinstance(cg, str) else (f"{cg:+.0f}%" if cg is not None else '-')
+        return _cs52.get(sym, '-')
 
     # ── ① 주간 신고가 경신 종목 수 ───────────────────────────────
     st.markdown("##### 📊 주간 52주 신고가 경신 종목 수 — 막대를 누르면 그 주 종목이 아래에 나옵니다")
@@ -3283,7 +3278,7 @@ with (t_52 or st.empty()), guard('52주 신고가'):
         st.write("조건에 맞는 종목이 없습니다.")
     st.caption("⚠️ 신고가는 **탐색 출발점**이지 매수 신호가 아닙니다. 상장폐지 종목까지 넣은 12.5년 검증에서 "
                "한국 52주 신고가 돌파 포트폴리오(KR-P1)는 KOSPI에 못 미쳤습니다(CAGR 4.3% vs 9.3%). "
-               "실적이 받쳐주는지(오른쪽 매출·영업익 YoY 열)를 보고 🚀 주도주 → CANSLIM · 🔍 종목 분석 순으로 확인하십시오.")
+               "실적이 받쳐주는지(오른쪽 매출·영업익 YoY 열)를 보고 🔍 종목 분석으로 확인하십시오.")
 
 
 with (t_value or st.empty()), guard('가치 발굴'):
@@ -3364,182 +3359,6 @@ with (t_value or st.empty()), guard('가치 발굴'):
             else:
                 st.info("조건 통과 종목 없음 — 기준을 완화해 주십시오.")
 
-
-
-# ════════════════════════════════════════════════════════════════════
-with (tab3 or st.empty()), guard('CANSLIM'):
-    _lab_enter(tab3)
-    # 2026-10-15 — 탭 자체 KR/US 라디오 폐지 → 상단 공통 시장 필터. '전체'면 두 시장을 한 표에.
-    #   RS(L) 은 **각 시장 안의 백분위**라서 시장을 섞어도 '그 시장에서 상위 몇 %'로 읽으면 된다.
-    _CS_SETS = [(m, p) for m, p in (('KR', CANSLIM_JSON), ('US', Path('results/canslim_us_latest.json')))
-                if _GMKT in ("전체", m)]
-    _CS = {m: load_json(p) for m, p in _CS_SETS}
-    _TRAJM = _traj_map()                             # 궤적(KR만) — US는 '-'
-    st.header("🏆 CANSLIM 스크리너" + ("" if _GMKT == "전체" else f" ({'한국' if _GMKT == 'KR' else '미국'})"))
-    for _m, _p in _CS_SETS:
-        st.caption(f"{_m} · " + data_stamp(str(_p)))
-    if 'US' in _CS:
-        st.caption("US: C·A=SEC EDGAR 공식 재무 · **영업이익 기준**(오닐의 '일회성 제외 EPS' 근사 — 부채 소멸 손실·평가손익·세금 효과가 "
-                   "순이익을 왜곡하던 것, 예: LITE -26,876%) · 영업이익 계정이 없는 금융·리츠는 순이익 · "
-                   "'일회성' 열 = 순이익 성장과 50%p 넘게 갈린 글자 · I(기관 수급)는 무료 일간 소스가 없어 공란(13F는 분기 지연)")
-
-    _missing = [m for m, d in _CS.items() if d is None]
-    for _m in _missing:
-        st.error(f"{_m} 데이터 없음 → `python {'canslim_run.py' if _m == 'KR' else 'canslim_us_run.py'}` 실행 후 새로고침")
-    _CS = {m: d for m, d in _CS.items() if d is not None}
-    canslim = {'stocks': [dict(x, _mkt=m) for m, d in _CS.items() for x in d.get('stocks', [])]} if _CS else None
-    if canslim is not None:
-        _mc = st.columns(max(len(_CS), 1) * 2)
-        for _i, (_m, _d) in enumerate(_CS.items()):
-            _mc[_i * 2].metric(f"{_m} 기준일 · 시장방향(M)", f"{_d['date']} · {_d['market_dir']}")
-            _mc[_i * 2 + 1].metric(f"{_m} 후보 (N+RS 사전필터)", f"{len(_d['stocks'])}개")
-            if not _d['market_ok']:
-                st.warning(f"⚠️ {'KOSPI' if _m == 'KR' else 'S&P500'} 하락추세 — {_m} 신규매수 주의")
-        _MOK = {m: bool(d['market_ok']) for m, d in _CS.items()}
-
-    if canslim is not None:
-        with st.expander("⚙️ CANSLIM 기준 조정 (슬라이더로 실시간)", expanded=False):
-            th_N    = st.slider("N  52주 신고가 허용거리 (%)", -30, 0, -5, key="th_N",
-                                help="예: -5 = 신고가 대비 5% 이내")
-            th_S    = st.slider("S  거래량 배수 (60일 평균 대비)", 1.0, 4.0, 1.5, 0.1, key="th_S")
-            th_Sb   = st.slider("S  캔들 몸통 비율 (%)", 10, 70, 40, key="th_Sb")
-            th_Sbull = st.checkbox("S  양봉 필수", value=True, key="th_Sbull")
-            th_L    = st.slider("L  상대강도 RS 하한 (백분위)", 40, 95, 70, key="th_L",
-                                help="표의 RS 열과 같은 값 — 3개월 40%·6·9·12개월 각 20% 가중 수익률의 그 시장 안 백분위")
-            st.divider()
-            th_C    = st.slider("C  분기 순이익 성장 (%)", 0, 150, 20, key="th_C",
-                                help="전년 동기 대비 성장 — KR 순이익 · US 영업이익(일회성 제외 근사)")
-            th_A1   = st.slider("A  연간 성장 — 최근년 (%)", -50, 150, 20, key="th_A1")
-            th_A2   = st.slider("A  연간 성장 — 전년 (%)", -50, 150, 20, key="th_A2")
-            th_I    = st.slider("I  기관+외인 순매수 하한 (억원·20일)", -2000, 10000, 0, 100, key="th_I",
-                                help="최근 20거래일 기관+외국인 합산 순매수 (양수=매집, pykrx)")
-            st.divider()
-            st.caption("**필수 통과 항목 설정**")
-            req_S = st.checkbox("S 통과 필수", value=False, key="req_S")
-            req_C = st.checkbox("C 통과 필수", value=False, key="req_C")
-            req_A = st.checkbox("A 통과 필수", value=False, key="req_A")
-            # 2026-10-14 — I(수급) 소스 pykrx 가 KRX 로그인을 요구하면서 KR·US 전 종목이 공란이다.
-            #   공란인데 7점 만점으로 세면 '최고 6점'이 '7점 중 6점'처럼 보이고, I 필수를 켜면
-            #   결과가 0개가 된다. 데이터가 없으면 I 를 점수와 필터에서 뺀다(있는 척하지 않는다).
-            _i_live = any(_s.get('i_inst_pct') is not None for _s in canslim.get('stocks', []))
-            req_I = st.checkbox("I 통과 필수", value=False, key="req_I", disabled=not _i_live,
-                                help=None if _i_live else "I(기관·외인 수급) 데이터 소스가 중단돼 지금은 쓸 수 없습니다")
-            _SC3 = '점수/7' if _i_live else '점수/6'
-            if not _i_live:
-                req_I = False
-                st.caption("⚠️ I(수급) 데이터 없음 — 점수는 6점 만점")
-
-        rows3 = []
-        for s in canslim['stocks']:
-            _mk3   = s['_mkt']
-            n_dist = s.get('n_dist_pct')
-            vol    = s.get('s_vol_ratio')
-            body   = s.get('s_body_pct')
-            bull   = s.get('s_bull', False)
-            # L 은 표의 공통 RS(백테스트와 같은 가중식)로 판정한다 — 전에는 12개월 백분위라 표마다 RS 가 달랐다
-            _crs = _CMB['RS'].get(s['sym']) if not _CMB.empty and s['sym'] in _CMB.index else None
-            rs     = _crs if _crs is not None and _crs == _crs else (s.get('rs_pct') or 0)
-            c_g    = s.get('c_growth_pct')
-            a_y1   = s.get('a_growth_y1')
-            a_y2   = s.get('a_growth_y2')
-            i_inst = s.get('i_inst_pct')
-
-            def _ge(v, th):        # 숫자 비교 ('흑자전환' 문자열=통과)
-                return (v == '흑자전환') or (isinstance(v, (int, float)) and v >= th)
-            n_ok = n_dist is not None and n_dist >= th_N
-            s_ok = (vol is not None and vol >= th_S and
-                    body is not None and body >= th_Sb and
-                    (not th_Sbull or bull))
-            l_ok = rs >= th_L
-            c_ok = _ge(c_g, th_C)
-            a_ok = _ge(a_y1, th_A1) and _ge(a_y2, th_A2)
-            i_ok = i_inst is not None and i_inst >= th_I
-
-            if not n_ok or not l_ok: continue
-            if req_S and not s_ok:   continue
-            if req_C and not c_ok:   continue
-            if req_A and not a_ok:   continue
-            if req_I and not i_ok:   continue
-
-            m_ok = _MOK.get(_mk3, True)
-            score = sum([m_ok, n_ok, l_ok, s_ok, c_ok, a_ok] + ([i_ok] if _i_live else []))
-
-            # 2026-10-15 격자 재설계 — (구) 셀 하나에 '✅ +23%' 처럼 판정과 값을 붙여 문자열로 냈다.
-            #   그러면 숫자로 정렬·필터·색이 안 된다. 값은 숫자 열로, 판정은 '통과' 열 하나로 분리한다.
-            def _n(v):
-                return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
-            _conv = [f"{lab} {v}" for lab, v in (('C', c_g), ('A최근', a_y1), ('A전년', a_y2))
-                     if isinstance(v, str)]                       # 흑자전환/적자전환 은 숫자가 아니라 사건
-            _pass = [l for l, ok in (('M', m_ok), ('C', c_ok), ('A', a_ok), ('N', n_ok),
-                                     ('S', s_ok), ('L', l_ok), ('I', i_ok and _i_live)) if ok]
-            rows3.append({
-                '종목': s['name'], '코드': s['sym'], '시장': _mk3,
-                _SC3: score,
-                '통과': ' '.join(_pass) + (f" · {' · '.join(_conv)}" if _conv else ''),
-                'C 분기(%)': _n(c_g),
-                'A 최근년(%)': _n(a_y1),
-                'S 거래량(배)': _n(vol),
-                '_rs': rs, '_score': score,
-                '_ok': {'C': c_ok, 'A': a_ok, 'S': s_ok, 'I': i_ok},
-            })
-
-        df3 = pd.DataFrame(rows3) if rows3 else pd.DataFrame()
-
-        if df3.empty:
-            st.warning("조건을 충족하는 종목이 없습니다. 조건을 완화해 주십시오.")
-        else:
-            df3 = df3.sort_values(['_score', '_rs'], ascending=False).reset_index(drop=True)
-            _nk = int((df3['시장'] == 'KR').sum()); _nu = len(df3) - _nk
-            st.subheader(f"총 {len(df3)}종 (KR {_nk} · US {_nu}) · 정렬: 점수 → RS")
-            _std_table(df3, [_SC3, '통과', 'C 분기(%)', 'A 최근년(%)', 'S 거래량(배)'],
-                       src='FinanceDataReader·yfinance(주가)·DART·SEC EDGAR(재무) → canslim_latest.json',
-                       path='results/canslim_latest.json',
-                       column_config={
-                           _SC3: st.column_config.NumberColumn(format='%d', help='M·C·A·N·S·L(·I) 중 현재 슬라이더 기준 통과 수'),
-                           '통과': st.column_config.TextColumn(help='통과한 글자 — M 시장 · C 분기 · A 연간 · N 신고가 · S 거래량 · L 상대강도 · I 수급. 뒤의 \'C 흑자전환\' 등은 숫자 대신 사건'),
-                           'C 분기(%)': st.column_config.NumberColumn(format='%+.0f', help='최근 분기 이익 YoY — KR 순이익 · US 영업이익(일회성 제외 근사)'),
-                           'A 최근년(%)': st.column_config.NumberColumn(format='%+.0f', help='최근 연간 이익 YoY'),
-                           'S 거래량(배)': st.column_config.NumberColumn(format='%.1f', help='거래량 ÷ 60일 평균')},
-                       note="N(신고가 근접) = 오른쪽 52주고점대비 · L(상대강도) = RS 열")
-            _cand_register(df3, 'canslim')
-            with st.expander("📖 CANSLIM 각 항목 기준·설명", expanded=False):
-                _tsrc('CANSLIM 기준(William O\'Neil) · 본 대시보드 설정', asof='고정 기준표')
-                st.dataframe(pd.DataFrame([
-                    {'글자': 'C', '이름': '분기 실적', '컬럼': 'C 분기(%)',
-                     '기준': '최근 분기 순이익 YoY ≥ +20% (흑자전환 포함)', '출처': 'DART 공식(폴백 네이버)'},
-                    {'글자': 'A', '이름': '연간 실적', '컬럼': 'A 최근년(%) (전년은 판정에만)',
-                     '기준': '연간 순이익 YoY ≥ +20% × 2개년 (최근년/전년)', '출처': 'DART 공식(폴백 네이버)'},
-                    {'글자': 'N', '이름': '신고가 근접', '컬럼': '52주고점대비(%)',
-                     '기준': '52주 신고가 대비 거리 — 0%에 가까울수록(신고가 부근) 강함', '출처': '주가'},
-                    {'글자': 'S', '이름': '수급(거래량)', '컬럼': 'S 거래량(배)',
-                     '기준': '거래량이 평균 대비 몇 배 터졌나 (≥1.5x + 양봉 몸통)', '출처': '주가·거래량'},
-                    {'글자': 'L', '이름': '주도주(상대강도)', '컬럼': 'RS',
-                     '기준': 'RS = 3개월 40%·6·9·12개월 각 20% 가중 수익률의 시장 내 백분위(0~99). 90 = 상위 10%', '출처': '주가(상대비교)'},
-                    {'글자': 'I', '이름': '기관 수급', '컬럼': '(소스 중단 — 판정 제외)',
-                     '기준': '최근 20거래일 기관+외국인 합산 순매수(억원) > 0 = 매집', '출처': 'KRX(pykrx)'},
-                    {'글자': 'M', '이름': '시장 방향', '컬럼': '상단 배지',
-                     '기준': '지수가 상승추세인가 — 하락장에선 아무리 좋아도 무리하지 않음', '출처': '지수'},
-                ]), use_container_width=True, hide_index=True, row_height=25, height=_dfh(7))
-                st.caption("오닐 CANSLIM: '이익이 급증(C·A)하는 신고가 부근(N) 주도주(L)를 "
-                           "거래량(S)·기관(I)이 받쳐주고 시장(M)이 우호적일 때 산다.'")
-
-            st.divider()
-            with st.expander("📊 항목별 통과율 (현재 슬라이더 기준)", expanded=False):
-                total3 = len(rows3)
-                pr_counts = {
-                    'C 분기실적': sum(1 for r in rows3 if r['_ok']['C']),
-                    'A 연간실적': sum(1 for r in rows3 if r['_ok']['A']),
-                    'S 거래량':   sum(1 for r in rows3 if r['_ok']['S']),
-                    'I 기관수급': sum(1 for r in rows3 if r['_ok']['I']),
-                }
-                pr_df = pd.DataFrame({
-                    '항목': list(pr_counts.keys()),
-                    '통과수': list(pr_counts.values()),
-                    '통과율(%)': [round(v/total3*100, 1) for v in pr_counts.values()],
-                })
-                _tsrc('FinanceDataReader·yfinance(주가)·DART·SEC EDGAR(재무) → canslim_latest.json', path='results/canslim_latest.json')
-                st.dataframe(pr_df, use_container_width=False, hide_index=True,
-                             row_height=25, height=_dfh(len(pr_df)))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -4948,8 +4767,8 @@ def _fetch_stock_data_cached(sym: str, days: int):
         # 한국 종목: yfinance가 429로 막히는 경우 네이버 실적표로 폴백 (순이익 기준)
         if is_kr:
             try:
-                from canslim_run import fetch_naver_earnings_table
-                earn['naver'] = fetch_naver_earnings_table(code)
+                import naver_main_table as _nmt
+                earn['naver'] = _nmt.earnings_table(code)
             except Exception:
                 pass
 
@@ -5686,7 +5505,7 @@ def _kr_naver_consensus_cached(sym):
     분기 (E)는 대개 가장 가까운 미래분기 1개만 나옴 → 0q(이번), 그 다음 것이 있으면 1q(다음).
 
     2026-10-25: 표 수집·헤더 해석(이 분기 (E) 처리 포함)을 naver_main_table로 통합
-    (consensus_snapshot.py·canslim_run.py와 공유) — 이 함수의 로직이 셋 중 가장
+    (consensus_snapshot.py와 공유) — 이 함수의 로직이 셋 중 가장
     완전해서 naver_main_table.fetch()의 기준이 됐다."""
     import naver_main_table as nmt
     tb = nmt.fetch(sym)
@@ -9199,7 +9018,7 @@ if _ADMIN:
             if st.button("🔄 전체 새로고침", use_container_width=True):
                 st.cache_data.clear()
                 st.rerun()
-        st.caption("데이터 갱신은 매일 06:00 자동(GitHub Actions). 수동: weekly_run·perf_run·canslim_run·screen_precompute")
+        st.caption("데이터 갱신은 매일 06:00 자동(GitHub Actions). 수동: weekly_run·perf_run·screen_precompute")
 
     # ── 정답 점검 (2026-10-19) ─────────────────────────────────────
     # 날짜가 신선해도 내용에 구멍이 날 수 있다(시총 파일에 S~Z 1,300종 누락, NVDA 시총 NULL).
@@ -9365,7 +9184,7 @@ def _related_rows(q):
     """질문에 종목명·코드가 있으면 그 종목의 숫자를 챗봇 자료에 붙인다."""
     qn = q.replace(' ', '').casefold()
     out = []
-    for f in ('results/perf_latest.json', 'results/canslim_latest.json', 'results/canslim_us_latest.json'):
+    for f in ('results/perf_latest.json',):
         for x in (load_json(Path(f)) or {}).get('stocks', []):
             n = str(x.get('name') or '').replace(' ', '').casefold()
             sym = str(x.get('sym') or '')

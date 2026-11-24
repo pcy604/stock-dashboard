@@ -2,7 +2,7 @@
 chcp 65001 >nul
 rem 노트북 일일 작업(StockScreener_Daily) — 2026-11-07 개편: 노트북만 할 수 있는 일만 한다.
 rem   토스 Open API 는 허용 IP 에서만 응답 → 토스 잔고 동기화(tools\toss_sync.py)만 이 PC 에서.
-rem   예전 [1/4]~[4/4](주봉·성과·CANSLIM·흑자전환)·DART 가치 스냅샷은 GitHub Actions(daily-refresh·fin-daily)가 매일 똑같이 만든다.
+rem   예전 [1/4]~[4/4](주봉·성과·흑자전환)·DART 가치 스냅샷은 GitHub Actions(daily-refresh·fin-daily)가 매일 똑같이 만든다.
 rem   그중 하나(주봉 스크리너)가 11-07 08:01 부터 13시간 넘게 멈춰 토스 동기화까지 가지 못했다 → 뺐다.
 rem 로그: data\update.log (Claude 상시 점검이 읽는다)
 set PYTHON=C:\Users\lg\AppData\Local\Python\bin\python.exe

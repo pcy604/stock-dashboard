@@ -13,8 +13,7 @@
 대조 항목
   ① perf_latest   KR 현재가          vs 원천 종가            (1% 이내 비율 ≥ 90%)
   ② perf_latest   52주 신고가 신호    vs 원천 신고가 -3% 이내  (일치율 ≥ 90%)
-  ③ canslim KR    N 거리(%)          vs 원천                  (1.5%p 이내 ≥ 90%)
-  ④ canslim KR    RS 퍼센타일        vs 원천                  (±10 이내 ≥ 85%)
+  (③④ CANSLIM 대조는 2026-11-25 스크리너 폐기로 삭제)
   ⑤ 커버리지      perf KR 종목 수     vs 원천 시총 3,000억+    (≥ 80%)
   앱의 기준일은 '현재가가 원천 종가와 일치하는 날'로 역산한다(앱은 날짜를 저장하지 않는다).
 
@@ -103,9 +102,8 @@ def main():
     d = _src()
     perf = json.load(open("results/perf_latest.json", encoding="utf-8"))
     kr = [s for s in perf.get("stocks", []) if s.get("market") == "KR"]
-    can = json.load(open("results/canslim_latest.json", encoding="utf-8")).get("stocks", [])
     prices = {s["sym"]: s.get("curr_price") for s in kr if s.get("curr_price")}
-    sample = dict(list(prices.items())[:120]) or {s["sym"]: None for s in can}
+    sample = dict(list(prices.items())[:120])
     asof = _asof(d, {k: v for k, v in sample.items() if v}) if any(sample.values()) else d.Date.max()
     m, big = _metrics(d, asof)
     intraday = _intraday()
@@ -125,10 +123,7 @@ def main():
     # ② 52주 신호
     sg = [(s["sym"], bool(s.get("now_sig_52w"))) for s in kr if s["sym"] in m.index]
     put("perf_52w", len(sg), sum((m.at[c, "dist"] >= -3) == v for c, v in sg), 0.9, "52주 신고가 -3% 판정 일치")
-    # ③④ CANSLIM
-    cn = [s for s in can if s["sym"] in big.index and s.get("n_dist_pct") is not None]
-    put("canslim_N", len(cn), sum(abs(big.at[s["sym"], "dist"] - s["n_dist_pct"]) <= 1.5 for s in cn), 0.9, "N 거리 1.5%p 이내", skip=intraday)
-    put("canslim_RS", len(cn), sum(abs(big.at[s["sym"], "rs"] - (s.get("rs_pct") or 0)) <= 10 for s in cn), 0.85, "RS ±10 이내")
+    # ③④ CANSLIM — 2026-11-25 스크리너 폐기로 삭제
     # ⑤ 커버리지
     cov = len(set(s["sym"] for s in kr) & set(big.index))
     res["checks"]["coverage"] = dict(n=len(big), ok=cov, rate=round(cov / len(big), 3) if len(big) else None,

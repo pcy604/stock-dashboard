@@ -27,7 +27,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '2026-11-20b'
+VERSION = '2026-11-25a'
 SITE = 'https://stock-dashboard-dmfvhcig7brge7utl7et5r.streamlit.app/'
 BOT = 'https://t.me/buza_alarm_bot'
 
@@ -59,7 +59,7 @@ CAPS = [
     ("🧭 종목 발굴", "주도주 후보 선별", "", [
         ("실전 후보 — RS {rs_min} 이상 × 영업이익 흑자전환 × 주봉 5주선 상회", 'g'),
         ("주간 매수 대상 — RS 상위 {slots}종", 'g'),
-        ("스크리닝 목록 — 상승률 상위·52주 신고가·시총 상위·CANSLIM·이익가속·흑자전환·가치", 'k')]),
+        ("스크리닝 목록 — 상승률 상위·52주 신고가·시총 상위·이익가속·흑자전환·가치", 'k')]),
     ("🔍 종목 분석", "개별 종목 실사", "", [
         ("결론 — 4축 카드(누르면 해당 섹션) + 매도 점검", 'y'),
         ("펀더멘탈 — 분기 매출·영업이익 YoY·이익률 · 기업 요약·사업부문·재무제표·컨센서스 추세", 'y'),

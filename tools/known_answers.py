@@ -289,13 +289,6 @@ def _():
         f"KR {d.get('n_kr')} · US {d.get('n_us')} · 삼성 TTM 순이익 {sam.get('ttm_ni')}"
 
 
-@check('CANSLIM', '미국 50종·한국 20종 이상 채점했는가')
-def _():
-    u = len(_j('results/canslim_us_latest.json').get('stocks', []))
-    k = len(_j('results/canslim_latest.json').get('stocks', []))
-    return u >= 50 and k >= 20, f"US {u} · KR {k}"
-
-
 # ───────────────────────── 주도주 (이익 가속) ─────────────────────────
 @check('주도주', '유니버스 2,000종 이상 · 최근 26주 내내 최대치의 90% 이상인가')
 def _():
@@ -423,13 +416,6 @@ def _():
     n = d.get('syms') or 0
     return n >= 2000, f"{n:,}종 · {d.get('rows', 0):,}행 · {d.get('period')} · 기준 {d.get('factor_ver')}"
 
-
-@check('CANSLIM US', 'C·A 가 일회성 제외 기준(영업이익)으로 계산돼 있는가 — 전 종목에 기준 표기(2026-10-20)')
-def _():
-    st = list(_stocks('results/canslim_us_latest.json')[1].values())
-    nob = [x['sym'] for x in st if not x.get('earn_basis')]
-    one = sum(1 for x in st if x.get('oneoff'))
-    return bool(st) and not nob, f"{len(st)}종 · 기준 표기 없음 {len(nob)}종 · 일회성 의심 {one}종"
 
 @check('스윙 정류장', '전 종목 스윙 표본이 충분한가 (미국 하락 5만+·한국 2만+, 변동성 경계 오름차순)')
 def _():

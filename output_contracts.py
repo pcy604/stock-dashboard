@@ -88,23 +88,6 @@ def c_screener():
     return out
 
 
-def c_canslim_kr():
-    d = _j("results/canslim_latest.json"); st = d.get("stocks", [])
-    return [chk(_age(d.get("date")) <= 4, BLOCK, f"date {d.get('date')} 4일 초과 — 유니버스/가격 수집 고장"),
-            chk(d.get("market_dir") not in (None, "N/A", "—"), BLOCK, "시장방향(M) 판정 실패"),
-            chk(len(st) >= 10, WARN, f"후보 {len(st)}종 (<10)"),
-            chk(_fill(st, "c_growth_pct") >= 0.5, WARN, f"C(분기실적) 채움률 {_fill(st,'c_growth_pct'):.0%}")]
-
-
-def c_canslim_us():
-    d = _j("results/canslim_us_latest.json"); st = d.get("stocks", [])
-    return [chk(_age(d.get("date")) <= 4, BLOCK, f"date {d.get('date')} 4일 초과"),
-            chk((d.get("fetch_fail_pct") or 0) < 30, BLOCK,
-                f"가격 수집 실패 {d.get('fetch_fail_pct')}% ({d.get('price_fail')}/{d.get('n_cands')}) — 후보 부족의 원인"),
-            chk(len(st) >= 10, BLOCK, f"후보 {len(st)}종 (<10)"),
-            chk(_fill(st, "c_growth_pct") >= 0.5, WARN, f"C 채움률 {_fill(st,'c_growth_pct'):.0%}")]
-
-
 def c_value():
     d = _j("results/value_kr.json"); st = d.get("stocks", [])
     return [chk(_age(d.get("generated")) <= 4, BLOCK, f"generated {d.get('generated')} 4일 초과"),
@@ -254,8 +237,6 @@ CONTRACTS = {
     "results/market_report.json": c_report,
     "results/perf_latest.json": c_perf,
     "results/screener_latest.json": c_screener,
-    "results/canslim_latest.json": c_canslim_kr,
-    "results/canslim_us_latest.json": c_canslim_us,
     "results/value_kr.json": c_value,
     "results/turnaround_latest.json": c_turnaround,
     "results/returns.json": c_profile("results/returns.json", 500, 800),

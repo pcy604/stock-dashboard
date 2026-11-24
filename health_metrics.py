@@ -123,7 +123,6 @@ METRICS = [
     ('perf_kr',        '월간성과 KR 종목 수', lambda: _count_market('results/perf_latest.json', 'KR'), 300, False),
     ('perf_us',        '월간성과 US 종목 수', lambda: _count_market('results/perf_latest.json', 'US'), 300, False),
     ('sectors_kr',     'KR 섹터 맵 종목 수', lambda: _count_digit_keys('data/sectors.json'), 1000, False),
-    ('canslim_kr_date', 'CANSLIM KR 날짜', lambda: _json('results/canslim_latest.json', 'date'), None, True),
 ]
 
 

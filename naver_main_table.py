@@ -76,3 +76,41 @@ def num(s):
         return float(s)
     except Exception:
         return None
+
+
+def earnings_table(sym):
+    """네이버 종목 메인 '기업실적분석' 테이블 파싱
+    반환: {'annual': [(label, ni), ...], 'quarterly': [(label, ni), ...]}
+    (E) 추정치 컬럼은 제외, ni는 억원 (음수 보존)
+
+    2026-11-25: canslim_run.py 폐기로 이곳으로 옮김(종목 분석 한국 실적 폴백).
+    """
+    tb = fetch(sym)
+    if tb is None:
+        return None
+    date_heads = tb['date_heads']
+    n_annual = tb['n_annual']
+    if len(date_heads) < 4:
+        return None
+
+    ni_vals  = row(tb, '당기순이익')
+    rev_vals = row(tb, '매출액')
+    op_vals  = row(tb, '영업이익')
+    if ni_vals is None:
+        return None
+
+    def _split(vals_raw):
+        if vals_raw is None:
+            return [], []
+        vals = [num(v) for v in vals_raw]
+        pr = list(zip(date_heads, vals))
+        a = [(l, v) for l, v in pr[:n_annual] if '(E)' not in l and v is not None]
+        q = [(l, v) for l, v in pr[n_annual:] if '(E)' not in l and v is not None]
+        return a, q
+
+    ni_a, ni_q = _split(ni_vals)
+    rev_a, rev_q = _split(rev_vals)
+    op_a, op_q = _split(op_vals)
+    return {'annual': ni_a, 'quarterly': ni_q,
+            'rev_annual': rev_a, 'rev_q': rev_q,
+            'op_annual': op_a, 'op_q': op_q}

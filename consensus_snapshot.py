@@ -61,7 +61,7 @@ def fetch_consensus(sym: str) -> dict | None:
 def _fetch_consensus_main(sym: str) -> dict | None:
     """(구) finance.naver.com 종목 메인 '기업실적분석' 표 — 해외 러너에는 표가 빠져 내려온다.
 
-    2026-10-25: 표 수집·헤더 해석을 naver_main_table로 통합(dashboard.py·canslim_run.py와
+    2026-10-25: 표 수집·헤더 해석을 naver_main_table로 통합(dashboard.py와
     공유) — 전에는 세 곳이 각자 파싱해 한쪽만 고쳐진 버그가 드리프트하고 있었다."""
     import naver_main_table as nmt
     try:

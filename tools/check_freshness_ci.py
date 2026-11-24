@@ -66,8 +66,6 @@ CHECK = [
     ("data/us_marketcap.csv", 4),
     ("results/screener_latest.json", 4),
     ("results/perf_latest.json", 4),
-    ("results/canslim_latest.json", 4),
-    ("results/canslim_us_latest.json", 4),
     ("results/value_kr.json", 4),
 ]
 
