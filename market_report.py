@@ -1298,6 +1298,10 @@ def main(kind, telegram=False):
         q = f.get("quality") or {}
         out = f"<!-- engine={engine} · close_check={q.get('close_check')} · anomalies={f.get('anomalies')} -->\n" + md
         open(f"preview_{kind}.md", "w", encoding="utf-8").write(out)
+        ks = {"daily": "^GSPC", "kr": "^KS11"}.get(kind)
+        d0 = next((x.get("date") for x in f["indices"] if x.get("sym") == ks), None)
+        json.dump(dict(kind=kind, date=d0, generated=f["generated"], engine=engine, markdown=md, facts=f),
+                  open(f"preview_{kind}.json", "w", encoding="utf-8"), ensure_ascii=False, default=str)
         print(out)
         return
     # 리포트 날짜 = 그 리포트가 다루는 장의 날짜(실행일이 아니다). 일요일 실행이 금요일 미국 장을 '새 리포트'로

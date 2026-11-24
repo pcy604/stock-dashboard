@@ -55,7 +55,9 @@ def summary(f):
         pct = bc["today"] if up else 100 - bc["today"]
         tail = (f"최근 {bc['n']}거래일 중 가장 넓은 {'상승' if up else '하락'}이었다" if bc["rank"] == (1 if up else bc["n"])
                 else f"최근 {bc['n']}거래일 평균은 {bc['avg']}%다")
-        S.append(f"대형주 {pct}%가 {'올랐고' if up else '내렸고'}, {tail}.")
+        lead = _idx(f, "^KS11" if kind == "kr" else "^GSPC")
+        but = "지수는 " + ("올랐지만" if lead["d1"] > 0 else "내렸지만") + " " if lead and abs(lead["d1"]) >= 0.2 and (lead["d1"] > 0) != up else ""
+        S.append(f"{but}대형주 {pct}%가 {'올랐고' if up else '내렸고'}, {tail}.")
     fl = ((ctx.get("flow") or {}).get("today") or {}).get("KOSPI") if kind == "kr" else None
     if fl and fl.get("외국인") is not None and fl.get("기관") is not None:
         a, b = fl["외국인"], fl["기관"]

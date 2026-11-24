@@ -41,20 +41,30 @@ def _rss(q: str, hours=36, timeout=12) -> list:
     return out
 
 
-def _pick(items, must=()):
-    """제목에 must 단어 중 하나가 들어간 첫 기사. 같은 제목 반복은 하나로."""
+_UPW = ("급등", "상승", "강세", "랠리", "반등", "치솟", "↑")
+_DNW = ("급락", "하락", "약세", "폭락", "추락", "↓")
+
+
+def _pick(items, must=(), sign=None):
+    """제목에 must 단어 중 하나가 들어간 첫 기사. sign(+1/-1)이 있으면 제목 방향이 반대인 기사는 버린다.
+    2026-11-25 — 엔비디아 -5.9% 날에 전날 '31% 급등' 기사가 붙었다(날짜 창 36시간 + 방향 무검사)."""
     for it in items:
-        if not must or any(m in it["title"] for m in must):
-            return it
+        if must and not any(m in it["title"] for m in must):
+            continue
+        if sign:
+            up, dn = any(w in it["title"] for w in _UPW), any(w in it["title"] for w in _DNW)
+            if (sign > 0 and dn and not up) or (sign < 0 and up and not dn):
+                continue
+        return it
     return None
 
 
 def find(targets: list) -> list:
-    """targets = [(라벨, 검색어, 제목에 있어야 할 단어들)] → [{label, title, source, url, date}] (못 찾은 건 빠짐)."""
+    """targets = [(라벨, 검색어, 제목에 있어야 할 단어들, 시간 창(h), 방향 ±1|None)] → [{label, title, source, url, date}]."""
     out = []
-    for label, q, must in targets:
+    for label, q, must, hours, sign in targets:
         try:
-            it = _pick(_rss(q), must)
+            it = _pick(_rss(q, hours=hours), must, sign)
         except Exception as e:
             print(f"  이유 뉴스 실패({q}):", str(e)[:80])
             it = None
@@ -71,18 +81,20 @@ def targets_for(f: dict) -> list:
     if kind == "kr":
         ks = next((x for x in f.get("indices") or [] if x.get("sym") == "^KS11"), {})
         if ks.get("d1") is not None:
-            T.append(("코스피", "코스피 마감", ("코스피",)))
+            T.append(("코스피", "코스피 마감", ("코스피",), 9, 1 if ks["d1"] > 0 else -1))   # 한국 장 09~15:30 → 07시 이후 기사
         kr = (f.get("stocks") or {}).get("KR") or {}
         th = (kr.get("themes_top") or [{}])[0]
         if th.get("name") and abs(th.get("ret") or 0) >= 3:
             lead = (th.get("lead") or [{}])[0].get("name")
-            T.append((f"{th['name']} 테마", f"{lead or th['name']} 주가", tuple(x for x in (lead, th["name"].split("/")[0]) if x)))
+            T.append((f"{th['name']} 테마", f"{lead or th['name']} 주가", tuple(x for x in (lead, th["name"].split("/")[0]) if x),
+                      9, 1 if th["ret"] > 0 else -1))
     else:
-        T.append(("뉴욕증시", "뉴욕증시 마감", ("뉴욕증시", "다우", "나스닥", "S&P")))
+        # 미국 장 = KST 23:30~06:00 → 발행(06:10) 기준 12시간 안 기사만. 지수는 혼조가 흔해 방향 검사 안 함
+        T.append(("뉴욕증시", "뉴욕증시 마감", ("뉴욕증시", "다우", "나스닥", "S&P"), 12, None))
         mc = (f.get("us") or {}).get("megacaps") or []
         big = max(mc, key=lambda r: abs(r.get("d1") or 0), default=None)
         if big and abs(big.get("d1") or 0) >= 5:
-            T.append((big["name"], f"{big['name']} 주가", (big["name"],)))
+            T.append((big["name"], f"{big['name']} 주가", (big["name"],), 12, 1 if big["d1"] > 0 else -1))
     return T
 
 
