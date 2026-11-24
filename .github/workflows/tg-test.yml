@@ -1,0 +1,17 @@
+# 텔레그램 설정 확인용 — 수동 실행 시 시험 메시지 1통 (2026-11-24 부자알람 봇으로 통일)
+name: tg-test
+on:
+  workflow_dispatch:
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          TOK: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          R=$(curl -s -X POST "https://api.telegram.org/bot${TOK}/sendMessage" \
+              --data-urlencode "chat_id=${CHAT}" \
+              --data-urlencode "text=✅ [시험] stock-dashboard 알림이 이제 부자알람 봇으로 옵니다.")
+          echo "$R" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ok=',d.get('ok'),'bot=',(d.get('result') or {}).get('from',{}).get('username'),d.get('description',''))"
+          echo "$R" | grep -q '"ok":true'
