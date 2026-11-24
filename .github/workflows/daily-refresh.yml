@@ -17,6 +17,9 @@ on:
       force_monday:
         description: '월요일 전용 단계(컨센서스 스냅샷·SEC float)를 오늘 강제 실행 — 놓친 주 복구용'
         default: 'false'
+  workflow_run:               # 2026-11-24: Cloudflare 가 21:10 UTC 정시에 깨우는 market-report(미국판) 뒤에 바로 이어 돈다
+    workflows: [market-report]
+    types: [completed]
   schedule:
     - cron: '30 21 * * 0-4'   # UTC 21:30 = 한국 06:30, 월~금 — 미국 마감(서머타임 20:00·겨울 21:00 UTC) 뒤 30분+, 한국은 전날 15:30 마감 확정(2026-10-21 21:00→21:30, 겨울엔 21:00 이 미국 마감 순간이었다)
 
@@ -26,7 +29,40 @@ permissions:
   checks: read
 
 jobs:
+  # 2026-11-24 관문 — GitHub schedule 이 5~8시간 밀려(11-17~24 매일 KST 11~14시 실행) 한국 장중에 돌았다.
+  #   장중 상장목록(오늘 시세)과 전일 종가 시계열이 섞여 정답 점검(삼성 시총 정합)이 7일 연속 실패했고,
+  #   미국 시황 종목 절도 묵은 값이 됐다. → 미국 마감 직후(workflow_run)에 돌리고, 늦게 온 schedule 은 장중이면 건너뛴다.
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.g.outputs.run }}
+    steps:
+      - id: g
+        env:
+          EV: ${{ github.event_name }}
+          WR_EV: ${{ github.event.workflow_run.event }}
+          WR_OK: ${{ github.event.workflow_run.conclusion }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          H=$(date -u +%H); KH=$(TZ=Asia/Seoul date +%H); DOW=$(date -u +%u)   # DOW 1=월 … 7=일 (UTC)
+          RUN=true
+          if [ "$EV" = "workflow_run" ]; then
+            # 미국판 정시 실행(Cloudflare dispatch)만 — 한국판(06:45 UTC)·push 재생성은 무시. 미국 장 = UTC 월~금 저녁
+            if [ "$WR_EV" != "workflow_dispatch" ] || [ "$H" -lt 20 ] || [ "$H" -gt 22 ] || [ "$DOW" -gt 5 ]; then RUN=false; fi
+          elif [ "$EV" = "schedule" ]; then
+            # 한국 장중(08~16시 KST)에 늦게 도착한 schedule 은 건너뛴다
+            if [ "$KH" -ge 8 ] && [ "$KH" -le 16 ]; then RUN=false; fi
+            # 지난 10시간 안에 이미 성공한 실행이 있으면 중복이라 건너뛴다
+            N=$(gh api "repos/${{ github.repository }}/actions/workflows/daily-refresh.yml/runs?status=success&per_page=5" \
+                 --jq "[.workflow_runs[] | select((now - (.updated_at|fromdate)) < 36000)] | length" 2>/dev/null || echo 0)
+            if [ "${N:-0}" -gt 0 ]; then RUN=false; fi
+          fi
+          echo "event=$EV wr=$WR_EV utc=$H kst=$KH dow=$DOW → run=$RUN"
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+
   refresh:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     # 2026-10-19 커버 기준 확대(한국 1,000억+·미국 $3억+, 약 4,000종)로 55 → 80분. 복구 실행(max_fetch↑)은 120분.
     timeout-minutes: ${{ (inputs.max_fetch && inputs.max_fetch != '600') && 120 || 80 }}
