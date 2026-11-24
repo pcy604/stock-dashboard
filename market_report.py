@@ -788,6 +788,31 @@ def ledger_facts():
                 trades_today=len(trades), rows=rows)
 
 
+def hilo_weekly(mk):
+    """주간 52주 신고가·신저가 종목 수 — 종합 탭 '주간 52주 신고가 · 신저가' 막대와 같은 집계(perf_latest nh·nl)."""
+    p = _j("results/perf_latest.json") or {}
+    wk = {}
+    for x in p.get("stocks") or []:
+        if x.get("market") != mk:
+            continue
+        for d, _c in x.get("nh") or []:
+            wk.setdefault(d, [0, 0])[0] += 1
+        for d in x.get("nl") or []:
+            wk.setdefault(d, [0, 0])[1] += 1
+    ds = sorted(wk)
+    if len(ds) < 3:
+        return {}
+    last, prev = wk[ds[-1]], wk[ds[-2]]
+    streak = 0
+    for d in reversed(ds):
+        if wk[d][1] > wk[d][0]:
+            streak += 1
+        else:
+            break
+    return dict(week=ds[-1], nh=last[0], nl=last[1], prev_nh=prev[0], prev_nl=prev[1], nl_over_nh_weeks=streak,
+                asof=str(p.get("date") or "")[:10])
+
+
 def anomalies(f):
     """대형주 하루 ±15% — 사실일 수도 있지만 두 번째 출처로 확인 전까지 '확인 필요' 표시."""
     out = []
@@ -832,7 +857,7 @@ def facts(kind):
         kr = (f["stocks"] or {}).get("KR") or {}
         f["quality"] = dict(close_check=kr_close_check(kr, f["indices"]))
         f["ctx"] = dict(breadth=breadth_context((f.get("internals_kr") or {}).get("breadth_hist")),
-                        flow=flow_context(kr.get("flow")), events=events_next(), ledger=ledger_facts())
+                        flow=flow_context(kr.get("flow")), events=events_next(), ledger=ledger_facts(), hilo=hilo_weekly("KR"))
         f["anomalies"] = anomalies(f)
         return f
     f = dict(kind=kind, generated=_now_kst(), verdict=verdict_facts(),
@@ -852,7 +877,7 @@ def facts(kind):
         except Exception as e:
             print("  시장 내부(미국·추이) 생략:", str(e)[:100])
         f["ctx"] = dict(breadth=breadth_context(((f.get("internals") or {}).get("US") or {}).get("breadth_hist")),
-                        events=events_next())
+                        events=events_next(), hilo=hilo_weekly("US"))
         f["anomalies"] = anomalies(f)
     return f
 

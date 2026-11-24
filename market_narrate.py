@@ -189,6 +189,18 @@ def stocks(f):
     return " ".join(S)
 
 
+def week52(f):
+    h = (f.get("ctx") or {}).get("hilo") or {}
+    if not h:
+        return ""
+    s = (f"이번 주 52주 신고가 {h['nh']:,}종, 신저가 {h['nl']:,}종({str(h.get('asof'))[5:]}까지 · 지난주 신고가 {h['prev_nh']:,}·신저가 {h['prev_nl']:,}).")
+    if h.get("nl_over_nh_weeks", 0) >= 2:
+        s += f" 신저가가 신고가보다 많은 주가 {h['nl_over_nh_weeks']}주째다."
+    elif h["nh"] > h["nl"]:
+        s += " 신고가가 신저가보다 많다."
+    return s
+
+
 def ledger(f):
     lg = (f.get("ctx") or {}).get("ledger") or {}
     if not lg:
@@ -227,7 +239,7 @@ def why_lines(f):
 
 
 def narrate(f):
-    return dict(summary=summary(f), why=why_lines(f), direction=direction(f), breadth=breadth(f), flow=flow(f),
+    return dict(summary=summary(f), why=why_lines(f), direction=direction(f), week52=week52(f), breadth=breadth(f), flow=flow(f),
                 sector=sector(f), stocks=stocks(f), ledger=ledger(f), checkpoints=checkpoints(f))
 
 
@@ -237,7 +249,7 @@ def compose(f, n):
     if n["why"]:
         L += ["", "**왜 움직였나 (뉴스 제목 그대로)**"] + [f"- {w}" for w in n["why"]]
     L += ["", "## 해설"]
-    for k, lab in (("direction", "시장 방향"), ("breadth", "시장 폭"), ("flow", "돈의 흐름"), ("sector", "업종·테마"),
+    for k, lab in (("direction", "시장 방향"), ("week52", "52주 신고가·신저가"), ("breadth", "시장 폭"), ("flow", "돈의 흐름"), ("sector", "업종·테마"),
                    ("stocks", "종목"), ("ledger", "실전 원장")):
         if n.get(k):
             L.append(f"- **{lab}** {n[k]}")
