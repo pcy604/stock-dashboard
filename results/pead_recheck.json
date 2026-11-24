@@ -1,57 +1,57 @@
 {
- "run": "2026-10-20 03:20",
+ "run": "2026-11-24 07:20",
  "factor_ver": "v1",
  "period": [
   "2018-01-01",
-  "2026-10-12"
+  "2026-11-16"
  ],
- "universe": 2570,
- "events_gap10": 3039,
- "ev_syms": 2814,
- "signals_per_year": 317.5,
- "overlap_with_star": 0.164,
+ "universe": 2594,
+ "events_gap10": 5102,
+ "ev_syms": 2909,
+ "signals_per_year": 556.6,
+ "overlap_with_star": 0.168,
  "SPY": {
-  "CAGR": 14.1,
+  "CAGR": 14.0,
   "MDD": -31.8,
   "y14_19": 10.7
  },
  "star": {
-  "CAGR": 8.75,
-  "p10": 7.15,
-  "MDD": -42.15,
-  "Sharpe": 0.45999999999999996,
+  "CAGR": 5.85,
+  "p10": 2.97,
+  "MDD": -42.3,
+  "Sharpe": 0.355,
   "y14_19": -1.2
  },
  "A_pead_all": {
-  "CAGR": 11.45,
-  "p10": 9.79,
-  "MDD": -37.7,
-  "Sharpe": 0.61,
-  "y14_19": 8.2
+  "CAGR": 8.25,
+  "p10": 5.81,
+  "MDD": -43.5,
+  "Sharpe": 0.445,
+  "y14_19": 6.85
  },
  "B_pead_big_today": {
-  "CAGR": 17.1,
-  "p10": 14.57,
-  "MDD": -28.7,
-  "Sharpe": 0.915,
-  "y14_19": 9.0
+  "CAGR": 13.75,
+  "p10": 11.99,
+  "MDD": -40.150000000000006,
+  "Sharpe": 0.6799999999999999,
+  "y14_19": 10.5
  },
  "C_pead_rest": {
-  "CAGR": -6.9,
-  "p10": -7.31,
-  "MDD": -61.25,
-  "Sharpe": -0.325,
-  "y14_19": 2.8
+  "CAGR": -4.75,
+  "p10": -5.65,
+  "MDD": -64.19999999999999,
+  "Sharpe": -0.125,
+  "y14_19": 3.2
  },
  "D_pead_all_shock1": {
-  "CAGR": 8.75,
-  "p10": 6.78,
-  "MDD": -39.75,
-  "Sharpe": 0.5,
-  "y14_19": 8.05
+  "CAGR": 7.15,
+  "p10": 5.43,
+  "MDD": -46.8,
+  "Sharpe": 0.405,
+  "y14_19": 7.1
  },
- "n_big": 1465,
- "n_rest": 1105,
+ "n_big": 1432,
+ "n_rest": 1162,
  "prev": {
   "source": "05 문서(2026-10-19, 1,249종 테이블)",
   "CAGR": 24.6,
@@ -61,10 +61,10 @@
  },
  "verdict": {
   "beats_star": true,
-  "p10_beats_star": true,
+  "p10_beats_star": false,
   "y14_19_beats_spy": false,
-  "bias_gap_pp": 24.0,
+  "bias_gap_pp": 18.5,
   "pass": false
  },
- "secs": 35
+ "secs": 37
 }

@@ -1,12 +1,12 @@
 {
  "cut": "2026-08-31",
- "lost": 27,
+ "lost": 24,
  "by_reason": {
-  "DB 없음 · 주봉 80주 미만": 7,
+  "DB 없음 · 주봉 80주 미만": 14,
   "거래대금 하한 미달": 1,
   "시총 NULL": 6,
-  "시총 하한 미달": 4,
-  "DB 없음 · 재무파일(fq_) 없음": 8,
+  "DB 없음 · 재무파일(fq_) 없음": 1,
+  "시총 하한 미달": 1,
   "이익가속 재계산 결과 불충족(재무 개정)": 1
  },
  "detail": {
@@ -25,7 +25,7 @@
    ],
    "fw_rows": 0,
    "in_marketcap": true,
-   "mcap_now": 148715385.78515196,
+   "mcap_now": 138621681.03079414,
    "in_universe_ever": true,
    "fq_file": true,
    "dy_file": false,
@@ -36,13 +36,13 @@
    "old_weeks": [
     "2024-11-04"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": true,
-   "mcap_now": 776354250.0,
+   "mcap_now": 737372290.9698486,
    "in_universe_ever": true,
    "fq_file": true,
    "dy_file": true,
-   "prices_wk": 720,
+   "prices_wk": 725,
    "marcap_at_old_B": [
     1.062
    ],
@@ -56,7 +56,7 @@
    "adv_ok": 0,
    "mc_ok": 1,
    "surge_ok": 1,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "거래대금 하한 미달"
   },
   "BLFS": {
@@ -80,13 +80,13 @@
    "old_weeks": [
     "2022-10-03"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
-   "dy_file": false,
-   "prices_wk": 599,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 604,
    "marcap_at_old_B": [
     null
    ],
@@ -100,7 +100,7 @@
    "adv_ok": 1,
    "mc_ok": 0,
    "surge_ok": 1,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "시총 NULL"
   },
   "CCO": {
@@ -125,33 +125,6 @@
    "prices_wk": 0,
    "reason": "DB 없음 · 주봉 80주 미만"
   },
-  "CHWY": {
-   "old_weeks": [
-    "2025-09-15"
-   ],
-   "fw_rows": 324,
-   "in_marketcap": true,
-   "mcap_now": 7771395312.88147,
-   "in_universe_ever": true,
-   "fq_file": true,
-   "dy_file": true,
-   "prices_wk": 384,
-   "marcap_at_old_B": [
-    0.0
-   ],
-   "close_at_old": [
-    38.49
-   ],
-   "rows_at_old_weeks": 1,
-   "marcap_null": 0,
-   "adv_null": 0,
-   "acc1": 1,
-   "adv_ok": 1,
-   "mc_ok": 0,
-   "surge_ok": 1,
-   "last_as_of": "2026-10-12",
-   "reason": "시총 하한 미달"
-  },
   "DOMO": {
    "old_weeks": [
     "2020-11-02",
@@ -169,12 +142,12 @@
    ],
    "fw_rows": 0,
    "in_marketcap": true,
-   "mcap_now": 149269994.73571777,
+   "mcap_now": 145145599.88117218,
    "in_universe_ever": true,
-   "fq_file": false,
+   "fq_file": true,
    "dy_file": false,
    "prices_wk": 0,
-   "reason": "DB 없음 · 재무파일(fq_) 없음"
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "EA": {
    "old_weeks": [
@@ -184,10 +157,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
+   "fq_file": true,
    "dy_file": false,
    "prices_wk": 0,
-   "reason": "DB 없음 · 재무파일(fq_) 없음"
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "ERIE": {
    "old_weeks": [
@@ -195,13 +168,13 @@
     "2023-07-31",
     "2024-02-26"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
-   "dy_file": false,
-   "prices_wk": 720,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 725,
    "marcap_at_old_B": [
     null,
     null,
@@ -219,55 +192,8 @@
    "adv_ok": 3,
    "mc_ok": 0,
    "surge_ok": 3,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "시총 NULL"
-  },
-  "FNKO": {
-   "old_weeks": [
-    "2020-11-30",
-    "2020-12-14",
-    "2021-01-11",
-    "2021-02-01",
-    "2021-03-08",
-    "2021-03-22",
-    "2021-05-03",
-    "2021-11-01",
-    "2022-11-07",
-    "2022-11-28",
-    "2022-12-26"
-   ],
-   "fw_rows": 408,
-   "in_marketcap": true,
-   "mcap_now": 370045835.8079181,
-   "in_universe_ever": true,
-   "fq_file": true,
-   "dy_file": true,
-   "prices_wk": 468,
-   "marcap_at_old_B": [
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "close_at_old": [
-    10.9,
-    11.43,
-    12.06,
-    13.47,
-    17.77,
-    19.48
-   ],
-   "rows_at_old_weeks": 11,
-   "marcap_null": 0,
-   "adv_null": 0,
-   "acc1": 11,
-   "adv_ok": 11,
-   "mc_ok": 0,
-   "surge_ok": 11,
-   "last_as_of": "2026-10-12",
-   "reason": "시총 하한 미달"
   },
   "FWONK": {
    "old_weeks": [
@@ -304,13 +230,13 @@
     "2021-03-01",
     "2025-06-02"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
-   "dy_file": false,
-   "prices_wk": 720,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 725,
    "marcap_at_old_B": [
     null,
     null,
@@ -328,20 +254,20 @@
    "adv_ok": 3,
    "mc_ok": 0,
    "surge_ok": 3,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "시총 NULL"
   },
   "HLI": {
    "old_weeks": [
     "2020-03-30"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": true,
-   "mcap_now": 8798816247.558594,
+   "mcap_now": 9223220245.361328,
    "in_universe_ever": true,
    "fq_file": true,
    "dy_file": true,
-   "prices_wk": 584,
+   "prices_wk": 589,
    "marcap_at_old_B": [
     0.03
    ],
@@ -355,7 +281,7 @@
    "adv_ok": 1,
    "mc_ok": 0,
    "surge_ok": 1,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "시총 하한 미달"
   },
   "HLX": {
@@ -375,23 +301,23 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
+   "fq_file": true,
    "dy_file": false,
    "prices_wk": 0,
-   "reason": "DB 없음 · 재무파일(fq_) 없음"
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "IMKTA": {
    "old_weeks": [
     "2022-02-28",
     "2026-02-02"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
-   "dy_file": false,
-   "prices_wk": 720,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 725,
    "marcap_at_old_B": [
     null,
     null
@@ -407,38 +333,8 @@
    "adv_ok": 2,
    "mc_ok": 0,
    "surge_ok": 2,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "시총 NULL"
-  },
-  "MBUU": {
-   "old_weeks": [
-    "2021-01-11",
-    "2025-08-11"
-   ],
-   "fw_rows": 459,
-   "in_marketcap": true,
-   "mcap_now": 412036971.01858526,
-   "in_universe_ever": true,
-   "fq_file": true,
-   "dy_file": true,
-   "prices_wk": 664,
-   "marcap_at_old_B": [
-    0.0,
-    0.0
-   ],
-   "close_at_old": [
-    71.22,
-    36.34
-   ],
-   "rows_at_old_weeks": 2,
-   "marcap_null": 0,
-   "adv_null": 0,
-   "acc1": 2,
-   "adv_ok": 2,
-   "mc_ok": 0,
-   "surge_ok": 2,
-   "last_as_of": "2026-10-12",
-   "reason": "시총 하한 미달"
   },
   "NABL": {
    "old_weeks": [
@@ -448,13 +344,13 @@
     "2026-07-27",
     "2026-08-24"
    ],
-   "fw_rows": 214,
+   "fw_rows": 219,
    "in_marketcap": true,
-   "mcap_now": 874632597.7385216,
+   "mcap_now": 853562779.3230686,
    "in_universe_ever": true,
    "fq_file": true,
    "dy_file": true,
-   "prices_wk": 274,
+   "prices_wk": 279,
    "marcap_at_old_B": [
     0.667,
     0.774,
@@ -476,7 +372,7 @@
    "adv_ok": 5,
    "mc_ok": 5,
    "surge_ok": 5,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "이익가속 재계산 결과 불충족(재무 개정)"
   },
   "QRVO": {
@@ -509,10 +405,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
+   "fq_file": true,
    "dy_file": false,
    "prices_wk": 0,
-   "reason": "DB 없음 · 재무파일(fq_) 없음"
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "SLP": {
    "old_weeks": [
@@ -535,13 +431,13 @@
    "old_weeks": [
     "2020-11-02"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
-   "dy_file": false,
-   "prices_wk": 720,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 725,
    "marcap_at_old_B": [
     null
    ],
@@ -555,7 +451,7 @@
    "adv_ok": 1,
    "mc_ok": 0,
    "surge_ok": 1,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "시총 NULL"
   },
   "SUN": {
@@ -564,13 +460,13 @@
     "2020-04-13",
     "2020-04-20"
    ],
-   "fw_rows": 459,
+   "fw_rows": 464,
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
-   "dy_file": false,
-   "prices_wk": 720,
+   "fq_file": true,
+   "dy_file": true,
+   "prices_wk": 725,
    "marcap_at_old_B": [
     null,
     null,
@@ -588,7 +484,7 @@
    "adv_ok": 3,
    "mc_ok": 0,
    "surge_ok": 3,
-   "last_as_of": "2026-10-12",
+   "last_as_of": "2026-11-16",
    "reason": "시총 NULL"
   },
   "TALK": {
@@ -599,10 +495,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
+   "fq_file": true,
    "dy_file": false,
    "prices_wk": 0,
-   "reason": "DB 없음 · 재무파일(fq_) 없음"
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "TBPH": {
    "old_weeks": [
@@ -615,10 +511,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
+   "fq_file": true,
    "dy_file": false,
    "prices_wk": 0,
-   "reason": "DB 없음 · 재무파일(fq_) 없음"
+   "reason": "DB 없음 · 주봉 80주 미만"
   },
   "WBD": {
    "old_weeks": [
@@ -651,10 +547,10 @@
    "in_marketcap": false,
    "mcap_now": null,
    "in_universe_ever": true,
-   "fq_file": false,
+   "fq_file": true,
    "dy_file": false,
    "prices_wk": 0,
-   "reason": "DB 없음 · 재무파일(fq_) 없음"
+   "reason": "DB 없음 · 주봉 80주 미만"
   }
  }
 }
