@@ -18,6 +18,9 @@ on:
       kind:
         description: 'kr | daily'
         default: 'kr'
+      preview:
+        description: '미리보기 — 발행·커밋 없이 결과만(true)'
+        default: 'false'
 permissions:
   contents: write
 concurrency:
@@ -46,8 +49,16 @@ jobs:
             if [ "${{ github.event.schedule }}" = "50 6 * * 1-5" ]; then KIND=kr; else KIND=daily; fi
           fi
           echo "kind=$KIND"
+          if [ "${{ inputs.preview }}" = "true" ]; then export MR_PREVIEW=1 REPORT_FORCE=1; fi
           python market_report.py "$KIND"
+      - name: 미리보기 파일
+        if: inputs.preview == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview
+          path: preview_*.md
       - name: 커밋 & 푸시
+        if: inputs.preview != 'true'
         run: |
           git config user.name  "github-actions"
           git config user.email "actions@github.com"

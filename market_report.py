@@ -1266,6 +1266,12 @@ def main(kind, telegram=False):
         print(f"⏭️ {kind} {d_new} 은 이미 발행됨({old.get('generated')} · {old.get('engine')}) — 덮어쓰지 않는다(REPORT_FORCE=1 로 강제)")
         return
     md, engine = render(f)
+    if os.environ.get("MR_PREVIEW"):   # 2026-11-24 미리보기 — 발행·저장 없이 출력만(차니 확인용)
+        q = f.get("quality") or {}
+        out = f"<!-- engine={engine} · close_check={q.get('close_check')} · anomalies={f.get('anomalies')} -->\n" + md
+        open(f"preview_{kind}.md", "w", encoding="utf-8").write(out)
+        print(out)
+        return
     # 리포트 날짜 = 그 리포트가 다루는 장의 날짜(실행일이 아니다). 일요일 실행이 금요일 미국 장을 '새 리포트'로
     #   다시 내보내지 않게 — 봇은 이 날짜로 중복 발송을 막는다(2026-10-21).
     key = {"daily": "^GSPC", "kr": "^KS11"}.get(kind)
