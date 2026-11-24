@@ -73,7 +73,7 @@
    "fallback": "없음 (화면은 떠도 저장 기능이 죽는다)",
    "kind": "project",
    "state": "authfail",
-   "streak": 2,
+   "streak": 3,
    "why": "프로젝트 REST HTTP 401"
   },
   "Telegram Bot API": {
