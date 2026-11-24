@@ -1,24 +1,24 @@
 {
- "generated": "2026-11-20 03:32",
- "asof": "2026-11-19",
+ "generated": "2026-11-24 06:01",
+ "asof": "2026-11-23",
  "rule": "코어 = SPY 종가가 200일 이평 위면 보유, 아래면 현금 (원칙 v1.3 §3) · 위성은 시장 필터 없음 (§4)",
  "core": {
   "on": false,
-  "close": 715.87,
-  "ma": 732.69,
-  "gap": -2.3,
-  "date": "2026-11-19",
-  "pos52": 57,
-  "mom12": 8.0
+  "close": 722.29,
+  "ma": 732.91,
+  "gap": -1.45,
+  "date": "2026-11-23",
+  "pos52": 61,
+  "mom12": 9.6
  },
  "kr_core": {
   "on": false,
-  "close": 5137.89,
-  "ma": 6525.31,
-  "gap": -21.26,
-  "date": "2026-11-19",
-  "pos52": 25,
-  "mom12": 26.1
+  "close": 5015.79,
+  "ma": 6522.25,
+  "gap": -23.1,
+  "date": "2026-11-24",
+  "pos52": 22,
+  "mom12": 20.3
  },
  "alloc": {
   "core": 50,
@@ -28,8 +28,8 @@
   "cash_total": 70
  },
  "canslim_m": {
-  "US": "하락추세 ⚠️ (200일선 -2.3%)",
-  "KR": "하락추세 ⚠️ (200일선 -21.3%)"
+  "US": "하락추세 ⚠️ (200일선 -1.4%)",
+  "KR": "하락추세 ⚠️ (200일선 -23.1%)"
  },
  "phase": {
   "key": "EARN",
@@ -69,7 +69,9 @@
   "sub": "선행 6개 중 0개 · 동행 3개 중 0개 경고"
  },
  "fred_ok": true,
- "fred_err": {},
+ "fred_err": {
+  "DGS2": "HTTPError: 500 Server Error: Internal Server Error for url: https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&api_"
+ },
  "history": [
   {
    "date": "2026-10-19",
@@ -175,6 +177,11 @@
    "date": "2026-11-19",
    "on": false,
    "gap": -2.3
+  },
+  {
+   "date": "2026-11-23",
+   "on": false,
+   "gap": -1.45
   }
  ],
  "changed": false,
