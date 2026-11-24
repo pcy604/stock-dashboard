@@ -670,8 +670,11 @@ def pulse_box(idx_rows: list[dict]):
         sub = [f"분배일 {pz.get('dist_n', '-')}개(25거래일)"]
         if pz.get('ftd_date'):
             sub.append(f"팔로스루 {pz['ftd_date'][5:]}")
-        if pz.get('low_date'):
-            sub.append(f"저점 {pz['low_date'][5:]} ({pz.get('corr_dd', 0):+.1f}%)")
+        elif '반등' in st_:   # 2026-11-24 — '다음에 볼 것'이 없었다
+            n = pz.get('rally_day') or 0
+            sub.append("상승 확인 조건: 4일째부터 +1.25%↑·거래량 증가" + (f" ({4 - n}거래일 뒤부터)" if n < 4 else " (지금 해당)"))
+        if pz.get('low_date'):   # 2026-11-24 — '저점 (-48%)'가 저점 값처럼 읽혔다. 괄호 값은 고점 대비 낙폭
+            sub.append(f"이번 조정 저점 {pz['low_date'][5:]} · 고점 대비 {pz.get('corr_dd', 0):+.1f}%")
         cards.append(f"""<div class="hm-card"><div class="nm">{_e(x.get('name'))}</div>
           <div class="px {cls}" style="font-size:17px">{_e(st_)}</div><div class="sub">{' · '.join(sub)}</div></div>""")
     if not cards:

@@ -18,7 +18,7 @@
 import json
 import os
 import sys
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 
 def _now_kst() -> str:
@@ -661,6 +661,148 @@ def _kr_rule_checks(f):
         return []
 
 
+# ═════ 2026-11-24 시황 첫 단추 — 정확성 관문 + 종합 탭 순서 재구성 ═════════════════════════════════════
+#   ① 종가 확정 검사: 15:45 판이 장중 스냅샷(KRX 캐시 14시대)을 종가로 썼다(삼성 +7.7% → 실제 +6.76%).
+#      대형주 시총가중 등락이 코스피 지수 등락과 0.45%p 넘게 어긋나면 '종가 아님'으로 보고 발행을 미룬다.
+#   ② 방향 검사: AI 가 '반도체가 약세를 이끌었다'고 썼다(필라델피아 반도체 +14%). 이름·방향어가 한 절에 같이 있으면 대조.
+#   ③ 발행판 덮어쓰기 금지 · ④ 5주선 '오늘' 거리 · ⑤ 이례적 급변 표시 · ⑥ 오닐·시장 폭 맥락·수급·신용·일정·실전 원장.
+CLOSE_TOL = 0.45          # %p — 종가 확정본 0.1~0.2, 장중 스냅샷 0.65 (2026-11-24 실측)
+ANOMALY_D1 = 15.0         # 대형주 하루 ±15% 이상은 '이례적 — 확인 필요'
+
+
+def kr_close_check(kr, indices):
+    """대형주(시총 1조+) 시총가중 오늘 등락 vs 코스피 지수 1일 등락. 어긋나면 종목 시세가 종가가 아니다."""
+    hm = (kr or {}).get("heatmap") or []
+    ks = next((x for x in indices or [] if x.get("sym") == "^KS11"), {})
+    rows = [r for r in hm if r.get("mc") and r.get("ret") is not None]
+    if len(rows) < 50 or ks.get("d1") is None:
+        return dict(ok=True, note="검사 불가(자료 부족)")
+    prev = [r["mc"] / (1 + r["ret"] / 100) for r in rows]
+    w = sum(a * r["ret"] for a, r in zip(prev, rows)) / sum(prev)
+    gap = w - ks["d1"]
+    return dict(ok=abs(gap) <= CLOSE_TOL, big_w=round(w, 2), kospi=ks["d1"], gap=round(gap, 2), tol=CLOSE_TOL)
+
+
+def _pulse_line(x):
+    pz = x.get("pulse") or {}
+    if not pz.get("state"):
+        return None
+    s = f"{x['name']} {pz['state']}"
+    bits = [f"분배일 {pz.get('dist_n', '-')}개/25일"]
+    if pz.get("ftd_date"):
+        bits.append(f"팔로스루 {pz['ftd_date'][5:]}")
+    elif str(pz.get("state", "")).startswith("반등 시도"):
+        n = pz.get("rally_day") or 0
+        bits.append("상승 확인 조건: 반등 4일째부터 +1.25%↑·거래량 증가" + (f"(앞으로 {4 - n}거래일 뒤부터)" if n < 4 else "(오늘부터 해당)"))
+    if pz.get("low_date"):
+        bits.append(f"이번 조정 저점 {pz['low_date'][5:]}(고점 대비 {pz.get('corr_dd', 0):+.1f}%)")
+    return s + " — " + " · ".join(bits)
+
+
+def _gate_line(indices):
+    g = []
+    for x in indices or []:
+        z = x.get("gate5w") or {}
+        if z.get("on") is None:
+            continue
+        live = z.get("live_gap")
+        g.append(f"{x['name']} {'위' if z.get('on') else '아래'}(지난 금요일 {(z.get('gap') or 0):+.1f}%"
+                 + (f" · 오늘 {live:+.1f}%" if live is not None else "") + ")")
+    if not g:
+        return None
+    allon = all((x.get("gate5w") or {}).get("on") for x in indices if (x.get("gate5w") or {}).get("on") is not None)
+    return (f"**실전 규칙 v1.9** — 주봉 5주선 {' · '.join(g)} → 신규 매수 {'가능' if allon else '중지(소속 지수가 5주선 아래)'}"
+            " · 판정은 금요일 종가로만")
+
+
+def breadth_context(hist):
+    """[{date, up, down}] → 오늘 상승 비율과 최근 30거래일 맥락(평균·순위)."""
+    pts = [(r["date"], r["up"] / max(r["up"] + r["down"], 1) * 100) for r in hist or [] if r.get("up") is not None]
+    if len(pts) < 5:
+        return None
+    pts = pts[-30:]
+    today = pts[-1][1]
+    avg = sum(p for _, p in pts) / len(pts)
+    rank = 1 + sum(p > today for _, p in pts)
+    return dict(date=pts[-1][0], today=round(today), avg=round(avg), rank=rank, n=len(pts),
+                up_days=sum(p >= 50 for _, p in pts))
+
+
+def flow_context(today_flow):
+    """오늘 투자자별(잠정) + kr_flow.json 의 외국인 5·20일 누적·신용잔고. 날짜를 같이 둔다."""
+    s = (_j("results/kr_flow.json") or {}).get("summary") or {}
+    out = {}
+    if today_flow:
+        out["today"] = today_flow
+    cum = {mk: dict(date=v.get("date"), d5=v.get("d5"), d20=v.get("d20")) for mk, v in s.items() if mk in ("KOSPI", "KOSDAQ")}
+    if cum:
+        out["foreign_cum"] = cum
+    cr = s.get("credit") or {}
+    if cr.get("v"):
+        out["credit"] = dict(date=cr.get("date"), tn=round(cr["v"] / 1e4, 1), chg20=round(cr.get("chg20") or 0, 1),
+                             from_peak=round(cr.get("from_peak") or 0, 1), peak_date=cr.get("peak_date"))
+    return out
+
+
+def events_next(days=7):
+    try:
+        import events as _EV
+        from datetime import timedelta as _td
+        today = (datetime.utcnow() + _td(hours=9)).date()
+        ev = _EV.build(today, days, None, None)
+        return [dict(date=e["date"], wd=e.get("wd"), time=e.get("time"), name=e["name"], kind=e.get("kind")) for e in ev
+                if e.get("kind") != "보유"][:6]
+    except Exception as e:
+        print("  일정 생략:", str(e)[:80])
+        return []
+
+
+def ledger_facts():
+    """실전 원장(한국) — 2026-11-22 차니 결정: 원장 성과 전부 공개(종목 권유 문구는 금지). 오늘 종가 기준 손익·손절선 거리."""
+    try:
+        led = json.load(open(os.path.join(BASE, "live", "ledger.json"), encoding="utf-8"))
+        import krx_listing
+        df = krx_listing.stock_listing("KRX", verbose=False)
+    except Exception as e:
+        print("  실전 원장 생략:", str(e)[:80])
+        return {}
+    px = dict(zip(df["Code"].astype(str).str.zfill(6), df["Close"]))
+    col = next((c for c in ("ChagesRatio", "ChangesRatio") if c in df), None)
+    d1 = dict(zip(df["Code"].astype(str).str.zfill(6), df[col])) if col else {}
+    pos = ((led.get("KR") or {}).get("positions") or {})
+    rows = []
+    for sym, p in pos.items():
+        c = px.get(sym)
+        if not c or not p.get("avg"):
+            continue
+        rows.append(dict(name=p.get("name"), sym=sym, d1=_r(d1.get(sym), 1), pnl=_r((c / p["avg"] - 1) * 100, 1),
+                         to_stop=_r((p["stop"] / c - 1) * 100, 1) if p.get("stop") else None))
+    if not rows:
+        return {}
+    today = (datetime.utcnow() + timedelta(hours=9)).date().isoformat()
+    trades = [i for i in led.get("done_ids", []) if today in str(i)]
+    return dict(n=len(rows), d1_avg=_r(sum(r["d1"] or 0 for r in rows) / len(rows), 1),
+                pnl_avg=_r(sum(r["pnl"] for r in rows) / len(rows), 1),
+                near_stop=[r for r in rows if r["to_stop"] is not None and r["to_stop"] > -5],
+                best=max(rows, key=lambda r: r["d1"] or -99), worst=min(rows, key=lambda r: r["d1"] or 99),
+                trades_today=len(trades), rows=rows)
+
+
+def anomalies(f):
+    """대형주 하루 ±15% — 사실일 수도 있지만 두 번째 출처로 확인 전까지 '확인 필요' 표시."""
+    out = []
+    us = (f.get("internals") or {}).get("US") or {}
+    for r in (us.get("megacaps") or []) + ((f.get("us") or {}).get("megacaps") or []):
+        v = r.get("ret", r.get("d1"))
+        if v is not None and abs(v) >= ANOMALY_D1 and r.get("name") not in {a["name"] for a in out}:
+            out.append(dict(name=r.get("name"), d1=v))
+    kr = ((f.get("stocks") or {}).get("KR") or {})
+    for r in kr.get("megacaps") or []:
+        if r.get("ret") is not None and abs(r["ret"]) >= ANOMALY_D1:
+            out.append(dict(name=r["name"], d1=r["ret"]))
+    return out
+
+
 def _fresher_kr(rows, db=None):
     """2026-11-24: 미국판(06:10 KST)이 Yahoo ^KS11 의 당일 봉 지연으로 코스피·코스닥을 전 거래일(11-20) 값으로 실었다.
     같은 날 15:45 한국판은 이미 11-23 종가를 갖고 있었다 → 한국판 지수 행이 더 새로우면 그것으로 바꾼다."""
@@ -687,6 +829,11 @@ def facts(kind):
             f["internals_kr"] = _MI.kr_internals()
         except Exception as e:
             print("  한국 시장 내부(주간·월간) 생략:", str(e)[:100])
+        kr = (f["stocks"] or {}).get("KR") or {}
+        f["quality"] = dict(close_check=kr_close_check(kr, f["indices"]))
+        f["ctx"] = dict(breadth=breadth_context((f.get("internals_kr") or {}).get("breadth_hist")),
+                        flow=flow_context(kr.get("flow")), events=events_next(), ledger=ledger_facts())
+        f["anomalies"] = anomalies(f)
         return f
     f = dict(kind=kind, generated=_now_kst(), verdict=verdict_facts(),
              indices=_fresher_kr(index_facts()), stocks=stock_facts(kind), signals=signal_facts())
@@ -704,6 +851,9 @@ def facts(kind):
             f["hy"] = hy_fact()
         except Exception as e:
             print("  시장 내부(미국·추이) 생략:", str(e)[:100])
+        f["ctx"] = dict(breadth=breadth_context(((f.get("internals") or {}).get("US") or {}).get("breadth_hist")),
+                        events=events_next())
+        f["anomalies"] = anomalies(f)
     return f
 
 
@@ -723,6 +873,9 @@ PROMPT = """너는 증권사 데일리 시황을 쓰는 시니어 애널리스�
   (예: "반도체 대형주가 지수를 끌어내렸지만 하락 종목은 평소의 2배가 아니라 3배 — 투매에 가까운 장.")
   ## 해설
   글머리표(-) 정확히 4개, 각 70자 이내, 이 순서·이 꼬리표만: **지수** · **수급** · **업종·테마** · **종목**.
+  **지수** 줄은 지수 등락 대신 시장 방향을 쓴다 — 실전 규칙(주봉 5주선, gate5w)과 오닐 국면(pulse)이 같은 말을 하는지 엇갈리는지,
+  오늘 상승 비율이 최근 30거래일 맥락(ctx.breadth)에서 어떤 날인지.
+  **수급** 줄은 오늘 투자자별 매매와 외국인 5·20일 누적(ctx.flow)의 방향이 같은지, 신용잔고 흐름을 쓴다(자료 있을 때).
   (한국·미국 리포트 양식을 같게 — 2026-11-15) 투자자별 매매 자료가 없으면(미국) **수급** 줄은 거래대금 쏠림·금리·달러로 돈의 방향을 쓴다.
   꼬리표마다 서로 다른 자료를 쓴다. 표에 없는 '관계'를 말한다 — 지수와 시장 폭의 괴리, 대형주와 중소형주의 방향 차이,
   강세 업종과 약세 업종이 같은 테마로 묶이는지, 거래대금이 몰린 곳과 오른 곳이 같은지. 숫자는 줄마다 최대 2개.
@@ -730,6 +883,11 @@ PROMPT = """너는 증권사 데일리 시황을 쓰는 시니어 애널리스�
   번호 목록 3개, 각 60자 이내. **다음 거래일에 볼 구체 조건** — 무엇이 어떤 수준을 넘는지/돌아오는지.
   서로 다른 데이터를 잇는다(지수 vs 시장 폭, 업종 vs 대장주, 1일 vs 5일·1개월, 달러·금리·유가 vs 주식).
   예: "1. 반도체 낙폭(-12%)이 VIX 30 위에서 멈추는지 — 이탈 땐 투매 연장"
+  7일 안 일정(ctx.events)이 있으면 그중 시장에 큰 것 하나를 체크포인트에 넣는다.
+추가 규칙(2026-11-24):
+- 방향을 뒤집지 말 것: 1일 등락이 +인 지수·업종·종목을 '약세·하락·부진'으로, −인 것을 '강세·상승'으로 쓰지 않는다. 발행 전 기계 검사가 막는다.
+- anomalies 에 있는 이례적 급변 값은 결론의 근거로 쓰지 않는다(두 번째 출처 확인 전).
+- ctx.ledger(실전 원장)는 사실만 쓸 수 있다. 특정 종목을 사라·팔라·유망하다는 문장은 금지.
 JSON:
 {facts}"""
 
@@ -766,74 +924,161 @@ _TITLE = {"daily": "일간 시황", "weekly": "주간 시황", "kr": "한국 장
 _BASIS = {"d1": "오늘", "ret_1w": "1주", "ret_4w": "4주"}
 
 
+def _eok(v):
+    """억원 → '+7,256억' / '-2.0조'."""
+    if v is None:
+        return "-"
+    return f"{v / 1e4:+,.1f}조" if abs(v) >= 1e4 else f"{v:+,.0f}억"
+
+
 def template(f):
-    """AI 없이도 발행되는 숫자 리포트."""
+    """AI 없이도 발행되는 숫자 리포트. 2026-11-24 — 종합 탭 순서(지수 → 시장 방향 → 시장 폭 → 돈 → 업종 → 종목 → 원장 → 일정)."""
     v = f.get("verdict") or {}
-    L = [f"## {_TITLE.get(f['kind'], '시황')} — 숫자 요약", ""]
-    # 2026-11-12 첫 줄 = 실전 v1.9(한국 주봉 5주선) 판정. 옛 '코어 50/위성 30' 은 원칙 v1.3 잔재라 참고로 내림.
-    _g = []
-    for x in f.get("indices") or []:
-        g = x.get("gate5w") or {}
-        if g.get("on") is not None:
-            _g.append(f"{x['name']} {'위' if g.get('on') else '아래'}({(g.get('gap') or 0):+.1f}%)")
-    if _g:
-        _all = all((x.get("gate5w") or {}).get("on") for x in f["indices"] if (x.get("gate5w") or {}).get("on") is not None)
-        L += [f"**실전 규칙 v1.9** — 주봉 5주선 {' · '.join(_g)} → 신규 매수 {'가능' if _all else '중지(소속 지수 아래인 시장)'}", ""]
+    kind = f["kind"]
+    ctx = f.get("ctx") or {}
+    idx = [x for x in f.get("indices") or [] if "close" in x]
+    L = [f"## {_TITLE.get(kind, '시황')} — 숫자 요약", ""]
+    an = f.get("anomalies") or []
+    if an:
+        L += ["⚠️ **이례적 급변 — 두 번째 출처로 확인 전**: " + ", ".join(f"{a['name']} {a['d1']:+.1f}%" for a in an), ""]
+
+    # ① 지수
+    rep = next((x.get("date") for x in idx if x.get("sym") == {"daily": "^GSPC", "kr": "^KS11"}.get(kind)), None)
+    L += ["**① 지수**", "", "| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |", "|---|---|---|---|---|---|"]
+    for x in idx:
+        nm = x["name"] + (f" ({x['date'][5:]})" if rep and x.get("date") and x["date"] != rep and x.get("sym") in ("^KS11", "^KQ11") else "")
+        L.append(f"| {nm} | {x['close']:,} | {x['d1']:+.1f}% | {x['d5']:+.1f}% | {x['m1']:+.1f}% | {x['from_52w_high']:+.1f}% |")
+
+    # ② 시장 방향 — 실전 규칙 + 오닐(참고) + 미국 코어 참고
+    L += ["", "**② 시장 방향**"]
+    gl = _gate_line(idx)
+    if gl:
+        L.append("- " + gl)
+    want = ("^KS11", "^KQ11") if kind == "kr" else ("^GSPC", "^IXIC") if kind == "daily" else ("^KS11", "^KQ11", "^GSPC", "^IXIC")
+    for x in idx:
+        if x.get("sym") in want:
+            pl = _pulse_line(x)
+            if pl:
+                L.append("- 오닐(참고) " + pl)
     if v:
-        L += [("⚠️ 미국 코어 스위치 전환 · " if v.get("changed") else "") +
-              f"참고 — 미국 S&P500 200일선 {v.get('core_gap_200d', 0):+.1f}% · 국면 {v.get('phase_ref') or '-'} · "
-              f"욕심 경고 {v.get('greed_warn_n', '-')}/3 (돈을 움직이지 않는 지표)", ""]
-    L += ["| 지수 | 종가 | 1일 | 5일 | 1개월 | 52주고 대비 |", "|---|---|---|---|---|---|"]
-    for x in f["indices"]:
-        if "close" in x:
-            L.append(f"| {x['name']} | {x['close']:,} | {x['d1']:+.1f}% | {x['d5']:+.1f}% | {x['m1']:+.1f}% | {x['from_52w_high']:+.1f}% |")
-    for m in ("KR", "US"):
-        s = f["stocks"].get(m) or {}
-        if not s:
-            continue
-        L += ["", f"**{m}** ({_BASIS.get(s['basis'], s['basis'])} 수익률{(' · ' + str(f['stocks'].get('perf_date'))[5:] + ' 기준') if f['stocks'].get('perf_date') else ''}, 대형주 {s['universe']}종 · 상승 비율 {s['breadth_up']}%)",
-              "강세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["top"]),
-              "약세: " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["bottom"])]
-        if "near_52w" in s:
-            L.append(f"52주 신고가 근접 {s['near_52w']}종 · 이번 주 경신 {s['new_high']}종")
+        L.append("- " + ("⚠️ 미국 코어 스위치 전환 · " if v.get("changed") else "") +
+                 f"참고 — 미국 S&P500 200일선 {v.get('core_gap_200d', 0):+.1f}% · 국면 {v.get('phase_ref') or '-'} · "
+                 f"욕심 경고 {v.get('greed_warn_n', '-')}/3 (돈을 움직이지 않는 지표)")
+
     kr = (f.get("stocks") or {}).get("KR") or {}
-    if kr.get("breadth_all"):
+    usi = ((f.get("internals") or {}).get("US") or {}) if kind == "daily" else {}
+    # ③ 시장 폭
+    L += ["", "**③ 시장 폭**"]
+    if kind == "kr" and kr.get("breadth_all"):
         b, t = kr["breadth_all"], kr.get("turnover_tn") or {}
-        L += ["", f"**시장 폭** 상승 {b['up']:,} · 하락 {b['down']:,} · 보합 {b['flat']:,} · 상한가 {b['limit_up']} · 하한가 {b['limit_down']}"
-              + (" · 거래대금 " + " · ".join(f"{k} {v:,.1f}조" for k, v in t.items()) if t else "")]
-    nh = kr.get("new_high_52w") or {}
+        L.append(f"- 상승 {b['up']:,} · 하락 {b['down']:,} · 보합 {b['flat']:,} · 상한가 {b['limit_up']} · 하한가 {b['limit_down']}"
+                 + (" · 거래대금 " + " · ".join(f"{k} {val:,.1f}조" for k, val in t.items()) if t else ""))
+    if usi.get("breadth_all"):
+        b = usi["breadth_all"]
+        L.append(f"- 미국 {usi.get('universe', 0):,}종 상승 {b['up']:,} · 하락 {b['down']:,}" + (f" · 거래대금 {usi['turnover_txt']}" if usi.get("turnover_txt") else ""))
+    bc = ctx.get("breadth")
+    if bc:
+        L.append(f"- 대형주 상승 비율 {bc['today']}% — 최근 {bc['n']}거래일 평균 {bc['avg']}% · {bc['n']}일 중 {bc['rank']}위 · 오른 종목이 더 많은 날 {bc['up_days']}번")
+    nh = kr.get("new_high_52w") if kind == "kr" else usi.get("new_high_52w")
     if nh:
-        L.append(f"**52주 신고가(장중)** {nh['n']}종/{nh['universe']:,}종"
-                 + (" — " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in nh["top"][:6]) if nh["top"] else ""))
-    if kr.get("themes_top"):
-        L.append("**강세 테마** " + ", ".join(f"{t['name']} {t['ret']:+.1f}%({'·'.join(x['name'] for x in t['lead'][:2])})" for t in kr["themes_top"][:3])
-                 + " · **약세** " + ", ".join(f"{t['name']} {t['ret']:+.1f}%" for t in kr.get("themes_bottom", [])[:2]))
-    if kr.get("featured"):
-        L.append("**특징주** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['tag']})" for r in kr["featured"]))
-    if kr.get("turnover_top"):
-        L.append("**거래대금 상위** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['amt_b']:,}억)" for r in kr["turnover_top"][:5]))
-    if kr.get("megacaps"):
-        L.append("**시총 상위 10** " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in kr["megacaps"]))
-    if kr.get("sectors"):
-        sc = kr["sectors"]
-        L.append("**업종(시총가중)** 강세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[:3])
-                 + " · 약세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3]))
+        L.append(f"- 52주 신고가(장중) {nh['n']}종/{nh['universe']:,}종"
+                 + (" — " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in nh["top"][:6]) if nh.get("top") else ""))
+
+    # ④ 돈의 흐름
+    fl = ctx.get("flow") or {}
     us = f.get("us") or {}
+    if fl or us.get("assets") or f.get("hy"):
+        L += ["", "**④ 돈의 흐름**"]
+    for mk, nm in (("KOSPI", "코스피"), ("KOSDAQ", "코스닥")):
+        tdy = (fl.get("today") or {}).get(mk)
+        cum = (fl.get("foreign_cum") or {}).get(mk)
+        if tdy or cum:
+            s_ = f"- {nm} " + (" · ".join(f"{k} {_eok(tdy.get(k))}" for k in ("외국인", "기관", "개인")) + " (오늘 잠정)" if tdy else "")
+            if cum and cum.get("d5") is not None:
+                s_ += f" / 외국인 누적 5일 {_eok(cum['d5'])} · 20일 {_eok(cum['d20'])} ({str(cum.get('date'))[5:]} 기준)"
+            L.append(s_)
+    cr = fl.get("credit")
+    if cr:
+        L.append(f"- 신용잔고 {cr['tn']:,}조 ({str(cr['date'])[5:]} 기준 · 20일 {cr['chg20']:+.1f}% · 고점 {str(cr.get('peak_date'))[5:]} 대비 {cr['from_peak']:+.1f}%)")
     if us.get("assets"):
-        L += ["", "**자산** " + ", ".join(f"{a['name']} {a['d1']:+.1f}%" for a in us["assets"])]
+        L.append("- 자산 " + ", ".join(f"{a['name']} {a['d1']:+.1f}%" for a in us["assets"]))
+    hy = f.get("hy") or {}
+    if hy.get("close") is not None:
+        L.append(f"- 하이일드 스프레드 {hy['close']}% ({str(hy.get('date'))[5:]} · 1일 {hy.get('d1', 0):+.0f}bp · 5일 {hy.get('d5', 0):+.0f}bp)")
+
+    # ⑤ 업종·테마
+    L += ["", "**⑤ 업종·테마**"]
+    if kr.get("sectors") and kind == "kr":
+        sc = kr["sectors"]
+        L.append("- 업종(시총가중) 강세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[:3])
+                 + " · 약세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3]))
+    if kr.get("themes_top") and kind == "kr":
+        L.append("- 강세 테마 " + ", ".join(f"{t_['name']} {t_['ret']:+.1f}%({'·'.join(x['name'] for x in t_['lead'][:2])})" for t_ in kr["themes_top"][:3])
+                 + " · 약세 " + ", ".join(f"{t_['name']} {t_['ret']:+.1f}%" for t_ in kr.get("themes_bottom", [])[:2]))
     if us.get("sectors"):
         sc = us["sectors"]
-        L.append("**업종(섹터 ETF)** 강세 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[:3])
+        L.append("- 미국 섹터 ETF 강세 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[:3])
                  + " · 약세 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in sc[::-1][:3]))
+    if usi.get("sectors"):
+        sc = usi["sectors"]
+        L.append("- 미국 업종(종목 집계) 강세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[:3])
+                 + " · 약세 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['lead']})" for r in sc[::-1][:3]))
+
+    # ⑥ 종목
+    L += ["", "**⑥ 종목**"]
+    if kind == "kr" and kr.get("top"):
+        L.append(f"- 대형주(시총 1조+ {kr['universe']}종 · 오늘 수익률) 강세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in kr["top"])
+                 + " · 약세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in kr["bottom"]))
+    if kind == "kr":
+        if kr.get("featured"):
+            L.append("- 특징주 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['tag']})" for r in kr["featured"]))
+        if kr.get("turnover_top"):
+            L.append("- 거래대금 상위 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['amt_b']:,}억)" for r in kr["turnover_top"][:5]))
+        if kr.get("megacaps"):
+            L.append("- 시총 상위 10 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in kr["megacaps"]))
+    if usi.get("top"):
+        L.append(f"- 미국 대형주(시총 상위 {usi.get('big_n', 500)}) 강세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in usi["top"][:6])
+                 + " · 약세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in (usi.get("bottom") or [])[:6]))
+    if usi.get("featured"):
+        L.append("- 특징주 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['tag']})" for r in usi["featured"][:6]))
     if us.get("megacaps"):
-        L.append("**대장주** " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in us["megacaps"]))
-    sg = f["signals"]
-    md_ = sg.get("market_direction") or {}
-    L += ["", "CANSLIM 시장방향 " + " · ".join(f"{m} {md_[m]}" for m in ("KR", "US") if md_.get(m))]
-    if "accel_new" in sg:
-        L.append(f"이익가속 신규({sg.get('accel_week')}): " + (", ".join(c['sym'] for c in sg['accel_new']) or "없음"))
+        L.append("- 대장주 " + ", ".join(f"{r['name']} {r['d1']:+.1f}%" for r in us["megacaps"]))
+    if kind == "weekly":
+        for m in ("KR", "US"):
+            s = f["stocks"].get(m) or {}
+            if s:
+                L += [f"- {m} {_BASIS.get(s['basis'], s['basis'])} 수익률(대형주 {s['universe']}종 · 상승 비율 {s['breadth_up']}%) 강세 "
+                      + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in s["top"]) + " · 약세 "
+                      + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in s["bottom"])]
+    sg = f.get("signals") or {}
+    if kind != "kr" and sg.get("accel_new") is not None and "accel_week" in sg:
+        L.append(f"- 주도주 후보(이익 가속 신규 · {sg.get('accel_week')} 주) " + (", ".join(c['sym'] for c in sg['accel_new']) or "없음"))
+
+    # ⑦ 실전 원장
+    lg = ctx.get("ledger") or {}
+    if lg:
+        L += ["", "**⑦ 실전 원장 (규칙대로 운용하는 실제 계좌 · 공개)**",
+              f"- 보유 {lg['n']}종 · 오늘 평균 {lg['d1_avg']:+.1f}% · 평균 손익 {lg['pnl_avg']:+.1f}% · 오늘 체결 {lg['trades_today']}건"
+              + f" · 오늘 최고 {lg['best']['name']} {lg['best']['d1']:+.1f}% · 최저 {lg['worst']['name']} {lg['worst']['d1']:+.1f}%"]
+        if lg.get("near_stop"):
+            L.append("- 손절선 5% 안 " + ", ".join(f"{r['name']}(손절선까지 {r['to_stop']:+.1f}%)" for r in lg["near_stop"]))
+
+    # ⑧ 다가오는 일정
+    ev = ctx.get("events") or []
+    if ev:
+        L += ["", "**⑧ 다가오는 일정(7일)**"] + [f"- {e['date'][5:]}({e.get('wd', '')}) {e.get('time') or ''} {e['name']}".replace("  ", " ") for e in ev]
     L += ["", f"※ 자동 생성(숫자 템플릿) · 투자 권유 아님 · {f['generated']} KST"]
-    return "\n".join(L)
+    # 내용 없는 절 머리(**② …**) 는 지운다
+    out = []
+    for i, ln in enumerate(L):
+        if ln.startswith("**") and ln[2:3] in "①②③④⑤⑥⑦⑧":
+            nxt = next((x for x in L[i + 1:] if x.strip()), "")
+            if not (nxt.startswith("- ") or nxt.startswith("|")):
+                if out and out[-1] == "":
+                    out.pop()
+                continue
+        out.append(ln)
+    return "\n".join(out)
 
 
 def _fact_numbers(x, acc=None):
@@ -890,11 +1135,81 @@ def render(f):
     except Exception as e:
         print("  Gemini 생략 →", str(e)[:120])
         return template(f), "template"
-    bad = unbacked_pcts(txt, f)
-    if bad:   # 틀린 숫자가 하나라도 있으면 AI 글을 버리고 숫자 템플릿으로 — 사실만 쓰는 리포트다
-        print(f"  ⚠️ AI 글에 근거 없는 숫자 {len(bad)}개 → 숫자 템플릿: {', '.join(bad[:8])}")
-        return template(f), f"template(ai_unbacked:{len(bad)})"
-    return compose(txt, f), f"gemini:{model}"
+    for attempt in (1, 2):
+        bad, wrong = unbacked_pcts(txt, f), direction_errors(txt, f)
+        if not bad and not wrong:
+            return compose(txt, f), f"gemini:{model}" + ("" if attempt == 1 else "(재작성)")
+        print(f"  ⚠️ AI 글 검사 실패(시도 {attempt}) — 근거 없는 숫자 {bad[:6]} · 방향 오류 {wrong[:4]}")
+        if attempt == 2:
+            break
+        fix = ("\n\n[직전 답의 오류 — 고쳐서 다시 써라]\n" + "\n".join(
+            [f"- 근거 없는 숫자: {', '.join(bad[:8])}"] * bool(bad) + [f"- 방향 오류: {w}" for w in wrong[:6]]))
+        try:
+            txt, model = ask_gemini(PROMPT.format(span=span, asof=asof, facts=json.dumps(_ai_slim(f), ensure_ascii=False)) + fix)
+        except Exception as e:
+            print("  재작성 실패:", str(e)[:100])
+            break
+    # 사실만 쓰는 리포트 — 두 번 다 틀리면 AI 문장을 버리고 숫자 템플릿으로
+    return template(f), f"template(ai_check:{len(bad)}숫자·{len(wrong)}방향)"
+
+
+_UP = ("상승", "강세", "반등", "급등", "올랐", "오름", "끌어올", "견인", "회복", "랠리")
+_DN = ("하락", "약세", "급락", "내렸", "부진", "끌어내", "밀렸", "투매", "폭락", "끌어내렸")
+
+
+def _direction_book(f):
+    """이름 → 1일 등락. 지수·업종·테마·대장주·종목 이름(그리고 흔한 별칭)."""
+    book = {}
+    def put(name, v):
+        if name and v is not None and len(str(name)) >= 2:
+            book.setdefault(str(name), float(v))
+    alias = {"^GSPC": ("S&P500", "S&P"), "^IXIC": ("나스닥",), "^DJI": ("다우",), "^SOX": ("필라델피아 반도체", "반도체 지수", "반도체 업종", "반도체주"),
+             "^KS11": ("코스피",), "^KQ11": ("코스닥",), "^VIX": ("VIX",)}
+    for x in f.get("indices") or []:
+        for a in alias.get(x.get("sym"), (x.get("name"),)):
+            put(a, x.get("d1"))
+    kr = (f.get("stocks") or {}).get("KR") or {}
+    us = f.get("us") or {}
+    usi = (f.get("internals") or {}).get("US") or {}
+    for r in kr.get("sectors") or []:
+        put(r.get("name"), r.get("ret"))
+    for r in (kr.get("themes_top") or []) + (kr.get("themes_bottom") or []):
+        put(r.get("name"), r.get("ret"))
+    for r in (us.get("sectors") or []):
+        put(r.get("name"), r.get("d1"))
+    for r in (usi.get("sectors") or []):
+        put(r.get("name"), r.get("ret"))
+    for r in (us.get("megacaps") or []):
+        put(r.get("name"), r.get("d1"))
+    for grp in ("megacaps", "top", "bottom", "featured", "turnover_top"):
+        for r in (kr.get(grp) or []) + (usi.get(grp) or []):
+            put(r.get("name"), r.get("ret"))
+    return book
+
+
+def direction_errors(md, f, min_abs=0.5):
+    """AI 문장에서 '이름 + 방향어'가 한 절에 같이 있는데 부호가 반대인 것. 방향어가 둘 다 있는 절은 판단 안 함.
+    2026-11-24 — '반도체 업종이 시장 약세를 이끌었으나'(필라델피아 반도체 +14%)가 그대로 발행됐다."""
+    import re
+    book = _direction_book(f)
+    names = sorted(book, key=len, reverse=True)
+    body = "\n".join(_ai_section(md, s) for s in ("한 줄 요약", "해설")) or (md or "")
+    out = []
+    for cl in re.split(r"[.\n,;·]|(?:으나|지만|반면|했고|하며|면서)", body):
+        up, dn = any(w in cl for w in _UP), any(w in cl for w in _DN)
+        if up == dn:
+            continue
+        hit = None
+        for n in names:
+            if n in cl:
+                hit = n
+                break
+        if not hit:
+            continue
+        v = book[hit]
+        if abs(v) >= min_abs and ((up and v < 0) or (dn and v > 0)):
+            out.append(f"'{cl.strip()[:40]}' — {hit} 실제 {v:+.1f}%")
+    return out
 
 
 def _ai_section(md, title):
@@ -930,6 +1245,26 @@ def main(kind, telegram=False):
         if ks.get("date") != today:
             print(f"⏭️ 한국 장 마감 리포트 생략 — 코스피 마지막 봉 {ks.get('date')} ≠ 오늘 {today}(휴장 또는 시세 지연)")
             return
+        # 2026-11-24 종가 확정 검사 — 장중 스냅샷이면 미룬다(Cloudflare 가 15분 뒤 다시 깨운다). 마지막 시도(16:25 KST~)는
+        #   종목 칸을 비우고 지수·수급만으로 발행 — '틀린 종가'보다 '빈칸'이 낫다.
+        cc = (f.get("quality") or {}).get("close_check") or {}
+        if not cc.get("ok", True):
+            kst = datetime.now(_tz.utc) + _td(hours=9)
+            msg = f"대형주 가중 {cc.get('big_w')}% vs 코스피 {cc.get('kospi')}% (차 {cc.get('gap')}%p > {cc.get('tol')})"
+            if (kst.hour, kst.minute) < (16, 25):
+                print(f"⏸️ 한국 리포트 보류 — 종목 시세가 종가가 아니다: {msg}")
+                return
+            print(f"⚠️ 마지막 시도 — 종목 칸 비우고 발행: {msg}")
+            f["stocks"] = {}
+            f["quality"]["stocks_dropped"] = True
+    # 2026-11-24 발행판 덮어쓰기 금지 — 06:10 에 보낸 판을 15:01 daily-refresh 가 다른 모델로 다시 써 '받은 것 ≠ 사이트'가 됐다.
+    old = (_j("results/market_report.json") or {}).get(f"latest_{kind}") or {}
+    key0 = {"daily": "^GSPC", "kr": "^KS11"}.get(kind)
+    d_new = next((x.get("date") for x in f["indices"] if x.get("sym") == key0 and x.get("date")), None)
+    if (old.get("date") == d_new and str(old.get("engine", "")).startswith("gemini")
+            and not os.environ.get("REPORT_FORCE")):
+        print(f"⏭️ {kind} {d_new} 은 이미 발행됨({old.get('generated')} · {old.get('engine')}) — 덮어쓰지 않는다(REPORT_FORCE=1 로 강제)")
+        return
     md, engine = render(f)
     # 리포트 날짜 = 그 리포트가 다루는 장의 날짜(실행일이 아니다). 일요일 실행이 금요일 미국 장을 '새 리포트'로
     #   다시 내보내지 않게 — 봇은 이 날짜로 중복 발송을 막는다(2026-10-21).

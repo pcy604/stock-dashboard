@@ -91,3 +91,15 @@ def test_chat_context_keeps_korea_close():
         _M._j = old
     assert "한국 장 마감" in c and "themes_top" in c and "heatmap" not in c
     assert len(c) <= 12000
+
+# ── 2026-11-24 정확성 관문 ──────────────────────────────────────────────
+_idx = [dict(sym="^KS11", name="코스피", d1=6.19)]
+_hm = [dict(mc=100.0, ret=6.2)] * 60
+assert M.kr_close_check(dict(heatmap=_hm), _idx)["ok"], "종가 확정본(차 0.01%p)은 통과"
+assert not M.kr_close_check(dict(heatmap=[dict(mc=100.0, ret=6.84)] * 60), _idx)["ok"], "장중 스냅샷(차 0.65%p)은 보류"
+_f = dict(indices=[dict(sym="^SOX", name="필라델피아 반도체", d1=14.0), dict(sym="^GSPC", name="S&P500", d1=4.7)], stocks={})
+_bad = "## 한 줄 요약\n반도체 업종이 시장 전반의 약세를 이끌었으나, 기술주 반등으로 하락폭은 제한됐다.\n## 해설\n- **지수** S&P500 반등"
+_ok = "## 한 줄 요약\n반도체 업종이 지수 반등을 이끌었다.\n## 해설\n- **지수** S&P500 반등"
+assert M.direction_errors(_bad, _f) and not M.direction_errors(_ok, _f), M.direction_errors(_bad, _f)
+assert M.breadth_context([dict(date=f"d{i}", up=40, down=60) for i in range(29)] + [dict(date="t", up=90, down=10)])["rank"] == 1
+print("✅ 정확성 관문 — 종가 확정 · 방향 검사 · 시장 폭 맥락")

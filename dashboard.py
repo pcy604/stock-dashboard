@@ -4357,6 +4357,18 @@ def _macro_kr_block():
         fig.update_layout(height=260, margin=dict(l=8, r=8, t=10, b=8), hovermode='x unified',
                           legend=dict(orientation='h', y=1.12, x=0), yaxis_title='누적 순매수(조원)')
         st.plotly_chart(fig, use_container_width=True, key='mac_kr_flow')
+    # 2026-11-24 신용잔고 추이(차니 요청) — 빚으로 산 주식이 늘면 하락 때 반대매매가 낙폭을 키운다. 수집 시작 이후만(지어내지 않음).
+    _dep = [r for r in (K.get('deposit') or []) if r.get('신용잔고')]
+    if len(_dep) >= 5:
+        _dd = pd.DataFrame(_dep)
+        _dd['date'] = pd.to_datetime(_dd['date'])
+        _dd = _dd.sort_values('date')
+        fig2 = go.Figure(go.Scatter(x=pd.DatetimeIndex(_dd['date']), y=_dd['신용잔고'] / 1e4, mode='lines', name='신용잔고',
+                                    line=dict(width=2, color='#b4462b'), hovertemplate='%{x|%m-%d} %{y:,.1f}조원<extra></extra>'))
+        fig2.update_layout(height=220, margin=dict(l=8, r=8, t=24, b=8), hovermode='x unified', showlegend=False,
+                           title=dict(text='신용잔고(빚) 추이', font=dict(size=13), x=0), yaxis_title='조원')
+        st.plotly_chart(fig2, use_container_width=True, key='mac_kr_credit')
+        st.caption(f"신용잔고 = 증권사 돈을 빌려 산 주식 잔액(유가+코스닥) · 수집 시작 {_dep[0]['date']} 이후만 표시")
     st.caption(f"출처: {K.get('src', '네이버 금융')} · OECD/FRED(수출) · 마지막 갱신: {K.get('generated', '⚠️ 미수집')}"
                + (f" · 수집 실패 {len(K['err'])}건" if K.get('err') else ''))
 
