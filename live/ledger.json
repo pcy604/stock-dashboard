@@ -16,7 +16,7 @@
     "stop": 11560.0,
     "added": false,
     "adds": 0,
-    "last_px": 14170.0,
+    "last_px": 14270.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -29,7 +29,7 @@
     "stop": 6088.0,
     "added": false,
     "adds": 0,
-    "last_px": 7050.0,
+    "last_px": 7170.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -42,7 +42,7 @@
     "stop": 11336.0,
     "added": false,
     "adds": 0,
-    "last_px": 12450.0,
+    "last_px": 12210.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    },
@@ -55,7 +55,7 @@
     "stop": 5640.0,
     "added": false,
     "adds": 0,
-    "last_px": 5890.0,
+    "last_px": 6180.0,
     "opened": "2026-11-09",
     "src": "2026-11-11 토스 화면 수량·평가손익으로 반영(이중 주문 정리)"
    }
@@ -93,7 +93,7 @@
  "pending": {},
  "adopt_note": "2026-11-11 차니 결정: 11-09 이중 주문(약 2배 체결)을 토스 실제 수량 그대로 원장에 반영. 평균단가=(평가금−평가손익)/수량, 고점=max(평균단가, 반영 시점 가격) — 11-09~11-10 종가 고점은 다음 실행부터 추적. 현금=30만−매입금(수수료 제외 추정, 봇은 토스 현금으로 판단)",
  "toss": {
-  "at": "2026-11-24 09:10 KST",
+  "at": "2026-11-25 08:40 KST",
   "cash_krw": 188314.0,
   "holdings": [
    {
@@ -101,85 +101,85 @@
     "name": "대한광통신",
     "qty": 2.0,
     "avg_cost": 11120.0,
-    "last_price": 15010.0,
-    "pnl_pct": 34.98
+    "last_price": 14860.0,
+    "pnl_pct": 33.629999999999995
    },
    {
     "sym": "228850",
     "name": "레이언스",
     "qty": 3.0,
     "avg_cost": 7356.666666,
-    "last_price": 6860.0,
-    "pnl_pct": -6.75
+    "last_price": 7120.0,
+    "pnl_pct": -3.2099999999999995
    },
    {
     "sym": "356680",
     "name": "엑스게이트",
     "qty": 2.0,
     "avg_cost": 13200.0,
-    "last_price": 12690.0,
-    "pnl_pct": -3.8600000000000003
+    "last_price": 12600.0,
+    "pnl_pct": -4.54
    },
    {
     "sym": "396300",
     "name": "HT로보틱스",
     "qty": 4.0,
     "avg_cost": 6640.0,
-    "last_price": 6050.0,
-    "pnl_pct": -8.88
+    "last_price": 6400.0,
+    "pnl_pct": -3.61
    }
   ],
   "open_orders": [],
   "tx": [
    {
-    "transactionTime": null,
-    "transactionType": "SELL",
-    "symbol": "024840",
-    "quantity": "8",
-    "filledPrice": null,
-    "amount": "28040",
-    "commission": "4",
-    "tax": "56",
-    "settled": false,
-    "settlementDate": "2026-11-25",
-    "isCancellation": false
-   },
-   {
-    "transactionTime": null,
+    "transactionTime": "2026-11-25T00:07:39.484+09:00",
     "transactionType": "SELL",
     "symbol": "092190",
     "quantity": "5",
-    "filledPrice": null,
+    "filledPrice": "5280",
     "amount": "26400",
     "commission": "3",
     "tax": "52",
-    "settled": false,
+    "settled": true,
     "settlementDate": "2026-11-25",
     "isCancellation": false
    },
    {
-    "transactionTime": null,
+    "transactionTime": "2026-11-25T00:07:39.471+09:00",
     "transactionType": "SELL",
     "symbol": "046970",
     "quantity": "5",
-    "filledPrice": null,
+    "filledPrice": "5290",
     "amount": "26450",
     "commission": "3",
     "tax": "52",
-    "settled": false,
+    "settled": true,
     "settlementDate": "2026-11-25",
     "isCancellation": false
    },
    {
-    "transactionTime": null,
+    "transactionTime": "2026-11-25T00:07:39.459+09:00",
+    "transactionType": "SELL",
+    "symbol": "024840",
+    "quantity": "8",
+    "filledPrice": "3505",
+    "amount": "28040",
+    "commission": "4",
+    "tax": "56",
+    "settled": true,
+    "settlementDate": "2026-11-25",
+    "isCancellation": false
+   },
+   {
+    "transactionTime": "2026-11-25T00:07:39.443+09:00",
     "transactionType": "SELL",
     "symbol": "317400",
     "quantity": "3",
-    "filledPrice": null,
+    "filledPrice": "5930",
     "amount": "17790",
     "commission": "2",
     "tax": "34",
-    "settled": false,
+    "settled": true,
     "settlementDate": "2026-11-25",
     "isCancellation": false
    },
