@@ -1132,7 +1132,28 @@ def _ai_slim(x):
     return x
 
 
+def render_rules(f):
+    """2026-11-25 기본 경로 — 문장은 market_narrate 가 사실에서 직접, 이유는 market_why 가 뉴스 제목 그대로."""
+    import market_narrate as N
+    try:
+        import market_why as W
+        f["why"] = W.find(W.targets_for(f))
+    except Exception as e:
+        print("  이유 뉴스 생략:", str(e)[:100])
+        f["why"] = []
+    n = N.narrate(f)
+    f["narrative"] = n
+    body = [ln for ln in template(f).splitlines()[1:] if not ln.startswith("※")]
+    out = [N.compose(f, n), "", "## 숫자"] + body
+    if n["checkpoints"]:
+        out += ["", "## 체크포인트"] + [f"{i}. {c}" for i, c in enumerate(n["checkpoints"], 1)]
+    out += ["", f"※ 사실에서 자동 작성(AI 문장 없음) · '왜'는 뉴스 제목 그대로 · 투자 권유 아님 · {f['generated']} KST"]
+    return "\n".join(out), "rules"
+
+
 def render(f):
+    if f["kind"] != "weekly" and not os.environ.get("MR_AI"):   # 2026-11-25 'AI체 없애자'(차니) — 일간·한국은 규칙 문장
+        return render_rules(f)
     asof = next((x.get("date") for x in f["indices"] if x.get("date")), f["generated"][:10])
     span = {"daily": "전일 미국 장(한국 지수는 오후 한국 리포트가 다루니 언급하지 말 것)", "weekly": "지난 1주",
             "kr": "오늘 한국 장(마감 기준)"}.get(f["kind"], "최근")
@@ -1268,7 +1289,7 @@ def main(kind, telegram=False):
     old = (_j("results/market_report.json") or {}).get(f"latest_{kind}") or {}
     key0 = {"daily": "^GSPC", "kr": "^KS11"}.get(kind)
     d_new = next((x.get("date") for x in f["indices"] if x.get("sym") == key0 and x.get("date")), None)
-    if (old.get("date") == d_new and str(old.get("engine", "")).startswith("gemini")
+    if (old.get("date") == d_new and not str(old.get("engine", "")).startswith("template")
             and not os.environ.get("REPORT_FORCE")):
         print(f"⏭️ {kind} {d_new} 은 이미 발행됨({old.get('generated')} · {old.get('engine')}) — 덮어쓰지 않는다(REPORT_FORCE=1 로 강제)")
         return

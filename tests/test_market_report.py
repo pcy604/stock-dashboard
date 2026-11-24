@@ -103,3 +103,16 @@ _ok = "## 한 줄 요약\n반도체 업종이 지수 반등을 이끌었다.\n##
 assert M.direction_errors(_bad, _f) and not M.direction_errors(_ok, _f), M.direction_errors(_bad, _f)
 assert M.breadth_context([dict(date=f"d{i}", up=40, down=60) for i in range(29)] + [dict(date="t", up=90, down=10)])["rank"] == 1
 print("✅ 정확성 관문 — 종가 확정 · 방향 검사 · 시장 폭 맥락")
+
+# ── 2026-11-25 규칙 문장(AI체 제거) — 방향을 틀릴 수 없어야 한다 ─────────────────
+import market_narrate as N
+_fk = dict(kind="kr", indices=[dict(sym="^KS11", name="코스피", d1=6.3, close=5006.0,
+                                    gate5w=dict(on=False, gap=-8.1, live_gap=-3.6), pulse=dict(state="반등 시도 1일째", rally_day=1))],
+           ctx=dict(breadth=dict(today=95, avg=45, rank=1, n=30, up_days=13)), stocks={})
+_s = N.summary(_fk)
+assert "+6.3%" in _s and "가장 넓은 상승" in _s and "약세" not in _s, _s
+assert "신규 매수는 중지" in N.direction(_fk) and "코스피는" in N.direction(_fk)
+assert N.checkpoints(_fk)[0].startswith("코스피 5주선(5,193)"), N.checkpoints(_fk)
+for _w in ("견조", "모멘텀", "투자심리", "보인다", "주목"):
+    assert _w not in open("market_narrate.py", encoding="utf-8").read().split('"""', 2)[2], _w
+print("✅ 규칙 문장 — 방향·5주선·AI체 금지어")
