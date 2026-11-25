@@ -404,7 +404,7 @@
       "sym": "PG",
       "name": "PROCTER & GAMBLE Co",
       "marcap": 375619930495,
-      "pct_change": 1.72,
+      "pct_change": 1.73,
       "signals": [
         "52주신고가",
         "5일선라이딩"
@@ -448,7 +448,7 @@
       "market": "US",
       "sym": "DIS",
       "name": "Walt Disney Co",
-      "marcap": 214545607639,
+      "marcap": 214528523694,
       "pct_change": 2.65,
       "signals": [
         "52주신고가",
@@ -671,7 +671,7 @@
       "market": "US",
       "sym": "DUK",
       "name": "Duke Energy CORP",
-      "marcap": 102867718454,
+      "marcap": 102828736264,
       "pct_change": 1.42,
       "signals": [
         "52주신고가",
@@ -740,7 +740,7 @@
       "sym": "UPS",
       "name": "UNITED PARCEL SERVICE INC",
       "marcap": 89988242340,
-      "pct_change": 0.37,
+      "pct_change": 0.4,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -753,7 +753,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": true,
-      "dist_52w": -9.0,
+      "dist_52w": -8.9,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -1189,7 +1189,7 @@
       "market": "US",
       "sym": "EW",
       "name": "Edwards Lifesciences Corp",
-      "marcap": 61174249649,
+      "marcap": 61157000350,
       "pct_change": 1.07,
       "signals": [
         "52주신고가",
@@ -1277,7 +1277,7 @@
       "market": "US",
       "sym": "FERG",
       "name": "Ferguson Enterprises Inc. /DE/",
-      "marcap": 49797399420,
+      "marcap": 49830359106,
       "pct_change": 2.29,
       "signals": [
         "5일선라이딩",
@@ -1345,7 +1345,7 @@
       "sym": "CMG",
       "name": "CHIPOTLE MEXICAN GRILL INC",
       "marcap": 45954233750,
-      "pct_change": 1.24,
+      "pct_change": 1.22,
       "signals": [
         "이평선수렴",
         "RSI/MACD"
@@ -1390,7 +1390,7 @@
       "sym": "YUM",
       "name": "YUM BRANDS INC",
       "marcap": 44031799163,
-      "pct_change": 3.92,
+      "pct_change": 3.93,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -1434,7 +1434,7 @@
       "market": "US",
       "sym": "DHI",
       "name": "HORTON D R INC /DE/",
-      "marcap": 41988424849,
+      "marcap": 41977718739,
       "pct_change": 8.64,
       "signals": [
         "이평선수렴",
@@ -1767,7 +1767,7 @@
       "market": "US",
       "sym": "EXR",
       "name": "Extra Space Storage Inc.",
-      "marcap": 33706594109,
+      "marcap": 33711814939,
       "pct_change": 2.77,
       "signals": [
         "52주신고가",
@@ -1790,7 +1790,7 @@
       "market": "US",
       "sym": "EG",
       "name": "EVEREST GROUP, LTD.",
-      "marcap": 32314747863,
+      "marcap": 32306181091,
       "pct_change": 3.24,
       "signals": [
         "52주신고가",
@@ -1949,7 +1949,7 @@
       "market": "US",
       "sym": "DGX",
       "name": "QUEST DIAGNOSTICS INC",
-      "marcap": 29760640136,
+      "marcap": 29751681640,
       "pct_change": 2.29,
       "signals": [
         "52주신고가",
@@ -2016,7 +2016,7 @@
       "market": "US",
       "sym": "DTE",
       "name": "DTE ENERGY CO",
-      "marcap": 28660061570,
+      "marcap": 28657979256,
       "pct_change": 0.66,
       "signals": [
         "5일선라이딩",
@@ -2062,7 +2062,7 @@
       "market": "US",
       "sym": "DOV",
       "name": "DOVER Corp",
-      "marcap": 27687080626,
+      "marcap": 27697198123,
       "pct_change": 1.31,
       "signals": [
         "이평선수렴",
@@ -2084,8 +2084,8 @@
       "market": "US",
       "sym": "DRI",
       "name": "DARDEN RESTAURANTS INC",
-      "marcap": 27580695581,
-      "pct_change": 0.79,
+      "marcap": 27588704418,
+      "pct_change": 0.81,
       "signals": [
         "52주신고가",
         "5일선라이딩",
@@ -2099,7 +2099,7 @@
       "sig_cup": false,
       "sig_maconv": true,
       "sig_rsimacd": false,
-      "dist_52w": 0.3,
+      "dist_52w": 0.4,
       "vol_ratio": null,
       "sector": "기타"
     },
@@ -2107,7 +2107,7 @@
       "market": "US",
       "sym": "FE",
       "name": "FIRSTENERGY CORP",
-      "marcap": 27565136938,
+      "marcap": 27544891935,
       "pct_change": -0.15,
       "signals": [
         "5일선라이딩",
@@ -2509,7 +2509,7 @@
       "market": "US",
       "sym": "DD",
       "name": "DuPont de Nemours, Inc.",
-      "marcap": 20750008505,
+      "marcap": 20754061340,
       "pct_change": 2.26,
       "signals": [
         "5일선라이딩",
@@ -2643,7 +2643,7 @@
       "market": "US",
       "sym": "ESS",
       "name": "ESSEX PROPERTY TRUST, INC.",
-      "marcap": 17947531736,
+      "marcap": 17944317151,
       "pct_change": 1.95,
       "signals": [
         "이평선수렴",
@@ -3157,7 +3157,7 @@
       "market": "US",
       "sym": "ELAN",
       "name": "Elanco Animal Health Inc",
-      "marcap": 13120460508,
+      "marcap": 13115462123,
       "pct_change": -1.72,
       "signals": [
         "5일선라이딩",
@@ -4570,7 +4570,7 @@
       "market": "US",
       "sym": "FBIN",
       "name": "Fortune Brands Innovations, Inc.",
-      "marcap": 5941736536,
+      "marcap": 5945912018,
       "pct_change": 5.57,
       "signals": [
         "5일선라이딩",
@@ -4660,7 +4660,7 @@
       "market": "US",
       "sym": "FCN",
       "name": "FTI CONSULTING, INC",
-      "marcap": 5781813316,
+      "marcap": 5784265447,
       "pct_change": 2.72,
       "signals": [
         "52주신고가",
@@ -5041,7 +5041,7 @@
       "market": "US",
       "sym": "CUZ",
       "name": "COUSINS PROPERTIES INC",
-      "marcap": 4992337459,
+      "marcap": 4993983503,
       "pct_change": 2.67,
       "signals": [
         "이평선수렴",
@@ -5177,7 +5177,7 @@
       "market": "US",
       "sym": "EPR",
       "name": "EPR PROPERTIES",
-      "marcap": 4636384538,
+      "marcap": 4637150881,
       "pct_change": 0.7,
       "signals": [
         "5일선라이딩",
@@ -5941,7 +5941,7 @@
       "market": "US",
       "sym": "CWT",
       "name": "CALIFORNIA WATER SERVICE GROUP",
-      "marcap": 3171893088,
+      "marcap": 3172144697,
       "pct_change": 3.13,
       "signals": [
         "이평선수렴",
@@ -6501,7 +6501,7 @@
       "market": "US",
       "sym": "DV",
       "name": "DoubleVerify Holdings, Inc.",
-      "marcap": 2123389496,
+      "marcap": 2124170459,
       "pct_change": 0.29,
       "signals": [
         "52주신고가",
@@ -6702,7 +6702,7 @@
       "market": "US",
       "sym": "ENOV",
       "name": "Enovis CORP",
-      "marcap": 1656407664,
+      "marcap": 1655253858,
       "pct_change": 5.87,
       "signals": [
         "이평선수렴",
@@ -6834,7 +6834,7 @@
       "market": "US",
       "sym": "ESRT",
       "name": "Empire State Realty Trust, Inc.",
-      "marcap": 1423506044,
+      "marcap": 1426207256,
       "pct_change": -4.86,
       "signals": [
         "5일선라이딩",
@@ -6967,7 +6967,7 @@
       "market": "US",
       "sym": "DLX",
       "name": "DELUXE CORP",
-      "marcap": 1194318021,
+      "marcap": 1197990017,
       "pct_change": -2.58,
       "signals": [
         "이평선수렴",
