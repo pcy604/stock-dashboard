@@ -911,6 +911,23 @@ def facts(kind):
             print("  시장 내부(미국·추이) 생략:", str(e)[:100])
         f["ctx"] = dict(breadth=breadth_context(((f.get("internals") or {}).get("US") or {}).get("breadth_hist")),
                         events=events_next(market="US"), hilo=hilo_weekly("US"))
+        try:   # 2026-11-26 경제 지표 — 그날 나온 지표의 실제치·예상치 + 7일 일정(ForexFactory + FRED)
+            import market_econ as _EC
+            d_us = next((x.get("date") for x in f["indices"] if x.get("sym") == "^GSPC" and x.get("date")), None)
+            if d_us:
+                ec = _EC.facts(d_us)
+                f["ctx"]["econ"] = ec
+                known = {e["name"] for e in f["ctx"]["events"]}
+                wd = "월화수목금토일"
+                for r in ec.get("upcoming") or []:
+                    if r["name"] not in known:
+                        dd = datetime.fromisoformat(r["kst_date"]).date()
+                        f["ctx"]["events"].append(dict(date=r["kst_date"], wd=wd[dd.weekday()], time=r["kst"][6:],
+                                                       name=r["name"] + (f" (예상 {r['forecast']})" if r.get("forecast") else ""),
+                                                       kind="미국"))
+                f["ctx"]["events"].sort(key=lambda e: (e["date"], e.get("time") or ""))
+        except Exception as e:
+            print("  경제 지표 생략:", str(e)[:100])
         f["anomalies"] = anomalies(f)
     return f
 

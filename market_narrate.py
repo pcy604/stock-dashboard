@@ -291,6 +291,8 @@ def checkpoints(f):
             ma = x["close"] / (1 + lg / 100)
             C.append(f"{x['name']} 5주선({ma:,.0f}) 회복 여부 — 금요일 종가로 판정, 오늘 종가와 {abs(lg):.1f}% 차이")
     ev = ((f.get("ctx") or {}).get("events") or [])
+    if f["kind"] != "kr":   # 미국판은 예상치가 붙은 다음 큰 지표를 먼저
+        ev = sorted(ev, key=lambda e: "예상" not in e["name"])
     if ev:
         e = ev[0]
         C.append(f"{e['date'][5:]}({e.get('wd', '')}) {(e.get('time') or '').strip()} {e['name']}".replace("  ", " "))
@@ -321,12 +323,21 @@ EXPLAIN_PROMPT = """아래 기사 제목들만 근거로, 오늘 {mkt} 시장이
 답: 두 문장만, 다른 말 없이."""
 
 
+def econ_lines(f):
+    try:
+        import market_econ as EC
+    except Exception:
+        return []
+    return [EC.line(r) for r in (((f.get("ctx") or {}).get("econ") or {}).get("today") or [])]
+
+
 def explain_facts(f):
     x = _idx(f, "^KS11" if f["kind"] == "kr" else "^IXIC") or {}
     s = f"{x.get('name')} {_p(x.get('d1'))}"
     if x.get("lo_pct") is not None:
         s += f" (장중 저점 {_p(x['lo_pct'])}, 고점 {_p(x.get('hi_pct'))})"
-    return s
+    ec = econ_lines(f)
+    return s + ("; 오늘 나온 지표: " + "; ".join(ec) if ec else "")
 
 
 def check_explain(txt, heads, f):
@@ -350,7 +361,7 @@ def why_lines(f):
 
 def narrate(f):
     light, sig = signal(f)
-    return dict(summary=summary(f), explain=f.get("explain") or "", why=why_lines(f), light=light, signal=sig, direction=direction(f), week52=week52(f),
+    return dict(summary=summary(f), econ=econ_lines(f), explain=f.get("explain") or "", why=why_lines(f), light=light, signal=sig, direction=direction(f), week52=week52(f),
                 breadth=breadth(f), flow=flow(f),
                 sector=sector(f), stocks=stocks(f), ledger=ledger(f), checkpoints=checkpoints(f))
 
@@ -358,8 +369,9 @@ def narrate(f):
 def compose(f, n):
     title = TITLE.get(f["kind"], "시황")
     L = [f"## {title}", "", "## 한 줄 요약", n["summary"]]
-    if n.get("explain") or n["why"]:
-        L += ["", f"**{WHY_LABEL_SHORT}**"] + ([n["explain"]] if n.get("explain") else []) + [f"- {w}" for w in n["why"]]
+    if n.get("explain") or n["why"] or n.get("econ"):
+        L += ["", f"**{WHY_LABEL_SHORT}**"] + [f"📊 {e}" for e in n.get("econ") or []] \
+             + ([n["explain"]] if n.get("explain") else []) + [f"- {w}" for w in n["why"]]
     L += ["", "## 해설"]
     if n.get("signal"):
         L.append(f"- **투자 신호등 {n['light']}** {n['signal']}")

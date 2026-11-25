@@ -105,15 +105,16 @@ def sector(f):
 
 def narrate(f):
     light, sig = signal(f)
-    return dict(summary=summary(f), explain=f.get("explain_en") or "",
+    return dict(summary=summary(f), econ=econ_lines(f), explain=f.get("explain_en") or "",
                 why=[f"“{w['title']}” — {w['source']}" for w in (f.get("why_en") or [])],
                 light=light, signal=sig, breadth=breadth(f), flow_stocks=flow_stocks(f), sector=sector(f))
 
 
 def compose(f, n, date):
     L = [f"🇺🇸 US Market Close · {date}", "", "① Today", n["summary"]]
-    if n["explain"] or n["why"]:
-        L += ["", "📰 What moved markets"] + ([n["explain"]] if n["explain"] else []) + [f"· {w}" for w in n["why"][:2]]
+    if n["explain"] or n["why"] or n.get("econ"):
+        L += ["", "📰 What moved markets"] + [f"📊 {e}" for e in n.get("econ") or []] \
+             + ([n["explain"]] if n["explain"] else []) + [f"· {w}" for w in n["why"][:2]]
     L += ["", f"② Market signal {n['light']}", n["signal"], "", "③ Breadth · 52-week highs/lows", n["breadth"],
           "", "④ Assets · Stocks", n["flow_stocks"], "", "⑤ Industries", n["sector"], "",
           "Rule-written from data · not investment advice"]
@@ -133,9 +134,19 @@ If headlines disagree, use the cause mentioned most often.
 Answer with the two sentences only."""
 
 
+def econ_lines(f):
+    try:
+        import market_econ as EC
+    except Exception:
+        return []
+    return [EC.line_en(r) for r in (((f.get("ctx") or {}).get("econ") or {}).get("today") or [])]
+
+
 def explain_facts(f):
     x = _idx(f, "^IXIC") or {}
-    return f"Nasdaq {_p(x.get('d1'))} (intraday low {_p(x.get('lo_pct'))}, high {_p(x.get('hi_pct'))})"
+    ec = econ_lines(f)
+    return (f"Nasdaq {_p(x.get('d1'))} (intraday low {_p(x.get('lo_pct'))}, high {_p(x.get('hi_pct'))})"
+            + ("; data out today: " + "; ".join(ec) if ec else ""))
 
 
 def check_explain(txt, heads, f):
