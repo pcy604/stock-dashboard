@@ -1221,6 +1221,34 @@ def explain_move(f):
     return ""
 
 
+def english_wrap(f):
+    import market_narrate_en as E
+    import market_why as W
+    heads = W.headlines_en()
+    f["why_en"] = [dict(title=h["title"], source=h["source"]) for h in heads[:1]]
+    exp = ""
+    if len(heads) >= 2:
+        prompt = E.EXPLAIN_PROMPT_EN.format(facts=E.explain_facts(f), heads="\n".join(f"- {h['title']} ({h['source']})" for h in heads))
+        for attempt in (1, 2):
+            try:
+                txt, model = ask_gemini(prompt)
+            except Exception as e:
+                print("  EN explain failed:", str(e)[:80])
+                break
+            txt = " ".join(txt.split())
+            bad = E.check_explain(txt, heads, f)
+            if not bad:
+                exp = txt
+                break
+            print(f"  EN explain check failed({attempt}): {bad[:4]}")
+            prompt += "\n[Fix these problems]\n" + "\n".join(f"- {b}" for b in bad[:6])
+    f["explain_en"] = exp
+    n = E.narrate(f)
+    ks = next((x.get("date") for x in f.get("indices") or [] if x.get("sym") == "^GSPC"), "")
+    n["text"] = E.compose(f, n, ks)
+    return n
+
+
 def render_rules(f):
     """2026-11-25 기본 경로 — 문장은 market_narrate 가 사실에서 직접, 이유는 market_why 가 뉴스 제목 그대로."""
     import market_narrate as N
@@ -1233,6 +1261,11 @@ def render_rules(f):
     f["explain"] = explain_move(f)
     n = N.narrate(f)
     f["narrative"] = n
+    if f["kind"] == "daily":   # 2026-11-26 글로벌판 1단계 — 미국 마감 영어(같은 사실·같은 순서)
+        try:
+            f["narrative_en"] = english_wrap(f)
+        except Exception as e:
+            print("  영어판 생략:", str(e)[:100])
     body = [ln for ln in template(f).splitlines()[1:] if not ln.startswith("※")]
     out = [N.compose(f, n), "", "## 숫자"] + body
     if n["checkpoints"]:

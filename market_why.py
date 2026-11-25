@@ -19,9 +19,9 @@ _JUNK = re.compile(r"\[포토\]|\[사진\]|\[영상\]|광고|이벤트|무료|�
 _UA = {"User-Agent": "Mozilla/5.0 (market-report)"}
 
 
-def _rss(q: str, hours=36, timeout=12) -> list:
-    url = ("https://news.google.com/rss/search?q=" + urllib.parse.quote(q + " when:2d")
-           + "&hl=ko&gl=KR&ceid=KR:ko")
+def _rss(q: str, hours=36, timeout=12, lang="ko") -> list:
+    loc = "&hl=ko&gl=KR&ceid=KR:ko" if lang == "ko" else "&hl=en-US&gl=US&ceid=US:en"
+    url = "https://news.google.com/rss/search?q=" + urllib.parse.quote(q + " when:2d") + loc
     r = requests.get(url, headers=_UA, timeout=timeout)
     r.raise_for_status()
     now = datetime.now(timezone.utc)
@@ -138,3 +138,23 @@ if __name__ == "__main__":
     import json, sys
     f = json.load(open("results/market_report.json", encoding="utf-8"))[f"latest_{sys.argv[1] if len(sys.argv) > 1 else 'kr'}"]["facts"]
     print(json.dumps(find(targets_for(f)), ensure_ascii=False, indent=1))
+
+
+_CAUSE_EN = re.compile(r"PCE|CPI|inflation|jobs|payroll|yield|Fed|Powell|rate|tariff|earnings|guidance|AI|selloff|rebound|"
+                       r"rally|intraday|reverse|recover|slump|surge|plunge|data|treasur", re.I)
+
+
+def headlines_en(n=8, hours=12) -> list:
+    """English headlines for the US close (global edition)."""
+    out, seen = [], set()
+    for q in ("stock market today", "stocks close Nasdaq", "Wall Street stocks"):
+        try:
+            for it in _rss(q, hours=hours, lang="en"):
+                if it["title"] not in seen:
+                    seen.add(it["title"])
+                    out.append(it)
+        except Exception as e:
+            print(f"  EN headlines failed({q}):", str(e)[:60])
+        time.sleep(0.4)
+    out.sort(key=lambda it: not _CAUSE_EN.search(it["title"]))
+    return out[:n]
