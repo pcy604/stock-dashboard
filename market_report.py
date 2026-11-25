@@ -675,7 +675,9 @@ def kr_close_check(kr, indices):
     ks = next((x for x in indices or [] if x.get("sym") == "^KS11"), {})
     rows = [r for r in hm if r.get("mc") and r.get("ret") is not None]
     if len(rows) < 50 or ks.get("d1") is None:
-        return dict(ok=True, note="검사 불가(자료 부족)")
+        # 2026-11-26 — 11-25 는 KRX 오늘자 등락률이 15:45 에 없어(asof 11-24) 종목 칸이 통째로 빈 채 '통과'로 발행됐다.
+        #   자료가 없으면 통과가 아니라 보류다(16:30 마지막 시도는 종목 칸 비우고 발행).
+        return dict(ok=False, note="종목 시세 없음(KRX 오늘자 미반영)", big_w=None, kospi=ks.get("d1"), gap=None, tol=CLOSE_TOL)
     prev = [r["mc"] / (1 + r["ret"] / 100) for r in rows]
     w = sum(a * r["ret"] for a, r in zip(prev, rows)) / sum(prev)
     gap = w - ks["d1"]
@@ -743,14 +745,19 @@ def flow_context(today_flow):
     return out
 
 
-def events_next(days=7):
+_EV_KR = {"한국", "실적KR"}
+
+
+def events_next(days=7, market=None):
     try:
         import events as _EV
         from datetime import timedelta as _td
         today = (datetime.now(timezone.utc) + _td(hours=9)).date()
         ev = _EV.build(today, days, None, None)
+        # 2026-11-26 시장별 — 한국판엔 한국 일정, 미국판엔 한국 외 일정(미국 지표·실적 등)
+        keep = (lambda k: k in _EV_KR) if market == "KR" else (lambda k: k not in _EV_KR) if market == "US" else (lambda k: True)
         return [dict(date=e["date"], wd=e.get("wd"), time=e.get("time"), name=e["name"], kind=e.get("kind")) for e in ev
-                if e.get("kind") != "보유"][:6]
+                if e.get("kind") != "보유" and keep(e.get("kind"))][:6]
     except Exception as e:
         print("  일정 생략:", str(e)[:80])
         return []
@@ -765,6 +772,11 @@ def ledger_facts():
     except Exception as e:
         print("  실전 원장 생략:", str(e)[:80])
         return {}
+    today = (datetime.now(timezone.utc) + timedelta(hours=9)).date().isoformat()
+    if str(df.attrs.get("asof") or "")[:10] != today:
+        # 2026-11-26 — 11-25(코스피 -6.1%) 원장에 전날 시세가 들어가 '오늘 평균 +6.3%'로 나갔다
+        print(f"  실전 원장 생략 — 시세 기준일 {df.attrs.get('asof')} ≠ 오늘 {today}")
+        return {}
     px = dict(zip(df["Code"].astype(str).str.zfill(6), df["Close"]))
     col = next((c for c in ("ChagesRatio", "ChangesRatio") if c in df), None)
     d1 = dict(zip(df["Code"].astype(str).str.zfill(6), df[col])) if col else {}
@@ -778,7 +790,6 @@ def ledger_facts():
                          to_stop=_r((p["stop"] / c - 1) * 100, 1) if p.get("stop") else None))
     if not rows:
         return {}
-    today = (datetime.now(timezone.utc) + timedelta(hours=9)).date().isoformat()
     trades = [i for i in led.get("done_ids", []) if today in str(i)]
     return dict(n=len(rows), d1_avg=_r(sum(r["d1"] or 0 for r in rows) / len(rows), 1),
                 pnl_avg=_r(sum(r["pnl"] for r in rows) / len(rows), 1),
@@ -856,7 +867,7 @@ def facts(kind):
         kr = (f["stocks"] or {}).get("KR") or {}
         f["quality"] = dict(close_check=kr_close_check(kr, f["indices"]))
         f["ctx"] = dict(breadth=breadth_context((f.get("internals_kr") or {}).get("breadth_hist")),
-                        flow=flow_context(kr.get("flow")), events=events_next(), ledger=ledger_facts(), hilo=hilo_weekly("KR"))
+                        flow=flow_context(kr.get("flow")), events=events_next(market="KR"), ledger=ledger_facts(), hilo=hilo_weekly("KR"))
         f["anomalies"] = anomalies(f)
         return f
     f = dict(kind=kind, generated=_now_kst(), verdict=verdict_facts(),
@@ -876,7 +887,7 @@ def facts(kind):
         except Exception as e:
             print("  시장 내부(미국·추이) 생략:", str(e)[:100])
         f["ctx"] = dict(breadth=breadth_context(((f.get("internals") or {}).get("US") or {}).get("breadth_hist")),
-                        events=events_next(), hilo=hilo_weekly("US"))
+                        events=events_next(market="US"), hilo=hilo_weekly("US"))
         f["anomalies"] = anomalies(f)
     return f
 
@@ -1024,10 +1035,12 @@ def template(f):
         tdy = (fl.get("today") or {}).get(mk)
         cum = (fl.get("foreign_cum") or {}).get(mk)
         if tdy or cum:
-            s_ = f"- {nm} " + (" · ".join(f"{k} {_eok(tdy.get(k))}" for k in ("외국인", "기관", "개인")) + " (오늘 잠정)" if tdy else "")
+            parts = []
+            if tdy:
+                parts.append(" · ".join(f"{k} {_eok(tdy.get(k))}" for k in ("외국인", "기관", "개인")) + " (오늘 잠정)")
             if cum and cum.get("d5") is not None:
-                s_ += f" / 외국인 누적 5일 {_eok(cum['d5'])} · 20일 {_eok(cum['d20'])} ({str(cum.get('date'))[5:]} 기준)"
-            L.append(s_)
+                parts.append(f"외국인 누적 5일 {_eok(cum['d5'])} · 20일 {_eok(cum['d20'])} ({str(cum.get('date'))[5:]} 기준)")
+            L.append(f"- {nm} " + " / ".join(parts))
     cr = fl.get("credit")
     if cr:
         L.append(f"- 신용잔고 {cr['tn']:,}조 ({str(cr['date'])[5:]} 기준 · 20일 {cr['chg20']:+.1f}% · 고점 {str(cr.get('peak_date'))[5:]} 대비 {cr['from_peak']:+.1f}%)")

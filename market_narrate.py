@@ -71,7 +71,12 @@ def summary(f):
 def direction(f):
     kind = f["kind"]
     S = []
-    syms = ("^KS11", "^KQ11") if kind == "kr" else ("^KS11", "^KQ11")
+    # 2026-11-26 차니: "종목 각 시장에 맞게" — 미국판엔 한국 5주선 대신 미국 코어(S&P500 200일선)
+    if kind != "kr":
+        v = f.get("verdict") or {}
+        if v.get("core_gap_200d") is not None:
+            S.append(f"S&P500은 200일선보다 {abs(v['core_gap_200d']):.1f}% {'위' if v['core_gap_200d'] >= 0 else '아래'}다.")
+    syms = ("^KS11", "^KQ11") if kind == "kr" else ()
     g = [(_idx(f, s) or {}) for s in syms]
     g = [x for x in g if (x.get("gate5w") or {}).get("on") is not None]
     if g:
@@ -81,7 +86,7 @@ def direction(f):
             for x in below:
                 lg = x["gate5w"].get("live_gap")
                 parts.append(f"{x['name']} {abs(lg):.1f}% 아래" if lg is not None and lg < 0 else f"{x['name']} 오늘은 위({_p(lg)})")
-            S.append(("" if kind == "kr" else "한국 ") + "실전 규칙: 지난 금요일 종가가 주봉 5주선 아래라 신규 매수는 중지 상태다(오늘 기준 " + ", ".join(parts) + ").")
+            S.append("실전 규칙: 지난 금요일 종가가 주봉 5주선 아래라 신규 매수는 중지 상태다(오늘 기준 " + ", ".join(parts) + ").")
         else:
             S.append("실전 규칙: 코스피·코스닥 모두 주봉 5주선 위라 신규 매수가 가능하다.")
     for s in (("^KS11",) if kind == "kr" else ("^GSPC",)):
@@ -134,7 +139,7 @@ def flow(f):
         tdy = (fl.get("today") or {}).get("KOSPI") or {}
         if tdy.get("외국인") is not None:
             same = (tdy["외국인"] > 0) == (cum["d20"] > 0)
-        S.append(f"외국인 코스피 20일 누적은 {_eok(cum['d20'])}" + ("" if same is None else ("로 같은 방향이다." if same else "로 아직 반대 방향이다.")))
+        S.append(f"외국인 코스피 20일 누적은 {_eok(cum['d20'])}" + ("." if same is None else ("로 오늘과 같은 방향이다." if same else "로 오늘과 반대 방향이다.")))
     cr = fl.get("credit")
     if cr:
         S.append(f"신용잔고 {cr['tn']:,}조({str(cr['date'])[5:]}), 고점({str(cr.get('peak_date'))[5:]})보다 {abs(cr['from_peak']):.1f}% {'적다' if cr['from_peak'] < 0 else '많다'}.")
@@ -213,7 +218,7 @@ def ledger(f):
 
 def checkpoints(f):
     C = []
-    for s in (("^KS11",) if f["kind"] == "kr" else ("^KS11",)):
+    for s in (("^KS11",) if f["kind"] == "kr" else ()):
         x = _idx(f, s) or {}
         g = x.get("gate5w") or {}
         lg = g.get("live_gap")
