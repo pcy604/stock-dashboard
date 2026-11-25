@@ -48,7 +48,7 @@ def test_build_offline_and_history_change(tmp_path):
     assert v2['changed'] is True and v2['prev_on'] is True and len(v2['history']) == 2
 
 
-def test_weekly_gate_matches_live_plan_index_ok():
+def test_weekly_gate_matches_live_plan_index_ok(monkeypatch):
     """매크로 탭 '실전 판정' 카드 = 봇 계획표(live/plan.index_ok) 와 같은 계산이어야 한다(2026-11-06)."""
     import importlib.util
     p = Path(__file__).resolve().parent.parent / 'results' / 'trade_idx.parquet'
@@ -56,8 +56,14 @@ def test_weekly_gate_matches_live_plan_index_ok():
         return
     spec = importlib.util.spec_from_file_location('live_plan', str(p.parent.parent / 'live' / 'plan.py'))
     plan = importlib.util.module_from_spec(spec); spec.loader.exec_module(plan)
+    # 계획표는 토요일(= 지수 자료가 금요일로 끝난 상태)에 만든다. 평일에 돌면 trade_idx 에 진행 중 주가 섞여
+    # 비교가 요일에 따라 깨졌다(2026-11-24 화) — 마지막 끝난 금요일까지로 잘라 토요일 상태를 재현한다.
+    full = pd.read_parquet(p)
+    last_fri = full.index.max() - pd.Timedelta(days=(full.index.max().weekday() - 4) % 7)
+    ix = full[full.index <= last_fri]
+    _rp = pd.read_parquet
+    monkeypatch.setattr(pd, 'read_parquet', lambda path, *a, **k: ix.copy() if str(path).endswith('trade_idx.parquet') else _rp(path, *a, **k))
     want = plan.index_ok()
-    ix = pd.read_parquet(p)
     after = ix.index.max() + pd.Timedelta(days=1)          # 계획표는 토요일에 만든다 = 끝난 주
     for k, col in (('KR', 'KOSPI'), ('KQ', 'KOSDAQ')):
         g = V.weekly_gate(ix[col], 5, today=after)
