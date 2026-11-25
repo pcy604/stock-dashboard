@@ -113,6 +113,8 @@ _s = N.summary(_fk)
 assert "+6.3%" in _s and "가장 넓은 상승" in _s and "약세" not in _s, _s
 assert "신규 매수는 중지" in N.direction(_fk) and "코스피는" in N.direction(_fk)
 assert N.checkpoints(_fk)[0].startswith("코스피 5주선(5,193)"), N.checkpoints(_fk)
-for _w in ("견조", "모멘텀", "투자심리", "보인다", "주목"):
-    assert _w not in open("market_narrate.py", encoding="utf-8").read().split('"""', 2)[2], _w
+_txt = N.compose(_fk, N.narrate(_fk))
+for _w in N.BANNED[:5]:
+    assert _w not in _txt, _w
+assert N.check_explain("투자심리가 위축된 것으로 보인다.", [dict(title="x")], _fk), "금지어 검사"
 print("✅ 규칙 문장 — 방향·5주선·AI체 금지어")

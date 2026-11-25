@@ -87,6 +87,23 @@ def find(targets: list) -> list:
     return out
 
 
+def headlines(f: dict, n=8) -> list:
+    """해설용 기사 제목 묶음 — 그날 시장 기사 여러 개(원인 단어 든 것 먼저). 2026-11-26 '재료 설명이 없다'(차니)."""
+    q, hours = ("뉴욕증시", 12) if f.get("kind") != "kr" else ("코스피", 9)
+    out, seen = [], set()
+    for qq in (q + " 마감", q + " 장중", q + " 이유"):
+        try:
+            for it in _rss(qq, hours=hours):
+                if it["title"] not in seen:
+                    seen.add(it["title"])
+                    out.append(it)
+        except Exception as e:
+            print(f"  해설용 기사 실패({qq}):", str(e)[:60])
+        time.sleep(0.4)
+    out.sort(key=lambda it: not _CAUSE.search(it["title"]))
+    return out[:n]
+
+
 def targets_for(f: dict) -> list:
     """리포트 사실에서 '이유를 붙일 대상'을 고른다 — 지수 하나 + 가장 큰 움직임 1~2개."""
     kind = f.get("kind")

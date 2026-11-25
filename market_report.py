@@ -1192,6 +1192,35 @@ def _ai_slim(x):
     return x
 
 
+def explain_move(f):
+    """재료 해설 2문장 — 기사 제목만 근거, 검사 통과 못 하면 1회 고쳐 쓰게 하고 그래도 안 되면 빈칸(제목만 남는다)."""
+    import market_narrate as N
+    try:
+        import market_why as W
+        heads = W.headlines(f)
+    except Exception as e:
+        print("  해설용 기사 생략:", str(e)[:80])
+        return ""
+    if len(heads) < 2:
+        return ""
+    prompt = N.EXPLAIN_PROMPT.format(mkt="미국" if f["kind"] != "kr" else "한국", facts=N.explain_facts(f),
+                                     heads="\n".join(f"- {h['title']} ({h['source']})" for h in heads))
+    for attempt in (1, 2):
+        try:
+            txt, model = ask_gemini(prompt)
+        except Exception as e:
+            print("  재료 해설 실패:", str(e)[:80])
+            return ""
+        txt = " ".join(txt.split())
+        bad = N.check_explain(txt, heads, f) + [w for w in direction_errors("## 한 줄 요약\n" + txt, f)]
+        if not bad:
+            print(f"  재료 해설 통과({model}, 시도 {attempt}): {txt}")
+            return txt
+        print(f"  재료 해설 검사 실패(시도 {attempt}): {bad[:5]} — {txt[:80]}")
+        prompt += "\n[직전 답의 문제 — 고쳐서 다시]\n" + "\n".join(f"- {b}" for b in bad[:6])
+    return ""
+
+
 def render_rules(f):
     """2026-11-25 기본 경로 — 문장은 market_narrate 가 사실에서 직접, 이유는 market_why 가 뉴스 제목 그대로."""
     import market_narrate as N
@@ -1201,6 +1230,7 @@ def render_rules(f):
     except Exception as e:
         print("  이유 뉴스 생략:", str(e)[:100])
         f["why"] = []
+    f["explain"] = explain_move(f)
     n = N.narrate(f)
     f["narrative"] = n
     body = [ln for ln in template(f).splitlines()[1:] if not ln.startswith("※")]

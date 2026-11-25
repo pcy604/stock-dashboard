@@ -11,6 +11,7 @@
 # 2026-11-26 차니 피드백 — '간밤' 대신 시장 이름, '왜 움직였나' 대신 '시장을 움직인 재료'
 TITLE = {"daily": "미국 증시 마감", "kr": "한국 증시 마감", "weekly": "주간 시황"}
 WHY_LABEL = "시장을 움직인 재료 (뉴스 제목 그대로)"
+WHY_LABEL_SHORT = "시장을 움직인 재료"
 
 
 def _p(v, d=1):
@@ -67,7 +68,7 @@ def summary(f):
         up = bc["today"] >= 50
         pct = bc["today"] if up else 100 - bc["today"]
         tail = (f"최근 {bc['n']}거래일 중 가장 넓은 {'상승' if up else '하락'}이었다" if bc["rank"] == (1 if up else bc["n"])
-                else f"최근 {bc['n']}거래일 평균은 {bc['avg']}%다")
+                else f"최근 {bc['n']}거래일 평균 상승 비율은 {bc['avg']}%다")
         lead = _idx(f, "^KS11" if kind == "kr" else "^GSPC")
         but = "지수는 " + ("올랐지만" if lead["d1"] > 0 else "내렸지만") + " " if lead and abs(lead["d1"]) >= 0.2 and (lead["d1"] > 0) != up else ""
         S.append(f"{but}대형주 {pct}%가 {'올랐고' if up else '내렸고'}, {tail}.")
@@ -154,98 +155,108 @@ def direction(f):
 
 
 def breadth(f):
+    """2026-11-26 차니: 줄줄이 나열 말고 항목별 줄바꿈."""
     kind = f["kind"]
     if kind == "kr":
         kr = (f.get("stocks") or {}).get("KR") or {}
-        b, t = kr.get("breadth_all"), kr.get("turnover_tn") or {}
+        b, tv = kr.get("breadth_all"), kr.get("turnover_tn") or {}
         nh = kr.get("new_high_52w") or {}
+        nl = (f.get("internals_kr") or {}).get("new_low_52w") or {}
+        uni = None
     else:
         u = (f.get("internals") or {}).get("US") or {}
-        b, t, nh = u.get("breadth_all"), {}, u.get("new_high_52w") or {}
-    S = []
+        b, tv, nh, nl, uni = u.get("breadth_all"), {}, u.get("new_high_52w") or {}, u.get("new_low_52w") or {}, u.get("universe")
+    L = []
     if b:
-        uni = (u.get("universe") if kind != "kr" else None)
-        S.append((f"{uni:,}종 중 " if uni else "") + f"상승 {b['up']:,}종, 하락 {b['down']:,}종" + (f", 상한가 {b['limit_up']}·하한가 {b['limit_down']}" if b.get("limit_up") is not None else "") + ".")
-    if t:
-        S.append("거래대금 " + ", ".join(f"{k} {v:,.1f}조" for k, v in t.items()) + ".")
-    nl = (u.get("new_low_52w") if kind != "kr" else ((f.get("internals_kr") or {}).get("new_low_52w"))) or {}
-    if kind == "kr" and not nl:
-        nl = {}
+        L.append(f"상승 {b['up']:,} · 하락 {b['down']:,}" + (f" ({uni:,}종)" if uni else "")
+                 + (f" · 상한가 {b['limit_up']} · 하한가 {b['limit_down']}" if b.get("limit_up") is not None else ""))
+    if tv:
+        L.append("거래대금 " + " · ".join(f"{k} {v:,.1f}조" for k, v in tv.items()))
     if nh.get("n") is not None:
-        S.append(f"오늘 52주 신고가 {nh['n']:,}종" + (f", 신저가 {nl['n']:,}종" if nl.get("n") is not None else "") + ".")
-    w = week52(f)
-    if w:
-        S.append(w)
-    return " ".join(S)
+        L.append(f"오늘 52주 신고가 {nh['n']:,}" + (f" · 신저가 {nl['n']:,}" if nl.get("n") is not None else ""))
+    h = (f.get("ctx") or {}).get("hilo") or {}
+    if h:
+        L.append(f"이번 주 신고가 {h['nh']:,} · 신저가 {h['nl']:,} (지난주 {h['prev_nh']:,} · {h['prev_nl']:,})")
+        if h.get("nl_over_nh_weeks", 0) >= 2:
+            L.append(f"→ 신저가가 더 많은 주 {h['nl_over_nh_weeks']}주째")
+        elif h["nh"] > h["nl"]:
+            L.append("→ 신고가가 신저가보다 많다")
+    return "\n".join(L)
+
+
+def _ud(v):
+    """텔레그램은 글자색이 없다 — 오름 🔺 / 내림 🔻 표식으로."""
+    return "🔺" if (v or 0) > 0 else "🔻" if (v or 0) < 0 else "▫️"
+
+
+def _pair(name, v):
+    return f"{_ud(v)}{name} {_p(v)}"
 
 
 def flow(f):
     ctx = f.get("ctx") or {}
     fl = ctx.get("flow") or {}
-    S = []
+    L = []
     for mk, nm in (("KOSPI", "코스피"), ("KOSDAQ", "코스닥")):
         tdy = (fl.get("today") or {}).get(mk)
         if tdy:
-            S.append(f"{nm} 외국인 {_eok(tdy.get('외국인'))}, 기관 {_eok(tdy.get('기관'))}, 개인 {_eok(tdy.get('개인'))}.")
+            L.append(f"{nm} " + " · ".join(f"{_ud(tdy.get(k))}{k} {_eok(tdy.get(k))}" for k in ("외국인", "기관", "개인") if tdy.get(k) is not None))
     cum = (fl.get("foreign_cum") or {}).get("KOSPI") or {}
     if cum.get("d20") is not None:
-        same = None
         tdy = (fl.get("today") or {}).get("KOSPI") or {}
-        if tdy.get("외국인") is not None:
-            same = (tdy["외국인"] > 0) == (cum["d20"] > 0)
-        S.append(f"외국인 코스피 20일 누적은 {_eok(cum['d20'])}" + ("." if same is None else ("로 오늘과 같은 방향이다." if same else "로 오늘과 반대 방향이다.")))
+        same = None if tdy.get("외국인") is None else (tdy["외국인"] > 0) == (cum["d20"] > 0)
+        L.append(f"외국인 코스피 20일 누적 {_eok(cum['d20'])}" + ("" if same is None else (" (오늘과 같은 방향)" if same else " (오늘과 반대 방향)")))
     cr = fl.get("credit")
     if cr:
-        S.append(f"신용잔고 {cr['tn']:,}조({str(cr['date'])[5:]}), 고점({str(cr.get('peak_date'))[5:]})보다 {abs(cr['from_peak']):.1f}% {'적다' if cr['from_peak'] < 0 else '많다'}.")
+        L.append(f"신용잔고 {cr['tn']:,}조 ({str(cr['date'])[5:]} · 고점 대비 {cr['from_peak']:+.1f}%)")
     us = f.get("us") or {}
     if f["kind"] != "kr" and us.get("assets"):
-        S.append(", ".join(f"{a['name']} {_p(a['d1'])}" for a in us["assets"][:4]) + ".")
+        L.append(" · ".join(_pair(a["name"], a["d1"]) for a in us["assets"][:4]))
     hy = f.get("hy") or {}
     if f["kind"] != "kr" and hy.get("close") is not None:
-        S.append(f"하이일드 스프레드 {hy['close']}%({str(hy.get('date'))[5:]}).")
-    return " ".join(S)
+        L.append(f"하이일드 스프레드 {hy['close']}% ({str(hy.get('date'))[5:]})")
+    return "\n".join(L)
 
 
 def sector(f):
-    S = []
+    L = []
     if f["kind"] == "kr":
         kr = (f.get("stocks") or {}).get("KR") or {}
         sc = kr.get("sectors") or []
-        if sc:
-            S.append("강한 업종은 " + ", ".join(f"{r['name']} {_p(r['ret'])}" for r in sc[:3]) + ".")
-            neg = [r for r in sc[::-1][:3] if r["ret"] < 0]
-            S.append(("약한 업종은 " + ", ".join(f"{r['name']} {_p(r['ret'])}" for r in neg) + ".") if neg else "내린 업종은 없었다.")
         th = kr.get("themes_top") or []
-        if th:
-            S.append("테마는 " + ", ".join(f"{t['name']} {_p(t['ret'])}" for t in th[:2]) + ".")
     else:
         sc = ((f.get("internals") or {}).get("US") or {}).get("sectors") or []
-        if sc:
-            S.append("강한 업종은 " + ", ".join(f"{r['name']} {_p(r['ret'])}" for r in sc[:3]) + ".")
-            neg = [r for r in sc[::-1][:3] if r["ret"] < 0]
-            S.append(("약한 업종은 " + ", ".join(f"{r['name']} {_p(r['ret'])}" for r in neg) + ".") if neg else "내린 업종은 없었다.")
-    return " ".join(S)
+        th = []
+    if sc:
+        L.append(" · ".join(_pair(r["name"], r["ret"]) for r in sc[:3]))
+        neg = [r for r in sc[::-1][:3] if r["ret"] < 0]
+        L.append(" · ".join(_pair(r["name"], r["ret"]) for r in neg) if neg else "내린 업종 없음")
+    if th:
+        L.append("테마 " + " · ".join(_pair(x["name"], x["ret"]) for x in th[:2]))
+    return "\n".join(L)
 
 
 def stocks(f):
-    S = []
+    L = []
     if f["kind"] == "kr":
         kr = (f.get("stocks") or {}).get("KR") or {}
         if kr.get("top"):
-            S.append("시총 1조 이상에서 " + ", ".join(f"{x['name']} {_p(x['ret'])}" for x in kr["top"][:3]) + "가 가장 많이 올랐다.")
+            L.append(" · ".join(_pair(x["name"], x["ret"]) for x in kr["top"][:3]))
+        if kr.get("bottom"):
+            L.append(" · ".join(_pair(x["name"], x["ret"]) for x in kr["bottom"][:3] if x["ret"] < 0) or "")
         lu = [r for r in kr.get("featured") or [] if r.get("tag") == "상한가"]
         if lu:
-            S.append("상한가 " + ", ".join(r["name"] for r in lu[:3]) + ".")
+            L.append("상한가 " + ", ".join(r["name"] for r in lu[:3]))
         tt = (kr.get("turnover_top") or [None])[0]
         if tt:
-            S.append(f"거래대금 1위는 {tt['name']}({_p(tt['ret'])}, {tt['amt_b'] / 1e4:,.1f}조).")
+            L.append(f"거래대금 1위 {tt['name']} {_p(tt['ret'])} ({tt['amt_b'] / 1e4:,.1f}조)")
     else:
         u = (f.get("internals") or {}).get("US") or {}
         if u.get("top"):
-            S.append(f"시총 상위 {u.get('big_n') or 500:,}에서 " + ", ".join(f"{x['name']} {_p(x['ret'])}" for x in u["top"][:3]) + "가 가장 많이 올랐다.")
+            L.append(" · ".join(_pair(x["name"], x["ret"]) for x in u["top"][:3]))
         if u.get("bottom"):
-            S.append("가장 많이 내린 종목은 " + ", ".join(f"{x['name']} {_p(x['ret'])}" for x in u["bottom"][:2]) + ".")
-    return " ".join(S)
+            L.append(" · ".join(_pair(x["name"], x["ret"]) for x in u["bottom"][:3]))
+    return "\n".join(x for x in L if x)
 
 
 def week52(f):
@@ -293,13 +304,53 @@ def checkpoints(f):
     return C[:3]
 
 
+# ── 재료 해설(2문장) — 기사 제목만 근거로 AI 가 쓰고, 기계 검사를 통과한 것만 ─────────────────────
+#   2026-11-26 차니: "재료에 대한 실제 설명이 없음 — 공장형 시황 같음". 제목만 붙이면 '왜'가 안 읽힌다.
+#   AI 체가 돌아오지 않게: 금지어 · 숫자는 제목/사실에 있는 것만 · 방향 검사 · 140자 이내.
+BANNED = ("견조", "모멘텀", "투자심리", "보인다", "주목", "풀이", "관측", "전망된다", "분석된다", "것으로", "시사",
+          "우려가 커지", "기대감이 커지", "~", "!")
+EXPLAIN_PROMPT = """아래 기사 제목들만 근거로, 오늘 {mkt} 시장이 왜 이렇게 움직였는지 한국어 2문장(140자 이내)으로 쓴다.
+규칙:
+- 첫 문장 = 원인(무슨 일이 있었나), 둘째 문장 = 그 결과 시장이 어떻게 반응했나(장중 흐름 포함).
+- 제목에 없는 사실·숫자를 지어내지 않는다. 숫자는 제목이나 [사실]에 있는 것만.
+- 증권사 마감 시황처럼 짧은 평서문('~했다'). 추측·평가 표현 금지: 보인다·풀이된다·관측·전망·주목·투자심리·모멘텀.
+- 제목들이 서로 다른 원인을 말하면 가장 많이 나온 원인 하나만 쓴다.
+[사실] {facts}
+[기사 제목]
+{heads}
+답: 두 문장만, 다른 말 없이."""
+
+
+def explain_facts(f):
+    x = _idx(f, "^KS11" if f["kind"] == "kr" else "^IXIC") or {}
+    s = f"{x.get('name')} {_p(x.get('d1'))}"
+    if x.get("lo_pct") is not None:
+        s += f" (장중 저점 {_p(x['lo_pct'])}, 고점 {_p(x.get('hi_pct'))})"
+    return s
+
+
+def check_explain(txt, heads, f):
+    """통과하면 [] — 아니면 문제 목록."""
+    import re
+    bad = []
+    txt = (txt or "").strip()
+    if not txt or len(txt) > 160:
+        bad.append(f"길이 {len(txt)}자")
+    bad += [f"금지어 '{w}'" for w in BANNED if w in txt]
+    pool = " ".join(h["title"] for h in heads) + " " + explain_facts(f) + " " + summary(f)
+    for num in re.findall(r"\d+(?:\.\d+)?", txt):
+        if num not in pool:
+            bad.append(f"근거 없는 숫자 {num}")
+    return bad
+
+
 def why_lines(f):
     return [f"{w['label']}: “{w['title']}” — {w['source']} ({w['date']})" for w in (f.get("why") or [])]
 
 
 def narrate(f):
     light, sig = signal(f)
-    return dict(summary=summary(f), why=why_lines(f), light=light, signal=sig, direction=direction(f), week52=week52(f),
+    return dict(summary=summary(f), explain=f.get("explain") or "", why=why_lines(f), light=light, signal=sig, direction=direction(f), week52=week52(f),
                 breadth=breadth(f), flow=flow(f),
                 sector=sector(f), stocks=stocks(f), ledger=ledger(f), checkpoints=checkpoints(f))
 
@@ -307,13 +358,15 @@ def narrate(f):
 def compose(f, n):
     title = TITLE.get(f["kind"], "시황")
     L = [f"## {title}", "", "## 한 줄 요약", n["summary"]]
-    if n["why"]:
-        L += ["", f"**{WHY_LABEL}**"] + [f"- {w}" for w in n["why"]]
+    if n.get("explain") or n["why"]:
+        L += ["", f"**{WHY_LABEL_SHORT}**"] + ([n["explain"]] if n.get("explain") else []) + [f"- {w}" for w in n["why"]]
     L += ["", "## 해설"]
     if n.get("signal"):
         L.append(f"- **투자 신호등 {n['light']}** {n['signal']}")
     for k, lab in (("breadth", "시장 폭 · 52주 신고가·신저가"), ("flow", "돈의 흐름"), ("sector", "업종·테마"),
                    ("stocks", "종목"), ("ledger", "실전 원장")):
         if n.get(k):
-            L.append(f"- **{lab}** {n[k]}")
+            ls = str(n[k]).split("\n")
+            L.append(f"- **{lab}** {ls[0]}")
+            L += [f"  - {x}" for x in ls[1:]]
     return "\n".join(L)
