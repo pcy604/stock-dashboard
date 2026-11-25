@@ -174,6 +174,29 @@ def us_extra_facts():
     return dict(assets=pick(US_ASSETS), sectors=sec, megacaps=pick(US_MEGA))
 
 
+def intraday_range(rows):
+    """2026-11-26 장중 흐름 — 종가만 보면 '나스닥 -4%까지 밀렸다가 회복' 같은 하루를 모른다(차니).
+    같은 날짜 일봉의 고가·저가를 전일 종가 대비 %로(lo_pct·hi_pct)."""
+    try:
+        import yfinance as yf
+        syms = [x["sym"] for x in rows if "close" in x and x["sym"] in ("^GSPC", "^IXIC", "^DJI", "^SOX", "^KS11", "^KQ11")]
+        d = yf.download(syms, period="10d", interval="1d", progress=False, auto_adjust=False, threads=True)
+    except Exception as e:
+        print("  장중 범위 생략:", str(e)[:80])
+        return rows
+    for x in rows:
+        try:
+            if x["sym"] not in syms:
+                continue
+            hi, lo = d["High"][x["sym"]].dropna(), d["Low"][x["sym"]].dropna()
+            day = next(i for i in hi.index if str(i.date()) == x["date"])
+            prev = x["close"] / (1 + x["d1"] / 100)
+            x["hi_pct"], x["lo_pct"] = _r((hi[day] / prev - 1) * 100), _r((lo[day] / prev - 1) * 100)
+        except Exception:
+            pass
+    return rows
+
+
 def index_facts():
     out = []
     df = _download([s for s, _ in INDICES])
@@ -856,7 +879,7 @@ def facts(kind):
     if kind == "kr":
         sg = signal_facts()
         f = dict(kind=kind, generated=_now_kst(), verdict={},
-                 indices=[x for x in index_facts() if x.get("sym") in KR_INDICES], stocks=kr_today_facts(),
+                 indices=intraday_range([x for x in index_facts() if x.get("sym") in KR_INDICES]), stocks=kr_today_facts(),
                  signals=dict(market_direction={"KR": sg["market_direction"].get("KR")}))
         f["rule_checks"] = _kr_rule_checks(f)
         try:   # 2026-11-14 종합 '주간·월간' 보기 + 대형주 상승 비율 추이 — 장 마감 직후 값으로
@@ -871,7 +894,7 @@ def facts(kind):
         f["anomalies"] = anomalies(f)
         return f
     f = dict(kind=kind, generated=_now_kst(), verdict=verdict_facts(),
-             indices=_fresher_kr(index_facts()), stocks=stock_facts(kind), signals=signal_facts())
+             indices=intraday_range(_fresher_kr(index_facts())), stocks=stock_facts(kind), signals=signal_facts())
     if kind == "daily":
         try:
             f["us"] = us_extra_facts()

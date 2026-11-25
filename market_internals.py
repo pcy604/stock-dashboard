@@ -104,7 +104,7 @@ def _dl(syms, period='1y', batch=100):
     """Yahoo 일봉 — 100종씩 끊어 받는다(한 번에 수백 종은 중간에 끊긴 적이 있다, price_store 문서)."""
     import pandas as pd
     import yfinance as yf
-    parts = {k: [] for k in ('Close', 'High', 'Volume')}
+    parts = {k: [] for k in ('Close', 'High', 'Low', 'Volume')}   # Low = 52주 신저가(2026-11-26)
     for i in range(0, len(syms), batch):
         try:
             d = yf.download(list(syms[i:i + batch]), period=period, interval='1d', progress=False,
@@ -147,7 +147,7 @@ _LIM = {1: 60, 5: 100, 21: 200}     # 기간 수익률 상한(%) — 넘으면 �
 PERIODS = (('d1', 1), ('w1', 5), ('m1', 21))
 
 
-def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3, hm_of=None, themes_of=None):
+def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3, hm_of=None, themes_of=None, lo=None):
     """k거래일 수익률로 본 시장 내부 — 일간(k=1)·주간(5)·월간(21) 같은 모양. 2026-11-14.
     meta {sym: (이름, 시총)} · big = 대형주 sym 집합(상승·하락 상위는 대형주에서만) · amt_fmt(거래대금) → 글자."""
     import pandas as pd
@@ -189,6 +189,17 @@ def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3, hm_of=None,
             if cur.get(s) == cur.get(s) and prev.get(s) == prev.get(s) and cur[s] >= prev[s] and cnt[s] >= 30:
                 nh.append(dict(name=nm(s), sym=s, ret=_r(r[s], 1), young=bool(cnt[s] < 240), _a=float(dv[s])))
         nh.sort(key=lambda x: -x['_a'])
+    # 2026-11-26 52주 신저가(오늘) — 신고가와 같은 규칙의 거울(그 기간 저가 ≤ 직전 252일 저가, 30거래일+ 이력)
+    nl = []
+    if lo is not None:
+        ll = lo.reindex(columns=c.columns)
+        if len(ll) > 60:
+            curl, prevl = ll.iloc[-k:].min(), ll.iloc[-252 - k:-k].min()
+            cntl = ll.iloc[-252 - k:].notna().sum()
+            for s in r.index:
+                if curl.get(s) == curl.get(s) and prevl.get(s) == prevl.get(s) and curl[s] <= prevl[s] and cntl[s] >= 30:
+                    nl.append(dict(name=nm(s), sym=s, ret=_r(r[s], 1), _a=float(dv[s])))
+            nl.sort(key=lambda x: -x['_a'])
     bg = rows[rows['sym'].isin(big)].sort_values('ret')
     row = lambda x: dict(name=nm(x.sym), sym=x.sym, ret=_r(x.ret, 1))
     hot = [dict(name=nm(s), sym=s, ret=_r(r[s], 1), tag=f"거래대금 {int(rank[s])}위", _a=float(dv[s]))
@@ -199,6 +210,7 @@ def _view(c, h, v, meta, k, big, amt_fmt, mc_div, sec_of, min_sec=3, hm_of=None,
                 breadth_all=dict(up=int((r > 0).sum()), down=int((r < 0).sum()), flat=int((r == 0).sum())),
                 big_n=int(len(bg)), breadth_up=(round(float((bg['ret'] > 0).mean() * 100)) if len(bg) else None),
                 sectors=sectors, megacaps=mega, new_high_52w=dict(n=len(nh), universe=int(len(r)), top=strip(nh[:8])),
+                **({'new_low_52w': dict(n=len(nl), universe=int(len(r)), top=strip(nl[:8]))} if lo is not None else {}),
                 featured=strip(hot[:8]), top=[row(x) for x in bg[::-1].head(8).itertuples()],
                 bottom=[row(x) for x in bg.head(8).itertuples()],
                 turnover_top=[dict(name=nm(s), sym=s, ret=_r(r[s], 1), tag=amt_fmt(dv[s]))
@@ -252,10 +264,10 @@ def _common(c):
     return [s for s in c.columns if ok.get(s, False)]
 
 
-def _pack(c, h, v, meta, big, amt_fmt, mc_div, sec_of, n_hist, hm_of=None, themes_of=None):
+def _pack(c, h, v, meta, big, amt_fmt, mc_div, sec_of, n_hist, hm_of=None, themes_of=None, lo=None):
     c = c[_common(c)]
     views = {p: _view(c, h.loc[:c.index[-1]], v.loc[:c.index[-1]], meta, k, big, amt_fmt, mc_div, sec_of,
-                      hm_of=hm_of, themes_of=themes_of) for p, k in PERIODS}
+                      hm_of=hm_of, themes_of=themes_of, lo=None if lo is None else lo.loc[:c.index[-1]]) for p, k in PERIODS}
     out = dict(views.get('d1') or {})
     if not out:
         return {}
@@ -268,7 +280,7 @@ def _pack(c, h, v, meta, big, amt_fmt, mc_div, sec_of, n_hist, hm_of=None, theme
     return out
 
 
-def us_internals(top_n=500, n_hist=30):
+def us_internals(top_n=1500, n_hist=30):
     """미국 — 유니버스 = perf_latest 미국 전 종목(시총 $3억+, NYSE·나스닥·AMEX ≈ 2,600종). 2026-11-14 확대(옛: 상위 500만).
     시장 폭·업종·신고가·거래대금은 전 종목, 상승·하락 상위·상승 비율 추이는 시총 상위 500(≈ S&P500)."""
     p = _j('results/perf_latest.json')
@@ -287,7 +299,8 @@ def us_internals(top_n=500, n_hist=30):
     ind = lambda s: (lambda x: IND_KO.get(x, x) if x else None)((sd.get(s) or {}).get('industry'))
     fmt = lambda a: f"${a / 1e9:,.1f}B"
     hm = lambda s: SEC_KO.get((sd.get(s) or {}).get('sector'), (sd.get(s) or {}).get('sector'))
-    out = _pack(c, d['High'], d['Volume'], meta, big, fmt, 1e9, ind, n_hist, hm_of=hm)
+    out = _pack(c, d['High'], d['Volume'], meta, big, fmt, 1e9, ind, n_hist, hm_of=hm,
+                lo=d['Low'] if 'Low' in d else None)
     if out:
         out['basis'] = 'd1'
     return out
@@ -305,6 +318,7 @@ def kr_internals(n_hist=30):
         d = _dl(df['y'].tolist())
         ren = dict(zip(df['y'], df['Code'].str.zfill(6)))
         c, h, v = (d[k].rename(columns=ren) for k in ('Close', 'High', 'Volume'))
+        lo = d['Low'].rename(columns=ren) if 'Low' in d else None
         c = _clean(c)
         if c.empty or len(c) < 30:
             return {}
@@ -326,7 +340,7 @@ def kr_internals(n_hist=30):
             pass
         _det = (_j('data/sector_detail.json') or {}).get('kr') or {}
         out = _pack(c, h, v, meta, big, fmt, 1e12, ind, n_hist,
-                    hm_of=lambda s: _hm0.get(s) or ind(s), themes_of=lambda s: (_det.get(s) or {}).get('themes'))
+                    hm_of=lambda s: _hm0.get(s) or ind(s), themes_of=lambda s: (_det.get(s) or {}).get('themes'), lo=lo)
         if out:
             out['basis'] = '시총 1,000억+'
         return out

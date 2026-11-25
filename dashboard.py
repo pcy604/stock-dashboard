@@ -9328,6 +9328,9 @@ def _home_top(V):
     # 오늘의 시장 — 한국·미국 × 일·주·월. 2026-11-15: 한국 일간도 일·주·월과 같은 종목 집합(시총 1,000억+)으로.
     #   네이버 전 종목 숫자(상한가·특징주·수급·당일 테마)는 그 위에 얹는 보조.
     _UH.LINK_BASE = ''
+    # 2026-11-26 ?home=US 로 미국 화면을 바로 — 시황 카드뉴스 캡처가 버튼 클릭에 실패해 미국판에 한국 화면이 찍혔다
+    if 'home_mkt' not in st.session_state and str(st.query_params.get('home', '')).upper() == 'US':
+        st.session_state['home_mkt'] = '🇺🇸 미국'
     _mk = st.segmented_control('시장', ['🇰🇷 한국', '🇺🇸 미국'], default='🇰🇷 한국', key='home_mkt',
                                label_visibility='collapsed') or '🇰🇷 한국'
     _is_kr = _mk.startswith('🇰🇷')

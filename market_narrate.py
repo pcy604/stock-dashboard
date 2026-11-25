@@ -8,6 +8,11 @@
 """
 
 
+# 2026-11-26 차니 피드백 — '간밤' 대신 시장 이름, '왜 움직였나' 대신 '시장을 움직인 재료'
+TITLE = {"daily": "미국 증시 마감", "kr": "한국 증시 마감", "weekly": "주간 시황"}
+WHY_LABEL = "시장을 움직인 재료 (뉴스 제목 그대로)"
+
+
 def _p(v, d=1):
     if v is None:
         return "-"
@@ -50,6 +55,14 @@ def summary(f):
         big = max(mc, key=lambda r: abs(r.get("d1") or 0), default=None)
         if big and sp and abs(big["d1"] or 0) >= 5 and (big["d1"] > 0) == (sp["d1"] > 0):
             S.append(f"{big['name']} {_p(big['d1'])}{_josa(big['name'], '이', '가')} {'상승' if big['d1'] > 0 else '하락'}을 이끌었다.")
+    lead0 = _idx(f, "^KS11" if kind == "kr" else "^IXIC")
+    if lead0 and lead0.get("lo_pct") is not None:
+        if lead0["d1"] - lead0["lo_pct"] >= 1.5:
+            S.append(f"{lead0['name']}{_josa(lead0['name'], '은', '는')} 장중 {_p(lead0['lo_pct'])}까지 밀렸다가 {_p(lead0['d1'])}로 마감했다"
+                     f"(저점에서 {lead0['d1'] - lead0['lo_pct']:.1f}%p 회복).")
+        elif lead0.get("hi_pct") is not None and lead0["hi_pct"] - lead0["d1"] >= 1.5:
+            S.append(f"{lead0['name']}{_josa(lead0['name'], '은', '는')} 장중 {_p(lead0['hi_pct'])}까지 올랐다가 {_p(lead0['d1'])}로 마감했다"
+                     f"(고점에서 {lead0['hi_pct'] - lead0['d1']:.1f}%p 반납).")
     if bc:
         up = bc["today"] >= 50
         pct = bc["today"] if up else 100 - bc["today"]
@@ -66,6 +79,40 @@ def summary(f):
         else:
             S.append(f"코스피에서 외국인 {_eok(a)}, 기관 {_eok(b)}.")
     return " ".join(S)
+
+
+def signal(f):
+    """2026-11-26 차니: '시장 방향은 어떻게 활용하는 건지 모르겠다' → 신호등 + 지금 무엇을 뜻하나 + 무엇이 바뀌면 바뀌나.
+    한국 = 우리 실전 규칙(주봉 5주선, 금요일 종가). 미국 = 오닐 국면 + S&P500 200일선(참고 지표)."""
+    if f["kind"] == "kr":
+        g = [x for x in ((_idx(f, s) or {}) for s in ("^KS11", "^KQ11")) if (x.get("gate5w") or {}).get("on") is not None]
+        if not g:
+            return "", ""
+        below = [x for x in g if not x["gate5w"]["on"]]
+        if not below:
+            return "🟢", "신규 매수 가능 — 코스피·코스닥 모두 주봉 5주선 위(실전 규칙)."
+        parts = []
+        for x in below:
+            lg = x["gate5w"].get("live_gap")
+            if lg is not None:
+                ma = x["close"] / (1 + lg / 100)
+                parts.append(f"{x['name']} 5주선 {ma:,.0f}(" + (f"{abs(lg):.1f}% 위" if lg >= 0 else f"+{(1 / (1 + lg / 100) - 1) * 100:.1f}% 필요") + ")")
+        return "🔴", ("신규 매수 쉬는 구간 — 실전 규칙은 지수가 주봉 5주선 위로 금요일 마감해야 다시 산다. "
+                      + "재개 조건: " + ", ".join(parts) + " 위에서 금요일 마감.")
+    x = _idx(f, "^GSPC") or {}
+    pz, v = x.get("pulse") or {}, f.get("verdict") or {}
+    st, gap = str(pz.get("state") or ""), v.get("core_gap_200d")
+    above = gap is not None and gap >= 0
+    if pz.get("ftd_date") and above:
+        return "🟢", f"상승 확인 국면 — {pz['ftd_date'][5:]} 팔로스루, S&P500 200일선 위({_p(gap)})."
+    if st.startswith("반등 시도"):
+        n = pz.get("rally_day") or 0
+        return "🟡", (f"반등 시도 {n}일째 — 오닐 방식은 '상승 확인'(반등 4일째 이후 +1.25% 이상·거래량 증가) 전까지 신규 매수를 미룬다"
+                      + (f"(빠르면 {4 - n}거래일 뒤)" if n < 4 else "") + "."
+                      + (f" S&P500은 200일선 {'위' if above else '아래'}({_p(gap)})." if gap is not None else ""))
+    return "🔴", (f"조정 국면 — 최근 25거래일 분배일(기관 매도 흔적) {pz.get('dist_n', '-')}개."
+                  + (f" S&P500은 200일선 {'위' if above else '아래'}({_p(gap)})." if gap is not None else "")
+                  + " 반등 시도가 시작되기 전까지는 신규 매수를 쉬는 구간이다.")
 
 
 def direction(f):
@@ -117,11 +164,18 @@ def breadth(f):
         b, t, nh = u.get("breadth_all"), {}, u.get("new_high_52w") or {}
     S = []
     if b:
-        S.append(f"상승 {b['up']:,}종, 하락 {b['down']:,}종" + (f", 상한가 {b['limit_up']}·하한가 {b['limit_down']}" if b.get("limit_up") is not None else "") + ".")
+        uni = (u.get("universe") if kind != "kr" else None)
+        S.append((f"{uni:,}종 중 " if uni else "") + f"상승 {b['up']:,}종, 하락 {b['down']:,}종" + (f", 상한가 {b['limit_up']}·하한가 {b['limit_down']}" if b.get("limit_up") is not None else "") + ".")
     if t:
         S.append("거래대금 " + ", ".join(f"{k} {v:,.1f}조" for k, v in t.items()) + ".")
+    nl = (u.get("new_low_52w") if kind != "kr" else ((f.get("internals_kr") or {}).get("new_low_52w"))) or {}
+    if kind == "kr" and not nl:
+        nl = {}
     if nh.get("n") is not None:
-        S.append(f"52주 신고가 {nh['n']}종.")
+        S.append(f"오늘 52주 신고가 {nh['n']:,}종" + (f", 신저가 {nl['n']:,}종" if nl.get("n") is not None else "") + ".")
+    w = week52(f)
+    if w:
+        S.append(w)
     return " ".join(S)
 
 
@@ -188,7 +242,7 @@ def stocks(f):
     else:
         u = (f.get("internals") or {}).get("US") or {}
         if u.get("top"):
-            S.append("시총 상위 500에서 " + ", ".join(f"{x['name']} {_p(x['ret'])}" for x in u["top"][:3]) + "가 가장 많이 올랐다.")
+            S.append(f"시총 상위 {u.get('big_n') or 500:,}에서 " + ", ".join(f"{x['name']} {_p(x['ret'])}" for x in u["top"][:3]) + "가 가장 많이 올랐다.")
         if u.get("bottom"):
             S.append("가장 많이 내린 종목은 " + ", ".join(f"{x['name']} {_p(x['ret'])}" for x in u["bottom"][:2]) + ".")
     return " ".join(S)
@@ -244,17 +298,21 @@ def why_lines(f):
 
 
 def narrate(f):
-    return dict(summary=summary(f), why=why_lines(f), direction=direction(f), week52=week52(f), breadth=breadth(f), flow=flow(f),
+    light, sig = signal(f)
+    return dict(summary=summary(f), why=why_lines(f), light=light, signal=sig, direction=direction(f), week52=week52(f),
+                breadth=breadth(f), flow=flow(f),
                 sector=sector(f), stocks=stocks(f), ledger=ledger(f), checkpoints=checkpoints(f))
 
 
 def compose(f, n):
-    title = {"daily": "미국 장 마감 시황", "kr": "한국 장 마감 시황", "weekly": "주간 시황"}.get(f["kind"], "시황")
+    title = TITLE.get(f["kind"], "시황")
     L = [f"## {title}", "", "## 한 줄 요약", n["summary"]]
     if n["why"]:
-        L += ["", "**왜 움직였나 (뉴스 제목 그대로)**"] + [f"- {w}" for w in n["why"]]
+        L += ["", f"**{WHY_LABEL}**"] + [f"- {w}" for w in n["why"]]
     L += ["", "## 해설"]
-    for k, lab in (("direction", "시장 방향"), ("week52", "52주 신고가·신저가"), ("breadth", "시장 폭"), ("flow", "돈의 흐름"), ("sector", "업종·테마"),
+    if n.get("signal"):
+        L.append(f"- **투자 신호등 {n['light']}** {n['signal']}")
+    for k, lab in (("breadth", "시장 폭 · 52주 신고가·신저가"), ("flow", "돈의 흐름"), ("sector", "업종·테마"),
                    ("stocks", "종목"), ("ledger", "실전 원장")):
         if n.get(k):
             L.append(f"- **{lab}** {n[k]}")
