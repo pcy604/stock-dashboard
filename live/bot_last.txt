@@ -1,3 +1,4 @@
-🔴 실전 주문 봇 2026-11-26 · 🇰🇷 · 시가 단일가 창
-  ⛔ 토스 연결 실패 — ConnectionError: HTTPSConnectionPool(host='openapi.tossinvest.com', port=443): Max retries exceeded with url: /oauth2/token (Caused by NameResolutionError("HTTPSConnection(host=
-  [텔레그램 오류] HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8674287891:AAFRAoqvYVaG9KkXeAPIgaNzOHNeIel81F0/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 11001] getaddrinfo failed)"))
+🔴 실전 주문 봇 2026-11-26 · 🇰🇷 · 정규장
+  ※ 대한광통신 불타기 조건 충족 — 소속 시장 5주선 아래라 보류
+  주문 없음
+  슬리브 자산 ≈ 281,697원 · 종목당 목표 28,170원
