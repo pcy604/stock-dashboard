@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-25",
+ "asof": "2026-11-26",
  "fail_streak_alarm": 3,
  "freshness": {
   "bad": [],
@@ -8,7 +8,7 @@
  "platforms": {
   "DART (금융감독원)": {
    "breaks": "한국 분기재무 전체 → 한국 백테스트 패널·흑자전환·이익가속",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "네이버 재무(비공식·구조 변경 위험)",
    "kind": "probe",
    "state": "ok",
@@ -17,7 +17,7 @@
   },
   "FRED (St. Louis Fed)": {
    "breaks": "🌍 매크로 탭 · 국면 판정 입력",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "World Bank·yfinance 일부 대체 가능",
    "kind": "probe",
    "state": "ok",
@@ -26,7 +26,7 @@
   },
   "GitHub (Actions·Release·raw)": {
    "breaks": "전부. 수집·발행·봇·패널이 모두 Actions 에서 돈다",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "없음 (고정 IP 서버로 이전해야 함 — 11-22 보류 중)",
    "kind": "probe",
    "state": "ok",
@@ -35,7 +35,7 @@
   },
   "Google Gemini": {
    "breaks": "💬 챗봇·AI 해설(제품은 돌고 설명만 사라진다)",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "Groq (이미 예비로 배선돼 있다)",
    "kind": "probe",
    "state": "ok",
@@ -43,7 +43,7 @@
    "why": "HTTP 200 (인증 확인)"
   },
   "Meta (Threads·Instagram)": {
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "kind": "manual",
    "state": "manual",
    "streak": 0,
@@ -51,7 +51,7 @@
   },
   "SEC EDGAR": {
    "breaks": "미국 전 종목 재무·시총·PER·PBR·주도주 신호",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "없음 (유료 데이터 벤더로 갈아타야 함)",
    "kind": "probe",
    "state": "ok",
@@ -60,7 +60,7 @@
   },
   "Streamlit Community Cloud": {
    "breaks": "사용자가 보는 화면 전부",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "없음 (자체 호스팅 이전 필요)",
    "kind": "probe",
    "state": "ok",
@@ -69,16 +69,16 @@
   },
   "Supabase": {
    "breaks": "퀀트 전략 저장·공개 게시판·VOC 접수·유입 집계",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "없음 (화면은 떠도 저장 기능이 죽는다)",
    "kind": "project",
    "state": "authfail",
-   "streak": 4,
+   "streak": 5,
    "why": "프로젝트 REST HTTP 401"
   },
   "Telegram Bot API": {
    "breaks": "봇 알림·실패 경보 전달(경보가 안 오면 고장을 모른다)",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "GitHub Actions 실패 메일",
    "kind": "probe",
    "state": "ok",
@@ -86,7 +86,7 @@
    "why": "HTTP 200 (인증 확인)"
   },
   "X (Twitter) API": {
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "kind": "manual",
    "state": "manual",
    "streak": 0,
@@ -94,7 +94,7 @@
   },
   "Yahoo Finance (yfinance)": {
    "breaks": "가격 시계열 → 스크리너·백테스트·주도주 전부",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "FinanceDataReader·pykrx(한국) · 미국은 사실상 없음",
    "kind": "probe",
    "state": "ok",
@@ -103,7 +103,7 @@
   },
   "네이버 금융": {
    "breaks": "한국 컨센서스 추세·일부 재무 보조 값",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "DART (공식, 단 컨센서스는 없음)",
    "kind": "indirect",
    "state": "ok",
@@ -112,7 +112,7 @@
   },
   "토스증권": {
    "breaks": "실전 원장·주문 봇 (허용 IP 때문에 노트북 전용 — 고정 IP 보류 중)",
-   "checked": "2026-11-25",
+   "checked": "2026-11-26",
    "fallback": "없음 (수동 입력)",
    "kind": "indirect",
    "state": "ok",
