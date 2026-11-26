@@ -1,14 +1,14 @@
 {
- "generated": "2026-11-25",
- "asof": "2026-11-25",
+ "generated": "2026-11-26",
+ "asof": "2026-11-26",
  "intraday": false,
  "checks": {
   "perf_price": {
    "n": 1161,
-   "ok": 1019,
-   "rate": 0.878,
+   "ok": 1128,
+   "rate": 0.972,
    "threshold": 0.9,
-   "pass_": false,
+   "pass_": true,
    "note": "현재가 3% 이내"
   },
   "perf_52w": {
@@ -20,23 +20,23 @@
    "note": "52주 신고가 -3% 판정 일치"
   },
   "coverage": {
-   "n": 600,
-   "ok": 582,
-   "rate": 0.97,
+   "n": 602,
+   "ok": 583,
+   "rate": 0.968,
    "threshold": 0.8,
    "pass_": true,
    "note": "원천 시총 3,000억+ 중 perf 에 있는 비율"
   },
   "perf_52w_count": {
    "n": 6,
-   "ok": 8,
-   "rate": 1.33,
+   "ok": 11,
+   "rate": 1.83,
    "threshold": 0.3,
    "pass_": true,
    "note": "앱/원천 신고가 근접 종목 수 비 (0.3~3배 · 주봉 vs 일봉 차 허용)"
   }
  },
  "source_52w_near": 6,
- "app_52w_near": 8,
- "ok": false
+ "app_52w_near": 11,
+ "ok": true
 }
