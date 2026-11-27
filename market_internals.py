@@ -286,12 +286,18 @@ def us_internals(top_n=None, n_hist=30):      # 2026-11-27 모수 통일 — Non
     p = _j('results/perf_latest.json')
     us = sorted([s for s in p.get('stocks', []) if s.get('market') == 'US' and s.get('marcap')], key=lambda s: -s['marcap'])
     if len(us) < 100:
+        print(f'  미국 시장 내부 생략: perf_latest 미국 {len(us)}종(<100)')
         return {}
     sd = (_j('data/sector_detail.json') or {}).get('us') or {}
     d = _dl([s['sym'] for s in us])
     c = _clean(d['Close'])
-    if c.empty or len(c) < 60:
-        return {}
+    if c.empty or len(c) < 60:   # 2026-11-28 — 11-27 판에서 조용히 비었다(오늘의 시장·히트맵 미국 공백). 이유를 남기고 50종씩 한 번 더
+        print(f"  미국 시장 내부: 1차 일봉 {c.shape} — 50종씩 재시도")
+        d = _dl([s['sym'] for s in us], batch=50)
+        c = _clean(d['Close'])
+        if c.empty or len(c) < 60:
+            print(f"  미국 시장 내부 생략: 일봉 {c.shape}(Yahoo)")
+            return {}
     # 2026-11-15 이름 통일 — 미국은 전부 **티커**(옛: 70종만 한글 → '엔비디아'와 'CBRS'가 섞였다)
     meta = {s['sym']: (s['sym'], s['marcap']) for s in us if s['sym'] in c.columns}
     have = [s['sym'] for s in us if s['sym'] in c.columns and c[s['sym']].iloc[-1] == c[s['sym']].iloc[-1]]
