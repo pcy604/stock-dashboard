@@ -422,7 +422,10 @@ def supabase():
     for suf in ("/rest/v1", "/rest"):
         if base.endswith(suf):
             base = base[: -len(suf)]
-    req = urllib.request.Request(base + "/rest/v1/", headers={"User-Agent": UA, "apikey": key,
+    #   2026-11-27 — '/rest/v1/'(스키마 목록)는 Supabase 새 키 체계에서 anon·publishable 키를 401 로 막는다.
+    #   그래서 앱은 멀쩡히 쓰는데(usage_events 24h 98건) 감시만 11-23부터 매일 '자격 거부'였다.
+    #   /auth/v1/health 는 유효한 키면 어떤 종류든 200, 틀린 키는 401, 일시정지는 5xx — R4 목적 그대로.
+    req = urllib.request.Request(base + "/auth/v1/health", headers={"User-Agent": UA, "apikey": key,
                                                               "Authorization": f"Bearer {key}"})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
