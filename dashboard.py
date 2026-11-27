@@ -4397,41 +4397,59 @@ def _macro_rules_section(V, _RG):
 
 
 def _index_valuation_block():
-    """2026-11-28 차니 — 지수도 역사 PER·PBR. tools/index_valuation.py(주간 · quant_panel 합산)."""
+    """2026-11-28 차니 — 지수도 역사 PER·PBR. 장기판(index_valuation_long: 거래소·Shiller) + 패널 합산판(2018~, 보조)."""
     import plotly.graph_objects as _go
     d = load_json(Path('results/index_valuation.json')) or {}
+    L = (load_json(Path('results/index_valuation_long.json')) or {}).get('indices') or {}
     ix = d.get('indices') or {}
-    if not ix:
+    if not ix and not L:
         return
     st.subheader("지수 밸류에이션 — 지금은 역사적으로 싼가")
-    _k = st.segmented_control('지표', ['PER', 'PBR'], default='PER', key='ixv_k', label_visibility='collapsed') or 'PER'
+    _c1, _c2 = st.columns([1, 2])
+    _k = _c1.segmented_control('지표', ['PER', 'PBR', 'CAPE'], default='PER', key='ixv_k', label_visibility='collapsed') or 'PER'
+    _yr = _c2.segmented_control('기간', ['전체', '30년', '10년'], default='전체', key='ixv_y', label_visibility='collapsed') or '전체'
     key = _k.lower()
-    cols = st.columns(len(ix))
-    for (name, v), col in zip(ix.items(), cols):
-        s = [x for x in v.get('series') or [] if x.get(key)]
-        if len(s) < 20:
-            continue
-        idx = pd.DatetimeIndex([x['date'] for x in s])
-        y = pd.Series([x[key] for x in s], index=idx)
-        m, sd, cur = float(y.mean()), float(y.std()), float(y.iloc[-1])
-        pct = float((y <= cur).mean() * 100)
-        fig = _go.Figure()
-        fig.add_trace(_go.Scatter(x=idx, y=[m + sd] * len(y), line=dict(width=0), showlegend=False, hoverinfo='skip'))
-        fig.add_trace(_go.Scatter(x=idx, y=[m - sd] * len(y), line=dict(width=0), fill='tonexty',
-                                  fillcolor='rgba(148,163,184,.18)', showlegend=False, hoverinfo='skip'))
-        fig.add_trace(_go.Scatter(x=idx, y=[m] * len(y), line=dict(color='#94A3B8', dash='dot', width=1), showlegend=False,
-                                  hovertemplate=f'평균 {m:.1f}<extra></extra>'))
-        fig.add_trace(_go.Scatter(x=idx, y=y.values, line=dict(color='#2563EB', width=1.8), showlegend=False,
-                                  hovertemplate='%{x|%Y-%m-%d} %{y:.2f}배<extra></extra>'))
-        fig.update_layout(height=220, margin=dict(l=8, r=8, t=8, b=8), yaxis=dict(title=None), xaxis=dict(title=None))
+    # 지수 → (장기 원천 이름, 패널 이름)
+    pairs = [('코스피', '코스피', '코스피'), ('코스닥', '코스닥', '코스닥'), ('S&P500', 'S&P500', '미국 대형 500')]
+    cols = st.columns(len(pairs))
+    for (title, lk, pk), col in zip(pairs, cols):
+        ls = (L.get(lk) or {}).get(key) or []
+        ps = [x for x in ((ix.get(pk) or {}).get('series') or []) if x.get(key)]
+        main = pd.Series({pd.Timestamp(a_): v for a_, v in ls}) if ls else pd.Series({pd.Timestamp(x['date']): x[key] for x in ps})
+        main = main.sort_index()
+        if _yr != '전체' and len(main):
+            main = main[main.index >= main.index[-1] - pd.DateOffset(years=int(_yr[:2]))]
         with col:
-            st.markdown(f"**{name}** · {_k} **{cur:.2f}배** · 역사 평균 {m:.1f} (±1σ {m - sd:.1f}~{m + sd:.1f}) · "
-                        f"**하위 {pct:.0f}%**" + (' — 역사 하위 20% 안' if pct <= 20 else ' — 역사 상위 20% 안' if pct >= 80 else ''))
+            if len(main) < 20:
+                st.markdown(f"**{title}** · {_k} 자료 없음" + (" — 한국거래소 로그인 필요(KRX_ID·KRX_PW)" if lk in ('코스피', '코스닥') and not ls else ''))
+                continue
+            m, sd, cur = float(main.mean()), float(main.std()), float(main.iloc[-1])
+            pct = float((main <= cur).mean() * 100)
+            idx = pd.DatetimeIndex(main.index)
+            fig = _go.Figure()
+            fig.add_trace(_go.Scatter(x=idx, y=[m + sd] * len(idx), line=dict(width=0), showlegend=False, hoverinfo='skip'))
+            fig.add_trace(_go.Scatter(x=idx, y=[m - sd] * len(idx), line=dict(width=0), fill='tonexty',
+                                      fillcolor='rgba(148,163,184,.18)', showlegend=False, hoverinfo='skip'))
+            fig.add_trace(_go.Scatter(x=idx, y=[m] * len(idx), line=dict(color='#94A3B8', dash='dot', width=1), showlegend=False,
+                                      hovertemplate=f'평균 {m:.1f}<extra></extra>'))
+            fig.add_trace(_go.Scatter(x=idx, y=main.values, name='장기(공식)' if ls else '패널 합산', line=dict(color='#2563EB', width=1.6),
+                                      hovertemplate='%{x|%Y-%m} %{y:.1f}배<extra></extra>'))
+            last_txt = ''
+            if ls and ps and key in ('per', 'pbr'):          # 장기 원천이 끊긴 뒤(Shiller 실적 2023-06)는 패널 합산으로 잇는다 — 방법이 달라 색을 나눈다
+                pser = pd.Series({pd.Timestamp(x['date']): x[key] for x in ps}).sort_index()
+                pser = pser[pser.index >= idx[0]]
+                fig.add_trace(_go.Scatter(x=pd.DatetimeIndex(pser.index), y=pser.values, name='패널 합산(2018~)',
+                                          line=dict(color='#F59E0B', width=1.2), hovertemplate='%{x|%Y-%m-%d} %{y:.1f}배<extra></extra>'))
+                last_txt = f" · 최근(패널) {float(pser.iloc[-1]):.1f}배"
+            fig.update_layout(height=230, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=-0.15, font=dict(size=10)),
+                              showlegend=bool(ls and ps and key in ('per', 'pbr')))
+            st.markdown(f"**{title}** · {_k} **{cur:.1f}배** ({main.index[-1]:%Y-%m}) · 평균 {m:.1f} (±1σ {m - sd:.1f}~{m + sd:.1f}) · "
+                        f"하위 **{pct:.0f}%**" + (' — 역사 하위 20% 안' if pct <= 20 else ' — 역사 상위 20% 안' if pct >= 80 else '') + last_txt)
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-    st.caption(f"출처: quant_panel(한국 KRX·DART·네이버 / 미국 SEC EDGAR) 주간 · tools/index_valuation.py · 마지막 갱신: {d.get('made', '-')} · "
-               "합산 방식(시총 합 ÷ 이익 합) · 적자 종목은 PER 계산에서 빠져 실제보다 낮게 나온다(같은 방법으로 매주 쟀으므로 역사 비교는 유효) · "
-               "미국 = 그 주 시총 상위 500(S&P500 근사) · 회색 띠 = 평균 ±1 표준편차 · ⚠️ 낮은 PER 이 곧 싸다는 뜻은 아니다 — 이익이 정점(반도체 호황 등)일 때 PER 은 가장 낮게 나온다")
-
+    st.caption("출처: S&P500 = Shiller 월별 자료(1871~, PER = 지수 ÷ 12개월 보고 이익 · CAPE = 10년 실질 이익) · "
+               "코스피·코스닥 = 한국거래소 지수 PER·PBR(로그인 설정 전에는 패널 합산 2018~) · 패널 합산 = quant_panel 시총 합 ÷ 이익 합(이익 낸 종목) · "
+               f"마지막 갱신: {d.get('made', '-')} · 회색 띠 = 평균 ±1 표준편차 · "
+               "⚠️ 낮은 PER 이 곧 싸다는 뜻은 아니다 — 이익이 정점일 때 PER 은 가장 낮게 나온다")
 
 with tab4, guard('매크로'):
     _lazy(tab4)

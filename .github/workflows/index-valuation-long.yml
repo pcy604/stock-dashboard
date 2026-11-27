@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 30
     env:
       PYTHONIOENCODING: utf-8
+      KRX_ID: ${{ secrets.KRX_ID }}    # 한국거래소 로그인(2025~ 필수) — data.krx.co.kr 무료 회원
+      KRX_PW: ${{ secrets.KRX_PW }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,3 +34,6 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "auto: 지수 밸류에이션 장기판 $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase --autostash -X theirs origin main && git push && break; sleep 5; done
+      - name: 산출물 신선도 검증
+        if: always()
+        run: python tools/check_freshness_ci.py --job index-valuation-long

@@ -6,7 +6,8 @@
 
 원천 (공식·장기 · 방법이 지수마다 하나로 고정되어 역사 비교가 된다)
   코스피·코스닥  한국거래소 지수 PER·PBR(pykrx get_index_fundamental) — 월말 값, 2000~ (코스닥 지수 PER 은 거래소 제공 시작부터)
-  S&P500        PER = multpl.com 월별 표(Shiller 자료 기반, 1871~) · PBR = multpl 분기(1999~) · CAPE = multpl 월별(1881~)
+  S&P500        Shiller 월별(1871~) — PER·CAPE. PBR 장기 무료 원천 없음(multpl 은 러너 차단)
+  ⚠️ 한국거래소는 2025년부터 로그인 필요 — GitHub Secrets KRX_ID·KRX_PW(data.krx.co.kr 무료 회원) 없으면 한국은 비어 있다.
 실패한 원천은 비우고 이유를 남긴다(지어내지 않는다). 패널 합산판(index_valuation.json)은 2018~ 보조로 그대로 둔다.
 """
 import json
@@ -50,7 +51,7 @@ def krx(ticker: str, start='20000101') -> dict:
     return out
 
 
-def multpl(path: str) -> list:
+def _unused_multpl(path: str) -> list:
     r = requests.get(f'https://www.multpl.com/{path}', headers=UA, timeout=30)
     r.raise_for_status()
     rows = re.findall(r'<td>([A-Z][a-z]{2} \d{1,2}, \d{4})</td>\s*<td>\s*(?:&#x2002;|&#8194;)?\s*([\d.]+)', r.text)
@@ -69,16 +70,19 @@ def main():
         except Exception as e:
             res[name] = dict(err=str(e)[:200])
             print(name, '실패', e)
-    sp = dict(src='multpl.com(Shiller 자료 기반) · PER 월별 1871~ · PBR 분기 1999~ · CAPE 월별')
-    for key, path in (('per', 's-p-500-pe-ratio/table/by-month'), ('pbr', 's-p-500-price-to-book/table/by-quarter'),
-                      ('cape', 'shiller-pe/table/by-month')):
-        try:
-            sp[key] = multpl(path)
-            print('S&P500', key, len(sp[key]), sp[key][:1], sp[key][-1:])
-        except Exception as e:
-            sp[f'err_{key}'] = str(e)[:200]
-            print('S&P500', key, '실패', e)
-        time.sleep(1.5)
+    # S&P500 — Shiller 월별 자료(datahub 미러, GitHub raw). multpl 은 러너에서 연결 거부(11-28 실측).
+    #   PER = 지수 ÷ 12개월 실적(보고 이익) · CAPE = 10년 실질 이익 평균 기준(PE10). 실적이 아직 0 인 최근 달은 뺀다.
+    sp = dict(src='Shiller 월별 자료(datahub.io 미러) · PER = 지수 ÷ 12개월 보고 이익 · CAPE = PE10')
+    try:
+        d = pd.read_csv('https://raw.githubusercontent.com/datasets/s-and-p-500/main/data/data.csv')
+        d = d[(d['Earnings'] > 0)]
+        sp['per'] = [[r.Date, round(r.SP500 / r.Earnings, 2)] for r in d.itertuples()]
+        c = d[d['PE10'] > 0]
+        sp['cape'] = [[r.Date, round(float(r.PE10), 2)] for r in c.itertuples()]
+        print('S&P500', len(sp['per']), sp['per'][0], sp['per'][-1])
+    except Exception as e:
+        sp['err'] = str(e)[:200]
+        print('S&P500 실패', e)
     res['S&P500'] = sp
     json.dump(dict(made=str(date.today()), indices=res), open(OUT, 'w', encoding='utf-8'), ensure_ascii=False)
     print('저장', OUT)
