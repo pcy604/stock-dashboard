@@ -9333,13 +9333,6 @@ def _home_top(V):
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof, period=_per)
     _UH.pulse_box([idx[n] for n in ('코스피', '코스닥', 'S&P500', '나스닥') if n in idx])
-    _hilo_chart()
-    _hk = {'d1': 'breadth_hist', 'w1': 'breadth_hist_w', 'm1': 'breadth_hist_m'}[_per]
-    _kt = _UH.trend_points(_kint.get(_hk) or ((inr.get('KR_trend') or {}).get('hist') if _per == 'd1' else None))
-    if _per == 'd1' and _kt and krf.get('breadth_up') is not None and _kfa > _kt[-1][0]:
-        _kt.append((_kfa, float(krf['breadth_up'])))
-    _UH.trend_box([('한국 상승 종목 비율', _kt, ' · 시총 1,000억+'),
-                   ('미국 상승 종목 비율', _UH.trend_points(usf.get(_hk)), ' · 시총 $3억+')], _per)
     # 오늘의 시장 — 한국·미국 × 일·주·월. 2026-11-15: 한국 일간도 일·주·월과 같은 종목 집합(시총 1,000억+)으로.
     #   네이버 전 종목 숫자(상한가·특징주·수급·당일 테마)는 그 위에 얹는 보조.
     _UH.LINK_BASE = ''
@@ -9349,9 +9342,6 @@ def _home_top(V):
     _mk = st.segmented_control('시장', ['🇰🇷 한국', '🇺🇸 미국'], default='🇰🇷 한국', key='home_mkt',
                                label_visibility='collapsed') or '🇰🇷 한국'
     _is_kr = _mk.startswith('🇰🇷')
-    _ttl = {'d1': '오늘의 시장', 'w1': '이번 주 시장 — 최근 5거래일', 'm1': '이번 달 시장 — 최근 21거래일'}[_per]
-    st.html(_UH.CSS + f"<div class='hm'><div class='hm-sec' style='margin-top:2px'><b>{_ttl}</b><span>지수 아래 실제 등락 종목 수 · 돈이 간 업종과 종목 · "
-                      "업종 줄을 누르면 구성 종목</span></div></div>")
     _extra = None
     if _is_kr:
         _kd = {k: v for k, v in _kint.items() if k not in ('periods',)}
@@ -9366,6 +9356,25 @@ def _home_top(V):
             _m = (_kint.get('periods') or {}).get(_per) or {}
     else:
         _m = usf if _per == 'd1' else ((usf.get('periods') or {}).get(_per) or {})
+    # 히트맵 — 한·미 × 일·주·월(2026-11-15: 한국 일간에만 있었고 접혀 있어 '어디 갔나' 했다)
+    # 2026-11-27 차니 '큰 것 → 작은 것' — 히트맵을 시장 선택 바로 아래(시장 전체 지도 → 폭·신고가 → 업종·종목)
+    _hm = ((_m or {}).get('heatmap') or (krf.get('heatmap') if (_is_kr and _per == 'd1') else None))
+    if _hm:
+        with st.expander(f"🗺️ 업종 히트맵 — 시총 상위 {len(_hm)}종 (면적 = 시총 · 색 = {_UH.PERIOD_LABEL[_per]} 등락)", expanded=True):
+            _hf = _UH.heatmap_fig(_hm, unit='조' if _is_kr else '$B')
+            if _hf is not None:
+                st.plotly_chart(_hf, use_container_width=True, config={'displayModeBar': False})
+                st.caption(f"출처: {'네이버 업종 16묶음' if _is_kr else 'Yahoo sector 11묶음'} · market_internals.py · 마지막 갱신: {(_m or {}).get('asof') or _kfa} · 칸을 누르면 업종 확대")
+    _hilo_chart()
+    _hk = {'d1': 'breadth_hist', 'w1': 'breadth_hist_w', 'm1': 'breadth_hist_m'}[_per]
+    _kt = _UH.trend_points(_kint.get(_hk) or ((inr.get('KR_trend') or {}).get('hist') if _per == 'd1' else None))
+    if _per == 'd1' and _kt and krf.get('breadth_up') is not None and _kfa > _kt[-1][0]:
+        _kt.append((_kfa, float(krf['breadth_up'])))
+    _UH.trend_box([('한국 상승 종목 비율', _kt, ' · 시총 1,000억+'),
+                   ('미국 상승 종목 비율', _UH.trend_points(usf.get(_hk)), ' · 시총 $3억+')], _per)
+    _ttl = {'d1': '오늘의 시장', 'w1': '이번 주 시장 — 최근 5거래일', 'm1': '이번 달 시장 — 최근 21거래일'}[_per]
+    st.html(_UH.CSS + f"<div class='hm'><div class='hm-sec' style='margin-top:2px'><b>{_ttl}</b><span>지수 아래 실제 등락 종목 수 · 돈이 간 업종과 종목 · "
+                      "업종 줄을 누르면 구성 종목</span></div></div>")
     if not _m:
         st.info("이 시장·기간의 자료가 아직 없습니다 — 한국은 평일 15:50, 미국은 06:30(KST) 시황 갱신 때 채워집니다.")
     else:
@@ -9382,14 +9391,6 @@ def _home_top(V):
                 st.dataframe(pd.DataFrame(_sr), hide_index=True, filters=False,
                              column_config={'등락(%)': st.column_config.NumberColumn(format='%+.1f', help='업종 안 종목의 시총가중 등락(고른 기간)'),
                                             '종목 수': st.column_config.NumberColumn(format='%d')})
-        # 히트맵 — 한·미 × 일·주·월(2026-11-15: 한국 일간에만 있었고 접혀 있어 '어디 갔나' 했다)
-        _hm = (_m.get('heatmap') or (krf.get('heatmap') if (_is_kr and _per == 'd1') else None))
-        if _hm:
-            with st.expander(f"🗺️ 업종 히트맵 — 시총 상위 {len(_hm)}종 (면적 = 시총 · 색 = {_UH.PERIOD_LABEL[_per]} 등락)", expanded=True):
-                _hf = _UH.heatmap_fig(_hm, unit='조' if _is_kr else '$B')
-                if _hf is not None:
-                    st.plotly_chart(_hf, use_container_width=True, config={'displayModeBar': False})
-                    st.caption(f"출처: {'네이버 업종 16묶음' if _is_kr else 'Yahoo sector 11묶음'} · market_internals.py · 마지막 갱신: {_ma} · 칸을 누르면 업종 확대")
     _UH.macro_cards(V)
     _src = ('results/macro.json (verdict.py · 매일 06:00 KST)' if V.get('_src') == 'file'
             else f"라이브 계산 — macro.json 이 없거나 낡음({V.get('_file_asof') or '없음'})")
