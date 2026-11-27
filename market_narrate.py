@@ -365,8 +365,7 @@ def compose(f, n):
         L += ["", f"**{WHY_LABEL_SHORT}**"] + [f"📊 {e}" for e in n.get("econ") or []] \
              + ([n["explain"]] if n.get("explain") else []) + [f"- {w}" for w in n["why"]]
     L += ["", "## 해설"]
-    if n.get("signal"):
-        L.append(f"- **투자 신호등 {n['light']}** {n['signal']}")
+    # 2026-11-28 차니 '투자 신호등 일단 없애' — 시황 본문에서 뺀다(narrative['signal'] 값은 남겨 둔다)
     for k, lab in (("breadth", "시장 폭 · 52주 신고가·신저가"), ("flow", "돈의 흐름"), ("sector", "업종·테마"),
                    ("stocks", "종목"), ("ledger", "실전 원장")):
         if n.get(k):

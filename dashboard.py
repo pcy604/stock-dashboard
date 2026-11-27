@@ -9383,7 +9383,7 @@ def _hilo_chart():
     _UH._html(_UH.CSS + "<div class='hm'><div class='hm-sec' style='margin-top:6px'><b>주간 52주 신고가 · 신저가</b>"
                       f"<span>위 = 신고가 경신 종목 수 · 아래 = 신저가 · 막대를 누르면 그 주 신고가 종목(종목 발굴) · 기준일 {asof}</span></div></div>")
     cols = st.columns(2)
-    for col, mk, lab in ((cols[0], 'KR', '🇰🇷 한국 · 시총 1,000억+'), (cols[1], 'US', '🇺🇸 미국 · 시총 $3억+')):
+    for col, mk, lab in ((cols[0], 'KR', '한국 · 시총 1,000억+'), (cols[1], 'US', '미국 · 시총 $3억+')):   # 2026-11-28 국기 이모지 = 윈도우에서 'US'·'KR' 글자로 보였다
         d = data.get(mk) or {}
         if not d:
             continue

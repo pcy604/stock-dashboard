@@ -54,6 +54,12 @@ CSS = """
   /* 인라인 grid-template-columns 는 미디어쿼리를 이겨서 폰에서 4열이 찌그러졌다(매크로 국면) — 클래스로 */
   .hm-g-auto { grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
   .hm-g4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  /* 2026-11-28 차니 — 글로벌 마켓 7×2(글자 작음) → 3열 × N행, 카드·글자 크게. 세로 공간을 쓴다(쇼츠·모바일과 같은 모양) */
+  .hm-grid.hm-g3 { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  .hm-g3 .hm-card { padding:14px 16px 12px; } .hm-g3 .hm-card .nm { font-size:14px; }
+  .hm-g3 .hm-card .px { font-size:26px; } .hm-g3 .hm-card .d1 { font-size:16px; } .hm-g3 .hm-card .sub { font-size:12.5px; }
+  @media (max-width:560px) { .hm-g3 .hm-card { padding:8px 8px 7px; } .hm-g3 .hm-card .nm { font-size:11px; }
+    .hm-g3 .hm-card .px { font-size:16px; } .hm-g3 .hm-card .d1 { font-size:12px; } .hm-g3 .hm-card .sub { font-size:10px; } }
   @media (max-width:560px) { .hm-g-auto, .hm-g4 { grid-template-columns:repeat(2,minmax(0,1fr)) !important; } }
   .hm-card { border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:10px 12px 9px; }
   .hm-card .nm { font-size:12px; color:var(--ink-3); font-weight:600; display:flex; justify-content:space-between; }
@@ -325,7 +331,7 @@ def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
           <div class="sub">{sub}<br><span class='u'>{t1}<i class='sp'> · </i>{t2}</span></div></div>""")
     _html(CSS + f"""<div class="hm"><div class="hm-sec"><b>글로벌 마켓</b>
       <span>큰 숫자 = 고른 기간 등락 · 선 = 최근 3개월 · 고점 = 52주 고점 대비 · VIX·환율·금리·달러·유가·스프레드는 오르면 위험이라 색 없음 · bp = 0.01%p</span></div>
-      <div class="hm-grid">{''.join(cards) or '<div class="hm-src">지수 데이터 없음</div>'}</div>
+      <div class="hm-grid hm-g3">{''.join(cards) or '<div class="hm-src">지수 데이터 없음</div>'}</div>
       <div class="hm-src">출처: Yahoo Finance · FRED(하이일드 스프레드 = ICE BofA US High Yield OAS) · market_report.py · 마지막 갱신: {_e(asof)}</div></div>""")
 
 
@@ -691,7 +697,7 @@ def _trend_card(label: str, pts: list[tuple], basis: str, period: str = 'd1') ->
     last = pts[-1][1]
     avg = sum(p for _, p in pts) / len(pts)
     upd = sum(p >= 50 for _, p in pts)
-    return (f"<div class='hm-card'><div class='nm'>{_e(label)}<span style='font-weight:500'>{_e(basis)}</span></div>"
+    return (f"<div class='hm-card'><div class='nm' style='justify-content:flex-start;gap:0'>{_e(label)}<span style='font-weight:500'>{_e(basis)}</span></div>"
             f"<div style='display:flex;gap:14px;align-items:baseline;margin-top:2px'><span class='px {'p' if last >= 50 else 'n'}'>{last:.0f}%</span>"
             f"<span class='sub'>최근 {len(pts)}{unit} 평균 {avg:.0f}% · 오른 종목이 더 많은 {day} {upd}번</span></div>"
             f"<div class='hm-trend'><div class='mid'></div>{bars}</div>"
