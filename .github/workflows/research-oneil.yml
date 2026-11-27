@@ -1,0 +1,42 @@
+# 오닐 게이트 백테스트 (2026-11-28) — research/oneil_gate_bt.py
+# 왜 CI 인가: 지수 일봉 거래량(yfinance)이 필요한데 작업 세션에서는 Yahoo 가 막혀 있다.
+#   패널은 Release 'quant-panel' 에서 받고, 결과 JSON 과 지수 일봉 캐시만 커밋한다(다른 파이프라인 무영향).
+name: research-oneil
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'research/oneil_gate_bt.py'
+      - 'market_pulse.py'
+      - '.github/workflows/research-oneil.yml'
+permissions:
+  contents: write
+jobs:
+  bt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: '1'
+      ONEIL_REFRESH: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: 패널 받기 (Release quant-panel)
+        run: gh release download quant-panel -p 'quant_panel_KR.parquet' -D results --clobber
+      - name: 백테스트
+        run: python research/oneil_gate_bt.py
+      - name: 커밋
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add results/oneil_gate_bt.json data/research/oneil_idx_daily.parquet
+          git diff --cached --quiet && exit 0
+          git commit -m "research: 오닐 게이트 백테스트 결과 [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
