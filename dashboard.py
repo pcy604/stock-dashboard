@@ -4435,6 +4435,13 @@ def _index_valuation_block():
             fig.add_trace(_go.Scatter(x=idx, y=main.values, name='장기(공식)' if ls else '패널 합산', line=dict(color='#2563EB', width=1.6),
                                       hovertemplate='%{x|%Y-%m} %{y:.1f}배<extra></extra>'))
             last_txt = ''
+            fp = (L.get(lk) or {}).get('fper') or []
+            if key == 'per' and fp:   # 2026-11-28 추정치 플레이 — 한국거래소 선행PER(컨센서스 추정 이익 기준)
+                fs = pd.Series({pd.Timestamp(a_): v for a_, v in fp}).sort_index()
+                fs = fs[fs.index >= idx[0]]
+                fig.add_trace(_go.Scatter(x=pd.DatetimeIndex(fs.index), y=fs.values, name='선행 PER(추정 이익)',
+                                          line=dict(color='#DC2626', width=1.2, dash='dash'), hovertemplate='%{x|%Y-%m} 선행 %{y:.1f}배<extra></extra>'))
+                last_txt += f" · 선행 **{float(fs.iloc[-1]):.1f}배**(추정 이익 기준)"
             if ls and ps and key in ('per', 'pbr'):          # 장기 원천이 끊긴 뒤(Shiller 실적 2023-06)는 패널 합산으로 잇는다 — 방법이 달라 색을 나눈다
                 pser = pd.Series({pd.Timestamp(x['date']): x[key] for x in ps}).sort_index()
                 pser = pser[pser.index >= idx[0]]
@@ -4442,7 +4449,7 @@ def _index_valuation_block():
                                           line=dict(color='#F59E0B', width=1.2), hovertemplate='%{x|%Y-%m-%d} %{y:.1f}배<extra></extra>'))
                 last_txt = f" · 최근(패널) {float(pser.iloc[-1]):.1f}배"
             fig.update_layout(height=230, margin=dict(l=8, r=8, t=8, b=8), legend=dict(orientation='h', y=-0.15, font=dict(size=10)),
-                              showlegend=bool(ls and ps and key in ('per', 'pbr')))
+                              showlegend=bool((ls and ps and key in ('per', 'pbr')) or (key == 'per' and fp)))
             st.markdown(f"**{title}** · {_k} **{cur:.1f}배** ({main.index[-1]:%Y-%m}) · 평균 {m:.1f} (±1σ {m - sd:.1f}~{m + sd:.1f}) · "
                         f"하위 **{pct:.0f}%**" + (' — 역사 하위 20% 안' if pct <= 20 else ' — 역사 상위 20% 안' if pct >= 80 else '') + last_txt)
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
@@ -4450,6 +4457,88 @@ def _index_valuation_block():
                "코스피·코스닥 = 한국거래소 지수 PER·PBR(로그인 설정 전에는 패널 합산 2018~) · 패널 합산 = quant_panel 시총 합 ÷ 이익 합(이익 낸 종목) · "
                f"마지막 갱신: {d.get('made', '-')} · 회색 띠 = 평균 ±1 표준편차 · "
                "⚠️ 낮은 PER 이 곧 싸다는 뜻은 아니다 — 이익이 정점일 때 PER 은 가장 낮게 나온다")
+
+def _krx_block():
+    """2026-11-28 차니 '거래소 데이터 다 가져와서 활용' — tools/krx_extra.py(한국거래소, 주 1회)."""
+    import plotly.graph_objects as _go
+    K = load_json(Path('results/krx_extra.json')) or {}
+    if not K:
+        return
+    st.subheader("한국 시장 — 한국거래소 자료")
+    dv, fo, sh, se = K.get('dividend') or {}, K.get('foreign') or {}, K.get('short') or {}, K.get('sectors') or []
+
+    def _ser(pts):
+        return pd.Series({pd.Timestamp(a): v for a, v in pts}).sort_index() if pts else pd.Series(dtype=float)
+    c = st.columns(4)
+    kd = _ser(dv.get('코스피'))
+    if len(kd):
+        c[0].metric('코스피 배당수익률', f"{kd.iloc[-1]:.2f}%", f"2000년 이후 하위 {(kd <= kd.iloc[-1]).mean() * 100:.0f}%", delta_color='off')
+    for col, mk, lab in ((c[1], 'KOSPI', '코스피'), (c[2], 'KOSDAQ', '코스닥')):
+        f = _ser(fo.get(mk))
+        if len(f):
+            yr = f[f.index <= f.index[-1] - pd.DateOffset(years=1)]
+            col.metric(f'외국인 보유 비중 · {lab}', f"{f.iloc[-1]:.1f}%",
+                       (f"1년 전 대비 {f.iloc[-1] - yr.iloc[-1]:+.1f}%p" if len(yr) else None))
+    sv = _ser(sh.get('KOSPI_value'))
+    if len(sv):
+        r20, p20 = sv.iloc[-20:].sum(), sv.iloc[-40:-20].sum()
+        c[3].metric('코스피 공매도 거래대금(20일)', f"{r20 / 1e12:,.2f}조", (f"직전 20일 대비 {(r20 / p20 - 1) * 100:+.0f}%" if p20 else None),
+                    delta_color='inverse')
+    g1, g2 = st.columns(2)
+    if fo:
+        fig = _go.Figure()
+        for mk, lab, colr in (('KOSPI', '코스피', '#2563EB'), ('KOSDAQ', '코스닥', '#F59E0B')):
+            f = _ser(fo.get(mk))
+            if len(f):
+                fig.add_trace(_go.Scatter(x=pd.DatetimeIndex(f.index), y=f.values, name=lab, line=dict(color=colr, width=1.8),
+                                          hovertemplate='%{x|%Y-%m} %{y:.1f}%<extra>' + lab + '</extra>'))
+        fig.update_layout(height=240, margin=dict(l=8, r=8, t=28, b=8), title=dict(text='외국인 보유 비중(시총 가중, %)', font=dict(size=13)),
+                          legend=dict(orientation='h', y=-0.2))
+        g1.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    if dv:
+        fig = _go.Figure()
+        for mk, colr in (('코스피', '#2563EB'), ('코스닥', '#F59E0B')):
+            d_ = _ser(dv.get(mk))
+            if len(d_):
+                fig.add_trace(_go.Scatter(x=pd.DatetimeIndex(d_.index), y=d_.values, name=mk, line=dict(color=colr, width=1.8),
+                                          hovertemplate='%{x|%Y-%m} %{y:.2f}%<extra>' + mk + '</extra>'))
+        fig.update_layout(height=240, margin=dict(l=8, r=8, t=28, b=8), title=dict(text='지수 배당수익률(%)', font=dict(size=13)),
+                          legend=dict(orientation='h', y=-0.2))
+        g2.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    if se:
+        st.markdown("##### 업종 밸류에이션 — 지금 값과 10년 안 위치")
+        _mk = st.segmented_control('업종 시장', ['코스피', '코스닥'], default='코스피', key='krx_se_mk', label_visibility='collapsed') or '코스피'
+        rows = [x for x in se if x.get('market') == ('KOSPI' if _mk == '코스피' else 'KOSDAQ') and x.get('per')]
+        if rows:
+            _tsrc('한국거래소 업종 지수 PER·PBR·배당수익률(tools/krx_extra.py)', path='results/krx_extra.json')
+            st.dataframe(pd.DataFrame([{'업종': x['name'], 'PER(배)': x.get('per'), '선행PER(배)': x.get('fper'), 'PER 10년 백분위(%)': x.get('per_pct10y'),
+                                        'PER 10년 중앙(배)': x.get('per_med10y'), 'PBR(배)': x.get('pbr'),
+                                        'PBR 10년 백분위(%)': x.get('pbr_pct10y'), '배당수익률(%)': x.get('div')} for x in rows]),
+                         hide_index=True,
+                         column_config={'PER(배)': st.column_config.NumberColumn(format='%.1f'),
+                                        '선행PER(배)': st.column_config.NumberColumn(format='%.1f', help='한국거래소 선행PER — 컨센서스 추정 이익 기준'),
+                                        'PER 10년 중앙(배)': st.column_config.NumberColumn(format='%.1f'),
+                                        'PBR(배)': st.column_config.NumberColumn(format='%.2f'),
+                                        '배당수익률(%)': st.column_config.NumberColumn(format='%.2f'),
+                                        'PER 10년 백분위(%)': st.column_config.NumberColumn(format='%.0f', help='0 = 10년 중 가장 낮은 PER, 100 = 가장 높은 PER'),
+                                        'PBR 10년 백분위(%)': st.column_config.NumberColumn(format='%.0f')})
+    tops = [(mk, sh.get(f'{mk}_top') or []) for mk in ('KOSPI', 'KOSDAQ')]
+    if any(t for _, t in tops):
+        with st.expander(f"공매도 잔고 상위 — 상장주식 대비 비중 · 기준 {sh.get('KOSPI_top_asof', '-')}(2~3거래일 늦게 공시)", expanded=False):
+            cc = st.columns(2)
+            for col, (mk, t) in zip(cc, tops):
+                if t:
+                    with col:
+                        _tsrc(f'한국거래소 공매도 잔고 상위 50 · {mk}', path='results/krx_extra.json')
+                        try:
+                            _nm = pd.read_csv('data/krx_listing_last.csv', dtype={'Code': str}).set_index('Code')['Name'].to_dict()
+                        except Exception:
+                            _nm = {}
+                        st.dataframe(pd.DataFrame([{'종목': _nm.get(x['sym'], x['name']), '코드': x['sym'], '잔고 비중(%)': x.get('ratio')} for x in t]),
+                                     hide_index=True, column_config={'잔고 비중(%)': st.column_config.NumberColumn(format='%.2f')})
+    st.caption(f"출처: 한국거래소(data.krx.co.kr) · tools/krx_extra.py · 기준 {K.get('asof', '-')} · 마지막 갱신: {K.get('made', '-')} · "
+               "외국인 보유 비중 = Σ(외국인 보유주식 × 종가) ÷ Σ(상장주식 × 종가) · 공매도 거래대금은 높을수록 하락 베팅이 많다는 뜻(색 반대)")
+
 
 with tab4, guard('매크로'):
     _lazy(tab4)
@@ -4465,6 +4554,9 @@ with tab4, guard('매크로'):
 
     with guard('매크로 · 지수 밸류에이션'):
         _index_valuation_block()
+
+    with guard('매크로 · 한국거래소'):
+        _krx_block()
 
     with st.spinner("사이클 지표 수집 중..."):
         _MI = macro_inputs()

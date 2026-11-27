@@ -228,6 +228,9 @@ SOURCES = [
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
          getter=_jsonl_max_date, raw=True),
     # 2026-10-21 — 애널 추정이 없는 종목 목록(화면이 '수집 대상 아님'과 '추정 없음'을 구분). 첫 수집은 10-26(월).
+    dict(path='results/krx_extra.json', label='한국거래소 업종 밸류·배당·외국인·공매도', cycle='주 1회 (토)', max_age=9,
+         producer='tools/krx_extra.py', job='index-valuation-long (토 14:23 KST)',
+         used_by='🌍 매크로 → 한국 시장 — 한국거래소 자료', getter=_key('made')),
     dict(path='results/index_valuation_long.json', label='지수 PER 장기판(거래소·Shiller)', cycle='주 1회 (토)', max_age=9,
          producer='tools/index_valuation_long.py', job='index-valuation-long (토 14:23 KST)',
          used_by='🌍 매크로 → 지수 밸류에이션', getter=_key('made')),
