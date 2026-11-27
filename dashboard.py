@@ -9245,7 +9245,7 @@ def _hilo_chart():
     data, asof, has_nl = _hilo_weekly(_mt)
     if not any(data.values()):
         return
-    st.html(_UH.CSS + "<div class='hm'><div class='hm-sec' style='margin-top:6px'><b>주간 52주 신고가 · 신저가</b>"
+    _UH._html(_UH.CSS + "<div class='hm'><div class='hm-sec' style='margin-top:6px'><b>주간 52주 신고가 · 신저가</b>"
                       f"<span>위 = 신고가 경신 종목 수 · 아래 = 신저가 · 막대를 누르면 그 주 신고가 종목(종목 발굴) · 기준일 {asof}</span></div></div>")
     cols = st.columns(2)
     for col, mk, lab in ((cols[0], 'KR', '🇰🇷 한국 · 시총 1,000억+'), (cols[1], 'US', '🇺🇸 미국 · 시총 $3억+')):
@@ -9373,7 +9373,7 @@ def _home_top(V):
     _UH.trend_box([('한국 상승 종목 비율', _kt, ' · 시총 1,000억+'),
                    ('미국 상승 종목 비율', _UH.trend_points(usf.get(_hk)), ' · 시총 $3억+')], _per)
     _ttl = {'d1': '오늘의 시장', 'w1': '이번 주 시장 — 최근 5거래일', 'm1': '이번 달 시장 — 최근 21거래일'}[_per]
-    st.html(_UH.CSS + f"<div class='hm'><div class='hm-sec' style='margin-top:2px'><b>{_ttl}</b><span>지수 아래 실제 등락 종목 수 · 돈이 간 업종과 종목 · "
+    _UH._html(_UH.CSS + f"<div class='hm'><div class='hm-sec' style='margin-top:2px'><b>{_ttl}</b><span>지수 아래 실제 등락 종목 수 · 돈이 간 업종과 종목 · "
                       "업종 줄을 누르면 구성 종목</span></div></div>")
     if not _m:
         st.info("이 시장·기간의 자료가 아직 없습니다 — 한국은 평일 15:50, 미국은 06:30(KST) 시황 갱신 때 채워집니다.")

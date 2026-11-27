@@ -143,6 +143,31 @@ _CARD_ORDER = ['S&P500', '나스닥', '다우', '코스피', '코스닥', '필�
                'VIX', '원/달러', '미국 10년물(%)', '달러인덱스', '금', 'WTI 유가', '하이일드 스프레드']
 
 
+
+# 2026-11-28 차니 '주석 위치 통일' — 머리줄 오른쪽(hm-sec span)·위·아래에 흩어져 있던 설명을
+#   **박스 맨 아래 왼쪽 한 줄**(hm-src)로 모은다. 그리는 곳마다 고치지 않고 출력 직전에 한 번에 옮긴다.
+_SEC = re.compile(r'(<div class=["\']hm-sec["\'][^>]*>\s*<b>.*?</b>)\s*<span>(.*?)</span>\s*(</div>)', re.S)
+
+
+def _fix_notes(h: str) -> str:
+    notes = []
+
+    def cut(m):
+        if m.group(2).strip():
+            notes.append(m.group(2).strip())
+        return m.group(1) + m.group(3)
+    h = _SEC.sub(cut, h)
+    if not notes:
+        return h
+    note = ''.join(f'<div class="hm-src">{n}</div>' for n in notes)
+    j = h.find('<div class="hm-src">')                     # 출처 줄이 있으면 그 바로 위(설명 → 출처 순)
+    i = j if j > max(h.rfind('class="hm-sec"'), h.rfind("class='hm-sec'")) else h.rfind('</div>')
+    return h[:i] + note + h[i:] if i >= 0 else h + note
+
+
+def _html(h: str):
+    return st.html(_fix_notes(h))
+
 def _e(x) -> str:
     return html.escape(str(x if x is not None else '-'))
 
@@ -225,7 +250,7 @@ def hero(g: dict, line: str, line_date: str, chips: list[str], live: str = ''):
         f"<span class='{'p' if r['rule_ok'] else 'n'}'>({'위' if r['rule_ok'] else '아래'})</span></span>" for r in g['rows'])
     body = (f"<p><b style='color:var(--ink)'>오늘 시장</b> — {_e(line)} <span style='color:var(--ink-3);font-size:12px'>(AI 요약 · {_e(line_date)})</span></p>"
             if line else "<p>오늘 시황 요약 준비 중 — 평일 15:50(KST) 한국 장 마감 후 갱신.</p>")
-    st.html(CSS + f"""<div class="hm"><div class="hm-hero" style="--tone:{_TONE.get(g['tone'], '#64748B')}">
+    _html(CSS + f"""<div class="hm"><div class="hm-hero" style="--tone:{_TONE.get(g['tone'], '#64748B')}">
       <div class="hm-kick">이번 주 시장 신호 · 한국 주봉 5주선{f' · {_e(wk)} 주봉 기준' if wk else ''}</div>
       <h3>{_e(g['head'])}</h3>
       <div class="gl">{gl}</div>
@@ -291,7 +316,7 @@ def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
           <div class="px">{px}</div><div class="d1">{big} <span style='font-size:11px;color:var(--ink-3);font-weight:500'>{lab}</span></div>
           {_spark(x.get('spark'), col)}
           <div class="sub">{sub}<br><span class='u'>{t1}<i class='sp'> · </i>{t2}</span></div></div>""")
-    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>글로벌 마켓</b>
+    _html(CSS + f"""<div class="hm"><div class="hm-sec"><b>글로벌 마켓</b>
       <span>큰 숫자 = 고른 기간 등락 · 선 = 최근 3개월 · 고점 = 52주 고점 대비 · VIX·환율·금리·달러·유가·스프레드는 오르면 위험이라 색 없음 · bp = 0.01%p</span></div>
       <div class="hm-grid">{''.join(cards) or '<div class="hm-src">지수 데이터 없음</div>'}</div>
       <div class="hm-src">출처: Yahoo Finance · FRED(하이일드 스프레드 = ICE BofA US High Yield OAS) · market_report.py · 마지막 갱신: {_e(asof)}</div></div>""")
@@ -459,7 +484,7 @@ def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period:
     src += ' · market_internals.py'
     if period != 'd1' and m.get('since'):
         src += f" · 기간 {m['since']} 종가 → {m.get('asof')} 종가"
-    st.html(CSS + f"""<div class="hm">
+    _html(CSS + f"""<div class="hm">
       <div class="hm-four">{row1}</div>
       <div class="hm-four" style="margin-top:10px">{row2}</div>
       <div class="hm-mcs"><b>시총 상위 10</b>{''.join(chips) or '<span>-</span>'}</div>
@@ -526,7 +551,7 @@ def steps(rows: list[tuple]):
     body = ''.join(f"""<div class="hm-step"><span class="dot" style="background:{col.get(t, '#CBD5E1')}"></span>
         <span class="k">{_e(k)}</span><span class="v">{v}{f' <em>{sub}</em>' if sub else ''}</span></div>"""
                    for k, t, v, sub in rows)
-    st.html(CSS + f'<div class="hm"><div class="hm-steps">{body}</div></div>')
+    _html(CSS + f'<div class="hm"><div class="hm-steps">{body}</div></div>')
 
 
 def account(led: dict, plan: dict, sectors: dict | None = None) -> dict:
@@ -589,7 +614,7 @@ def health(rows: list[tuple]):
     chips = ''.join(f"<span style='display:inline-flex;gap:6px;align-items:center;font-size:12px;padding:4px 10px;border:1px solid var(--line);"
                     f"border-radius:999px;background:var(--surface)'><i style='width:8px;height:8px;border-radius:50%;background:{col.get(t)}'></i>"
                     f"<b style='font-weight:650'>{_e(k)}</b> {v}</span>" for k, t, v in rows)
-    st.html(CSS + f"<div class='hm' style='display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px'>{chips}</div>")
+    _html(CSS + f"<div class='hm' style='display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px'>{chips}</div>")
 
 
 def account_cards(a: dict, kospi_since: float | None, since: str):
@@ -607,7 +632,7 @@ def account_cards(a: dict, kospi_since: float | None, since: str):
          card('업종 쏠림(최대)', '-' if a['top_sector'][1] is None else f"{a['top_sector'][1]:.0f}%",
               f"{_e(a['top_sector'][0])} · 겹치는 테마 " + (', '.join(f"{t} {len(n)}종" for t, n in a['shared'][:2]) or '없음'),
               'n' if (a['top_sector'][1] or 0) > 30 else 'z')]
-    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🔐 내 실전 계좌 (토스 한국 · 소유자만)</b>
+    _html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🔐 내 실전 계좌 (토스 한국 · 소유자만)</b>
       <span>{_e(a['src'])} {_e(a.get('at') or '')} 기준 · 실시간 아님 · {since}부터 운용</span></div><div class="hm-acc">{''.join(c)}</div></div>""")
 
 
@@ -626,7 +651,7 @@ def events_box(ev: list[dict], days: int):
           <span><i style="font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;color:{fg};background:{bg}">{_e(e.get('kind'))}</i></span>
           <span class="v"><b style="color:var(--ink)">{_e(e['name'])}</b>{f"<br>{_e(e['detail'])}" if e.get('detail') else ''}</span></div>""")
     body = ''.join(rows) or "<div class='hm-step'><span></span><span></span><span></span><span class='v'>예정된 일정 없음</span></div>"
-    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🗓️ 다가오는 일정 — {days}일</b>
+    _html(CSS + f"""<div class="hm"><div class="hm-sec"><b>🗓️ 다가오는 일정 — {days}일</b>
       <span>날짜순 · 시각은 한국 시간</span></div><div class="hm-steps">{body}</div></div>""")
 
 
@@ -688,7 +713,7 @@ def pulse_box(idx_rows: list[dict]):
           <div class="px {cls}" style="font-size:17px">{_e(st_)}</div><div class="sub">{' · '.join(sub)}</div></div>""")
     if not cards:
         return
-    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>시장 추세 판정 — 오닐 방식 (참고)</b>
+    _html(CSS + f"""<div class="hm"><div class="hm-sec"><b>시장 추세 판정 — 오닐 방식 (참고)</b>
       <span>지수의 가격·거래량으로 본 상승·조정 단계 · 매수 신호(주봉 5주선)와 별개 · 일봉 판정이라 기간 전환과 무관</span></div>{_PULSE_HELP}{_PULSE_LEGEND}
       <div class="hm-grid hm-g-auto">{''.join(cards)}</div></div>""")
 
@@ -697,7 +722,7 @@ def trend_box(trends: list[tuple], period: str = 'd1'):
     """대형주 상승 비율 — 일간 30거래일 · 주간 26주 · 월간 12개월(2026-11-15 기간 전환)."""
     tr = ''.join(_trend_card(*t, period=period) for t in trends)
     if tr:
-        st.html(CSS + f"<div class='hm'><div class='hm-two' style='margin-top:4px'>{tr}</div></div>")
+        _html(CSS + f"<div class='hm'><div class='hm-two' style='margin-top:4px'>{tr}</div></div>")
 
 
 def trend_points(hist: list[dict]) -> list[tuple]:
@@ -723,7 +748,7 @@ def macro_cards(V: dict):
           card('미국 장기 추세', '-' if not c else ('200일선 위' if c.get('on') else '200일선 아래'),
                '-' if not c else f"S&P500 200일선 대비 {c.get('gap', 0):+.1f}%",
                'z' if not c else ('p' if c.get('on') else 'n'))]
-    st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>매크로 국면</b>
+    _html(CSS + f"""<div class="hm"><div class="hm-sec"><b>매크로 국면</b>
       <span>경기·유동성의 큰 그림 · 매매 신호 아님 · 근거는 🌍 매크로 탭</span></div>
       <div class="hm-grid hm-g4">{''.join(cs)}</div></div>""")
 
@@ -763,7 +788,7 @@ def today_box(me: list[tuple], bot: list[str], asof: str):
                    f"<i style='width:9px;height:9px;border-radius:50%;background:{col.get(t, '#9CA3AF')};flex:none;transform:translateY(1px)'></i>"
                    f"<span>{v}</span></div>" for t, v in me)
     done = ''.join(f"<div class='hm-row'><span>{_e(b)}</span></div>" for b in bot[:6]) or "<div class='hm-kv'>오늘 매매 없음</div>"
-    st.html(CSS + f"""<div class="hm"><div class="hm-two" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);margin-top:10px">
+    _html(CSS + f"""<div class="hm"><div class="hm-two" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);margin-top:10px">
       <div class="hm-box" style="border-left:4px solid var(--accent)"><h5>🙋 오늘 내가 할 일</h5>{mine}</div>
       <div class="hm-box"><h5>🤖 오늘 봇이 한 일 <span style='font-weight:500;color:var(--ink-3)'>({_e(asof)})</span></h5>{done}</div>
     </div></div>""")
@@ -802,7 +827,7 @@ def date_items(now, kr: str, us: str, plan: str, bot: str | None = None) -> list
 def dates_strip(items: list[tuple]):
     bits = ''.join(f"<span style='margin-right:14px;white-space:nowrap'>{_e(k)} <b style='color:{'#D97706' if old else 'var(--ink-1)'}'>"
                    f"{_e(v)}{' ⚠' if old else ''}</b></span>" for k, v, old in items)
-    st.html(CSS + f"<div class='hm'><div style='font-size:12.5px;color:var(--ink-3);padding:6px 2px 2px;"
+    _html(CSS + f"<div class='hm'><div style='font-size:12.5px;color:var(--ink-3);padding:6px 2px 2px;"
                   f"font-variant-numeric:tabular-nums'>📅 {bits}<span style='color:var(--ink-3)'>· ⚠ = 늦음(주말만 보정·휴장일 미보정)</span></div></div>")
 
 
@@ -820,7 +845,7 @@ def checkpoints_box(rows: list[str], asof: str):
     if not rows:
         return
     li = ''.join(f"<div class='hm-row' style='display:block;padding:5px 0'>{r}</div>" for r in rows)
-    st.html(CSS + f"""<div class="hm"><div class="hm-box"><h5>🎯 이번에 볼 것 — 숫자 조건 <span style='font-weight:500;color:var(--ink-3)'>({_e(asof)} 기준)</span></h5>{li}
+    _html(CSS + f"""<div class="hm"><div class="hm-box"><h5>🎯 이번에 볼 것 — 숫자 조건 <span style='font-weight:500;color:var(--ink-3)'>({_e(asof)} 기준)</span></h5>{li}
       <div class="hm-src">출처: 시황 리포트 facts(지수 주봉 5주선·시장 폭) · tools/kr_flow.py · events.py — 규칙 계산, AI 아님 · 마지막 갱신: {_e(asof)}</div></div></div>""")
 
 
@@ -833,7 +858,7 @@ def report_card(date: str, kind: str, summary: str, why: list[str], checks: list
     wy = ''.join(f"<li>{_b(w)}</li>" for w in why[:5])
     ck = ''.join(f"<li>{_e(c)}</li>" for c in checks[:4])
     ru = ''.join(f"<div class='hm-row' style='display:block;padding:4px 0'>{r}</div>" for r in rules)
-    st.html(CSS + f"""<div class="hm"><div class="hm-box" style="padding:18px 20px">
+    _html(CSS + f"""<div class="hm"><div class="hm-box" style="padding:18px 20px">
       <div style="font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--ink-3)">{_e(date)} · {_e(kind)}</div>
       <div style="font-size:17px;font-weight:750;line-height:1.55;margin:6px 0 12px;color:var(--ink);letter-spacing:-.01em;max-width:980px">{_e(summary) or '요약 없음'}</div>
       {f'<ul class="hm-why">{wy}</ul>' if wy else ''}
@@ -877,7 +902,7 @@ def _bot_link() -> str:
 
 def tour_head():
     """한 줄 규칙(굵게) → 풀이 한 줄 → [신뢰 등급 범례 | 텔레그램] 한 줄."""
-    st.html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-lead" style="margin-bottom:6px">
+    _html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-lead" style="margin-bottom:6px">
       <div style="font-size:16px;font-weight:780;color:var(--ink);letter-spacing:-.02em;line-height:1.5">{_e(MN.lead())}</div>
       <div style="font-size:12.5px;margin-top:2px">{_e(MN.lead_sub())}</div></div>
       <div class="mn-row mn-src" style="margin-top:0"><span>{MN._legend()}</span><span>{_bot_link()}</span></div></div>""")
@@ -886,12 +911,12 @@ def tour_head():
 def tour_card(i: int, tab: str, q: str, d: str, feats: list, on: bool):
     """탭 하나 = 카드 하나: 탭 이름 → 질문 → 한 줄 → 기능(등급). 카드를 누르면 그 탭으로(dashboard 가 투명 버튼을 겹친다)."""
     li = ''.join(f"<li>{_e(f.split(' — ')[0])}{MN._tag(g)}</li>" for f, g in feats)
-    st.html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-card mn-tour{' on' if on else ''}">
+    _html(CSS + MN.CSS + _TOUR_CSS + f"""<div class="mn"><div class="mn-card mn-tour{' on' if on else ''}">
       <div class="k">{i} · {_e(tab)}<b>{'현재 탭' if on else '이동 →'}</b></div><div class="t">{_e(q)}</div><ul>{li}</ul></div></div>""")
 
 
 def routines_panel():
-    st.html(CSS + MN.CSS + f'<div class="mn">{MN.sec_routines()}</div>')
+    _html(CSS + MN.CSS + f'<div class="mn">{MN.sec_routines()}</div>')
 
 
 # 사용법 상위 탭(2026-11-16 4차) — '전체 설명서' 탭을 없애고 하위 절을 상위로 올렸다. 개요 = 카드 + 운용 루틴 + PDF.
@@ -912,7 +937,7 @@ def tab_icon_css() -> str:
 def section_panel(sid: str):
     """상위 탭 하나 = 설명서 절 하나. 맨 위 제목 줄 형식은 개요의 '운용 루틴'과 같다(2026-11-16 디자인 일관성)."""
     sec = {x[0]: x for x in MN.SECTIONS}[sid]
-    st.html(CSS + MN.CSS + f'<div class="mn"><div class="mn-h"><b>{_e(sec[1])}</b><span>{_e(sec[2])}</span></div>{sec[3]()}</div>')
+    _html(CSS + MN.CSS + f'<div class="mn"><div class="mn-h"><b>{_e(sec[1])}</b><span>{_e(sec[2])}</span></div>{sec[3]()}</div>')
 
 
 def pdf_row():
@@ -930,4 +955,4 @@ def manual_internal():
     """🏛️ 경영실 — 공개 설명서에서 뺀 절(개선 내역 · 검증·한계). 2026-11-15."""
     for tab, (_sid, title, lead, fn) in zip(st.tabs([x[1] for x in MN.INTERNAL]), MN.INTERNAL):
         with tab:
-            st.html(CSS + MN.CSS + f'<div class="mn"><div class="mn-src" style="margin:0 2px 10px">{_e(lead)}</div>{fn()}</div>')
+            _html(CSS + MN.CSS + f'<div class="mn"><div class="mn-src" style="margin:0 2px 10px">{_e(lead)}</div>{fn()}</div>')
