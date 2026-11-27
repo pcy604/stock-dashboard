@@ -286,6 +286,10 @@ def _spark(vals, color: str) -> str:
 _PKEY = {'d1': ('d1', '1일'), 'w1': ('d5', '5일'), 'm1': ('m1', '1개월')}
 
 
+_IDX_ETF = {'S&P500': 'SPY', '나스닥': 'QQQ', '다우': 'DIA', '필라델피아 반도체': 'SOXX', '코스피': '069500', '코스닥': '229200',
+            '금': 'GLD', '미국 10년물(%)': 'IEF', 'WTI 유가': 'USO'}
+
+
 def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
     """글로벌 마켓 — 7 × 2. 큰 등락 = 고른 기간(일·주·월), 스파크라인 = 최근 3개월. 없는 값은 '-'(지어내지 않음).
     2026-11-15: 기간 전환 연동 + 스파크라인."""
@@ -312,7 +316,10 @@ def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
         big = _bp(x.get(key)) if bp else _pct(x.get(key), neutral=neu)
         mv = x.get(key)
         col = '#94A3B8' if (neu or bp or mv is None) else ('#16A34A' if mv > 0 else '#DC2626')
-        cards.append(f"""<div class="hm-card"><div class="nm">{_e(nm)}</div>
+        _etf = _IDX_ETF.get(nm)       # 2026-11-28 지수 이름 → 대표 ETF 종목 분석(구성 비중·PER·PBR)
+        _nm = (f"<a class='hm-a' href='{LINK_BASE}?sym={_etf}' target='_blank' rel='noopener' title='대표 ETF {_etf} 분석 — 구성 종목·비중'>{_e(nm)} ↗</a>"
+               if _etf else _e(nm))
+        cards.append(f"""<div class="hm-card"><div class="nm">{_nm}</div>
           <div class="px">{px}</div><div class="d1">{big} <span style='font-size:11px;color:var(--ink-3);font-weight:500'>{lab}</span></div>
           {_spark(x.get('spark'), col)}
           <div class="sub">{sub}<br><span class='u'>{t1}<i class='sp'> · </i>{t2}</span></div></div>""")

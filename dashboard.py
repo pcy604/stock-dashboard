@@ -5997,6 +5997,61 @@ def _an_v2_fill(L: dict):
         L['_V2C'].caption(f"`결론 그리기 실패: {type(e).__name__}: {str(e)[:100]}`")
 
 
+@st.cache_data(ttl=6 * 3600, max_entries=64, show_spinner=False)
+def _etf_data(sym: str) -> dict:
+    """2026-11-28 차니 — ETF 구성 비중·밸류에이션. 야후 funds_data(상위 10종·업종 비중·펀드 PER/PBR)."""
+    import yfinance as yf
+    fd = yf.Ticker(sym).funds_data
+    out = {}
+    try:
+        th = fd.top_holdings
+        out['top'] = [dict(sym=str(i), name=str(r.get('Name') or i), w=float(r.get('Holding Percent') or 0) * 100)
+                      for i, r in th.iterrows()]
+    except Exception as e:
+        out['err_top'] = str(e)[:80]
+    try:
+        out['sector'] = {k: float(v) * 100 for k, v in (fd.sector_weightings or {}).items() if v}
+    except Exception:
+        pass
+    try:
+        eh = fd.equity_holdings
+        col = eh.columns[0]
+        out['val'] = {str(k): float(v) for k, v in eh[col].items() if pd.notna(v)}
+    except Exception:
+        pass
+    return out
+
+
+def _etf_panel(sym: str):
+    d = _etf_data(sym)
+    if not d.get('top') and not d.get('val'):
+        st.caption(f"`ETF 구성 자료 없음(야후 funds_data): {d.get('err_top', '-')}`")
+        return
+    st.subheader("🧺 ETF 구성 · 밸류에이션")
+    v = d.get('val') or {}
+    c = st.columns(4)
+    for col, (k, lab) in zip(c, (('Price/Earnings', 'PER(펀드)'), ('Price/Book', 'PBR(펀드)'),
+                                  ('Price/Sales', 'PSR(펀드)'), ('3 Year Earnings Growth', '3년 이익성장'))):
+        x = v.get(k)
+        col.metric(lab, '-' if x is None else (f"{x * 100:.1f}%" if 'Growth' in k else f"{x:.1f}배"))
+    top = d.get('top') or []
+    if top:
+        _tsrc('Yahoo Finance funds_data(상위 10종 · 비중)', live=True)
+        st.dataframe(pd.DataFrame([{'종목': t['name'], '코드': t['sym'], '비중(%)': round(t['w'], 2)} for t in top]),
+                     hide_index=True, filters=False,
+                     column_config={'비중(%)': st.column_config.ProgressColumn(format='%.2f', min_value=0,
+                                                                              max_value=max(t['w'] for t in top) or 1)})
+        st.caption(f"상위 10종 합계 {sum(t['w'] for t in top):.1f}% · 구성 종목을 누르면 그 종목 분석으로")
+        _pick = st.segmented_control('구성 종목 분석', [t['sym'] for t in top], key=f'etf_pick_{sym}',
+                                     label_visibility='collapsed')
+        if _pick:
+            st.session_state['analyze_sym'] = _pick
+            st.rerun()
+    sec = d.get('sector') or {}
+    if sec:
+        st.caption('업종 비중 — ' + ' · '.join(f"{k.replace('_', ' ')} {w:.0f}%" for k, w in sorted(sec.items(), key=lambda x: -x[1])[:6]))
+
+
 @st.fragment
 def _tab_analysis():
     # 2026-10-15 — 이 탭의 조작(검색·토글·버튼)은 이 탭만 다시 그린다. 예전에는 검색 한 번에
@@ -6071,6 +6126,11 @@ def _tab_analysis():
                 price_now = hist['Close'].iloc[-1]
                 price_prev= hist['Close'].iloc[-2] if len(hist) > 1 else price_now
                 chg_pct   = (price_now / price_prev - 1) * 100
+                if str((info or {}).get('quoteType', '')).upper() == 'ETF':   # 2026-11-28 ETF 는 구성·비중이 먼저
+                    try:
+                        _etf_panel(sym8_clean)
+                    except Exception as _e_etf:
+                        st.caption(f"`ETF 구성 실패: {type(_e_etf).__name__}: {str(_e_etf)[:100]}`")
 
                 # 2026-10-28 — 시총을 야후 info 하나에만 기대고 있었다. 클라우드에서 야후가 요청 제한으로 비면 시총 0 →
                 #   PER·PBR·PSR·EPS 가 전부 '-'(AXTI 실화면, 사용자 지적). S&P500 밖 미국 종목은 다른 출처도 없었다.
