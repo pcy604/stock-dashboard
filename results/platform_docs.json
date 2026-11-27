@@ -39,11 +39,11 @@
     "{\"docsConfig\":{\"theme\":\"luma\",\"$schema\":\"https://mintlify.com/docs.json\",\"name\":\"X\",\"colors\":{\"primary\":\"#0D0D0D\",\"light\":\"#B2B2B2\",\"dark\":\"#0D0D0D\"},\"logo\":{\"light\":\"https://mintcdn.com/x-preview/CX6FNhUUR8mtNZ97/logo/light.svg?fit=max\\u0026auto=format\\u0026n=CX6FNhUUR8mtNZ97\\u0026q=85\\u0026s=b2e6f",
     "{\"page\":{\"pagePath\":\"overview\",\"slug\":\"/overview\",\"pageMetadata\":{\"title\":\"X Developer Platform\",\"sidebarTitle\":\"Overview\",\"mode\":\"wide\",\"icon\":\"house\",\"description\":\"Build, analyze, and innovate with X's real-time global data. Access posts, users, trends, and more through modern APIs with flexible "
    ],
-   "last_change": "2026-11-24",
+   "last_change": "2026-11-27",
    "last_diff": [],
-   "n_lines": 114,
+   "n_lines": 115,
    "platform": "X (Twitter) API",
-   "sha": "355fc46fd8906c5a"
+   "sha": "cd7eae9799d35463"
   },
   "https://docs.github.com/en/actions/reference/limits": {
    "first_seen": "2026-11-22",
@@ -117,10 +117,11 @@
     "Pulling images from Docker Hub is always subject to the rate limit.",
     "Pricing"
    ],
-   "last_change": "2026-11-22",
-   "n_lines": 507,
+   "last_change": "2026-11-27",
+   "last_diff": [],
+   "n_lines": 508,
    "platform": "GitHub (Actions·Release·raw)",
-   "sha": "bbce79a0ec9a39c3"
+   "sha": "0f266abad16d9838"
   },
   "https://docs.github.com/en/billing/concepts/product-billing/github-actions": {
    "first_seen": "2026-11-22",
@@ -435,17 +436,15 @@
     "in the dashboard, which shows how each project is tracking against your plan's limits. Your upcoming invoice on the",
     "billing page",
     "Yes. If your organization has an AWS spend commitment (such as a PPA or EDP), you can buy Pro or Team through AWS Marketplace so eligible Supabase spend counts toward that commitment. Billing details and plan management then run through AWS, and Spend Cap is unavailable for AWS-managed organizations",
-    "Pricing",
-    "self.__next_f.push([1,\"1:\\\"$Sreact.fragment\\\"\\n2:\\\"static/chunks/82bb98b3-762767c932cddc03.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n3:\\\"static/chunks/8567-fce4c724ed401617.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n4:\\\"static/chunks/3299-258f49af8a22102e.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n"
+    "Pricing"
    ],
-   "last_change": "2026-11-24",
+   "last_change": "2026-11-27",
    "last_diff": [
-    "-self.__next_f.push([1,\"1:\\\"$Sreact.fragment\\\"\\n2:\\\"static/chunks/82bb98b3-762767c932cddc03.js?dpl=dpl_7W1q7buQQnRM5kh1dSxhfsvnkdwh\\\"\\n3:\\\"static/chunks/8567-fce4c724ed401617.js?dpl=dpl_7W1q7buQQnRM5kh1dSxhfsvnkdwh\\\"\\n4:\\\"static/chunks/3299-258f49af8a22102e.js?dpl=dpl_7W1q7buQQnRM5kh1dSxhfsvnkdwh\\\"\\n",
-    "+self.__next_f.push([1,\"1:\\\"$Sreact.fragment\\\"\\n2:\\\"static/chunks/82bb98b3-762767c932cddc03.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n3:\\\"static/chunks/8567-fce4c724ed401617.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n4:\\\"static/chunks/3299-258f49af8a22102e.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n"
+    "-self.__next_f.push([1,\"1:\\\"$Sreact.fragment\\\"\\n2:\\\"static/chunks/82bb98b3-762767c932cddc03.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n3:\\\"static/chunks/8567-fce4c724ed401617.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n4:\\\"static/chunks/3299-258f49af8a22102e.js?dpl=dpl_FybPnrgFoPee7NJ4XkGGnibVfQaN\\\"\\n"
    ],
-   "n_lines": 1124,
+   "n_lines": 1129,
    "platform": "Supabase",
-   "sha": "61e51e100fac94d6"
+   "sha": "8632f77390d75b92"
   },
   "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data": {
    "first_seen": "2026-11-22",

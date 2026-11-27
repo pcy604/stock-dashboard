@@ -76,9 +76,9 @@
    "checked": "2026-11-27",
    "fallback": "없음 (화면은 떠도 저장 기능이 죽는다)",
    "kind": "project",
-   "state": "authfail",
-   "streak": 6,
-   "why": "프로젝트 REST HTTP 401"
+   "state": "ok",
+   "streak": 0,
+   "why": "프로젝트 REST HTTP 200"
   },
   "Telegram Bot API": {
    "breaks": "봇 알림·실패 경보 전달(경보가 안 오면 고장을 모른다)",
@@ -111,8 +111,8 @@
    "fallback": "DART (공식, 단 컨센서스는 없음)",
    "kind": "indirect",
    "state": "down",
-   "streak": 1,
-   "why": "산출물 results/consensus_q.json: 11일 정지 (허용 10일)"
+   "streak": 2,
+   "why": "산출물 results/consensus_q.json: 11일 정지 (허용 8일)"
   },
   "토스증권": {
    "breaks": "실전 원장·주문 봇 (허용 IP 때문에 노트북 전용 — 고정 IP 보류 중)",
@@ -147,7 +147,7 @@
    "what": "GitHub 60일 무활동 → 크론 중단"
   },
   {
-   "cover": "alarm",
+   "cover": "ok",
    "id": "R4",
    "note": "프로젝트 REST 엔드포인트. 비밀값 SUPABASE_URL·SUPABASE_KEY 필요",
    "watch": "l1:supabase",
