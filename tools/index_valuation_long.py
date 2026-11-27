@@ -43,7 +43,7 @@ def krx(ticker: str, start='20000101') -> dict:
     d = d[~d.index.duplicated()].sort_index()
     m = d.resample('ME').last()
     out = {}
-    for col, key in (('PER', 'per'), ('PBR', 'pbr')):
+    for col, key in (('PER', 'per'), ('선행PER', 'fper'), ('PBR', 'pbr'), ('배당수익률', 'div')):   # 2026-11-28 선행PER = 컨센서스 추정 이익 기준
         if col in m.columns:
             s = pd.to_numeric(m[col], errors='coerce')
             s = s[(s > 0) & (s < 200)].dropna()

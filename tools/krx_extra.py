@@ -60,32 +60,39 @@ def index_monthly(stock, tk, start=date(2000, 1, 1)):
 
 
 def sectors(stock, today):
+    """업종 지수별 월말 PER·PBR·배당 10년 → 지금 값(마지막 행)·10년 백분위.
+    2026-11-28 — '오늘 전 업종 한 번에'(by_ticker)는 pykrx 에서 KeyError(열 이름 불일치)라 업종마다 날짜 조회로."""
     out = []
+    start = date(date.today().year - 10, 1, 1)
     for mk in ('KOSPI', 'KOSDAQ'):
         try:
-            cur = stock.get_index_fundamental(today, market=mk)
+            tks = stock.get_index_ticker_list(today, market=mk)
         except Exception as e:
-            print(f'  업종 {mk} 오늘: {str(e)[:80]}')
+            print(f'  업종 {mk} 목록: {str(e)[:80]}')
             continue
-        print(f'  업종 {mk} 열', list(cur.columns)[:8], len(cur))
-        cp, cb, cd = _col(cur, 'PER'), _col(cur, 'PBR'), _col(cur, '배당')
-        for tk in list(cur.index):
+        print(f'  업종 {mk} {len(tks)}개')
+        for tk in tks:
             try:
                 name = stock.get_index_ticker_name(tk)
             except Exception:
                 name = str(tk)
-            h = index_monthly(stock, tk, start=date(date.today().year - 10, 1, 1))
+            h = index_monthly(stock, tk, start=start)
+            if not len(h):
+                continue
             row = dict(market=mk, ticker=str(tk), name=name)
-            for key, c in (('per', cp), ('pbr', cb), ('div', cd)):
-                v = pd.to_numeric(cur.loc[tk, c], errors='coerce') if c else None
-                row[key] = round(float(v), 2) if v is not None and pd.notna(v) and v > 0 else None
-                hc = _col(h, {'per': 'PER', 'pbr': 'PBR', 'div': '배당'}[key]) if len(h) else None
-                if hc and row[key] is not None:
-                    s = pd.to_numeric(h[hc], errors='coerce')
-                    s = s[s > 0].dropna()
-                    if len(s) >= 24:
-                        row[f'{key}_pct10y'] = round(float((s <= row[key]).mean() * 100), 0)
-                        row[f'{key}_med10y'] = round(float(s.median()), 2)
+            for key, pat in (('per', 'PER'), ('fper', '선행PER'), ('pbr', 'PBR'), ('div', '배당')):
+                hc = (_col(h, '선행PER') if key == 'fper' else
+                      next((c for c in h.columns if str(c) == 'PER'), None) if key == 'per' else _col(h, pat))
+                if not hc:
+                    continue
+                s_ = pd.to_numeric(h[hc], errors='coerce')
+                s_ = s_[s_ > 0].dropna()
+                if not len(s_):
+                    continue
+                row[key] = round(float(s_.iloc[-1]), 2)
+                if len(s_) >= 24 and key != 'fper':
+                    row[f'{key}_pct10y'] = round(float((s_ <= s_.iloc[-1]).mean() * 100), 0)
+                    row[f'{key}_med10y'] = round(float(s_.median()), 2)
             out.append(row)
     return out
 
@@ -138,8 +145,15 @@ def short(stock, today):
         except Exception as e:
             res[f'{mk}_err'] = str(e)[:150]
         time.sleep(SLEEP)
-        try:
-            t = stock.get_shorting_balance_top50(today, mk)
+        try:   # 잔고는 2~3거래일 늦게 공시된다 — 비어 있으면 하루씩 앞으로
+            t = pd.DataFrame()
+            for back in range(0, 8):
+                d_ = _ymd(pd.Timestamp(today) - pd.tseries.offsets.BDay(back))
+                t = stock.get_shorting_balance_top50(d_, mk)
+                if t is not None and len(t.columns):
+                    res[f'{mk}_top_asof'] = str(pd.Timestamp(d_).date())
+                    break
+                time.sleep(SLEEP)
             print(f'  공매도 잔고 {mk} 열', list(t.columns))
             nm, bal, ratio = _col(t, '종목명'), _col(t, '공매도잔고'), _col(t, '비중', '비율')
             res[f'{mk}_top'] = [dict(sym=str(i), name=str(r[nm]) if nm else str(i),
