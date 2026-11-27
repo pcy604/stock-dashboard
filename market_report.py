@@ -1060,7 +1060,7 @@ def template(f):
         L.append(f"- 미국 {usi.get('universe', 0):,}종 상승 {b['up']:,} · 하락 {b['down']:,}" + (f" · 거래대금 {usi['turnover_txt']}" if usi.get("turnover_txt") else ""))
     bc = ctx.get("breadth")
     if bc:
-        L.append(f"- 대형주 상승 비율 {bc['today']}% — 최근 {bc['n']}거래일 평균 {bc['avg']}% · {bc['n']}일 중 {bc['rank']}위 · 오른 종목이 더 많은 날 {bc['up_days']}번")
+        L.append(f"- 상승 종목 비율 {bc['today']}% — 최근 {bc['n']}거래일 평균 {bc['avg']}% · {bc['n']}일 중 {bc['rank']}위 · 오른 종목이 더 많은 날 {bc['up_days']}번")
     nh = kr.get("new_high_52w") if kind == "kr" else usi.get("new_high_52w")
     if nh:
         L.append(f"- 52주 신고가(장중) {nh['n']}종/{nh['universe']:,}종"
@@ -1121,7 +1121,7 @@ def template(f):
         if kr.get("megacaps"):
             L.append("- 시총 상위 10 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%" for r in kr["megacaps"]))
     if usi.get("top"):
-        L.append(f"- 미국 대형주(시총 상위 {usi.get('big_n', 500)}) 강세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in usi["top"][:6])
+        L.append(f"- 미국 종목(시총 $3억+ {usi.get('big_n', '-')}종) 강세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in usi["top"][:6])
                  + " · 약세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in (usi.get("bottom") or [])[:6]))
     if usi.get("featured"):
         L.append("- 특징주 " + ", ".join(f"{r['name']} {r['ret']:+.1f}%({r['tag']})" for r in usi["featured"][:6]))
@@ -1221,7 +1221,7 @@ def explain_move(f):
     if len(heads) < 2:
         return ""
     prompt = N.EXPLAIN_PROMPT.format(mkt="미국" if f["kind"] != "kr" else "한국", facts=N.explain_facts(f),
-                                     heads="\n".join(f"- {h['title']} ({h['source']})" for h in heads))
+                                     heads="\n".join(f"[{i}] {h['title']} ({h['source']})" for i, h in enumerate(heads, 1)))
     for attempt in (1, 2):
         try:
             txt, model = ask_gemini(prompt)
@@ -1232,6 +1232,9 @@ def explain_move(f):
         bad = N.check_explain(txt, heads, f) + [w for w in direction_errors("## 한 줄 요약\n" + txt, f)]
         if not bad:
             print(f"  재료 해설 통과({model}, 시도 {attempt}): {txt}")
+            import re as _re
+            used = sorted({int(i) for i in _re.findall(r"\[(\d+)\]", txt)})
+            f["explain_src"] = [dict(n=i, **{k: heads[i - 1].get(k) for k in ("title", "source", "url", "date")}) for i in used]
             return txt
         print(f"  재료 해설 검사 실패(시도 {attempt}): {bad[:5]} — {txt[:80]}")
         prompt += "\n[직전 답의 문제 — 고쳐서 다시]\n" + "\n".join(f"- {b}" for b in bad[:6])

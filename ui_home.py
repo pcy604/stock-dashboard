@@ -44,8 +44,17 @@ CSS = """
   .hm-grid { display:grid; gap:8px; grid-template-columns:repeat(7,minmax(0,1fr)); }
   @media (max-width:1200px) { .hm-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
   @media (max-width:980px) { .hm-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-  @media (max-width:560px) { .hm-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  /* 2026-11-27 차니 — 폰·쇼츠(세로)에서 글로벌 마켓 7×2 → 3열 × N 행. 세로 공간을 쓰고 카드를 작게(숫자 우선). */
+  @media (max-width:560px) { .hm-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+    .hm-card { padding:8px 8px 7px; } .hm-card .nm { font-size:10.5px; } .hm-card .px { font-size:15px; }
+    .hm-card .d1 { font-size:11.5px; } .hm-card .sub { font-size:10px; line-height:1.4; } .hm-card svg { max-width:100%; height:auto; }
+    .hm-card .sub .u { display:block; white-space:nowrap; } .hm-card .sub .sp { display:none; } .hm-card .sub br { display:none; }
+    .hm-card .sub .l200 { display:none; } .hm-card .sub .u span[style] { margin-left:4px; }
     .hm-sec { flex-direction:column; align-items:flex-start; gap:2px; } .hm-sec b { white-space:nowrap; } }
+  /* 인라인 grid-template-columns 는 미디어쿼리를 이겨서 폰에서 4열이 찌그러졌다(매크로 국면) — 클래스로 */
+  .hm-g-auto { grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+  .hm-g4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  @media (max-width:560px) { .hm-g-auto, .hm-g4 { grid-template-columns:repeat(2,minmax(0,1fr)) !important; } }
   .hm-card { border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:10px 12px 9px; }
   .hm-card .nm { font-size:12px; color:var(--ink-3); font-weight:600; display:flex; justify-content:space-between; }
   .hm-card .nm i { font-style:normal; font-size:10.5px; padding:1px 6px; border-radius:999px; }
@@ -264,7 +273,7 @@ def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
         bp = x.get('unit') == 'bp'
         f = (lambda k: _bp(x.get(k))) if bp else (lambda k: _pct(x.get(k), neutral=neu, nd=1))
         ab = x.get('above_200d')
-        sub = ' · '.join(f"{l} {f(k)}" for k, l in others)
+        sub = "<i class='sp'> · </i>".join(f"<span class='u'>{l} {f(k)}</span>" for k, l in others)   # 폰: 단위마다 한 줄
         if bp:
             t1 = f"1년 저점 {x['from_52w_low']:+.0f}bp" if x.get('from_52w_low') is not None else '1년 저점 -'
         else:
@@ -273,7 +282,7 @@ def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
             t2 = '200일선 -'
         else:
             dot = 'var(--ink-3)' if (neu or bp) else ('var(--pos)' if ab else 'var(--neg)')
-            t2 = f"<span style='color:{dot}'>●</span> 200일선 {'위' if ab else '아래'}"
+            t2 = f"<span style='color:{dot}'>●</span><span class='l200'> 200일선 {'위' if ab else '아래'}</span>"
         px = f"{x['close']:.2f}%" if bp and x.get('close') is not None else _num(x.get('close'))
         big = _bp(x.get(key)) if bp else _pct(x.get(key), neutral=neu)
         mv = x.get(key)
@@ -281,7 +290,7 @@ def market_cards(rows: list[dict], asof: str = '', period: str = 'd1'):
         cards.append(f"""<div class="hm-card"><div class="nm">{_e(nm)}</div>
           <div class="px">{px}</div><div class="d1">{big} <span style='font-size:11px;color:var(--ink-3);font-weight:500'>{lab}</span></div>
           {_spark(x.get('spark'), col)}
-          <div class="sub">{sub}<br>{t1} · {t2}</div></div>""")
+          <div class="sub">{sub}<br><span class='u'>{t1}<i class='sp'> · </i>{t2}</span></div></div>""")
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>글로벌 마켓</b>
       <span>큰 숫자 = 고른 기간 등락 · 선 = 최근 3개월 · 고점 = 52주 고점 대비 · VIX·환율·금리·달러·유가·스프레드는 오르면 위험이라 색 없음 · bp = 0.01%p</span></div>
       <div class="hm-grid">{''.join(cards) or '<div class="hm-src">지수 데이터 없음</div>'}</div>
@@ -681,7 +690,7 @@ def pulse_box(idx_rows: list[dict]):
         return
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>시장 추세 판정 — 오닐 방식 (참고)</b>
       <span>지수의 가격·거래량으로 본 상승·조정 단계 · 매수 신호(주봉 5주선)와 별개 · 일봉 판정이라 기간 전환과 무관</span></div>{_PULSE_HELP}{_PULSE_LEGEND}
-      <div class="hm-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">{''.join(cards)}</div></div>""")
+      <div class="hm-grid hm-g-auto">{''.join(cards)}</div></div>""")
 
 
 def trend_box(trends: list[tuple], period: str = 'd1'):
@@ -716,7 +725,7 @@ def macro_cards(V: dict):
                'z' if not c else ('p' if c.get('on') else 'n'))]
     st.html(CSS + f"""<div class="hm"><div class="hm-sec"><b>매크로 국면</b>
       <span>경기·유동성의 큰 그림 · 매매 신호 아님 · 근거는 🌍 매크로 탭</span></div>
-      <div class="hm-grid" style="grid-template-columns:repeat(4,minmax(0,1fr))">{''.join(cs)}</div></div>""")
+      <div class="hm-grid hm-g4">{''.join(cs)}</div></div>""")
 
 
 def heatmap_fig(rows: list[dict], unit: str = '조'):

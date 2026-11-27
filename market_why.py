@@ -47,7 +47,7 @@ _DNW = ("급락", "하락", "약세", "폭락", "추락", "↓")
 
 # 2026-11-26 차니: "'왜'에 대한 얘기가 전혀 없음 — PCE 예상 상회로 나스닥 -4%까지 갔다가 살아 돌아왔는데"
 #   '뉴욕증시 혼조 마감' 같은 결과 기사보다 원인 단어가 든 제목을 먼저 고른다.
-_CAUSE = re.compile(r"PCE|CPI|PPI|물가|고용|실업|금리|연준|Fed|파월|FOMC|국채|관세|실적|가이던스|전망|우려|기대|쇼크|예상|"
+_CAUSE = re.compile(r"숏|공매도|청산|커버링|버리|반전|PCE|CPI|PPI|물가|고용|실업|금리|연준|Fed|파월|FOMC|국채|관세|실적|가이던스|전망|우려|기대|쇼크|예상|"
                     r"반발|매수세|저가|반등|낙폭|회복|장중|급반등|만회|지정학|전쟁|협상|규제")
 
 
@@ -87,11 +87,15 @@ def find(targets: list) -> list:
     return out
 
 
-def headlines(f: dict, n=8) -> list:
-    """해설용 기사 제목 묶음 — 그날 시장 기사 여러 개(원인 단어 든 것 먼저). 2026-11-26 '재료 설명이 없다'(차니)."""
+def headlines(f: dict, n=14) -> list:
+    """해설용 기사 제목 묶음 — 그날 시장 기사 여러 개(원인 단어 든 것 먼저). 2026-11-26 '재료 설명이 없다'(차니).
+    2026-11-28 — 8개·마감 기사만으로는 장중 반전의 원인(PCE 부진 → 버리 숏 청산 반등)이 빠졌다.
+    반전·급변 기사 + 그날 나온 경제지표 이름 + (미국판) 영어 기사까지 모아 14개."""
     q, hours = ("뉴욕증시", 12) if f.get("kind") != "kr" else ("코스피", 9)
     out, seen = [], set()
-    for qq in (q + " 마감", q + " 장중", q + " 이유"):
+    econ = [r.get("name", "") for r in (((f.get("ctx") or {}).get("econ") or {}).get("today") or [])][:2]
+    qs = [q + " 마감", q + " 장중", q + " 이유", q + " 반등", q + " 급락"] + [f"{e.split('(')[0].strip()} {q}" for e in econ if e]
+    for qq in qs:
         try:
             for it in _rss(qq, hours=hours):
                 if it["title"] not in seen:
@@ -100,7 +104,15 @@ def headlines(f: dict, n=8) -> list:
         except Exception as e:
             print(f"  해설용 기사 실패({qq}):", str(e)[:60])
         time.sleep(0.4)
-    out.sort(key=lambda it: not _CAUSE.search(it["title"]))
+    if f.get("kind") != "kr":                       # 미국 장 원인은 영어 기사가 먼저·자세히 쓴다
+        try:
+            for it in headlines_en(n=6, hours=hours):
+                if it["title"] not in seen:
+                    seen.add(it["title"])
+                    out.append(it)
+        except Exception as e:
+            print("  영어 기사 실패:", str(e)[:60])
+    out.sort(key=lambda it: not (_CAUSE.search(it["title"]) or _CAUSE_EN.search(it["title"])))
     return out[:n]
 
 
@@ -140,7 +152,7 @@ if __name__ == "__main__":
     print(json.dumps(find(targets_for(f)), ensure_ascii=False, indent=1))
 
 
-_CAUSE_EN = re.compile(r"PCE|CPI|inflation|jobs|payroll|yield|Fed|Powell|rate|tariff|earnings|guidance|AI|selloff|rebound|"
+_CAUSE_EN = re.compile(r"short|cover|Burry|PCE|CPI|inflation|jobs|payroll|yield|Fed|Powell|rate|tariff|earnings|guidance|AI|selloff|rebound|"
                        r"rally|intraday|reverse|recover|slump|surge|plunge|data|treasur", re.I)
 
 

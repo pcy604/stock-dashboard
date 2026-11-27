@@ -71,7 +71,7 @@ def summary(f):
                 else f"최근 {bc['n']}거래일 평균 상승 비율은 {bc['avg']}%다")
         lead = _idx(f, "^KS11" if kind == "kr" else "^GSPC")
         but = "지수는 " + ("올랐지만" if lead["d1"] > 0 else "내렸지만") + " " if lead and abs(lead["d1"]) >= 0.2 and (lead["d1"] > 0) != up else ""
-        S.append(f"{but}대형주 {pct}%가 {'올랐고' if up else '내렸고'}, {tail}.")
+        S.append(f"{but}종목 {pct}%가 {'올랐고' if up else '내렸고'}, {tail}.")   # 2026-11-28 모수 통일 — 대형주 아님(1,000억+/$3억+ 전 종목)
     fl = ((ctx.get("flow") or {}).get("today") or {}).get("KOSPI") if kind == "kr" else None
     if fl and fl.get("외국인") is not None and fl.get("기관") is not None:
         a, b = fl["외국인"], fl["기관"]
@@ -311,16 +311,20 @@ def checkpoints(f):
 #   AI 체가 돌아오지 않게: 금지어 · 숫자는 제목/사실에 있는 것만 · 방향 검사 · 140자 이내.
 BANNED = ("견조", "모멘텀", "투자심리", "보인다", "주목", "풀이", "관측", "전망된다", "분석된다", "것으로", "시사",
           "우려가 커지", "기대감이 커지", "~", "!")
-EXPLAIN_PROMPT = """아래 기사 제목들만 근거로, 오늘 {mkt} 시장이 왜 이렇게 움직였는지 한국어 2문장(140자 이내)으로 쓴다.
+# 2026-11-28 차니 — '왜'가 약했다(PCE 부진으로 급락 → 마이클 버리 숏 청산 소식에 반등 같은 하루의 줄거리를 몰랐다).
+#   옛 규칙 '원인 하나만'이 장중 반전을 지웠다. 마감 시황(Reuters·Bloomberg Markets Wrap) 구조로:
+#   재료를 시간 순서로 2~3개, 문장마다 근거 기사 번호 [n]. 번호 없는 문장 = 탈락(check_explain).
+EXPLAIN_PROMPT = """아래 번호 붙은 기사 제목들만 근거로, 오늘 {mkt} 시장을 움직인 재료를 한국어 2~3문장(260자 이내)으로 쓴다.
 규칙:
-- 첫 문장 = 원인(무슨 일이 있었나), 둘째 문장 = 그 결과 시장이 어떻게 반응했나(장중 흐름 포함).
-- 제목에 없는 사실·숫자를 지어내지 않는다. 숫자는 제목이나 [사실]에 있는 것만.
+- 시간 순서: 장 초반·장중·마감 흐름이 바뀐 이유를 각각 쓴다(예: 지표 부진에 하락 → 다른 재료에 반등). 재료가 하나뿐이면 2문장.
+- 매 문장 끝에 근거 기사 번호를 [3] 또는 [1][4] 처럼 붙인다. 근거 번호를 못 붙이는 내용은 쓰지 않는다.
+- 제목에 없는 사실·숫자를 지어내지 않는다. 숫자는 제목이나 [사실]에 있는 것만. 지수 방향은 [사실]과 같아야 한다.
 - 증권사 마감 시황처럼 짧은 평서문('~했다'). 추측·평가 표현 금지: 보인다·풀이된다·관측·전망·주목·투자심리·모멘텀.
-- 제목들이 서로 다른 원인을 말하면 가장 많이 나온 원인 하나만 쓴다.
+- 지수 등락만 말하는 제목(원인 없음)은 근거로 쓰지 않는다.
 [사실] {facts}
 [기사 제목]
 {heads}
-답: 두 문장만, 다른 말 없이."""
+답: 문장만, 다른 말 없이."""
 
 
 def econ_lines(f):
@@ -345,8 +349,17 @@ def check_explain(txt, heads, f):
     import re
     bad = []
     txt = (txt or "").strip()
-    if not txt or len(txt) > 160:
+    if not txt or len(txt) > 300:
         bad.append(f"길이 {len(txt)}자")
+    # 문장마다 근거 번호 — 없거나 없는 번호면 탈락(지어낸 원인 차단)
+    _t = re.sub(r"\.\s*((?:\[\d+\])+)", r" \1.", txt)          # '했다. [1]' → '했다 [1].'
+    for sen in [x for x in re.split(r"\.\s*", _t) if len(x.strip()) > 3]:
+        ids = [int(i) for i in re.findall(r"\[(\d+)\]", sen)]
+        if not ids:
+            bad.append(f"근거 번호 없는 문장: {sen[:30]}")
+        elif any(i < 1 or i > len(heads) for i in ids):
+            bad.append(f"없는 기사 번호 {ids}")
+    txt = re.sub(r"\[\d+\]", "", txt)
     bad += [f"금지어 '{w}'" for w in BANNED if w in txt]
     pool = " ".join(h["title"] for h in heads) + " " + explain_facts(f) + " " + summary(f)
     for num in re.findall(r"\d+(?:\.\d+)?", txt):
@@ -356,6 +369,10 @@ def check_explain(txt, heads, f):
 
 
 def why_lines(f):
+    # 2026-11-28 — 해설이 있으면 해설이 인용한 기사만 근거로 단다(번호 = 해설의 [n]). 없으면 옛 방식(제목 그대로).
+    src = f.get("explain_src") or []
+    if f.get("explain") and src:
+        return [f"[{s['n']}] “{s['title']}” — {s['source']} ({s.get('date', '')})" for s in src]
     return [f"{w['label']}: “{w['title']}” — {w['source']} ({w['date']})" for w in (f.get("why") or [])]
 
 
