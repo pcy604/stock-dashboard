@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-23",
+ "generated": "2026-11-27",
  "rule": "52주 신고가 돌파 + 이익 변곡(흑자전환 OR 영업익 YoY≥100%) 진입 · 고점대비 -30% 트레일링 청산 · 재진입 허용",
  "earn_ab": {
   "price_only": {
@@ -65,26 +65,26 @@
    "tail": 69.6
   }
  },
- "universe": 1302,
- "period": "2018-01-01 ~ 2026-11-23",
+ "universe": 1304,
+ "period": "2018-01-01 ~ 2026-11-27",
  "backtest": {
   "7": {
    "label": "-7% 트레일링",
-   "n": 12977,
+   "n": 12998,
    "winrate": 34.1,
    "avg": 1.14,
-   "med": -4.82,
+   "med": -4.83,
    "p90": 19.4,
    "p99": 70.1,
    "best": 475.7,
    "worst": -47.6,
    "payoff": 2.38,
    "hold_d": 9,
-   "top1pct_share": 102.2
+   "top1pct_share": 102.0
   },
   "8": {
    "label": "-8% 트레일링",
-   "n": 12101,
+   "n": 12122,
    "winrate": 34.3,
    "avg": 1.31,
    "med": -5.09,
@@ -94,114 +94,162 @@
    "worst": -47.6,
    "payoff": 2.38,
    "hold_d": 11,
-   "top1pct_share": 98.0
+   "top1pct_share": 97.9
   },
   "10": {
    "label": "-10% 트레일링",
-   "n": 10627,
+   "n": 10646,
    "winrate": 34.7,
    "avg": 1.7,
    "med": -5.86,
-   "p90": 25.2,
-   "p99": 90.3,
+   "p90": 25.3,
+   "p99": 90.2,
    "best": 509.1,
    "worst": -47.6,
    "payoff": 2.41,
    "hold_d": 15,
-   "top1pct_share": 91.8
+   "top1pct_share": 91.6
   },
   "15": {
    "label": "-15% 트레일링",
-   "n": 8174,
+   "n": 8189,
    "winrate": 35.0,
    "avg": 2.68,
    "med": -7.49,
-   "p90": 34.4,
-   "p99": 129.9,
+   "p90": 34.5,
+   "p99": 129.8,
    "best": 509.1,
    "worst": -47.6,
    "payoff": 2.48,
    "hold_d": 29,
-   "top1pct_share": 76.4
+   "top1pct_share": 76.2
   },
   "20": {
    "label": "-20% 트레일링",
-   "n": 6559,
+   "n": 6570,
    "winrate": 35.6,
-   "avg": 4.57,
-   "med": -9.24,
-   "p90": 44.4,
-   "p99": 170.3,
+   "avg": 4.58,
+   "med": -9.23,
+   "p90": 44.3,
+   "p99": 170.2,
    "best": 1170.9,
    "worst": -47.6,
-   "payoff": 2.64,
+   "payoff": 2.65,
    "hold_d": 49,
-   "top1pct_share": 62.3
+   "top1pct_share": 62.0
   },
   "30": {
    "label": "-30% 트레일링",
-   "n": 4578,
-   "winrate": 37.3,
-   "avg": 10.57,
-   "med": -11.8,
+   "n": 4586,
+   "winrate": 37.4,
+   "avg": 10.62,
+   "med": -11.73,
    "p90": 71.7,
-   "p99": 300.3,
+   "p99": 300.2,
    "best": 1967.7,
    "worst": -49.2,
-   "payoff": 3.01,
+   "payoff": 3.0,
    "hold_d": 131,
-   "top1pct_share": 47.2
+   "top1pct_share": 46.9
   }
  },
- "n": 4,
+ "n": 8,
  "candidates": [
   {
    "sym": "263860",
    "name": "지니언스",
    "entry_date": "2026-10-28",
    "entry_px": 27300.0,
-   "close": 37250.0,
-   "ret": 36.4,
-   "peak_gain": 41.2,
-   "stop": 26985.0,
-   "adv_eok": 908,
-   "days": 26
+   "close": 40900.0,
+   "ret": 49.8,
+   "peak_gain": 52.9,
+   "stop": 29225.0,
+   "adv_eok": 1166,
+   "days": 30
+  },
+  {
+   "sym": "036710",
+   "name": "심텍홀딩스",
+   "entry_date": "2026-11-24",
+   "entry_px": 6290.0,
+   "close": 6760.0,
+   "ret": 7.5,
+   "peak_gain": 7.5,
+   "stop": 4732.0,
+   "adv_eok": 117,
+   "days": 3
   },
   {
    "sym": "180640",
    "name": "한진칼",
    "entry_date": "2026-11-20",
    "entry_px": 237000.0,
-   "close": 228000.0,
-   "ret": -3.8,
-   "peak_gain": 0.0,
-   "stop": 165900.0,
-   "adv_eok": 1376,
-   "days": 3
+   "close": 250500.0,
+   "ret": 5.7,
+   "peak_gain": 5.7,
+   "stop": 175350.0,
+   "adv_eok": 1521,
+   "days": 7
   },
   {
-   "sym": "003490",
-   "name": "대한항공",
-   "entry_date": "2026-11-19",
-   "entry_px": 32650.0,
-   "close": 30200.0,
-   "ret": -7.5,
+   "sym": "290550",
+   "name": "디케이티",
+   "entry_date": "2026-11-26",
+   "entry_px": 33750.0,
+   "close": 35650.0,
+   "ret": 5.6,
+   "peak_gain": 5.6,
+   "stop": 24955.0,
+   "adv_eok": 191,
+   "days": 1
+  },
+  {
+   "sym": "029460",
+   "name": "케이씨",
+   "entry_date": "2026-11-27",
+   "entry_px": 49400.0,
+   "close": 49400.0,
+   "ret": 0.0,
    "peak_gain": 0.0,
-   "stop": 22855.0,
-   "adv_eok": 862,
-   "days": 4
+   "stop": 34580.0,
+   "adv_eok": 25,
+   "days": 0
+  },
+  {
+   "sym": "122900",
+   "name": "아이마켓코리아",
+   "entry_date": "2026-11-27",
+   "entry_px": 8670.0,
+   "close": 8670.0,
+   "ret": 0.0,
+   "peak_gain": 0.0,
+   "stop": 6069.0,
+   "adv_eok": 10,
+   "days": 0
   },
   {
    "sym": "089590",
    "name": "제주항공",
    "entry_date": "2026-11-19",
    "entry_px": 8500.0,
-   "close": 7830.0,
-   "ret": -7.9,
+   "close": 7920.0,
+   "ret": -6.8,
    "peak_gain": 0.0,
    "stop": 5950.0,
-   "adv_eok": 128,
-   "days": 4
+   "adv_eok": 148,
+   "days": 8
+  },
+  {
+   "sym": "003490",
+   "name": "대한항공",
+   "entry_date": "2026-11-19",
+   "entry_px": 32650.0,
+   "close": 30150.0,
+   "ret": -7.7,
+   "peak_gain": 0.0,
+   "stop": 22855.0,
+   "adv_eok": 936,
+   "days": 8
   }
  ],
  "caveats": [
