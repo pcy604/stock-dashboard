@@ -15,6 +15,7 @@ on:
     - cron: '0 22 1 1,4,7,10 *' # 분기 첫날 → L3
 permissions:
   contents: write
+  actions: write     # 2026-11-27 자가 복구 — 멈춘 산출물의 워크플로를 다시 돌린다(tools/auto_heal.py)
 jobs:
   watch:
     runs-on: ubuntu-latest
@@ -46,6 +47,11 @@ jobs:
         id: l1
         run: python tools/platform_watch.py --l1
 
+      - name: 자가 복구 — 멈춘 산출물의 워크플로 재실행
+        if: always()
+        run: python tools/auto_heal.py
+        continue-on-error: true
+
       - name: L2 — 규정 문서 diff (월요일·수동)
         if: always() && (github.event.schedule == '40 21 * * 1' || github.event_name == 'workflow_dispatch')
         run: python tools/platform_watch.py --l2
@@ -59,7 +65,7 @@ jobs:
         run: |
           git config user.name  "github-actions"
           git config user.email "actions@github.com"
-          for f in results/platform_status.json results/platform_docs.json; do
+          for f in results/platform_status.json results/platform_docs.json results/auto_heal.json; do
             [ -f "$f" ] && git add -f "$f"
           done
           git add -f docs/research/*_플랫폼_재평가.md 2>/dev/null || true

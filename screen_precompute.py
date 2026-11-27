@@ -47,7 +47,9 @@ def _enrich_maps():
             code = str(r.get('Code', '')).zfill(6) if r.get('Code') else ''
             if code:
                 if r.get('Name'): names.setdefault(code, str(r['Name']))
-                if r.get('Marcap'): caps.setdefault(code, int(r['Marcap']))
+                # 2026-11-27 — 상장목록(오늘) 시총이 우선. 예전엔 perf_latest(며칠 묵을 수 있음) 값이 먼저 잡혀
+                #   returns.json 시총이 같은 실행의 종가와 11% 어긋났다(삼성전자 정답 점검 실패 · 시총 1,000억 모수 경계 흔들림).
+                if r.get('Marcap'): caps[code] = int(r['Marcap'])
         sp = fdr.StockListing('S&P500')
         for _, r in sp.iterrows():
             if r.get('Symbol') and r.get('Name'):

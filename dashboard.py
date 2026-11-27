@@ -319,6 +319,10 @@ hr { margin: 0.6rem 0 !important; }
 [data-testid="stTextInput"] input { min-height: 38px !important; height: 38px !important; }
 [data-testid="stTextInput"] [data-baseweb="input"], [data-testid="stTextInput"] [data-baseweb="base-input"] { min-height: 38px !important; height: 38px !important; }
 .an-title { font-size: 22px; font-weight: 700; line-height: 38px; margin: 0; white-space: nowrap; }
+.st-key-an_head [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child { flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; }
+.st-key-an_head [data-testid="stForm"] { padding: 0 !important; border: 0 !important; }
+.st-key-an_head [data-testid="stTextInput"] input, .st-key-an_head [data-testid="stFormSubmitButton"] button { height: 40px !important; min-height: 40px !important; box-sizing: border-box; }
+.st-key-an_head [data-testid="stTextInput"] > div, .st-key-an_head [data-testid="stTextInput"] [data-baseweb="input"] { height: 40px !important; min-height: 40px !important; }
 [data-testid="stExpander"] details { padding: 0 !important;
   border: 1px solid var(--line) !important; border-radius: 6px !important; }
 [data-testid="stExpander"] summary { font-weight: 560 !important; }
@@ -1383,14 +1387,15 @@ try:
 except Exception:
     _IS_LAB = os.environ.get('LAB_OPEN') == '1'
 # 2026-11-12 차니 — 🏛️ 경영실(KPI·로드맵·결정·이슈·회의록·변경 이력) 도 소유자만. 연구실과 같은 판정.
-_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🧭 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오", "💬 VOC"] + (["🔬 연구실", "🏛️ 경영실"] if _IS_LAB else [])   # 2026-11-20 VOC(전원)
+# 2026-11-27 차니 — VOC 는 경영실 하위로(소유자). 방문자에게는 경영실이 안 보이므로 접수 창구로 VOC 탭을 그대로 둔다.
+_MAIN_TABS = ["🏠 종합", "🌍 매크로", "🧭 종목 발굴", "🔍 종목 분석", "🛡️ 내 포트폴리오"] + (["🔬 연구실", "🏛️ 경영실"] if _IS_LAB else ["💬 VOC"])
 if st.session_state.get('main_tab') == '🔎 종목 발굴':          # 2026-11-16 아이콘 변경 — 세션에 남은 옛 이름
     st.session_state['main_tab'] = '🧭 종목 발굴'
 _mt = st.tabs(key='main_tab', on_change='rerun', tabs=_MAIN_TABS)
 tab_home, tab4, tab_screen, tab7, tab_pf = _mt[:5]
-tab_voc = _mt[5]
-tab_lab = _mt[6] if _IS_LAB else None
-tab_gov = _mt[7] if _IS_LAB else None
+tab_lab = _mt[5] if _IS_LAB else None
+tab_gov = _mt[6] if _IS_LAB else None
+tab_voc = None if _IS_LAB else _mt[5]
 if _IS_LAB:
     with tab_lab:
         st.caption("🔬 **연구실 — 소유자만 보입니다.** 검증 중이거나 기각된 연구 · 퀀트 백테스트. 결론이 난 것만 다른 탭으로 옮깁니다.")
@@ -1439,20 +1444,22 @@ with tab_screen:                           # 데이터를 건드리지 않는 �
     # 2026-11-01 차니: 공개 화면은 '교집합 후보' 하나만. 나머지 발굴 도구(상승 상위·52주 신고가·CANSLIM·이익가속·흑자전환·가치 발굴)는
     #   🔬 연구실 → 🗂 발굴 도구로(소유자만). 핸들 이름은 그대로 두고, 공개 시점엔 None → 각 블록이 _lab_enter 로 건너뛴다.
     # 2026-11-08 차니: 맨 위 = 실전 규칙 v1.9 후보, 그 아래 = 재료 목록(공개 — 가격·재무 사실 목록이라 숨길 이유 없음). 후보 바구니 제거.
-    t_core = st.container()
+    # 2026-11-27 차니 — 실전 후보와 재료 목록 6개를 한 줄에 나란히(맨 위). 예전엔 재료 목록이 탭 맨 아래 구석이었다.
+    #   고른 목록 하나만 계산한다(메모리 — 10-24 다운). 기본 = 실전 후보.
+    _CORE = "🧭 실전 후보 (v1.9)"
+    _TOOLS = ["🏦 시총 상위", "🔥 상승 상위", "📈 52주 신고가", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
+    _tool = st.segmented_control('발굴 목록', [_CORE] + _TOOLS, default=_CORE, key='tools_pick',
+                                 label_visibility='collapsed') or _CORE
+    t_core = st.container() if _tool == _CORE else None
+    if t_core is not None:
+        _TOOL_IDS.add(id(t_core))
 t_cap = t_gain = t_52 = t_lead = t_turn = t_value = None
 if True:                                          # 2026-11-08 공개(옛: 소유자만)
     # 2026-11-08 차니 "발굴 도구는 종목 발굴이랑 뭐가 다르지?" — 다른 건 '재료'(교집합 이전 목록)라는 것뿐이고,
     #   보는 이유도 '교집합에 왜 들어왔나/빠졌나' 확인이라 종목 발굴 아래가 제자리. 연구실 서브탭에서 내린다.
     #   여섯 개를 다 그리면 메모리(10-24 다운)라 고른 하나만 계산 — 기본은 안 고름.
     with tab_screen:
-        st.divider()
-        st.markdown("##### 🗂 재료 목록")
-        st.caption("교집합 후보를 만드는 재료 — 가격이 먼저 말하는 목록(상승 상위·52주 신고가)과 숫자가 먼저 말하는 목록(이익가속·흑자전환·가치). "
-                   "위 후보에 왜 들어왔는지·왜 빠졌는지 확인할 때 엽니다. 고른 목록 하나만 계산합니다.")
-        _TOOLS = ["🏦 시총 상위", "🔥 상승 상위", "📈 52주 신고가", "⚡ 이익가속", "🔄 흑자전환", "💎 가치 발굴 (KR)"]
-        _tool = st.segmented_control('재료 목록', _TOOLS, default=None, key='tools_pick', label_visibility='collapsed')
-        if _tool:
+        if _tool != _CORE:
             _tc = st.container()
             _TOOL_IDS.add(id(_tc))
             t_cap, t_gain, t_52, t_lead, t_turn, t_value = [(_tc if _tool == _t else None) for _t in _TOOLS]
@@ -1618,7 +1625,8 @@ def _std_table(rows, specific, *, sort_by=None, ascending=False, src=None, path=
 # ── 🚀 주도주 · 교집합 후보 (2026-10-23 신설) ─────────────────────────
 # 정의: RS 강도 상위 20% × (이번 주 이익가속 또는 최근 흑자전환). 52주 신고가 '전에' 걸리게 하려는 것.
 # ⚠️ 검증 전이다 — research/rs_accel_bt.py(CI research-rs) 결과가 합격일 때만 '규칙'으로 승격한다.
-with t_core, guard('주도주 교집합'):
+with (t_core or st.empty()), guard('주도주 교집합'):
+    _lab_enter(t_core)
     # 2026-11-08 차니 "종목 발굴 전략을 실제로 쓸 그 전략으로" — 화면 = 실전 규칙 v1.9 의 후보 정의 그대로(live/plan.py 와 같은 조건).
     #   옛 '교집합 후보(RS≥80 × 이익가속/흑자전환, 백테스트 불합격 11.35%)' 는 내렸다.
     _lazy(tab_screen)
@@ -1635,16 +1643,16 @@ with t_core, guard('주도주 교집합'):
                "**영업이익 흑자전환**(이번 분기 영업흑자 + 전년 같은 분기 영업적자) · **주봉 종가 > 5주선**. "
                "**순서** = RS 높은 순, 위 10개가 이번 주 매수 대상. **매수는 소속 지수(코스피/코스닥) 주봉이 5주선 위일 때만.** "
                "보유 중엔 고점 −20% 손절 · RS 70 아래로 떨어지면 매도 · 첫 매수 50% → +10%·+20%에 25%씩 불타기.")
-    _g = st.columns(3)
-    for _k, _lab, _col in (('KR', '코스피', _g[0]), ('KQ', '코스닥', _g[1])):
+    # 2026-11-27 차니 — 큰 metric 상자 5개(두 줄)를 한 줄 요약으로. 지수 2개 + 통과·5주선 위·매수 대상.
+    _gate_bits = []
+    for _k, _lab in (('KR', '코스피'), ('KQ', '코스닥')):
         _x = _ix.get(_k) or {}
         if _x:
             # 2026-11-12 감사: 오버라이드 주에는 ok=True 라 '🟢 매수 가능'인데 종가 < 5주선이 같이 찍혀 모순으로 보였다.
             _above = (_x.get('last') or 0) > (_x.get('ma200') or 0)
-            _lbl = ('🟢 매수 가능' if _above else '🟠 오버라이드(규칙상 중지)') if _x.get('ok') else '🔴 신규 중지'
-            _col.metric(f"{_lab} 5주선", _lbl,
-                        f"{_x.get('last', 0):,.2f} vs 5주선 {_x.get('ma200', 0):,.2f} · {_x.get('date', '')}", delta_color='off',
-                        help=(_x.get('override') or None))
+            _lbl = ('🟢 매수 가능' if _above else '🟠 오버라이드') if _x.get('ok') else '🔴 신규 중지'
+            _gate_bits.append(f"<span title='{_html.escape(str(_x.get('override') or ''))}'><b>{_lab}</b> {_lbl} "
+                              f"<span style='color:#6b7280'>{_x.get('last', 0):,.0f} / 5주선 {_x.get('ma200', 0):,.0f}</span></span>")
     if _GMKT == 'US':
         st.info("v1.9 는 한국 전용입니다(2026-11-04 결정 — 미국 슬리브 중단). 같은 규칙의 미국판은 퀀트 백테스트에서 S&P500(배당 포함)에 못 미쳤습니다.")
     elif _CMB.empty:
@@ -1664,10 +1672,11 @@ with t_core, guard('주도주 교집합'):
             x['이번 주'] = '매수 대상' if n_ <= 10 else '대기'
         for x in _rows:
             x.setdefault('이번 주', '추세 미확인')
-        _c = st.columns(3)
-        _c[0].metric("조건 통과", f"{len(_rows):,}종", "RS 80+ · 흑자전환 · 시총 1,000억+", delta_color='off')
-        _c[1].metric("5주선 위(봇 확인)", f"{len(_ok):,}종", f"계획표 {_plan.get('made', '-')}", delta_color='off')
-        _c[2].metric("이번 주 매수 대상", f"{min(10, len(_ok))}종", '지수 5주선 위일 때만 실제 매수', delta_color='off')
+        _cnt = (f"<b>조건 통과</b> {len(_rows):,}종 → <b>5주선 위</b> {len(_ok):,}종 "
+                f"<span style='color:#6b7280'>(계획표 {_plan.get('made', '-')})</span> → <b>이번 주 매수 대상</b> {min(10, len(_ok))}종")
+        st.html("<div style='display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:13.5px;padding:8px 12px;"
+                "border:1px solid #e5e7eb;border-radius:10px;background:#fff;margin:4px 0 8px'>"
+                + ' · '.join(_gate_bits + [_cnt]) + "</div>")
         if _rows:
             _std_table(pd.DataFrame(_rows), ['이번 주', '5주선 위'],
                        src='common_metrics(RS) · turnaround_latest.json(흑자전환) · live/plan_latest.json(5주선·지수)',
@@ -5955,7 +5964,8 @@ def _tab_analysis():
     _tui.begin_run(st)       # 표 필터 키 순번을 프래그먼트 실행마다 0부터 — 키가 바뀌면 필터가 풀린다
     with guard('종목 분석'):
         # 2026-11-16 — 한 줄: 제목 · 검색창 · 분석 버튼 · 탭 선택(펀더멘탈·밸류에이션·히스토리·수급)
-        _h1, _h2, _h3 = st.columns([1.0, 3.6, 2.4], vertical_alignment='center', gap='small')
+        # 2026-11-27 차니 — 제목 바로 오른쪽에 검색창, 높이 통일(빈 세 번째 칸 제거). 제목 칸은 글자 폭만(CSS .st-key-an_head)
+        _h1, _h2 = st.container(key='an_head').columns([1, 7], vertical_alignment='center', gap='small')
         _h1.markdown("<div class='an-title'>🔍 종목 분석</div>", unsafe_allow_html=True)
 
         # 2026-10-15 — 모바일에서 검색이 안 되던 문제. 키보드의 '이동/검색'(Enter)은 입력칸만
@@ -9100,8 +9110,8 @@ else:
     with guard('운영 점검 요약'):
         _ka_n, _st_n = _ops_counts()          # 상단 배지와 같은 캐시(10분) — 두 번 읽지 않는다
         _ka_n, _st_n = _ka_n or 0, _st_n or 0
-        if (_ka_n or _st_n) and _IS_LAB:           # 2026-11-14 운영 점검은 소유자만(고객 화면에 내부 점검 문구 노출 X)
-            st.caption(f"🔴 운영 점검 틀림 {_ka_n} · 정지 {_st_n} (`?diag=admin`)")
+        # 2026-11-27 차니 — 탭 머리의 '운영 점검 틀림 N · 정지 N' 줄 삭제. 상태는 📘 사용법 > 🗄️ 데이터(정답 점검·신선도) 한 곳에서만.
+        #   멈춘 산출물은 tools/auto_heal.py 가 매일 06:20 워크플로를 다시 돌린다.
 # 2026-11-16 — 사이트 공통 '출처' 줄 삭제(차니: 코멘트는 제자리로). 출처는 표마다 · 전체 목록은 📘 사용법 > 🗄️ 데이터.
 
 
@@ -9292,8 +9302,13 @@ def _home_top(V):
     _t = (b.get('up') or 0) + (b.get('down') or 0) + (b.get('flat') or 0)
     if _t:
         chips.append(f"한국 상승 종목 {b['up'] / _t * 100:.0f}%")
-    if usf.get('breadth_up') is not None:
-        chips.append(f"미국 대형주 상승 {usf['breadth_up']}%")
+    # 2026-11-27 — 한·미 같은 말·같은 모수(그 시장 전 종목 중 오른 종목 비율). 예전엔 미국만 '대형주 상승'(상위 500)이라 비교가 안 됐다.
+    _ub = usf.get('breadth_all') or {}
+    _ut = (_ub.get('up') or 0) + (_ub.get('down') or 0) + (_ub.get('flat') or 0)
+    if _ut:
+        chips.append(f"미국 상승 종목 {_ub['up'] / _ut * 100:.0f}%")
+    elif usf.get('breadth_up') is not None:
+        chips.append(f"미국 상승 종목 {usf['breadth_up']}%")
     _lv, _re = [], []
     for _n in ('코스피', '코스닥'):
         _x = idx.get(_n) or {}
@@ -9673,14 +9688,19 @@ with tab_home, guard('종합 — 바로가기'):
 
 
 # ── 💬 VOC (2026-11-20, 전원) — 기능 요청·버그 접수, 상태·답변 공개 ─────────
-with tab_voc, guard('VOC'):
-    _lazy(tab_voc)
+def _voc_render():
     import ui_voc as _UV
     if getattr(_UV, 'VERSION', None) != '2026-11-20a':
         import importlib as _il, voc_store as _VS
         _il.reload(_VS); _UV = _il.reload(_UV)
     import access as _accv
     _UV.render(st, list(_MAIN_TABS[:5]), _IS_LAB, _accv.uid())
+
+
+if tab_voc is not None:
+    with tab_voc, guard('VOC'):
+        _lazy(tab_voc)
+        _voc_render()
 
 
 # ── 🏛️ 경영실 (2026-11-12, 소유자만) — 열려 있을 때만 그린다 ─────────
@@ -9693,7 +9713,11 @@ if tab_gov is not None:
             import importlib as _il, gov as _G
             _il.reload(_G); _UG = _il.reload(_UG)
         import access as _accg
-        _UG.render(st, _accg.email() or 'owner', _accg.uid())
+        _gv = st.tabs(['🏛️ 운영', '💬 VOC'])
+        with _gv[0]:
+            _UG.render(st, _accg.email() or 'owner', _accg.uid())
+        with _gv[1]:
+            _voc_render()
 
 
 # ── 페이지 최하단 고지 — 모든 탭 공통 (2026-10-21 지인 베타 배포 전 필수) ─────────
@@ -9711,6 +9735,7 @@ with st.expander("ⓘ 정보 도구 · 투자 권유 아님 · 가격 15분+ 지
 # 2026-11-06 — 배포가 10-31 에 멈춘 채 일주일을 몰랐다. 이 줄을 keepalive 가 GitHub main 과 대조한다(build_info).
 try:
     import build_info as _bi
-    st.caption(_bi.stamp(_bi.local_build()))
+    # 2026-11-27 차니 — 고객에게 필요 없는 줄. 화면에서는 숨기고 DOM 에만 둔다(keepalive 가 text_content 로 읽는다).
+    st.html(f"<div class='build-stamp' style='display:none'>{_html.escape(_bi.stamp(_bi.local_build()))}</div>")
 except Exception as _e:
     st.caption(f"`배포 빌드 확인 실패: {type(_e).__name__}`")

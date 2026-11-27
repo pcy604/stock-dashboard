@@ -92,8 +92,9 @@ async def main():
             await _settle(pg)
             # 2026-11-06 — 배포 빌드가 main 을 따라오는가(10-31~11-05 배포 정지를 이 점검이 7/7 초록으로 놓쳤다)
             try:
-                txt = await pg.locator('[data-testid="stMain"], section.main, body').first.inner_text(timeout=15000)
-                dep = build_info.parse_stamp(txt)
+                # 2026-11-27 — 빌드 줄을 화면에서 숨겼다(display:none). inner_text 는 숨긴 글자를 못 읽어 text_content 로.
+                txt = await pg.locator('[data-testid="stMain"], section.main, body').first.text_content(timeout=15000)
+                dep = build_info.parse_stamp(txt or '')
                 v = build_info.lag_verdict(dep, _main_commits(), dt.datetime.now(dt.timezone.utc).timestamp())
                 r = {'page': '배포 빌드 = main', 'ok': v['ok'], 'deployed': dep, **{k: v[k] for k in v if k != 'ok'}}
             except Exception as e:

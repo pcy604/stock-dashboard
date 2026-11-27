@@ -379,19 +379,22 @@ def _():
     return _age(t) <= 4, f"latest_daily {t}"
 
 
-@check('AI 생성물', '시황 리포트·신고가 요약이 최근 2일 안에 실제 AI 로 만들어졌는가 (키 누락 감지)')
+@check('AI 생성물', '시황 리포트(규칙 문장)·신고가 요약(AI)이 최근 2일 안에 정상 경로로 만들어졌는가 (템플릿 폴백·키 누락 감지)')
 def _():
     # 2026-10-20 — GitHub Actions 에 GEMINI_KEY 가 없어 시황 리포트가 10-14 부터 '숫자 템플릿'으로만 나갔고,
     #   신고가 AI 요약은 한 번도 만들어지지 않았다. 경고(WARN)만 떠서 일주일간 아무도 몰랐다.
     rep = _j('results/market_report.json')
     recent = [h for h in rep.get('history', []) if _age(h.get('date')) <= 2]
-    rep_ok = any(str(h.get('engine', '')).startswith('gemini') for h in recent)
+    # 2026-11-27 — 11-25 부터 시황 문장은 AI 가 아니라 사실에서 직접 쓴다(engine='rules', 의도된 설계).
+    #   그런데 이 점검은 여전히 gemini 만 통과로 봐 '데이터 점검 1건'이 매일 떴다(오경보). rules 도 정상이다.
+    #   'template'(숫자 템플릿 = 실패 경로)만 실패로 본다.
+    rep_ok = any(str(h.get('engine', '')).startswith(('gemini', 'rules')) for h in recent)
     try:
         nh = _j('results/new_high_ai.json')
     except Exception:
         nh = {}
     nh_ok = any(_age(str(v.get('generated', ''))[:10]) <= 2 for v in (nh.get('weeks') or {}).values())
-    return rep_ok and nh_ok, (f"시황 리포트 AI {'✅' if rep_ok else '❌(최근 2일 템플릿만)'} · "
+    return rep_ok and nh_ok, (f"시황 리포트 {'✅' if rep_ok else '❌(최근 2일 템플릿만)'} · "
                               f"신고가 요약 {'✅' if nh_ok else '❌(최근 2일 생성 없음)'} — ❌면 GitHub Secrets 의 GEMINI_KEY 확인")
 
 

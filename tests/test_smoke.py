@@ -52,7 +52,8 @@ def test_no_error_box(app):
 
 def test_reached_last_line(app):
     """푸터(스크립트 마지막 블록)가 그려졌다 = 끝까지 실행됐다."""
-    texts = [c.value for c in app.caption] + [m.value for m in app.markdown]
+    texts = [c.value for c in app.caption] + [m.value for m in app.markdown] \
+        + [getattr(h, 'body', '') or '' for h in app.get('html')]     # 2026-11-27 빌드 줄 = 숨긴 st.html
     assert any('배포 빌드' in (t or '') for t in texts), '푸터 미도달 — 중간에서 죽었다'   # 2026-11-16 공통 출처 줄 삭제 → 마지막 줄 = 배포 빌드
 
 

@@ -191,7 +191,11 @@ jobs:
 
       - name: 컨센서스 시계열 스냅샷 (월요일만 — 리비전 모멘텀 재료)
         run: |
-          if [ "$(TZ=Asia/Seoul date +%u)" = "1" ] || [ "${{ inputs.force_monday }}" = "true" ]; then python consensus_snapshot.py; else echo "월요일 아님 — 스킵"; fi
+          # 2026-11-27 자가 복구 — 월요일 실행을 놓치면(11-23: schedule 지연) 다음 월요일까지 2주 묵었다.
+          #   마지막 스냅샷이 7일 이상 낡았으면 요일과 무관하게 돈다.
+          LAST=$(tail -1 results/consensus_history.jsonl 2>/dev/null | python -c "import sys,json;print(json.loads(sys.stdin.read() or '{}').get('date',''))" || true)
+          AGE=$(python -c "import datetime as d,sys;s='$LAST';print((d.date.today()-d.date.fromisoformat(s)).days if s else 99)")
+          if [ "$(TZ=Asia/Seoul date +%u)" = "1" ] || [ "${{ inputs.force_monday }}" = "true" ] || [ "$AGE" -ge 7 ]; then echo "컨센서스 스냅샷 (마지막 $LAST · ${AGE}일)"; python consensus_snapshot.py; else echo "월요일 아님·${AGE}일 — 스킵"; fi
         continue-on-error: true
 
       - name: 파이프라인 신선도 검사 (정지 시 텔레그램 경보)
