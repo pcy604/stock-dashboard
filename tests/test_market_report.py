@@ -111,7 +111,7 @@ _fk = dict(kind="kr", indices=[dict(sym="^KS11", name="코스피", d1=6.3, close
            ctx=dict(breadth=dict(today=95, avg=45, rank=1, n=30, up_days=13)), stocks={})
 _s = N.summary(_fk)
 assert "+6.3%" in _s and "가장 넓은 상승" in _s and "약세" not in _s, _s
-assert "신규 매수는 중지" in N.direction(_fk) and "코스피는" in N.direction(_fk)
+assert "신규 매수는 중지" in N.direction(_fk) and "오닐" not in N.direction(_fk)   # 2026-11-28 오닐 제거
 assert N.checkpoints(_fk)[0].startswith("코스피 5주선(5,193)"), N.checkpoints(_fk)
 _txt = N.compose(_fk, N.narrate(_fk))
 for _w in N.BANNED[:5]:

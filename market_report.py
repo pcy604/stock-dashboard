@@ -1039,9 +1039,7 @@ def template(f):
     want = ("^KS11", "^KQ11") if kind == "kr" else ("^GSPC", "^IXIC") if kind == "daily" else ("^KS11", "^KQ11", "^GSPC", "^IXIC")
     for x in idx:
         if x.get("sym") in want:
-            pl = _pulse_line(x)
-            if pl:
-                L.append("- 오닐(참고) " + pl)
+            pass   # 2026-11-28 오닐(참고) 줄 제거 — 백테스트 전 · 실전 규칙과 충돌
     if v:
         L.append("- " + ("⚠️ 미국 코어 스위치 전환 · " if v.get("changed") else "") +
                  f"참고 — 미국 S&P500 200일선 {v.get('core_gap_200d', 0):+.1f}% · 국면 {v.get('phase_ref') or '-'} · "

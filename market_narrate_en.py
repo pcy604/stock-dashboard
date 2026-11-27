@@ -53,19 +53,13 @@ def summary(f):
 
 
 def signal(f):
-    x = _idx(f, "^GSPC") or {}
-    pz, v = x.get("pulse") or {}, f.get("verdict") or {}
-    st, gap = str(pz.get("state") or ""), v.get("core_gap_200d")
-    above = gap is not None and gap >= 0
-    ma = f" S&P 500 is {abs(gap):.1f}% {'above' if above else 'below'} its 200-day average." if gap is not None else ""
-    if pz.get("ftd_date") and above:
-        return "🟢", f"Confirmed uptrend — follow-through day on {pz['ftd_date'][5:]}." + ma
-    if st.startswith("반등 시도"):
-        n = pz.get("rally_day") or 0
-        return "🟡", (f"Rally attempt, day {n}. O'Neil's method waits for a follow-through day (day 4+, +1.25% or more on higher volume)"
-                      " before new buys" + (f" — earliest in {4 - n} session(s)." if n < 4 else ".") + ma)
-    return "🔴", (f"Market in correction — {pz.get('dist_n', '-')} distribution days in the last 25 sessions." + ma
-                  + " No new buys until a rally attempt starts.")
+    # 2026-11-28 — O'Neil removed (untested, contradicted the live rule). US = S&P 500 vs 200-day only (reference).
+    gap = (f.get("verdict") or {}).get("core_gap_200d")
+    if gap is None:
+        return "", ""
+    if gap >= 0:
+        return "🟢", f"S&P 500 is {gap:.1f}% above its 200-day average — long-term uptrend (reference only)."
+    return "🔴", f"S&P 500 is {abs(gap):.1f}% below its 200-day average — long-term downtrend (reference only)."
 
 
 def breadth(f):

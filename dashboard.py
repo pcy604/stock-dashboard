@@ -9332,7 +9332,7 @@ def _home_top(V):
     _per = {'일간': 'd1', '주간': 'w1', '월간': 'm1'}[_pk]
     _asof = max([str(x.get('date') or '') for x in idx.values()] or ['-'])
     _UH.market_cards(list(idx.values()), _asof, period=_per)
-    _UH.pulse_box([idx[n] for n in ('코스피', '코스닥', 'S&P500', '나스닥') if n in idx])
+    # 2026-11-28 차니 — 오닐 판정 카드 제거: 실전 규칙(5주선)과 반대 신호를 냈고 백테스트 전이다(research/oneil_gate_bt 결과로 재검토).
     # 오늘의 시장 — 한국·미국 × 일·주·월. 2026-11-15: 한국 일간도 일·주·월과 같은 종목 집합(시총 1,000억+)으로.
     #   네이버 전 종목 숫자(상한가·특징주·수급·당일 테마)는 그 위에 얹는 보조.
     _UH.LINK_BASE = ''

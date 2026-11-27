@@ -84,7 +84,7 @@ def summary(f):
 
 def signal(f):
     """2026-11-26 차니: '시장 방향은 어떻게 활용하는 건지 모르겠다' → 신호등 + 지금 무엇을 뜻하나 + 무엇이 바뀌면 바뀌나.
-    한국 = 우리 실전 규칙(주봉 5주선, 금요일 종가). 미국 = 오닐 국면 + S&P500 200일선(참고 지표)."""
+    한국 = 우리 실전 규칙(주봉 5주선, 금요일 종가). 미국 = S&P500 200일선(참고 지표 · 11-28 오닐 제거)."""
     if f["kind"] == "kr":
         g = [x for x in ((_idx(f, s) or {}) for s in ("^KS11", "^KQ11")) if (x.get("gate5w") or {}).get("on") is not None]
         if not g:
@@ -100,20 +100,13 @@ def signal(f):
                 parts.append(f"{x['name']} 5주선 {ma:,.0f}(" + (f"{abs(lg):.1f}% 위" if lg >= 0 else f"+{(1 / (1 + lg / 100) - 1) * 100:.1f}% 필요") + ")")
         return "🔴", ("신규 매수 쉬는 구간 — 실전 규칙은 지수가 주봉 5주선 위로 금요일 마감해야 다시 산다. "
                       + "재개 조건: " + ", ".join(parts) + " 위에서 금요일 마감.")
-    x = _idx(f, "^GSPC") or {}
-    pz, v = x.get("pulse") or {}, f.get("verdict") or {}
-    st, gap = str(pz.get("state") or ""), v.get("core_gap_200d")
-    above = gap is not None and gap >= 0
-    if pz.get("ftd_date") and above:
-        return "🟢", f"상승 확인 국면 — {pz['ftd_date'][5:]} 팔로스루, S&P500 200일선 위({_p(gap)})."
-    if st.startswith("반등 시도"):
-        n = pz.get("rally_day") or 0
-        return "🟡", (f"반등 시도 {n}일째 — 오닐 방식은 '상승 확인'(반등 4일째 이후 +1.25% 이상·거래량 증가) 전까지 신규 매수를 미룬다"
-                      + (f"(빠르면 {4 - n}거래일 뒤)" if n < 4 else "") + "."
-                      + (f" S&P500은 200일선 {'위' if above else '아래'}({_p(gap)})." if gap is not None else ""))
-    return "🔴", (f"조정 국면 — 최근 25거래일 분배일(기관 매도 흔적) {pz.get('dist_n', '-')}개."
-                  + (f" S&P500은 200일선 {'위' if above else '아래'}({_p(gap)})." if gap is not None else "")
-                  + " 반등 시도가 시작되기 전까지는 신규 매수를 쉬는 구간이다.")
+    # 2026-11-28 — 미국 신호등에서 오닐(팔로스루·분배일) 제거. 미국은 실전 규칙이 없다 → 참고 지표 S&P500 200일선만.
+    gap = (f.get("verdict") or {}).get("core_gap_200d")
+    if gap is None:
+        return "", ""
+    if gap >= 0:
+        return "🟢", f"S&P500 200일선 위({_p(gap)}) — 장기 추세 상승(참고 지표 · 미국은 실전 매매 규칙 없음)."
+    return "🔴", f"S&P500 200일선 아래({_p(gap)}) — 장기 추세 하락(참고 지표 · 미국은 실전 매매 규칙 없음)."
 
 
 def direction(f):
@@ -137,20 +130,6 @@ def direction(f):
             S.append("실전 규칙: 지난 금요일 종가가 주봉 5주선 아래라 신규 매수는 중지 상태다(오늘 기준 " + ", ".join(parts) + ").")
         else:
             S.append("실전 규칙: 코스피·코스닥 모두 주봉 5주선 위라 신규 매수가 가능하다.")
-    for s in (("^KS11",) if kind == "kr" else ("^GSPC",)):
-        x = _idx(f, s) or {}
-        pz = x.get("pulse") or {}
-        st = pz.get("state") or ""
-        if not st:
-            continue
-        if pz.get("ftd_date"):
-            S.append(f"오닐 기준 {x['name']}{_josa(x['name'], '은', '는')} {pz['ftd_date'][5:]} 팔로스루로 상승 확인 국면이다.")
-        elif st.startswith("반등 시도"):
-            n = pz.get("rally_day") or 0
-            S.append(f"오닐 기준 {x['name']}{_josa(x['name'], '은', '는')} {st}다. 4거래일째부터 +1.25% 이상 상승·거래량 증가가 나오면 상승 확인으로 본다"
-                     + (f"(앞으로 {4 - n}거래일)." if n < 4 else "."))
-        else:
-            S.append(f"오닐 기준 {x['name']}{_josa(x['name'], '은', '는')} '{st}' 단계, 최근 25거래일 분배일 {pz.get('dist_n', '-')}개.")
     return " ".join(S)
 
 
@@ -296,10 +275,6 @@ def checkpoints(f):
     if ev:
         e = ev[0]
         C.append(f"{e['date'][5:]}({e.get('wd', '')}) {(e.get('time') or '').strip()} {e['name']}".replace("  ", " "))
-    x = _idx(f, "^KS11" if f["kind"] == "kr" else "^GSPC") or {}
-    pz = x.get("pulse") or {}
-    if str(pz.get("state", "")).startswith("반등 시도"):
-        C.append(f"{x['name']} 반등 4거래일째부터 +1.25% 이상·거래량 증가(팔로스루)가 나오는지")
     cum = (((f.get("ctx") or {}).get("flow") or {}).get("foreign_cum") or {}).get("KOSPI") or {}
     if len(C) < 3 and cum.get("d20") is not None:
         C.append(f"외국인 순매수가 이어지는지 — 20일 누적 {_eok(cum['d20'])}")
