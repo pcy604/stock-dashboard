@@ -4396,6 +4396,43 @@ def _macro_rules_section(V, _RG):
 
 
 
+def _index_valuation_block():
+    """2026-11-28 차니 — 지수도 역사 PER·PBR. tools/index_valuation.py(주간 · quant_panel 합산)."""
+    import plotly.graph_objects as _go
+    d = load_json(Path('results/index_valuation.json')) or {}
+    ix = d.get('indices') or {}
+    if not ix:
+        return
+    st.subheader("지수 밸류에이션 — 지금은 역사적으로 싼가")
+    _k = st.segmented_control('지표', ['PER', 'PBR'], default='PER', key='ixv_k', label_visibility='collapsed') or 'PER'
+    key = _k.lower()
+    cols = st.columns(len(ix))
+    for (name, v), col in zip(ix.items(), cols):
+        s = [x for x in v.get('series') or [] if x.get(key)]
+        if len(s) < 20:
+            continue
+        idx = pd.DatetimeIndex([x['date'] for x in s])
+        y = pd.Series([x[key] for x in s], index=idx)
+        m, sd, cur = float(y.mean()), float(y.std()), float(y.iloc[-1])
+        pct = float((y <= cur).mean() * 100)
+        fig = _go.Figure()
+        fig.add_trace(_go.Scatter(x=idx, y=[m + sd] * len(y), line=dict(width=0), showlegend=False, hoverinfo='skip'))
+        fig.add_trace(_go.Scatter(x=idx, y=[m - sd] * len(y), line=dict(width=0), fill='tonexty',
+                                  fillcolor='rgba(148,163,184,.18)', showlegend=False, hoverinfo='skip'))
+        fig.add_trace(_go.Scatter(x=idx, y=[m] * len(y), line=dict(color='#94A3B8', dash='dot', width=1), showlegend=False,
+                                  hovertemplate=f'평균 {m:.1f}<extra></extra>'))
+        fig.add_trace(_go.Scatter(x=idx, y=y.values, line=dict(color='#2563EB', width=1.8), showlegend=False,
+                                  hovertemplate='%{x|%Y-%m-%d} %{y:.2f}배<extra></extra>'))
+        fig.update_layout(height=220, margin=dict(l=8, r=8, t=8, b=8), yaxis=dict(title=None), xaxis=dict(title=None))
+        with col:
+            st.markdown(f"**{name}** · {_k} **{cur:.2f}배** · 역사 평균 {m:.1f} (±1σ {m - sd:.1f}~{m + sd:.1f}) · "
+                        f"**하위 {pct:.0f}%**" + (' — 역사 하위 20% 안' if pct <= 20 else ' — 역사 상위 20% 안' if pct >= 80 else ''))
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.caption(f"출처: quant_panel(한국 KRX·DART·네이버 / 미국 SEC EDGAR) 주간 · tools/index_valuation.py · 마지막 갱신: {d.get('made', '-')} · "
+               "합산 방식(시총 합 ÷ 이익 합) · 적자 종목은 PER 계산에서 빠져 실제보다 낮게 나온다(같은 방법으로 매주 쟀으므로 역사 비교는 유효) · "
+               "미국 = 그 주 시총 상위 500(S&P500 근사) · 회색 띠 = 평균 ±1 표준편차 · ⚠️ 낮은 PER 이 곧 싸다는 뜻은 아니다 — 이익이 정점(반도체 호황 등)일 때 PER 은 가장 낮게 나온다")
+
+
 with tab4, guard('매크로'):
     _lazy(tab4)
     st.header("🌍 매크로")
@@ -4407,6 +4444,9 @@ with tab4, guard('매크로'):
 
     with guard('매크로 · 한국'):
         _macro_kr_block()
+
+    with guard('매크로 · 지수 밸류에이션'):
+        _index_valuation_block()
 
     with st.spinner("사이클 지표 수집 중..."):
         _MI = macro_inputs()

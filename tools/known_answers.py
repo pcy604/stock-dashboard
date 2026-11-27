@@ -452,6 +452,16 @@ def _():
     return r >= 0.9, f"최근 3일 시세 {r * 100:.0f}% · {len(b):,}종 · 기준 {str(ref.max())[:10]} · 중앙 경과 {age.median():.0f}일"
 
 
+@check('지수 밸류에이션', '코스피·미국 대형 500 PER 이 3~60배 안이고 최근 2주 안 자료인가')
+def _():
+    d = json.load(open(os.path.join(BASE, 'results/index_valuation.json'), encoding='utf-8'))
+    ix = d['indices']
+    k, u = ix['코스피']['series'][-1], ix['미국 대형 500']['series'][-1]
+    ok = all(x.get('per') and 3 <= x['per'] <= 60 for x in (k, u))
+    age = (pd.Timestamp.today() - pd.Timestamp(k['date'])).days
+    return ok and age <= 14, f"코스피 {k.get('per')} · 미국 {u.get('per')} · {k['date']}({age}일 전)"
+
+
 def run():
     out = []
     for area, q, fn in CHECKS:

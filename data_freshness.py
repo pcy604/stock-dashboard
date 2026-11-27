@@ -228,6 +228,10 @@ SOURCES = [
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
          getter=_jsonl_max_date, raw=True),
     # 2026-10-21 — 애널 추정이 없는 종목 목록(화면이 '수집 대상 아님'과 '추정 없음'을 구분). 첫 수집은 10-26(월).
+    # 2026-11-28 — 지수 밸류에이션(합산 PER·PBR 역사). 🌍 매크로 '지수 밸류에이션'.
+    dict(path='results/index_valuation.json', label='지수 PER·PBR 역사', cycle='주 1회 (토)', max_age=9,
+         producer='tools/index_valuation.py', job='quant-panel (토 13:41 KST)',
+         used_by='🌍 매크로 → 지수 밸류에이션', getter=_key('made')),
     # 2026-10-23 — 분기 컨센서스(발표 직전 값). 실적 vs 컨센서스 비교의 유일한 원천. 첫 수집 10-26(월).
     dict(path='results/consensus_q.json', label='KR 분기 컨센서스(발표 직전)',
          cycle='주 1회 (월 · 놓치면 다음 날 자동)', max_age=8, producer='consensus_snapshot.py',

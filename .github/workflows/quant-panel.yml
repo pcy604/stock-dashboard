@@ -66,6 +66,9 @@ jobs:
       # FACTOR_VER 를 **주지 않는다** — 주면 quant_panel 이 그 하나만 쓰고 접합이 꺼진다.
       - name: 패널 만들기
         run: python research/quant_panel.py
+      - name: 지수 밸류에이션(합산 PER·PBR 역사)
+        run: python tools/index_valuation.py
+        continue-on-error: true
       - name: Release 에 올리기
         run: |
           ls -la results/quant_panel_*.parquet
@@ -75,7 +78,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add results/quant_panel_info.json
+          git add results/quant_panel_info.json results/index_valuation.json
           git diff --cached --quiet && exit 0
           git commit -m "auto: 퀀트 패널 $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase --autostash -X theirs origin main && git push && break; sleep 5; done
+
+      # 2026-11-28 지수 밸류에이션(results/index_valuation.json) 감시자
+      - name: 산출물 신선도 검증
+        if: always()
+        run: python tools/check_freshness_ci.py --job quant-panel
