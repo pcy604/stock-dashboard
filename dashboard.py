@@ -9338,8 +9338,8 @@ def _home_top(V):
     _kt = _UH.trend_points(_kint.get(_hk) or ((inr.get('KR_trend') or {}).get('hist') if _per == 'd1' else None))
     if _per == 'd1' and _kt and krf.get('breadth_up') is not None and _kfa > _kt[-1][0]:
         _kt.append((_kfa, float(krf['breadth_up'])))
-    _UH.trend_box([('한국 상승 종목 비율', _kt, ' · 시총 1조+'),
-                   ('미국 상승 종목 비율', _UH.trend_points(usf.get(_hk)), f" · 시총 상위 {usf.get('hist_universe') or 500}")], _per)
+    _UH.trend_box([('한국 상승 종목 비율', _kt, ' · 시총 1,000억+'),
+                   ('미국 상승 종목 비율', _UH.trend_points(usf.get(_hk)), ' · 시총 $3억+')], _per)
     # 오늘의 시장 — 한국·미국 × 일·주·월. 2026-11-15: 한국 일간도 일·주·월과 같은 종목 집합(시총 1,000억+)으로.
     #   네이버 전 종목 숫자(상한가·특징주·수급·당일 테마)는 그 위에 얹는 보조.
     _UH.LINK_BASE = ''
@@ -9707,15 +9707,13 @@ if tab_voc is not None:
 if tab_gov is not None:
     with tab_gov, guard('경영실'):
         _lazy(tab_gov)
-        _ops_today()
-        import ui_gov as _UG
-        if getattr(_UG, 'VERSION', None) != '2026-11-15a':      # ui_gov.VERSION 과 같아야 함(tests/test_ui_gov)
-            import importlib as _il, gov as _G
-            _il.reload(_G); _UG = _il.reload(_UG)
-        import access as _accg
-        _gv = st.tabs(['🏛️ 운영', '💬 VOC'])
+        # 2026-11-27 차니 — 입력형 7개 탭 폐지 → docs/현황.md·changelog 를 그대로 읽는 한 장(ui_office) + VOC
+        import ui_office as _UO
+        _gv = st.tabs(['🏛️ 현황', '💬 VOC'])
         with _gv[0]:
-            _UG.render(st, _accg.email() or 'owner', _accg.uid())
+            _UO.render(st, _ops_counts())
+            with st.expander('📟 오늘 운영 — 할 일 · 봇 기록 · 실전 계좌 · 실적 기한', expanded=False):
+                _ops_today()
         with _gv[1]:
             _voc_render()
 

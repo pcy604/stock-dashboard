@@ -262,7 +262,7 @@ def stock_facts(kind):
     st = p.get("stocks", [])
     key = "ret_1w" if kind == "daily" else "ret_4w"
     res = {"perf_date": p.get("date")}
-    for m, cap in (("KR", 1e12), ("US", 1e10)):
+    for m, cap in (("KR", 1e11), ("US", 3e8)):      # 2026-11-27 모수 통일 — 한국 1,000억+ · 미국 $3억+ (옛 1조+·$100억+)
         big = [s for s in st if s.get("market") == m and (s.get("marcap") or 0) >= cap and s.get(key) is not None]
         # 2026-10-15: 주간 리포트 강세 1위가 CFNB +4,465% 였다 — 대형주 4주 수익률로 불가능한 값
         #   (주식 분할·티커 재사용·시세 오류). 사실만 쓰는 리포트라 오류 숫자가 곧 거짓말이 된다.
@@ -329,7 +329,7 @@ def kr_today_facts(today=None):
         return {}
     import pandas as pd
     df = df.assign(_r=pd.to_numeric(df[col], errors="coerce"))
-    big = df[(df["Marcap"] >= 1e12) & df["_r"].notna()].sort_values("_r")
+    big = df[(df["Marcap"] >= 1e11) & df["_r"].notna()].sort_values("_r")      # 2026-11-27 모수 통일(1,000억+). 히트맵만 1조+(면적 표시용) — 아래 kr_heatmap 호출부
     row = lambda r: dict(name=r["Name"], sym=r["Code"], ret=_r(r["_r"], 1))
     allr = df[df["_r"].notna()]
     # 시장 폭 — 전 종목(코넥스·거래정지 제외) 상승/하락/보합, 상·하한가(±29.5% 이상)
@@ -374,7 +374,7 @@ def kr_today_facts(today=None):
     except Exception as e:
         print("  신고가·특징주 생략:", str(e)[:80])
     try:
-        out["heatmap"] = kr_heatmap(big, today)
+        out["heatmap"] = kr_heatmap(big[big["Marcap"] >= 1e12], today)   # 히트맵 = 면적 표시라 1조+ 유지(1,000억 종목은 칸이 보이지 않음)
     except Exception as e:
         print("  히트맵 생략:", str(e)[:80])
     try:
@@ -646,7 +646,7 @@ def us_rule_checks(idx_rows, us=None, events=None) -> list[str]:
                        else "4개: 하나 더 쌓이면 '압력 받는 상승'" if n == 4 else "여유 — 상승 추세 훼손 신호 없음"))
     bu = (us or {}).get('breadth_up')
     if bu is not None:
-        out.append(f"시장 폭: 대형주(시총 상위 500) 상승 {bu}% — " + ("넓게 오른 날. 이어지는지(60%+)" if bu >= 60
+        out.append(f"시장 폭: 상승 종목(시총 $3억+) {bu}% — " + ("넓게 오른 날. 이어지는지(60%+)" if bu >= 60
                    else "지수와 달리 오르는 종목이 적음 — 소수 종목 장세 주의" if bu < 45 else "중립"))
     near = []
     for e in events or []:
@@ -1111,7 +1111,7 @@ def template(f):
     # ⑥ 종목
     L += ["", "**⑥ 종목**"]
     if kind == "kr" and kr.get("top"):
-        L.append(f"- 대형주(시총 1조+ {kr['universe']}종 · 오늘 수익률) 강세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in kr["top"])
+        L.append(f"- 시총 1,000억+ {kr['universe']}종 · 오늘 수익률 강세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in kr["top"])
                  + " · 약세 " + ", ".join(f"{x['name']} {x['ret']:+.1f}%" for x in kr["bottom"]))
     if kind == "kr":
         if kr.get("featured"):

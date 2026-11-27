@@ -35,7 +35,7 @@ print("✅ AI 문장 + 숫자 템플릿 합성")
 # 한국 장 마감 리포트 — 오늘자 KRX 목록일 때만 종목 등락, 아니면 생략
 import sys as _s, types
 fake = pd.DataFrame({"Code": ["005930", "000660", "123456"], "Name": ["삼성전자", "SK하이닉스", "소형주"],
-                     "Marcap": [1e15, 9e14, 1e11], "ChagesRatio": [4.4, -1.2, 30.0]})
+                     "Marcap": [1e15, 9e14, 9e10], "ChagesRatio": [4.4, -1.2, 30.0]})   # 2026-11-27 모수 1,000억+ → 소형주 900억은 제외
 fake.attrs = {"asof": "2026-10-21"}
 _s.modules["krx_listing"] = types.SimpleNamespace(stock_listing=lambda *a, **k: fake)
 import os as _os, tempfile as _tf

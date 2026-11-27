@@ -280,7 +280,7 @@ def _pack(c, h, v, meta, big, amt_fmt, mc_div, sec_of, n_hist, hm_of=None, theme
     return out
 
 
-def us_internals(top_n=1500, n_hist=30):
+def us_internals(top_n=None, n_hist=30):      # 2026-11-27 모수 통일 — None = 전 종목(시총 $3억+). 옛 상위 500/1500
     """미국 — 유니버스 = perf_latest 미국 전 종목(시총 $3억+, NYSE·나스닥·AMEX ≈ 2,600종). 2026-11-14 확대(옛: 상위 500만).
     시장 폭·업종·신고가·거래대금은 전 종목, 상승·하락 상위·상승 비율 추이는 시총 상위 500(≈ S&P500)."""
     p = _j('results/perf_latest.json')
@@ -295,7 +295,7 @@ def us_internals(top_n=1500, n_hist=30):
     # 2026-11-15 이름 통일 — 미국은 전부 **티커**(옛: 70종만 한글 → '엔비디아'와 'CBRS'가 섞였다)
     meta = {s['sym']: (s['sym'], s['marcap']) for s in us if s['sym'] in c.columns}
     have = [s['sym'] for s in us if s['sym'] in c.columns and c[s['sym']].iloc[-1] == c[s['sym']].iloc[-1]]
-    big = set(have[:top_n])                              # 값이 있는 종목으로 정확히 top_n(옛: 결측 1종 → 499)
+    big = set(have if top_n is None else have[:top_n])                              # 값이 있는 종목으로 정확히 top_n(옛: 결측 1종 → 499)
     ind = lambda s: (lambda x: IND_KO.get(x, x) if x else None)((sd.get(s) or {}).get('industry'))
     fmt = lambda a: f"${a / 1e9:,.1f}B"
     hm = lambda s: SEC_KO.get((sd.get(s) or {}).get('sector'), (sd.get(s) or {}).get('sector'))
@@ -323,7 +323,7 @@ def kr_internals(n_hist=30):
         if c.empty or len(c) < 30:
             return {}
         meta = {r.Code.zfill(6): (r.Name, r.Marcap) for r in df.itertuples() if r.Code.zfill(6) in c.columns}
-        big = {r.Code.zfill(6) for r in df[df['Marcap'] >= 1e12].itertuples()} & set(c.columns)
+        big = set(c.columns)      # 2026-11-27 모수 통일 — 상승 비율·상승/하락 상위도 전 종목(시총 1,000억+). 옛 1조+
         smap = _j('data/sectors.json') or {}
         try:
             from market_report import _sec_short

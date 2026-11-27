@@ -738,6 +738,37 @@ def cmd_build(net_price=False):
         if need and got < len(need) * 0.5:
             print(f"::error title=미국 시세 수집 실패::{got}/{len(need)}종만 성공 — Yahoo 가 이 러너를 막았을 수 있다", flush=True)
 
+    # 2026-11-27 — '하루 600종' 회전 때문에 시총 $3억+ 2,633종 중 1,888종의 시세가 3일 넘게 묵어 있었다
+    #   (중앙 7일 · 최대 57일, 11-25 실측). 600 은 종목별 개별 조회 상한일 뿐이다. 알려진 티커는
+    #   Yahoo 묶음 일봉(100종씩 · market_internals 와 같은 방식)으로 **매일 전부** 최신 종가로 덮는다.
+    if net_price and os.environ.get("BULK_PX", "1") == "1":
+        try:
+            import yfinance as yf
+            _today = pd.Timestamp.today().normalize()
+            def _old(x):
+                v = _LC.get(x) or prices.get(x)
+                return not v or not v[1] or (_today - pd.Timestamp(str(v[1])[:10])).days > 1
+            stale = [x for x in sh if _old(x)]
+            fresh = 0
+            for i in range(0, len(stale), 100):
+                try:
+                    _d = yf.download(stale[i:i + 100], period="5d", interval="1d", progress=False,
+                                     auto_adjust=False, threads=True)["Close"]
+                    if isinstance(_d, pd.Series):
+                        _d = _d.to_frame(stale[i])
+                    for _c in _d.columns:
+                        _v = _d[_c].dropna()
+                        if len(_v) and float(_v.iloc[-1]) > 0:
+                            _LC[_c] = (float(_v.iloc[-1]), _v.index[-1].strftime("%Y-%m-%d"))
+                            fresh += 1
+                except Exception as _e:
+                    print(f"  Yahoo 묶음 실패: {str(_e)[:80]}", flush=True)
+            print(f"  묶음 시세 갱신 {fresh}/{len(stale)}종 (낡은 시세 → 최신 종가)", flush=True)
+            if stale and fresh < len(stale) * 0.5:
+                print(f"::warning title=미국 묶음 시세 부족::{fresh}/{len(stale)}종만 갱신", flush=True)
+        except Exception as _e:
+            print(f"[WARN] 묶음 시세 단계 실패: {_e}", flush=True)
+
     mc_rows, ts_rows = [], []
     for sym, d in sh.items():
         px, pxd = _LC.get(sym, (None, None))

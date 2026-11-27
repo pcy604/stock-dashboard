@@ -8,9 +8,10 @@ import ui_gov
 
 
 def test_version_matches_dashboard():
+    # 2026-11-27 — 경영실은 ui_office(현황 한 장)로 바뀌어 dashboard 가 ui_gov 를 부르지 않는다.
     src = Path(__file__).resolve().parents[1].joinpath('dashboard.py').read_text(encoding='utf-8')
     m = re.search(r"getattr\(_UG, 'VERSION', None\) != '([^']+)'", src)
-    assert m and m.group(1) == ui_gov.VERSION
+    assert m is None or m.group(1) == ui_gov.VERSION
 
 
 def test_diff_lines():

@@ -441,6 +441,17 @@ def _():
         f"테마 {len(d.get('themes') or {})} · KR {len(kr):,} · US {n_us:,} · 장비 {eq} · NVDA {(us.get('NVDA') or {}).get('industry')}"
 
 
+@check('미국 시총', '시총 $3억+ 종목의 90% 이상이 최근 3일 안의 종가로 시총이 계산됐는가 (일부만 갱신 감지)')
+def _():
+    # 2026-11-27 — 하루 600종 회전 때문에 2,633종 중 1,888종이 3일 넘게 묵은 시세로 시총을 쓰고 있었다(행 수는 정상).
+    d = pd.read_csv(os.path.join(BASE, 'data/us_marketcap.csv'))
+    b = d[d['marketcap'] >= 3e8]
+    ref = pd.to_datetime(b['px_date'], errors='coerce')
+    age = (ref.max() - ref).dt.days
+    r = float((age <= 3).mean()) if len(b) else 0.0
+    return r >= 0.9, f"최근 3일 시세 {r * 100:.0f}% · {len(b):,}종 · 기준 {str(ref.max())[:10]} · 중앙 경과 {age.median():.0f}일"
+
+
 def run():
     out = []
     for area, q, fn in CHECKS:

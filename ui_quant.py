@@ -82,7 +82,7 @@ PRESETS = {
                                     exit=dict(stop=15, trail=[[0, 25], [50, 20], [100, 15]], cooldown=4,
                                               signals=[dict(type='doji_vol', vol_x=2), dict(type='macd_neg')])),
 }
-_LIQ = {'US': 1e9, 'KR': 1e11}
+_LIQ = {'US': 3e8, 'KR': 1e11}      # 2026-11-27 모수 통일(옛 미국 $10억)
 _CIX = {'KR': ['KOSPI', 'KOSDAQ'], 'US': ['SPX', 'NDX']}          # 현금 확대 신호용 지수(소속 시장 MKT 는 종목별이라 못 씀)
 _RE = {'ma': '이평 위로 마감하면', 'confirm': '이평 위 k번 연속 마감하면', 'rising': '이평 위 + 이평이 오르기 시작하면',
        'band': '이평 × (1+x%) 위로 마감하면', 'new_high': '지수가 다시 신고가를 내면', 'm_ma': '지수가 m선 위로 마감하면'}

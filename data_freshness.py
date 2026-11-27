@@ -224,13 +224,13 @@ SOURCES = [
          getter=_fundq_quarter, raw=True),
     # 2026-10-19 — 07-24 한 번 쌓이고 석 달 멈춰 있었는데 감시 목록에 없었다.
     dict(path='results/consensus_history.jsonl', label='KR 컨센서스 주간 스냅샷',
-         cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
+         cycle='주 1회 (월 · 놓치면 다음 날 자동)', max_age=8, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
          getter=_jsonl_max_date, raw=True),
     # 2026-10-21 — 애널 추정이 없는 종목 목록(화면이 '수집 대상 아님'과 '추정 없음'을 구분). 첫 수집은 10-26(월).
     # 2026-10-23 — 분기 컨센서스(발표 직전 값). 실적 vs 컨센서스 비교의 유일한 원천. 첫 수집 10-26(월).
     dict(path='results/consensus_q.json', label='KR 분기 컨센서스(발표 직전)',
-         cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
+         cycle='주 1회 (월 · 놓치면 다음 날 자동)', max_age=8, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 실적 발표 · 서프라이즈(KR)',
          getter=_cq_max_date, raw=True),
     # 2026-10-27 — 세부 업종(KR 네이버 테마·업종 · US 야후 산업). 종목 분석 🏁 업종 내 순위의 '비교할 무리'.
@@ -249,7 +249,7 @@ SOURCES = [
          job='swing-stations', used_by='🔍 종목 분석 → 🎯 매매 판단 → 🚏 정류장',
          getter=_key('asof')),
     dict(path='results/consensus_nocover.json', label='KR 컨센서스 미커버 종목',
-         cycle='주 1회 (월)', max_age=10, producer='consensus_snapshot.py',
+         cycle='주 1회 (월 · 놓치면 다음 날 자동)', max_age=8, producer='consensus_snapshot.py',
          job='daily-refresh (월요일)', used_by='🔍 종목 분석 → 컨센서스 추세(KR)',
          getter=_key('date')),
     dict(path='results/new_high_ai.json', label='52주 신고가 AI 공통점 요약',

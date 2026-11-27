@@ -333,7 +333,7 @@ def _breadth_box(m: dict, kr: bool, extra: dict | None = None) -> str:
     tt = m.get('turnover_txt') or (f"${m['turnover_bn']:,.0f}B" if m.get('turnover_bn') else None)
     kv.append(f"거래대금 합계 {tt}" if tt else '거래대금 -')
     if m.get('big_n'):
-        kv.append(f"대형주({'시총 1조+' if kr else '시총 상위 500'}) {m['big_n']:,}종 중 상승 {m.get('breadth_up', '-')}%")
+        kv.append(f"{'시총 1,000억+' if kr else '시총 $3억+'} {m['big_n']:,}종 중 상승 {m.get('breadth_up', '-')}%")
     eb = (extra or {}).get('breadth_all') or {}
     if eb.get('up') is not None:      # 한국 일간 — 네이버 전 종목(1,000억 미만 포함) 보조 숫자
         # 2026-11-23 — 한 카드 안에 분모가 셋(1,212 · 286 · 2,611)인데 관계를 안 적어
@@ -426,12 +426,12 @@ def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period:
     else:
         hot = _rank_box(_go('급등주', 'gain', mk) + ' ' + _SUB.format(f'(+{th_}% 이상 · 돈이 몰린 순)'),
                         (m.get('featured') or [])[:6], 'tag')
-    up_box = _rank_box(_go('대형주 상승 상위', 'cap', mk) + ' ' + _SUB.format('(시총 1조+)' if kr else '(시총 상위 500)'),
+    up_box = _rank_box(_go('상승 상위', 'cap', mk) + ' ' + _SUB.format('(시총 1,000억+)' if kr else '(시총 $3억+)'),
                        (m.get('top') or [])[:6])
     if kr:
         row2 = _theme_box(m) + nh_box + hot + up_box
     else:
-        row2 = hot + nh_box + up_box + _rank_box('대형주 하락 상위 ' + _SUB.format('(시총 상위 500)'), (m.get('bottom') or [])[:6])
+        row2 = hot + nh_box + up_box + _rank_box('하락 상위 ' + _SUB.format('(시총 $3억+)'), (m.get('bottom') or [])[:6])
     # 시총 상위 10 — 한 줄 칩(2026-11-15: 타일 2줄이 화면을 너무 차지)
     sat = {'d1': 4, 'w1': 8, 'm1': 16}.get(period, 4)
     chips = []
@@ -446,7 +446,7 @@ def market_today(m: dict, kr: bool, asof: str, flow: dict | None = None, period:
                "수급·특징주·전 종목 등락 = 네이버 금융(market_report.py · tools/kr_flow.py)")
     else:
         src = ("Yahoo Finance 일봉 · 대상 = SEC 공시 미국 상장사 중 시총 $3억+ · Yahoo 일봉이 오늘·1일·5일·21일 전 모두 있는 종목"
-               "(상장 1개월 미만·시세 이상치 제외 → 일·주·월 같은 종목) · 업종 = Yahoo industry(3종+ 묶음) · 대형주 = 시총 상위 500")
+               "(상장 1개월 미만·시세 이상치 제외 → 일·주·월 같은 종목) · 업종 = Yahoo industry(3종+ 묶음)")
     src += ' · market_internals.py'
     if period != 'd1' and m.get('since'):
         src += f" · 기간 {m['since']} 종가 → {m.get('asof')} 종가"
