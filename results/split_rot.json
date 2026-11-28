@@ -24,30 +24,31 @@
    "syms": 11,
    "tol": 0.1,
    "ver": "v1"
+  },
+  {
+   "asof": "2026-11-28",
+   "remaining": 0,
+   "repair_max": 60,
+   "repaired": [],
+   "repaired_n": 0,
+   "rows": 0,
+   "since": "2018-01-01",
+   "skipped_not_in_universe": 0,
+   "syms": 0,
+   "tol": 0.1,
+   "ver": "v1"
   }
  ],
  "latest": {
-  "asof": "2026-11-23",
+  "asof": "2026-11-28",
   "remaining": 0,
   "repair_max": 60,
-  "repaired": [
-   "ARI",
-   "ELME",
-   "IEP",
-   "MSGS",
-   "SENEA",
-   "SITC",
-   "SKIN",
-   "SNDK",
-   "SUPN",
-   "TLSS",
-   "VISN"
-  ],
-  "repaired_n": 11,
-  "rows": 28,
+  "repaired": [],
+  "repaired_n": 0,
+  "rows": 0,
   "since": "2018-01-01",
   "skipped_not_in_universe": 0,
-  "syms": 11,
+  "syms": 0,
   "tol": 0.1,
   "ver": "v1"
  }
